@@ -21,12 +21,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-} from 'react-native';
+import { View, StyleSheet, Pressable, Dimensions } from 'react-native';
 import Animated, {
   FadeIn,
   useSharedValue,
@@ -77,7 +72,9 @@ const STEP_LABELS: Record<number, string> = {
  * Pairs of steps share a gradient to create a cohesive visual arc:
  *   1-2 peace (calming blue), 3-4 healing (warm gold), 5-6 renewal (green/white).
  */
-function getGradientVariant(step: number): 'peace' | 'healing' | 'renewal' | 'divine' {
+function getGradientVariant(
+  step: number
+): 'peace' | 'healing' | 'renewal' | 'divine' {
   if (step <= 2) return 'peace';
   if (step <= 4) return 'healing';
   if (step <= 6) return 'renewal';
@@ -158,7 +155,7 @@ export default function StepScreen(): React.JSX.Element {
       Math.abs(translateX.value),
       [0, SCREEN_WIDTH * 0.4],
       [1, 0.5],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     ),
   }));
 
@@ -193,7 +190,11 @@ export default function StepScreen(): React.JSX.Element {
   const isSummary = currentStep === TOTAL_STEPS;
 
   return (
-    <DivineGradient variant={getGradientVariant(currentStep)} animated style={styles.root}>
+    <DivineGradient
+      variant={getGradientVariant(currentStep)}
+      animated
+      style={styles.root}
+    >
       <View style={[styles.screen, { paddingTop: insets.top + spacing.sm }]}>
         {/* Step indicator at top */}
         <Animated.View entering={FadeIn.duration(300)}>

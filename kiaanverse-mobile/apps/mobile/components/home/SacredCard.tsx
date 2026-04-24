@@ -69,7 +69,11 @@ export function SacredCard({
   );
 
   if (!onPress) {
-    return <View accessibilityRole={accessibilityRole} {...a11y}>{card}</View>;
+    return (
+      <View accessibilityRole={accessibilityRole} {...a11y}>
+        {card}
+      </View>
+    );
   }
 
   return (
@@ -78,10 +82,16 @@ export function SacredCard({
       {...a11y}
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withTiming(0.98, { duration: 120, easing: Easing.out(Easing.quad) });
+        scale.value = withTiming(0.98, {
+          duration: 120,
+          easing: Easing.out(Easing.quad),
+        });
       }}
       onPressOut={() => {
-        scale.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) });
+        scale.value = withTiming(1, {
+          duration: 200,
+          easing: Easing.out(Easing.quad),
+        });
       }}
     >
       {card}

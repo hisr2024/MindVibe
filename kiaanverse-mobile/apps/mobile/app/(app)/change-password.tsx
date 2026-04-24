@@ -39,11 +39,12 @@ const TEXT_TERTIARY = 'rgba(240,235,225,0.4)';
 
 /** Surface a FastAPI error body — `detail` can be a string or `{detail, code}`. */
 function extractErrorMessage(err: unknown, fallback: string): string {
-  const response = (err as { response?: { data?: { detail?: unknown } } }).response;
+  const response = (err as { response?: { data?: { detail?: unknown } } })
+    .response;
   const detail = response?.data?.detail;
   if (typeof detail === 'string') return detail;
   if (detail && typeof detail === 'object') {
-    const inner = (detail as { detail?: unknown; message?: unknown });
+    const inner = detail as { detail?: unknown; message?: unknown };
     if (typeof inner.detail === 'string') return inner.detail;
     if (typeof inner.message === 'string') return inner.message;
   }
@@ -85,7 +86,10 @@ export default function ChangePasswordScreen(): React.JSX.Element {
 
   const handleChange = async () => {
     if (newPass !== confirm) {
-      Alert.alert('Passwords do not match', 'Please re-enter the new password.');
+      Alert.alert(
+        'Passwords do not match',
+        'Please re-enter the new password.'
+      );
       return;
     }
     const policyError = validateNewPassword(newPass, current);
@@ -100,15 +104,13 @@ export default function ChangePasswordScreen(): React.JSX.Element {
         current_password: current,
         new_password: newPass,
       });
-      Alert.alert(
-        'Password changed',
-        'Your password has been updated. 🙏',
-        [{ text: 'OK', onPress: () => router.back() }],
-      );
+      Alert.alert('Password changed', 'Your password has been updated. 🙏', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     } catch (err) {
       Alert.alert(
         'Could not change password',
-        extractErrorMessage(err, 'Please try again in a moment.'),
+        extractErrorMessage(err, 'Please try again in a moment.')
       );
     } finally {
       setLoading(false);

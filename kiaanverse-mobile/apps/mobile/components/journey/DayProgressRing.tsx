@@ -76,7 +76,7 @@ function DayProgressRingInner({
         height: radius * 2,
       },
       -90,
-      360 * ratio,
+      360 * ratio
     );
     return p;
   }, [cx, cy, radius, ratio]);

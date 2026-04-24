@@ -43,10 +43,7 @@ import * as Haptics from 'expo-haptics';
 import { GoldenDivider, SacredCard } from '@kiaanverse/ui';
 import type { SubscriptionTier } from '@kiaanverse/store';
 
-import {
-  tierIdentity,
-  type TierIdentity,
-} from './tierIdentity';
+import { tierIdentity, type TierIdentity } from './tierIdentity';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(240,235,225,0.55)';
@@ -100,7 +97,7 @@ function SubscriptionPlanCardInner({
       shimmer.value = withRepeat(
         withTiming(1, { duration: 2400, easing: Easing.linear }),
         -1,
-        false,
+        false
       );
     } else {
       shimmer.value = -1;
@@ -118,10 +115,10 @@ function SubscriptionPlanCardInner({
           withTiming(0, {
             duration: 2000,
             easing: Easing.inOut(Easing.ease),
-          }),
+          })
         ),
         -1,
-        false,
+        false
       );
     } else {
       breath.value = 0;
@@ -144,14 +141,18 @@ function SubscriptionPlanCardInner({
     onPress();
   };
 
-  const showOuterGlow = identity.motion === 'shimmer' || identity.motion === 'pulse';
+  const showOuterGlow =
+    identity.motion === 'shimmer' || identity.motion === 'pulse';
 
   const cardBorder = selected
     ? { borderColor: identity.accent, borderWidth: 1.5 }
     : {};
 
   return (
-    <Animated.View style={[styles.outer, cardPulseStyle, style]} testID={testID}>
+    <Animated.View
+      style={[styles.outer, cardPulseStyle, style]}
+      testID={testID}
+    >
       <Pressable
         onPress={handlePress}
         accessibilityRole="button"
@@ -229,8 +230,7 @@ function SubscriptionPlanCardInner({
                 end={{ x: 0.5, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              {(identity.motion === 'shimmer' ||
-                identity.motion === 'pulse') ? (
+              {identity.motion === 'shimmer' || identity.motion === 'pulse' ? (
                 <Animated.View style={[styles.stripeShimmer, shimmerStyle]}>
                   <LinearGradient
                     colors={[
@@ -252,7 +252,11 @@ function SubscriptionPlanCardInner({
   );
 }
 
-function TierHeader({ identity }: { readonly identity: TierIdentity }): React.JSX.Element {
+function TierHeader({
+  identity,
+}: {
+  readonly identity: TierIdentity;
+}): React.JSX.Element {
   if (identity.key === 'free') {
     return (
       <View style={styles.tierHeader}>

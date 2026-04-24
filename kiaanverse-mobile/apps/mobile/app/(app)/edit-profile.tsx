@@ -46,7 +46,8 @@ const TEXT_MUTED = 'rgba(240,235,225,0.5)';
 const TEXT_TERTIARY = 'rgba(240,235,225,0.4)';
 
 function extractErrorMessage(err: unknown, fallback: string): string {
-  const response = (err as { response?: { data?: { detail?: unknown } } }).response;
+  const response = (err as { response?: { data?: { detail?: unknown } } })
+    .response;
   const detail = response?.data?.detail;
   if (typeof detail === 'string') return detail;
   if (detail && typeof detail === 'object') {
@@ -116,12 +117,12 @@ export default function EditProfileScreen(): React.JSX.Element {
       Alert.alert(
         'Profile updated',
         'Your sacred identity has been updated. 🙏',
-        [{ text: 'OK', onPress: () => router.back() }],
+        [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (err) {
       Alert.alert(
         'Could not update profile',
-        extractErrorMessage(err, 'Please try again in a moment.'),
+        extractErrorMessage(err, 'Please try again in a moment.')
       );
     } finally {
       setLoading(false);

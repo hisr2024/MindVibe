@@ -52,9 +52,18 @@ function SacredChip({ text, delay, onPress }: ChipProps): React.JSX.Element {
 
   useEffect(() => {
     // lotus-bloom: ease-out cubic with a mild overshoot via delayed scale.
-    opacity.value = withDelay(delay, withTiming(1, { duration: 360, easing: Easing.out(Easing.cubic) }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 360, easing: Easing.out(Easing.cubic) }));
-    scale.value = withDelay(delay, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 360, easing: Easing.out(Easing.cubic) })
+    );
+    translateY.value = withDelay(
+      delay,
+      withTiming(0, { duration: 360, easing: Easing.out(Easing.cubic) })
+    );
+    scale.value = withDelay(
+      delay,
+      withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) })
+    );
   }, [delay, opacity, translateY, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -76,10 +85,7 @@ function SacredChip({ text, delay, onPress }: ChipProps): React.JSX.Element {
         style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
       >
         <LinearGradient
-          colors={[
-            'rgba(19,26,61,0.9)',
-            'rgba(27,79,187,0.35)',
-          ]}
+          colors={['rgba(19,26,61,0.9)', 'rgba(27,79,187,0.35)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}

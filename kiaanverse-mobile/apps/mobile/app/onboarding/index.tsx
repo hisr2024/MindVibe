@@ -26,10 +26,7 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import {
-  GestureDetector,
-  Gesture,
-} from 'react-native-gesture-handler';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { Screen, colors, spacing } from '@kiaanverse/ui';
 import {
   useOnboardingStore,
@@ -61,7 +58,13 @@ const SWIPE_THRESHOLD = 50;
 // Progress Dots
 // ---------------------------------------------------------------------------
 
-function ProgressDots({ current, total }: { current: number; total: number }): React.JSX.Element {
+function ProgressDots({
+  current,
+  total,
+}: {
+  current: number;
+  total: number;
+}): React.JSX.Element {
   return (
     <View style={styles.dotsRow}>
       {Array.from({ length: total }, (_, i) => (
@@ -87,14 +90,8 @@ export default function OnboardingScreen(): React.JSX.Element {
   const { width: _screenWidth } = useWindowDimensions();
   const router = useRouter();
 
-  const {
-    currentStep,
-    answers,
-    setAnswer,
-    nextStep,
-    prevStep,
-    complete,
-  } = useOnboardingStore();
+  const { currentStep, answers, setAnswer, nextStep, prevStep, complete } =
+    useOnboardingStore();
   const { completeOnboarding } = useAuthStore();
   const { setNotifications } = useUserPreferencesStore();
 
@@ -135,7 +132,10 @@ export default function OnboardingScreen(): React.JSX.Element {
       }
     })
     .onEnd((event) => {
-      if (event.translationX < -SWIPE_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
+      if (
+        event.translationX < -SWIPE_THRESHOLD &&
+        currentStep < TOTAL_STEPS - 1
+      ) {
         // Swipe left → next step
         runOnJS(goNext)();
       } else if (event.translationX > SWIPE_THRESHOLD && currentStep > 0) {
@@ -163,21 +163,21 @@ export default function OnboardingScreen(): React.JSX.Element {
         : [...current, id];
       setAnswer('purposes', updated);
     },
-    [answers.purposes, setAnswer],
+    [answers.purposes, setAnswer]
   );
 
   const handleGitaChange = useCallback(
     (value: number) => {
       setAnswer('gitaFamiliarity', value);
     },
-    [setAnswer],
+    [setAnswer]
   );
 
   const handlePracticeTimeChange = useCallback(
     (time: string) => {
       setAnswer('dailyPracticeTime', time);
     },
-    [setAnswer],
+    [setAnswer]
   );
 
   const handleComplete = useCallback(
@@ -234,7 +234,7 @@ export default function OnboardingScreen(): React.JSX.Element {
       router,
       setAnswer,
       setNotifications,
-    ],
+    ]
   );
 
   // -----------------------------------------------------------------------

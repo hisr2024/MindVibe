@@ -61,7 +61,7 @@ export function registerPlaybackService(): void {
     // require returns the ServiceHandler directly; the cast documents the
     // contract (Metro's `require` is typed as `any`).
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    () => require('./playbackService') as unknown as ServiceHandler,
+    () => require('./playbackService') as unknown as ServiceHandler
   );
 }
 

@@ -23,7 +23,11 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
-import { useMoodTrends, useWeeklyInsights, useJourneyDashboard } from '@kiaanverse/api';
+import {
+  useMoodTrends,
+  useWeeklyInsights,
+  useJourneyDashboard,
+} from '@kiaanverse/api';
 
 type DateRange = '7d' | '30d' | '90d';
 const DATE_RANGES: { label: string; value: DateRange }[] = [
@@ -61,14 +65,20 @@ export default function AnalyticsScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Your Journey Insights" onBack={() => router.back()} />
+      <GoldenHeader
+        title="Your Journey Insights"
+        onBack={() => router.back()}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Date range selector */}
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.rangeRow}>
+        <Animated.View
+          entering={FadeInDown.duration(400)}
+          style={styles.rangeRow}
+        >
           {DATE_RANGES.map((range) => (
             <Pressable
               key={range.value}
@@ -82,7 +92,11 @@ export default function AnalyticsScreen(): React.JSX.Element {
             >
               <Text
                 variant="caption"
-                color={dateRange === range.value ? colors.background.dark : colors.text.secondary}
+                color={
+                  dateRange === range.value
+                    ? colors.background.dark
+                    : colors.text.secondary
+                }
               >
                 {range.label}
               </Text>
@@ -102,14 +116,22 @@ export default function AnalyticsScreen(): React.JSX.Element {
                 <LoadingMandala size={40} />
               </View>
             ) : visibleTrends.length === 0 ? (
-              <Text variant="bodySmall" color={colors.text.muted} align="center" style={styles.emptyChart}>
+              <Text
+                variant="bodySmall"
+                color={colors.text.muted}
+                align="center"
+                style={styles.emptyChart}
+              >
                 No mood data yet for this period.
               </Text>
             ) : (
               <View style={styles.chartContainer}>
                 <View style={styles.barsRow}>
                   {visibleTrends.map((trend, index) => {
-                    const height = Math.max((trend.averageScore / maxScore) * 100, 4);
+                    const height = Math.max(
+                      (trend.averageScore / maxScore) * 100,
+                      4
+                    );
                     return (
                       <View key={`bar-${index}`} style={styles.barWrapper}>
                         <View
@@ -118,7 +140,11 @@ export default function AnalyticsScreen(): React.JSX.Element {
                             { height, backgroundColor: colors.primary[500] },
                           ]}
                         />
-                        <Text variant="caption" color={colors.text.muted} style={styles.barLabel}>
+                        <Text
+                          variant="caption"
+                          color={colors.text.muted}
+                          style={styles.barLabel}
+                        >
                           {trend.date.slice(-2)}
                         </Text>
                       </View>
@@ -159,7 +185,11 @@ export default function AnalyticsScreen(): React.JSX.Element {
                   <Text variant="h2" color={colors.divine.aura} align="center">
                     {dashboardData.completedCount}
                   </Text>
-                  <Text variant="caption" color={colors.text.muted} align="center">
+                  <Text
+                    variant="caption"
+                    color={colors.text.muted}
+                    align="center"
+                  >
                     Completed
                   </Text>
                 </View>
@@ -167,7 +197,11 @@ export default function AnalyticsScreen(): React.JSX.Element {
                   <Text variant="h2" color={colors.primary[300]} align="center">
                     {dashboardData.activeJourneys?.length ?? 0}
                   </Text>
-                  <Text variant="caption" color={colors.text.muted} align="center">
+                  <Text
+                    variant="caption"
+                    color={colors.text.muted}
+                    align="center"
+                  >
                     Active
                   </Text>
                 </View>
@@ -175,7 +209,11 @@ export default function AnalyticsScreen(): React.JSX.Element {
                   <Text variant="h2" color={colors.text.primary} align="center">
                     {dashboardData.streakDays}
                   </Text>
-                  <Text variant="caption" color={colors.text.muted} align="center">
+                  <Text
+                    variant="caption"
+                    color={colors.text.muted}
+                    align="center"
+                  >
                     Streak Days
                   </Text>
                 </View>

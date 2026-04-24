@@ -73,7 +73,16 @@ export interface ChatHeaderProps {
 
 function MicIcon({ color }: { color: string }): React.JSX.Element {
   return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M12 2 a3 3 0 0 1 3 3 v6 a3 3 0 0 1 -6 0 v-6 a3 3 0 0 1 3 -3 Z" />
       <Path d="M6 11 a6 6 0 0 0 12 0" />
       <Line x1={12} y1={17} x2={12} y2={21} />
@@ -84,7 +93,16 @@ function MicIcon({ color }: { color: string }): React.JSX.Element {
 
 function BroomIcon({ color }: { color: string }): React.JSX.Element {
   return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {/* Stem */}
       <Line x1={16} y1={4} x2={8} y2={12} />
       {/* Brush bounds */}
@@ -100,7 +118,7 @@ function BroomIcon({ color }: { color: string }): React.JSX.Element {
 export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
   function ChatHeader(
     { streaming, onToggleVoice, onClearConversation, voiceEnabled = false },
-    ref,
+    ref
   ) {
     const insets = useSafeAreaInsets();
 
@@ -117,10 +135,10 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
       breath.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) })
         ),
         -1,
-        false,
+        false
       );
     }, [breath]);
 
@@ -140,7 +158,7 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
         pulsePhase.value = 0;
         pulsePhase.value = withSequence(
           withTiming(1, { duration: 450, easing: Easing.out(Easing.quad) }),
-          withTiming(0, { duration: 450, easing: Easing.in(Easing.quad) }),
+          withTiming(0, { duration: 450, easing: Easing.in(Easing.quad) })
         );
       },
     }));
@@ -175,7 +193,7 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
         styles.container,
         { paddingTop: insets.top, height: HEADER_CONTENT_HEIGHT + insets.top },
       ],
-      [insets.top],
+      [insets.top]
     );
 
     return (
@@ -189,7 +207,10 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
               pointerEvents="none"
             />
             {/* Steady breathing halo — doubles intensity when streaming. */}
-            <Animated.View style={[styles.halo, haloStyle]} pointerEvents="none" />
+            <Animated.View
+              style={[styles.halo, haloStyle]}
+              pointerEvents="none"
+            />
             <View style={styles.mandalaWrap}>
               {MandalaSpin ? (
                 <MandalaSpin
@@ -215,11 +236,17 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
                 numberOfLines={1}
                 accessibilityLabel="Paramatma is listening"
               >
-                <Animated.Text style={styles.subtitleSanskrit}>परमात्मा </Animated.Text>
+                <Animated.Text style={styles.subtitleSanskrit}>
+                  परमात्मा{' '}
+                </Animated.Text>
                 is listening
               </Animated.Text>
               <Animated.Text
-                style={[styles.subtitle, styles.subtitleOverlay, subtitleReflectingStyle]}
+                style={[
+                  styles.subtitle,
+                  styles.subtitleOverlay,
+                  subtitleReflectingStyle,
+                ]}
                 numberOfLines={1}
               >
                 Reflecting on dharma…
@@ -259,7 +286,7 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
         />
       </View>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

@@ -18,8 +18,18 @@ import type { JournalEntry } from '@kiaanverse/api';
 import { COPY } from './constants';
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ] as const;
 
 const WEEK_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
@@ -67,7 +77,7 @@ function computeStreaks(entries: readonly JournalEntry[]): {
   // always produces `YYYY-MM-DD`, so the parsed tuple is guaranteed to have
   // exactly three numeric segments — the explicit triple destructure keeps
   // the TS compiler from widening each segment to `number | undefined`.
-  const sorted: Array<readonly [number, number, number]> = [...days].map((k) => {
+  const sorted: (readonly [number, number, number])[] = [...days].map((k) => {
     const [y, m, d] = k.split('-').map(Number);
     return [y ?? 0, m ?? 0, d ?? 0] as const;
   });
@@ -109,15 +119,19 @@ export function CalendarTab(): React.JSX.Element {
   }, [entries]);
 
   const grid = useMemo(() => {
-    const firstOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const firstOfMonth = new Date(
+      viewDate.getFullYear(),
+      viewDate.getMonth(),
+      1
+    );
     const firstDow = firstOfMonth.getDay();
     const daysInMonth = new Date(
       viewDate.getFullYear(),
       viewDate.getMonth() + 1,
-      0,
+      0
     ).getDate();
 
-    const cells: Array<Date | null> = [];
+    const cells: (Date | null)[] = [];
     for (let i = 0; i < firstDow; i += 1) cells.push(null);
     for (let d = 1; d <= daysInMonth; d += 1) {
       cells.push(new Date(viewDate.getFullYear(), viewDate.getMonth(), d));
@@ -140,11 +154,22 @@ export function CalendarTab(): React.JSX.Element {
   const today = new Date();
 
   return (
-    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Streak cards */}
       <View style={styles.streakRow}>
-        <StreakCard value={streaks.current} title={COPY.calendarCurrent} glyph={'\u{1F525}'} />
-        <StreakCard value={streaks.longest} title={COPY.calendarLongest} glyph={'\u{2728}'} />
+        <StreakCard
+          value={streaks.current}
+          title={COPY.calendarCurrent}
+          glyph={'\u{1F525}'}
+        />
+        <StreakCard
+          value={streaks.longest}
+          title={COPY.calendarLongest}
+          glyph={'\u{2728}'}
+        />
       </View>
 
       {/* Month header */}
@@ -159,7 +184,11 @@ export function CalendarTab(): React.JSX.Element {
             ←
           </Text>
         </Pressable>
-        <Text variant="h2" color={colors.text.primary} style={styles.monthLabel}>
+        <Text
+          variant="h2"
+          color={colors.text.primary}
+          style={styles.monthLabel}
+        >
           {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
         </Text>
         <Pressable
@@ -236,7 +265,11 @@ function StreakCard({
       <Text variant="h1" color={colors.primary[500]} style={styles.streakValue}>
         {value}
       </Text>
-      <Text variant="caption" color={colors.text.muted} style={styles.streakTitle}>
+      <Text
+        variant="caption"
+        color={colors.text.muted}
+        style={styles.streakTitle}
+      >
         {title}
       </Text>
       <Text variant="caption" color={colors.text.secondary}>

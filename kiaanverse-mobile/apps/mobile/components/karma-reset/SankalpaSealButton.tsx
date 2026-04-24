@@ -49,11 +49,11 @@ function RippleRing({
       opacity.value = 0.8;
       scale.value = withDelay(
         delay,
-        withTiming(2.5, { duration: 700, easing: Easing.out(Easing.ease) }),
+        withTiming(2.5, { duration: 700, easing: Easing.out(Easing.ease) })
       );
       opacity.value = withDelay(
         delay,
-        withTiming(0, { duration: 700, easing: Easing.out(Easing.ease) }),
+        withTiming(0, { duration: 700, easing: Easing.out(Easing.ease) })
       );
     }
   }, [active, delay, scale, opacity]);
@@ -81,10 +81,10 @@ export function SankalpaSealButton({
       glow.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) })
         ),
         -1,
-        true,
+        true
       );
     } else {
       glow.value = withTiming(0, { duration: 300 });
@@ -104,11 +104,11 @@ export function SankalpaSealButton({
     if (sealed) {
       revealOpacity.value = withDelay(
         200,
-        withTiming(1, { duration: 500, easing: Easing.out(Easing.ease) }),
+        withTiming(1, { duration: 500, easing: Easing.out(Easing.ease) })
       );
       revealScale.value = withDelay(
         400,
-        withSpring(1, { damping: 18, stiffness: 200 }),
+        withSpring(1, { damping: 18, stiffness: 200 })
       );
     }
   }, [sealed, revealScale, revealOpacity]);
@@ -183,10 +183,7 @@ export function SankalpaSealButton({
       </View>
 
       {/* Fullscreen golden sweep */}
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.sweep, sweepStyle]}
-      />
+      <Animated.View pointerEvents="none" style={[styles.sweep, sweepStyle]} />
 
       {/* Tat tvam asi reveal */}
       {sealed ? (

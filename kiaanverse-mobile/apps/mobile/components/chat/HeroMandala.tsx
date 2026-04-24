@@ -54,10 +54,10 @@ function HeroMandalaInner({
         withTiming(0, {
           duration: active ? 1600 : 2600,
           easing: Easing.inOut(Easing.ease),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
   }, [breath, active]);
 
@@ -66,7 +66,7 @@ function HeroMandalaInner({
     rotation.value = withRepeat(
       withTiming(360, { duration: 48_000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
   }, [rotation]);
 
@@ -109,7 +109,7 @@ function HeroMandalaInner({
   // Eight small blue bindus orbiting on the outer ring.
   const bindus = useMemo(() => {
     return Array.from({ length: 8 }, (_, i) => {
-      const a = ((i / 8) * Math.PI * 2) - Math.PI / 2;
+      const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
       return { x: cx + outerR * Math.cos(a), y: cy + outerR * Math.sin(a) };
     });
   }, [cx, cy, outerR]);
@@ -118,11 +118,7 @@ function HeroMandalaInner({
 
   return (
     <View
-      style={[
-        styles.wrap,
-        { width: size, height: size },
-        style,
-      ]}
+      style={[styles.wrap, { width: size, height: size }, style]}
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
@@ -146,34 +142,101 @@ function HeroMandalaInner({
       <Animated.View style={[StyleSheet.absoluteFill, spinStyle]}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {/* Concentric rings */}
-          <Circle cx={cx} cy={cy} r={outerR} stroke={GOLD} strokeWidth={1.1} fill="none" opacity={0.55} />
-          <Circle cx={cx} cy={cy} r={midR} stroke={GOLD} strokeWidth={0.9} fill="none" opacity={0.45} />
-          <Circle cx={cx} cy={cy} r={innerR} stroke={GOLD} strokeWidth={0.9} fill="none" opacity={0.7} />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={outerR}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            fill="none"
+            opacity={0.55}
+          />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={midR}
+            stroke={GOLD}
+            strokeWidth={0.9}
+            fill="none"
+            opacity={0.45}
+          />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={innerR}
+            stroke={GOLD}
+            strokeWidth={0.9}
+            fill="none"
+            opacity={0.7}
+          />
 
           {/* Shatkona (6-pointed star) */}
-          <Line x1={starPoints.up[0]!.x} y1={starPoints.up[0]!.y}
-            x2={starPoints.up[1]!.x} y2={starPoints.up[1]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
-          <Line x1={starPoints.up[1]!.x} y1={starPoints.up[1]!.y}
-            x2={starPoints.up[2]!.x} y2={starPoints.up[2]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
-          <Line x1={starPoints.up[2]!.x} y1={starPoints.up[2]!.y}
-            x2={starPoints.up[0]!.x} y2={starPoints.up[0]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
+          <Line
+            x1={starPoints.up[0]!.x}
+            y1={starPoints.up[0]!.y}
+            x2={starPoints.up[1]!.x}
+            y2={starPoints.up[1]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
+          <Line
+            x1={starPoints.up[1]!.x}
+            y1={starPoints.up[1]!.y}
+            x2={starPoints.up[2]!.x}
+            y2={starPoints.up[2]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
+          <Line
+            x1={starPoints.up[2]!.x}
+            y1={starPoints.up[2]!.y}
+            x2={starPoints.up[0]!.x}
+            y2={starPoints.up[0]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
 
-          <Line x1={starPoints.down[0]!.x} y1={starPoints.down[0]!.y}
-            x2={starPoints.down[1]!.x} y2={starPoints.down[1]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
-          <Line x1={starPoints.down[1]!.x} y1={starPoints.down[1]!.y}
-            x2={starPoints.down[2]!.x} y2={starPoints.down[2]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
-          <Line x1={starPoints.down[2]!.x} y1={starPoints.down[2]!.y}
-            x2={starPoints.down[0]!.x} y2={starPoints.down[0]!.y}
-            stroke={GOLD} strokeWidth={1.1} opacity={0.75}/>
+          <Line
+            x1={starPoints.down[0]!.x}
+            y1={starPoints.down[0]!.y}
+            x2={starPoints.down[1]!.x}
+            y2={starPoints.down[1]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
+          <Line
+            x1={starPoints.down[1]!.x}
+            y1={starPoints.down[1]!.y}
+            x2={starPoints.down[2]!.x}
+            y2={starPoints.down[2]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
+          <Line
+            x1={starPoints.down[2]!.x}
+            y1={starPoints.down[2]!.y}
+            x2={starPoints.down[0]!.x}
+            y2={starPoints.down[0]!.y}
+            stroke={GOLD}
+            strokeWidth={1.1}
+            opacity={0.75}
+          />
 
           {/* Eight blue bindus on the outer ring */}
           {bindus.map((b, i) => (
-            <Circle key={`bindu-${i}`} cx={b.x} cy={b.y} r={binduR} fill={BLUE_BINDU} opacity={0.85} />
+            <Circle
+              key={`bindu-${i}`}
+              cx={b.x}
+              cy={b.y}
+              r={binduR}
+              fill={BLUE_BINDU}
+              opacity={0.85}
+            />
           ))}
 
           {/* Core */}

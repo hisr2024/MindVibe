@@ -56,7 +56,8 @@ export default function ViyogaMeditation(): React.JSX.Element {
   // screen is never empty (a user landing here from deep-link wouldn't
   // have an aiResponse).
   const screens: readonly string[] =
-    flow.aiResponse?.meditationScreens && flow.aiResponse.meditationScreens.length > 0
+    flow.aiResponse?.meditationScreens &&
+    flow.aiResponse.meditationScreens.length > 0
       ? flow.aiResponse.meditationScreens
       : DEFAULT_SCREENS;
 
@@ -73,14 +74,18 @@ export default function ViyogaMeditation(): React.JSX.Element {
   const goTo = useCallback(
     (index: number) => {
       if (index < 0 || index >= screens.length) return;
-      textOpacity.value = withTiming(0, { duration: FADE_OUT_MS }, (finished) => {
-        if (finished) {
-          runOnJS(setCurrent)(index);
-          textOpacity.value = withTiming(1, { duration: FADE_IN_MS });
+      textOpacity.value = withTiming(
+        0,
+        { duration: FADE_OUT_MS },
+        (finished) => {
+          if (finished) {
+            runOnJS(setCurrent)(index);
+            textOpacity.value = withTiming(1, { duration: FADE_IN_MS });
+          }
         }
-      });
+      );
     },
-    [screens.length, textOpacity],
+    [screens.length, textOpacity]
   );
 
   // Auto-advance tick. Clears itself when auto mode flips off, when the
@@ -97,11 +102,15 @@ export default function ViyogaMeditation(): React.JSX.Element {
         const next = c + 1;
         // Drive the crossfade from inside the state updater so we don't
         // stack fades when interval fires faster than the animation.
-        textOpacity.value = withTiming(0, { duration: FADE_OUT_MS }, (finished) => {
-          if (finished) {
-            textOpacity.value = withTiming(1, { duration: FADE_IN_MS });
+        textOpacity.value = withTiming(
+          0,
+          { duration: FADE_OUT_MS },
+          (finished) => {
+            if (finished) {
+              textOpacity.value = withTiming(1, { duration: FADE_IN_MS });
+            }
           }
-        });
+        );
         return next;
       });
     }, AUTO_ADVANCE_MS);
@@ -161,7 +170,9 @@ export default function ViyogaMeditation(): React.JSX.Element {
           <TouchableOpacity
             onPress={handleBack}
             accessibilityRole="button"
-            accessibilityLabel={isFirst ? 'Back to transmission' : 'Previous sentence'}
+            accessibilityLabel={
+              isFirst ? 'Back to transmission' : 'Previous sentence'
+            }
           >
             <Text style={s.navBtn}>← Back</Text>
           </TouchableOpacity>
@@ -169,7 +180,9 @@ export default function ViyogaMeditation(): React.JSX.Element {
           <TouchableOpacity
             onPress={handleAuto}
             accessibilityRole="button"
-            accessibilityLabel={autoMode ? 'Pause auto-advance' : 'Start auto-advance'}
+            accessibilityLabel={
+              autoMode ? 'Pause auto-advance' : 'Start auto-advance'
+            }
             accessibilityState={{ selected: autoMode }}
             disabled={current === lastIndex && !autoMode}
           >

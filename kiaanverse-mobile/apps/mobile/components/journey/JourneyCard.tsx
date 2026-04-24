@@ -118,7 +118,7 @@ function JourneyCardInner(props: JourneyCardProps): React.JSX.Element {
         easing: Easing.out(Easing.cubic),
       });
     },
-    [scale, rippleX, rippleY, rippleProgress],
+    [scale, rippleX, rippleY, rippleProgress]
   );
 
   const handlePressOut = useCallback(() => {
@@ -146,8 +146,7 @@ function JourneyCardInner(props: JourneyCardProps): React.JSX.Element {
     };
   });
 
-  const height =
-    props.variant === 'active' ? ACTIVE_HEIGHT : TEMPLATE_HEIGHT;
+  const height = props.variant === 'active' ? ACTIVE_HEIGHT : TEMPLATE_HEIGHT;
 
   return (
     <Animated.View

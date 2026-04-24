@@ -16,13 +16,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -84,12 +78,12 @@ function YantraLoader(): React.JSX.Element {
     opacity.value = withRepeat(
       withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
     scale.value = withRepeat(
       withTiming(1.03, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
   }, [opacity, scale]);
 
@@ -101,9 +95,32 @@ function YantraLoader(): React.JSX.Element {
   return (
     <Animated.View style={[styles.yantraWrap, animatedStyle]}>
       <Svg width={130} height={130} viewBox="0 0 130 130">
-        <Circle cx={65} cy={65} r={58} fill="rgba(22, 26, 66, 0.85)" stroke={GOLD} strokeWidth={1} />
-        <Circle cx={65} cy={65} r={42} fill="none" stroke={GOLD} strokeOpacity={0.45} strokeWidth={0.8} />
-        <Circle cx={65} cy={65} r={28} fill="none" stroke={GOLD} strokeOpacity={0.35} strokeWidth={0.8} />
+        <Circle
+          cx={65}
+          cy={65}
+          r={58}
+          fill="rgba(22, 26, 66, 0.85)"
+          stroke={GOLD}
+          strokeWidth={1}
+        />
+        <Circle
+          cx={65}
+          cy={65}
+          r={42}
+          fill="none"
+          stroke={GOLD}
+          strokeOpacity={0.45}
+          strokeWidth={0.8}
+        />
+        <Circle
+          cx={65}
+          cy={65}
+          r={28}
+          fill="none"
+          stroke={GOLD}
+          strokeOpacity={0.35}
+          strokeWidth={0.8}
+        />
         {/* Hex 1 */}
         <Path
           d="M65 30 L92 50 L92 80 L65 100 L38 80 L38 50 Z"
@@ -120,8 +137,24 @@ function YantraLoader(): React.JSX.Element {
           strokeWidth={1}
         />
         {/* Cross axes */}
-        <Line x1={20} y1={65} x2={110} y2={65} stroke={GOLD} strokeOpacity={0.18} strokeWidth={0.6} />
-        <Line x1={65} y1={20} x2={65} y2={110} stroke={GOLD} strokeOpacity={0.18} strokeWidth={0.6} />
+        <Line
+          x1={20}
+          y1={65}
+          x2={110}
+          y2={65}
+          stroke={GOLD}
+          strokeOpacity={0.18}
+          strokeWidth={0.6}
+        />
+        <Line
+          x1={65}
+          y1={20}
+          x2={65}
+          y2={110}
+          stroke={GOLD}
+          strokeOpacity={0.18}
+          strokeWidth={0.6}
+        />
         <Circle cx={65} cy={65} r={4} fill={GOLD} />
         {/* 6 perimeter dots */}
         {[0, 60, 120, 180, 240, 300].map((deg) => {
@@ -202,7 +235,7 @@ export function GitaCounselChamber({
   const expandAll = useCallback(() => {
     if (!transmission) return;
     setExpanded(
-      Object.fromEntries(transmission.steps.map((s) => [s.id, true])),
+      Object.fromEntries(transmission.steps.map((s) => [s.id, true]))
     );
   }, [transmission]);
 
@@ -210,13 +243,10 @@ export function GitaCounselChamber({
 
   const toggleFullText = useCallback(() => setShowFullText((v) => !v), []);
 
-  const toggleStep = useCallback(
-    (id: string) => {
-      void Haptics.selectionAsync().catch(() => {});
-      setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-    },
-    [],
-  );
+  const toggleStep = useCallback((id: string) => {
+    void Haptics.selectionAsync().catch(() => {});
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
   const onCopy = useCallback(async () => {
     if (!transmission) return;
@@ -267,12 +297,13 @@ export function GitaCounselChamber({
 
   return (
     <View style={styles.root}>
-      <Animated.View entering={FadeIn.duration(420)} style={styles.transmissionCard}>
+      <Animated.View
+        entering={FadeIn.duration(420)}
+        style={styles.transmissionCard}
+      >
         <View style={styles.transmissionHeader}>
           <View style={styles.transmissionTitleBlock}>
-            <Text style={styles.transmissionTitle}>
-              Relationship Compass's
-            </Text>
+            <Text style={styles.transmissionTitle}>Relationship Compass's</Text>
             <Text style={styles.transmissionTitle}>Transmission</Text>
             <View style={styles.badgeRow}>
               <View style={styles.gitaBadge}>
@@ -297,10 +328,18 @@ export function GitaCounselChamber({
             <Pressable
               onPress={onSpeak}
               accessibilityRole="button"
-              accessibilityLabel={isSpeaking ? 'Stop reading' : 'Read transmission aloud'}
-              style={[styles.iconButton, styles.speakButton, isSpeaking && styles.speakButtonActive]}
+              accessibilityLabel={
+                isSpeaking ? 'Stop reading' : 'Read transmission aloud'
+              }
+              style={[
+                styles.iconButton,
+                styles.speakButton,
+                isSpeaking && styles.speakButtonActive,
+              ]}
             >
-              <Text style={styles.iconButtonLabel}>{isSpeaking ? '⏸︎' : '🔊'}</Text>
+              <Text style={styles.iconButtonLabel}>
+                {isSpeaking ? '⏸︎' : '🔊'}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -352,7 +391,11 @@ export function GitaCounselChamber({
 
       <View style={styles.cta}>
         <GoldenButton
-          title={partnerName.trim() ? `Set Intention with ${partnerName.trim()}` : 'Set Your Dharmic Intention'}
+          title={
+            partnerName.trim()
+              ? `Set Intention with ${partnerName.trim()}`
+              : 'Set Your Dharmic Intention'
+          }
           onPress={onContinue}
           variant="divine"
         />

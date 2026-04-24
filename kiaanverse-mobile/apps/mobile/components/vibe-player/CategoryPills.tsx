@@ -91,7 +91,7 @@ function CategoryPillsInner({
       void Haptics.selectionAsync();
       onChange(key);
     },
-    [value, onChange],
+    [value, onChange]
   );
 
   return (

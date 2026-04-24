@@ -18,7 +18,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { GoldenButton } from '@kiaanverse/ui';
 
@@ -34,9 +38,14 @@ const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
 const GOLD = '#E8B54A';
 const CARD_BG = 'rgba(22, 26, 66, 0.6)';
 
-const GUNA_STEPS: readonly { value: GunaName; sanskrit: string; label: string; color: string }[] = [
-  { value: 'tamas',  sanskrit: 'तमस्', label: 'Tamas',  color: '#9CA3AF' },
-  { value: 'rajas',  sanskrit: 'रजस्', label: 'Rajas',  color: '#E89B4A' },
+const GUNA_STEPS: readonly {
+  value: GunaName;
+  sanskrit: string;
+  label: string;
+  color: string;
+}[] = [
+  { value: 'tamas', sanskrit: 'तमस्', label: 'Tamas', color: '#9CA3AF' },
+  { value: 'rajas', sanskrit: 'रजस्', label: 'Rajas', color: '#E89B4A' },
   { value: 'sattva', sanskrit: 'सत्त्व', label: 'Sattva', color: GOLD },
 ];
 
@@ -64,7 +73,7 @@ export function CompassAltarChamber({
       void Haptics.selectionAsync().catch(() => {});
       onRelationshipTypeChange(type);
     },
-    [onRelationshipTypeChange],
+    [onRelationshipTypeChange]
   );
 
   const handleGunaPress = useCallback(
@@ -72,7 +81,7 @@ export function CompassAltarChamber({
       void Haptics.selectionAsync().catch(() => {});
       onGunaReadingChange(g);
     },
-    [onGunaReadingChange],
+    [onGunaReadingChange]
   );
 
   return (
@@ -154,7 +163,10 @@ export function CompassAltarChamber({
       ) : null}
 
       {relationshipType ? (
-        <Animated.View entering={FadeInDown.delay(120).duration(360)} style={styles.gunaBlock}>
+        <Animated.View
+          entering={FadeInDown.delay(120).duration(360)}
+          style={styles.gunaBlock}
+        >
           <Text style={styles.gunaPrompt}>
             How does this relationship feel right now?
           </Text>
@@ -195,7 +207,10 @@ export function CompassAltarChamber({
         </Animated.View>
       ) : null}
 
-      <Animated.View entering={FadeInUp.delay(1100).duration(360)} style={styles.cta}>
+      <Animated.View
+        entering={FadeInUp.delay(1100).duration(360)}
+        style={styles.cta}
+      >
         <GoldenButton
           title="Open the Compass"
           onPress={onProceed}

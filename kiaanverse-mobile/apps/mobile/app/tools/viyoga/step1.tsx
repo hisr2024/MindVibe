@@ -124,7 +124,12 @@ export default function ViyogaStep1(): React.JSX.Element {
               />
 
               <View style={s.cardContent}>
-                <Text style={[s.cardSkt, { color: isSelected ? type.color : '#D4A017' }]}>
+                <Text
+                  style={[
+                    s.cardSkt,
+                    { color: isSelected ? type.color : '#D4A017' },
+                  ]}
+                >
                   {type.skt}
                 </Text>
                 <Text style={[s.cardLabel, isSelected && { color: '#F0EBE1' }]}>

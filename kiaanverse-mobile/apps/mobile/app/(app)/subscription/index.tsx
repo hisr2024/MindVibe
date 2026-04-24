@@ -13,7 +13,14 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
@@ -49,7 +56,8 @@ interface UserSubscriptionResponse {
 }
 
 export default function MySubscriptionScreen(): React.JSX.Element {
-  const [subscription, setSubscription] = useState<UserSubscriptionResponse | null>(null);
+  const [subscription, setSubscription] =
+    useState<UserSubscriptionResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [restoring, setRestoring] = useState(false);
 
@@ -58,7 +66,7 @@ export default function MySubscriptionScreen(): React.JSX.Element {
     (async () => {
       try {
         const res = await apiClient.get<UserSubscriptionResponse | null>(
-          '/api/subscriptions/current',
+          '/api/subscriptions/current'
         );
         if (mounted) setSubscription(res.data);
       } catch (err) {
@@ -88,7 +96,7 @@ export default function MySubscriptionScreen(): React.JSX.Element {
         'Unable to open store',
         Platform.OS === 'ios'
           ? 'Please open Settings → Apple ID → Subscriptions.'
-          : 'Please open the Google Play Store → Menu → Subscriptions.',
+          : 'Please open the Google Play Store → Menu → Subscriptions.'
       );
     });
   }, [subscription?.plan?.product_id]);
@@ -98,15 +106,17 @@ export default function MySubscriptionScreen(): React.JSX.Element {
     try {
       const result = await restorePurchases();
       if (result.success) {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
         Alert.alert(
           'Purchases restored',
-          `Your ${TIER_CONFIGS[result.tier].name} subscription is active.`,
+          `Your ${TIER_CONFIGS[result.tier].name} subscription is active.`
         );
       } else {
         Alert.alert(
           'Nothing to restore',
-          result.error ?? 'No active subscription was found for this account.',
+          result.error ?? 'No active subscription was found for this account.'
         );
       }
     } finally {
@@ -136,7 +146,9 @@ export default function MySubscriptionScreen(): React.JSX.Element {
           <Text style={styles.tierLabel}>
             {isFree ? 'Free Seeker' : `✦ ${TIER_CONFIGS[tier].name}`}
           </Text>
-          <Text style={styles.tierSubtitle}>{TIER_CONFIGS[tier].description}</Text>
+          <Text style={styles.tierSubtitle}>
+            {TIER_CONFIGS[tier].description}
+          </Text>
 
           {!isFree && (
             <>
@@ -155,7 +167,9 @@ export default function MySubscriptionScreen(): React.JSX.Element {
                 <DetailRow
                   label="Billing"
                   value={
-                    subscription.plan.billing_period === 'yearly' ? 'Annual' : 'Monthly'
+                    subscription.plan.billing_period === 'yearly'
+                      ? 'Annual'
+                      : 'Monthly'
                   }
                 />
               )}
@@ -200,9 +214,9 @@ export default function MySubscriptionScreen(): React.JSX.Element {
 
         <Text style={styles.footnote}>
           Subscriptions are billed and managed by{' '}
-          {Platform.OS === 'ios' ? 'the App Store' : 'Google Play'}. Cancel anytime
-          in your store account — access continues until the end of the current
-          billing period.
+          {Platform.OS === 'ios' ? 'the App Store' : 'Google Play'}. Cancel
+          anytime in your store account — access continues until the end of the
+          current billing period.
         </Text>
       </ScrollView>
     </DivineScreenWrapper>
@@ -221,7 +235,9 @@ function DetailRow({
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailKey}>{label}</Text>
-      <Text style={[styles.detailVal, valueColor ? { color: valueColor } : null]}>
+      <Text
+        style={[styles.detailVal, valueColor ? { color: valueColor } : null]}
+      >
         {value}
       </Text>
     </View>

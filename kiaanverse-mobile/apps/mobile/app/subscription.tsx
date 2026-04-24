@@ -97,45 +97,78 @@ function TierCard({
       ]}
     >
       {badge && (
-        <View style={[
-          styles.badge,
-          isPopular
-            ? { backgroundColor: c.accent }
-            : { backgroundColor: colors.alpha.goldMedium, borderWidth: 1, borderColor: colors.alpha.goldStrong },
-        ]}>
+        <View
+          style={[
+            styles.badge,
+            isPopular
+              ? { backgroundColor: c.accent }
+              : {
+                  backgroundColor: colors.alpha.goldMedium,
+                  borderWidth: 1,
+                  borderColor: colors.alpha.goldStrong,
+                },
+          ]}
+        >
           <Text
             variant="caption"
-            style={[styles.badgeText, { color: isPopular ? c.background : c.accent }]}
+            style={[
+              styles.badgeText,
+              { color: isPopular ? c.background : c.accent },
+            ]}
           >
             {badge}
           </Text>
         </View>
       )}
 
-      <Text variant="h2" color={c.textPrimary}>{name}</Text>
+      <Text variant="h2" color={c.textPrimary}>
+        {name}
+      </Text>
       <Text style={[styles.tierPrice, { color: c.textPrimary }]}>{price}</Text>
       {monthlyEquivalent && (
         <Text variant="caption" color={c.textTertiary}>
           {monthlyEquivalent}/mo when billed yearly
         </Text>
       )}
-      <Text variant="bodySmall" color={c.textSecondary} style={styles.tierDescription}>
+      <Text
+        variant="bodySmall"
+        color={c.textSecondary}
+        style={styles.tierDescription}
+      >
         {description}
       </Text>
 
       {/* KIAAN Questions Badge */}
-      <View style={[styles.quotaBadge, { backgroundColor: colors.alpha.goldLight, borderColor: colors.alpha.goldMedium }]}>
+      <View
+        style={[
+          styles.quotaBadge,
+          {
+            backgroundColor: colors.alpha.goldLight,
+            borderColor: colors.alpha.goldMedium,
+          },
+        ]}
+      >
         <Text variant="caption" color={c.textPrimary} style={styles.quotaLabel}>
           KIAAN Questions
         </Text>
-        <Text style={[styles.quotaValue, { color: c.accent }]}>{kiaanQuota}</Text>
+        <Text style={[styles.quotaValue, { color: c.accent }]}>
+          {kiaanQuota}
+        </Text>
       </View>
 
       <View style={styles.featureList}>
         {features.map((feature, index) => (
           <View key={index} style={styles.featureRow}>
-            <Text style={[styles.featureCheck, { color: colors.semantic.success }]}>✓</Text>
-            <Text variant="bodySmall" color={c.textSecondary} style={styles.featureText}>
+            <Text
+              style={[styles.featureCheck, { color: colors.semantic.success }]}
+            >
+              ✓
+            </Text>
+            <Text
+              variant="bodySmall"
+              color={c.textSecondary}
+              style={styles.featureText}
+            >
               {feature}
             </Text>
           </View>
@@ -143,8 +176,19 @@ function TierCard({
       </View>
 
       {isCurrentTier ? (
-        <View style={[styles.selectButton, { backgroundColor: colors.semantic.success + '20', borderWidth: 1, borderColor: colors.semantic.success + '50' }]}>
-          <Text variant="label" color={colors.semantic.success}>Current Plan</Text>
+        <View
+          style={[
+            styles.selectButton,
+            {
+              backgroundColor: colors.semantic.success + '20',
+              borderWidth: 1,
+              borderColor: colors.semantic.success + '50',
+            },
+          ]}
+        >
+          <Text variant="label" color={colors.semantic.success}>
+            Current Plan
+          </Text>
         </View>
       ) : (
         <TouchableOpacity
@@ -235,9 +279,17 @@ function BillingToggle({
   const c = theme.colors;
 
   return (
-    <View style={[styles.billingToggle, { backgroundColor: colors.alpha.goldLight }]}>
+    <View
+      style={[
+        styles.billingToggle,
+        { backgroundColor: colors.alpha.goldLight },
+      ]}
+    >
       <TouchableOpacity
-        style={[styles.billingOption, billingPeriod === 'monthly' && { backgroundColor: c.accent }]}
+        style={[
+          styles.billingOption,
+          billingPeriod === 'monthly' && { backgroundColor: c.accent },
+        ]}
         onPress={() => onToggle('monthly')}
         activeOpacity={0.7}
       >
@@ -249,7 +301,10 @@ function BillingToggle({
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.billingOption, billingPeriod === 'yearly' && { backgroundColor: c.accent }]}
+        style={[
+          styles.billingOption,
+          billingPeriod === 'yearly' && { backgroundColor: c.accent },
+        ]}
         onPress={() => onToggle('yearly')}
         activeOpacity={0.7}
       >
@@ -259,8 +314,17 @@ function BillingToggle({
         >
           Yearly
         </Text>
-        <View style={[styles.saveBadge, { backgroundColor: colors.semantic.success + '30' }]}>
-          <Text style={[styles.saveBadgeText, { color: colors.semantic.success }]}>Save 20%</Text>
+        <View
+          style={[
+            styles.saveBadge,
+            { backgroundColor: colors.semantic.success + '30' },
+          ]}
+        >
+          <Text
+            style={[styles.saveBadgeText, { color: colors.semantic.success }]}
+          >
+            Save 20%
+          </Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -307,7 +371,9 @@ export default function SubscriptionScreen(): React.JSX.Element {
     }
 
     void loadProducts();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Get localized price from store products, fallback to config
@@ -316,14 +382,14 @@ export default function SubscriptionScreen(): React.JSX.Element {
       if (targetTier === 'free') return 'Free';
 
       const product = products.find(
-        (p) => p.tier === targetTier && p.billingPeriod === billingPeriod,
+        (p) => p.tier === targetTier && p.billingPeriod === billingPeriod
       );
       if (product) return product.price;
 
       const config = TIER_CONFIGS[targetTier];
       return config.priceDisplay[billingPeriod].usd;
     },
-    [products, billingPeriod],
+    [products, billingPeriod]
   );
 
   // Get monthly equivalent for yearly pricing
@@ -336,7 +402,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
       const monthlyEq = (yearlyUsd / 12).toFixed(2);
       return `$${monthlyEq}`;
     },
-    [billingPeriod],
+    [billingPeriod]
   );
 
   // Handle purchase
@@ -358,7 +424,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
               Alert.alert(
                 'Welcome to ' + TIER_CONFIGS[result.tier].name,
                 'Your subscription is now active. Enjoy your spiritual journey!',
-                [{ text: 'Continue', onPress: () => router.back() }],
+                [{ text: 'Continue', onPress: () => router.back() }]
               );
             }
           },
@@ -373,7 +439,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
               Alert.alert(
                 'Coming soon 🙏',
                 'This plan will be available very soon. Thank you for your patience.',
-                [{ text: 'OK' }],
+                [{ text: 'OK' }]
               );
               return;
             }
@@ -384,7 +450,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
         // Error already handled by onError callback
       }
     },
-    [router, setTier, setPurchaseStatus, clearError, billingPeriod],
+    [router, setTier, setPurchaseStatus, clearError, billingPeriod]
   );
 
   // Handle restore
@@ -399,10 +465,13 @@ export default function SubscriptionScreen(): React.JSX.Element {
       Alert.alert(
         'Purchases Restored',
         `Your ${TIER_CONFIGS[result.tier].name} subscription has been restored.`,
-        [{ text: 'Continue', onPress: () => router.back() }],
+        [{ text: 'Continue', onPress: () => router.back() }]
       );
     } else {
-      setPurchaseStatus('error', result.error ?? 'No purchases found to restore.');
+      setPurchaseStatus(
+        'error',
+        result.error ?? 'No purchases found to restore.'
+      );
     }
   }, [router, setTier, setPurchaseStatus, clearError]);
 
@@ -419,21 +488,31 @@ export default function SubscriptionScreen(): React.JSX.Element {
   const allTiers: SubscriptionTier[] = ['free', 'bhakta', 'sadhak', 'siddha'];
 
   return (
-    <Screen gradient gradientVariant="sacred" edges={['top', 'left', 'right', 'bottom']}>
+    <Screen
+      gradient
+      gradientVariant="sacred"
+      edges={['top', 'left', 'right', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.closeButton, { backgroundColor: colors.alpha.whiteMedium }]}
+          style={[
+            styles.closeButton,
+            { backgroundColor: colors.alpha.whiteMedium },
+          ]}
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Text variant="body" color={colors.raw.white}>✕</Text>
+          <Text variant="body" color={colors.raw.white}>
+            ✕
+          </Text>
         </TouchableOpacity>
         <Text variant="h2" color={c.textPrimary} align="center">
           Choose Your Path to Inner Peace
         </Text>
         <Text variant="bodySmall" color={c.textSecondary} align="center">
-          Every plan includes the same quality KIAAN guidance. Choose based on how often you&apos;d like to connect.
+          Every plan includes the same quality KIAAN guidance. Choose based on
+          how often you&apos;d like to connect.
         </Text>
       </View>
 
@@ -441,7 +520,11 @@ export default function SubscriptionScreen(): React.JSX.Element {
       {isProcessing && (
         <View style={[styles.loadingOverlay, { backgroundColor: c.overlay }]}>
           <ActivityIndicator size="large" color={c.accent} />
-          <Text variant="body" color={colors.raw.white} style={styles.loadingText}>
+          <Text
+            variant="body"
+            color={colors.raw.white}
+            style={styles.loadingText}
+          >
             {purchaseStatus === 'restoring'
               ? 'Restoring purchases...'
               : purchaseStatus === 'verifying'
@@ -453,18 +536,35 @@ export default function SubscriptionScreen(): React.JSX.Element {
 
       {/* Error banner */}
       {error && (
-        <View style={[styles.errorBanner, { backgroundColor: colors.semantic.error + '20', borderColor: colors.semantic.error + '50' }]}>
-          <Text variant="bodySmall" color={colors.divine.lotus} style={styles.errorText}>
+        <View
+          style={[
+            styles.errorBanner,
+            {
+              backgroundColor: colors.semantic.error + '20',
+              borderColor: colors.semantic.error + '50',
+            },
+          ]}
+        >
+          <Text
+            variant="bodySmall"
+            color={colors.divine.lotus}
+            style={styles.errorText}
+          >
             {error}
           </Text>
           <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
-            <Text variant="label" color={c.accent}>Retry</Text>
+            <Text variant="label" color={c.accent}>
+              Retry
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* Billing Period Toggle */}
-      <BillingToggle billingPeriod={billingPeriod} onToggle={setBillingPeriod} />
+      <BillingToggle
+        billingPeriod={billingPeriod}
+        onToggle={setBillingPeriod}
+      />
 
       {/* Tier cards */}
       <ScrollView
@@ -475,7 +575,11 @@ export default function SubscriptionScreen(): React.JSX.Element {
         {isLoading ? (
           <View style={styles.loadingProducts}>
             <ActivityIndicator size="small" color={c.accent} />
-            <Text variant="bodySmall" color={c.textTertiary} style={styles.loadingProductsText}>
+            <Text
+              variant="bodySmall"
+              color={c.textTertiary}
+              style={styles.loadingProductsText}
+            >
               Loading plans...
             </Text>
           </View>
@@ -493,7 +597,13 @@ export default function SubscriptionScreen(): React.JSX.Element {
                 features={TIER_FEATURES[t]}
                 isCurrentTier={tier === t}
                 isPopular={t === 'sadhak'}
-                badge={t === 'sadhak' ? 'Most Popular' : t === 'siddha' ? 'Unlimited' : undefined}
+                badge={
+                  t === 'sadhak'
+                    ? 'Most Popular'
+                    : t === 'siddha'
+                      ? 'Unlimited'
+                      : undefined
+                }
                 onSelect={() => handlePurchase(t)}
                 disabled={isProcessing}
               />
@@ -508,24 +618,41 @@ export default function SubscriptionScreen(): React.JSX.Element {
           disabled={isProcessing}
           activeOpacity={0.7}
         >
-          <Text variant="bodySmall" color={c.textTertiary} style={styles.restoreButtonText}>
+          <Text
+            variant="bodySmall"
+            color={c.textTertiary}
+            style={styles.restoreButtonText}
+          >
             Restore Purchases
           </Text>
         </TouchableOpacity>
 
         {/* KIAAN Promise */}
         <GlowCard variant="golden" style={styles.promiseCard}>
-          <Text variant="label" color={c.textPrimary}>The KIAAN Promise</Text>
+          <Text variant="label" color={c.textPrimary}>
+            The KIAAN Promise
+          </Text>
           <Text variant="bodySmall" color={c.textSecondary}>
-            Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month.
+            Every user receives the same quality of guidance from KIAAN—the only
+            difference is how many questions you can ask each month.
           </Text>
         </GlowCard>
 
         {/* Legal text */}
-        <Text variant="caption" color={c.textTertiary} align="center" style={styles.legalText}>
-          Subscriptions auto-renew {billingPeriod === 'yearly' ? 'annually' : 'monthly'}. Cancel anytime in{' '}
-          {Platform.OS === 'ios' ? 'Settings → Subscriptions' : 'Google Play → Subscriptions'}.
-          Payment will be charged to your {Platform.OS === 'ios' ? 'Apple ID' : 'Google Play'} account.
+        <Text
+          variant="caption"
+          color={c.textTertiary}
+          align="center"
+          style={styles.legalText}
+        >
+          Subscriptions auto-renew{' '}
+          {billingPeriod === 'yearly' ? 'annually' : 'monthly'}. Cancel anytime
+          in{' '}
+          {Platform.OS === 'ios'
+            ? 'Settings → Subscriptions'
+            : 'Google Play → Subscriptions'}
+          . Payment will be charged to your{' '}
+          {Platform.OS === 'ios' ? 'Apple ID' : 'Google Play'} account.
         </Text>
       </ScrollView>
     </Screen>

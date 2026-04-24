@@ -54,7 +54,16 @@ const KRISHNA_AURA: readonly [string, string, string] = [
 
 function MicIcon({ color }: { color: string }): React.JSX.Element {
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M12 2 a3 3 0 0 1 3 3 v6 a3 3 0 0 1 -6 0 v-6 a3 3 0 0 1 3 -3 Z" />
       <Path d="M6 11 a6 6 0 0 0 12 0" />
       <Line x1={12} y1={17} x2={12} y2={21} />
@@ -66,7 +75,16 @@ function MicIcon({ color }: { color: string }): React.JSX.Element {
 /** Lotus-tipped arrow: a leaf-shaped head with two petal accents. */
 function LotusArrow({ color }: { color: string }): React.JSX.Element {
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {/* Stem */}
       <Line x1={4} y1={20} x2={14} y2={10} />
       {/* Arrowhead — leaf silhouette */}
@@ -115,7 +133,11 @@ function ChatInputInner({
   }, [canSend, pressScale]);
 
   const handlePressOut = useCallback(() => {
-    pressScale.value = withSpring(1.0, { damping: 14, stiffness: 260, mass: 0.7 });
+    pressScale.value = withSpring(1.0, {
+      damping: 14,
+      stiffness: 260,
+      mass: 0.7,
+    });
   }, [pressScale]);
 
   const handleSend = useCallback(() => {
@@ -124,14 +146,14 @@ function ChatInputInner({
     pulse.value = 0;
     pulse.value = withSequence(
       withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) }),
-      withTiming(0, { duration: 380, easing: Easing.in(Easing.quad) }),
+      withTiming(0, { duration: 380, easing: Easing.in(Easing.quad) })
     );
     onSubmit();
   }, [canSend, onSubmit, pulse]);
 
   const handleSubmitEditing = useCallback(
     (_e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => handleSend(),
-    [handleSend],
+    [handleSend]
   );
 
   const sendButtonStyle = useAnimatedStyle(() => ({

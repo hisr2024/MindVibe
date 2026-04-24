@@ -88,16 +88,13 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
   const [ceremonyDone, setCeremonyDone] = useState(false);
 
   const phaseIndex = PHASE_ORDER.indexOf(phase);
-  const completedIndices = useMemo(
-    () => {
-      const indices = new Set<number>();
-      for (const k of completed) {
-        indices.add(PHASE_ORDER.indexOf(k));
-      }
-      return indices;
-    },
-    [completed],
-  );
+  const completedIndices = useMemo(() => {
+    const indices = new Set<number>();
+    for (const k of completed) {
+      indices.add(PHASE_ORDER.indexOf(k));
+    }
+    return indices;
+  }, [completed]);
 
   const streak = streakData?.current ?? 0;
 
@@ -201,9 +198,7 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
           }
           duration={4800}
         />
-        <View
-          style={[styles.completedBlock, { paddingTop: insets.top + 40 }]}
-        >
+        <View style={[styles.completedBlock, { paddingTop: insets.top + 40 }]}>
           <Text style={styles.om} allowFontScaling={false}>
             ॐ
           </Text>

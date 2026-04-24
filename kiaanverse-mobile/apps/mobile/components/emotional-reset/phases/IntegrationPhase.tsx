@@ -68,9 +68,7 @@ export function IntegrationPhase({
           </View>
           <View style={styles.summaryBody}>
             <Text style={styles.summaryEyebrow}>Your emotional journey</Text>
-            <Text
-              style={[styles.summaryLine, { color: emotion.glowColor }]}
-            >
+            <Text style={[styles.summaryLine, { color: emotion.glowColor }]}>
               {emotion.label} ({emotion.sanskrit}) · Intensity {intensity}/5
             </Text>
           </View>
@@ -80,7 +78,9 @@ export function IntegrationPhase({
         {response?.shloka?.translation ? (
           <View style={styles.shlokaCard}>
             <View style={styles.shlokaHeader}>
-              <Text style={styles.shlokaSavedLabel}>Saved to Sacred Library</Text>
+              <Text style={styles.shlokaSavedLabel}>
+                Saved to Sacred Library
+              </Text>
               <Text style={styles.shlokaBookmark}>🔖</Text>
             </View>
             <Text style={styles.shlokaText}>
@@ -118,12 +118,7 @@ export function IntegrationPhase({
       </ScrollView>
 
       {/* Sticky completion CTA */}
-      <View
-        style={[
-          styles.ctaRow,
-          { paddingBottom: insets.bottom + 16 },
-        ]}
-      >
+      <View style={[styles.ctaRow, { paddingBottom: insets.bottom + 16 }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Complete sacred reset"

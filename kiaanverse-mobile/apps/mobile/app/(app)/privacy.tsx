@@ -67,8 +67,7 @@ const SECTIONS: readonly Section[] = [
   },
   {
     heading: '7. Contact',
-    body:
-      'Kiaanverse (Germany)\nprivacy@kiaanverse.com\nkiaanverse.com/privacy',
+    body: 'Kiaanverse (Germany)\nprivacy@kiaanverse.com\nkiaanverse.com/privacy',
   },
 ];
 

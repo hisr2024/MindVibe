@@ -29,10 +29,7 @@ export {
   type FilterKey,
   resolveApiCategory,
 } from './CategoryPills';
-export {
-  ShlokaCompanion,
-  type ShlokaCompanionProps,
-} from './ShlokaCompanion';
+export { ShlokaCompanion, type ShlokaCompanionProps } from './ShlokaCompanion';
 export {
   DailyVerseBanner,
   type DailyVerseBannerProps,

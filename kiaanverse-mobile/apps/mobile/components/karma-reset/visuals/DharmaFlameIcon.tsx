@@ -63,7 +63,7 @@ export function DharmaFlameIcon({
       flicker.value = withRepeat(
         withTiming(1, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
         -1,
-        true,
+        true
       );
     } else {
       flicker.value = 0;
@@ -93,13 +93,8 @@ export function DharmaFlameIcon({
   const originY = canvasHeight; // bottom-center pivot for the flicker
 
   return (
-    <Canvas
-      style={{ width: canvasWidth, height: canvasHeight, opacity }}
-    >
-      <Group
-        transform={transform}
-        origin={vec(originX, originY)}
-      >
+    <Canvas style={{ width: canvasWidth, height: canvasHeight, opacity }}>
+      <Group transform={transform} origin={vec(originX, originY)}>
         <Group transform={[{ scale }]}>
           {/* Main flame body — radial gradient from bottom-center */}
           <Path path={outerPath}>

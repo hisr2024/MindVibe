@@ -161,7 +161,7 @@ export default function ShlokasHubScreen(): React.JSX.Element {
     (route: string) => {
       router.push(route as never);
     },
-    [router],
+    [router]
   );
 
   const handleOpenVibePlayer = useCallback(() => {
@@ -176,7 +176,7 @@ export default function ShlokasHubScreen(): React.JSX.Element {
         { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
         { title: 'Sacred Community', tools: COMMUNITY_TOOLS },
       ] as const,
-    [],
+    []
   );
 
   // Sacred Sound (Vibe Player) is the final section and gets the last

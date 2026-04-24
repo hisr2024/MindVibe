@@ -54,7 +54,10 @@ function ShlokaCompanionInner({
   }));
 
   return (
-    <Animated.View style={[styles.wrap, animatedStyle]} pointerEvents={expanded ? 'auto' : 'none'}>
+    <Animated.View
+      style={[styles.wrap, animatedStyle]}
+      pointerEvents={expanded ? 'auto' : 'none'}
+    >
       <View style={styles.labelRow}>
         <View style={styles.labelBar} />
         <Text style={styles.label}>VERSE OF THIS MEDITATION</Text>

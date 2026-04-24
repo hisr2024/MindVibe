@@ -135,7 +135,7 @@ function PlayerTrackCardInner({
       shimmer.value = withRepeat(
         withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
         -1,
-        true,
+        true
       );
     } else {
       shimmer.value = withTiming(0, { duration: 400 });
@@ -177,7 +177,10 @@ function PlayerTrackCardInner({
     : formatDuration(track.duration);
 
   return (
-    <Animated.View style={[styles.outer, cardAnimatedStyle, style]} testID={testID}>
+    <Animated.View
+      style={[styles.outer, cardAnimatedStyle, style]}
+      testID={testID}
+    >
       <SacredCard
         onPress={undefined}
         style={styles.card}
@@ -189,14 +192,17 @@ function PlayerTrackCardInner({
           onPress={handlePress}
           accessibilityRole="button"
           accessibilityLabel={`${track.title} by ${track.artist}, ${formatDuration(
-            track.duration,
+            track.duration
           )}`}
           accessibilityState={{ selected: isCurrent }}
           style={styles.pressArea}
         >
           {/* Now-playing subtle background shimmer. */}
           {isCurrent ? (
-            <Animated.View style={[styles.shimmer, shimmerStyle]} pointerEvents="none">
+            <Animated.View
+              style={[styles.shimmer, shimmerStyle]}
+              pointerEvents="none"
+            >
               <LinearGradient
                 colors={[
                   'rgba(212,160,23,0.0)',
@@ -212,10 +218,7 @@ function PlayerTrackCardInner({
 
           {/* 40 px play circle. */}
           <View
-            style={[
-              styles.playCircle,
-              isCurrent && styles.playCircleCurrent,
-            ]}
+            style={[styles.playCircle, isCurrent && styles.playCircleCurrent]}
             pointerEvents="none"
           >
             {showEqualizer ? (
@@ -253,9 +256,7 @@ function PlayerTrackCardInner({
             <Pressable
               onPress={handleBookmark}
               accessibilityRole="button"
-              accessibilityLabel={
-                isBookmarked ? 'Remove bookmark' : 'Bookmark'
-              }
+              accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
               accessibilityState={{ selected: isBookmarked }}
               hitSlop={8}
               style={styles.bookmarkBtn}

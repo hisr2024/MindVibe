@@ -96,10 +96,34 @@ export interface KarmaWeightConfig {
 }
 
 export const KARMA_WEIGHTS: readonly KarmaWeightConfig[] = [
-  { id: 'light', sanskrit: 'स्पर्श', label: 'A brush', flameSize: 20, reflectionDepth: 1 },
-  { id: 'moderate', sanskrit: 'उपस्थित', label: 'Present', flameSize: 28, reflectionDepth: 2 },
-  { id: 'heavy', sanskrit: 'प्रबल', label: 'Heavy', flameSize: 38, reflectionDepth: 3 },
-  { id: 'very_heavy', sanskrit: 'अभिभूत', label: 'All-consuming', flameSize: 48, reflectionDepth: 4 },
+  {
+    id: 'light',
+    sanskrit: 'स्पर्श',
+    label: 'A brush',
+    flameSize: 20,
+    reflectionDepth: 1,
+  },
+  {
+    id: 'moderate',
+    sanskrit: 'उपस्थित',
+    label: 'Present',
+    flameSize: 28,
+    reflectionDepth: 2,
+  },
+  {
+    id: 'heavy',
+    sanskrit: 'प्रबल',
+    label: 'Heavy',
+    flameSize: 38,
+    reflectionDepth: 3,
+  },
+  {
+    id: 'very_heavy',
+    sanskrit: 'अभिभूत',
+    label: 'All-consuming',
+    flameSize: 48,
+    reflectionDepth: 4,
+  },
 ] as const;
 
 export interface KarmaResetContext {
@@ -154,12 +178,48 @@ export interface DharmicQualityConfig {
 }
 
 export const DHARMIC_QUALITIES: readonly DharmicQualityConfig[] = [
-  { id: 'ahimsa', sanskrit: 'अहिंसा', label: 'Non-Harm', color: '#065F46', description: 'Do no harm in thought, word, deed' },
-  { id: 'satya', sanskrit: 'सत्य', label: 'Truth', color: '#1D4ED8', description: 'Speak and act with complete honesty' },
-  { id: 'karuna', sanskrit: 'करुणा', label: 'Compassion', color: '#0E7490', description: "Meet others' pain with warmth" },
-  { id: 'viveka', sanskrit: 'विवेक', label: 'Discernment', color: '#7C3AED', description: 'Choose wisdom over reaction' },
-  { id: 'seva', sanskrit: 'सेवा', label: 'Service', color: '#D4A017', description: 'Give without expectation of return' },
-  { id: 'vairagya', sanskrit: 'वैराग्य', label: 'Detachment', color: '#B91C1C', description: 'Act without clinging to outcome' },
+  {
+    id: 'ahimsa',
+    sanskrit: 'अहिंसा',
+    label: 'Non-Harm',
+    color: '#065F46',
+    description: 'Do no harm in thought, word, deed',
+  },
+  {
+    id: 'satya',
+    sanskrit: 'सत्य',
+    label: 'Truth',
+    color: '#1D4ED8',
+    description: 'Speak and act with complete honesty',
+  },
+  {
+    id: 'karuna',
+    sanskrit: 'करुणा',
+    label: 'Compassion',
+    color: '#0E7490',
+    description: "Meet others' pain with warmth",
+  },
+  {
+    id: 'viveka',
+    sanskrit: 'विवेक',
+    label: 'Discernment',
+    color: '#7C3AED',
+    description: 'Choose wisdom over reaction',
+  },
+  {
+    id: 'seva',
+    sanskrit: 'सेवा',
+    label: 'Service',
+    color: '#D4A017',
+    description: 'Give without expectation of return',
+  },
+  {
+    id: 'vairagya',
+    sanskrit: 'वैराग्य',
+    label: 'Detachment',
+    color: '#B91C1C',
+    description: 'Act without clinging to outcome',
+  },
 ] as const;
 
 export interface SankalpaSeal {

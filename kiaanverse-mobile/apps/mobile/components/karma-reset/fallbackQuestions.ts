@@ -13,10 +13,7 @@
  * to `action`, matching the web behaviour exactly.
  */
 
-import type {
-  KarmaCategory,
-  KarmaReflectionQuestion,
-} from './types';
+import type { KarmaCategory, KarmaReflectionQuestion } from './types';
 
 export const FALLBACK_QUESTIONS: Record<
   KarmaCategory,
@@ -35,7 +32,8 @@ export const FALLBACK_QUESTIONS: Record<
     },
     {
       question: 'Who was most affected by what you did?',
-      subtext: 'Sometimes we see the ripple only after the stone has been thrown.',
+      subtext:
+        'Sometimes we see the ripple only after the stone has been thrown.',
       options: [
         'The person or situation I acted toward',
         'My own inner peace and integrity',
@@ -44,7 +42,8 @@ export const FALLBACK_QUESTIONS: Record<
       ],
     },
     {
-      question: 'If you could stand at that moment again, what would you choose?',
+      question:
+        'If you could stand at that moment again, what would you choose?',
       subtext: 'This is not about regret. It is about clarity.',
       options: [
         'I would choose compassion over reaction',
@@ -57,7 +56,8 @@ export const FALLBACK_QUESTIONS: Record<
   speech: [
     {
       question: 'What was the quality of your speech in that moment?',
-      subtext: 'The Gita speaks of three kinds of speech — sattvic, rajasic, and tamasic.',
+      subtext:
+        'The Gita speaks of three kinds of speech — sattvic, rajasic, and tamasic.',
       options: [
         'My words were sharp — meant to wound or control',
         'My words were true but delivered without care',
@@ -77,7 +77,8 @@ export const FALLBACK_QUESTIONS: Record<
     },
     {
       question: 'What would sattvic speech have sounded like in that moment?',
-      subtext: 'Speech that is truthful, pleasing, beneficial, and causes no agitation.',
+      subtext:
+        'Speech that is truthful, pleasing, beneficial, and causes no agitation.',
       options: [
         'Quiet honesty without blame',
         'A question instead of a statement',
@@ -108,7 +109,8 @@ export const FALLBACK_QUESTIONS: Record<
       ],
     },
     {
-      question: 'If you could sit beside this thought without becoming it, what would you see?',
+      question:
+        'If you could sit beside this thought without becoming it, what would you see?',
       subtext: 'The witness sees without being carried away.',
       options: [
         'A scared child trying to protect itself',
@@ -120,8 +122,10 @@ export const FALLBACK_QUESTIONS: Record<
   ],
   reaction: [
     {
-      question: 'In the moment of your reaction, what happened to your awareness?',
-      subtext: 'Reaction is the gap between stimulus and choice collapsing to zero.',
+      question:
+        'In the moment of your reaction, what happened to your awareness?',
+      subtext:
+        'Reaction is the gap between stimulus and choice collapsing to zero.',
       options: [
         'I lost awareness completely — it was automatic',
         "I saw myself reacting but couldn't stop",
@@ -140,7 +144,8 @@ export const FALLBACK_QUESTIONS: Record<
       ],
     },
     {
-      question: 'What does equanimity look like for you in situations like this?',
+      question:
+        'What does equanimity look like for you in situations like this?',
       subtext: 'Samatva — the balance that Krishna calls yoga itself.',
       options: [
         'Pausing before I speak or act',
@@ -172,7 +177,8 @@ export const FALLBACK_QUESTIONS: Record<
       ],
     },
     {
-      question: "If you were to take one small step toward what you've been avoiding, what would it be?",
+      question:
+        "If you were to take one small step toward what you've been avoiding, what would it be?",
       subtext: 'Svadharma begins with a single conscious step.',
       options: [
         'Speaking one honest sentence to the person involved',
@@ -184,8 +190,10 @@ export const FALLBACK_QUESTIONS: Record<
   ],
   intention: [
     {
-      question: 'When you examine the intention behind your action, what do you find?',
-      subtext: 'The Gita says: you have a right to action, never to its fruits.',
+      question:
+        'When you examine the intention behind your action, what do you find?',
+      subtext:
+        'The Gita says: you have a right to action, never to its fruits.',
       options: [
         'My intention was good but the outcome was not what I expected',
         'My intention was mixed — part selfless, part self-serving',
@@ -204,8 +212,10 @@ export const FALLBACK_QUESTIONS: Record<
       ],
     },
     {
-      question: 'If you release the fruit and look only at the action itself, was it dharmic?',
-      subtext: 'Dharma is the action aligned with truth, regardless of outcome.',
+      question:
+        'If you release the fruit and look only at the action itself, was it dharmic?',
+      subtext:
+        'Dharma is the action aligned with truth, regardless of outcome.',
       options: [
         'Yes — the action was right, even if the outcome was painful',
         'No — I see now that the action itself was misaligned',
@@ -218,7 +228,7 @@ export const FALLBACK_QUESTIONS: Record<
 
 export function getFallbackQuestion(
   category: KarmaCategory,
-  questionIndex: 0 | 1 | 2,
+  questionIndex: 0 | 1 | 2
 ): KarmaReflectionQuestion {
   const list = FALLBACK_QUESTIONS[category] ?? FALLBACK_QUESTIONS.action;
   const idx = Math.min(Math.max(questionIndex, 0), list.length - 1);

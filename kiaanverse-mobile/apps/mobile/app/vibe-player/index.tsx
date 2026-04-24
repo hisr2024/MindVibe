@@ -199,7 +199,7 @@ const BUILTIN_TRACKS: readonly MeditationTrack[] = [
 
 /** Filter builtins by the API category string the parent is currently querying. */
 function selectBuiltinTracks(
-  apiCategory: string | undefined,
+  apiCategory: string | undefined
 ): readonly MeditationTrack[] {
   if (!apiCategory) return BUILTIN_TRACKS;
   return BUILTIN_TRACKS.filter((t) => t.category === apiCategory);
@@ -211,7 +211,7 @@ function selectBuiltinTracks(
 
 type VibeTab = 'library' | 'gita' | 'mymusic' | 'playing';
 
-const TABS: ReadonlyArray<{ key: VibeTab; label: string }> = [
+const TABS: readonly { key: VibeTab; label: string }[] = [
   { key: 'library', label: 'Library' },
   { key: 'gita', label: 'Gita' },
   { key: 'mymusic', label: 'My Music' },
@@ -231,7 +231,7 @@ function SegmentedTabs({
       void Haptics.selectionAsync().catch(() => undefined);
       onChange(tab);
     },
-    [value, onChange],
+    [value, onChange]
   );
 
   return (
@@ -295,7 +295,7 @@ function LibrarySection({
       apiTracks && apiTracks.length > 0
         ? apiTracks
         : selectBuiltinTracks(apiCategory),
-    [apiTracks, apiCategory],
+    [apiTracks, apiCategory]
   );
 
   const renderTrack = useCallback(
@@ -318,7 +318,7 @@ function LibrarySection({
         />
       );
     },
-    [bookmarks, currentTrackId, isPlaying, onTrackPress, onToggleBookmark],
+    [bookmarks, currentTrackId, isPlaying, onTrackPress, onToggleBookmark]
   );
 
   const keyExtractor = useCallback((item: MeditationTrack) => item.id, []);
@@ -379,7 +379,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
       apiTracks && apiTracks.length > 0
         ? apiTracks
         : selectBuiltinTracks(apiCategory),
-    [apiTracks, apiCategory],
+    [apiTracks, apiCategory]
   );
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
@@ -394,7 +394,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   // would persist via a user-preferences slice. Until then we keep a
   // session-scoped `Set` so the UX works end-to-end.
   const [bookmarks, setBookmarks] = useState<ReadonlySet<string>>(
-    () => new Set(),
+    () => new Set()
   );
 
   const handleToggleBookmark = useCallback((trackId: string) => {
@@ -421,7 +421,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         addToQueue(entry);
       }
     },
-    [addToQueue, clearQueue],
+    [addToQueue, clearQueue]
   );
 
   const handleTrackPress = useCallback(
@@ -460,7 +460,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
           Alert.alert(
             'Audio not available',
             `${result.message}\n\nTip: tap "Add your music" to play any track from your device.`,
-            [{ text: 'OK', style: 'default' }],
+            [{ text: 'OK', style: 'default' }]
           );
         } else {
           Alert.alert('Playback error', result.message, [
@@ -469,7 +469,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         }
       });
     },
-    [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router],
+    [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router]
   );
 
   const handleDailyVersePress = useCallback(() => {
@@ -494,7 +494,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         </Text>
       </View>
     ),
-    [],
+    []
   );
 
   return (

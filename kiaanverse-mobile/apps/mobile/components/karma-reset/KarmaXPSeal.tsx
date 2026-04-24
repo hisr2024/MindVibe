@@ -48,7 +48,7 @@ export function KarmaXPSeal({
       if (frame >= totalFrames) {
         clearInterval(id);
         void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
+          Haptics.NotificationFeedbackType.Success
         );
       }
     }, 1200 / totalFrames);
@@ -77,10 +77,7 @@ export function KarmaXPSeal({
 
   const cardStyle = useAnimatedStyle(() => ({
     opacity: cardOpacity.value,
-    transform: [
-      { translateY: cardY.value },
-      { scale: cardScale.value },
-    ],
+    transform: [{ translateY: cardY.value }, { scale: cardScale.value }],
   }));
 
   // Journal-save fade-in then fade-out on a 3s cycle
@@ -91,8 +88,8 @@ export function KarmaXPSeal({
         withTiming(1, { duration: 600, easing: Easing.out(Easing.ease) }),
         withDelay(
           1800,
-          withTiming(0, { duration: 600, easing: Easing.in(Easing.ease) }),
-        ),
+          withTiming(0, { duration: 600, easing: Easing.in(Easing.ease) })
+        )
       );
     }
   }, [showJournalSave, journalOpacity]);
@@ -113,12 +110,10 @@ export function KarmaXPSeal({
 
       {/* Streak lotus row */}
       {showStreak ? (
-        <Animated.View
-          entering={FadeInUp.duration(500)}
-          style={styles.streak}
-        >
+        <Animated.View entering={FadeInUp.duration(500)} style={styles.streak}>
           <Animated.Text style={styles.streakLabel}>
-            {streakCount} {streakCount === 1 ? 'Day' : 'Days'} of Dharmic Clarity
+            {streakCount} {streakCount === 1 ? 'Day' : 'Days'} of Dharmic
+            Clarity
           </Animated.Text>
           <View style={styles.lotusRow}>
             {Array.from({ length: lotusCount }).map((_, i) => (

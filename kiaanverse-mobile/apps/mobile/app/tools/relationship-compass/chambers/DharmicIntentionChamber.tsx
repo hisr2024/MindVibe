@@ -17,7 +17,10 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { GoldenButton } from '@kiaanverse/ui';
 
-import { DHARMIC_QUALITIES, type DharmicQuality } from '../data/dharmicQualities';
+import {
+  DHARMIC_QUALITIES,
+  type DharmicQuality,
+} from '../data/dharmicQualities';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -48,7 +51,7 @@ export function DharmicIntentionChamber({
     if (intentionText.trim().length > 0) return;
     const name = partnerName.trim() || 'them';
     onIntentionTextChange(
-      `In my relationship with ${name}, I choose ${selectedQuality.label.toLowerCase()}.`,
+      `In my relationship with ${name}, I choose ${selectedQuality.label.toLowerCase()}.`
     );
     // Intentionally only re-run when the selected quality changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,7 +62,7 @@ export function DharmicIntentionChamber({
       void Haptics.selectionAsync().catch(() => {});
       onQualityChange(q);
     },
-    [onQualityChange],
+    [onQualityChange]
   );
 
   const handleSeal = useCallback(() => {
@@ -69,10 +72,7 @@ export function DharmicIntentionChamber({
 
   return (
     <View style={styles.root}>
-      <Animated.Text
-        entering={FadeIn.duration(380)}
-        style={styles.title}
-      >
+      <Animated.Text entering={FadeIn.duration(380)} style={styles.title}>
         Set your dharmic intention
       </Animated.Text>
 

@@ -49,7 +49,7 @@ export default function ViyogaLoading(): React.JSX.Element {
         easing: Easing.linear,
       }),
       -1,
-      false,
+      false
     );
     return () => {
       cancelAnimation(rotation);

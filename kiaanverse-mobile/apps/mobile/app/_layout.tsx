@@ -30,7 +30,12 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
+import {
+  ThemeProvider,
+  useTheme,
+  colors,
+  LoadingMandala,
+} from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
 import {
   api,
@@ -39,7 +44,14 @@ import {
   disconnectIAP,
   setIapAccountTag,
 } from '@kiaanverse/api';
-import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground, useSubscriptionStore } from '@kiaanverse/store';
+import {
+  useAuthStore,
+  useThemeStore,
+  useUserPreferencesStore,
+  useSyncQueueStore,
+  startSyncOnForeground,
+  useSubscriptionStore,
+} from '@kiaanverse/store';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
 import { useArrivalStatus } from '../hooks/useArrivalStatus';
@@ -92,33 +104,57 @@ const queryPersister = createAsyncStoragePersister({
 async function executeSyncItem(item: SyncQueueItem): Promise<void> {
   switch (item.type) {
     case 'mood':
-      await api.moods.create(item.payload as { score: number; tags?: string[]; note?: string });
+      await api.moods.create(
+        item.payload as { score: number; tags?: string[]; note?: string }
+      );
       break;
     case 'journey_step': {
-      const { journeyId, dayIndex } = item.payload as { journeyId: string; dayIndex: number };
+      const { journeyId, dayIndex } = item.payload as {
+        journeyId: string;
+        dayIndex: number;
+      };
       await api.journeys.completeStep(journeyId, dayIndex);
       break;
     }
     case 'chat_message': {
-      const { message, sessionId } = item.payload as { message: string; sessionId?: string };
+      const { message, sessionId } = item.payload as {
+        message: string;
+        sessionId?: string;
+      };
       await api.chat.send(message, sessionId);
       break;
     }
     case 'journal': {
-      await api.journal.create(item.payload as { content_encrypted: string; tags?: string[] });
+      await api.journal.create(
+        item.payload as { content_encrypted: string; tags?: string[] }
+      );
       break;
     }
     case 'sadhana': {
-      await api.sadhana.complete(item.payload as { mood_score?: number; verse_id?: string; reflection?: string; intention?: string });
+      await api.sadhana.complete(
+        item.payload as {
+          mood_score?: number;
+          verse_id?: string;
+          reflection?: string;
+          intention?: string;
+        }
+      );
       break;
     }
     case 'community_post': {
-      const { content, circleId, tags } = item.payload as { content: string; circleId?: string; tags?: string[] };
+      const { content, circleId, tags } = item.payload as {
+        content: string;
+        circleId?: string;
+        tags?: string[];
+      };
       await api.community.createPost(content, circleId, tags);
       break;
     }
     case 'community_reaction': {
-      const { postId, reaction } = item.payload as { postId: string; reaction: string };
+      const { postId, reaction } = item.payload as {
+        postId: string;
+        reaction: string;
+      };
       await api.community.reactToPost(postId, reaction);
       break;
     }
@@ -132,7 +168,11 @@ async function executeSyncItem(item: SyncQueueItem): Promise<void> {
 // Auth Gate — redirects based on auth + onboarding state
 // ---------------------------------------------------------------------------
 
-function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Element {
+function AuthGate({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.JSX.Element {
   const { status, isOnboarded, hasHydrated } = useAuthStore();
   const { isLoaded: arrivalLoaded, hasSeenArrival } = useArrivalStatus();
   const segments = useSegments();
@@ -159,7 +199,12 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
       return;
     }
 
-    if (status === 'unauthenticated' && hasSeenArrival && !inAuthGroup && !inArrival) {
+    if (
+      status === 'unauthenticated' &&
+      hasSeenArrival &&
+      !inAuthGroup &&
+      !inArrival
+    ) {
       router.replace('/(auth)/login');
     } else if (status === 'authenticated' && !isOnboarded && !inOnboarding) {
       router.replace('/onboarding');
@@ -170,7 +215,15 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
     ) {
       router.replace('/(tabs)');
     }
-  }, [status, isOnboarded, hasHydrated, hasSeenArrival, arrivalLoaded, segments, router]);
+  }, [
+    status,
+    isOnboarded,
+    hasHydrated,
+    hasSeenArrival,
+    arrivalLoaded,
+    segments,
+    router,
+  ]);
 
   return <>{children}</>;
 }
@@ -181,7 +234,8 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
-  const { status, user, initialize, checkBiometricAvailability } = useAuthStore();
+  const { status, user, initialize, checkBiometricAvailability } =
+    useAuthStore();
   const hydrateSubscription = useSubscriptionStore((s) => s.hydrate);
   const { isOnline } = useNetworkStatus();
   const pendingCount = useSyncQueueStore((s) => s.queue.length);
@@ -330,7 +384,11 @@ function AppContent(): React.JSX.Element {
 
   return (
     <View style={styles.container} onLayout={onLayoutReady}>
-      <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
+      <StatusBar
+        style={
+          theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'
+        }
+      />
       <OfflineBanner isOffline={!isOnline} pendingCount={pendingCount} />
       <NotificationToast />
       <ToastContainer />
@@ -358,7 +416,11 @@ function AppContent(): React.JSX.Element {
 
           <Stack.Screen
             name="subscription"
-            options={{ animation: 'slide_from_bottom', presentation: 'modal', animationDuration: 350 }}
+            options={{
+              animation: 'slide_from_bottom',
+              presentation: 'modal',
+              animationDuration: 350,
+            }}
           />
 
           {/* Sacred Tools */}
@@ -419,12 +481,32 @@ export default function RootLayout(): React.JSX.Element {
     <GestureHandlerRootView style={styles.container}>
       <PersistQueryClientProvider
         client={queryClient}
-        persistOptions={{ persister: queryPersister, maxAge: 1000 * 60 * 60 * 24 }}
+        persistOptions={{
+          persister: queryPersister,
+          maxAge: 1000 * 60 * 60 * 24,
+        }}
       >
         <ThemeProvider mode={mode} onModeChange={setMode}>
           <I18nProvider
             initialLocale={locale as 'en'}
-            namespaces={['common', 'navigation', 'errors', 'auth', 'home', 'kiaan', 'journeys', 'tools', 'emotional-reset', 'karma-reset', 'journal', 'sadhana', 'community', 'vibe-player', 'analytics', 'settings']}
+            namespaces={[
+              'common',
+              'navigation',
+              'errors',
+              'auth',
+              'home',
+              'kiaan',
+              'journeys',
+              'tools',
+              'emotional-reset',
+              'karma-reset',
+              'journal',
+              'sadhana',
+              'community',
+              'vibe-player',
+              'analytics',
+              'settings',
+            ]}
           >
             <ErrorBoundary>
               <AppContent />

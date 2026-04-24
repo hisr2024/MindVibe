@@ -75,7 +75,9 @@ export function initErrorTracking(): void {
   if (!dsn) {
     if (__DEV__) {
       // eslint-disable-next-line no-console
-      console.warn('[errorTracking] EXPO_PUBLIC_SENTRY_DSN not set — Sentry disabled');
+      console.warn(
+        '[errorTracking] EXPO_PUBLIC_SENTRY_DSN not set — Sentry disabled'
+      );
     }
     return;
   }
@@ -111,7 +113,7 @@ export type ErrorLevel = 'fatal' | 'error' | 'warning' | 'info' | 'debug';
  */
 export function captureError(
   error: unknown,
-  context?: Record<string, unknown>,
+  context?: Record<string, unknown>
 ): void {
   const sentry = getSentry();
 
@@ -142,7 +144,7 @@ export function captureError(
  */
 export function captureMessage(
   message: string,
-  level: ErrorLevel = 'info',
+  level: ErrorLevel = 'info'
 ): void {
   const sentry = getSentry();
 
@@ -200,7 +202,7 @@ export function clearUserContext(): void {
  */
 export function breadcrumb(
   message: string,
-  data?: Record<string, unknown>,
+  data?: Record<string, unknown>
 ): void {
   const sentry = getSentry();
   if (!sentry) return;

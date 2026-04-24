@@ -90,7 +90,7 @@ export default function RegisterScreen(): React.JSX.Element {
       clearError();
       await signup(data.email.trim(), data.password, data.name.trim());
     },
-    [signup, clearError],
+    [signup, clearError]
   );
 
   const handleGoToLogin = useCallback(() => {
@@ -120,11 +120,7 @@ export default function RegisterScreen(): React.JSX.Element {
           <Text variant="h2" align="center">
             Check your email
           </Text>
-          <Text
-            variant="body"
-            color={colors.text.muted}
-            align="center"
-          >
+          <Text variant="body" color={colors.text.muted} align="center">
             We sent a verification link to your email address. Please verify
             your email before signing in.
           </Text>

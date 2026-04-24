@@ -15,7 +15,9 @@ interface ArrivalPhaseProps {
   onComplete: () => void;
 }
 
-export function ArrivalPhase({ onComplete }: ArrivalPhaseProps): React.JSX.Element {
+export function ArrivalPhase({
+  onComplete,
+}: ArrivalPhaseProps): React.JSX.Element {
   useEffect(() => {
     const t = setTimeout(onComplete, 1600);
     return () => clearTimeout(t);

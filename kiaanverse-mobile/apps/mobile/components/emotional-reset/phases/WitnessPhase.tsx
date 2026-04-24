@@ -11,13 +11,7 @@
  */
 
 import React from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -84,7 +78,10 @@ export function WitnessPhase({
 
       {/* Crisis panel — safety first; never advance */}
       {!loading && crisis ? (
-        <Animated.View entering={FadeIn.duration(400)} style={styles.crisisCard}>
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.crisisCard}
+        >
           <Text style={styles.crisisEyebrow}>You are not alone</Text>
           <Text style={styles.crisisBody}>{crisis}</Text>
           <Pressable
@@ -123,7 +120,9 @@ export function WitnessPhase({
               style={styles.shlokaCard}
             >
               <View style={styles.shlokaTopBorder} />
-              <Text style={styles.shlokaSanskrit}>{response.shloka.sanskrit}</Text>
+              <Text style={styles.shlokaSanskrit}>
+                {response.shloka.sanskrit}
+              </Text>
               {response.shloka.transliteration ? (
                 <Text style={styles.shlokaTransliteration}>
                   {response.shloka.transliteration}
@@ -133,7 +132,9 @@ export function WitnessPhase({
                 {response.shloka.translation}
               </Text>
               {response.shloka.reference ? (
-                <Text style={styles.shlokaRef}>{response.shloka.reference}</Text>
+                <Text style={styles.shlokaRef}>
+                  {response.shloka.reference}
+                </Text>
               ) : null}
             </Animated.View>
           ) : null}
@@ -164,7 +165,10 @@ export function WitnessPhase({
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onContinue();
               }}
-              style={({ pressed }) => [styles.cta, pressed && { opacity: 0.85 }]}
+              style={({ pressed }) => [
+                styles.cta,
+                pressed && { opacity: 0.85 },
+              ]}
             >
               <LinearGradient
                 colors={['#D4A017', '#F0C040']}

@@ -16,9 +16,14 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuthStore, useUserPreferencesStore } from '@kiaanverse/store';
-import { initializeNotifications, rescheduleAll } from '../services/notificationService';
+import {
+  initializeNotifications,
+  rescheduleAll,
+} from '../services/notificationService';
 
-type NotificationPreferences = ReturnType<typeof useUserPreferencesStore.getState>['notifications'];
+type NotificationPreferences = ReturnType<
+  typeof useUserPreferencesStore.getState
+>['notifications'];
 
 /**
  * Hook that manages the notification system lifecycle.

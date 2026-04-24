@@ -134,18 +134,18 @@ function OmBreath(): React.JSX.Element {
         withTiming(1.0, {
           duration: 2000,
           easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
     opacity.value = withRepeat(
       withSequence(
         withTiming(1.0, { duration: 2000 }),
-        withTiming(0.6, { duration: 2000 }),
+        withTiming(0.6, { duration: 2000 })
       ),
       -1,
-      false,
+      false
     );
   }, [opacity, scale]);
 
@@ -182,18 +182,18 @@ function UserAvatar({
         withTiming(1.0, {
           duration: 2000,
           easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
     auraOpacity.value = withRepeat(
       withSequence(
         withTiming(0.5, { duration: 2000 }),
-        withTiming(0.2, { duration: 2000 }),
+        withTiming(0.2, { duration: 2000 })
       ),
       -1,
-      false,
+      false
     );
   }, [auraOpacity, auraScale]);
 
@@ -230,7 +230,7 @@ function DivineHeader(): React.JSX.Element {
 
   const openProfile = (): void => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     router.push('/(tabs)/profile');
   };
@@ -322,11 +322,11 @@ function GreetingHero(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.greeting,
-      withTiming(1, { duration: 500, easing: easeLotusBloom }),
+      withTiming(1, { duration: 500, easing: easeLotusBloom })
     );
     translateY.value = withDelay(
       ZONE_DELAY.greeting,
-      withTiming(0, { duration: 500, easing: easeLotusBloom }),
+      withTiming(0, { duration: 500, easing: easeLotusBloom })
     );
   }, [opacity, translateY]);
 
@@ -342,9 +342,7 @@ function GreetingHero(): React.JSX.Element {
 
       {/* Line 2: User name with sweeping gold shimmer */}
       <GoldShimmer>
-        <Text style={s.greetingName}>
-          {user?.name ?? 'Sacred Seeker'}
-        </Text>
+        <Text style={s.greetingName}>{user?.name ?? 'Sacred Seeker'}</Text>
       </GoldShimmer>
 
       {/* Line 3: Sanskrit translation at 50% gold */}
@@ -385,11 +383,11 @@ function DailyVerseCard(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.verse,
-      withTiming(1, { duration: 500, easing: easeLotusBloom }),
+      withTiming(1, { duration: 500, easing: easeLotusBloom })
     );
     translateY.value = withDelay(
       ZONE_DELAY.verse,
-      withTiming(0, { duration: 500, easing: easeLotusBloom }),
+      withTiming(0, { duration: 500, easing: easeLotusBloom })
     );
   }, [opacity, translateY]);
 
@@ -401,7 +399,7 @@ function DailyVerseCard(): React.JSX.Element {
   const askSakha = (): void => {
     if (!verse) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     router.push({
       pathname: '/(tabs)/chat',
@@ -414,7 +412,7 @@ function DailyVerseCard(): React.JSX.Element {
   const bookmark = (): void => {
     if (!verse) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     toggleBookmark(verse.id);
   };
@@ -553,11 +551,11 @@ function ToolsRail(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.tools,
-      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+      withTiming(1, { duration: 400, easing: easeLotusBloom })
     );
     translateY.value = withDelay(
       ZONE_DELAY.tools,
-      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+      withTiming(0, { duration: 400, easing: easeLotusBloom })
     );
   }, [opacity, translateY]);
 
@@ -568,7 +566,7 @@ function ToolsRail(): React.JSX.Element {
 
   const openTool = (route: string): void => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     // expo-router typed-routes treat string literals as unions of known
     // paths; `as never` satisfies that contract without loosening to `any`.
@@ -594,9 +592,7 @@ function ToolsRail(): React.JSX.Element {
             accessibilityLabel={`${tool.name} tool`}
           >
             {/* Left color accent — 3px vertical semantic stripe */}
-            <View
-              style={[s.toolChipAccent, { backgroundColor: tool.color }]}
-            />
+            <View style={[s.toolChipAccent, { backgroundColor: tool.color }]} />
 
             <View style={s.toolChipContent}>
               <Text style={s.toolChipIcon}>{tool.icon}</Text>
@@ -648,11 +644,11 @@ function SadhanaStreakCard(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.sadhana,
-      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+      withTiming(1, { duration: 400, easing: easeLotusBloom })
     );
     translateY.value = withDelay(
       ZONE_DELAY.sadhana,
-      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+      withTiming(0, { duration: 400, easing: easeLotusBloom })
     );
   }, [opacity, translateY]);
 
@@ -673,10 +669,10 @@ function SadhanaStreakCard(): React.JSX.Element {
         withTiming(1.0, {
           duration: 600,
           easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
   }, [flamePulse]);
   const flameStyle = useAnimatedStyle(() => ({
@@ -685,7 +681,7 @@ function SadhanaStreakCard(): React.JSX.Element {
 
   const continueSadhana = (): void => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     router.push('/sadhana' as never);
   };
@@ -752,11 +748,11 @@ function KiaanVibeBanner(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.vibe,
-      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+      withTiming(1, { duration: 400, easing: easeLotusBloom })
     );
     translateY.value = withDelay(
       ZONE_DELAY.vibe,
-      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+      withTiming(0, { duration: 400, easing: easeLotusBloom })
     );
   }, [opacity, translateY]);
 
@@ -767,7 +763,7 @@ function KiaanVibeBanner(): React.JSX.Element {
 
   const openVibePlayer = (): void => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined,
+      () => undefined
     );
     router.push('/vibe-player' as never);
   };
@@ -797,9 +793,7 @@ function KiaanVibeBanner(): React.JSX.Element {
           {/* Text */}
           <View style={s.vibeText}>
             <Text style={s.vibeName}>KIAAN Vibe Player</Text>
-            <Text style={s.vibeSub}>
-              Mantras · Meditation · Gita Shlokas
-            </Text>
+            <Text style={s.vibeSub}>Mantras · Meditation · Gita Shlokas</Text>
           </View>
 
           {/* Play button — Krishna Aura gradient */}

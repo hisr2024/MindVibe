@@ -84,7 +84,9 @@ export interface SacredArrivalProps {
   readonly onComplete: () => void;
 }
 
-function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Element {
+function SacredArrivalInner({
+  onComplete,
+}: SacredArrivalProps): React.JSX.Element {
   // Scene-level shared values.
   const pointOpacity = useSharedValue(0);
   const pointScale = useSharedValue(1);
@@ -97,27 +99,40 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
 
   // Letter shared values — allocated as fixed-length tuple to preserve hook
   // call order across renders (React requires identical hook sequence).
-  const l0o = useSharedValue(0); const l0y = useSharedValue(8);
-  const l1o = useSharedValue(0); const l1y = useSharedValue(8);
-  const l2o = useSharedValue(0); const l2y = useSharedValue(8);
-  const l3o = useSharedValue(0); const l3y = useSharedValue(8);
-  const l4o = useSharedValue(0); const l4y = useSharedValue(8);
-  const l5o = useSharedValue(0); const l5y = useSharedValue(8);
-  const l6o = useSharedValue(0); const l6y = useSharedValue(8);
-  const l7o = useSharedValue(0); const l7y = useSharedValue(8);
-  const l8o = useSharedValue(0); const l8y = useSharedValue(8);
-  const l9o = useSharedValue(0); const l9y = useSharedValue(8);
+  const l0o = useSharedValue(0);
+  const l0y = useSharedValue(8);
+  const l1o = useSharedValue(0);
+  const l1y = useSharedValue(8);
+  const l2o = useSharedValue(0);
+  const l2y = useSharedValue(8);
+  const l3o = useSharedValue(0);
+  const l3y = useSharedValue(8);
+  const l4o = useSharedValue(0);
+  const l4y = useSharedValue(8);
+  const l5o = useSharedValue(0);
+  const l5y = useSharedValue(8);
+  const l6o = useSharedValue(0);
+  const l6y = useSharedValue(8);
+  const l7o = useSharedValue(0);
+  const l7y = useSharedValue(8);
+  const l8o = useSharedValue(0);
+  const l8y = useSharedValue(8);
+  const l9o = useSharedValue(0);
+  const l9y = useSharedValue(8);
 
-  const letterOpacities: ReadonlyArray<SharedValue<number>> = useMemo(
+  const letterOpacities: readonly SharedValue<number>[] = useMemo(
     () => [l0o, l1o, l2o, l3o, l4o, l5o, l6o, l7o, l8o, l9o],
-    [l0o, l1o, l2o, l3o, l4o, l5o, l6o, l7o, l8o, l9o],
+    [l0o, l1o, l2o, l3o, l4o, l5o, l6o, l7o, l8o, l9o]
   );
-  const letterTranslates: ReadonlyArray<SharedValue<number>> = useMemo(
+  const letterTranslates: readonly SharedValue<number>[] = useMemo(
     () => [l0y, l1y, l2y, l3y, l4y, l5y, l6y, l7y, l8y, l9y],
-    [l0y, l1y, l2y, l3y, l4y, l5y, l6y, l7y, l8y, l9y],
+    [l0y, l1y, l2y, l3y, l4y, l5y, l6y, l7y, l8y, l9y]
   );
 
-  const titleChars = useMemo(() => Array.from(TITLE).slice(0, NAME_SLOT_COUNT), []);
+  const titleChars = useMemo(
+    () => Array.from(TITLE).slice(0, NAME_SLOT_COUNT),
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -151,7 +166,7 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
             REDUCED_MOTION_DURATION - 200,
             withTiming(0, { duration: 200 }, (finished) => {
               if (finished) runOnJS(fireComplete)();
-            }),
+            })
           );
           scheduleComplete(REDUCED_MOTION_DURATION + 80);
           return;
@@ -165,20 +180,20 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
         pointScale.value = withRepeat(
           withSequence(
             withTiming(1.4, { duration: 800, easing: LOTUS_BLOOM }),
-            withTiming(1.0, { duration: 800, easing: LOTUS_BLOOM }),
+            withTiming(1.0, { duration: 800, easing: LOTUS_BLOOM })
           ),
           -1,
-          false,
+          false
         );
 
         // ACT 2 — OM ARRIVES
         omProgress.value = withDelay(
           ACT1_POINT,
-          withTiming(1, { duration: ACT2_OM, easing: LOTUS_BLOOM }),
+          withTiming(1, { duration: ACT2_OM, easing: LOTUS_BLOOM })
         );
         omAuraOpacity.value = withDelay(
           ACT1_POINT + 200,
-          withTiming(0.65, { duration: ACT2_OM, easing: DIVINE_IN }),
+          withTiming(0.65, { duration: ACT2_OM, easing: DIVINE_IN })
         );
 
         // ACT 3 — THE NAME (letter stagger)
@@ -188,34 +203,34 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
           if (!oSv || !ySv) return;
           oSv.value = withDelay(
             ACT3_NAME_START + idx * ACT3_LETTER_STAGGER,
-            withTiming(1, { duration: 320, easing: LOTUS_BLOOM }),
+            withTiming(1, { duration: 320, easing: LOTUS_BLOOM })
           );
           ySv.value = withDelay(
             ACT3_NAME_START + idx * ACT3_LETTER_STAGGER,
-            withTiming(0, { duration: 320, easing: LOTUS_BLOOM }),
+            withTiming(0, { duration: 320, easing: LOTUS_BLOOM })
           );
         });
 
         // ACT 4 — INVOCATION
         invocationOpacity.value = withDelay(
           ACT4_INVOCATION,
-          withTiming(0.6, { duration: 600, easing: DIVINE_IN }),
+          withTiming(0.6, { duration: 600, easing: DIVINE_IN })
         );
 
         // ACT 5 — THE BLOOM
         omScale.value = withDelay(
           ACT5_BLOOM,
-          withTiming(0.8, { duration: 400, easing: DIVINE_OUT }),
+          withTiming(0.8, { duration: 400, easing: DIVINE_OUT })
         );
         sceneScale.value = withDelay(
           ACT5_BLOOM,
-          withTiming(1.1, { duration: 400, easing: DIVINE_OUT }),
+          withTiming(1.1, { duration: 400, easing: DIVINE_OUT })
         );
         sceneOpacity.value = withDelay(
           ACT5_BLOOM,
           withTiming(0, { duration: 400, easing: DIVINE_OUT }, (finished) => {
             if (finished) runOnJS(fireComplete)();
-          }),
+          })
         );
 
         // Safety net — fire if animation callback gets dropped.
@@ -247,7 +262,9 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
   const omStyle = useAnimatedStyle(() => ({
     opacity: omProgress.value,
     transform: [
-      { scale: interpolate(omProgress.value, [0, 1], [0.4, 1]) * omScale.value },
+      {
+        scale: interpolate(omProgress.value, [0, 1], [0.4, 1]) * omScale.value,
+      },
     ],
   }));
   const omAuraStyle = useAnimatedStyle(() => ({
@@ -258,20 +275,58 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
   }));
 
   // Per-letter styles — top-level hooks (not in a loop) to keep hook order stable.
-  const letter0Style = useAnimatedStyle(() => ({ opacity: l0o.value, transform: [{ translateY: l0y.value }] }));
-  const letter1Style = useAnimatedStyle(() => ({ opacity: l1o.value, transform: [{ translateY: l1y.value }] }));
-  const letter2Style = useAnimatedStyle(() => ({ opacity: l2o.value, transform: [{ translateY: l2y.value }] }));
-  const letter3Style = useAnimatedStyle(() => ({ opacity: l3o.value, transform: [{ translateY: l3y.value }] }));
-  const letter4Style = useAnimatedStyle(() => ({ opacity: l4o.value, transform: [{ translateY: l4y.value }] }));
-  const letter5Style = useAnimatedStyle(() => ({ opacity: l5o.value, transform: [{ translateY: l5y.value }] }));
-  const letter6Style = useAnimatedStyle(() => ({ opacity: l6o.value, transform: [{ translateY: l6y.value }] }));
-  const letter7Style = useAnimatedStyle(() => ({ opacity: l7o.value, transform: [{ translateY: l7y.value }] }));
-  const letter8Style = useAnimatedStyle(() => ({ opacity: l8o.value, transform: [{ translateY: l8y.value }] }));
-  const letter9Style = useAnimatedStyle(() => ({ opacity: l9o.value, transform: [{ translateY: l9y.value }] }));
+  const letter0Style = useAnimatedStyle(() => ({
+    opacity: l0o.value,
+    transform: [{ translateY: l0y.value }],
+  }));
+  const letter1Style = useAnimatedStyle(() => ({
+    opacity: l1o.value,
+    transform: [{ translateY: l1y.value }],
+  }));
+  const letter2Style = useAnimatedStyle(() => ({
+    opacity: l2o.value,
+    transform: [{ translateY: l2y.value }],
+  }));
+  const letter3Style = useAnimatedStyle(() => ({
+    opacity: l3o.value,
+    transform: [{ translateY: l3y.value }],
+  }));
+  const letter4Style = useAnimatedStyle(() => ({
+    opacity: l4o.value,
+    transform: [{ translateY: l4y.value }],
+  }));
+  const letter5Style = useAnimatedStyle(() => ({
+    opacity: l5o.value,
+    transform: [{ translateY: l5y.value }],
+  }));
+  const letter6Style = useAnimatedStyle(() => ({
+    opacity: l6o.value,
+    transform: [{ translateY: l6y.value }],
+  }));
+  const letter7Style = useAnimatedStyle(() => ({
+    opacity: l7o.value,
+    transform: [{ translateY: l7y.value }],
+  }));
+  const letter8Style = useAnimatedStyle(() => ({
+    opacity: l8o.value,
+    transform: [{ translateY: l8y.value }],
+  }));
+  const letter9Style = useAnimatedStyle(() => ({
+    opacity: l9o.value,
+    transform: [{ translateY: l9y.value }],
+  }));
 
   const letterStyles = [
-    letter0Style, letter1Style, letter2Style, letter3Style, letter4Style,
-    letter5Style, letter6Style, letter7Style, letter8Style, letter9Style,
+    letter0Style,
+    letter1Style,
+    letter2Style,
+    letter3Style,
+    letter4Style,
+    letter5Style,
+    letter6Style,
+    letter7Style,
+    letter8Style,
+    letter9Style,
   ];
 
   return (
@@ -290,13 +345,25 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
             <Stop offset="100%" stopColor="#000000" stopOpacity="1" />
           </RadialGradient>
         </Defs>
-        <Circle cx={W / 2} cy={H / 2} r={Math.max(W, H)} fill="url(#voidGlow)" />
+        <Circle
+          cx={W / 2}
+          cy={H / 2}
+          r={Math.max(W, H)}
+          fill="url(#voidGlow)"
+        />
       </Svg>
 
       {/* OM aura — concentric golden glow that breathes behind the glyph. */}
-      <Animated.View style={[styles.auraWrap, omAuraStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.auraWrap, omAuraStyle]}
+        pointerEvents="none"
+      >
         <LinearGradient
-          colors={['rgba(212, 160, 23, 0.35)', 'rgba(27, 79, 187, 0.12)', 'transparent']}
+          colors={[
+            'rgba(212, 160, 23, 0.35)',
+            'rgba(27, 79, 187, 0.12)',
+            'transparent',
+          ]}
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 1 }}
           style={styles.auraGradient}
@@ -304,7 +371,10 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
       </Animated.View>
 
       {/* ACT 1 — point of light. */}
-      <Animated.View style={[styles.pointWrap, pointStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.pointWrap, pointStyle]}
+        pointerEvents="none"
+      >
         <View style={styles.point} />
       </Animated.View>
 

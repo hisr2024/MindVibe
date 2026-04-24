@@ -18,11 +18,7 @@
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import {
-  DivineButton,
-  SacredCard,
-  SacredInput,
-} from '@kiaanverse/ui';
+import { DivineButton, SacredCard, SacredInput } from '@kiaanverse/ui';
 
 import { NEUTRAL_ACCENT, ripuAlpha, type Ripu } from './ripus';
 

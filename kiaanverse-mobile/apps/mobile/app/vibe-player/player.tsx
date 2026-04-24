@@ -131,7 +131,8 @@ export default function VibePlayerScreen(): React.JSX.Element {
     setBookmarked((b) => !b);
   }, []);
 
-  const displayDuration = duration > 0 ? duration : currentTrack?.duration ?? 0;
+  const displayDuration =
+    duration > 0 ? duration : (currentTrack?.duration ?? 0);
 
   // Album art occupies ~50 % of the screen height, clamped to a circle
   // whose diameter never exceeds the screen width so the mandala never
@@ -147,7 +148,7 @@ export default function VibePlayerScreen(): React.JSX.Element {
 
   const categoryDisplay = currentTrack
     ? categoryLabel(
-        (currentTrack as { category?: string }).category ?? 'Meditation',
+        (currentTrack as { category?: string }).category ?? 'Meditation'
       )
     : '';
 

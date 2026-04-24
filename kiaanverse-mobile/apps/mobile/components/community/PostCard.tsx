@@ -58,7 +58,7 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
       void Haptics.selectionAsync();
       reactToPost.mutate({ postId: post.id, reaction: reactionKey });
     },
-    [reactToPost, post.id],
+    [reactToPost, post.id]
   );
 
   const postAge = useMemo(() => timeAgo(post.createdAt), [post.createdAt]);
@@ -69,13 +69,13 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
     <View style={styles.card}>
       {/* Author Row */}
       <View style={styles.authorRow}>
-        <Avatar
-          name={post.authorName}
-          uri={post.authorAvatar}
-          size={36}
-        />
+        <Avatar name={post.authorName} uri={post.authorAvatar} size={36} />
         <View style={styles.authorInfo}>
-          <Text variant="body" color={colors.text.primary} style={styles.authorName}>
+          <Text
+            variant="body"
+            color={colors.text.primary}
+            style={styles.authorName}
+          >
             {post.authorName}
           </Text>
           <Text variant="caption" color={colors.text.muted}>
@@ -122,11 +122,12 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
       </View>
 
       {/* Meta: reactions + comments count */}
-      {(post.reactionsCount > 0 || post.commentsCount > 0) ? (
+      {post.reactionsCount > 0 || post.commentsCount > 0 ? (
         <View style={styles.metaRow}>
           {post.reactionsCount > 0 ? (
             <Text variant="caption" color={colors.text.muted}>
-              {post.reactionsCount} reaction{post.reactionsCount !== 1 ? 's' : ''}
+              {post.reactionsCount} reaction
+              {post.reactionsCount !== 1 ? 's' : ''}
             </Text>
           ) : null}
           {post.commentsCount > 0 ? (

@@ -23,7 +23,9 @@ export interface SubMandalaTextureProps {
   readonly size?: number;
 }
 
-function SubMandalaTextureInner({ size }: SubMandalaTextureProps): React.JSX.Element {
+function SubMandalaTextureInner({
+  size,
+}: SubMandalaTextureProps): React.JSX.Element {
   const { width, height } = useWindowDimensions();
   const diameter = size ?? Math.min(width, height) * 0.75;
   const cx = width / 2;
@@ -96,12 +98,7 @@ function SubMandalaTextureInner({ size }: SubMandalaTextureProps): React.JSX.Ele
           />
 
           {/* 6-pointed Shatkona star */}
-          <Path
-            path={starPath}
-            color={GOLD}
-            style="stroke"
-            strokeWidth={1}
-          />
+          <Path path={starPath} color={GOLD} style="stroke" strokeWidth={1} />
 
           {/* Center seed */}
           <Circle cx={cx} cy={cy} r={3} color={GOLD} />

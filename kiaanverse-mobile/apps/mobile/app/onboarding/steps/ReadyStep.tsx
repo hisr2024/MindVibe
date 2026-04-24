@@ -9,7 +9,13 @@ import React, { useCallback, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';
-import { Text, GoldenButton, LoadingMandala, colors, spacing } from '@kiaanverse/ui';
+import {
+  Text,
+  GoldenButton,
+  LoadingMandala,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 
 interface ReadyStepProps {
   readonly onComplete: (notificationsEnabled: boolean) => void;
@@ -48,17 +54,23 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Animated.View entering={FadeInDown.duration(800).delay(200)} style={styles.content}>
+      <Animated.View
+        entering={FadeInDown.duration(800).delay(200)}
+        style={styles.content}
+      >
         <Text variant="sacred" color={colors.divine.aura} align="center">
-          {'"'}You have the right to perform your prescribed duties, but you are not
-          entitled to the fruits of your actions.{'"'}
+          {'"'}You have the right to perform your prescribed duties, but you are
+          not entitled to the fruits of your actions.{'"'}
         </Text>
         <Text variant="caption" color={colors.text.muted} align="center">
           — Bhagavad Gita 2.47
         </Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.duration(600).delay(600)} style={styles.textWrap}>
+      <Animated.View
+        entering={FadeInDown.duration(600).delay(600)}
+        style={styles.textWrap}
+      >
         <Text variant="h1" align="center">
           You{"'"}re Ready
         </Text>
@@ -68,7 +80,10 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
         </Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.duration(600).delay(900)} style={styles.actions}>
+      <Animated.View
+        entering={FadeInDown.duration(600).delay(900)}
+        style={styles.actions}
+      >
         <GoldenButton
           title="Enable Notifications & Begin"
           variant="divine"

@@ -16,12 +16,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import {
-  Canvas,
-  Rect,
-  RadialGradient,
-  vec,
-} from '@shopify/react-native-skia';
+import { Canvas, Rect, RadialGradient, vec } from '@shopify/react-native-skia';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -39,12 +34,12 @@ const PHASE_CONFIG: Record<
   KarmaResetPhase,
   { rgb: [number, number, number]; glow: number; ember: number }
 > = {
-  entry:      { rgb: [249, 115, 22],  glow: 0.04, ember: 0.04 },
-  context:    { rgb: [212, 160, 23],  glow: 0.06, ember: 0.05 },
-  reflection: { rgb: [27, 79, 187],   glow: 0.05, ember: 0.04 },
-  wisdom:     { rgb: [212, 160, 23],  glow: 0.10, ember: 0.06 },
-  sankalpa:   { rgb: [240, 192, 64],  glow: 0.12, ember: 0.08 },
-  seal:       { rgb: [212, 160, 23],  glow: 0.15, ember: 0.10 },
+  entry: { rgb: [249, 115, 22], glow: 0.04, ember: 0.04 },
+  context: { rgb: [212, 160, 23], glow: 0.06, ember: 0.05 },
+  reflection: { rgb: [27, 79, 187], glow: 0.05, ember: 0.04 },
+  wisdom: { rgb: [212, 160, 23], glow: 0.1, ember: 0.06 },
+  sankalpa: { rgb: [240, 192, 64], glow: 0.12, ember: 0.08 },
+  seal: { rgb: [212, 160, 23], glow: 0.15, ember: 0.1 },
 };
 
 function rgba(rgb: [number, number, number], alpha: number): string {
@@ -63,24 +58,27 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps): React.JSX.Element {
     breath.value = withRepeat(
       withTiming(1.0, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
   }, [breath]);
 
   const glowStyle = useAnimatedStyle(() => ({ opacity: breath.value }));
 
   const emberCenter = useMemo(() => vec(width / 2, height), [width, height]);
-  const glowCenter = useMemo(() => vec(width / 2, height * 0.4), [width, height]);
+  const glowCenter = useMemo(
+    () => vec(width / 2, height * 0.4),
+    [width, height]
+  );
   const emberRadius = height * 0.5;
   const glowRadius = width * 0.5;
 
   const emberColors = useMemo(
     () => [rgba([249, 115, 22], config.ember), rgba([249, 115, 22], 0)],
-    [config.ember],
+    [config.ember]
   );
   const glowColors = useMemo(
     () => [rgba(config.rgb, config.glow), rgba(config.rgb, 0)],
-    [config.glow, config.rgb],
+    [config.glow, config.rgb]
   );
 
   return (

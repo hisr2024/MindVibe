@@ -53,9 +53,7 @@ function Char({
   }));
 
   return (
-    <Animated.Text style={[styles.sanskritChar, style]}>
-      {char}
-    </Animated.Text>
+    <Animated.Text style={[styles.sanskritChar, style]}>{char}</Animated.Text>
   );
 }
 
@@ -73,7 +71,7 @@ export function EntryPhase({ onComplete }: EntryPhaseProps): React.JSX.Element {
       .catch(() => {});
     const sub = AccessibilityInfo.addEventListener(
       'reduceMotionChanged',
-      setReduceMotion,
+      setReduceMotion
     );
     return () => {
       mounted = false;
@@ -123,10 +121,7 @@ export function EntryPhase({ onComplete }: EntryPhaseProps): React.JSX.Element {
 
   const flameStyle = useAnimatedStyle(() => ({
     opacity: flameOpacity.value,
-    transform: [
-      { translateY: flameY.value },
-      { scale: flameScale.value },
-    ],
+    transform: [{ translateY: flameY.value }, { scale: flameScale.value }],
   }));
 
   return (
@@ -137,7 +132,7 @@ export function EntryPhase({ onComplete }: EntryPhaseProps): React.JSX.Element {
       </Animated.View>
 
       {/* Sanskrit "कर्म" — letter by letter */}
-      {(step === 'sanskrit' || step === 'subtitle' || step === 'shrink') ? (
+      {step === 'sanskrit' || step === 'subtitle' || step === 'shrink' ? (
         <View style={styles.sanskritRow}>
           {SANSKRIT_CHARS.map((char, i) => (
             <Char key={`${i}-${char}`} char={char} delay={i * 80} />
@@ -146,11 +141,8 @@ export function EntryPhase({ onComplete }: EntryPhaseProps): React.JSX.Element {
       ) : null}
 
       {/* Subtitle */}
-      {(step === 'subtitle' || step === 'shrink') ? (
-        <Animated.Text
-          entering={FadeIn.duration(300)}
-          style={styles.subtitle}
-        >
+      {step === 'subtitle' || step === 'shrink' ? (
+        <Animated.Text entering={FadeIn.duration(300)} style={styles.subtitle}>
           Karma Reset
         </Animated.Text>
       ) : null}

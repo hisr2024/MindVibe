@@ -62,11 +62,14 @@ function LotusIndicator({
     if (isActive) {
       scale.value = withRepeat(
         withSequence(
-          withTiming(1.15, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1.15, {
+            duration: 1000,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
         ),
         -1,
-        true,
+        true
       );
     } else {
       scale.value = withTiming(1, { duration: 300 });
@@ -107,7 +110,7 @@ export function ReflectionPhase({
     const load = async () => {
       const q = await fetchReflectionQuestion(
         context,
-        questionIndex as 0 | 1 | 2,
+        questionIndex as 0 | 1 | 2
       );
       if (!cancelled) setCurrentQuestion(q);
     };
@@ -155,13 +158,7 @@ export function ReflectionPhase({
     } else {
       onComplete(next);
     }
-  }, [
-    currentAnswer,
-    currentQuestion,
-    questionIndex,
-    answers,
-    onComplete,
-  ]);
+  }, [currentAnswer, currentQuestion, questionIndex, answers, onComplete]);
 
   // Sakha avatar pulsing glow
   const glow = useSharedValue(0);
@@ -169,7 +166,7 @@ export function ReflectionPhase({
     glow.value = withRepeat(
       withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
   }, [glow]);
   const avatarStyle = useAnimatedStyle(() => ({
@@ -298,7 +295,10 @@ export function ReflectionPhase({
                   ]}
                 >
                   <Text
-                    style={[styles.optionText, { color: '#B8AE98', fontSize: 14 }]}
+                    style={[
+                      styles.optionText,
+                      { color: '#B8AE98', fontSize: 14 },
+                    ]}
                   >
                     Speak freely...
                   </Text>

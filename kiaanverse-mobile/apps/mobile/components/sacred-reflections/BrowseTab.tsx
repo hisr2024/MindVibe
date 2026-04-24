@@ -33,12 +33,7 @@ import { Text, colors, spacing } from '@kiaanverse/ui';
 import { useJournalEntries } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 
-import {
-  BROWSE_FILTER_IDS,
-  COPY,
-  MOOD_BY_ID,
-  type MoodId,
-} from './constants';
+import { BROWSE_FILTER_IDS, COPY, MOOD_BY_ID, type MoodId } from './constants';
 
 interface BrowseTabProps {
   readonly onOpenEditor: () => void;
@@ -84,7 +79,10 @@ function countThisMonth(entries: readonly JournalEntry[]): number {
   const now = new Date();
   return entries.filter((entry) => {
     const d = new Date(entry.created_at);
-    return d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth();
+    return (
+      d.getUTCFullYear() === now.getUTCFullYear() &&
+      d.getUTCMonth() === now.getUTCMonth()
+    );
   }).length;
 }
 
@@ -119,10 +117,16 @@ function WeeklyStrip({
         const day = new Date(weekStart);
         day.setDate(weekStart.getDate() + idx);
         const isToday = isSameDayUtc(day, today);
-        const hasEntry = daysJournaled.has(`${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`);
+        const hasEntry = daysJournaled.has(
+          `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`
+        );
         return (
           <View key={idx} style={styles.weekCell}>
-            <Text variant="caption" color={colors.text.muted} style={styles.weekLabel}>
+            <Text
+              variant="caption"
+              color={colors.text.muted}
+              style={styles.weekLabel}
+            >
               {label}
             </Text>
             <View
@@ -163,7 +167,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       void Haptics.selectionAsync();
       router.push(`/journal/${entryId}`);
     },
-    [router],
+    [router]
   );
 
   const entries = useMemo(() => data?.entries ?? [], [data]);
@@ -180,7 +184,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       // Fall back to tags so journals written before the moods[]/tags[]
       // split (shipped alongside this patch) still group correctly.
       result = result.filter(
-        (e) => e.moods?.includes(activeFilter) || e.tags.includes(activeFilter),
+        (e) => e.moods?.includes(activeFilter) || e.tags.includes(activeFilter)
       );
     }
     if (searchQuery.trim()) {
@@ -189,7 +193,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         (e) =>
           e.title?.toLowerCase().includes(q) ||
           e.content_preview?.toLowerCase().includes(q) ||
-          e.tags.some((t) => t.toLowerCase().includes(q)),
+          e.tags.some((t) => t.toLowerCase().includes(q))
       );
     }
     return result;
@@ -213,9 +217,9 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       //      writes moods & tags separately to match the backend contract).
       //   2. Tags fallback for entries written before the split.
       //   3. null → no mood pill rendered.
-      const moodFromColumn = (item.moods ?? []).find(
-        (m) => m in MOOD_BY_ID,
-      ) as MoodId | undefined;
+      const moodFromColumn = (item.moods ?? []).find((m) => m in MOOD_BY_ID) as
+        | MoodId
+        | undefined;
       const moodFromTags = item.tags.find((t) => t in MOOD_BY_ID) as
         | MoodId
         | undefined;
@@ -247,7 +251,11 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
               </Text>
             </View>
             {item.title ? (
-              <Text variant="h3" color={colors.text.primary} style={styles.entryTitle}>
+              <Text
+                variant="h3"
+                color={colors.text.primary}
+                style={styles.entryTitle}
+              >
                 {item.title}
               </Text>
             ) : null}
@@ -263,7 +271,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         </Animated.View>
       );
     },
-    [handleEntryPress],
+    [handleEntryPress]
   );
 
   const renderEmpty = !isLoading ? (
@@ -275,7 +283,11 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
           : 'Your sacred library awaits your first offering'}
       </Text>
       <Pressable onPress={onOpenEditor}>
-        <Text variant="caption" color={colors.text.muted} style={styles.emptySub}>
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          style={styles.emptySub}
+        >
           {COPY.emptyLibrarySub}
         </Text>
       </Pressable>
@@ -299,7 +311,11 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       <Text variant="h2" color={colors.text.primary} style={styles.heading}>
         {COPY.browseHeading}
       </Text>
-      <Text variant="caption" color={colors.primary[500]} style={styles.headingSanskrit}>
+      <Text
+        variant="caption"
+        color={colors.primary[500]}
+        style={styles.headingSanskrit}
+      >
         {COPY.browseSanskrit}
       </Text>
 
@@ -309,11 +325,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       <View style={styles.statsRow}>
         <StatCard value={total} label="reflections" title="TOTAL" />
         <StatCard value={monthCount} label="entries" title="THIS MONTH" />
-        <StatCard
-          value={streak}
-          label={`\u{1F525} days`}
-          title="STREAK"
-        />
+        <StatCard value={streak} label={`\u{1F525} days`} title="STREAK" />
       </View>
 
       {/* Search */}
@@ -352,7 +364,9 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
               </Text>
               <Text
                 variant="caption"
-                color={isActive ? colors.background.dark : colors.text.secondary}
+                color={
+                  isActive ? colors.background.dark : colors.text.secondary
+                }
               >
                 {chipLabel}
               </Text>
@@ -394,7 +408,11 @@ function StatCard({
       <Text variant="h1" color={colors.primary[500]} style={styles.statValue}>
         {value}
       </Text>
-      <Text variant="caption" color={colors.text.muted} style={styles.statTitle}>
+      <Text
+        variant="caption"
+        color={colors.text.muted}
+        style={styles.statTitle}
+      >
         {title}
       </Text>
       <Text variant="caption" color={colors.text.secondary}>

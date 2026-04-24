@@ -8,7 +8,13 @@
  */
 
 import React, { useRef, useEffect, useCallback } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, type ViewStyle } from 'react-native';
+import {
+  View,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
 import Animated, {
   FadeIn,
   useSharedValue,
@@ -51,17 +57,21 @@ const DAY_BUTTON_GAP = 10;
 // ActiveDayRing — pulsing golden border for the currently selected day.
 // ---------------------------------------------------------------------------
 
-function ActiveDayRing({ color }: { readonly color: string }): React.JSX.Element {
+function ActiveDayRing({
+  color,
+}: {
+  readonly color: string;
+}): React.JSX.Element {
   const scale = useSharedValue(1);
 
   useEffect(() => {
     scale.value = withRepeat(
       withSequence(
         withTiming(1.12, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      true,
+      true
     );
   }, [scale]);
 
@@ -112,11 +122,12 @@ function DayButton({
       ? accentColor
       : colors.alpha.whiteLight;
 
-  const textColor = isCompleted || isCurrent
-    ? colors.raw.white
-    : isLocked
-      ? colors.text.muted
-      : colors.text.secondary;
+  const textColor =
+    isCompleted || isCurrent
+      ? colors.raw.white
+      : isLocked
+        ? colors.text.muted
+        : colors.text.secondary;
 
   return (
     <Pressable
@@ -126,7 +137,12 @@ function DayButton({
       accessibilityLabel={`Day ${day}${isCompleted ? ', completed' : ''}${isCurrent ? ', current' : ''}${isLocked ? ', locked' : ''}`}
       accessibilityState={{ disabled: isLocked, selected: isCurrent }}
     >
-      <View style={[styles.dayButton, { backgroundColor: bgColor, opacity: isLocked ? 0.4 : 1 }]}>
+      <View
+        style={[
+          styles.dayButton,
+          { backgroundColor: bgColor, opacity: isLocked ? 0.4 : 1 },
+        ]}
+      >
         {isCurrent && <ActiveDayRing color={accentColor} />}
 
         {isCompleted ? (
@@ -160,7 +176,10 @@ export function DaySelector({
   // Auto-scroll to current day on mount
   useEffect(() => {
     const timer = setTimeout(() => {
-      const offset = Math.max(0, (currentDay - 3) * (DAY_BUTTON_SIZE + DAY_BUTTON_GAP));
+      const offset = Math.max(
+        0,
+        (currentDay - 3) * (DAY_BUTTON_SIZE + DAY_BUTTON_GAP)
+      );
       scrollRef.current?.scrollTo({ x: offset, animated: true });
     }, 300);
     return () => clearTimeout(timer);

@@ -79,7 +79,7 @@ export function buildMetadataPayload(opts: {
 // Defined at module scope so the useVoiceRecorder hook receives a stable
 // reference (its internal callbacks re-run when `transcribe` changes).
 async function transcribeAudio(
-  formData: FormData,
+  formData: FormData
 ): Promise<{ transcript: string; confidence: number }> {
   const { data } = await api.voice.transcribe(formData);
   return data;
@@ -129,7 +129,9 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           const sep = prev.trim().length === 0 ? '' : '\n\n';
           return `${prev}${sep}${result.transcript}`;
         });
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
       } else if (voiceError) {
         Alert.alert('Voice unavailable', voiceError);
       }
@@ -153,7 +155,10 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
       return;
     }
     if (body.trim().length === 0) {
-      Alert.alert('Sacred space awaits', 'Let the words come. Write your reflection before offering it.');
+      Alert.alert(
+        'Sacred space awaits',
+        'Let the words come. Write your reflection before offering it.'
+      );
       return;
     }
 
@@ -189,7 +194,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
     } catch (err) {
       Alert.alert(
         'Could not offer reflection',
-        err instanceof Error ? err.message : 'Please try again in a moment.',
+        err instanceof Error ? err.message : 'Please try again in a moment.'
       );
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -197,9 +202,8 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
     }
   }, [mood, title, body, selectedTags, createJournal, onSaved]);
 
-  const wordCount = body.trim().length === 0
-    ? 0
-    : body.trim().split(/\s+/).length;
+  const wordCount =
+    body.trim().length === 0 ? 0 : body.trim().split(/\s+/).length;
 
   return (
     <KeyboardAvoidingView
@@ -213,7 +217,11 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         {/* ---- Mood prompt ---- */}
-        <Text variant="label" color={colors.primary[500]} style={styles.sectionLabel}>
+        <Text
+          variant="label"
+          color={colors.primary[500]}
+          style={styles.sectionLabel}
+        >
           {COPY.moodPrompt}
         </Text>
         <ScrollView
@@ -310,7 +318,11 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           </Pressable>
         </View>
 
-        <Text variant="caption" color={colors.text.muted} style={styles.wordCount}>
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          style={styles.wordCount}
+        >
           {isRecording
             ? `\u{1F534} Recording · ${durationSeconds}s — tap ■ to stop`
             : voiceStatus === 'transcribing'
@@ -334,7 +346,9 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
               >
                 <Text
                   variant="caption"
-                  color={isActive ? colors.background.dark : colors.text.secondary}
+                  color={
+                    isActive ? colors.background.dark : colors.text.secondary
+                  }
                 >
                   #{tag}
                 </Text>
@@ -344,9 +358,16 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         </View>
 
         {/* ---- Encryption notice ---- */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.encryptionBanner}>
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.encryptionBanner}
+        >
           <Text style={styles.lockIcon}>{'\u{1F512}'}</Text>
-          <Text variant="caption" color={colors.text.secondary} style={styles.encryptionText}>
+          <Text
+            variant="caption"
+            color={colors.text.secondary}
+            style={styles.encryptionText}
+          >
             {COPY.encryptionNotice}
           </Text>
         </Animated.View>

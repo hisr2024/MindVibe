@@ -32,19 +32,25 @@ function TearDrop(): React.JSX.Element {
   useEffect(() => {
     scale.value = withRepeat(
       withSequence(
-        withTiming(1.08, { duration: 2400, easing: Easing.bezier(0.45, 0.05, 0.55, 0.95) }),
-        withTiming(1.0, { duration: 2400, easing: Easing.bezier(0.45, 0.05, 0.55, 0.95) }),
+        withTiming(1.08, {
+          duration: 2400,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+        withTiming(1.0, {
+          duration: 2400,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        })
       ),
       -1,
-      false,
+      false
     );
     opacity.value = withRepeat(
       withSequence(
         withTiming(1.0, { duration: 2400 }),
-        withTiming(0.6, { duration: 2400 }),
+        withTiming(0.6, { duration: 2400 })
       ),
       -1,
-      false,
+      false
     );
   }, [scale, opacity]);
 

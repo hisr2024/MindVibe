@@ -38,7 +38,9 @@ export default function ComposeScreen(): React.JSX.Element {
   const { data: circles } = useCommunityCircles();
 
   const [content, setContent] = useState('');
-  const [selectedCircleId, setSelectedCircleId] = useState<string | undefined>(undefined);
+  const [selectedCircleId, setSelectedCircleId] = useState<string | undefined>(
+    undefined
+  );
   const [tagsInput, setTagsInput] = useState('');
 
   const charsRemaining = MAX_CHARS - content.length;
@@ -71,24 +73,25 @@ export default function ComposeScreen(): React.JSX.Element {
       .filter((t) => t.length > 0);
 
     try {
-      const payload: { content: string; circle_id?: string; tags?: string[] } = {
-        content: content.trim(),
-        tags,
-      };
+      const payload: { content: string; circle_id?: string; tags?: string[] } =
+        {
+          content: content.trim(),
+          tags,
+        };
       if (selectedCircleId !== undefined) payload.circle_id = selectedCircleId;
       await createPost.mutateAsync(payload);
       router.back();
     } catch {
       Alert.alert(
         'Could Not Post',
-        'Your wisdom could not be shared right now. Please try again.',
+        'Your wisdom could not be shared right now. Please try again.'
       );
     }
   }, [canSubmit, content, selectedCircleId, tagsInput, createPost, router]);
 
   const availableCircles = useMemo(
     () => (circles ?? []).filter((c) => c.isJoined),
-    [circles],
+    [circles]
   );
 
   return (
@@ -123,7 +126,11 @@ export default function ComposeScreen(): React.JSX.Element {
               selectionColor={colors.primary[500]}
               maxLength={MAX_CHARS + 20}
             />
-            <Text variant="caption" color={charCountColor} style={styles.charCount}>
+            <Text
+              variant="caption"
+              color={charCountColor}
+              style={styles.charCount}
+            >
               {charsRemaining} characters remaining
             </Text>
           </View>
@@ -148,7 +155,9 @@ export default function ComposeScreen(): React.JSX.Element {
                       selectedCircleId === circle.id && styles.circleChipActive,
                     ]}
                     accessibilityRole="button"
-                    accessibilityState={{ selected: selectedCircleId === circle.id }}
+                    accessibilityState={{
+                      selected: selectedCircleId === circle.id,
+                    }}
                   >
                     <Text
                       variant="caption"

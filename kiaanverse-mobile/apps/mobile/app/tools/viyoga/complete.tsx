@@ -70,11 +70,15 @@ export default function ViyogaComplete(): React.JSX.Element {
         accessibilityLabel={`All ${FLAME_COUNT} flames are lit`}
       >
         {Array.from({ length: FLAME_COUNT }).map((_, i) => (
-          <Text key={i} style={s.flame}>🔥</Text>
+          <Text key={i} style={s.flame}>
+            🔥
+          </Text>
         ))}
       </View>
 
-      <Text style={s.om} accessibilityLabel="OM">ॐ</Text>
+      <Text style={s.om} accessibilityLabel="OM">
+        ॐ
+      </Text>
 
       <Text style={s.complete}>VIYOGA COMPLETE</Text>
 

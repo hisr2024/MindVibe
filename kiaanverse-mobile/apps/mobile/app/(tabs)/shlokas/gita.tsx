@@ -17,7 +17,13 @@
  * Offline-first: chapter catalog + daily verse cached for 24h.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
   Modal,
@@ -129,7 +135,10 @@ function DailyVerse(): React.JSX.Element {
 
   if (isLoading || !data?.verse) {
     return (
-      <Animated.View entering={FadeIn.duration(400)} style={styles.dailyLoading}>
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.dailyLoading}
+      >
         {error ? (
           <OmLoader size={56} label="The daily verse will return soon…" />
         ) : (
@@ -173,13 +182,22 @@ interface ChapterRowProps {
   readonly onPress: (chapterId: number) => void;
 }
 
-function ChapterRow({ chapter, index, onPress }: ChapterRowProps): React.JSX.Element {
-  const handlePress = useCallback(() => onPress(chapter.id), [chapter.id, onPress]);
+function ChapterRow({
+  chapter,
+  index,
+  onPress,
+}: ChapterRowProps): React.JSX.Element {
+  const handlePress = useCallback(
+    () => onPress(chapter.id),
+    [chapter.id, onPress]
+  );
   const sanskrit = CHAPTER_SANSKRIT_NAMES[chapter.id] ?? '';
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 35).duration(340).springify()}
+      entering={FadeInDown.delay(index * 35)
+        .duration(340)
+        .springify()}
     >
       <SacredCard
         onPress={handlePress}
@@ -308,7 +326,7 @@ function SearchOverlay({
         </Pressable>
       );
     },
-    [onClose, onSelectVerse],
+    [onClose, onSelectVerse]
   );
 
   return (
@@ -353,8 +371,8 @@ function SearchOverlay({
               <OmLoader size={48} />
               <Text style={styles.emptyTitle}>Searching the sacred texts…</Text>
               <Text style={styles.emptyHint}>
-                Type at least {SEARCH_MIN_CHARS} characters to find verses by theme,
-                Sanskrit keyword, or English translation.
+                Type at least {SEARCH_MIN_CHARS} characters to find verses by
+                theme, Sanskrit keyword, or English translation.
               </Text>
             </View>
           ) : isLoading ? (
@@ -365,16 +383,16 @@ function SearchOverlay({
             <View style={styles.emptyState}>
               <Text style={styles.errorTitle}>Unable to search right now</Text>
               <Text style={styles.emptyHint}>
-                Please check your connection and try again. Your previously viewed
-                verses remain available offline.
+                Please check your connection and try again. Your previously
+                viewed verses remain available offline.
               </Text>
             </View>
           ) : results.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyTitle}>No verses found</Text>
               <Text style={styles.emptyHint}>
-                Try another keyword — e.g. &ldquo;dharma&rdquo;, &ldquo;karma&rdquo;,
-                or &ldquo;surrender&rdquo;.
+                Try another keyword — e.g. &ldquo;dharma&rdquo;,
+                &ldquo;karma&rdquo;, or &ldquo;surrender&rdquo;.
               </Text>
             </View>
           ) : (
@@ -385,7 +403,9 @@ function SearchOverlay({
               contentContainerStyle={styles.resultsContent}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
-              ItemSeparatorComponent={() => <View style={styles.resultSeparator} />}
+              ItemSeparatorComponent={() => (
+                <View style={styles.resultSeparator} />
+              )}
               showsVerticalScrollIndicator={false}
             />
           )}
@@ -410,14 +430,14 @@ export default function ShlokasScreen(): React.JSX.Element {
     (chapterId: number) => {
       router.push(`/(tabs)/shlokas/${chapterId}`);
     },
-    [router],
+    [router]
   );
 
   const openVerse = useCallback(
     (chapter: number, verse: number) => {
       router.push(`/(tabs)/shlokas/${chapter}/${verse}`);
     },
-    [router],
+    [router]
   );
 
   const listHeader = useMemo(
@@ -432,14 +452,14 @@ export default function ShlokasScreen(): React.JSX.Element {
         <GoldenDivider withGlyph style={styles.sectionDivider} />
       </View>
     ),
-    [],
+    []
   );
 
   const renderChapter = useCallback<ListRenderItem<GitaChapter>>(
     ({ item, index }) => (
       <ChapterRow chapter={item} index={index} onPress={openChapter} />
     ),
-    [openChapter],
+    [openChapter]
   );
 
   const listEmpty = (
@@ -448,7 +468,9 @@ export default function ShlokasScreen(): React.JSX.Element {
         <OmLoader size={64} label="Opening the sacred text…" />
       ) : error ? (
         <>
-          <Text style={styles.errorTitle}>Chapters are temporarily unavailable</Text>
+          <Text style={styles.errorTitle}>
+            Chapters are temporarily unavailable
+          </Text>
           <Text style={styles.emptyHint}>
             Pull down to try again — your bookmarks remain safe offline.
           </Text>

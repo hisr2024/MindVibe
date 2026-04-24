@@ -7,13 +7,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  Modal,
-  Pressable,
-} from 'react-native';
+import { View, FlatList, StyleSheet, Modal, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -59,23 +53,30 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
     setShowLogModal(true);
   }, []);
 
-  const renderRipple = useCallback(({ item, index }: { item: RippleEffect; index: number }) => (
-    <Animated.View entering={FadeInUp.delay(index * 60).duration(400)}>
-      <Card style={styles.rippleCard}>
-        <View style={styles.rippleHeader}>
-          <Text variant="body" color={colors.text.primary} style={styles.rippleAction}>
-            {item.action}
+  const renderRipple = useCallback(
+    ({ item, index }: { item: RippleEffect; index: number }) => (
+      <Animated.View entering={FadeInUp.delay(index * 60).duration(400)}>
+        <Card style={styles.rippleCard}>
+          <View style={styles.rippleHeader}>
+            <Text
+              variant="body"
+              color={colors.text.primary}
+              style={styles.rippleAction}
+            >
+              {item.action}
+            </Text>
+            <Text variant="caption" color={colors.primary[300]}>
+              +{item.karma_points}
+            </Text>
+          </View>
+          <Text variant="bodySmall" color={colors.text.secondary}>
+            {item.impact}
           </Text>
-          <Text variant="caption" color={colors.primary[300]}>
-            +{item.karma_points}
-          </Text>
-        </View>
-        <Text variant="bodySmall" color={colors.text.secondary}>
-          {item.impact}
-        </Text>
-      </Card>
-    </Animated.View>
-  ), []);
+        </Card>
+      </Animated.View>
+    ),
+    []
+  );
 
   if (isLoading) {
     return (
@@ -105,14 +106,26 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
             </Text>
 
             {/* Total karma display */}
-            <Animated.View entering={FadeInDown.duration(600)} style={styles.karmaDisplay}>
+            <Animated.View
+              entering={FadeInDown.duration(600)}
+              style={styles.karmaDisplay}
+            >
               <Text variant="caption" color={colors.text.muted} align="center">
                 Total Karma
               </Text>
-              <Text variant="h1" color={colors.divine.aura} align="center" style={styles.karmaNumber}>
+              <Text
+                variant="h1"
+                color={colors.divine.aura}
+                align="center"
+                style={styles.karmaNumber}
+              >
                 {data?.total_karma ?? 0}
               </Text>
-              <Text variant="bodySmall" color={colors.primary[300]} align="center">
+              <Text
+                variant="bodySmall"
+                color={colors.primary[300]}
+                align="center"
+              >
                 {data?.positive_actions ?? 0} positive actions
               </Text>
             </Animated.View>
@@ -120,7 +133,11 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
             {/* Areas of growth */}
             {data?.areas_of_growth && data.areas_of_growth.length > 0 ? (
               <Animated.View entering={FadeInDown.delay(200).duration(500)}>
-                <Text variant="label" color={colors.text.muted} style={styles.sectionLabel}>
+                <Text
+                  variant="label"
+                  color={colors.text.muted}
+                  style={styles.sectionLabel}
+                >
                   Areas of Growth
                 </Text>
                 <View style={styles.chipRow}>
@@ -135,7 +152,11 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
             {data?.gita_guidance ? (
               <Animated.View entering={FadeInDown.delay(300).duration(500)}>
                 <Card style={styles.guidanceCard}>
-                  <Text variant="bodySmall" color={colors.primary[300]} style={styles.guidanceText}>
+                  <Text
+                    variant="bodySmall"
+                    color={colors.primary[300]}
+                    style={styles.guidanceText}
+                  >
                     {data.gita_guidance}
                   </Text>
                 </Card>
@@ -144,7 +165,11 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
 
             <Divider />
 
-            <Text variant="label" color={colors.text.muted} style={styles.sectionLabel}>
+            <Text
+              variant="label"
+              color={colors.text.muted}
+              style={styles.sectionLabel}
+            >
               Ripple Effects
             </Text>
           </View>
@@ -165,7 +190,10 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
 
       {/* Log Action Modal */}
       <Modal visible={showLogModal} transparent animationType="slide">
-        <Pressable style={styles.modalOverlay} onPress={() => setShowLogModal(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLogModal(false)}
+        >
           <Pressable style={styles.modalContent} onPress={() => {}}>
             <Text variant="h3" color={colors.text.primary} align="center">
               Log Karmic Action
@@ -189,7 +217,10 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
               onPress={handleLogAction}
               disabled={!newAction.trim()}
             />
-            <Pressable onPress={() => setShowLogModal(false)} style={styles.cancelButton}>
+            <Pressable
+              onPress={() => setShowLogModal(false)}
+              style={styles.cancelButton}
+            >
               <Text variant="body" color={colors.text.muted} align="center">
                 Cancel
               </Text>

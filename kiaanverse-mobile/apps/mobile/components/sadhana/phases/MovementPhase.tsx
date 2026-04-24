@@ -61,10 +61,10 @@ function MovementPhaseInner({
       <SacredCard style={styles.card}>
         <Text style={styles.cardTitle}>Surya Namaskar — Five Rounds</Text>
         <Text style={styles.cardBody}>
-          Stand tall. Palms together at the heart. Move with the breath
-          through five rounds of sun salutations. Let attention settle
-          into the body — notice the warmth, the circulation, the return
-          of the breath to its rhythm.
+          Stand tall. Palms together at the heart. Move with the breath through
+          five rounds of sun salutations. Let attention settle into the body —
+          notice the warmth, the circulation, the return of the breath to its
+          rhythm.
         </Text>
       </SacredCard>
 

@@ -10,7 +10,15 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Text, GoldenButton, GlowCard, MandalaSpin, colors, spacing, radii } from '@kiaanverse/ui';
+import {
+  Text,
+  GoldenButton,
+  GlowCard,
+  MandalaSpin,
+  colors,
+  spacing,
+  radii,
+} from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,7 +52,10 @@ const FALLBACK = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Element {
+export function WisdomStep({
+  stepData,
+  onNext,
+}: WisdomStepProps): React.JSX.Element {
   const verseRef = stepData?.verseRef ?? FALLBACK.verseRef;
   const sanskrit = stepData?.sanskrit ?? FALLBACK.sanskrit;
   const translation = stepData?.translation ?? FALLBACK.translation;
@@ -61,7 +72,12 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
         <Text variant="h2" color={colors.divine.aura} align="center">
           Sacred Wisdom
         </Text>
-        <Text variant="caption" color={colors.text.muted} align="center" style={styles.verseRef}>
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          align="center"
+          style={styles.verseRef}
+        >
           {verseRef}
         </Text>
       </Animated.View>
@@ -82,7 +98,12 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
               {sanskrit}
             </Text>
             <View style={styles.divider} />
-            <Text variant="body" color={colors.text.secondary} align="center" style={styles.translation}>
+            <Text
+              variant="body"
+              color={colors.text.secondary}
+              align="center"
+              style={styles.translation}
+            >
               {translation}
             </Text>
           </GlowCard>
@@ -91,10 +112,18 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
 
       {/* Application section */}
       <Animated.View entering={FadeInDown.delay(600).duration(500)}>
-        <Text variant="label" color={colors.text.primary} style={styles.sectionTitle}>
+        <Text
+          variant="label"
+          color={colors.text.primary}
+          style={styles.sectionTitle}
+        >
           How This Applies
         </Text>
-        <Text variant="body" color={colors.text.secondary} style={styles.applicationText}>
+        <Text
+          variant="body"
+          color={colors.text.secondary}
+          style={styles.applicationText}
+        >
           {application}
         </Text>
       </Animated.View>

@@ -71,10 +71,7 @@ function JourneyHeroInner({
             <Text style={styles.symbol} allowFontScaling={false}>
               {ripu.symbol}
             </Text>
-            <Text
-              style={[styles.english, { color: accent }]}
-              numberOfLines={1}
-            >
+            <Text style={[styles.english, { color: accent }]} numberOfLines={1}>
               {ripu.name.toUpperCase()}
             </Text>
           </View>

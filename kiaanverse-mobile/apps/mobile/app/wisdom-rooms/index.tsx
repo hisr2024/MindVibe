@@ -7,7 +7,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -40,7 +46,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push(`/wisdom-rooms/${roomId}`);
     },
-    [router],
+    [router]
   );
 
   const renderRoom = useCallback(
@@ -50,7 +56,12 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
           <View style={styles.roomHeader}>
             <View style={styles.roomTitleRow}>
               {item.isActive ? <View style={styles.activeDot} /> : null}
-              <Text variant="label" color={colors.text.primary} numberOfLines={1} style={styles.roomName}>
+              <Text
+                variant="label"
+                color={colors.text.primary}
+                numberOfLines={1}
+                style={styles.roomName}
+              >
                 {item.topic}
               </Text>
             </View>
@@ -58,7 +69,11 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
           </View>
 
           {item.description ? (
-            <Text variant="bodySmall" color={colors.text.secondary} numberOfLines={2}>
+            <Text
+              variant="bodySmall"
+              color={colors.text.secondary}
+              numberOfLines={2}
+            >
               {item.description}
             </Text>
           ) : null}
@@ -77,7 +92,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
         </Card>
       </Animated.View>
     ),
-    [handleJoin],
+    [handleJoin]
   );
 
   const keyExtractor = useCallback((item: WisdomRoom) => item.id, []);
@@ -97,7 +112,12 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
     <Screen>
       <GoldenHeader title="Wisdom Rooms" onBack={() => router.back()} />
 
-      <Text variant="body" color={colors.text.secondary} align="center" style={styles.subtitle}>
+      <Text
+        variant="body"
+        color={colors.text.secondary}
+        align="center"
+        style={styles.subtitle}
+      >
         Join guided discussions
       </Text>
 

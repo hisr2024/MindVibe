@@ -158,7 +158,7 @@ export default function ToolsDashboardScreen(): React.JSX.Element {
     (route: string) => {
       router.push(route as never);
     },
-    [router],
+    [router]
   );
 
   const handleOpenVibePlayer = useCallback(() => {
@@ -172,7 +172,7 @@ export default function ToolsDashboardScreen(): React.JSX.Element {
         { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
         { title: 'Karma Insights', tools: INSIGHT_TOOLS },
       ] as const,
-    [],
+    []
   );
 
   // Section index 3 is reserved for Sacred Sound (VibePlayer) — so the

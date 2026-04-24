@@ -40,18 +40,18 @@ export function OmLoader({
     scale.value = withRepeat(
       withSequence(
         withTiming(1.08, { duration: 900, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0.9, { duration: 900, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.9, { duration: 900, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
-      false,
+      false
     );
     opacity.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 900, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0.55, { duration: 900, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.55, { duration: 900, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
-      false,
+      false
     );
   }, [active, scale, opacity]);
 
@@ -63,7 +63,10 @@ export function OmLoader({
   return (
     <View style={[styles.wrap, style]}>
       <Animated.View style={animatedStyle}>
-        <Text style={[styles.glyph, { fontSize: size }]} accessibilityLabel="Refreshing">
+        <Text
+          style={[styles.glyph, { fontSize: size }]}
+          accessibilityLabel="Refreshing"
+        >
           ॐ
         </Text>
       </Animated.View>

@@ -81,8 +81,8 @@ function WisdomPhaseInner({
 
       <View style={styles.helperBlock}>
         <Text style={styles.helper}>
-          Sit with the verse. When you are ready, invite Sakha for a
-          deeper meaning or continue when settled.
+          Sit with the verse. When you are ready, invite Sakha for a deeper
+          meaning or continue when settled.
         </Text>
       </View>
 

@@ -41,9 +41,18 @@ export function useDivineEntrance({
     const delay = baseDelayMs + index * staggerMs;
     const easing = Easing.out(Easing.cubic);
 
-    opacity.value = withDelay(delay, withTiming(1, { duration: durationMs, easing }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: durationMs, easing }));
-    scale.value = withDelay(delay, withTiming(1, { duration: durationMs, easing }));
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: durationMs, easing })
+    );
+    translateY.value = withDelay(
+      delay,
+      withTiming(0, { duration: durationMs, easing })
+    );
+    scale.value = withDelay(
+      delay,
+      withTiming(1, { duration: durationMs, easing })
+    );
   }, [index, baseDelayMs, staggerMs, durationMs, opacity, translateY, scale]);
 
   const style = useAnimatedStyle(() => ({

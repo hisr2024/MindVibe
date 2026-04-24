@@ -45,19 +45,28 @@ function MiniEqualizer() {
 
   useEffect(() => {
     bar1.value = withRepeat(
-      withSequence(withTiming(14, { duration: 300 }), withTiming(4, { duration: 400 })),
+      withSequence(
+        withTiming(14, { duration: 300 }),
+        withTiming(4, { duration: 400 })
+      ),
       -1,
-      true,
+      true
     );
     bar2.value = withRepeat(
-      withSequence(withTiming(18, { duration: 250 }), withTiming(6, { duration: 350 })),
+      withSequence(
+        withTiming(18, { duration: 250 }),
+        withTiming(6, { duration: 350 })
+      ),
       -1,
-      true,
+      true
     );
     bar3.value = withRepeat(
-      withSequence(withTiming(12, { duration: 350 }), withTiming(3, { duration: 300 })),
+      withSequence(
+        withTiming(12, { duration: 350 }),
+        withTiming(3, { duration: 300 })
+      ),
       -1,
-      true,
+      true
     );
 
     return () => {
@@ -94,7 +103,11 @@ const eqStyles = StyleSheet.create({
   },
 });
 
-export function TrackCard({ track, isPlaying, onPress }: TrackCardProps): React.JSX.Element {
+export function TrackCard({
+  track,
+  isPlaying,
+  onPress,
+}: TrackCardProps): React.JSX.Element {
   return (
     <Pressable
       onPress={onPress}

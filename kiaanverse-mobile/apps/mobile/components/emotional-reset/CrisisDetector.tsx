@@ -54,7 +54,9 @@ const HELPLINES: readonly Helpline[] = [
 // Component
 // ---------------------------------------------------------------------------
 
-export function CrisisDetector({ onDismiss }: CrisisDetectorProps): React.JSX.Element {
+export function CrisisDetector({
+  onDismiss,
+}: CrisisDetectorProps): React.JSX.Element {
   const router = useRouter();
 
   const handleCall = (number: string): void => {
@@ -72,7 +74,10 @@ export function CrisisDetector({ onDismiss }: CrisisDetectorProps): React.JSX.El
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.card}>
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(500)}
+          style={styles.card}
+        >
           {/* Reassurance header */}
           <Text variant="h2" color={colors.divine.aura} align="center">
             You Are Not Alone
@@ -89,13 +94,22 @@ export function CrisisDetector({ onDismiss }: CrisisDetectorProps): React.JSX.El
 
           {/* Breathing suggestion */}
           <View style={styles.breathingCard}>
-            <Text variant="bodySmall" color={colors.primary[300]} align="center">
-              Take a slow breath in... hold... and release. You are safe in this moment.
+            <Text
+              variant="bodySmall"
+              color={colors.primary[300]}
+              align="center"
+            >
+              Take a slow breath in... hold... and release. You are safe in this
+              moment.
             </Text>
           </View>
 
           {/* Helplines */}
-          <Text variant="label" color={colors.text.primary} style={styles.sectionTitle}>
+          <Text
+            variant="label"
+            color={colors.text.primary}
+            style={styles.sectionTitle}
+          >
             Reach Out for Support
           </Text>
           {HELPLINES.map((helpline) => (

@@ -103,13 +103,13 @@ function looksLikeComplete(v: unknown): v is KarmaCompleteResponse {
 
 export async function getReflectionQuestion(
   context: KarmaResetContext,
-  questionIndex: 0 | 1 | 2,
+  questionIndex: 0 | 1 | 2
 ): Promise<KarmaReflectionQuestion> {
   const body = sanitize({ context, questionIndex });
   try {
     const { data } = await apiClient.post<unknown>(
       '/api/karma-reset/reflect',
-      body,
+      body
     );
     if (looksLikeQuestion(data)) return data;
   } catch {
@@ -120,13 +120,13 @@ export async function getReflectionQuestion(
 
 export async function getWisdom(
   context: KarmaResetContext,
-  reflections: KarmaReflectionAnswer[],
+  reflections: KarmaReflectionAnswer[]
 ): Promise<KarmaWisdomResponse> {
   const body = sanitize({ context, reflections });
   try {
     const { data } = await apiClient.post<unknown>(
       '/api/karma-reset/wisdom',
-      body,
+      body
     );
     if (looksLikeWisdom(data)) return data;
   } catch {
@@ -138,7 +138,7 @@ export async function getWisdom(
 export async function completeSession(
   sessionId: string,
   sankalpaSigned: boolean,
-  actionDharmaCommitted: string[],
+  actionDharmaCommitted: string[]
 ): Promise<KarmaCompleteResponse> {
   const body = sanitize({
     sessionId,
@@ -148,7 +148,7 @@ export async function completeSession(
   try {
     const { data } = await apiClient.post<unknown>(
       '/api/karma-reset/complete',
-      body,
+      body
     );
     if (looksLikeComplete(data)) return data;
   } catch {

@@ -44,11 +44,11 @@ function PulseDot({ delay }: { delay: number }): React.JSX.Element {
           withTiming(1.0, { duration: 200, easing: Easing.in(Easing.quad) }),
           // Pause before the next cycle so all three dots share a 850 ms period
           // (3 dots × 150 ms stagger + 400 ms swing ≈ 850 ms).
-          withTiming(1.0, { duration: 450 }),
+          withTiming(1.0, { duration: 450 })
         ),
         -1,
-        false,
-      ),
+        false
+      )
     );
     opacity.value = withDelay(
       delay,
@@ -56,11 +56,11 @@ function PulseDot({ delay }: { delay: number }): React.JSX.Element {
         withSequence(
           withTiming(1.0, { duration: 200, easing: Easing.out(Easing.quad) }),
           withTiming(0.55, { duration: 200, easing: Easing.in(Easing.quad) }),
-          withTiming(0.55, { duration: 450 }),
+          withTiming(0.55, { duration: 450 })
         ),
         -1,
-        false,
-      ),
+        false
+      )
     );
   }, [delay, scale, opacity]);
 
@@ -80,7 +80,7 @@ function SpinningOm(): React.JSX.Element {
     rotation.value = withRepeat(
       withTiming(360, { duration: 8000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
   }, [rotation]);
 
@@ -88,16 +88,17 @@ function SpinningOm(): React.JSX.Element {
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  return (
-    <Animated.Text style={[styles.om, animatedStyle]}>ॐ</Animated.Text>
-  );
+  return <Animated.Text style={[styles.om, animatedStyle]}>ॐ</Animated.Text>;
 }
 
 function TypingIndicatorInner(): React.JSX.Element {
   const entrance = useSharedValue(0);
 
   useEffect(() => {
-    entrance.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) });
+    entrance.value = withTiming(1, {
+      duration: 200,
+      easing: Easing.out(Easing.quad),
+    });
   }, [entrance]);
 
   const entranceStyle = useAnimatedStyle(() => ({

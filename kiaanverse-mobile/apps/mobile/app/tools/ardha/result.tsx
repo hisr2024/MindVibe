@@ -15,13 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -87,7 +81,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
       if (expandMode !== 'accordion') setExpandMode('accordion');
       setOpenSection((prev) => (prev === key ? '' : key));
     },
-    [expandMode],
+    [expandMode]
   );
 
   const handleExpandAll = useCallback(() => {
@@ -110,7 +104,10 @@ export default function ArdhaResultScreen(): React.JSX.Element {
     try {
       // Share sheet doubles as Copy on mobile — every OS exposes "Copy"
       // as one of its share targets, and we avoid adding a clipboard dep.
-      await Share.share({ message: payload.fullText, title: "Ardha's Reframe" });
+      await Share.share({
+        message: payload.fullText,
+        title: "Ardha's Reframe",
+      });
     } catch {
       // User dismissed the sheet; nothing to do.
     }
@@ -148,7 +145,11 @@ export default function ArdhaResultScreen(): React.JSX.Element {
   if (!payload) {
     // Redirect effect above handles this — return the dark shell so the
     // screen never flashes empty content.
-    return <DivineBackground variant="cosmic" style={styles.root}><></></DivineBackground>;
+    return (
+      <DivineBackground variant="cosmic" style={styles.root}>
+        <></>
+      </DivineBackground>
+    );
   }
 
   const sections = payload.sections;
@@ -216,7 +217,11 @@ export default function ArdhaResultScreen(): React.JSX.Element {
           <View style={[styles.controlsRow, isCrisis && styles.hidden]}>
             {[
               { key: 'expand', label: 'Expand All', onPress: handleExpandAll },
-              { key: 'collapse', label: 'Collapse All', onPress: handleCollapseAll },
+              {
+                key: 'collapse',
+                label: 'Collapse All',
+                onPress: handleCollapseAll,
+              },
               { key: 'full', label: 'Full Text', onPress: handleFullText },
             ].map((c) => (
               <Pressable
@@ -282,7 +287,9 @@ export default function ArdhaResultScreen(): React.JSX.Element {
                       {isOpen ? (
                         <View style={styles.sectionBody}>
                           <View style={styles.sectionDivider} />
-                          <Text style={styles.sectionContent}>{section.content}</Text>
+                          <Text style={styles.sectionContent}>
+                            {section.content}
+                          </Text>
                         </View>
                       ) : null}
                     </View>
@@ -317,14 +324,19 @@ export default function ArdhaResultScreen(): React.JSX.Element {
           {isCrisis ? (
             <Text style={styles.crisisCareLine}>
               ARDHA has paused reframing. What you are feeling deserves direct,
-              compassionate support — please reach out to the people and helplines
-              listed above.
+              compassionate support — please reach out to the people and
+              helplines listed above.
             </Text>
           ) : analysis.pillars.length > 0 ? (
             analysis.pillars.map((pillar, i) => (
-              <View key={`${pillar.badge}-${i}`} style={styles.analysisPillarRow}>
+              <View
+                key={`${pillar.badge}-${i}`}
+                style={styles.analysisPillarRow}
+              >
                 <View style={styles.analysisPillarBadge}>
-                  <Text style={styles.analysisPillarBadgeText}>{pillar.badge}</Text>
+                  <Text style={styles.analysisPillarBadgeText}>
+                    {pillar.badge}
+                  </Text>
                 </View>
                 <View style={styles.analysisPillarBody}>
                   <Text style={styles.analysisPillarName}>
@@ -352,7 +364,8 @@ export default function ArdhaResultScreen(): React.JSX.Element {
 
           {!isCrisis && payload.compliance.maxScore > 0 ? (
             <Text style={styles.complianceLine}>
-              Compliance {payload.compliance.score}/{payload.compliance.maxScore}
+              Compliance {payload.compliance.score}/
+              {payload.compliance.maxScore}
               {payload.fallback ? ' · template fallback' : ''}
             </Text>
           ) : null}

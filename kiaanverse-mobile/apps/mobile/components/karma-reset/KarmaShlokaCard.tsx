@@ -56,7 +56,8 @@ function splitGraphemes(input: string): string[] {
     const code = char.codePointAt(0) ?? 0;
     const isCombining =
       (code >= 0x0300 && code <= 0x036f) ||
-      (code >= 0x0900 && code <= 0x097f &&
+      (code >= 0x0900 &&
+        code <= 0x097f &&
         // only virama + vowel signs; leave consonants standalone
         ((code >= 0x093a && code <= 0x094f) ||
           (code >= 0x0951 && code <= 0x0957) ||

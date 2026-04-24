@@ -87,26 +87,43 @@ export function useSubscription(): UseSubscriptionResult {
   const limit = MONTHLY_LIMITS[tier];
   const rank = TIER_RANK[tier];
 
-  return useMemo(() => ({
-    tier,
-    isReady: isHydrated,
-    isPaid: tier !== 'free',
-    canSendMessage: canSendMessageFn(),
-    canUseVoice: canUseVoiceFn(),
-    hasEncryptedJournal: rank >= TIER_RANK.bhakta,
-    hasAdvancedAnalytics: rank >= TIER_RANK.sadhak,
-    hasKiaanAgent: rank >= TIER_RANK.sadhak,
-    hasDedicatedSupport: rank >= TIER_RANK.siddha,
-    hasTeamFeatures: rank >= TIER_RANK.siddha,
-    kiaanRemaining: limit === -1 ? -1 : Math.max(0, limit - monthlyKiaanCount),
-    kiaanLimit: limit,
-    kiaanUsed: monthlyKiaanCount,
-    expiresAt,
-    canStartJourney: canStartJourneyFn,
-    hasFeature: hasFeatureFn,
-    purchaseStatus,
-    error,
-  }), [tier, isHydrated, expiresAt, monthlyKiaanCount, limit, rank, purchaseStatus, error, canSendMessageFn, canUseVoiceFn, canStartJourneyFn, hasFeatureFn]);
+  return useMemo(
+    () => ({
+      tier,
+      isReady: isHydrated,
+      isPaid: tier !== 'free',
+      canSendMessage: canSendMessageFn(),
+      canUseVoice: canUseVoiceFn(),
+      hasEncryptedJournal: rank >= TIER_RANK.bhakta,
+      hasAdvancedAnalytics: rank >= TIER_RANK.sadhak,
+      hasKiaanAgent: rank >= TIER_RANK.sadhak,
+      hasDedicatedSupport: rank >= TIER_RANK.siddha,
+      hasTeamFeatures: rank >= TIER_RANK.siddha,
+      kiaanRemaining:
+        limit === -1 ? -1 : Math.max(0, limit - monthlyKiaanCount),
+      kiaanLimit: limit,
+      kiaanUsed: monthlyKiaanCount,
+      expiresAt,
+      canStartJourney: canStartJourneyFn,
+      hasFeature: hasFeatureFn,
+      purchaseStatus,
+      error,
+    }),
+    [
+      tier,
+      isHydrated,
+      expiresAt,
+      monthlyKiaanCount,
+      limit,
+      rank,
+      purchaseStatus,
+      error,
+      canSendMessageFn,
+      canUseVoiceFn,
+      canStartJourneyFn,
+      hasFeatureFn,
+    ]
+  );
 }
 
 export default useSubscription;

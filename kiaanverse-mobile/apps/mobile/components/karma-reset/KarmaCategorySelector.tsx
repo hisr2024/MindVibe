@@ -59,9 +59,7 @@ function CategoryCard({
     scale.value = withSpring(1, { damping: 15, stiffness: 350 });
   }, [scale]);
 
-  const borderColor = isSelected
-    ? `${cat.color}80`
-    : 'rgba(255,255,255,0.06)';
+  const borderColor = isSelected ? `${cat.color}80` : 'rgba(255,255,255,0.06)';
   const topBorderColor = isSelected ? cat.color : 'rgba(255,255,255,0.06)';
 
   return (
@@ -114,7 +112,7 @@ export function KarmaCategorySelector({
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onSelect(cat.id);
     },
-    [onSelect],
+    [onSelect]
   );
 
   return (

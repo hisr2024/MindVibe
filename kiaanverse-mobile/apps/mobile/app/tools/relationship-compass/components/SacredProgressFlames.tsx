@@ -49,14 +49,17 @@ export interface SacredProgressFlamesProps {
  * Stylised lotus diya — a small SVG that we tint with the prop colour.
  * Drawn as three flame-shaped petals so it reads as a single lit lamp.
  */
-function LotusFlame({ color, size }: { readonly color: string; readonly size: number }) {
+function LotusFlame({
+  color,
+  size,
+}: {
+  readonly color: string;
+  readonly size: number;
+}) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 28">
       {/* Centre flame */}
-      <Path
-        d="M12 2 C 14 8 14 12 12 18 C 10 12 10 8 12 2 Z"
-        fill={color}
-      />
+      <Path d="M12 2 C 14 8 14 12 12 18 C 10 12 10 8 12 2 Z" fill={color} />
       {/* Left petal */}
       <Path
         d="M5 9 C 8 12 9 16 12 20 C 9 18 6 16 4 13 C 4 11 4 10 5 9 Z"
@@ -70,11 +73,7 @@ function LotusFlame({ color, size }: { readonly color: string; readonly size: nu
         opacity={0.85}
       />
       {/* Base */}
-      <Path
-        d="M5 21 H19 L17 26 H7 Z"
-        fill={color}
-        opacity={0.55}
-      />
+      <Path d="M5 21 H19 L17 26 H7 Z" fill={color} opacity={0.55} />
     </Svg>
   );
 }
@@ -87,10 +86,10 @@ function ActiveFlame({ size }: { readonly size: number }): React.JSX.Element {
     opacity.value = withRepeat(
       withSequence(
         withTiming(0.6, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      false,
+      false
     );
   }, [opacity]);
 

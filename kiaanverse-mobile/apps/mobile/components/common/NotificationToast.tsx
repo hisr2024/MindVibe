@@ -13,7 +13,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInUp,
+  SlideOutUp,
+} from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';
 import { Text, colors, spacing, radii } from '@kiaanverse/ui';
 import type { NotificationData } from '../../services/notificationService';
@@ -46,27 +51,29 @@ export function NotificationToast(): React.JSX.Element | null {
 
   // Listen for foreground notifications
   useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener((notification) => {
-      const { title, body, data } = notification.request.content;
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        const { title, body, data } = notification.request.content;
 
-      // Only show toast if we have meaningful content
-      if (!title && !body) return;
+        // Only show toast if we have meaningful content
+        if (!title && !body) return;
 
-      const toastId = notification.request.identifier + Date.now();
+        const toastId = notification.request.identifier + Date.now();
 
-      setToast({
-        id: toastId,
-        title: title ?? '',
-        body: body ?? '',
-        data: data as NotificationData | undefined,
-      });
+        setToast({
+          id: toastId,
+          title: title ?? '',
+          body: body ?? '',
+          data: data as NotificationData | undefined,
+        });
 
-      // Auto-dismiss after 4 seconds
-      if (dismissTimer.current) clearTimeout(dismissTimer.current);
-      dismissTimer.current = setTimeout(() => {
-        setToast((current) => (current?.id === toastId ? null : current));
-      }, AUTO_DISMISS_MS);
-    });
+        // Auto-dismiss after 4 seconds
+        if (dismissTimer.current) clearTimeout(dismissTimer.current);
+        dismissTimer.current = setTimeout(() => {
+          setToast((current) => (current?.id === toastId ? null : current));
+        }, AUTO_DISMISS_MS);
+      }
+    );
 
     return () => subscription.remove();
   }, []);
@@ -131,7 +138,11 @@ export function NotificationToast(): React.JSX.Element | null {
         accessibilityRole="alert"
         accessibilityLabel={`Notification: ${toast.title}. ${toast.body}`}
       >
-        <Animated.View entering={FadeIn.delay(100)} exiting={FadeOut} style={styles.content}>
+        <Animated.View
+          entering={FadeIn.delay(100)}
+          exiting={FadeOut}
+          style={styles.content}
+        >
           <Text style={styles.title} numberOfLines={1}>
             {toast.title}
           </Text>

@@ -61,7 +61,13 @@ export interface StepContentSection {
 /**
  * Teaching section with book icon and amber/gold left border.
  */
-function TeachingSection({ text, delay }: { readonly text: string; readonly delay: number }): React.JSX.Element {
+function TeachingSection({
+  text,
+  delay,
+}: {
+  readonly text: string;
+  readonly delay: number;
+}): React.JSX.Element {
   return (
     <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
       <GlowCard variant="divine" style={styles.sectionCard}>
@@ -73,7 +79,11 @@ function TeachingSection({ text, delay }: { readonly text: string; readonly dela
             Today&apos;s Teaching
           </Text>
         </View>
-        <Text variant="body" color={colors.text.primary} style={styles.bodyText}>
+        <Text
+          variant="body"
+          color={colors.text.primary}
+          style={styles.bodyText}
+        >
           {text}
         </Text>
       </GlowCard>
@@ -104,12 +114,21 @@ function ReflectionSection({
         </View>
         {prompts.map((prompt, index) => (
           <View key={index} style={styles.numberedItem}>
-            <View style={[styles.numberBadge, { backgroundColor: colors.alpha.goldLight }]}>
+            <View
+              style={[
+                styles.numberBadge,
+                { backgroundColor: colors.alpha.goldLight },
+              ]}
+            >
               <Text variant="caption" color={colors.divine.peacock}>
                 {index + 1}
               </Text>
             </View>
-            <Text variant="body" color={colors.text.secondary} style={styles.numberedText}>
+            <Text
+              variant="body"
+              color={colors.text.secondary}
+              style={styles.numberedText}
+            >
               {prompt}
             </Text>
           </View>
@@ -155,12 +174,21 @@ function PracticeSection({
         </View>
         {instructions.map((instruction, index) => (
           <View key={index} style={styles.numberedItem}>
-            <View style={[styles.numberBadge, { backgroundColor: `${colors.semantic.success}20` }]}>
+            <View
+              style={[
+                styles.numberBadge,
+                { backgroundColor: `${colors.semantic.success}20` },
+              ]}
+            >
               <Text variant="caption" color={colors.semantic.success}>
                 {index + 1}
               </Text>
             </View>
-            <Text variant="body" color={colors.text.secondary} style={styles.numberedText}>
+            <Text
+              variant="body"
+              color={colors.text.secondary}
+              style={styles.numberedText}
+            >
               {instruction}
             </Text>
           </View>
@@ -220,7 +248,11 @@ function SafetySection({
             Please Note
           </Text>
         </View>
-        <Text variant="bodySmall" color={colors.text.secondary} style={styles.bodyText}>
+        <Text
+          variant="bodySmall"
+          color={colors.text.secondary}
+          style={styles.bodyText}
+        >
           {text}
         </Text>
       </View>
@@ -253,7 +285,9 @@ export function StepContent({
     <View style={styles.container}>
       {/* Verse Section — the Sacred Heart */}
       {verseRef ? (
-        <Animated.View entering={FadeInDown.delay((delayCounter += 100)).duration(500)}>
+        <Animated.View
+          entering={FadeInDown.delay((delayCounter += 100)).duration(500)}
+        >
           <VerseCard
             verseRef={verseRef}
             sanskrit={sanskrit}
@@ -272,7 +306,10 @@ export function StepContent({
 
       {/* Reflection Prompts */}
       {reflectionPrompts && reflectionPrompts.length > 0 ? (
-        <ReflectionSection prompts={reflectionPrompts} delay={(delayCounter += 100)} />
+        <ReflectionSection
+          prompts={reflectionPrompts}
+          delay={(delayCounter += 100)}
+        />
       ) : null}
 
       {/* Practice Instructions */}
@@ -287,7 +324,10 @@ export function StepContent({
 
       {/* Micro-Commitment */}
       {microCommitment ? (
-        <MicroCommitmentSection text={microCommitment} delay={(delayCounter += 100)} />
+        <MicroCommitmentSection
+          text={microCommitment}
+          delay={(delayCounter += 100)}
+        />
       ) : null}
 
       {/* Safety Notes */}

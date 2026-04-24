@@ -28,7 +28,10 @@ import {
 } from '@kiaanverse/ui';
 
 import { SacredTabBar } from '../components/sacred-reflections/SacredTabBar';
-import { COPY, type SacredTab } from '../components/sacred-reflections/constants';
+import {
+  COPY,
+  type SacredTab,
+} from '../components/sacred-reflections/constants';
 import { EditorTab } from '../components/sacred-reflections/EditorTab';
 import { BrowseTab } from '../components/sacred-reflections/BrowseTab';
 import { KiaanTab } from '../components/sacred-reflections/KiaanTab';
@@ -52,9 +55,15 @@ export default function SacredReflectionsScreen(): React.JSX.Element {
         <SacredTabBar active={activeTab} onChange={setActiveTab} />
 
         <View style={styles.tabContent}>
-          {activeTab === 'editor' && <EditorTab onSaved={() => setActiveTab('browse')} />}
-          {activeTab === 'browse' && <BrowseTab onOpenEditor={() => setActiveTab('editor')} />}
-          {activeTab === 'kiaan' && <KiaanTab onOpenEditor={() => setActiveTab('editor')} />}
+          {activeTab === 'editor' && (
+            <EditorTab onSaved={() => setActiveTab('browse')} />
+          )}
+          {activeTab === 'browse' && (
+            <BrowseTab onOpenEditor={() => setActiveTab('editor')} />
+          )}
+          {activeTab === 'kiaan' && (
+            <KiaanTab onOpenEditor={() => setActiveTab('editor')} />
+          )}
           {activeTab === 'calendar' && <CalendarTab />}
         </View>
       </View>

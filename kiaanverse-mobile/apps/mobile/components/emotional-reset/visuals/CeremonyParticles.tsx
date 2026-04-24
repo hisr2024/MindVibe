@@ -13,11 +13,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import {
-  Canvas,
-  Circle,
-  Group,
-} from '@shopify/react-native-skia';
+import { Canvas, Circle, Group } from '@shopify/react-native-skia';
 import {
   useSharedValue,
   withTiming,
@@ -50,7 +46,9 @@ function seed(i: number, salt: number): number {
   return x - Math.floor(x);
 }
 
-export function CeremonyParticles({ stage }: CeremonyParticlesProps): React.JSX.Element {
+export function CeremonyParticles({
+  stage,
+}: CeremonyParticlesProps): React.JSX.Element {
   const { width, height } = useWindowDimensions();
   const cx = width / 2;
   const cy = height / 2;
@@ -63,10 +61,19 @@ export function CeremonyParticles({ stage }: CeremonyParticlesProps): React.JSX.
       const edge = Math.floor(r1 * 4);
 
       let startX: number, startY: number;
-      if (edge === 0)      { startX = r2 * width;  startY = -16; }
-      else if (edge === 1) { startX = width + 16;  startY = r2 * height; }
-      else if (edge === 2) { startX = r2 * width;  startY = height + 16; }
-      else                 { startX = -16;         startY = r2 * height; }
+      if (edge === 0) {
+        startX = r2 * width;
+        startY = -16;
+      } else if (edge === 1) {
+        startX = width + 16;
+        startY = r2 * height;
+      } else if (edge === 2) {
+        startX = r2 * width;
+        startY = height + 16;
+      } else {
+        startX = -16;
+        startY = r2 * height;
+      }
 
       const angle = r3 * Math.PI * 2;
       const speed = 80 + r1 * 180;
@@ -84,9 +91,9 @@ export function CeremonyParticles({ stage }: CeremonyParticlesProps): React.JSX.
 
   // Single shared progress value drives every particle; deriving positions
   // from progress + stage keeps memory + wakeups low.
-  const convergeP = useSharedValue(0);   // 0 → 1 during "converge"
-  const burstP = useSharedValue(0);      // 0 → 1 during "burst"
-  const floatP = useSharedValue(0);      // 0 → 1 during "float"
+  const convergeP = useSharedValue(0); // 0 → 1 during "converge"
+  const burstP = useSharedValue(0); // 0 → 1 during "burst"
+  const floatP = useSharedValue(0); // 0 → 1 during "float"
   const alphaP = useSharedValue(1);
 
   useEffect(() => {

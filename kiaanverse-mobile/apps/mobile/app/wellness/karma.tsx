@@ -42,12 +42,37 @@ interface TreeLevelInfo {
   readonly description: string;
 }
 
-const TREE_LEVELS: ReadonlyArray<TreeLevelInfo> = [
-  { name: 'Seed', emoji: '🌱', minPoints: 0, description: 'Your journey begins. Plant the first seed of wisdom.' },
-  { name: 'Sapling', emoji: '🌿', minPoints: 10, description: 'Your sapling grows with each mindful action.' },
-  { name: 'Young Tree', emoji: '🌳', minPoints: 30, description: 'Roots deepen. Branches reach toward the light.' },
-  { name: 'Mighty Tree', emoji: '🏔️', minPoints: 60, description: 'Strong and steady, offering shade to all.' },
-  { name: 'Sacred Tree', emoji: '✨', minPoints: 100, description: 'The Bodhi tree of your spiritual journey.' },
+const TREE_LEVELS: readonly TreeLevelInfo[] = [
+  {
+    name: 'Seed',
+    emoji: '🌱',
+    minPoints: 0,
+    description: 'Your journey begins. Plant the first seed of wisdom.',
+  },
+  {
+    name: 'Sapling',
+    emoji: '🌿',
+    minPoints: 10,
+    description: 'Your sapling grows with each mindful action.',
+  },
+  {
+    name: 'Young Tree',
+    emoji: '🌳',
+    minPoints: 30,
+    description: 'Roots deepen. Branches reach toward the light.',
+  },
+  {
+    name: 'Mighty Tree',
+    emoji: '🏔️',
+    minPoints: 60,
+    description: 'Strong and steady, offering shade to all.',
+  },
+  {
+    name: 'Sacred Tree',
+    emoji: '✨',
+    minPoints: 100,
+    description: 'The Bodhi tree of your spiritual journey.',
+  },
 ] as const;
 
 const LEVEL_TO_INDEX: Record<KarmaTreeLevel, number> = {
@@ -60,7 +85,7 @@ const LEVEL_TO_INDEX: Record<KarmaTreeLevel, number> = {
 
 function getLevelInfo(level: KarmaTreeLevel): TreeLevelInfo {
   const info = TREE_LEVELS[LEVEL_TO_INDEX[level]];
-  return info !== undefined ? info : TREE_LEVELS[0] as TreeLevelInfo;
+  return info !== undefined ? info : (TREE_LEVELS[0] as TreeLevelInfo);
 }
 
 function getNextLevel(level: KarmaTreeLevel): TreeLevelInfo | null {
@@ -89,17 +114,31 @@ function LevelProgress({
   const next = getNextLevel(level);
 
   const progress = next
-    ? Math.min(((totalPoints - current.minPoints) / (next.minPoints - current.minPoints)) * 100, 100)
+    ? Math.min(
+        ((totalPoints - current.minPoints) /
+          (next.minPoints - current.minPoints)) *
+          100,
+        100
+      )
     : 100;
 
   return (
     <Animated.View entering={FadeIn.duration(400)}>
-      <View style={[styles.levelCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+      <View
+        style={[
+          styles.levelCard,
+          { backgroundColor: c.card, borderColor: c.cardBorder },
+        ]}
+      >
         <View style={styles.levelHeader}>
           <Text variant="h2">{current.emoji}</Text>
           <View style={styles.levelText}>
-            <Text variant="label" color={c.textPrimary}>{current.name}</Text>
-            <Text variant="caption" color={c.textSecondary}>{current.description}</Text>
+            <Text variant="label" color={c.textPrimary}>
+              {current.name}
+            </Text>
+            <Text variant="caption" color={c.textSecondary}>
+              {current.description}
+            </Text>
           </View>
         </View>
 
@@ -114,7 +153,12 @@ function LevelProgress({
         {/* Progress bar */}
         {next ? (
           <View style={styles.progressSection}>
-            <View style={[styles.progressTrack, { backgroundColor: colors.alpha.whiteLight }]}>
+            <View
+              style={[
+                styles.progressTrack,
+                { backgroundColor: colors.alpha.whiteLight },
+              ]}
+            >
               <View
                 style={[
                   styles.progressFill,
@@ -156,15 +200,30 @@ function NodeDetail({
 
   return (
     <Animated.View entering={FadeIn.duration(300)}>
-      <View style={[styles.nodeDetail, { backgroundColor: c.card, borderColor: colors.primary[500] }]}>
+      <View
+        style={[
+          styles.nodeDetail,
+          { backgroundColor: c.card, borderColor: colors.primary[500] },
+        ]}
+      >
         <View style={styles.nodeDetailHeader}>
-          <Text variant="label" color={c.textPrimary}>{node.label}</Text>
-          <Pressable onPress={onClose} hitSlop={8} accessibilityLabel="Close detail">
-            <Text variant="caption" color={c.textTertiary}>Close</Text>
+          <Text variant="label" color={c.textPrimary}>
+            {node.label}
+          </Text>
+          <Pressable
+            onPress={onClose}
+            hitSlop={8}
+            accessibilityLabel="Close detail"
+          >
+            <Text variant="caption" color={c.textTertiary}>
+              Close
+            </Text>
           </Pressable>
         </View>
 
-        <Text variant="bodySmall" color={c.textSecondary}>{node.action}</Text>
+        <Text variant="bodySmall" color={c.textSecondary}>
+          {node.action}
+        </Text>
 
         <View style={styles.nodePointsRow}>
           <Award size={12} color={colors.primary[300]} />
@@ -172,9 +231,15 @@ function NodeDetail({
             +{node.points} karma points
           </Text>
           {node.completed ? (
-            <Text variant="caption" color={colors.semantic.success}> &bull; Completed</Text>
+            <Text variant="caption" color={colors.semantic.success}>
+              {' '}
+              &bull; Completed
+            </Text>
           ) : (
-            <Text variant="caption" color={c.textTertiary}> &bull; Pending</Text>
+            <Text variant="caption" color={c.textTertiary}>
+              {' '}
+              &bull; Pending
+            </Text>
           )}
         </View>
 
@@ -209,7 +274,9 @@ export default function KarmaTreeScreen(): React.JSX.Element {
   const router = useRouter();
 
   const { data, isLoading, error } = useKarmaTree();
-  const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(
+    null
+  );
 
   // Transform KarmaNodeData to KarmaNode for the UI component
   const nodes = data?.nodes;
@@ -299,7 +366,11 @@ export default function KarmaTreeScreen(): React.JSX.Element {
 
         {/* Level guide */}
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-          <Text variant="label" color={c.textSecondary} style={styles.guideTitle}>
+          <Text
+            variant="label"
+            color={c.textSecondary}
+            style={styles.guideTitle}
+          >
             Growth Stages
           </Text>
           <View style={styles.levelGuide}>
@@ -310,7 +381,11 @@ export default function KarmaTreeScreen(): React.JSX.Element {
                   key={lvl.name}
                   style={[
                     styles.levelItem,
-                    { borderColor: isActive ? colors.primary[500] : c.cardBorder },
+                    {
+                      borderColor: isActive
+                        ? colors.primary[500]
+                        : c.cardBorder,
+                    },
                   ]}
                 >
                   <Text variant="body">{lvl.emoji}</Text>

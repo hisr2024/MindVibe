@@ -22,12 +22,48 @@ export interface EmotionalState {
 }
 
 export const EMOTIONS: EmotionalState[] = [
-  { id: 'anger',     label: 'Anger',      sanskrit: 'क्रोध',   glowColor: '#EF4444', emoji: '🔥' },
-  { id: 'fear',      label: 'Fear',       sanskrit: 'भय',      glowColor: '#3B82F6', emoji: '💧' },
-  { id: 'grief',     label: 'Grief',      sanskrit: 'शोक',     glowColor: '#6B7280', emoji: '🌧' },
-  { id: 'anxiety',   label: 'Anxiety',    sanskrit: 'चिंता',   glowColor: '#8B5CF6', emoji: '🌀' },
-  { id: 'confusion', label: 'Confusion',  sanskrit: 'भ्रम',    glowColor: '#F59E0B', emoji: '🌫' },
-  { id: 'despair',   label: 'Despair',    sanskrit: 'निराशा',  glowColor: '#64748B', emoji: '🌑' },
+  {
+    id: 'anger',
+    label: 'Anger',
+    sanskrit: 'क्रोध',
+    glowColor: '#EF4444',
+    emoji: '🔥',
+  },
+  {
+    id: 'fear',
+    label: 'Fear',
+    sanskrit: 'भय',
+    glowColor: '#3B82F6',
+    emoji: '💧',
+  },
+  {
+    id: 'grief',
+    label: 'Grief',
+    sanskrit: 'शोक',
+    glowColor: '#6B7280',
+    emoji: '🌧',
+  },
+  {
+    id: 'anxiety',
+    label: 'Anxiety',
+    sanskrit: 'चिंता',
+    glowColor: '#8B5CF6',
+    emoji: '🌀',
+  },
+  {
+    id: 'confusion',
+    label: 'Confusion',
+    sanskrit: 'भ्रम',
+    glowColor: '#F59E0B',
+    emoji: '🌫',
+  },
+  {
+    id: 'despair',
+    label: 'Despair',
+    sanskrit: 'निराशा',
+    glowColor: '#64748B',
+    emoji: '🌑',
+  },
 ];
 
 export interface Shloka {
@@ -64,7 +100,9 @@ export function parseAIResponse(raw: string): AIResponse | null {
   try {
     const witnessMatch = raw.match(/\[WITNESS\]\s*([\s\S]*?)(?=\[SHLOKA\])/i);
     const shlokaMatch = raw.match(/\[SHLOKA\]\s*([\s\S]*?)(?=\[REFLECTION\])/i);
-    const reflectionMatch = raw.match(/\[REFLECTION\]\s*([\s\S]*?)(?=\[AFFIRMATION\])/i);
+    const reflectionMatch = raw.match(
+      /\[REFLECTION\]\s*([\s\S]*?)(?=\[AFFIRMATION\])/i
+    );
     const affirmationMatch = raw.match(/\[AFFIRMATION\]\s*([\s\S]*?)$/i);
 
     const witness = witnessMatch?.[1]?.trim() ?? '';
@@ -72,7 +110,10 @@ export function parseAIResponse(raw: string): AIResponse | null {
     const reflection = reflectionMatch?.[1]?.trim() ?? '';
     const affirmation = affirmationMatch?.[1]?.trim() ?? '';
 
-    const lines = shlokaText.split('\n').map((s) => s.trim()).filter(Boolean);
+    const lines = shlokaText
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
     const shloka: Shloka = {
       sanskrit: lines[0] ?? '',
       transliteration: lines[1] ?? '',

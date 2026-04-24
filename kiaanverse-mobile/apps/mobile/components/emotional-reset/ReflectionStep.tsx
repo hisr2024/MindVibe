@@ -12,7 +12,13 @@
  * NO ScrollView -- content and input share flex space within the viewport.
  */
 
-import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from 'react';
 import {
   View,
   StyleSheet,
@@ -98,7 +104,9 @@ const EMOTION_PROMPTS: Record<string, string> = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Element {
+export function ReflectionStep({
+  onNext,
+}: ReflectionStepProps): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
   const insets = useSafeAreaInsets();
@@ -126,10 +134,10 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
     promptBreath.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.65, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.65, { duration: 3000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      true,
+      true
     );
   }, [promptBreath]);
 
@@ -148,7 +156,7 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
       borderGlow.value,
       [0.3, 1],
       [0.15, 0.6],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     );
     return {
       borderColor: `rgba(212, 160, 23, ${borderOpacity})`,
@@ -193,7 +201,7 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
 
   const wordCount = useMemo(
     () => text.trim().split(/\s+/).filter(Boolean).length,
-    [text],
+    [text]
   );
 
   return (
@@ -214,7 +222,10 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
 
       <View style={styles.content}>
         {/* Header */}
-        <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
+        <Animated.View
+          entering={FadeInDown.duration(600)}
+          style={styles.header}
+        >
           <Text variant="h2" color={colors.divine.aura} align="center">
             Reflect Within
           </Text>
@@ -281,7 +292,11 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
             </Text>
             <Text
               variant="caption"
-              color={text.length > MAX_CHARS * 0.9 ? colors.semantic.warning : colors.text.muted}
+              color={
+                text.length > MAX_CHARS * 0.9
+                  ? colors.semantic.warning
+                  : colors.text.muted
+              }
             >
               {text.length}/{MAX_CHARS}
             </Text>

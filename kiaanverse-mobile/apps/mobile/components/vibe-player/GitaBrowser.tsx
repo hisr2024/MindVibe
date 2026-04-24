@@ -32,25 +32,90 @@ interface ChapterRow {
   readonly verses: number;
 }
 
-const CHAPTERS: ReadonlyArray<ChapterRow> = [
-  { num: 1,  english: 'Arjuna Vishada Yoga',     sanskrit: 'अर्जुन विषाद योग',              verses: 47 },
-  { num: 2,  english: 'Sankhya Yoga',            sanskrit: 'सांख्य योग',                    verses: 72 },
-  { num: 3,  english: 'Karma Yoga',              sanskrit: 'कर्म योग',                       verses: 43 },
-  { num: 4,  english: 'Jnana Karma Sanyasa Yoga', sanskrit: 'ज्ञान कर्म संन्यास योग',        verses: 42 },
-  { num: 5,  english: 'Karma Sanyasa Yoga',      sanskrit: 'कर्म संन्यास योग',              verses: 29 },
-  { num: 6,  english: 'Dhyana Yoga',             sanskrit: 'आत्म संयम योग',                 verses: 47 },
-  { num: 7,  english: 'Jnana Vijnana Yoga',      sanskrit: 'ज्ञान विज्ञान योग',              verses: 30 },
-  { num: 8,  english: 'Aksara Brahma Yoga',      sanskrit: 'अक्षर ब्रह्म योग',              verses: 28 },
-  { num: 9,  english: 'Raja Vidya Yoga',         sanskrit: 'राज विद्या राज गुह्य योग',       verses: 34 },
-  { num: 10, english: 'Vibhuti Yoga',            sanskrit: 'विभूति योग',                    verses: 42 },
-  { num: 11, english: 'Vishvarupa Darshana Yoga', sanskrit: 'विश्वरूप दर्शन योग',            verses: 55 },
-  { num: 12, english: 'Bhakti Yoga',             sanskrit: 'भक्ति योग',                      verses: 20 },
-  { num: 13, english: 'Kshetra Kshetrajna Yoga', sanskrit: 'क्षेत्र क्षेत्रज्ञ विभाग योग',   verses: 35 },
-  { num: 14, english: 'Gunatraya Vibhaga Yoga',  sanskrit: 'गुणत्रय विभाग योग',             verses: 27 },
-  { num: 15, english: 'Purushottama Yoga',       sanskrit: 'पुरुषोत्तम योग',                verses: 20 },
-  { num: 16, english: 'Daivasura Sampad Yoga',   sanskrit: 'दैवासुर संपद विभाग योग',         verses: 24 },
-  { num: 17, english: 'Shraddhatraya Yoga',      sanskrit: 'श्रद्धात्रय विभाग योग',          verses: 28 },
-  { num: 18, english: 'Moksha Sanyasa Yoga',     sanskrit: 'मोक्ष संन्यास योग',              verses: 78 },
+const CHAPTERS: readonly ChapterRow[] = [
+  {
+    num: 1,
+    english: 'Arjuna Vishada Yoga',
+    sanskrit: 'अर्जुन विषाद योग',
+    verses: 47,
+  },
+  { num: 2, english: 'Sankhya Yoga', sanskrit: 'सांख्य योग', verses: 72 },
+  { num: 3, english: 'Karma Yoga', sanskrit: 'कर्म योग', verses: 43 },
+  {
+    num: 4,
+    english: 'Jnana Karma Sanyasa Yoga',
+    sanskrit: 'ज्ञान कर्म संन्यास योग',
+    verses: 42,
+  },
+  {
+    num: 5,
+    english: 'Karma Sanyasa Yoga',
+    sanskrit: 'कर्म संन्यास योग',
+    verses: 29,
+  },
+  { num: 6, english: 'Dhyana Yoga', sanskrit: 'आत्म संयम योग', verses: 47 },
+  {
+    num: 7,
+    english: 'Jnana Vijnana Yoga',
+    sanskrit: 'ज्ञान विज्ञान योग',
+    verses: 30,
+  },
+  {
+    num: 8,
+    english: 'Aksara Brahma Yoga',
+    sanskrit: 'अक्षर ब्रह्म योग',
+    verses: 28,
+  },
+  {
+    num: 9,
+    english: 'Raja Vidya Yoga',
+    sanskrit: 'राज विद्या राज गुह्य योग',
+    verses: 34,
+  },
+  { num: 10, english: 'Vibhuti Yoga', sanskrit: 'विभूति योग', verses: 42 },
+  {
+    num: 11,
+    english: 'Vishvarupa Darshana Yoga',
+    sanskrit: 'विश्वरूप दर्शन योग',
+    verses: 55,
+  },
+  { num: 12, english: 'Bhakti Yoga', sanskrit: 'भक्ति योग', verses: 20 },
+  {
+    num: 13,
+    english: 'Kshetra Kshetrajna Yoga',
+    sanskrit: 'क्षेत्र क्षेत्रज्ञ विभाग योग',
+    verses: 35,
+  },
+  {
+    num: 14,
+    english: 'Gunatraya Vibhaga Yoga',
+    sanskrit: 'गुणत्रय विभाग योग',
+    verses: 27,
+  },
+  {
+    num: 15,
+    english: 'Purushottama Yoga',
+    sanskrit: 'पुरुषोत्तम योग',
+    verses: 20,
+  },
+  {
+    num: 16,
+    english: 'Daivasura Sampad Yoga',
+    sanskrit: 'दैवासुर संपद विभाग योग',
+    verses: 24,
+  },
+  {
+    num: 17,
+    english: 'Shraddhatraya Yoga',
+    sanskrit: 'श्रद्धात्रय विभाग योग',
+    verses: 28,
+  },
+  {
+    num: 18,
+    english: 'Moksha Sanyasa Yoga',
+    sanskrit: 'मोक्ष संन्यास योग',
+    verses: 78,
+  },
 ];
 
 const GOLD = '#D4A017';
@@ -104,14 +169,14 @@ export function GitaBrowser(): React.JSX.Element {
       // is no longer visible in the bottom bar.
       router.push(`/(tabs)/shlokas/${num}` as never);
     },
-    [router],
+    [router]
   );
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<ChapterRow>) => (
       <ChapterCard row={item} onPress={handleChapterPress} />
     ),
-    [handleChapterPress],
+    [handleChapterPress]
   );
 
   const keyExtractor = useCallback((item: ChapterRow) => String(item.num), []);

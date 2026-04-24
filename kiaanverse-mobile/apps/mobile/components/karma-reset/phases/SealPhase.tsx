@@ -54,7 +54,7 @@ export function SealPhase({
       const result = await finishSession(
         session.sessionId,
         session.sankalpa?.sealed ?? false,
-        committedActions,
+        committedActions
       );
       setXpAwarded(result.xpAwarded);
       setStreakCount(result.streakCount);

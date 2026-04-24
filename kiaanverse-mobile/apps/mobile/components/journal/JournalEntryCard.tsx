@@ -68,7 +68,7 @@ function JournalEntryCardInner({
 
   // Separate mood tag from other tags for display
   const displayTags = entry.tags.filter(
-    (tag) => !Object.keys(MOOD_EMOJI_MAP).includes(tag),
+    (tag) => !Object.keys(MOOD_EMOJI_MAP).includes(tag)
   );
   const visibleTags = displayTags.slice(0, MAX_VISIBLE_TAGS);
   const hiddenCount = displayTags.length - MAX_VISIBLE_TAGS;

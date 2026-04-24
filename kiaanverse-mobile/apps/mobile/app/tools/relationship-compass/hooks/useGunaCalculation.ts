@@ -26,7 +26,9 @@ export interface GunaSelections {
 
 const PATTERNS_PER_GUNA = 8;
 
-export function useGunaCalculation(selectedPatterns: GunaSelections): GunaScores {
+export function useGunaCalculation(
+  selectedPatterns: GunaSelections
+): GunaScores {
   return useMemo(() => {
     const tamas = selectedPatterns.tamas.length / PATTERNS_PER_GUNA;
     const rajas = selectedPatterns.rajas.length / PATTERNS_PER_GUNA;
@@ -37,8 +39,10 @@ export function useGunaCalculation(selectedPatterns: GunaSelections): GunaScores
 
     if (max > 0) {
       if (tamas === max && tamas > rajas && tamas > sattva) dominant = 'tamas';
-      else if (rajas === max && rajas > tamas && rajas > sattva) dominant = 'rajas';
-      else if (sattva === max && sattva > tamas && sattva > rajas) dominant = 'sattva';
+      else if (rajas === max && rajas > tamas && rajas > sattva)
+        dominant = 'rajas';
+      else if (sattva === max && sattva > tamas && sattva > rajas)
+        dominant = 'sattva';
     }
 
     return { tamas, rajas, sattva, dominant };

@@ -141,7 +141,7 @@ export default function ChatScreen(): React.JSX.Element {
     };
     AsyncStorage.setItem(
       CONVERSATION_CACHE_KEY,
-      JSON.stringify(snapshot),
+      JSON.stringify(snapshot)
     ).catch(() => {
       /* best-effort — safe to ignore when storage is full */
     });
@@ -173,14 +173,16 @@ export default function ChatScreen(): React.JSX.Element {
       if (!trimmed || streaming) return;
 
       if (!isOnline) {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning
+        );
         return;
       }
 
       setInput('');
       await send(trimmed);
     },
-    [isOnline, send, streaming],
+    [isOnline, send, streaming]
   );
 
   const handleSubmit = useCallback(() => {
@@ -191,17 +193,14 @@ export default function ChatScreen(): React.JSX.Element {
     (prompt: string) => {
       void handleSend(prompt);
     },
-    [handleSend],
+    [handleSend]
   );
 
-  const handleInsightPress = useCallback(
-    (prompt: string) => {
-      // Fill the composer so the user can edit before sending, rather than
-      // auto-sending — gives them control over their spiritual dialogue.
-      setInput(prompt);
-    },
-    [],
-  );
+  const handleInsightPress = useCallback((prompt: string) => {
+    // Fill the composer so the user can edit before sending, rather than
+    // auto-sending — gives them control over their spiritual dialogue.
+    setInput(prompt);
+  }, []);
 
   const handleClearConversation = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -233,13 +232,10 @@ export default function ChatScreen(): React.JSX.Element {
         />
       );
     },
-    [],
+    []
   );
 
-  const keyExtractor = useCallback(
-    (item: SakhaStreamMessage) => item.id,
-    [],
-  );
+  const keyExtractor = useCallback((item: SakhaStreamMessage) => item.id, []);
 
   const hasMessages = messages.length > 0;
 

@@ -72,7 +72,7 @@ export type FlowAnswers = Record<string, string>;
 export interface ViyogaTransmission {
   readonly header: string;
   readonly footer: string;
-  readonly sections: ReadonlyArray<{ readonly content: string }>;
+  readonly sections: readonly { readonly content: string }[];
   readonly verse: string | null;
   /** One sentence per meditation screen (meditation.tsx). */
   readonly meditationScreens: readonly string[];
@@ -102,7 +102,11 @@ interface SacredFlowState {
   flows: Record<string, FlowBucket>;
   setAnswer: (flow: FlowName, key: string, value: string) => void;
   setVerse: (flow: FlowName, verse: KiaanGitaVerse | null) => void;
-  setStatus: (flow: FlowName, status: FlowStatus, error?: string | null) => void;
+  setStatus: (
+    flow: FlowName,
+    status: FlowStatus,
+    error?: string | null
+  ) => void;
   setAIResponse: (flow: FlowName, response: FlowAIResponse) => void;
   setPlainText: (flow: FlowName, text: string | null) => void;
   reset: (flow: FlowName) => void;
@@ -213,7 +217,7 @@ function buildViyogaPrompt(answers: FlowAnswers): string {
 interface ViyogaBackendResponse {
   assistant?: string;
   error?: string;
-  citations?: Array<{ reference_if_any?: string }>;
+  citations?: { reference_if_any?: string }[];
   karma_yoga_insight?: {
     teaching?: string;
     verse?: string;
@@ -233,12 +237,16 @@ interface ViyogaBackendResponse {
  */
 function shapeTransmission(
   raw: ViyogaBackendResponse,
-  answers: FlowAnswers,
+  answers: FlowAnswers
 ): ViyogaTransmission {
   const assistant = (raw.assistant ?? '').trim();
   const teaching = (raw.karma_yoga_insight?.teaching ?? '').trim();
   const remedy = (raw.karma_yoga_insight?.remedy ?? '').trim();
-  const verse = (raw.karma_yoga_insight?.verse ?? raw.citations?.[0]?.reference_if_any ?? '').trim();
+  const verse = (
+    raw.karma_yoga_insight?.verse ??
+    raw.citations?.[0]?.reference_if_any ??
+    ''
+  ).trim();
 
   const paragraphs = assistant
     .split(/\n\s*\n/)
@@ -266,9 +274,10 @@ function shapeTransmission(
       ? `Sakha has witnessed your longing for ${from}`
       : 'Sakha has witnessed your longing';
 
-  const footer = verse.length > 0
-    ? `Anchored in ${verse}`
-    : 'Even in separation, there is union.';
+  const footer =
+    verse.length > 0
+      ? `Anchored in ${verse}`
+      : 'Even in separation, there is union.';
 
   // Meditation / release / fire copy — backends today don't structure
   // these, so we hand the screens the same tasteful defaults they'd
@@ -322,7 +331,7 @@ function pickAnswer(answers: FlowAnswers, key: string, fallback = ''): string {
 async function submitKiaanTool(
   flow: Exclude<FlowName, 'viyoga'>,
   answers: FlowAnswers,
-  verse: KiaanGitaVerse | null,
+  verse: KiaanGitaVerse | null
 ): Promise<string> {
   const v = verse ?? undefined;
 
@@ -334,7 +343,7 @@ async function submitKiaanTool(
           limiting_belief: pickAnswer(answers, 'limiting_belief'),
           fear: pickAnswer(answers, 'fear'),
         },
-        v,
+        v
       );
       return res.response;
     }
@@ -345,7 +354,7 @@ async function submitKiaanTool(
           dimension: pickAnswer(answers, 'dimension', 'action'),
           dharmic_action: pickAnswer(answers, 'dharmic_action'),
         },
-        v,
+        v
       );
       return res.response;
     }
@@ -356,7 +365,7 @@ async function submitKiaanTool(
           intensity: pickAnswer(answers, 'intensity', '5'),
           situation: pickAnswer(answers, 'situation'),
         },
-        v,
+        v
       );
       return res.response;
     }
@@ -364,10 +373,14 @@ async function submitKiaanTool(
       const res = await kiaan.tools.relationshipCompass(
         {
           challenge: pickAnswer(answers, 'challenge'),
-          relationship_type: pickAnswer(answers, 'relationship_type', 'partner'),
+          relationship_type: pickAnswer(
+            answers,
+            'relationship_type',
+            'partner'
+          ),
           core_difficulty: pickAnswer(answers, 'core_difficulty'),
         },
-        v,
+        v
       );
       return res.response;
     }
@@ -383,12 +396,15 @@ const AUTH_EXPIRED_SENTINEL = 'AUTH_EXPIRED';
 
 function humaniseError(err: unknown): string {
   if (isAuthError(err)) return AUTH_EXPIRED_SENTINEL;
-  if (isOfflineError(err))
-    return "Saved. Sakha will reply when you're online.";
+  if (isOfflineError(err)) return "Saved. Sakha will reply when you're online.";
   if (isApiError(err)) {
     if (err.statusCode === 429)
       return 'Pause, breathe — too many requests. Try in a minute.';
-    if (err.statusCode === 502 || err.statusCode === 503 || err.statusCode === 504)
+    if (
+      err.statusCode === 502 ||
+      err.statusCode === 503 ||
+      err.statusCode === 504
+    )
       return 'Sakha is collecting herself. Your words are saved locally; try again.';
     if (err.statusCode >= 500)
       return 'Something went wrong. Your words are safe.';
@@ -428,7 +444,9 @@ export interface UseSacredFlowResult {
  * sign-in without catching the error themselves.
  */
 export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
-  const bucket = useSacredFlowStore((state) => state.flows[flow] ?? EMPTY_BUCKET);
+  const bucket = useSacredFlowStore(
+    (state) => state.flows[flow] ?? EMPTY_BUCKET
+  );
   const setAnswer = useSacredFlowStore((state) => state.setAnswer);
   const setVerseFn = useSacredFlowStore((state) => state.setVerse);
   const setStatus = useSacredFlowStore((state) => state.setStatus);
@@ -440,14 +458,14 @@ export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
     (key: string, value: string) => {
       setAnswer(flow, key, value);
     },
-    [flow, setAnswer],
+    [flow, setAnswer]
   );
 
   const setVerse = useCallback(
     (verse: KiaanGitaVerse | null) => {
       setVerseFn(flow, verse);
     },
-    [flow, setVerseFn],
+    [flow, setVerseFn]
   );
 
   const submitFlow = useCallback(async (): Promise<void> => {
@@ -459,7 +477,9 @@ export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
 
     try {
       if (flow === 'viyoga') {
-        const { data } = await api.viyoga.chat(buildViyogaPrompt(latest.answers));
+        const { data } = await api.viyoga.chat(
+          buildViyogaPrompt(latest.answers)
+        );
         const raw = (data ?? {}) as ViyogaBackendResponse;
 
         if (raw.error) {

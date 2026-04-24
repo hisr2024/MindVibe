@@ -137,7 +137,7 @@ function ToolCardInner({
         easing: Easing.out(Easing.cubic),
       });
     },
-    [scale, rippleProgress, rippleX, rippleY],
+    [scale, rippleProgress, rippleX, rippleY]
   );
 
   const handlePressOut = useCallback(() => {
@@ -197,7 +197,11 @@ function ToolCardInner({
             <Animated.View
               style={[
                 styles.ripple,
-                { backgroundColor: color, width: RIPPLE_SIZE, height: RIPPLE_SIZE },
+                {
+                  backgroundColor: color,
+                  width: RIPPLE_SIZE,
+                  height: RIPPLE_SIZE,
+                },
                 rippleStyle,
               ]}
             />
@@ -221,10 +225,7 @@ function ToolCardInner({
             <Text style={styles.name} numberOfLines={1}>
               {name}
             </Text>
-            <Text
-              style={[styles.sanskrit, { color }]}
-              numberOfLines={1}
-            >
+            <Text style={[styles.sanskrit, { color }]} numberOfLines={1}>
               {sanskrit}
             </Text>
             <Text style={styles.description} numberOfLines={1}>
@@ -233,9 +234,7 @@ function ToolCardInner({
           </View>
 
           {/* Chevron */}
-          <Text style={styles.chevron}>
-            ›
-          </Text>
+          <Text style={styles.chevron}>›</Text>
         </Pressable>
 
         {/* Left semantic-color stripe (3 px × full height). Rendered LAST

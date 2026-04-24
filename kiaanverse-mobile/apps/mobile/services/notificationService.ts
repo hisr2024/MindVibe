@@ -199,7 +199,8 @@ async function setupNotificationCategories(): Promise<void> {
  */
 export async function requestPermissions(): Promise<boolean> {
   try {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     if (existingStatus === 'granted') return true;
 
     const { status } = await Notifications.requestPermissionsAsync();
@@ -219,7 +220,7 @@ export async function getExpoPushToken(): Promise<string | null> {
     if (!projectId) {
       if (__DEV__) {
         console.warn(
-          'Cannot get push token: EAS_PROJECT_ID not configured in app.config.ts extra.eas.projectId',
+          'Cannot get push token: EAS_PROJECT_ID not configured in app.config.ts extra.eas.projectId'
         );
       }
       return null;
@@ -228,7 +229,9 @@ export async function getExpoPushToken(): Promise<string | null> {
     const hasPermission = await requestPermissions();
     if (!hasPermission) return null;
 
-    const tokenResponse = await Notifications.getExpoPushTokenAsync({ projectId });
+    const tokenResponse = await Notifications.getExpoPushTokenAsync({
+      projectId,
+    });
     return tokenResponse.data;
   } catch (error) {
     if (__DEV__) {
@@ -299,15 +302,15 @@ async function hasPermission(): Promise<boolean> {
  */
 export async function scheduleDailyVerse(
   hour: number,
-  minute: number,
+  minute: number
 ): Promise<string | null> {
   try {
     if (!(await hasPermission())) return null;
 
     // Cancel existing before rescheduling
-    await Notifications.cancelScheduledNotificationAsync(NOTIFICATION_IDS.DAILY_VERSE).catch(
-      () => {},
-    );
+    await Notifications.cancelScheduledNotificationAsync(
+      NOTIFICATION_IDS.DAILY_VERSE
+    ).catch(() => {});
 
     const identifier = await Notifications.scheduleNotificationAsync({
       identifier: NOTIFICATION_IDS.DAILY_VERSE,
@@ -317,7 +320,9 @@ export async function scheduleDailyVerse(
         data: { type: 'daily-verse' } satisfies NotificationData,
         sound: 'default',
         ...(Platform.OS === 'android' && { channelId: CHANNELS.DAILY_VERSE }),
-        ...(Platform.OS === 'ios' && { categoryIdentifier: CATEGORIES.DAILY_VERSE }),
+        ...(Platform.OS === 'ios' && {
+          categoryIdentifier: CATEGORIES.DAILY_VERSE,
+        }),
       },
       trigger: {
         hour,
@@ -347,7 +352,7 @@ export async function scheduleDailyVerse(
 export async function scheduleJourneyReminder(
   journeyId: string,
   hour: number,
-  minute: number,
+  minute: number
 ): Promise<string | null> {
   try {
     if (!(await hasPermission())) return null;
@@ -355,17 +360,26 @@ export async function scheduleJourneyReminder(
     const notificationId = NOTIFICATION_IDS.journeyReminder(journeyId);
 
     // Cancel existing before rescheduling
-    await Notifications.cancelScheduledNotificationAsync(notificationId).catch(() => {});
+    await Notifications.cancelScheduledNotificationAsync(notificationId).catch(
+      () => {}
+    );
 
     const identifier = await Notifications.scheduleNotificationAsync({
       identifier: notificationId,
       content: {
         title: 'Journey Awaits',
         body: 'Time for your spiritual practice. Continue your journey toward inner peace.',
-        data: { type: 'journey-reminder', journeyId } satisfies NotificationData,
+        data: {
+          type: 'journey-reminder',
+          journeyId,
+        } satisfies NotificationData,
         sound: 'default',
-        ...(Platform.OS === 'android' && { channelId: CHANNELS.JOURNEY_REMINDERS }),
-        ...(Platform.OS === 'ios' && { categoryIdentifier: CATEGORIES.JOURNEY_REMINDER }),
+        ...(Platform.OS === 'android' && {
+          channelId: CHANNELS.JOURNEY_REMINDERS,
+        }),
+        ...(Platform.OS === 'ios' && {
+          categoryIdentifier: CATEGORIES.JOURNEY_REMINDER,
+        }),
       },
       trigger: {
         hour,
@@ -394,9 +408,9 @@ export async function scheduleStreakAlert(): Promise<string | null> {
     if (!(await hasPermission())) return null;
 
     // Cancel existing before rescheduling
-    await Notifications.cancelScheduledNotificationAsync(NOTIFICATION_IDS.STREAK_ALERT).catch(
-      () => {},
-    );
+    await Notifications.cancelScheduledNotificationAsync(
+      NOTIFICATION_IDS.STREAK_ALERT
+    ).catch(() => {});
 
     const identifier = await Notifications.scheduleNotificationAsync({
       identifier: NOTIFICATION_IDS.STREAK_ALERT,
@@ -406,7 +420,9 @@ export async function scheduleStreakAlert(): Promise<string | null> {
         data: { type: 'streak-alert' } satisfies NotificationData,
         sound: 'default',
         ...(Platform.OS === 'android' && { channelId: CHANNELS.STREAK_ALERTS }),
-        ...(Platform.OS === 'ios' && { categoryIdentifier: CATEGORIES.STREAK_ALERT }),
+        ...(Platform.OS === 'ios' && {
+          categoryIdentifier: CATEGORIES.STREAK_ALERT,
+        }),
       },
       trigger: {
         hour: 20,
@@ -488,7 +504,10 @@ export async function rescheduleAll(): Promise<void> {
  * Navigate to the appropriate screen based on notification data.
  * Used by both the response listener and initial notification handler.
  */
-function navigateToNotification(router: AppRouter, data: NotificationData | undefined): void {
+function navigateToNotification(
+  router: AppRouter,
+  data: NotificationData | undefined
+): void {
   if (!data?.type) return;
 
   try {
@@ -533,10 +552,16 @@ function navigateToNotification(router: AppRouter, data: NotificationData | unde
 function setupResponseListener(router: AppRouter): Notifications.Subscription {
   return Notifications.addNotificationResponseReceivedListener((response) => {
     const actionId = response.actionIdentifier;
-    const data = response.notification.request.content.data as NotificationData | undefined;
+    const data = response.notification.request.content.data as
+      | NotificationData
+      | undefined;
 
     // Dismiss-type actions — do nothing
-    if (actionId === 'later' || actionId === 'snooze' || actionId === 'dismiss') {
+    if (
+      actionId === 'later' ||
+      actionId === 'snooze' ||
+      actionId === 'dismiss'
+    ) {
       return;
     }
 
@@ -553,7 +578,9 @@ async function handleInitialNotification(router: AppRouter): Promise<void> {
   try {
     const response = await Notifications.getLastNotificationResponseAsync();
     if (response) {
-      const data = response.notification.request.content.data as NotificationData | undefined;
+      const data = response.notification.request.content.data as
+        | NotificationData
+        | undefined;
       // Small delay to ensure navigation is ready after cold start
       setTimeout(() => navigateToNotification(router, data), 500);
     }

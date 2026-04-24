@@ -70,7 +70,7 @@ async function writeManifest(manifest: UploadManifest): Promise<void> {
   await ensureUploadsDir();
   await FileSystem.writeAsStringAsync(
     MANIFEST_PATH,
-    JSON.stringify(manifest, null, 2),
+    JSON.stringify(manifest, null, 2)
   );
 }
 
@@ -114,7 +114,7 @@ export async function pickAndImportAudio(): Promise<UserTrack | null> {
   const fileSize =
     info.exists && typeof (info as { size?: number }).size === 'number'
       ? (info as { size: number }).size
-      : asset.size ?? 0;
+      : (asset.size ?? 0);
 
   // Title = filename without extension. User can edit later in-UI.
   const displayTitle = asset.name.replace(/\.[^.]+$/, '');
@@ -168,11 +168,11 @@ export async function deleteUserTrack(trackId: string): Promise<void> {
 /** Rename an uploaded track's display title. */
 export async function renameUserTrack(
   trackId: string,
-  newTitle: string,
+  newTitle: string
 ): Promise<void> {
   const manifest = await readManifest();
   const next = manifest.tracks.map((t) =>
-    t.id === trackId ? { ...t, title: newTitle } : t,
+    t.id === trackId ? { ...t, title: newTitle } : t
   );
   await writeManifest({ version: 1, tracks: next });
 }

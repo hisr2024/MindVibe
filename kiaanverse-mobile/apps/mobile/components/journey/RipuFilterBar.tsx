@@ -75,7 +75,7 @@ function RipuFilterBarInner({
       void Haptics.selectionAsync();
       onChange(next);
     },
-    [value, onChange],
+    [value, onChange]
   );
 
   return (

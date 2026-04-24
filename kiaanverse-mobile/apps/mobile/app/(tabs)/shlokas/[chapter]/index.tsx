@@ -29,10 +29,7 @@ import {
   OmLoader,
   ShlokaCard,
 } from '@kiaanverse/ui';
-import {
-  useGitaChapterDetail,
-  type GitaVerseSummary,
-} from '@kiaanverse/api';
+import { useGitaChapterDetail, type GitaVerseSummary } from '@kiaanverse/api';
 
 const GOLD = '#D4A017';
 const GOLD_SOFT = 'rgba(212, 160, 23, 0.35)';
@@ -72,12 +69,14 @@ interface VerseRowProps {
 function VerseRow({ verse, index, onPress }: VerseRowProps): React.JSX.Element {
   const handlePress = useCallback(
     () => onPress(verse.chapter, verse.verse),
-    [onPress, verse.chapter, verse.verse],
+    [onPress, verse.chapter, verse.verse]
   );
 
   return (
     <Animated.View
-      entering={FadeInDown.delay(Math.min(index, 12) * 25).duration(300).springify()}
+      entering={FadeInDown.delay(Math.min(index, 12) * 25)
+        .duration(300)
+        .springify()}
     >
       <Pressable
         onPress={handlePress}
@@ -101,27 +100,30 @@ export default function ChapterDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
 
   const chapterId = Number(chapter);
-  const validChapter = Number.isInteger(chapterId) && chapterId >= 1 && chapterId <= 18;
+  const validChapter =
+    Number.isInteger(chapterId) && chapterId >= 1 && chapterId <= 18;
 
   const { data, isLoading, error, refetch } = useGitaChapterDetail(
-    validChapter ? chapterId : 0,
+    validChapter ? chapterId : 0
   );
 
   const openVerse = useCallback(
     (ch: number, v: number) => {
       router.push(`/(tabs)/shlokas/${ch}/${v}`);
     },
-    [router],
+    [router]
   );
 
   const sanskritName = useMemo(
-    () => (validChapter ? CHAPTER_SANSKRIT_NAMES[chapterId] ?? '' : ''),
-    [chapterId, validChapter],
+    () => (validChapter ? (CHAPTER_SANSKRIT_NAMES[chapterId] ?? '') : ''),
+    [chapterId, validChapter]
   );
 
   const renderVerse = useCallback<ListRenderItem<GitaVerseSummary>>(
-    ({ item, index }) => <VerseRow verse={item} index={index} onPress={openVerse} />,
-    [openVerse],
+    ({ item, index }) => (
+      <VerseRow verse={item} index={index} onPress={openVerse} />
+    ),
+    [openVerse]
   );
 
   const listHeader = useMemo(() => {
@@ -152,10 +154,7 @@ export default function ChapterDetailScreen(): React.JSX.Element {
   if (!validChapter) {
     return (
       <DivineScreenWrapper>
-        <ChapterHeader
-          title="Unknown chapter"
-          onBack={() => router.back()}
-        />
+        <ChapterHeader title="Unknown chapter" onBack={() => router.back()} />
         <View style={styles.state}>
           <Text style={styles.errorTitle}>Chapter not found</Text>
           <Text style={styles.stateHint}>
@@ -180,9 +179,12 @@ export default function ChapterDetailScreen(): React.JSX.Element {
         </View>
       ) : error && !data ? (
         <View style={styles.state}>
-          <Text style={styles.errorTitle}>This chapter is temporarily unavailable</Text>
+          <Text style={styles.errorTitle}>
+            This chapter is temporarily unavailable
+          </Text>
           <Text style={styles.stateHint}>
-            Your offline cache will be used when available. You can try again below.
+            Your offline cache will be used when available. You can try again
+            below.
           </Text>
           <Pressable onPress={() => void refetch()} style={styles.retryButton}>
             <Text style={styles.retryText}>Retry</Text>
@@ -223,7 +225,11 @@ interface ChapterHeaderProps {
   readonly onBack: () => void;
 }
 
-function ChapterHeader({ title, subtitle, onBack }: ChapterHeaderProps): React.JSX.Element {
+function ChapterHeader({
+  title,
+  subtitle,
+  onBack,
+}: ChapterHeaderProps): React.JSX.Element {
   return (
     <View style={styles.header}>
       <Pressable

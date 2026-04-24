@@ -97,17 +97,17 @@ function SacredGeometryArtInner({
     r1.value = withRepeat(
       withTiming(-360, { duration: 60_000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
     r2.value = withRepeat(
       withTiming(360, { duration: 45_000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
     r3.value = withRepeat(
       withTiming(-360, { duration: 90_000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
   }, [isPlaying, r1, r2, r3]);
 
@@ -126,10 +126,10 @@ function SacredGeometryArtInner({
         withTiming(0, {
           duration: periodMs / 2,
           easing: Easing.inOut(Easing.ease),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
   }, [bpm, isPlaying, breath]);
 
@@ -197,13 +197,21 @@ function SacredGeometryArtInner({
 
   return (
     <Animated.View
-      style={[styles.container, { width: size, height: size }, breathStyle, style]}
+      style={[
+        styles.container,
+        { width: size, height: size },
+        breathStyle,
+        style,
+      ]}
       testID={testID}
       accessibilityLabel={`Sacred ${category} mandala`}
       accessibilityRole="image"
     >
       {/* Outer ring — counter-clockwise, slowest. */}
-      <Animated.View style={[StyleSheet.absoluteFill, ring1Style]} pointerEvents="none">
+      <Animated.View
+        style={[StyleSheet.absoluteFill, ring1Style]}
+        pointerEvents="none"
+      >
         <Canvas style={StyleSheet.absoluteFill}>
           <Circle
             cx={cx}
@@ -226,7 +234,10 @@ function SacredGeometryArtInner({
       </Animated.View>
 
       {/* Mid ring + Shatkona — clockwise. */}
-      <Animated.View style={[StyleSheet.absoluteFill, ring2Style]} pointerEvents="none">
+      <Animated.View
+        style={[StyleSheet.absoluteFill, ring2Style]}
+        pointerEvents="none"
+      >
         <Canvas style={StyleSheet.absoluteFill}>
           <Circle
             cx={cx}
@@ -246,7 +257,10 @@ function SacredGeometryArtInner({
       </Animated.View>
 
       {/* Inner ring + seed bindu — counter-clockwise (bindu stationary). */}
-      <Animated.View style={[StyleSheet.absoluteFill, ring3Style]} pointerEvents="none">
+      <Animated.View
+        style={[StyleSheet.absoluteFill, ring3Style]}
+        pointerEvents="none"
+      >
         <Canvas style={StyleSheet.absoluteFill}>
           <Circle
             cx={cx}

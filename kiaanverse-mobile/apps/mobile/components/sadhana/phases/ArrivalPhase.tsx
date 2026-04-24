@@ -35,7 +35,9 @@ export interface ArrivalPhaseProps {
   readonly onComplete: () => void;
 }
 
-function ArrivalPhaseInner({ onComplete }: ArrivalPhaseProps): React.JSX.Element {
+function ArrivalPhaseInner({
+  onComplete,
+}: ArrivalPhaseProps): React.JSX.Element {
   const [cycles, setCycles] = useState(0);
   const [active, setActive] = useState(true);
 
@@ -75,9 +77,7 @@ function ArrivalPhaseInner({ onComplete }: ArrivalPhaseProps): React.JSX.Element
           Cycle {Math.min(cycles + (isReady ? 0 : 1), REQUIRED_CYCLES)} of{' '}
           {REQUIRED_CYCLES}
         </Text>
-        <Text style={styles.helper}>
-          4 in · 7 hold · 8 out
-        </Text>
+        <Text style={styles.helper}>4 in · 7 hold · 8 out</Text>
       </View>
 
       <View style={styles.cta}>

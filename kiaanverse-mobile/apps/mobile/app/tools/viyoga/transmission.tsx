@@ -155,7 +155,7 @@ export default function ViyogaTransmission(): React.JSX.Element {
   // controls can drive every accordion at once. "I Get It" (index 0)
   // starts open, matching the screenshot.
   const [openStates, setOpenStates] = useState<readonly boolean[]>(() =>
-    SECTIONS.map((_, i) => i === 0),
+    SECTIONS.map((_, i) => i === 0)
   );
 
   const toggleSection = useCallback((index: number) => {
@@ -222,7 +222,10 @@ export default function ViyogaTransmission(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <View style={t.header}>
-          <View style={t.flames} accessibilityLabel={`Step ${PROGRESS_FLAMES_LIT} of ${PROGRESS_FLAMES_TOTAL}`}>
+          <View
+            style={t.flames}
+            accessibilityLabel={`Step ${PROGRESS_FLAMES_LIT} of ${PROGRESS_FLAMES_TOTAL}`}
+          >
             {Array.from({ length: PROGRESS_FLAMES_TOTAL }).map((_, i) => (
               <Text
                 key={i}

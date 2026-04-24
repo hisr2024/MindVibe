@@ -21,7 +21,10 @@ interface BreathPhaseProps {
   onComplete: () => void;
 }
 
-export function BreathPhase({ intensity, onComplete }: BreathPhaseProps): React.JSX.Element {
+export function BreathPhase({
+  intensity,
+  onComplete,
+}: BreathPhaseProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const [showSkip, setShowSkip] = useState(false);
 
@@ -33,13 +36,24 @@ export function BreathPhase({ intensity, onComplete }: BreathPhaseProps): React.
   const pattern = breathPatternForIntensity(intensity);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+    <View
+      style={[
+        styles.root,
+        { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+      ]}
+    >
       <Text style={styles.eyebrow}>Sacred Breath Purification</Text>
 
-      <BreathMandala pattern={pattern} rounds={4} onComplete={() => {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        onComplete();
-      }} />
+      <BreathMandala
+        pattern={pattern}
+        rounds={4}
+        onComplete={() => {
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success
+          );
+          onComplete();
+        }}
+      />
 
       {showSkip ? (
         <Animated.View entering={FadeIn.duration(400)}>

@@ -57,11 +57,7 @@ function WisdomCircleCardInner({
       accessibilityLabel={`Wisdom circle: ${circle.name}`}
     >
       <Animated.View
-        style={[
-          styles.card,
-          animatedStyle,
-          width ? { width } : undefined,
-        ]}
+        style={[styles.card, animatedStyle, width ? { width } : undefined]}
       >
         {/* Circle Avatar / Icon */}
         <View style={styles.iconContainer}>

@@ -38,7 +38,11 @@ export interface TierBadgeProps {
   readonly testID?: string;
 }
 
-function TierBadgeInner({ tier, style, testID }: TierBadgeProps): React.JSX.Element {
+function TierBadgeInner({
+  tier,
+  style,
+  testID,
+}: TierBadgeProps): React.JSX.Element {
   const identity = tierIdentity(tier);
 
   // Shimmer sweep (Sadhak) — a gold ribbon translates left → right.
@@ -51,7 +55,7 @@ function TierBadgeInner({ tier, style, testID }: TierBadgeProps): React.JSX.Elem
       shimmerX.value = withRepeat(
         withTiming(1.5, { duration: 2600, easing: Easing.inOut(Easing.ease) }),
         -1,
-        false,
+        false
       );
     } else {
       shimmerX.value = -1;
@@ -63,10 +67,10 @@ function TierBadgeInner({ tier, style, testID }: TierBadgeProps): React.JSX.Elem
       breath.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) })
         ),
         -1,
-        false,
+        false
       );
     } else {
       breath.value = 0;
@@ -93,7 +97,10 @@ function TierBadgeInner({ tier, style, testID }: TierBadgeProps): React.JSX.Elem
 
       {/* Sadhak shimmer — a translucent gold ribbon sweeping the badge. */}
       {identity.motion === 'shimmer' ? (
-        <Animated.View style={[styles.shimmerWrap, shimmerStyle]} pointerEvents="none">
+        <Animated.View
+          style={[styles.shimmerWrap, shimmerStyle]}
+          pointerEvents="none"
+        >
           <LinearGradient
             colors={[
               'rgba(240,192,64,0)',
@@ -110,7 +117,11 @@ function TierBadgeInner({ tier, style, testID }: TierBadgeProps): React.JSX.Elem
   );
 }
 
-function BadgeBody({ identity }: { readonly identity: TierIdentity }): React.JSX.Element {
+function BadgeBody({
+  identity,
+}: {
+  readonly identity: TierIdentity;
+}): React.JSX.Element {
   if (identity.key === 'free') {
     return (
       <View style={[styles.body, styles.bodyFree]}>
@@ -121,10 +132,7 @@ function BadgeBody({ identity }: { readonly identity: TierIdentity }): React.JSX
   if (identity.key === 'siddha') {
     return (
       <View
-        style={[
-          styles.body,
-          { borderColor: tierAlpha(identity.accent, 0.9) },
-        ]}
+        style={[styles.body, { borderColor: tierAlpha(identity.accent, 0.9) }]}
       >
         <LinearGradient
           colors={identity.gradient as unknown as string[]}

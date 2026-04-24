@@ -49,11 +49,11 @@ function Petal({
   useEffect(() => {
     scale.value = withDelay(
       index * 80,
-      withSpring(1, { damping: 12, stiffness: 120 }),
+      withSpring(1, { damping: 12, stiffness: 120 })
     );
     opacity.value = withDelay(
       index * 80,
-      withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })
     );
   }, [scale, opacity, index]);
 
@@ -87,7 +87,7 @@ function CompassRoseInner({
   useEffect(() => {
     centerScale.value = withDelay(
       PETAL_ANGLES.length * 80,
-      withSpring(1, { damping: 8, stiffness: 160 }),
+      withSpring(1, { damping: 8, stiffness: 160 })
     );
   }, [centerScale]);
 

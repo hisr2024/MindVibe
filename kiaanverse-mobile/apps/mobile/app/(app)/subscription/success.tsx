@@ -128,15 +128,10 @@ export default function SubscriptionSuccessScreen(): React.JSX.Element {
         <Text style={styles.om} accessibilityLabel="Om">
           ॐ
         </Text>
-        <Text
-          style={styles.title}
-          accessibilityRole="header"
-        >
+        <Text style={styles.title} accessibilityRole="header">
           Your Sankalpa Is Made
         </Text>
-        {sanskrit ? (
-          <Text style={styles.sanskrit}>{sanskrit}</Text>
-        ) : null}
+        {sanskrit ? <Text style={styles.sanskrit}>{sanskrit}</Text> : null}
         <Text style={styles.subtitle}>
           The sacred path opens before you.{'\n'}
           Welcome, {tierName}.

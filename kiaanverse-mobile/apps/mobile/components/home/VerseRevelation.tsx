@@ -7,7 +7,13 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -28,18 +34,30 @@ export interface VerseRevelationProps {
   readonly style?: ViewStyle | undefined;
 }
 
-function Word({ text, delay }: { text: string; delay: number }): React.JSX.Element {
+function Word({
+  text,
+  delay,
+}: {
+  text: string;
+  delay: number;
+}): React.JSX.Element {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(8);
 
   useEffect(() => {
     opacity.value = withDelay(
       delay,
-      withTiming(1, { duration: WORD_DURATION_MS, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, {
+        duration: WORD_DURATION_MS,
+        easing: Easing.out(Easing.cubic),
+      })
     );
     translateY.value = withDelay(
       delay,
-      withTiming(0, { duration: WORD_DURATION_MS, easing: Easing.out(Easing.cubic) }),
+      withTiming(0, {
+        duration: WORD_DURATION_MS,
+        easing: Easing.out(Easing.cubic),
+      })
     );
   }, [delay, opacity, translateY]);
 
@@ -66,8 +84,12 @@ export function VerseRevelation({
           /^\s+$/.test(word) ? (
             <Text key={`w-${i}`}>{word}</Text>
           ) : (
-            <Word key={`w-${i}`} text={word} delay={delay + i * WORD_STAGGER_MS} />
-          ),
+            <Word
+              key={`w-${i}`}
+              text={word}
+              delay={delay + i * WORD_STAGGER_MS}
+            />
+          )
         )}
       </Text>
     </View>

@@ -25,7 +25,13 @@
  *     the persisted `useRelationshipStore` so it shows up in their log.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   BackHandler,
   Pressable,
@@ -34,11 +40,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeOut,
-} from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { ChevronLeft, Bell } from 'lucide-react-native';
@@ -114,10 +116,7 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
   const gunaScores = useGunaCalculation(draft.selectedPatterns);
   const dharmaValues = useDharmaMapData(draft.selectedPatterns);
 
-  const currentIndex = useMemo(
-    () => CHAMBER_ORDER.indexOf(chamber),
-    [chamber],
-  );
+  const currentIndex = useMemo(() => CHAMBER_ORDER.indexOf(chamber), [chamber]);
 
   // ---------------------------------------------------------------------
   // Hardware back: route back through chambers, never directly out of the
@@ -211,9 +210,9 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
   // Intention → Seal transition: persist the reading once and only once.
   // ---------------------------------------------------------------------
   const handleSeal = useCallback(() => {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-      () => {},
-    );
+    void Haptics.notificationAsync(
+      Haptics.NotificationFeedbackType.Success
+    ).catch(() => {});
     if (!draft.relationshipType || sealedRef.current) {
       setChamber('seal');
       return;
@@ -247,13 +246,7 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
     sealedRef.current = reading;
     addSealedReading(reading);
     setChamber('seal');
-  }, [
-    addSealedReading,
-    draft,
-    gunaScores,
-    dharmaValues,
-    wisdom.transmission,
-  ]);
+  }, [addSealedReading, draft, gunaScores, dharmaValues, wisdom.transmission]);
 
   // ---------------------------------------------------------------------
   // Renders — each chamber is wrapped in a fade so transitions feel calm.
@@ -318,11 +311,15 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
           <CompassSealChamber
             partnerName={reading?.partnerName ?? draft.partnerName}
             relationshipTypeLabel={
-              reading?.relationshipTypeLabel ?? draft.relationshipType?.label ?? ''
+              reading?.relationshipTypeLabel ??
+              draft.relationshipType?.label ??
+              ''
             }
             dominantGuna={reading?.gunaScores.dominant ?? gunaScores.dominant}
             selectedQualityLabel={
-              reading?.selectedQualityLabel ?? draft.selectedQuality?.label ?? null
+              reading?.selectedQualityLabel ??
+              draft.selectedQuality?.label ??
+              null
             }
             intentionText={reading?.intentionText ?? draft.intentionText}
             sealedAt={reading?.sealedAt ?? new Date().toISOString()}

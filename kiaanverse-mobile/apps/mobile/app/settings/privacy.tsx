@@ -35,7 +35,11 @@ import { API_CONFIG } from '@kiaanverse/api';
 
 export default function PrivacySettingsScreen(): React.JSX.Element {
   const router = useRouter();
-  const { data: status, refetch, isLoading: statusLoading } = usePrivacyStatus();
+  const {
+    data: status,
+    refetch,
+    isLoading: statusLoading,
+  } = usePrivacyStatus();
   const requestExport = useRequestExport();
   const requestDeletion = useRequestDeletion();
   const cancelDeletion = useCancelDeletion();
@@ -70,7 +74,9 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
         clearInterval(id);
         setPolling(false);
         if (s === 'completed') {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Success
+          );
         }
       }
     }, 10_000);
@@ -102,13 +108,18 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
           onPress: async () => {
             try {
               await requestDeletion.mutateAsync(undefined);
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              void Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Error
+              );
             } catch {
-              Alert.alert('Error', 'Failed to schedule deletion. Please try again.');
+              Alert.alert(
+                'Error',
+                'Failed to schedule deletion. Please try again.'
+              );
             }
           },
         },
-      ],
+      ]
     );
   }, [requestDeletion]);
 
@@ -123,27 +134,36 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
           onPress: async () => {
             try {
               await cancelDeletion.mutateAsync();
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              void Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
             } catch {
-              Alert.alert('Error', 'Failed to cancel deletion. Please try again.');
+              Alert.alert(
+                'Error',
+                'Failed to cancel deletion. Please try again.'
+              );
             }
           },
         },
-      ],
+      ]
     );
   }, [cancelDeletion]);
 
   // ─── Helpers ──────────────────────────────────────────
   const gracePeriodDate = status?.deletion?.grace_period_ends_at
-    ? new Date(status.deletion.grace_period_ends_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+    ? new Date(status.deletion.grace_period_ends_at).toLocaleDateString(
+        'en-US',
+        {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }
+      )
     : null;
 
   const isExportReady = exportStatus === 'completed';
-  const isExportPending = exportStatus === 'pending' || exportStatus === 'processing';
+  const isExportPending =
+    exportStatus === 'pending' || exportStatus === 'processing';
   const isDeletionPending = deletionStatus === 'grace_period';
 
   return (
@@ -168,8 +188,14 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
             disabled={cancelDeletion.isPending}
             style={styles.mt8}
           >
-            <Text variant="caption" color={colors.primary[500]} style={styles.underline}>
-              {cancelDeletion.isPending ? 'Cancelling…' : 'Cancel deletion request'}
+            <Text
+              variant="caption"
+              color={colors.primary[500]}
+              style={styles.underline}
+            >
+              {cancelDeletion.isPending
+                ? 'Cancelling…'
+                : 'Cancel deletion request'}
             </Text>
           </Pressable>
         </Card>
@@ -191,12 +217,16 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
           <View style={styles.statusRow}>
             <View style={[styles.statusDot, styles.statusDotActive]} />
             <Text variant="caption" color={colors.text.secondary}>
-              {exportStatus === 'pending' ? 'Export queued…' : 'Building your archive…'}
+              {exportStatus === 'pending'
+                ? 'Export queued…'
+                : 'Building your archive…'}
             </Text>
           </View>
         )}
 
-        {(!exportStatus || exportStatus === 'failed' || exportStatus === 'expired') && (
+        {(!exportStatus ||
+          exportStatus === 'failed' ||
+          exportStatus === 'expired') && (
           <GoldenButton
             title={requestExport.isPending ? 'Requesting…' : 'Request Export'}
             onPress={handleRequestExport}
@@ -205,7 +235,11 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
         )}
 
         {status?.export?.expires_at && isExportReady && (
-          <Text variant="caption" color={colors.text.muted} style={[styles.mt4, styles.textCenter]}>
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            style={[styles.mt4, styles.textCenter]}
+          >
             Link expires{' '}
             {new Date(status.export.expires_at).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -220,8 +254,8 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
       <SectionHeader title="Delete My Account" />
       <Card style={styles.card}>
         <Text variant="caption" color={colors.text.muted} style={styles.mb8}>
-          Art. 17 — Right to erasure. All your data will be permanently
-          deleted after a 30-day grace period.
+          Art. 17 — Right to erasure. All your data will be permanently deleted
+          after a 30-day grace period.
         </Text>
 
         {!isDeletionPending && (
@@ -231,7 +265,9 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
             style={styles.dangerButton}
           >
             <Text variant="label" color={colors.semantic.error}>
-              {requestDeletion.isPending ? 'Scheduling…' : 'Request Account Deletion'}
+              {requestDeletion.isPending
+                ? 'Scheduling…'
+                : 'Request Account Deletion'}
             </Text>
           </Pressable>
         )}
@@ -247,7 +283,11 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
 
 function SectionHeader({ title }: { title: string }): React.JSX.Element {
   return (
-    <Text variant="caption" color={colors.text.muted} style={styles.sectionHeader}>
+    <Text
+      variant="caption"
+      color={colors.text.muted}
+      style={styles.sectionHeader}
+    >
       {title.toUpperCase()}
     </Text>
   );

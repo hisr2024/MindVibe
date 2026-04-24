@@ -6,7 +6,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import NetInfo, { type NetInfoState, type NetInfoStateType } from '@react-native-community/netinfo';
+import NetInfo, {
+  type NetInfoState,
+  type NetInfoStateType,
+} from '@react-native-community/netinfo';
 
 export interface NetworkStatus {
   /** True when connected AND internet is reachable */

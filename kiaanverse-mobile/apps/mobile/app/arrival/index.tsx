@@ -96,7 +96,8 @@ const PAGES: readonly PageData[] = [
   {
     id: 'sacred',
     title: 'This is your sacred space.',
-    subtitle: 'Encrypted. Private. Yours alone.\nKiaanverse never reads your journal.',
+    subtitle:
+      'Encrypted. Private. Yours alone.\nKiaanverse never reads your journal.',
     skt: 'पवित्र क्षेत्र',
     accent: '#10B981',
     visual: 'lock',
@@ -124,7 +125,9 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
       if (kind === 'light') {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } else {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
       }
     } catch {
       // Haptics unsupported on this device — silent fallback.
@@ -228,7 +231,9 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
               accessibilityLabel="Skip the introduction"
               testID="arrival-skip"
             >
-              <Text allowFontScaling={false} style={styles.skipText}>Skip</Text>
+              <Text allowFontScaling={false} style={styles.skipText}>
+                Skip
+              </Text>
             </TouchableOpacity>
           ) : (
             // Reserve the same vertical space so the CTA doesn't jump on the
@@ -251,7 +256,11 @@ interface CeremonyPageProps {
   readonly isActive: boolean;
 }
 
-function CeremonyPage({ data, index, isActive }: CeremonyPageProps): React.JSX.Element {
+function CeremonyPage({
+  data,
+  index,
+  isActive,
+}: CeremonyPageProps): React.JSX.Element {
   // Entry animations — trigger each time the page becomes active so that
   // re-arriving after a back-swipe still feels alive.
   const titleOpacity = useSharedValue(0);
@@ -275,19 +284,19 @@ function CeremonyPage({ data, index, isActive }: CeremonyPageProps): React.JSX.E
         const durText = reduce ? 150 : 560;
         titleOpacity.value = withDelay(
           100,
-          withTiming(1, { duration: durTitle, easing: LOTUS_BLOOM }),
+          withTiming(1, { duration: durTitle, easing: LOTUS_BLOOM })
         );
         titleTranslate.value = withDelay(
           100,
-          withTiming(0, { duration: durTitle, easing: LOTUS_BLOOM }),
+          withTiming(0, { duration: durTitle, easing: LOTUS_BLOOM })
         );
         subtitleOpacity.value = withDelay(
           260,
-          withTiming(1, { duration: durText, easing: LOTUS_BLOOM }),
+          withTiming(1, { duration: durText, easing: LOTUS_BLOOM })
         );
         sktOpacity.value = withDelay(
           reduce ? 320 : 480,
-          withTiming(0.75, { duration: durText, easing: LOTUS_BLOOM }),
+          withTiming(0.75, { duration: durText, easing: LOTUS_BLOOM })
         );
       })
       .catch(() => {
@@ -320,7 +329,11 @@ function CeremonyPage({ data, index, isActive }: CeremonyPageProps): React.JSX.E
       accessibilityLabel={`${data.title.replace(/\n/g, ' ')}. ${data.subtitle.replace(/\n/g, ' ')}`}
     >
       <View style={styles.visualWrap}>
-        <PageVisual kind={data.visual} accent={data.accent} isActive={isActive} />
+        <PageVisual
+          kind={data.visual}
+          accent={data.accent}
+          isActive={isActive}
+        />
       </View>
 
       <View style={styles.textBlock}>
@@ -331,11 +344,17 @@ function CeremonyPage({ data, index, isActive }: CeremonyPageProps): React.JSX.E
           {data.skt}
         </Animated.Text>
 
-        <Animated.Text allowFontScaling={false} style={[styles.title, titleStyle]}>
+        <Animated.Text
+          allowFontScaling={false}
+          style={[styles.title, titleStyle]}
+        >
           {data.title}
         </Animated.Text>
 
-        <Animated.Text allowFontScaling={false} style={[styles.subtitle, subtitleStyle]}>
+        <Animated.Text
+          allowFontScaling={false}
+          style={[styles.subtitle, subtitleStyle]}
+        >
           {data.subtitle}
         </Animated.Text>
       </View>
@@ -344,7 +363,9 @@ function CeremonyPage({ data, index, isActive }: CeremonyPageProps): React.JSX.E
       <View style={styles.pageIndex}>
         <Text allowFontScaling={false} style={styles.pageIndexText}>
           {String(index + 1).padStart(2, '0')}
-          <Text style={styles.pageIndexDim}>{` / ${String(PAGES.length).padStart(2, '0')}`}</Text>
+          <Text
+            style={styles.pageIndexDim}
+          >{` / ${String(PAGES.length).padStart(2, '0')}`}</Text>
         </Text>
       </View>
     </View>
@@ -364,7 +385,11 @@ interface PageVisualProps {
   readonly isActive: boolean;
 }
 
-function PageVisual({ kind, accent, isActive }: PageVisualProps): React.JSX.Element {
+function PageVisual({
+  kind,
+  accent,
+  isActive,
+}: PageVisualProps): React.JSX.Element {
   const pulse = useSharedValue(0.9);
   const rotate = useSharedValue(0);
 
@@ -376,15 +401,15 @@ function PageVisual({ kind, accent, isActive }: PageVisualProps): React.JSX.Elem
         pulse.value = withRepeat(
           withSequence(
             withTiming(1.08, { duration: 1800, easing: LOTUS_BLOOM }),
-            withTiming(0.92, { duration: 1800, easing: LOTUS_BLOOM }),
+            withTiming(0.92, { duration: 1800, easing: LOTUS_BLOOM })
           ),
           -1,
-          false,
+          false
         );
         rotate.value = withRepeat(
           withTiming(360, { duration: 36000, easing: Easing.linear }),
           -1,
-          false,
+          false
         );
       })
       .catch(() => {

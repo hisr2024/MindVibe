@@ -61,7 +61,7 @@ function GratitudePhaseInner({
       void Haptics.selectionAsync();
       onChangeMood(score);
     },
-    [mood, onChangeMood],
+    [mood, onChangeMood]
   );
 
   const canFinish = mood !== null;
@@ -104,10 +104,7 @@ function GratitudePhaseInner({
                   {opt.emoji}
                 </Text>
                 <Text
-                  style={[
-                    styles.moodLabel,
-                    active && styles.moodLabelActive,
-                  ]}
+                  style={[styles.moodLabel, active && styles.moodLabelActive]}
                   numberOfLines={1}
                 >
                   {opt.label}
