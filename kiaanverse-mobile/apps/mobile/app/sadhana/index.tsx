@@ -20,6 +20,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -253,12 +254,14 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
         completed={completedIndices}
       />
 
-      {/* `padding` behavior works reliably on both platforms; `height` on
-          Android fights the soft-keyboard insets and causes layout jumps
-          mid-phase transition. */}
+      {/* Reserve the system gesture/nav bar inset so the bottom CTA on
+          every phase is always reachable, and the text fields on the
+          Reflection / Gratitude phases lift above the keyboard.
+          iOS needs `padding` because the window does not resize; Android
+          defaults to adjustResize, so `height` avoids a double-shift. */}
       <KeyboardAvoidingView
-        style={styles.body}
-        behavior="padding"
+        style={[styles.body, { paddingBottom: Math.max(insets.bottom, 12) }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
         <PhaseCeremony phaseKey={phase}>{renderPhase()}</PhaseCeremony>

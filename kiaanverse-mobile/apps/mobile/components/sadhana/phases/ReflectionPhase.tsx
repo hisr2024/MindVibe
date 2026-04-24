@@ -13,7 +13,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { DivineButton, SacredInput } from '@kiaanverse/ui';
 
 const SACRED_WHITE = '#F5F0E8';
@@ -44,7 +44,13 @@ function ReflectionPhaseInner({
   }, [canComplete, onComplete]);
 
   return (
-    <View style={styles.wrap}>
+    <ScrollView
+      style={styles.wrap}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.titleBlock}>
         <Text style={styles.phaseLabel} allowFontScaling={false}>
           PHASE IV
@@ -86,7 +92,7 @@ function ReflectionPhaseInner({
           disabled={!canComplete}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -96,9 +102,15 @@ export const ReflectionPhase = React.memo(ReflectionPhaseInner);
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     paddingVertical: 24,
     paddingHorizontal: 20,
     gap: 16,
+    // Extra bottom breathing room so the "Complete Phase" button floats
+    // above the keyboard once it opens, rather than flush against it.
+    paddingBottom: 32,
   },
   titleBlock: {
     alignItems: 'center',
@@ -144,12 +156,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   inputWrap: {
-    flex: 1,
     gap: 6,
   },
   input: {
-    flex: 1,
-    minHeight: 160,
+    minHeight: 180,
   },
   encryptedHint: {
     fontFamily: 'Outfit-Regular',
