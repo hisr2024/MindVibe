@@ -253,3 +253,16 @@ export {
   useRequestDeletion,
   useCancelDeletion,
 } from './hooks';
+
+// Bundled Gita corpus (matches kiaanverse.com/m/ — full text for all 700 verses)
+export {
+  getLocalChapter,
+  getLocalChapterHeaders,
+  getLocalVerse,
+  isLocalGitaAvailable,
+} from './localGita';
+export type {
+  LocalGitaChapter,
+  LocalGitaChapterHeader,
+  LocalGitaVerse,
+} from './localGita';

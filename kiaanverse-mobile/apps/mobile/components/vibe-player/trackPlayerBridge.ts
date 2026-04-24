@@ -21,8 +21,10 @@
  */
 
 import TrackPlayer, {
+  State,
   type Track as RnTpTrack,
 } from 'react-native-track-player';
+import { setupTrackPlayer } from '../../services/trackPlayerSetup';
 
 declare const __DEV__: boolean;
 
@@ -55,7 +57,19 @@ function isPlayableUrl(url: string): boolean {
   return /^(https?:|file:|asset:)/i.test(url);
 }
 
-/** Load a single track into TrackPlayer's queue and start playback. */
+/** Load a single track into TrackPlayer's queue and start playback.
+ *
+ *  Robustness:
+ *    - We `await setupTrackPlayer()` first so the native audio session is
+ *      always ready. This is a no-op when setup already completed in
+ *      `_layout.tsx`, but covers the deep-link / cold-start path where the
+ *      Vibe Player screen mounts before the layout effect has finished.
+ *    - After `play()` we poll the State for ~1.5 s. If RNTP never reaches
+ *      Playing/Buffering/Loading, the URL is unreachable on this network
+ *      (Android often returns no error in that case — it just sits silent).
+ *      We surface that as an `error` so the user gets actionable feedback
+ *      instead of a UI that claims "playing" with no sound.
+ */
 export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
   if (!isPlayableUrl(track.audioUrl)) {
     if (__DEV__) {
@@ -72,6 +86,10 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
   }
 
   try {
+    // Ensure native is initialised even on deep-link cold start where
+    // _layout's setup effect may not have completed yet.
+    await setupTrackPlayer();
+
     await TrackPlayer.reset();
     const rnTrack: RnTpTrack = {
       id: track.id,
@@ -83,6 +101,18 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
     };
     await TrackPlayer.add(rnTrack);
     await TrackPlayer.play();
+
+    // Confirm playback actually engaged (poll up to ~1.5 s). Catches the
+    // silent-failure mode where Android resolves play() but never buffers.
+    const playable = await waitForPlayableState(1500);
+    if (!playable) {
+      return {
+        ok: false,
+        reason: 'error',
+        message:
+          'The audio source did not respond. Check your internet connection and try again.',
+      };
+    }
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -97,6 +127,28 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
       message: `Could not play this track: ${message}`,
     };
   }
+}
+
+/** Poll TrackPlayer.getState() until it reports a non-idle state or timeout. */
+async function waitForPlayableState(timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const state = await TrackPlayer.getState();
+      if (
+        state === State.Playing ||
+        state === State.Buffering ||
+        state === State.Loading ||
+        state === State.Ready
+      ) {
+        return true;
+      }
+    } catch {
+      // Native not ready yet — keep polling until deadline.
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return false;
 }
 
 /** Resume playback (no-op if nothing loaded). */
