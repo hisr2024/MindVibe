@@ -11,17 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.mindvibe.app.sadhana.ui.NityaSadhanaHost
+import com.mindvibe.app.journey.ui.JourneyHost
 import com.mindvibe.app.ui.theme.KiaanColors
 import com.mindvibe.app.ui.theme.KiaanTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Entry point for the MindVibe / Kiaanverse Android app.
+ * Entry point for the Kiaanverse Android app.
  *
- * The home experience is the Nitya Sadhana — the adaptive daily practice
- * that mirrors kiaanverse.com/m/sadhana. Edge-to-edge is enabled so the
- * cosmos background flows under the system bars without a letterbox.
+ * The home experience is the षड्रिपु Journeys flow — a 1:1 adaptation of
+ * kiaanverse.com mobile (Today / Journeys / Battleground / Wisdom). Edge-
+ * to-edge is enabled so the cosmos background flows under the system bars
+ * without a letterbox.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = KiaanColors.CosmosBlack,
                 ) {
-                    NityaSadhanaHost()
+                    JourneyHost()
                 }
             }
         }
@@ -48,8 +49,8 @@ class MainActivity : ComponentActivity() {
 
 @Preview(showBackground = true, backgroundColor = 0xFF05060C)
 @Composable
-private fun NityaSadhanaHostPreview() {
+private fun JourneyHostPreview() {
     KiaanTheme {
-        NityaSadhanaHost()
+        JourneyHost()
     }
 }
