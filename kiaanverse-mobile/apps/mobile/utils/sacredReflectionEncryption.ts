@@ -52,7 +52,7 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
     keyBytes,
     { name: 'AES-GCM' },
     false,
-    ['encrypt', 'decrypt'],
+    ['encrypt', 'decrypt']
   );
 }
 
@@ -60,9 +60,11 @@ export async function encryptReflection(plaintext: string): Promise<string> {
   if (!hasSubtleCrypto()) {
     const hash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
-      plaintext,
+      plaintext
     );
-    return btoa(unescape(encodeURIComponent(plaintext))) + ':' + hash.slice(0, 16);
+    return (
+      btoa(unescape(encodeURIComponent(plaintext))) + ':' + hash.slice(0, 16)
+    );
   }
   const key = (await getOrCreateEncryptionKey()) as CryptoKey;
   const iv = await Crypto.getRandomBytesAsync(12);
@@ -70,7 +72,7 @@ export async function encryptReflection(plaintext: string): Promise<string> {
   const encrypted = await globalThis.crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
     key,
-    encoded,
+    encoded
   );
   const cipherBytes = new Uint8Array(encrypted);
   const combined = new Uint8Array(iv.length + cipherBytes.length);
@@ -100,7 +102,7 @@ export async function decryptReflection(ciphertext: string): Promise<string> {
     const plaintextBytes = await globalThis.crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       key,
-      cipher,
+      cipher
     );
     return new TextDecoder().decode(plaintextBytes);
   } catch {
@@ -127,12 +129,14 @@ export interface WeeklyAssessmentAnswers {
 type AssessmentStore = Record<string, WeeklyAssessmentAnswers>;
 
 export function getIsoWeekKey(date: Date): string {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const d = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil(
-    (((d.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7,
+    ((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7
   );
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
 }
@@ -152,7 +156,7 @@ export async function loadAssessmentStore(): Promise<AssessmentStore> {
 
 export async function saveAssessmentAnswers(
   weekKey: string,
-  answers: Omit<WeeklyAssessmentAnswers, 'saved_at'>,
+  answers: Omit<WeeklyAssessmentAnswers, 'saved_at'>
 ): Promise<void> {
   try {
     const store = await loadAssessmentStore();

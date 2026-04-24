@@ -38,7 +38,16 @@ const INSIGHT_PROMPTS: readonly string[] = [
 
 function LightbulbIcon({ color }: { color: string }): React.JSX.Element {
   return (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M9 18 h6" />
       <Path d="M10 21 h4" />
       <Path d="M12 3 a6 6 0 0 1 4 10.5 c-.7.6 -1 1.4 -1 2.2 V17 h-6 v-1.3 c0 -.8 -.3 -1.6 -1 -2.2 A6 6 0 0 1 12 3 Z" />
@@ -69,10 +78,10 @@ function InsightFabInner({
     breath.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      false,
+      false
     );
   }, [breath]);
 
@@ -109,9 +118,7 @@ function InsightFabInner({
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: visibility.value,
-    transform: [
-      { scale: press.value * (0.94 + visibility.value * 0.06) },
-    ],
+    transform: [{ scale: press.value * (0.94 + visibility.value * 0.06) }],
   }));
 
   if (hidden && visibility.value === 0) {

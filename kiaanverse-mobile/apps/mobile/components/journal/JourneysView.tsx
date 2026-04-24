@@ -33,13 +33,20 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
-import { useJourneys, useJourneyDashboard, type Journey } from '@kiaanverse/api';
+import {
+  useJourneys,
+  useJourneyDashboard,
+  type Journey,
+} from '@kiaanverse/api';
 
 // ---------------------------------------------------------------------------
 // Enemy metadata (six shadripu — must match backend EnemyType enum)
 // ---------------------------------------------------------------------------
 
-const ENEMY_INFO: Record<string, { name: string; sanskrit: string; color: string }> = {
+const ENEMY_INFO: Record<
+  string,
+  { name: string; sanskrit: string; color: string }
+> = {
   kama: { name: 'Desire', sanskrit: 'काम', color: '#f59e0b' },
   krodha: { name: 'Anger', sanskrit: 'क्रोध', color: '#ef4444' },
   lobha: { name: 'Greed', sanskrit: 'लोभ', color: '#10b981' },
@@ -48,7 +55,9 @@ const ENEMY_INFO: Record<string, { name: string; sanskrit: string; color: string
   matsarya: { name: 'Envy', sanskrit: 'मत्सर्य', color: '#06b6d4' },
 };
 
-function resolveEnemyKey(journey: Pick<Journey, 'category' | 'title'>): string | undefined {
+function resolveEnemyKey(
+  journey: Pick<Journey, 'category' | 'title'>
+): string | undefined {
   const searchText = `${journey.category} ${journey.title}`.toLowerCase();
   for (const key of Object.keys(ENEMY_INFO)) {
     if (searchText.includes(key)) return key;
@@ -72,7 +81,9 @@ function ActiveJourneyCard({
   onPress,
 }: ActiveJourneyCardProps): React.JSX.Element {
   const progress =
-    journey.durationDays > 0 ? (journey.completedSteps / journey.durationDays) * 100 : 0;
+    journey.durationDays > 0
+      ? (journey.completedSteps / journey.durationDays) * 100
+      : 0;
   const enemyKey = resolveEnemyKey(journey);
   const enemy = enemyKey ? ENEMY_INFO[enemyKey] : undefined;
   const accentColor = enemy?.color ?? colors.primary[500];
@@ -83,7 +94,11 @@ function ActiveJourneyCard({
   }, [journey, onPress]);
 
   return (
-    <Animated.View entering={FadeInDown.delay(index * 70).duration(450).springify()}>
+    <Animated.View
+      entering={FadeInDown.delay(index * 70)
+        .duration(450)
+        .springify()}
+    >
       <Pressable
         onPress={handlePress}
         accessibilityRole="button"
@@ -92,7 +107,9 @@ function ActiveJourneyCard({
         <GlowCard variant="golden" style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={styles.headerLeft}>
-              <View style={[styles.colorDot, { backgroundColor: accentColor }]} />
+              <View
+                style={[styles.colorDot, { backgroundColor: accentColor }]}
+              />
               {enemy ? (
                 <Text variant="caption" color={accentColor}>
                   {enemy.sanskrit}
@@ -110,7 +127,11 @@ function ActiveJourneyCard({
 
           <GoldenProgressBar progress={progress} height={8} />
 
-          <Text variant="caption" color={colors.text.muted} style={styles.progressLabel}>
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            style={styles.progressLabel}
+          >
             {Math.round(progress)}% complete
           </Text>
         </GlowCard>
@@ -139,7 +160,7 @@ export function JourneysView(): React.JSX.Element {
     (journey: Journey) => {
       router.push(`/journey/${journey.id}`);
     },
-    [router],
+    [router]
   );
 
   const handleBrowseCatalog = useCallback(() => {
@@ -149,9 +170,13 @@ export function JourneysView(): React.JSX.Element {
 
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<Journey>) => (
-      <ActiveJourneyCard journey={item} index={index} onPress={handleJourneyPress} />
+      <ActiveJourneyCard
+        journey={item}
+        index={index}
+        onPress={handleJourneyPress}
+      />
     ),
-    [handleJourneyPress],
+    [handleJourneyPress]
   );
 
   const keyExtractor = useCallback((item: Journey) => item.id, []);
@@ -162,15 +187,21 @@ export function JourneysView(): React.JSX.Element {
         <Text variant="h3" color={colors.primary[500]} style={styles.heroTitle}>
           षड्रिपु · Six Inner Enemies
         </Text>
-        <Text variant="bodySmall" color={colors.text.secondary} style={styles.heroSub}>
-          Transform anger, desire, greed, delusion, pride, and envy through guided
-          multi-day practices rooted in the Bhagavad Gita.
+        <Text
+          variant="bodySmall"
+          color={colors.text.secondary}
+          style={styles.heroSub}
+        >
+          Transform anger, desire, greed, delusion, pride, and envy through
+          guided multi-day practices rooted in the Bhagavad Gita.
         </Text>
 
         <View style={styles.statsRow}>
           <StatPill
             label="Active"
-            value={dashboard?.activeJourneys?.length ?? activeJourneys?.length ?? 0}
+            value={
+              dashboard?.activeJourneys?.length ?? activeJourneys?.length ?? 0
+            }
           />
           <StatPill label="Completed" value={dashboard?.completedCount ?? 0} />
           <StatPill label="Streak" value={dashboard?.streakDays ?? 0} />
@@ -184,13 +215,17 @@ export function JourneysView(): React.JSX.Element {
         />
 
         {(activeJourneys?.length ?? 0) > 0 ? (
-          <Text variant="label" color={colors.text.primary} style={styles.sectionLabel}>
+          <Text
+            variant="label"
+            color={colors.text.primary}
+            style={styles.sectionLabel}
+          >
             Your Active Journeys
           </Text>
         ) : null}
       </Animated.View>
     ),
-    [activeJourneys, dashboard, handleBrowseCatalog],
+    [activeJourneys, dashboard, handleBrowseCatalog]
   );
 
   const renderEmpty = useCallback(
@@ -200,13 +235,17 @@ export function JourneysView(): React.JSX.Element {
           <LoadingMandala size={56} />
         </View>
       ) : (
-        <Animated.View entering={FadeIn.duration(400)} style={styles.emptyState}>
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.emptyState}
+        >
           <Flame size={40} color={colors.alpha.goldMedium} />
           <Text variant="body" color={colors.text.muted} align="center">
             No active journeys yet
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
-            Begin a sacred path from the catalog to start transforming an inner enemy.
+            Begin a sacred path from the catalog to start transforming an inner
+            enemy.
           </Text>
           <Pressable
             onPress={handleBrowseCatalog}
@@ -222,7 +261,7 @@ export function JourneysView(): React.JSX.Element {
           </Pressable>
         </Animated.View>
       ),
-    [activeLoading, handleBrowseCatalog],
+    [activeLoading, handleBrowseCatalog]
   );
 
   return (
@@ -249,7 +288,13 @@ export function JourneysView(): React.JSX.Element {
 // StatPill — compact count display
 // ---------------------------------------------------------------------------
 
-function StatPill({ label, value }: { label: string; value: number }): React.JSX.Element {
+function StatPill({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}): React.JSX.Element {
   return (
     <View style={styles.statPill}>
       <Text variant="h3" color={colors.primary[500]}>

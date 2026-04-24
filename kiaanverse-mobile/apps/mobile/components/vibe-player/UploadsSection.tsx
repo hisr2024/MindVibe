@@ -86,11 +86,9 @@ export function UploadsSection({
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      Alert.alert(
-        'Import failed',
-        `We couldn't add that file. ${message}`,
-        [{ text: 'OK' }],
-      );
+      Alert.alert('Import failed', `We couldn't add that file. ${message}`, [
+        { text: 'OK' },
+      ]);
     } finally {
       setImporting(false);
     }
@@ -111,10 +109,10 @@ export function UploadsSection({
               await refresh();
             },
           },
-        ],
+        ]
       );
     },
-    [refresh],
+    [refresh]
   );
 
   const renderTrack = useCallback(
@@ -150,7 +148,7 @@ export function UploadsSection({
         </View>
       );
     },
-    [currentTrackId, isPlaying, onTrackPress, handleDelete],
+    [currentTrackId, isPlaying, onTrackPress, handleDelete]
   );
 
   const keyExtractor = useCallback((item: UserTrack) => item.id, []);
@@ -185,8 +183,8 @@ export function UploadsSection({
             )}
           </Pressable>
           <Text style={styles.hintText}>
-            Import MP3, M4A, WAV, FLAC, OGG or any audio file from your
-            device. Your files stay private — they never leave this phone.
+            Import MP3, M4A, WAV, FLAC, OGG or any audio file from your device.
+            Your files stay private — they never leave this phone.
           </Text>
         </View>
       }

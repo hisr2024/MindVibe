@@ -72,8 +72,8 @@ function PhaseCeremonyInner({
       }),
       withDelay(
         INTERLUDE_MS,
-        withTiming(1, { duration: PHASE_IN_MS, easing: LOTUS_BLOOM }),
-      ),
+        withTiming(1, { duration: PHASE_IN_MS, easing: LOTUS_BLOOM })
+      )
     );
     scale.value = withSequence(
       withTiming(1.06, {
@@ -85,9 +85,9 @@ function PhaseCeremonyInner({
         // Fresh bloom — shrink down and then scale up for the enter.
         withSequence(
           withTiming(0.94, { duration: 1 }),
-          withTiming(1, { duration: PHASE_IN_MS, easing: LOTUS_BLOOM }),
-        ),
-      ),
+          withTiming(1, { duration: PHASE_IN_MS, easing: LOTUS_BLOOM })
+        )
+      )
     );
 
     // Swap the node after the outgoing + interlude — i.e. right before

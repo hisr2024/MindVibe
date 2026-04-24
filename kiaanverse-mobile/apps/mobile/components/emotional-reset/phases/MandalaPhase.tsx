@@ -27,12 +27,18 @@ import { FeelingMandala } from '../visuals/FeelingMandala';
 import type { EmotionalState } from '../types';
 
 interface MandalaPhaseProps {
-  onOffer: (emotion: EmotionalState, intensity: number, context: string) => void;
+  onOffer: (
+    emotion: EmotionalState,
+    intensity: number,
+    context: string
+  ) => void;
 }
 
 const CONTEXT_MAX = 500;
 
-export function MandalaPhase({ onOffer }: MandalaPhaseProps): React.JSX.Element {
+export function MandalaPhase({
+  onOffer,
+}: MandalaPhaseProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const [emotion, setEmotion] = useState<EmotionalState | null>(null);
   const [intensity, setIntensity] = useState<number>(0);
@@ -67,8 +73,13 @@ export function MandalaPhase({ onOffer }: MandalaPhaseProps): React.JSX.Element 
         />
 
         {canSubmit ? (
-          <Animated.View entering={FadeInUp.duration(450)} style={styles.contextCard}>
-            <Text style={styles.contextLabel}>Pour your heart here (optional)</Text>
+          <Animated.View
+            entering={FadeInUp.duration(450)}
+            style={styles.contextCard}
+          >
+            <Text style={styles.contextLabel}>
+              Pour your heart here (optional)
+            </Text>
             <TextInput
               value={context}
               onChangeText={(v) => setContext(v.slice(0, CONTEXT_MAX))}
@@ -79,19 +90,16 @@ export function MandalaPhase({ onOffer }: MandalaPhaseProps): React.JSX.Element 
               maxLength={CONTEXT_MAX}
               textAlignVertical="top"
             />
-            <Text style={styles.contextCount}>{context.length}/{CONTEXT_MAX}</Text>
+            <Text style={styles.contextCount}>
+              {context.length}/{CONTEXT_MAX}
+            </Text>
           </Animated.View>
         ) : null}
       </ScrollView>
 
       {/* Sticky CTA */}
       {canSubmit ? (
-        <View
-          style={[
-            styles.ctaRow,
-            { paddingBottom: insets.bottom + 16 },
-          ]}
-        >
+        <View style={[styles.ctaRow, { paddingBottom: insets.bottom + 16 }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Offer to Sakha"
@@ -108,7 +116,7 @@ export function MandalaPhase({ onOffer }: MandalaPhaseProps): React.JSX.Element 
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.ctaText}>🌺  Offer to Sakha</Text>
+              <Text style={styles.ctaText}>🌺 Offer to Sakha</Text>
             </LinearGradient>
           </Pressable>
         </View>

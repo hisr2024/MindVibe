@@ -32,11 +32,17 @@ import { StreakFlame } from '../../components/sadhana/StreakFlame';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 const MOOD_LABELS: Record<number, string> = {
-  1: '😔', 2: '😕', 3: '😐', 4: '🙂', 5: '😊',
+  1: '😔',
+  2: '😕',
+  3: '😐',
+  4: '🙂',
+  5: '😊',
 };
 
 function getMonthName(month: number): string {
-  return new Date(2026, month, 1).toLocaleDateString('en-US', { month: 'long' });
+  return new Date(2026, month, 1).toLocaleDateString('en-US', {
+    month: 'long',
+  });
 }
 
 function getDaysInMonth(year: number, month: number): number {
@@ -74,7 +80,8 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
     const set = new Set<string>();
     (records ?? []).forEach((r) => {
       // Extract date portion from ISO string or date field
-      const dateStr = r.date ?? (r.completed_at ? r.completed_at.slice(0, 10) : '');
+      const dateStr =
+        r.date ?? (r.completed_at ? r.completed_at.slice(0, 10) : '');
       set.add(dateStr);
     });
     return set;
@@ -83,7 +90,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
   const calendarDays = useMemo(() => {
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
-    const cells: Array<{ day: number | null; completed: boolean }> = [];
+    const cells: { day: number | null; completed: boolean }[] = [];
 
     // Empty cells before month start
     for (let i = 0; i < firstDay; i++) {
@@ -142,13 +149,17 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
           </Text>
         ) : null}
         {item.reflection ? (
-          <Text variant="caption" color={colors.text.secondary} numberOfLines={2}>
+          <Text
+            variant="caption"
+            color={colors.text.secondary}
+            numberOfLines={2}
+          >
             {item.reflection}
           </Text>
         ) : null}
       </View>
     ),
-    [],
+    []
   );
 
   const keyExtractor = useCallback((item: SadhanaRecord) => item.id, []);
@@ -160,15 +171,25 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <StreakFlame streak={streak} size={28} />
-            <Text variant="caption" color={colors.text.muted}>Current</Text>
+            <Text variant="caption" color={colors.text.muted}>
+              Current
+            </Text>
           </View>
           <View style={styles.statItem}>
-            <Text variant="h2" color={colors.primary[300]}>{longestStreak}</Text>
-            <Text variant="caption" color={colors.text.muted}>Longest</Text>
+            <Text variant="h2" color={colors.primary[300]}>
+              {longestStreak}
+            </Text>
+            <Text variant="caption" color={colors.text.muted}>
+              Longest
+            </Text>
           </View>
           <View style={styles.statItem}>
-            <Text variant="h2" color={colors.primary[300]}>{totalDays}</Text>
-            <Text variant="caption" color={colors.text.muted}>Total Days</Text>
+            <Text variant="h2" color={colors.primary[300]}>
+              {totalDays}
+            </Text>
+            <Text variant="caption" color={colors.text.muted}>
+              Total Days
+            </Text>
           </View>
         </View>
 
@@ -178,14 +199,26 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
         <View style={styles.calendarContainer}>
           {/* Month Nav */}
           <View style={styles.monthNav}>
-            <Pressable onPress={handlePrevMonth} hitSlop={12} accessibilityLabel="Previous month">
-              <Text variant="h2" color={colors.text.secondary}>{'<'}</Text>
+            <Pressable
+              onPress={handlePrevMonth}
+              hitSlop={12}
+              accessibilityLabel="Previous month"
+            >
+              <Text variant="h2" color={colors.text.secondary}>
+                {'<'}
+              </Text>
             </Pressable>
             <Text variant="body" color={colors.text.primary}>
               {getMonthName(viewMonth)} {viewYear}
             </Text>
-            <Pressable onPress={handleNextMonth} hitSlop={12} accessibilityLabel="Next month">
-              <Text variant="h2" color={colors.text.secondary}>{'>'}</Text>
+            <Pressable
+              onPress={handleNextMonth}
+              hitSlop={12}
+              accessibilityLabel="Next month"
+            >
+              <Text variant="h2" color={colors.text.secondary}>
+                {'>'}
+              </Text>
             </Pressable>
           </View>
 
@@ -193,7 +226,11 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
           <View style={styles.weekRow}>
             {WEEKDAYS.map((day) => (
               <View key={day} style={styles.dayCell}>
-                <Text variant="caption" color={colors.text.muted} align="center">
+                <Text
+                  variant="caption"
+                  color={colors.text.muted}
+                  align="center"
+                >
                   {day}
                 </Text>
               </View>
@@ -205,10 +242,19 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
             {calendarDays.map((cell, index) => (
               <View key={index} style={styles.dayCell}>
                 {cell.day !== null ? (
-                  <View style={[styles.dayCircle, cell.completed && styles.dayCompleted]}>
+                  <View
+                    style={[
+                      styles.dayCircle,
+                      cell.completed && styles.dayCompleted,
+                    ]}
+                  >
                     <Text
                       variant="caption"
-                      color={cell.completed ? colors.background.dark : colors.text.secondary}
+                      color={
+                        cell.completed
+                          ? colors.background.dark
+                          : colors.text.secondary
+                      }
                       align="center"
                     >
                       {cell.day}
@@ -222,12 +268,25 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
 
         <Divider />
 
-        <Text variant="label" color={colors.text.secondary} style={styles.sectionTitle}>
+        <Text
+          variant="label"
+          color={colors.text.secondary}
+          style={styles.sectionTitle}
+        >
           Recent Practices
         </Text>
       </Animated.View>
     ),
-    [streak, longestStreak, totalDays, viewYear, viewMonth, calendarDays, handlePrevMonth, handleNextMonth],
+    [
+      streak,
+      longestStreak,
+      totalDays,
+      viewYear,
+      viewMonth,
+      calendarDays,
+      handlePrevMonth,
+      handleNextMonth,
+    ]
   );
 
   return (

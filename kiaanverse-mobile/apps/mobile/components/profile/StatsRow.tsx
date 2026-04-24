@@ -65,7 +65,7 @@ function Stat({
       </Text>
       <Text style={styles.unitLine} allowFontScaling={false}>
         <Text style={styles.unit}>{unit}</Text>
-        <Text style={styles.label}>  {label}</Text>
+        <Text style={styles.label}> {label}</Text>
       </Text>
     </View>
   );

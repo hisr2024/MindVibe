@@ -81,7 +81,7 @@ export default function LoginScreen(): React.JSX.Element {
       clearError();
       await login(data.email.trim(), data.password);
     },
-    [login, clearError],
+    [login, clearError]
   );
 
   const handleBiometric = useCallback(async () => {

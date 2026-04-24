@@ -49,7 +49,7 @@ function LotusProgressHeaderInner({
 }: LotusProgressHeaderProps): React.JSX.Element {
   const indices = React.useMemo(
     () => Array.from({ length: total }, (_, i) => i),
-    [total],
+    [total]
   );
 
   const completedCount = completed.size;
@@ -91,7 +91,12 @@ interface PetalProps {
   readonly totalPetals: number;
 }
 
-function Petal({ index, isCompleted, isActive, totalPetals }: PetalProps): React.JSX.Element {
+function Petal({
+  index,
+  isCompleted,
+  isActive,
+  totalPetals,
+}: PetalProps): React.JSX.Element {
   const pulse = useSharedValue(0);
   const bloom = useSharedValue(isCompleted ? 1 : 0);
 
@@ -116,10 +121,10 @@ function Petal({ index, isCompleted, isActive, totalPetals }: PetalProps): React
         withTiming(0, {
           duration: 1100,
           easing: Easing.inOut(Easing.ease),
-        }),
+        })
       ),
       -1,
-      false,
+      false
     );
   }, [isActive, pulse]);
 

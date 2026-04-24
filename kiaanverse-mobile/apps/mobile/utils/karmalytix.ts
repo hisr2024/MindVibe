@@ -65,16 +65,20 @@ export interface WeeklyAssessmentAnswers {
 }
 
 export function getIsoWeekKey(date: Date): string {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const d = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
+  const weekNo = Math.ceil(
+    ((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7
+  );
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
 }
 
 export async function loadWeeklyAssessment(
-  weekKey: string,
+  weekKey: string
 ): Promise<WeeklyAssessmentAnswers | null> {
   try {
     const raw = await AsyncStorage.getItem(ASSESSMENT_STORAGE_KEY);
@@ -101,7 +105,9 @@ async function loadSnapshotStore(): Promise<SnapshotStore> {
     const raw = await AsyncStorage.getItem(SNAPSHOT_STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as unknown;
-    return typeof parsed === 'object' && parsed !== null ? (parsed as SnapshotStore) : {};
+    return typeof parsed === 'object' && parsed !== null
+      ? (parsed as SnapshotStore)
+      : {};
   } catch {
     return {};
   }
@@ -110,7 +116,7 @@ async function loadSnapshotStore(): Promise<SnapshotStore> {
 export async function persistWeekSnapshot(
   weekKey: string,
   scores: KarmaDimensionScores,
-  overall: number,
+  overall: number
 ): Promise<void> {
   try {
     const store = await loadSnapshotStore();
@@ -122,7 +128,7 @@ export async function persistWeekSnapshot(
 }
 
 export async function getPreviousWeekSnapshot(
-  currentWeekKey: string,
+  currentWeekKey: string
 ): Promise<(KarmaDimensionScores & { overall: number }) | null> {
   const store = await loadSnapshotStore();
   const keys = Object.keys(store)
@@ -148,7 +154,7 @@ export interface KarmaMetadataSummary {
   entry_count: number;
   journaling_days: number;
   unique_tags: number;
-  top_tags: Array<{ tag: string; count: number }>;
+  top_tags: { tag: string; count: number }[];
   dominant_mood: string | null;
   dominant_category: string | null;
   dominant_time_of_day: string | null;
@@ -165,7 +171,13 @@ export interface KarmaReport {
   assessment: WeeklyAssessmentAnswers | null;
 }
 
-const CATEGORY_TAGS = new Set(['Gratitude', 'Reflection', 'Prayer', 'Dream', 'Shadow']);
+const CATEGORY_TAGS = new Set([
+  'Gratitude',
+  'Reflection',
+  'Prayer',
+  'Dream',
+  'Shadow',
+]);
 const TIME_TAG_PREFIX = 'time:';
 
 function mostFrequent<T extends string>(values: readonly T[]): T | null {
@@ -203,7 +215,7 @@ export function summarizeWeek(input: {
   });
 
   const journalingDays = new Set(
-    weekEntries.map((e) => (e.created_at ?? '').slice(0, 10)),
+    weekEntries.map((e) => (e.created_at ?? '').slice(0, 10))
   ).size;
 
   const moodTags: string[] = [];
@@ -271,7 +283,9 @@ export function computeDimensions(input: {
   previousOverall: number | null;
 }): KarmaDimensionScores {
   // -- 1. Emotional Balance -------------------------------------------------
-  const trendMoods = input.moodTrends.map((t) => moodSignedValue(t.dominantMood));
+  const trendMoods = input.moodTrends.map((t) =>
+    moodSignedValue(t.dominantMood)
+  );
   let positivePct = 50;
   if (trendMoods.length > 0) {
     const positive = trendMoods.filter((v) => v > 0).length;
@@ -300,15 +314,21 @@ export function computeDimensions(input: {
     // Each point of week-over-week overall improvement → +2; capped ±30.
     const currentGuess =
       (emotional_balance + (input.summary.journaling_days / 7) * 70) / 2;
-    return Math.max(-30, Math.min(30, (currentGuess - input.previousOverall) * 2));
+    return Math.max(
+      -30,
+      Math.min(30, (currentGuess - input.previousOverall) * 2)
+    );
   })();
   const bookmarksBoost = Math.min(25, input.summary.verse_bookmarks * 5);
   const assessmentBoost = (input.assessment?.consistency_score ?? 0) * 5; // 0..25
-  const spiritual_growth = clamp(50 + deltaBoost + bookmarksBoost + assessmentBoost - 15);
+  const spiritual_growth = clamp(
+    50 + deltaBoost + bookmarksBoost + assessmentBoost - 15
+  );
 
   // -- 3. Practice Consistency ---------------------------------------------
   const consistencyBase = (input.summary.journaling_days / 7) * 70;
-  const depthBonus = input.summary.entry_count > input.summary.journaling_days ? 20 : 0;
+  const depthBonus =
+    input.summary.entry_count > input.summary.journaling_days ? 20 : 0;
   const richnessBonus = input.summary.entry_count >= 5 ? 10 : 0;
   const consistency = clamp(consistencyBase + depthBonus + richnessBonus);
 
@@ -357,17 +377,60 @@ export interface ReflectionSections {
  * included here — the full Sanskrit + translation lives in the Gita cache
  * and is resolved by the caller via useGitaVerse(chapter, verse).
  */
-const GITA_ECHO_BY_MOOD: Record<string, { chapter: number; verse: number; note: string }> = {
-  anxious:  { chapter: 2, verse: 47, note: 'You have a right to action, not to its fruits.' },
-  sad:      { chapter: 2, verse: 14, note: 'Contacts with the world are impermanent — endure them.' },
-  angry:    { chapter: 2, verse: 62, note: 'From attachment, desire; from desire, anger — watch the chain.' },
-  confused: { chapter: 2, verse: 7,  note: 'When confusion clouds duty, ask the Self for guidance.' },
-  tired:    { chapter: 6, verse: 5,  note: 'Let the Self lift the self — you are your own ally.' },
-  neutral:  { chapter: 6, verse: 16, note: 'Yoga is not for the excess nor the deprived — balance is the path.' },
-  grateful: { chapter: 9, verse: 22, note: 'To those steady in devotion, I carry what they need.' },
-  peaceful: { chapter: 2, verse: 70, note: 'Desires enter the ocean-self that remains still.' },
-  hopeful:  { chapter: 4, verse: 7,  note: 'Whenever dharma wanes, the Divine stirs again within.' },
-  inspired: { chapter: 10, verse: 20, note: 'I am the Self seated in the heart of every being.' },
+const GITA_ECHO_BY_MOOD: Record<
+  string,
+  { chapter: number; verse: number; note: string }
+> = {
+  anxious: {
+    chapter: 2,
+    verse: 47,
+    note: 'You have a right to action, not to its fruits.',
+  },
+  sad: {
+    chapter: 2,
+    verse: 14,
+    note: 'Contacts with the world are impermanent — endure them.',
+  },
+  angry: {
+    chapter: 2,
+    verse: 62,
+    note: 'From attachment, desire; from desire, anger — watch the chain.',
+  },
+  confused: {
+    chapter: 2,
+    verse: 7,
+    note: 'When confusion clouds duty, ask the Self for guidance.',
+  },
+  tired: {
+    chapter: 6,
+    verse: 5,
+    note: 'Let the Self lift the self — you are your own ally.',
+  },
+  neutral: {
+    chapter: 6,
+    verse: 16,
+    note: 'Yoga is not for the excess nor the deprived — balance is the path.',
+  },
+  grateful: {
+    chapter: 9,
+    verse: 22,
+    note: 'To those steady in devotion, I carry what they need.',
+  },
+  peaceful: {
+    chapter: 2,
+    verse: 70,
+    note: 'Desires enter the ocean-self that remains still.',
+  },
+  hopeful: {
+    chapter: 4,
+    verse: 7,
+    note: 'Whenever dharma wanes, the Divine stirs again within.',
+  },
+  inspired: {
+    chapter: 10,
+    verse: 20,
+    note: 'I am the Self seated in the heart of every being.',
+  },
 };
 
 const DIMENSION_LABELS: Record<keyof KarmaDimensionScores, string> = {
@@ -378,13 +441,17 @@ const DIMENSION_LABELS: Record<keyof KarmaDimensionScores, string> = {
   wisdom_integration: 'Wisdom Integration',
 };
 
-function findLowestDimension(
-  scores: KarmaDimensionScores,
-): { key: keyof KarmaDimensionScores; value: number } {
-  const entries = Object.entries(scores) as Array<[keyof KarmaDimensionScores, number]>;
+function findLowestDimension(scores: KarmaDimensionScores): {
+  key: keyof KarmaDimensionScores;
+  value: number;
+} {
+  const entries = Object.entries(scores) as [
+    keyof KarmaDimensionScores,
+    number,
+  ][];
   return entries.reduce(
     (lowest, [key, value]) => (value < lowest.value ? { key, value } : lowest),
-    { key: entries[0]![0], value: entries[0]![1] },
+    { key: entries[0]![0], value: entries[0]![1] }
   );
 }
 
@@ -436,9 +503,11 @@ export function buildReflectionSections(input: {
   };
 }
 
-export function getRecommendedVerseRef(
-  dominantMood: string | null,
-): { chapter: number; verse: number; note: string } {
+export function getRecommendedVerseRef(dominantMood: string | null): {
+  chapter: number;
+  verse: number;
+  note: string;
+} {
   const key = dominantMood ?? 'neutral';
   return GITA_ECHO_BY_MOOD[key] ?? GITA_ECHO_BY_MOOD.neutral!;
 }

@@ -52,9 +52,7 @@ export function WordReveal({
   }, [words, speed, startDelay]);
 
   return (
-    <Text style={[styles.text, style]}>
-      {words.slice(0, count).join(' ')}
-    </Text>
+    <Text style={[styles.text, style]}>{words.slice(0, count).join(' ')}</Text>
   );
 }
 

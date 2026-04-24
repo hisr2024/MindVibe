@@ -82,10 +82,7 @@ function WeightFlame({
           {weight.sanskrit}
         </Animated.Text>
         <Animated.Text
-          style={[
-            styles.label,
-            { color: isSelected ? '#B8AE98' : '#6B6355' },
-          ]}
+          style={[styles.label, { color: isSelected ? '#B8AE98' : '#6B6355' }]}
         >
           {weight.label}
         </Animated.Text>
@@ -104,7 +101,7 @@ export function KarmaWeightSelector({
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onSelect(weight.id);
     },
-    [onSelect],
+    [onSelect]
   );
 
   return (

@@ -11,7 +11,13 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, ScrollView, StyleSheet, Pressable, TextInput } from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  TextInput,
+} from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { useRouter } from 'expo-router';
@@ -64,7 +70,11 @@ const SPIRITUAL_TO_RING: Partial<Record<SpiritualMood, Mood>> = {
 // Mood Detail Card (shown after selection)
 // ---------------------------------------------------------------------------
 
-function MoodDetailCard({ moodId }: { moodId: SpiritualMood }): React.JSX.Element | null {
+function MoodDetailCard({
+  moodId,
+}: {
+  moodId: SpiritualMood;
+}): React.JSX.Element | null {
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
@@ -73,18 +83,36 @@ function MoodDetailCard({ moodId }: { moodId: SpiritualMood }): React.JSX.Elemen
 
   return (
     <Animated.View entering={FadeIn.duration(400)}>
-      <View style={[styles.detailCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+      <View
+        style={[
+          styles.detailCard,
+          { backgroundColor: c.card, borderColor: c.cardBorder },
+        ]}
+      >
         <View style={styles.detailHeader}>
           <Text variant="h2">{moodInfo.emoji}</Text>
           <View style={styles.detailNames}>
-            <Text variant="label" color={c.textPrimary}>{moodInfo.label}</Text>
-            <Text variant="caption" color={colors.primary[300]}>{moodInfo.sanskrit}</Text>
+            <Text variant="label" color={c.textPrimary}>
+              {moodInfo.label}
+            </Text>
+            <Text variant="caption" color={colors.primary[300]}>
+              {moodInfo.sanskrit}
+            </Text>
           </View>
         </View>
 
-        <View style={[styles.practiceBox, { backgroundColor: colors.alpha.goldLight }]}>
+        <View
+          style={[
+            styles.practiceBox,
+            { backgroundColor: colors.alpha.goldLight },
+          ]}
+        >
           <Sparkles size={14} color={colors.primary[300]} />
-          <Text variant="bodySmall" color={c.textPrimary} style={styles.practiceText}>
+          <Text
+            variant="bodySmall"
+            color={c.textPrimary}
+            style={styles.practiceText}
+          >
             {moodInfo.suggestedPractice}
           </Text>
         </View>
@@ -134,12 +162,14 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
 
   // Last 30 days
   const last30 = useMemo(() => {
-    const days: Array<{ date: string; score: number | null }> = [];
+    const days: { date: string; score: number | null }[] = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().slice(0, 10);
-      const entry = entries.find((e) => (e.date ?? e.at?.slice(0, 10)) === dateStr);
+      const entry = entries.find(
+        (e) => (e.date ?? e.at?.slice(0, 10)) === dateStr
+      );
       days.push({ date: dateStr, score: entry ? entry.score : null });
     }
     return days;
@@ -166,8 +196,13 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
       <Svg width={chartWidth} height={chartHeight}>
         {/* Center line (neutral) */}
         <Line
-          x1={0} y1={scoreToY(0)} x2={chartWidth} y2={scoreToY(0)}
-          stroke={c.cardBorder} strokeWidth={1} strokeDasharray="4 4"
+          x1={0}
+          y1={scoreToY(0)}
+          x2={chartWidth}
+          y2={scoreToY(0)}
+          stroke={c.cardBorder}
+          strokeWidth={1}
+          strokeDasharray="4 4"
         />
 
         {/* Bars */}
@@ -194,13 +229,41 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
         })}
 
         {/* Y-axis labels */}
-        <SvgText x={chartWidth - 2} y={topPad + 4} fontSize={9} fill={c.textTertiary} textAnchor="end">+2</SvgText>
-        <SvgText x={chartWidth - 2} y={scoreToY(0) + 3} fontSize={9} fill={c.textTertiary} textAnchor="end">0</SvgText>
-        <SvgText x={chartWidth - 2} y={chartHeight - bottomPad + 10} fontSize={9} fill={c.textTertiary} textAnchor="end">-2</SvgText>
+        <SvgText
+          x={chartWidth - 2}
+          y={topPad + 4}
+          fontSize={9}
+          fill={c.textTertiary}
+          textAnchor="end"
+        >
+          +2
+        </SvgText>
+        <SvgText
+          x={chartWidth - 2}
+          y={scoreToY(0) + 3}
+          fontSize={9}
+          fill={c.textTertiary}
+          textAnchor="end"
+        >
+          0
+        </SvgText>
+        <SvgText
+          x={chartWidth - 2}
+          y={chartHeight - bottomPad + 10}
+          fontSize={9}
+          fill={c.textTertiary}
+          textAnchor="end"
+        >
+          -2
+        </SvgText>
       </Svg>
       <View style={styles.chartLabels}>
-        <Text variant="caption" color={c.textTertiary}>30 days ago</Text>
-        <Text variant="caption" color={c.textTertiary}>Today</Text>
+        <Text variant="caption" color={c.textTertiary}>
+          30 days ago
+        </Text>
+        <Text variant="caption" color={c.textTertiary}>
+          Today
+        </Text>
       </View>
     </View>
   );
@@ -232,9 +295,16 @@ function InsightsSection(): React.JSX.Element | null {
       <View style={styles.insightsSection}>
         <View style={styles.insightsHeader}>
           <TrendingUp size={16} color={colors.primary[300]} />
-          <Text variant="label" color={c.textSecondary}>Mood Insights</Text>
+          <Text variant="label" color={c.textSecondary}>
+            Mood Insights
+          </Text>
         </View>
-        <View style={[styles.insightCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+        <View
+          style={[
+            styles.insightCard,
+            { backgroundColor: c.card, borderColor: c.cardBorder },
+          ]}
+        >
           <Text variant="bodySmall" color={c.textPrimary}>
             Your dominant mood recently: {dominant[0]} ({dominant[1]} entries)
           </Text>
@@ -258,20 +328,24 @@ export default function MoodTrackingScreen(): React.JSX.Element {
   const c = theme.colors;
   const router = useRouter();
 
-  const { selectedMood, note, selectMood, setNote, markLogged } = useMoodStore();
+  const { selectedMood, note, selectMood, setNote, markLogged } =
+    useMoodStore();
   const createMood = useCreateMood();
   const moodHistory = useWellnessStore((s) => s.moodHistory);
   const addMoodEntry = useWellnessStore((s) => s.addMoodEntry);
 
   const [ringMood, setRingMood] = useState<Mood | undefined>(
-    selectedMood ? SPIRITUAL_TO_RING[selectedMood] : undefined,
+    selectedMood ? SPIRITUAL_TO_RING[selectedMood] : undefined
   );
 
-  const handleMoodSelect = useCallback((mood: Mood) => {
-    setRingMood(mood);
-    const spiritual = RING_TO_SPIRITUAL[mood];
-    selectMood(spiritual);
-  }, [selectMood]);
+  const handleMoodSelect = useCallback(
+    (mood: Mood) => {
+      setRingMood(mood);
+      const spiritual = RING_TO_SPIRITUAL[mood];
+      selectMood(spiritual);
+    },
+    [selectMood]
+  );
 
   const handleSubmit = useCallback(() => {
     if (!selectedMood) return;
@@ -279,7 +353,13 @@ export default function MoodTrackingScreen(): React.JSX.Element {
     if (!moodInfo) return;
 
     const today = new Date().toISOString().slice(0, 10);
-    const payload: { score: number; state: SpiritualMood; date: string; tags: string[]; note?: string } = {
+    const payload: {
+      score: number;
+      state: SpiritualMood;
+      date: string;
+      tags: string[];
+      note?: string;
+    } = {
       score: moodInfo.score,
       state: selectedMood,
       date: today,
@@ -287,26 +367,23 @@ export default function MoodTrackingScreen(): React.JSX.Element {
     };
     if (note) payload.note = note;
 
-    createMood.mutate(
-      payload,
-      {
-        onSuccess: (data) => {
-          markLogged();
-          setRingMood(undefined);
-          // Sync to wellness store for offline chart display
-          const entry: MoodEntry = {
-            id: typeof data.id === 'number' ? data.id : 0,
-            score: payload.score,
-            state: payload.state,
-            tags: payload.tags,
-            date: payload.date,
-            at: new Date().toISOString(),
-          };
-          if (payload.note !== undefined) entry.note = payload.note;
-          addMoodEntry(entry);
-        },
+    createMood.mutate(payload, {
+      onSuccess: (data) => {
+        markLogged();
+        setRingMood(undefined);
+        // Sync to wellness store for offline chart display
+        const entry: MoodEntry = {
+          id: typeof data.id === 'number' ? data.id : 0,
+          score: payload.score,
+          state: payload.state,
+          tags: payload.tags,
+          date: payload.date,
+          at: new Date().toISOString(),
+        };
+        if (payload.note !== undefined) entry.note = payload.note;
+        addMoodEntry(entry);
       },
-    );
+    });
   }, [selectedMood, note, createMood, markLogged]);
 
   const kiaanResponse = createMood.data
@@ -327,7 +404,12 @@ export default function MoodTrackingScreen(): React.JSX.Element {
       >
         {/* MoodRing selector */}
         <Animated.View entering={FadeInDown.duration(500).springify()}>
-          <Text variant="label" color={c.textSecondary} align="center" style={styles.sectionLabel}>
+          <Text
+            variant="label"
+            color={c.textSecondary}
+            align="center"
+            style={styles.sectionLabel}
+          >
             How are you feeling right now?
           </Text>
           <MoodRing
@@ -346,7 +428,14 @@ export default function MoodTrackingScreen(): React.JSX.Element {
             {/* Note input */}
             <Animated.View entering={FadeIn.duration(300)}>
               <TextInput
-                style={[styles.noteInput, { backgroundColor: c.card, borderColor: c.cardBorder, color: c.textPrimary }]}
+                style={[
+                  styles.noteInput,
+                  {
+                    backgroundColor: c.card,
+                    borderColor: c.cardBorder,
+                    color: c.textPrimary,
+                  },
+                ]}
                 placeholder="Add a reflection (optional)..."
                 placeholderTextColor={c.textTertiary}
                 value={note}
@@ -361,7 +450,10 @@ export default function MoodTrackingScreen(): React.JSX.Element {
             <Pressable
               onPress={handleSubmit}
               disabled={createMood.isPending}
-              style={[styles.submitButton, { backgroundColor: colors.primary[500] }]}
+              style={[
+                styles.submitButton,
+                { backgroundColor: colors.primary[500] },
+              ]}
               accessibilityRole="button"
               accessibilityLabel="Log mood"
             >
@@ -375,7 +467,12 @@ export default function MoodTrackingScreen(): React.JSX.Element {
         {/* KIAAN response */}
         {kiaanResponse ? (
           <Animated.View entering={FadeIn.duration(400)}>
-            <View style={[styles.responseCard, { backgroundColor: colors.alpha.goldLight }]}>
+            <View
+              style={[
+                styles.responseCard,
+                { backgroundColor: colors.alpha.goldLight },
+              ]}
+            >
               <Text variant="bodySmall" color={colors.primary[300]}>
                 {kiaanResponse}
               </Text>

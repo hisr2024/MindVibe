@@ -76,9 +76,7 @@ export function WisdomPhase({
     const load = async () => {
       const result = await fetchWisdom(context, reflections);
       setWisdom(result);
-      void Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success,
-      );
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
     void load();
   }, [context, reflections, fetchWisdom]);
@@ -98,7 +96,7 @@ export function WisdomPhase({
     glow.value = withRepeat(
       withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
   }, [glow]);
   const avatarStyle = useAnimatedStyle(() => ({
@@ -132,10 +130,7 @@ export function WisdomPhase({
             {reflections.map((r, i) => (
               <View
                 key={i}
-                style={[
-                  styles.recapRow,
-                  { borderLeftColor: categoryColor },
-                ]}
+                style={[styles.recapRow, { borderLeftColor: categoryColor }]}
               >
                 <Text numberOfLines={1} style={styles.recapText}>
                   {r.answer}
@@ -157,7 +152,10 @@ export function WisdomPhase({
           ) : null}
         </Animated.View>
       ) : (
-        <Animated.View entering={FadeIn.duration(400)} style={styles.wisdomColumn}>
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.wisdomColumn}
+        >
           {/* 1. Dharmic mirror */}
           <DharmaMirrorCard
             text={wisdom.dharmicMirror}
@@ -203,9 +201,13 @@ export function WisdomPhase({
 
           {/* 5. Action Dharma cards */}
           <Animated.View entering={FadeIn.delay(3000).duration(400)}>
+            {/* `onCommit` is optional on ActionDharmaCardsProps; with
+                exactOptionalPropertyTypes we spread it only when defined. */}
             <ActionDharmaCards
               actions={wisdom.actionDharma}
-              onCommit={onActionsChange}
+              {...(onActionsChange !== undefined && {
+                onCommit: onActionsChange,
+              })}
             />
           </Animated.View>
 

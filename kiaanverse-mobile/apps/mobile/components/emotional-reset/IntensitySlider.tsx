@@ -42,13 +42,22 @@ const MAX_VALUE = 10;
 const THUMB_SIZE = 32;
 const TRACK_HEIGHT = 10;
 
-const GRADIENT_COLORS = ['#3D8B5E', '#7DBF5E', '#F0C040', '#E67E22', '#C0392B'] as const;
+const GRADIENT_COLORS = [
+  '#3D8B5E',
+  '#7DBF5E',
+  '#F0C040',
+  '#E67E22',
+  '#C0392B',
+] as const;
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.Element {
+export function IntensitySlider({
+  value,
+  onChange,
+}: IntensitySliderProps): React.JSX.Element {
   const trackWidth = useSharedValue(0);
   const lastReportedValue = useRef(value);
 
@@ -75,7 +84,7 @@ export function IntensitySlider({ value, onChange }: IntensitySliderProps): Reac
         onChange(newValue);
       }
     },
-    [onChange],
+    [onChange]
   );
 
   /**
@@ -104,15 +113,14 @@ export function IntensitySlider({ value, onChange }: IntensitySliderProps): Reac
       thumbX.value = withSpring(snappedX, { damping: 20, stiffness: 300 });
     });
 
-  const tapGesture = Gesture.Tap()
-    .onEnd((e) => {
-      'worklet';
-      const x = Math.max(0, Math.min(e.x, trackWidth.value));
-      const newVal = xToValue(x, trackWidth.value);
-      const snappedX = valueToX(newVal, trackWidth.value);
-      thumbX.value = withSpring(snappedX, { damping: 20, stiffness: 300 });
-      runOnJS(fireHapticAndChange)(newVal);
-    });
+  const tapGesture = Gesture.Tap().onEnd((e) => {
+    'worklet';
+    const x = Math.max(0, Math.min(e.x, trackWidth.value));
+    const newVal = xToValue(x, trackWidth.value);
+    const snappedX = valueToX(newVal, trackWidth.value);
+    thumbX.value = withSpring(snappedX, { damping: 20, stiffness: 300 });
+    runOnJS(fireHapticAndChange)(newVal);
+  });
 
   const composedGesture = Gesture.Race(panGesture, tapGesture);
 
@@ -122,7 +130,7 @@ export function IntensitySlider({ value, onChange }: IntensitySliderProps): Reac
       trackWidth.value = width;
       thumbX.value = valueToX(value, width);
     },
-    [value, thumbX, trackWidth],
+    [value, thumbX, trackWidth]
   );
 
   const thumbAnimatedStyle = useAnimatedStyle(() => ({

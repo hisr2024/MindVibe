@@ -12,11 +12,27 @@ import { DivineScreenWrapper, SacredCard, GoldenDivider } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
 
 const SETTINGS = [
-  { key: 'daily_verse',      label: 'Daily Verse',     sub: 'Morning shloka reminder' },
-  { key: 'sadhana_reminder', label: 'Nitya Sadhana',   sub: 'Practice reminders' },
-  { key: 'journey_nudge',    label: 'Journey Nudges',  sub: 'Step completion reminders' },
-  { key: 'kiaan_insights',   label: 'KIAAN Insights',  sub: 'Weekly wisdom digest' },
-  { key: 'streak_alert',     label: 'Streak Alerts',   sub: "Don't break your streak" },
+  { key: 'daily_verse', label: 'Daily Verse', sub: 'Morning shloka reminder' },
+  {
+    key: 'sadhana_reminder',
+    label: 'Nitya Sadhana',
+    sub: 'Practice reminders',
+  },
+  {
+    key: 'journey_nudge',
+    label: 'Journey Nudges',
+    sub: 'Step completion reminders',
+  },
+  {
+    key: 'kiaan_insights',
+    label: 'KIAAN Insights',
+    sub: 'Weekly wisdom digest',
+  },
+  {
+    key: 'streak_alert',
+    label: 'Streak Alerts',
+    sub: "Don't break your streak",
+  },
 ] as const;
 
 export default function NotificationsScreen(): React.JSX.Element {
@@ -31,7 +47,9 @@ export default function NotificationsScreen(): React.JSX.Element {
   const toggle = async (key: string, value: boolean) => {
     setPrefs((p) => ({ ...p, [key]: value }));
     try {
-      await apiClient.patch('/api/user/notification-preferences', { [key]: value });
+      await apiClient.patch('/api/user/notification-preferences', {
+        [key]: value,
+      });
     } catch (e) {
       console.error(e);
     }
@@ -59,7 +77,9 @@ export default function NotificationsScreen(): React.JSX.Element {
                     false: 'rgba(255,255,255,0.1)',
                     true: 'rgba(212,160,23,0.4)',
                   }}
-                  thumbColor={prefs[s.key] ? '#D4A017' : 'rgba(240,235,225,0.5)'}
+                  thumbColor={
+                    prefs[s.key] ? '#D4A017' : 'rgba(240,235,225,0.5)'
+                  }
                 />
               </View>
               {idx < SETTINGS.length - 1 && (

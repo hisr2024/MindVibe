@@ -100,31 +100,44 @@ export function CeremonyPhase({
     const timers: ReturnType<typeof setTimeout>[] = [];
 
     // Particles already start at 'converge' on mount.
-    timers.push(setTimeout(() => {
-      setStage('om');
-      omScale.value = withSpring(1, { damping: 9, stiffness: 120 });
-      omOpacity.value = withTiming(1, { duration: 260 });
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 1200));
+    timers.push(
+      setTimeout(() => {
+        setStage('om');
+        omScale.value = withSpring(1, { damping: 9, stiffness: 120 });
+        omOpacity.value = withTiming(1, { duration: 260 });
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      }, 1200)
+    );
 
-    timers.push(setTimeout(() => {
-      setStage('burst');
-      omScale.value = withTiming(2, { duration: 500, easing: Easing.out(Easing.cubic) });
-      omOpacity.value = withTiming(0, { duration: 500 });
-    }, 1700));
+    timers.push(
+      setTimeout(() => {
+        setStage('burst');
+        omScale.value = withTiming(2, {
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+        });
+        omOpacity.value = withTiming(0, { duration: 500 });
+      }, 1700)
+    );
 
-    timers.push(setTimeout(() => {
-      setStage('float');
-      setShowMessage(true);
-    }, 2100));
+    timers.push(
+      setTimeout(() => {
+        setStage('float');
+        setShowMessage(true);
+      }, 2100)
+    );
 
-    timers.push(setTimeout(() => {
-      setShowSummary(true);
-    }, 3800));
+    timers.push(
+      setTimeout(() => {
+        setShowSummary(true);
+      }, 3800)
+    );
 
-    timers.push(setTimeout(() => {
-      setStage('done');
-    }, 5200));
+    timers.push(
+      setTimeout(() => {
+        setStage('done');
+      }, 5200)
+    );
 
     return () => timers.forEach(clearTimeout);
   }, [omScale, omOpacity]);
@@ -143,10 +156,7 @@ export function CeremonyPhase({
 
       {/* OM glyph — blooms at center during the `om` stage */}
       <View
-        style={[
-          styles.omWrap,
-          { top: height / 2 - 40, left: width / 2 - 40 },
-        ]}
+        style={[styles.omWrap, { top: height / 2 - 40, left: width / 2 - 40 }]}
         pointerEvents="none"
       >
         <Animated.Text style={[styles.om, omStyle]}>ॐ</Animated.Text>
@@ -192,9 +202,7 @@ export function CeremonyPhase({
 
             <View style={styles.statsRow}>
               <Text style={styles.stat}>Duration: {durationLabel}</Text>
-              <Text style={styles.stat}>
-                {emotion.label}  →  Peace
-              </Text>
+              <Text style={styles.stat}>{emotion.label} → Peace</Text>
             </View>
 
             <Pressable

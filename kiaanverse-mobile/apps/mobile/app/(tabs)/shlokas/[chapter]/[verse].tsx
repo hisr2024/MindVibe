@@ -27,7 +27,13 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Bookmark, BookmarkCheck, ChevronLeft, Share2, Sparkles } from 'lucide-react-native';
+import {
+  Bookmark,
+  BookmarkCheck,
+  ChevronLeft,
+  Share2,
+  Sparkles,
+} from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -38,10 +44,7 @@ import {
   OmLoader,
   ShlokaCard,
 } from '@kiaanverse/ui';
-import {
-  useGitaTranslations,
-  useGitaVerseDetail,
-} from '@kiaanverse/api';
+import { useGitaTranslations, useGitaVerseDetail } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
 
 const GOLD = '#D4A017';
@@ -71,18 +74,19 @@ export default function VerseDetailScreen(): React.JSX.Element {
 
   const addRecentlyViewed = useGitaStore((s) => s.addRecentlyViewed);
   const toggleBookmark = useGitaStore((s) => s.toggleBookmark);
-  const isBookmarked = useGitaStore((s) =>
-    verseId.length > 0 && s.bookmarkedVerseIds.includes(verseId),
+  const isBookmarked = useGitaStore(
+    (s) => verseId.length > 0 && s.bookmarkedVerseIds.includes(verseId)
   );
 
   const { data, isLoading, error, refetch } = useGitaVerseDetail(
     paramsValid ? chapterNum : 0,
-    paramsValid ? verseNum : 0,
+    paramsValid ? verseNum : 0
   );
   const { data: translations } = useGitaTranslations(verseId);
 
   useEffect(() => {
-    if (paramsValid) addRecentlyViewed({ chapter: chapterNum, verse: verseNum });
+    if (paramsValid)
+      addRecentlyViewed({ chapter: chapterNum, verse: verseNum });
   }, [addRecentlyViewed, chapterNum, paramsValid, verseNum]);
 
   const handleToggleBookmark = useCallback(() => {
@@ -90,7 +94,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
     void Haptics.impactAsync(
       isBookmarked
         ? Haptics.ImpactFeedbackStyle.Light
-        : Haptics.ImpactFeedbackStyle.Medium,
+        : Haptics.ImpactFeedbackStyle.Medium
     ).catch(() => {
       // Haptics unavailable (simulator / tests) — silent.
     });
@@ -364,7 +368,9 @@ function Header({
         <Pressable
           onPress={onToggleBookmark}
           accessibilityRole="button"
-          accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'}
+          accessibilityLabel={
+            isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'
+          }
           accessibilityState={{ selected: isBookmarked ?? false }}
           hitSlop={12}
           style={styles.backButton}

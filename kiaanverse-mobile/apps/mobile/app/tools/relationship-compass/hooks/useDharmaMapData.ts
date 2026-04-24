@@ -15,7 +15,7 @@ import type { GunaSelections } from './useGunaCalculation';
 const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
 
 export function useDharmaMapData(
-  selectedPatterns: GunaSelections,
+  selectedPatterns: GunaSelections
 ): Record<string, number> {
   return useMemo(() => {
     const tamasCount = selectedPatterns.tamas.length;
@@ -32,14 +32,18 @@ export function useDharmaMapData(
     const rajasRatio = rajasCount / total;
 
     return {
-      trust:      clamp01(0.3 + sattvaRatio * 0.7 - tamasRatio * 0.3),
-      honesty:    clamp01(0.3 + sattvaRatio * 0.6 - tamasRatio * 0.2),
-      respect:    clamp01(0.3 + sattvaRatio * 0.7 - rajasRatio * 0.2),
-      growth:     clamp01(0.3 + sattvaRatio * 0.5 - tamasRatio * 0.4),
-      freedom:    clamp01(0.4 - tamasRatio * 0.3 - rajasRatio * 0.3 + sattvaRatio * 0.4),
+      trust: clamp01(0.3 + sattvaRatio * 0.7 - tamasRatio * 0.3),
+      honesty: clamp01(0.3 + sattvaRatio * 0.6 - tamasRatio * 0.2),
+      respect: clamp01(0.3 + sattvaRatio * 0.7 - rajasRatio * 0.2),
+      growth: clamp01(0.3 + sattvaRatio * 0.5 - tamasRatio * 0.4),
+      freedom: clamp01(
+        0.4 - tamasRatio * 0.3 - rajasRatio * 0.3 + sattvaRatio * 0.4
+      ),
       compassion: clamp01(0.3 + sattvaRatio * 0.6 - tamasRatio * 0.4),
-      dharma:     clamp01(0.2 + sattvaRatio * 0.8 - tamasRatio * 0.2),
-      union:      clamp01(0.3 + sattvaRatio * 0.5 - tamasRatio * 0.3 - rajasRatio * 0.2),
+      dharma: clamp01(0.2 + sattvaRatio * 0.8 - tamasRatio * 0.2),
+      union: clamp01(
+        0.3 + sattvaRatio * 0.5 - tamasRatio * 0.3 - rajasRatio * 0.2
+      ),
     };
   }, [
     selectedPatterns.tamas.length,

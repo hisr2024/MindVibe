@@ -8,7 +8,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Text, SakhaAvatar, GoldenButton, DivineBackground, colors, spacing } from '@kiaanverse/ui';
+import {
+  Text,
+  SakhaAvatar,
+  GoldenButton,
+  DivineBackground,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 
 interface WelcomeStepProps {
   readonly onNext: () => void;
@@ -18,14 +25,20 @@ export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
   return (
     <DivineBackground variant="sacred">
       <View style={styles.container}>
-        <Animated.View entering={FadeInDown.duration(800).delay(200)} style={styles.avatarWrap}>
+        <Animated.View
+          entering={FadeInDown.duration(800).delay(200)}
+          style={styles.avatarWrap}
+        >
           {/* Golden aura ring behind avatar */}
           <View style={styles.auraRing}>
             <SakhaAvatar size={140} state="idle" name="Sakha" />
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(600).delay(500)} style={styles.textWrap}>
+        <Animated.View
+          entering={FadeInDown.duration(600).delay(500)}
+          style={styles.textWrap}
+        >
           <Text variant="h1" align="center">
             Meet Sakha
           </Text>
@@ -35,7 +48,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(600).delay(800)} style={styles.ctaWrap}>
+        <Animated.View
+          entering={FadeInDown.duration(600).delay(800)}
+          style={styles.ctaWrap}
+        >
           <GoldenButton
             title="Begin Your Journey"
             variant="divine"

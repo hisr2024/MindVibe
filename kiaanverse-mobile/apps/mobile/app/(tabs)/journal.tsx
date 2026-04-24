@@ -68,7 +68,14 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
  * `tags` array since the backend schema does not yet include a dedicated
  * `category` field — the diary remains the single source of truth.
  */
-const TAG_FILTERS = ['All', 'Gratitude', 'Reflection', 'Prayer', 'Dream', 'Insight'] as const;
+const TAG_FILTERS = [
+  'All',
+  'Gratitude',
+  'Reflection',
+  'Prayer',
+  'Dream',
+  'Insight',
+] as const;
 
 // ---------------------------------------------------------------------------
 // KarmaLytixBanner — promoted shortcut into the Sacred Mirror surface
@@ -110,15 +117,27 @@ function KarmaLytixBanner({
             <Text variant="label" color={colors.primary[500]}>
               KarmaLytix
             </Text>
-            <Text variant="caption" color={colors.text.secondary} style={styles.karmaLytixSub}>
+            <Text
+              variant="caption"
+              color={colors.text.secondary}
+              style={styles.karmaLytixSub}
+            >
               KIAAN analyses your reflections
             </Text>
-            <Text variant="caption" color={colors.text.muted} style={styles.karmaLytixPrivacy}>
+            <Text
+              variant="caption"
+              color={colors.text.muted}
+              style={styles.karmaLytixPrivacy}
+            >
               {'\u{1F512}'} Metadata only · Content never read
             </Text>
           </View>
         </View>
-        <Text variant="h3" color={colors.primary[500]} style={styles.karmaLytixArrow}>
+        <Text
+          variant="h3"
+          color={colors.primary[500]}
+          style={styles.karmaLytixArrow}
+        >
           {'›'}
         </Text>
       </LinearGradient>
@@ -164,7 +183,10 @@ function SwipeableEntryCard({
     .onUpdate((event) => {
       if (event.translationX < 0) {
         translateX.value = event.translationX;
-        deleteOpacity.value = Math.min(1, Math.abs(event.translationX) / SWIPE_THRESHOLD);
+        deleteOpacity.value = Math.min(
+          1,
+          Math.abs(event.translationX) / SWIPE_THRESHOLD
+        );
       }
     })
     .onEnd((event) => {
@@ -205,7 +227,11 @@ function SwipeableEntryCard({
 
       <GestureDetector gesture={panGesture}>
         <Animated.View style={cardAnimatedStyle}>
-          <Pressable onPress={handlePress} onLongPress={handleLongPress} delayLongPress={400}>
+          <Pressable
+            onPress={handlePress}
+            onLongPress={handleLongPress}
+            delayLongPress={400}
+          >
             <GlowCard variant="golden">
               <JournalEntryCard entry={entry} onPress={onPress} />
             </GlowCard>
@@ -242,13 +268,13 @@ function JournalView(): React.JSX.Element {
         (entry) =>
           entry.title?.toLowerCase().includes(query) ||
           entry.content_preview?.toLowerCase().includes(query) ||
-          entry.tags.some((tag) => tag.toLowerCase().includes(query)),
+          entry.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
     if (activeTag !== 'All') {
       result = result.filter((entry) =>
-        entry.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase()),
+        entry.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase())
       );
     }
 
@@ -265,7 +291,7 @@ function JournalView(): React.JSX.Element {
     (entry: JournalEntry) => {
       router.push(`/journal/${entry.id}`);
     },
-    [router],
+    [router]
   );
 
   const handleEntryDelete = useCallback(
@@ -274,7 +300,7 @@ function JournalView(): React.JSX.Element {
         t('deleteTitle', 'Delete Reflection'),
         t(
           'deleteMessage',
-          'This reflection will be archived. You can recover it later.',
+          'This reflection will be archived. You can recover it later.'
         ),
         [
           { text: t('cancel', 'Cancel'), style: 'cancel' },
@@ -282,21 +308,23 @@ function JournalView(): React.JSX.Element {
             text: t('delete', 'Delete'),
             style: 'destructive',
             onPress: async () => {
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              void Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Warning
+              );
               try {
                 await deleteJournal.mutateAsync(entry.id);
               } catch {
                 Alert.alert(
                   t('deleteErrorTitle', 'Could Not Delete'),
-                  t('deleteErrorMessage', 'Please try again in a moment.'),
+                  t('deleteErrorMessage', 'Please try again in a moment.')
                 );
               }
             },
           },
-        ],
+        ]
       );
     },
-    [deleteJournal, t],
+    [deleteJournal, t]
   );
 
   const handleEntryLongPress = useCallback(
@@ -312,7 +340,7 @@ function JournalView(): React.JSX.Element {
         { text: t('cancel', 'Cancel'), style: 'cancel' },
       ]);
     },
-    [router, t],
+    [router, t]
   );
 
   const handleFabPress = useCallback(() => {
@@ -344,7 +372,7 @@ function JournalView(): React.JSX.Element {
         onLongPress={handleEntryLongPress}
       />
     ),
-    [handleEntryPress, handleEntryDelete, handleEntryLongPress],
+    [handleEntryPress, handleEntryDelete, handleEntryLongPress]
   );
 
   const keyExtractor = useCallback((item: JournalEntry) => item.id, []);
@@ -352,7 +380,10 @@ function JournalView(): React.JSX.Element {
   const renderEmpty = useCallback(
     () =>
       !isLoading ? (
-        <Animated.View entering={FadeIn.duration(600)} style={styles.emptyContainer}>
+        <Animated.View
+          entering={FadeIn.duration(600)}
+          style={styles.emptyContainer}
+        >
           <Text variant="h2" align="center" style={styles.lotusIcon}>
             {'\u{1FAB7}'}
           </Text>
@@ -362,18 +393,23 @@ function JournalView(): React.JSX.Element {
           <Text variant="caption" color={colors.text.muted} align="center">
             {t(
               'emptySub',
-              'Begin your first entry. Every reflection is AES-256 encrypted on your device.',
+              'Begin your first entry. Every reflection is AES-256 encrypted on your device.'
             )}
           </Text>
-          <Text variant="caption" color={colors.text.muted} align="center" style={styles.karmaNote}>
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            align="center"
+            style={styles.karmaNote}
+          >
             {t(
               'karmalytixNote',
-              '🔒 Your reflections power KarmaLytix — private insights, never shared.',
+              '🔒 Your reflections power KarmaLytix — private insights, never shared.'
             )}
           </Text>
         </Animated.View>
       ) : null,
-    [isLoading, t],
+    [isLoading, t]
   );
 
   return (
@@ -408,7 +444,11 @@ function JournalView(): React.JSX.Element {
           >
             <Text
               variant="caption"
-              color={activeTag === tag ? colors.background.dark : colors.text.secondary}
+              color={
+                activeTag === tag
+                  ? colors.background.dark
+                  : colors.text.secondary
+              }
             >
               {tag}
             </Text>
@@ -421,12 +461,17 @@ function JournalView(): React.JSX.Element {
           data={filteredEntries}
           renderItem={renderEntry}
           keyExtractor={keyExtractor}
-          contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 96 }]}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: insets.bottom + 96 },
+          ]}
           showsVerticalScrollIndicator={false}
           // The KarmaLytix banner sits above the entry list and scrolls
           // with it so it stays out of the way on long diaries but is
           // immediately visible when the user opens the tab.
-          ListHeaderComponent={<KarmaLytixBanner onPress={handleOpenKarmaLytix} />}
+          ListHeaderComponent={
+            <KarmaLytixBanner onPress={handleOpenKarmaLytix} />
+          }
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl

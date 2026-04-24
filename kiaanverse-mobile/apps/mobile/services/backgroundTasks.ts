@@ -54,10 +54,12 @@ TaskManager.defineTask(VERSE_PREFETCH_TASK, async () => {
         JSON.stringify({
           chapter: randomChapter,
           fetchedAt: new Date().toISOString(),
-          title: typeof chapterData === 'object' && chapterData !== null
-            ? (chapterData as Record<string, unknown>).name ?? `Chapter ${randomChapter}`
-            : `Chapter ${randomChapter}`,
-        }),
+          title:
+            typeof chapterData === 'object' && chapterData !== null
+              ? ((chapterData as Record<string, unknown>).name ??
+                `Chapter ${randomChapter}`)
+              : `Chapter ${randomChapter}`,
+        })
       );
     }
 
@@ -98,8 +100,10 @@ TaskManager.defineTask(BACKGROUND_SYNC_TASK, async () => {
 export async function registerBackgroundTasks(): Promise<void> {
   try {
     // Check if tasks are already registered
-    const verseRegistered = await TaskManager.isTaskRegisteredAsync(VERSE_PREFETCH_TASK);
-    const syncRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_SYNC_TASK);
+    const verseRegistered =
+      await TaskManager.isTaskRegisteredAsync(VERSE_PREFETCH_TASK);
+    const syncRegistered =
+      await TaskManager.isTaskRegisteredAsync(BACKGROUND_SYNC_TASK);
 
     if (!verseRegistered) {
       await BackgroundFetch.registerTaskAsync(VERSE_PREFETCH_TASK, {
@@ -119,7 +123,10 @@ export async function registerBackgroundTasks(): Promise<void> {
   } catch (error) {
     // Background fetch may not be available on all devices (e.g., emulators)
     if (__DEV__) {
-      console.warn('Background task registration failed (may not be available):', error);
+      console.warn(
+        'Background task registration failed (may not be available):',
+        error
+      );
     }
   }
 }

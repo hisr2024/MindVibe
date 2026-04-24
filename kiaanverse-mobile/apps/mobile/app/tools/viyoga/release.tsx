@@ -28,7 +28,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
 
-const DEFAULT_SUBTITLE = 'Not the love. Not the memory. But the weight of the pain.';
+const DEFAULT_SUBTITLE =
+  'Not the love. Not the memory. But the weight of the pain.';
 
 export default function ViyogaRelease(): React.JSX.Element {
   const insets = useSafeAreaInsets();
@@ -36,7 +37,8 @@ export default function ViyogaRelease(): React.JSX.Element {
   const [release, setRelease] = useState('');
 
   const subtitle =
-    flow.aiResponse?.releaseSubtitle && flow.aiResponse.releaseSubtitle.length > 0
+    flow.aiResponse?.releaseSubtitle &&
+    flow.aiResponse.releaseSubtitle.length > 0
       ? flow.aiResponse.releaseSubtitle
       : DEFAULT_SUBTITLE;
 

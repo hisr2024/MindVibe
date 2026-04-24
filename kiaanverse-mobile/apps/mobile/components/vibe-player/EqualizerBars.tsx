@@ -75,10 +75,10 @@ function Bar({
           withTiming(REST_HEIGHT, {
             duration: fall,
             easing: Easing.in(Easing.quad),
-          }),
+          })
         ),
         -1,
-        true,
+        true
       );
     } else {
       cancelAnimation(h);
@@ -122,7 +122,13 @@ function EqualizerBarsInner({
       importantForAccessibility="no-hide-descendants"
     >
       {[0, 1, 2].map((i) => (
-        <Bar key={i} index={i} isPlaying={isPlaying} color={color} height={height} />
+        <Bar
+          key={i}
+          index={i}
+          isPlaying={isPlaying}
+          color={color}
+          height={height}
+        />
       ))}
     </View>
   );

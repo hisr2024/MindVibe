@@ -48,7 +48,10 @@ function getGlowOpacity(streak: number): number {
   return 0.7;
 }
 
-function StreakFlameInner({ streak, size = 40 }: StreakFlameProps): React.JSX.Element {
+function StreakFlameInner({
+  streak,
+  size = 40,
+}: StreakFlameProps): React.JSX.Element {
   const baseScale = getFlameScale(streak);
   const glowOpacity = getGlowOpacity(streak);
   const shouldPulse = streak >= 14;
@@ -64,19 +67,31 @@ function StreakFlameInner({ streak, size = 40 }: StreakFlameProps): React.JSX.El
       // Pulsing animation for 14+ day streaks
       scale.value = withRepeat(
         withSequence(
-          withTiming(baseScale * 1.1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(baseScale, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(baseScale * 1.1, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(baseScale, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+          })
         ),
         -1, // infinite
-        true,
+        true
       );
       opacity.value = withRepeat(
         withSequence(
-          withTiming(glowOpacity * 1.3, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(glowOpacity, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(glowOpacity * 1.3, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(glowOpacity, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+          })
         ),
         -1,
-        true,
+        true
       );
     }
   }, [streak, baseScale, glowOpacity, shouldPulse, scale, opacity]);

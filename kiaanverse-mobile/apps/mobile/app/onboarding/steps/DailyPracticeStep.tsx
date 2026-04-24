@@ -28,11 +28,14 @@ export function DailyPracticeStep({
 }: DailyPracticeStepProps): React.JSX.Element {
   // Parse initial value (HH:mm 24h format) into hour/period
   const parsedHour = value ? parseInt(value.split(':')[0] ?? '8', 10) : 8;
-  const initialDisplayHour = parsedHour > 12 ? parsedHour - 12 : parsedHour === 0 ? 12 : parsedHour;
+  const initialDisplayHour =
+    parsedHour > 12 ? parsedHour - 12 : parsedHour === 0 ? 12 : parsedHour;
   const initialPeriod = parsedHour >= 12 ? 'PM' : 'AM';
 
   const [selectedHour, setSelectedHour] = useState(initialDisplayHour);
-  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>(initialPeriod as 'AM' | 'PM');
+  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>(
+    initialPeriod as 'AM' | 'PM'
+  );
 
   const updateTime = useCallback(
     (hour: number, period: 'AM' | 'PM') => {
@@ -42,7 +45,7 @@ export function DailyPracticeStep({
       const timeStr = `${String(h24).padStart(2, '0')}:00`;
       onChange(timeStr);
     },
-    [onChange],
+    [onChange]
   );
 
   const handleHourSelect = useCallback(
@@ -51,7 +54,7 @@ export function DailyPracticeStep({
       setSelectedHour(hour);
       updateTime(hour, selectedPeriod);
     },
-    [selectedPeriod, updateTime],
+    [selectedPeriod, updateTime]
   );
 
   const handlePeriodToggle = useCallback(
@@ -60,7 +63,7 @@ export function DailyPracticeStep({
       setSelectedPeriod(period);
       updateTime(selectedHour, period);
     },
-    [selectedHour, updateTime],
+    [selectedHour, updateTime]
   );
 
   return (
@@ -112,7 +115,10 @@ export function DailyPracticeStep({
             <Pressable
               key={period}
               onPress={() => handlePeriodToggle(period)}
-              style={[styles.periodChip, isSelected && styles.periodChipSelected]}
+              style={[
+                styles.periodChip,
+                isSelected && styles.periodChipSelected,
+              ]}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
             >

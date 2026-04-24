@@ -72,40 +72,65 @@ import {
  * selected pill.
  */
 const MOODS = [
-  { id: 'peaceful',  sanskrit: 'शान्त',     emoji: '\u{1F54A}',  color: '#10B981' },
-  { id: 'grateful',  sanskrit: 'कृतज्ञ',    emoji: '\u{1F64F}',  color: '#D4A017' },
-  { id: 'hopeful',   sanskrit: 'आशान्वित',  emoji: '\u{1F305}',  color: '#F59E0B' },
-  { id: 'anxious',   sanskrit: 'चिंतित',    emoji: '\u{1F630}',  color: '#EF4444' },
-  { id: 'sad',       sanskrit: 'दुःखी',     emoji: '\u{1F327}',  color: '#3B82F6' },
-  { id: 'confused',  sanskrit: 'भ्रमित',    emoji: '\u{1F300}',  color: '#8B5CF6' },
-  { id: 'angry',     sanskrit: 'क्रोधित',   emoji: '\u{1F525}',  color: '#DC2626' },
-  { id: 'inspired',  sanskrit: 'प्रेरित',   emoji: '\u{2728}',   color: '#06B6D4' },
-  { id: 'tired',     sanskrit: 'थका हुआ',   emoji: '\u{1F319}',  color: '#6B7280' },
-  { id: 'neutral',   sanskrit: 'सामान्य',   emoji: '\u{2696}',   color: 'rgba(240,235,225,0.5)' },
+  { id: 'peaceful', sanskrit: 'शान्त', emoji: '\u{1F54A}', color: '#10B981' },
+  { id: 'grateful', sanskrit: 'कृतज्ञ', emoji: '\u{1F64F}', color: '#D4A017' },
+  { id: 'hopeful', sanskrit: 'आशान्वित', emoji: '\u{1F305}', color: '#F59E0B' },
+  { id: 'anxious', sanskrit: 'चिंतित', emoji: '\u{1F630}', color: '#EF4444' },
+  { id: 'sad', sanskrit: 'दुःखी', emoji: '\u{1F327}', color: '#3B82F6' },
+  { id: 'confused', sanskrit: 'भ्रमित', emoji: '\u{1F300}', color: '#8B5CF6' },
+  { id: 'angry', sanskrit: 'क्रोधित', emoji: '\u{1F525}', color: '#DC2626' },
+  { id: 'inspired', sanskrit: 'प्रेरित', emoji: '\u{2728}', color: '#06B6D4' },
+  { id: 'tired', sanskrit: 'थका हुआ', emoji: '\u{1F319}', color: '#6B7280' },
+  {
+    id: 'neutral',
+    sanskrit: 'सामान्य',
+    emoji: '\u{2696}',
+    color: 'rgba(240,235,225,0.5)',
+  },
 ] as const;
 
 type MoodId = (typeof MOODS)[number]['id'];
 
 const CATEGORIES = [
-  { id: 'Gratitude',  sanskrit: 'कृतज्ञता',   icon: '\u{1F64F}', color: '#D4A017' },
-  { id: 'Reflection', sanskrit: 'विचार',       icon: '\u{1FA9E}', color: '#8B5CF6' },
-  { id: 'Prayer',     sanskrit: 'प्रार्थना',   icon: '\u{2728}',  color: '#3B82F6' },
-  { id: 'Dream',      sanskrit: 'स्वप्न',      icon: '\u{1F319}', color: '#06B6D4' },
-  { id: 'Shadow',     sanskrit: 'छाया',        icon: '\u{1F311}', color: '#6B7280' },
+  {
+    id: 'Gratitude',
+    sanskrit: 'कृतज्ञता',
+    icon: '\u{1F64F}',
+    color: '#D4A017',
+  },
+  { id: 'Reflection', sanskrit: 'विचार', icon: '\u{1FA9E}', color: '#8B5CF6' },
+  { id: 'Prayer', sanskrit: 'प्रार्थना', icon: '\u{2728}', color: '#3B82F6' },
+  { id: 'Dream', sanskrit: 'स्वप्न', icon: '\u{1F319}', color: '#06B6D4' },
+  { id: 'Shadow', sanskrit: 'छाया', icon: '\u{1F311}', color: '#6B7280' },
 ] as const;
 
 type CategoryId = (typeof CATEGORIES)[number]['id'];
 
 const SUGGESTED_TAGS = [
-  'gratitude', 'fear', 'longing', 'clarity', 'confusion', 'devotion',
-  'surrender', 'anger', 'joy', 'grief', 'love', 'purpose',
+  'gratitude',
+  'fear',
+  'longing',
+  'clarity',
+  'confusion',
+  'devotion',
+  'surrender',
+  'anger',
+  'joy',
+  'grief',
+  'love',
+  'purpose',
 ] as const;
 
 /** Hard cap on user-selected tags (mood + category are added automatically). */
 const MAX_USER_TAGS = 5;
 
 const CHALLENGE_OPTIONS = [
-  'Anger', 'Fear', 'Attachment', 'Pride', 'Greed', 'Confusion',
+  'Anger',
+  'Fear',
+  'Attachment',
+  'Pride',
+  'Greed',
+  'Confusion',
 ] as const;
 
 // Encryption, ISO-week keys, time-of-day bucketing, and assessment
@@ -216,14 +241,14 @@ export default function NewJournalScreen(): React.JSX.Element {
     if (body.trim().length === 0) {
       Alert.alert(
         t('emptyBodyTitle', 'Sacred space awaits'),
-        t('emptyBodyMessage', 'Please write your reflection before saving.'),
+        t('emptyBodyMessage', 'Please write your reflection before saving.')
       );
       return;
     }
     if (!mood) {
       Alert.alert(
         t('missingMoodTitle', 'How are you feeling?'),
-        t('missingMoodMessage', 'Please select your current mood.'),
+        t('missingMoodMessage', 'Please select your current mood.')
       );
       return;
     }
@@ -267,7 +292,10 @@ export default function NewJournalScreen(): React.JSX.Element {
     } catch {
       Alert.alert(
         t('saveErrorTitle', 'Could Not Save'),
-        t('saveErrorMessage', 'Your reflection could not be saved right now. Please try again.'),
+        t(
+          'saveErrorMessage',
+          'Your reflection could not be saved right now. Please try again.'
+        )
       );
     }
   }, [
@@ -288,10 +316,11 @@ export default function NewJournalScreen(): React.JSX.Element {
 
   // -- Render --
 
-  const canSave = body.trim().length > 0 && mood !== null && !createJournal.isPending;
+  const canSave =
+    body.trim().length > 0 && mood !== null && !createJournal.isPending;
   const tagCountLabel = useMemo(
     () => `${selectedTags.length}/${MAX_USER_TAGS}`,
-    [selectedTags.length],
+    [selectedTags.length]
   );
 
   return (
@@ -301,7 +330,11 @@ export default function NewJournalScreen(): React.JSX.Element {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={[styles.screen, { paddingTop: insets.top }]}>
-          <ConfettiCannon isActive={showSaveSuccess} particleCount={30} duration={2000} />
+          <ConfettiCannon
+            isActive={showSaveSuccess}
+            particleCount={30}
+            duration={2000}
+          />
 
           <GoldenHeader
             title={t('newEntryTitle', 'Sacred Reflection')}
@@ -318,7 +351,11 @@ export default function NewJournalScreen(): React.JSX.Element {
           >
             {/* Hero */}
             <Animated.View entering={FadeInDown.duration(400)}>
-              <Text variant="devanagariSmall" color={colors.primary[500]} align="center">
+              <Text
+                variant="devanagariSmall"
+                color={colors.primary[500]}
+                align="center"
+              >
                 आज का मनन
               </Text>
               <Text
@@ -329,7 +366,7 @@ export default function NewJournalScreen(): React.JSX.Element {
               >
                 {t(
                   'privacyNote',
-                  '🔒 Your words are encrypted on this device · Never read by Kiaanverse',
+                  '🔒 Your words are encrypted on this device · Never read by Kiaanverse'
                 )}
               </Text>
             </Animated.View>
@@ -338,7 +375,11 @@ export default function NewJournalScreen(): React.JSX.Element {
 
             {/* SECTION 1 — Mood */}
             <Animated.View entering={FadeInDown.duration(400).delay(80)}>
-              <Text variant="label" color={colors.text.primary} style={styles.sectionLabel}>
+              <Text
+                variant="label"
+                color={colors.text.primary}
+                style={styles.sectionLabel}
+              >
                 {t('moodSectionLabel', 'How is your inner state right now?')}
               </Text>
               <View style={styles.moodGrid}>
@@ -382,7 +423,11 @@ export default function NewJournalScreen(): React.JSX.Element {
 
             {/* SECTION 2 — Category */}
             <Animated.View entering={FadeInDown.duration(400).delay(120)}>
-              <Text variant="label" color={colors.text.primary} style={styles.sectionLabel}>
+              <Text
+                variant="label"
+                color={colors.text.primary}
+                style={styles.sectionLabel}
+              >
                 {t('categorySectionLabel', 'This reflection is a…')}
               </Text>
               <View style={styles.categoryRow}>
@@ -437,7 +482,8 @@ export default function NewJournalScreen(): React.JSX.Element {
               <View style={styles.tagGrid}>
                 {SUGGESTED_TAGS.map((tag) => {
                   const selected = selectedTags.includes(tag);
-                  const disabled = !selected && selectedTags.length >= MAX_USER_TAGS;
+                  const disabled =
+                    !selected && selectedTags.length >= MAX_USER_TAGS;
                   return (
                     <SacredChip
                       key={tag}
@@ -455,10 +501,18 @@ export default function NewJournalScreen(): React.JSX.Element {
 
             {/* SECTION 4 — Encrypted body */}
             <Animated.View entering={FadeInDown.duration(400).delay(200)}>
-              <Text variant="label" color={colors.text.primary} style={styles.sectionLabel}>
+              <Text
+                variant="label"
+                color={colors.text.primary}
+                style={styles.sectionLabel}
+              >
                 {t('reflectionSectionLabel', 'Your sacred reflection')}
               </Text>
-              <Text variant="caption" color={colors.text.muted} style={styles.encryptedLabel}>
+              <Text
+                variant="caption"
+                color={colors.text.muted}
+                style={styles.encryptedLabel}
+              >
                 {t('encryptedLabel', '🔒 Encrypted on this device')}
               </Text>
               <TextInput
@@ -467,7 +521,7 @@ export default function NewJournalScreen(): React.JSX.Element {
                 onChangeText={setBody}
                 placeholder={t(
                   'bodyPlaceholder',
-                  'Begin your sacred reflection… Write freely. This space is yours alone.',
+                  'Begin your sacred reflection… Write freely. This space is yours alone.'
                 )}
                 placeholderTextColor={colors.text.muted}
                 multiline
@@ -491,18 +545,26 @@ export default function NewJournalScreen(): React.JSX.Element {
                 >
                   {t('assessmentTitle', '🌀 Weekly Sacred Assessment')}
                 </Text>
-                <Text variant="caption" color={colors.text.muted} style={styles.assessmentSub}>
+                <Text
+                  variant="caption"
+                  color={colors.text.muted}
+                  style={styles.assessmentSub}
+                >
                   {t(
                     'assessmentSub',
-                    'These answers are plaintext and power your KarmaLytix analysis. They are NOT encrypted — choose your words accordingly.',
+                    'These answers are plaintext and power your KarmaLytix analysis. They are NOT encrypted — choose your words accordingly.'
                   )}
                 </Text>
 
                 {/* Q1 — dharmic challenge */}
-                <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
+                <Text
+                  variant="label"
+                  color={colors.text.primary}
+                  style={styles.qLabel}
+                >
                   {t(
                     'q1Label',
-                    'What was your greatest dharmic challenge this week?',
+                    'What was your greatest dharmic challenge this week?'
                   )}
                 </Text>
                 <View style={styles.challengeRow}>
@@ -517,8 +579,15 @@ export default function NewJournalScreen(): React.JSX.Element {
                 </View>
 
                 {/* Q2 — Gita teaching */}
-                <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-                  {t('q2Label', 'Which Gita teaching felt most alive this week?')}
+                <Text
+                  variant="label"
+                  color={colors.text.primary}
+                  style={styles.qLabel}
+                >
+                  {t(
+                    'q2Label',
+                    'Which Gita teaching felt most alive this week?'
+                  )}
                 </Text>
                 <SacredInput
                   value={gitaTeaching}
@@ -528,7 +597,11 @@ export default function NewJournalScreen(): React.JSX.Element {
                 />
 
                 {/* Q3 — consistency */}
-                <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
+                <Text
+                  variant="label"
+                  color={colors.text.primary}
+                  style={styles.qLabel}
+                >
                   {t('q3Label', 'How consistent was your practice? (1–5)')}
                 </Text>
                 <View style={styles.consistencyRow}>
@@ -548,7 +621,9 @@ export default function NewJournalScreen(): React.JSX.Element {
                       >
                         <Text
                           variant="label"
-                          color={filled ? colors.background.dark : colors.text.muted}
+                          color={
+                            filled ? colors.background.dark : colors.text.muted
+                          }
                         >
                           {n}
                         </Text>
@@ -558,7 +633,11 @@ export default function NewJournalScreen(): React.JSX.Element {
                 </View>
 
                 {/* Q4 — pattern */}
-                <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
+                <Text
+                  variant="label"
+                  color={colors.text.primary}
+                  style={styles.qLabel}
+                >
                   {t('q4Label', 'What pattern are you noticing in yourself?')}
                 </Text>
                 <SacredInput
@@ -569,7 +648,11 @@ export default function NewJournalScreen(): React.JSX.Element {
                 />
 
                 {/* Q5 — sankalpa */}
-                <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
+                <Text
+                  variant="label"
+                  color={colors.text.primary}
+                  style={styles.qLabel}
+                >
                   {t('q5Label', 'What sankalpa do you carry into next week?')}
                 </Text>
                 <SacredInput

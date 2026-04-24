@@ -89,7 +89,10 @@ export interface UseSakhaStreamResult {
 }
 
 /** Parse accumulated SSE text into data frames + remaining buffer. */
-function parseSSEFrames(raw: string, cursor: number): { frames: string[]; nextCursor: number } {
+function parseSSEFrames(
+  raw: string,
+  cursor: number
+): { frames: string[]; nextCursor: number } {
   const frames: string[] = [];
   let nextCursor = cursor;
   const slice = raw.slice(cursor);
@@ -130,7 +133,7 @@ const NO_CREDENTIALS_TEXT =
   'To speak with Sakha, please sign in with your email. (Developer Login skips the server session and cannot start a dialogue.)';
 
 export function useSakhaStream(
-  options: UseSakhaStreamOptions = {},
+  options: UseSakhaStreamOptions = {}
 ): UseSakhaStreamResult {
   const { getAccessToken, baseUrl } = options;
 
@@ -168,7 +171,7 @@ export function useSakhaStream(
     const id = assistantIdRef.current;
     if (!id) return;
     setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, text: m.text + delta } : m)),
+      prev.map((m) => (m.id === id ? { ...m, text: m.text + delta } : m))
     );
   }, []);
 
@@ -222,7 +225,7 @@ export function useSakhaStream(
         console.log(
           `[SakhaStream] POST ${baseUrl ?? API_CONFIG.baseURL}/api/chat/message/stream  auth=${
             token ? 'Bearer ***' : 'NONE'
-          }`,
+          }`
         );
       }
 
@@ -235,8 +238,8 @@ export function useSakhaStream(
       const finishStreamingSuccess = (): void => {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === assistantId ? { ...m, isStreaming: false } : m,
-          ),
+            m.id === assistantId ? { ...m, isStreaming: false } : m
+          )
         );
         setStreaming(false);
         xhrRef.current = null;
@@ -245,7 +248,7 @@ export function useSakhaStream(
 
       const finishStreamingFailure = (
         reason: 'network' | 'auth' | 'server' | 'cold_start' | 'no_credentials',
-        activeXhr: XMLHttpRequest,
+        activeXhr: XMLHttpRequest
       ): void => {
         const errorText =
           reason === 'no_credentials'
@@ -265,14 +268,14 @@ export function useSakhaStream(
                     text: m.text.length > 0 ? m.text : errorText,
                     isStreaming: false,
                   }
-                : m,
-            ),
+                : m
+            )
           );
         }
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
           // eslint-disable-next-line no-console
           console.error(
-            `[SakhaStream] failed (${reason}) status=${activeXhr.status} response=${activeXhr.responseText?.slice(0, 200) ?? ''}`,
+            `[SakhaStream] failed (${reason}) status=${activeXhr.status} response=${activeXhr.responseText?.slice(0, 200) ?? ''}`
           );
         }
         setError(errorText);
@@ -294,7 +297,8 @@ export function useSakhaStream(
         x.setRequestHeader('Content-Type', 'application/json');
         x.setRequestHeader('Accept', 'text/event-stream');
         x.setRequestHeader('X-Client', 'kiaanverse-mobile');
-        if (authToken) x.setRequestHeader('Authorization', `Bearer ${authToken}`);
+        if (authToken)
+          x.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
         x.onreadystatechange = () => {
           // 3 = LOADING (incremental responseText is available).
@@ -315,7 +319,8 @@ export function useSakhaStream(
             // session exists.
             if ((status === 401 || status === 403) && !hasRetriedAfterRefresh) {
               hasRetriedAfterRefresh = true;
-              const hadInitialToken = authToken !== null && authToken.length > 0;
+              const hadInitialToken =
+                authToken !== null && authToken.length > 0;
               void (async () => {
                 const refreshed = await refreshAccessToken();
                 if (refreshed) {
@@ -356,7 +361,8 @@ export function useSakhaStream(
                 error?: string;
                 message?: string;
               };
-              if (event.session_id && !sessionId) setSessionId(event.session_id);
+              if (event.session_id && !sessionId)
+                setSessionId(event.session_id);
               if (event.sessionId && !sessionId) setSessionId(event.sessionId);
               // Quota / service-unavailable frames the backend emits
               // occasionally carry an `error` field and a human message.
@@ -396,8 +402,8 @@ export function useSakhaStream(
           // Aborts set isStreaming false silently — no error toast.
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantId ? { ...m, isStreaming: false } : m,
-            ),
+              m.id === assistantId ? { ...m, isStreaming: false } : m
+            )
           );
           setStreaming(false);
         };
@@ -407,7 +413,7 @@ export function useSakhaStream(
             JSON.stringify({
               message: trimmed,
               session_id: sessionId ?? undefined,
-            }),
+            })
           );
         } catch {
           finishStreamingFailure('network', x);
@@ -416,15 +422,12 @@ export function useSakhaStream(
 
       openAndSend(token);
     },
-    [appendAssistantText, baseUrl, getAccessToken, sessionId, streaming],
+    [appendAssistantText, baseUrl, getAccessToken, sessionId, streaming]
   );
 
-  const onStreamCompleted = useCallback(
-    (handler: (() => void) | null) => {
-      streamCompleteCallbackRef.current = handler;
-    },
-    [],
-  );
+  const onStreamCompleted = useCallback((handler: (() => void) | null) => {
+    streamCompleteCallbackRef.current = handler;
+  }, []);
 
   return {
     messages,

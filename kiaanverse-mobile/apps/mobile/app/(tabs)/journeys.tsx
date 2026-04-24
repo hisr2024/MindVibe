@@ -16,10 +16,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  DivineBackground,
-  GoldenHeader,
-} from '@kiaanverse/ui';
+import { DivineBackground, GoldenHeader } from '@kiaanverse/ui';
 import { useTranslation } from '@kiaanverse/i18n';
 
 import { JourneysView } from '../../components/journal/JourneysView';

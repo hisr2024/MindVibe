@@ -25,7 +25,7 @@ export interface ChakraColumnIconProps {
  * Each circle's vertical spacing is slightly greater than the next
  * circle's diameter so they don't visually collide.
  */
-const CHAKRAS: ReadonlyArray<{ cy: number; r: number }> = [
+const CHAKRAS: readonly { cy: number; r: number }[] = [
   { cy: 3.25, r: 2.25 },
   { cy: 7.5, r: 1.9 },
   { cy: 11.5, r: 1.6 },

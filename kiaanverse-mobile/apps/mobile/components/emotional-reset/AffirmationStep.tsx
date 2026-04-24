@@ -40,7 +40,10 @@ const FALLBACK_AFFIRMATIONS: readonly string[] = [
 // Component
 // ---------------------------------------------------------------------------
 
-export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): React.JSX.Element {
+export function AffirmationStep({
+  stepData,
+  onNext,
+}: AffirmationStepProps): React.JSX.Element {
   const affirmations = stepData?.affirmations?.length
     ? stepData.affirmations
     : [...FALLBACK_AFFIRMATIONS];
@@ -63,7 +66,12 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
         <Text variant="h2" color={colors.divine.aura} align="center">
           Sacred Affirmations
         </Text>
-        <Text variant="caption" color={colors.text.muted} align="center" style={styles.counter}>
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          align="center"
+          style={styles.counter}
+        >
           {currentIndex + 1} of {total}
         </Text>
       </Animated.View>
@@ -74,7 +82,9 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
         style={styles.tapArea}
         accessibilityRole="button"
         accessibilityLabel={
-          allRevealed ? 'All affirmations revealed' : 'Tap to reveal next affirmation'
+          allRevealed
+            ? 'All affirmations revealed'
+            : 'Tap to reveal next affirmation'
         }
         disabled={allRevealed}
       >
@@ -96,7 +106,12 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
         </Animated.View>
 
         {!allRevealed ? (
-          <Text variant="caption" color={colors.text.muted} align="center" style={styles.tapHint}>
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            align="center"
+            style={styles.tapHint}
+          >
             Tap to reveal next
           </Text>
         ) : null}

@@ -7,24 +7,30 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import { DivineScreenWrapper, SacredCard } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
 
 const LANGUAGES = [
-  { code: 'en', label: 'English',   native: 'English' },
-  { code: 'hi', label: 'Hindi',     native: 'हिन्दी' },
-  { code: 'sa', label: 'Sanskrit',  native: 'संस्कृत' },
-  { code: 'ta', label: 'Tamil',     native: 'தமிழ்' },
-  { code: 'te', label: 'Telugu',    native: 'తెలుగు' },
-  { code: 'mr', label: 'Marathi',   native: 'मराठी' },
-  { code: 'bn', label: 'Bengali',   native: 'বাংলা' },
-  { code: 'gu', label: 'Gujarati',  native: 'ગુજરાતી' },
-  { code: 'kn', label: 'Kannada',   native: 'ಕನ್ನಡ' },
+  { code: 'en', label: 'English', native: 'English' },
+  { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
+  { code: 'sa', label: 'Sanskrit', native: 'संस्कृत' },
+  { code: 'ta', label: 'Tamil', native: 'தமிழ்' },
+  { code: 'te', label: 'Telugu', native: 'తెలుగు' },
+  { code: 'mr', label: 'Marathi', native: 'मराठी' },
+  { code: 'bn', label: 'Bengali', native: 'বাংলা' },
+  { code: 'gu', label: 'Gujarati', native: 'ગુજરાતી' },
+  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ' },
   { code: 'ml', label: 'Malayalam', native: 'മലയാളം' },
-  { code: 'de', label: 'German',    native: 'Deutsch' },
-  { code: 'fr', label: 'French',    native: 'Français' },
-  { code: 'es', label: 'Spanish',   native: 'Español' },
+  { code: 'de', label: 'German', native: 'Deutsch' },
+  { code: 'fr', label: 'French', native: 'Français' },
+  { code: 'es', label: 'Spanish', native: 'Español' },
 ] as const;
 
 export default function LanguageSettings(): React.JSX.Element {

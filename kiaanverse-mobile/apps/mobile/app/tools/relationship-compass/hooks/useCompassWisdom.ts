@@ -54,16 +54,19 @@ interface FallbackStepMeta {
 }
 
 const FALLBACK_STEPS: readonly FallbackStepMeta[] = [
-  { id: 'pause',       title: 'Step 1: Pause Before Reacting',     icon: '🌿' },
-  { id: 'attachment',  title: 'Step 2: Identify the Attachment',   icon: '🔥' },
-  { id: 'regulate',    title: 'Step 3: Regulate',                  icon: '🧘' },
-  { id: 'speak',       title: 'Step 4: Speak (Karma Yoga)',        icon: '🕊️' },
-  { id: 'humanity',    title: 'Step 5: See Their Humanity',        icon: '👁️' },
-  { id: 'looks-like',  title: 'What This Looks Like',              icon: '📱' },
-  { id: 'real-test',   title: 'The Real Test',                     icon: '💎' },
+  { id: 'pause', title: 'Step 1: Pause Before Reacting', icon: '🌿' },
+  { id: 'attachment', title: 'Step 2: Identify the Attachment', icon: '🔥' },
+  { id: 'regulate', title: 'Step 3: Regulate', icon: '🧘' },
+  { id: 'speak', title: 'Step 4: Speak (Karma Yoga)', icon: '🕊️' },
+  { id: 'humanity', title: 'Step 5: See Their Humanity', icon: '👁️' },
+  { id: 'looks-like', title: 'What This Looks Like', icon: '📱' },
+  { id: 'real-test', title: 'The Real Test', icon: '💎' },
 ] as const;
 
-function withBody(meta: FallbackStepMeta, body: string): CompassTransmissionStep {
+function withBody(
+  meta: FallbackStepMeta,
+  body: string
+): CompassTransmissionStep {
   return { id: meta.id, title: meta.title, icon: meta.icon, body };
 }
 
@@ -92,7 +95,7 @@ function buildEnrichedMessage(input: CompassWisdomInput): string {
 
   const parts: string[] = [];
   parts.push(
-    `[Relationship: ${input.relationshipTypeLabel} with ${input.partnerName || 'someone'}]`,
+    `[Relationship: ${input.relationshipTypeLabel} with ${input.partnerName || 'someone'}]`
   );
   if (input.initialGunaReading && input.initialGunaReading !== 'balanced') {
     parts.push(`[Initial guna reading: ${input.initialGunaReading}]`);
@@ -127,7 +130,7 @@ function buildEnrichedMessage(input: CompassWisdomInput): string {
  */
 function splitIntoSteps(
   guidance: string,
-  fallback: CompassTransmission,
+  fallback: CompassTransmission
 ): readonly CompassTransmissionStep[] {
   // Split at sentence boundaries that precede a capital letter (English
   // upper-case OR any Devanagari letter, both covered by \p{Lu}/\p{L}).
@@ -143,7 +146,8 @@ function splitIntoSteps(
 
   return FALLBACK_STEPS.map((stepMeta, i) => {
     const slice = sentences.slice(i * perStep, (i + 1) * perStep).join(' ');
-    const body = slice || fallback.steps[i]?.body || 'Pause and notice what arises.';
+    const body =
+      slice || fallback.steps[i]?.body || 'Pause and notice what arises.';
     return withBody(stepMeta, body);
   });
 }
@@ -177,7 +181,7 @@ function buildFallback(input: CompassWisdomInput): CompassTransmission {
   ];
 
   const steps: CompassTransmissionStep[] = FALLBACK_STEPS.map((meta, i) =>
-    withBody(meta, bodies[i] ?? 'Pause and notice what arises.'),
+    withBody(meta, bodies[i] ?? 'Pause and notice what arises.')
   );
 
   const fullText = steps.map((s) => `${s.title}\n${s.body}`).join('\n\n');
@@ -200,7 +204,9 @@ export interface UseCompassWisdomResult {
 
 export function useCompassWisdom(): UseCompassWisdomResult {
   const guideMutation = useRelationshipGuide();
-  const [transmission, setTransmission] = useState<CompassTransmission | null>(null);
+  const [transmission, setTransmission] = useState<CompassTransmission | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   const request = useCallback(
@@ -246,7 +252,7 @@ export function useCompassWisdom(): UseCompassWisdomResult {
         return fallback;
       }
     },
-    [guideMutation],
+    [guideMutation]
   );
 
   const reset = useCallback(() => {

@@ -18,17 +18,8 @@ import {
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import {
-  Screen,
-  Text,
-  GoldenHeader,
-  colors,
-  spacing,
-} from '@kiaanverse/ui';
-import {
-  useCommunityPosts,
-  useCommunityCircles,
-} from '@kiaanverse/api';
+import { Screen, Text, GoldenHeader, colors, spacing } from '@kiaanverse/ui';
+import { useCommunityPosts, useCommunityCircles } from '@kiaanverse/api';
 import type { CommunityPost, CommunityCircle } from '@kiaanverse/api';
 import { PostCard } from '../../components/community/PostCard';
 import { WisdomCircleCard } from '../../components/community/WisdomCircleCard';
@@ -45,15 +36,9 @@ export default function CommunityScreen(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<Tab>('feed');
   const [refreshing, setRefreshing] = useState(false);
 
-  const {
-    data: posts,
-    refetch: refetchPosts,
-  } = useCommunityPosts();
+  const { data: posts, refetch: refetchPosts } = useCommunityPosts();
 
-  const {
-    data: circles,
-    refetch: refetchCircles,
-  } = useCommunityCircles();
+  const { data: circles, refetch: refetchCircles } = useCommunityCircles();
 
   const handleTabPress = useCallback((tab: Tab) => {
     void Haptics.selectionAsync();
@@ -79,12 +64,12 @@ export default function CommunityScreen(): React.JSX.Element {
     (circle: CommunityCircle) => {
       router.push(`/community/circles/${circle.id}`);
     },
-    [router],
+    [router]
   );
 
   const renderPost = useCallback(
     ({ item }: { item: CommunityPost }) => <PostCard post={item} />,
-    [],
+    []
   );
 
   const renderCircle = useCallback(
@@ -95,34 +80,47 @@ export default function CommunityScreen(): React.JSX.Element {
         width={CARD_WIDTH}
       />
     ),
-    [handleCirclePress],
+    [handleCirclePress]
   );
 
   const postKeyExtractor = useCallback((item: CommunityPost) => item.id, []);
-  const circleKeyExtractor = useCallback((item: CommunityCircle) => item.id, []);
+  const circleKeyExtractor = useCallback(
+    (item: CommunityCircle) => item.id,
+    []
+  );
 
   const renderFeedEmpty = useCallback(
     () => (
-      <Animated.View entering={FadeIn.duration(500)} style={styles.emptyContainer}>
-        <Text variant="h2" align="center">{'🕊️'}</Text>
+      <Animated.View
+        entering={FadeIn.duration(500)}
+        style={styles.emptyContainer}
+      >
+        <Text variant="h2" align="center">
+          {'🕊️'}
+        </Text>
         <Text variant="body" color={colors.text.muted} align="center">
           The community awaits your first words of wisdom.
         </Text>
       </Animated.View>
     ),
-    [],
+    []
   );
 
   const renderCirclesEmpty = useCallback(
     () => (
-      <Animated.View entering={FadeIn.duration(500)} style={styles.emptyContainer}>
-        <Text variant="h2" align="center">{'🔮'}</Text>
+      <Animated.View
+        entering={FadeIn.duration(500)}
+        style={styles.emptyContainer}
+      >
+        <Text variant="h2" align="center">
+          {'🔮'}
+        </Text>
         <Text variant="body" color={colors.text.muted} align="center">
           No wisdom circles available yet.{'\n'}Check back soon.
         </Text>
       </Animated.View>
     ),
-    [],
+    []
   );
 
   const refreshControl = useMemo(
@@ -134,7 +132,7 @@ export default function CommunityScreen(): React.JSX.Element {
         colors={[colors.primary[500]]}
       />
     ),
-    [refreshing, handleRefresh],
+    [refreshing, handleRefresh]
   );
 
   return (
@@ -151,7 +149,9 @@ export default function CommunityScreen(): React.JSX.Element {
         >
           <Text
             variant="body"
-            color={activeTab === 'feed' ? colors.primary[500] : colors.text.muted}
+            color={
+              activeTab === 'feed' ? colors.primary[500] : colors.text.muted
+            }
           >
             Feed
           </Text>
@@ -164,7 +164,9 @@ export default function CommunityScreen(): React.JSX.Element {
         >
           <Text
             variant="body"
-            color={activeTab === 'circles' ? colors.primary[500] : colors.text.muted}
+            color={
+              activeTab === 'circles' ? colors.primary[500] : colors.text.muted
+            }
           >
             Circles
           </Text>

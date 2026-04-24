@@ -18,7 +18,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -83,7 +87,9 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
 
   const emotion = session?.emotion ?? 'anger';
   const transformedEmotion =
-    stepData?.transformedEmotion ?? EMOTION_TRANSFORMS[emotion] ?? 'Inner Peace';
+    stepData?.transformedEmotion ??
+    EMOTION_TRANSFORMS[emotion] ??
+    'Inner Peace';
   const insight =
     stepData?.insight ??
     'You have shown great courage by facing your emotions with awareness.';
@@ -119,22 +125,35 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
   return (
     <View style={styles.root}>
       {/* Sacred confetti celebration -- fires immediately */}
-      <ConfettiCannon isActive={showCelebration} particleCount={30} duration={3000} />
+      <ConfettiCannon
+        isActive={showCelebration}
+        particleCount={30}
+        duration={3000}
+      />
 
       {/* Completion heading */}
-      <Animated.View entering={FadeIn.duration(600)} style={styles.headingBlock}>
+      <Animated.View
+        entering={FadeIn.duration(600)}
+        style={styles.headingBlock}
+      >
         <Text variant="h1" color={colors.divine.aura} align="center">
           Your Sacred Reset{'\n'}is Complete
         </Text>
       </Animated.View>
 
       {/* Lotus completion badge -- large and centered */}
-      <Animated.View entering={FadeIn.delay(200).duration(500)} style={styles.lotusCenter}>
+      <Animated.View
+        entering={FadeIn.delay(200).duration(500)}
+        style={styles.lotusCenter}
+      >
         <LotusProgress progress={1} size={80} />
       </Animated.View>
 
       {/* Emotion transformation arrow */}
-      <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.transformRow}>
+      <Animated.View
+        entering={FadeInDown.delay(300).duration(500)}
+        style={styles.transformRow}
+      >
         <View style={styles.emotionBadge}>
           <Text variant="label" color={colors.semantic.error}>
             {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
@@ -153,17 +172,28 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
       {/* Key insight card */}
       <Animated.View entering={FadeInDown.delay(500).duration(500)}>
         <GlowCard variant="sacred">
-          <Text variant="caption" color={colors.primary[500]} style={styles.insightLabel}>
+          <Text
+            variant="caption"
+            color={colors.primary[500]}
+            style={styles.insightLabel}
+          >
             Key Insight
           </Text>
-          <Text variant="body" color={colors.text.secondary} style={styles.insightText}>
+          <Text
+            variant="body"
+            color={colors.text.secondary}
+            style={styles.insightText}
+          >
             {insight}
           </Text>
         </GlowCard>
       </Animated.View>
 
       {/* Session stats row -- dynamic values from session and step data */}
-      <Animated.View entering={FadeInDown.delay(650).duration(500)} style={styles.statsRow}>
+      <Animated.View
+        entering={FadeInDown.delay(650).duration(500)}
+        style={styles.statsRow}
+      >
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
             {durationMin}
@@ -194,11 +224,18 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
 
       {/* Verse recommendation (if the API provided one) */}
       {stepData?.verseRecommendation ? (
-        <Animated.View entering={FadeInDown.delay(800).duration(500)} style={styles.verseCard}>
+        <Animated.View
+          entering={FadeInDown.delay(800).duration(500)}
+          style={styles.verseCard}
+        >
           <Text variant="caption" color={colors.primary[500]}>
             Recommended Verse
           </Text>
-          <Text variant="label" color={colors.text.primary} style={styles.verseRef}>
+          <Text
+            variant="label"
+            color={colors.text.primary}
+            style={styles.verseRef}
+          >
             {stepData.verseRecommendation.ref}
           </Text>
           <Text variant="bodySmall" color={colors.text.secondary}>

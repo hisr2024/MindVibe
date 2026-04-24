@@ -9,7 +9,14 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
-import { Screen, Text, Input, GoldenButton, colors, spacing } from '@kiaanverse/ui';
+import {
+  Screen,
+  Text,
+  Input,
+  GoldenButton,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 import { useTranslation } from '@kiaanverse/i18n';
 
 export default function ForgotPasswordScreen(): React.JSX.Element {
@@ -40,9 +47,12 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
         style={styles.container}
       >
         <View style={styles.header}>
-          <Text variant="h1" align="center">Reset Password</Text>
+          <Text variant="h1" align="center">
+            Reset Password
+          </Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Enter your email and we{"'"}ll send you a link to reset your password.
+            Enter your email and we{"'"}ll send you a link to reset your
+            password.
           </Text>
         </View>
 
@@ -52,8 +62,8 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
               Check your inbox
             </Text>
             <Text variant="body" color={colors.text.secondary} align="center">
-              If an account exists for {email}, you{"'"}ll receive a password reset
-              link shortly.
+              If an account exists for {email}, you{"'"}ll receive a password
+              reset link shortly.
             </Text>
             <View style={styles.backLink}>
               <Link href="/(auth)/login">
@@ -87,7 +97,11 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.footer}>
-              <Text variant="bodySmall" color={colors.text.muted} align="center">
+              <Text
+                variant="bodySmall"
+                color={colors.text.muted}
+                align="center"
+              >
                 Remember your password?{' '}
               </Text>
               <Link href="/(auth)/login">

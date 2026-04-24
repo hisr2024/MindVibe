@@ -38,7 +38,10 @@ interface ErrorBoundaryState {
 // Component
 // ---------------------------------------------------------------------------
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -86,7 +89,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <Text style={styles.icon}>🕉</Text>
             <Text style={styles.title}>Something went wrong</Text>
             <Text style={styles.message}>
-              A moment of turbulence on the path. Take a breath, and let us try again.
+              A moment of turbulence on the path. Take a breath, and let us try
+              again.
             </Text>
             <Pressable
               onPress={this.handleRetry}

@@ -48,7 +48,7 @@ const BACKEND_INPUT_LIMIT = 2000;
 function buildStepOneInput(
   emotion: EmotionalState,
   intensity: number,
-  context: string,
+  context: string
 ): string {
   const header = `I am feeling ${emotion.label.toLowerCase()} (${emotion.sanskrit}) at intensity ${intensity}/5.`;
   const ctxSegment = context ? ` ${context.slice(0, 800)}` : '';
@@ -87,7 +87,7 @@ export function EmotionalResetScreen(): React.JSX.Element {
       withTiming(1, {
         duration: 600,
         easing: Easing.bezier(0, 0.8, 0.2, 1),
-      }),
+      })
     );
   }, [phase, fade]);
   const fadeStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
@@ -97,7 +97,11 @@ export function EmotionalResetScreen(): React.JSX.Element {
 
   // Phase 1 → 2 (start session + step 1)
   const handleOffer = useCallback(
-    async (selected: EmotionalState, selectedIntensity: number, context: string) => {
+    async (
+      selected: EmotionalState,
+      selectedIntensity: number,
+      context: string
+    ) => {
       setEmotion(selected);
       setIntensity(selectedIntensity);
       setPhase('witness');
@@ -111,15 +115,21 @@ export function EmotionalResetScreen(): React.JSX.Element {
         // but we honour the signature so the shared hooks stay happy.
         const startResp = await api.emotionalReset.start(
           selected.label.toLowerCase(),
-          selectedIntensity,
+          selectedIntensity
         );
         const sessionData = (startResp.data ?? {}) as StartPayload;
         if (!sessionData.session_id) {
-          throw new Error('The sacred session could not be opened. Please try again.');
+          throw new Error(
+            'The sacred session could not be opened. Please try again.'
+          );
         }
         setSessionId(sessionData.session_id);
 
-        const userInput = buildStepOneInput(selected, selectedIntensity, context);
+        const userInput = buildStepOneInput(
+          selected,
+          selectedIntensity,
+          context
+        );
         const stepResp = await api.emotionalReset.step(sessionData.session_id, {
           current_step: 1,
           user_input: userInput,
@@ -129,7 +139,7 @@ export function EmotionalResetScreen(): React.JSX.Element {
         if (stepData.crisis_detected) {
           setCrisis(
             stepData.crisis_response ||
-              'Your wellbeing comes first. If you are in crisis, please reach out to a trusted person or local emergency services.',
+              'Your wellbeing comes first. If you are in crisis, please reach out to a trusted person or local emergency services.'
           );
           return;
         }
@@ -141,20 +151,28 @@ export function EmotionalResetScreen(): React.JSX.Element {
         } else {
           setResponse({
             witness: guidance,
-            shloka: { sanskrit: '', transliteration: '', translation: '', reference: '' },
+            shloka: {
+              sanskrit: '',
+              transliteration: '',
+              translation: '',
+              reference: '',
+            },
             reflection: stepData.assessment?.assessment ?? '',
             affirmation: '',
           });
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to connect. Please try again.';
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Unable to connect. Please try again.';
         setError(message);
         setResponse(FALLBACK_RESPONSE);
       } finally {
         setLoading(false);
       }
     },
-    [],
+    []
   );
 
   // Phase 2 → 3
@@ -192,17 +210,12 @@ export function EmotionalResetScreen(): React.JSX.Element {
       <StatusBar style="light" />
       <EmotionalResetCanvas phase={phase} />
 
-      <Animated.View
-        style={[StyleSheet.absoluteFill, fadeStyle]}
-        key={phase}
-      >
+      <Animated.View style={[StyleSheet.absoluteFill, fadeStyle]} key={phase}>
         {phase === 'arrival' ? (
           <ArrivalPhase onComplete={handleArrivalComplete} />
         ) : null}
 
-        {phase === 'mandala' ? (
-          <MandalaPhase onOffer={handleOffer} />
-        ) : null}
+        {phase === 'mandala' ? <MandalaPhase onOffer={handleOffer} /> : null}
 
         {phase === 'witness' && emotion ? (
           <WitnessPhase
@@ -218,7 +231,10 @@ export function EmotionalResetScreen(): React.JSX.Element {
         ) : null}
 
         {phase === 'breath' ? (
-          <BreathPhase intensity={intensity} onComplete={handleBreathComplete} />
+          <BreathPhase
+            intensity={intensity}
+            onComplete={handleBreathComplete}
+          />
         ) : null}
 
         {phase === 'integration' && emotion ? (

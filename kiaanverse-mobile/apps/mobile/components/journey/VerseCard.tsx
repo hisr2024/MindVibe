@@ -72,7 +72,9 @@ export function VerseCard({
           </Text>
         </View>
         <Text variant="caption" color={colors.text.muted}>
-          {'\u0936\u094D\u0930\u0940\u092E\u0926\u094D\u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E'}
+          {
+            '\u0936\u094D\u0930\u0940\u092E\u0926\u094D\u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E'
+          }
         </Text>
       </View>
 
@@ -111,7 +113,12 @@ export function VerseCard({
       {englishTranslation ? (
         <>
           <View style={styles.divider} />
-          <Text variant="body" color={colors.text.primary} align="center" style={styles.translation}>
+          <Text
+            variant="body"
+            color={colors.text.primary}
+            align="center"
+            style={styles.translation}
+          >
             {englishTranslation}
           </Text>
         </>
@@ -120,7 +127,11 @@ export function VerseCard({
       {/* Hindi translation toggle */}
       {hindiTranslation ? (
         <>
-          <Pressable onPress={toggleHindi} style={styles.toggleRow} accessibilityRole="button">
+          <Pressable
+            onPress={toggleHindi}
+            style={styles.toggleRow}
+            accessibilityRole="button"
+          >
             <Text variant="caption" color={colors.primary[300]}>
               {showHindi ? 'Hide Hindi Translation' : 'Show Hindi Translation'}
             </Text>

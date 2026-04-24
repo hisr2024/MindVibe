@@ -27,11 +27,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { GoldenButton } from '@kiaanverse/ui';
 
-import {
-  GUNA_PANELS,
-  GUNA_PATTERNS,
-  type GunaKey,
-} from '../data/gunaPatterns';
+import { GUNA_PANELS, GUNA_PATTERNS, type GunaKey } from '../data/gunaPatterns';
 import type { GunaScores, GunaSelections } from '../hooks/useGunaCalculation';
 
 const SACRED_WHITE = '#F5F0E8';
@@ -63,17 +59,20 @@ export function GunaMirrorChamber({
   const scrollRef = useRef<ScrollView>(null);
   const [activePanel, setActivePanel] = useState(0);
 
-  const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const idx = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-    setActivePanel((prev) => (prev === idx ? prev : idx));
-  }, []);
+  const onScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const idx = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+      setActivePanel((prev) => (prev === idx ? prev : idx));
+    },
+    []
+  );
 
   const handleToggle = useCallback(
     (guna: GunaKey, patternId: string) => {
       void Haptics.selectionAsync().catch(() => {});
       onTogglePattern(guna, patternId);
     },
-    [onTogglePattern],
+    [onTogglePattern]
   );
 
   const totalSelected =
@@ -126,10 +125,7 @@ export function GunaMirrorChamber({
         style={styles.panelScroller}
       >
         {GUNA_PANELS.map((panel) => (
-          <View
-            key={panel.key}
-            style={[styles.panel, { width: SCREEN_WIDTH }]}
-          >
+          <View key={panel.key} style={[styles.panel, { width: SCREEN_WIDTH }]}>
             <View style={[styles.panelHeader, { backgroundColor: panel.tint }]}>
               <Text style={[styles.panelTitle, { color: panel.color }]}>
                 {panel.sanskrit} — {panel.label}
@@ -139,7 +135,9 @@ export function GunaMirrorChamber({
 
             <View style={styles.chipWrap}>
               {GUNA_PATTERNS[panel.key].map((pattern) => {
-                const isSelected = selectedPatterns[panel.key].includes(pattern.id);
+                const isSelected = selectedPatterns[panel.key].includes(
+                  pattern.id
+                );
                 return (
                   <Pressable
                     key={pattern.id}
@@ -192,7 +190,10 @@ export function GunaMirrorChamber({
         ))}
       </View>
 
-      <Animated.View entering={FadeInDown.duration(360)} style={styles.scoreBlock}>
+      <Animated.View
+        entering={FadeInDown.duration(360)}
+        style={styles.scoreBlock}
+      >
         {GUNA_PANELS.map((panel) => (
           <View key={panel.key} style={styles.scoreRow}>
             <Text style={[styles.scoreLabel, { color: panel.color }]}>

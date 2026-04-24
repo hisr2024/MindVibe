@@ -63,7 +63,7 @@ const LOADING_LINES: readonly string[] = [
 
 /** ARDHA pillars shown in the reference accordion under the CTA. */
 const PILLAR_SUMMARY = ARDHA_SECTIONS.filter(
-  (s) => s.key !== 'gita_verse' && s.key !== 'compliance_check',
+  (s) => s.key !== 'gita_verse' && s.key !== 'compliance_check'
 );
 
 export default function ArdhaInputScreen(): React.JSX.Element {
@@ -142,7 +142,9 @@ export default function ArdhaInputScreen(): React.JSX.Element {
           style={styles.card}
         >
           <View style={styles.cardHeader}>
-            <Text style={styles.cardHeaderLabel}>Share the thought to reframe</Text>
+            <Text style={styles.cardHeaderLabel}>
+              Share the thought to reframe
+            </Text>
             <View style={styles.bulbBadge}>
               <Text style={styles.bulb}>💡</Text>
             </View>
@@ -220,7 +222,9 @@ export default function ArdhaInputScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 opacity={0.35}
               />
-              <Text style={styles.loadingLine}>{LOADING_LINES[loadingIdx]}</Text>
+              <Text style={styles.loadingLine}>
+                {LOADING_LINES[loadingIdx]}
+              </Text>
             </View>
           ) : null}
 
@@ -271,8 +275,8 @@ export default function ArdhaInputScreen(): React.JSX.Element {
           </Text>
           <View style={styles.cbtFlow}>
             <Text style={styles.cbtFlowText}>
-              Atma Distinction → Raga-Dvesha Scan → Dharma Alignment →
-              Hrdaya Samatvam → Arpana
+              Atma Distinction → Raga-Dvesha Scan → Dharma Alignment → Hrdaya
+              Samatvam → Arpana
             </Text>
           </View>
         </Animated.View>
@@ -282,12 +286,14 @@ export default function ArdhaInputScreen(): React.JSX.Element {
 }
 
 function formatError(err: unknown): string {
-  if (isAuthError(err)) return 'Your session has expired. Please sign in again.';
+  if (isAuthError(err))
+    return 'Your session has expired. Please sign in again.';
   if (isOfflineError(err))
     return 'The network is unreachable. Check your connection and try once more.';
   if (isApiError(err) && err.statusCode >= 500)
     return 'ARDHA is waking from deep meditation. Please try again in a moment.';
-  if (err instanceof Error && err.message) return `ARDHA could not reframe: ${err.message}`;
+  if (err instanceof Error && err.message)
+    return `ARDHA could not reframe: ${err.message}`;
   return 'ARDHA could not reframe right now. Please try again.';
 }
 

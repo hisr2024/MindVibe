@@ -46,7 +46,10 @@ export function GitaFamiliarityStep({
   // Sync thumb position when value or screen dimensions change
   // (e.g. navigating back to this step, or screen rotation)
   useEffect(() => {
-    thumbX.value = withSpring(value * segmentWidth, { damping: 20, stiffness: 200 });
+    thumbX.value = withSpring(value * segmentWidth, {
+      damping: 20,
+      stiffness: 200,
+    });
   }, [value, segmentWidth, thumbX]);
 
   const thumbStyle = useAnimatedStyle(() => ({
@@ -61,13 +64,17 @@ export function GitaFamiliarityStep({
     (level: number) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       // Reanimated shared-value mutation — the idiomatic worklet pattern.
-      thumbX.value = withSpring(level * segmentWidth, { damping: 20, stiffness: 200 });
+      thumbX.value = withSpring(level * segmentWidth, {
+        damping: 20,
+        stiffness: 200,
+      });
       onChange(level);
     },
-    [onChange, segmentWidth, thumbX],
+    [onChange, segmentWidth, thumbX]
   );
 
-  const currentLabel = LEVELS.find((l) => l.value === value)?.label ?? 'Never read';
+  const currentLabel =
+    LEVELS.find((l) => l.value === value)?.label ?? 'Never read';
 
   return (
     <View style={styles.container}>
@@ -108,10 +115,7 @@ export function GitaFamiliarityStep({
               accessibilityValue={{ text: level.label }}
             >
               <View
-                style={[
-                  styles.tick,
-                  level.value <= value && styles.tickActive,
-                ]}
+                style={[styles.tick, level.value <= value && styles.tickActive]}
               />
             </Pressable>
           ))}
@@ -129,11 +133,7 @@ export function GitaFamiliarityStep({
       </View>
 
       <View style={styles.actions}>
-        <GoldenButton
-          title="Continue"
-          onPress={onNext}
-          testID="gita-next"
-        />
+        <GoldenButton title="Continue" onPress={onNext} testID="gita-next" />
         <GoldenButton
           title="Skip"
           variant="ghost"

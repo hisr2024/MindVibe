@@ -28,7 +28,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+} from 'react-native-reanimated';
 import {
   Text,
   Input,
@@ -42,7 +46,11 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
-import { useJournalEntry, useUpdateJournal, useDeleteJournal } from '@kiaanverse/api';
+import {
+  useJournalEntry,
+  useUpdateJournal,
+  useDeleteJournal,
+} from '@kiaanverse/api';
 
 const MOOD_OPTIONS = [
   { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },
@@ -73,7 +81,13 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
   }
   if (!HAS_SUBTLE_CRYPTO) return keyBase64;
   const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
-  return globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return globalThis.crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
 }
 
 /**
@@ -82,13 +96,22 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
  */
 async function encryptContent(content: string): Promise<string> {
   if (!HAS_SUBTLE_CRYPTO) {
-    const hash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, content);
-    return btoa(unescape(encodeURIComponent(content))) + ':' + hash.slice(0, 16);
+    const hash = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      content
+    );
+    return (
+      btoa(unescape(encodeURIComponent(content))) + ':' + hash.slice(0, 16)
+    );
   }
-  const key = await getOrCreateEncryptionKey() as CryptoKey;
+  const key = (await getOrCreateEncryptionKey()) as CryptoKey;
   const iv = await Crypto.getRandomBytesAsync(12);
   const encoded = new TextEncoder().encode(content);
-  const encrypted = await globalThis.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  const encrypted = await globalThis.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encoded
+  );
   const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length);
   combined.set(iv, 0);
   combined.set(new Uint8Array(encrypted), iv.length);
@@ -105,13 +128,23 @@ async function decryptContent(encryptedBase64: string): Promise<string> {
     return decodeURIComponent(escape(atob(base64Part)));
   }
   if (!HAS_SUBTLE_CRYPTO) {
-    try { return decodeURIComponent(escape(atob(encryptedBase64))); } catch { return encryptedBase64; }
+    try {
+      return decodeURIComponent(escape(atob(encryptedBase64)));
+    } catch {
+      return encryptedBase64;
+    }
   }
-  const key = await getOrCreateEncryptionKey() as CryptoKey;
-  const combined = Uint8Array.from(atob(encryptedBase64), (c) => c.charCodeAt(0));
+  const key = (await getOrCreateEncryptionKey()) as CryptoKey;
+  const combined = Uint8Array.from(atob(encryptedBase64), (c) =>
+    c.charCodeAt(0)
+  );
   const iv = combined.slice(0, 12);
   const data = combined.slice(12);
-  const decrypted = await globalThis.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  const decrypted = await globalThis.crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    data
+  );
   return new TextDecoder().decode(decrypted);
 }
 
@@ -167,7 +200,9 @@ export default function JournalDetailScreen(): React.JSX.Element {
       .catch(() => {
         if (!cancelled) setDecryptedContent(entry.content_encrypted);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [entry]);
 
   const handleStartEdit = useCallback(() => {
@@ -177,7 +212,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
     setEditContent(decryptedContent);
     setEditMood(entry.mood_tag ?? null);
     const nonMoodTags = entry.tags.filter(
-      (t) => !MOOD_OPTIONS.some((m) => m.tag === t),
+      (t) => !MOOD_OPTIONS.some((m) => m.tag === t)
     );
     setEditTagsInput(nonMoodTags.join(', '));
     setIsEditing(true);
@@ -224,7 +259,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
     } catch {
       Alert.alert(
         'Could Not Save',
-        'Your changes could not be saved right now. Please try again.',
+        'Your changes could not be saved right now. Please try again.'
       );
     }
   }, [editContent, editTagsInput, editMood, updateJournal, id]);
@@ -245,11 +280,14 @@ export default function JournalDetailScreen(): React.JSX.Element {
               await deleteJournal.mutateAsync(id ?? '');
               router.back();
             } catch {
-              Alert.alert('Error', 'Could not delete this reflection. Please try again.');
+              Alert.alert(
+                'Error',
+                'Could not delete this reflection. Please try again.'
+              );
             }
           },
         },
-      ],
+      ]
     );
   }, [router, deleteJournal, id]);
 
@@ -280,7 +318,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
   const moodEmoji = getMoodEmoji(entry.mood_tag);
   const moodLabel = getMoodLabel(entry.mood_tag);
   const nonMoodTags = entry.tags.filter(
-    (t) => !MOOD_OPTIONS.some((m) => m.tag === t),
+    (t) => !MOOD_OPTIONS.some((m) => m.tag === t)
   );
 
   // ---------------------------------------------------------------------------
@@ -303,7 +341,9 @@ export default function JournalDetailScreen(): React.JSX.Element {
                   accessibilityRole="button"
                   accessibilityLabel="Cancel editing"
                 >
-                  <Text variant="body" color={colors.text.muted}>Cancel</Text>
+                  <Text variant="body" color={colors.text.muted}>
+                    Cancel
+                  </Text>
                 </Pressable>
               }
             />
@@ -342,7 +382,11 @@ export default function JournalDetailScreen(): React.JSX.Element {
                   <Text variant="body">{option.emoji}</Text>
                   <Text
                     variant="caption"
-                    color={editMood === option.tag ? colors.background.dark : colors.text.muted}
+                    color={
+                      editMood === option.tag
+                        ? colors.background.dark
+                        : colors.text.muted
+                    }
                   >
                     {option.label}
                   </Text>
@@ -378,7 +422,12 @@ export default function JournalDetailScreen(): React.JSX.Element {
             </View>
 
             {/* Save button — anchored at bottom above keyboard */}
-            <View style={[styles.editSaveContainer, { paddingBottom: insets.bottom + 16 }]}>
+            <View
+              style={[
+                styles.editSaveContainer,
+                { paddingBottom: insets.bottom + 16 },
+              ]}
+            >
               <GoldenButton
                 title="Save Changes"
                 onPress={handleSaveEdit}
@@ -425,7 +474,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
         >
           {/* Mood badge at top */}
           {moodEmoji ? (
-            <Animated.View entering={FadeIn.duration(400)} style={styles.moodBadgeRow}>
+            <Animated.View
+              entering={FadeIn.duration(400)}
+              style={styles.moodBadgeRow}
+            >
               <View style={styles.moodBadgeLarge}>
                 <Text variant="h1">{moodEmoji}</Text>
                 <Text variant="label" color={colors.text.secondary}>
@@ -440,7 +492,11 @@ export default function JournalDetailScreen(): React.JSX.Element {
             <GlowCard variant="divine" style={styles.viewCard}>
               {/* Title */}
               {entry.title ? (
-                <Text variant="h1" color={colors.text.primary} style={styles.viewTitle}>
+                <Text
+                  variant="h1"
+                  color={colors.text.primary}
+                  style={styles.viewTitle}
+                >
                   {entry.title}
                 </Text>
               ) : null}
@@ -448,7 +504,11 @@ export default function JournalDetailScreen(): React.JSX.Element {
               <SacredDivider />
 
               {/* Decrypted content */}
-              <Text variant="body" color={colors.text.primary} style={styles.viewContent}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.viewContent}
+              >
                 {decryptedContent}
               </Text>
 
@@ -463,7 +523,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
           {/* Tags as horizontal pill row */}
           {nonMoodTags.length > 0 ? (
-            <Animated.View entering={FadeIn.duration(400).delay(200)} style={styles.viewTagRow}>
+            <Animated.View
+              entering={FadeIn.duration(400).delay(200)}
+              style={styles.viewTagRow}
+            >
               {nonMoodTags.map((tag) => (
                 <Pressable
                   key={tag}
@@ -478,7 +541,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
           ) : null}
 
           {/* Date at bottom */}
-          <Animated.View entering={FadeIn.duration(400).delay(300)} style={styles.viewDateRow}>
+          <Animated.View
+            entering={FadeIn.duration(400).delay(300)}
+            style={styles.viewDateRow}
+          >
             <Text variant="caption" color={colors.text.muted} align="center">
               {formatDate(entry.created_at)}
             </Text>
@@ -491,7 +557,12 @@ export default function JournalDetailScreen(): React.JSX.Element {
           onClose={() => setShowActions(false)}
           snapPoints={[250]}
         >
-          <View style={[styles.bottomSheetContent, { paddingBottom: insets.bottom + spacing.md }]}>
+          <View
+            style={[
+              styles.bottomSheetContent,
+              { paddingBottom: insets.bottom + spacing.md },
+            ]}
+          >
             <Pressable
               onPress={() => {
                 setShowActions(false);

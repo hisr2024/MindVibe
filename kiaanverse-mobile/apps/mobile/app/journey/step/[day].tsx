@@ -151,14 +151,19 @@ function parseStepSections(step: WisdomJourneyStep) {
   }
 
   // Extract reflection prompts from the step.reflection field or content
-  const reflectionText = step.reflection ?? sections['reflection'] ?? sections['guided reflection'] ?? '';
+  const reflectionText =
+    step.reflection ??
+    sections['reflection'] ??
+    sections['guided reflection'] ??
+    '';
   const reflectionPrompts = reflectionText
     .split('\n')
     .map((l) => l.replace(/^\d+\.\s*/, '').trim())
     .filter(Boolean);
 
   // Extract practice instructions
-  const practiceText = sections['practice'] ?? sections["today's practice"] ?? '';
+  const practiceText =
+    sections['practice'] ?? sections["today's practice"] ?? '';
   const practiceInstructions = practiceText
     .split('\n')
     .map((l) => l.replace(/^\d+\.\s*/, '').trim())
@@ -166,10 +171,17 @@ function parseStepSections(step: WisdomJourneyStep) {
 
   return {
     teaching: sections['teaching'] ?? content,
-    reflectionPrompts: reflectionPrompts.length > 0 ? reflectionPrompts : undefined,
-    practiceInstructions: practiceInstructions.length > 0 ? practiceInstructions : undefined,
-    microCommitment: sections['micro-commitment'] ?? sections['commitment'] ?? undefined,
-    safetyNotes: sections['safety'] ?? sections['safety notes'] ?? sections['note'] ?? undefined,
+    reflectionPrompts:
+      reflectionPrompts.length > 0 ? reflectionPrompts : undefined,
+    practiceInstructions:
+      practiceInstructions.length > 0 ? practiceInstructions : undefined,
+    microCommitment:
+      sections['micro-commitment'] ?? sections['commitment'] ?? undefined,
+    safetyNotes:
+      sections['safety'] ??
+      sections['safety notes'] ??
+      sections['note'] ??
+      undefined,
   };
 }
 
@@ -198,7 +210,10 @@ function CompletionArea({
 }): React.JSX.Element {
   if (isCompleted) {
     return (
-      <Animated.View entering={FadeIn.duration(400)} style={styles.completionArea}>
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.completionArea}
+      >
         <GlowCard variant="golden" style={styles.completedCard}>
           <Text variant="h3" color={colors.semantic.success} align="center">
             {'\u2705'} Step Completed
@@ -213,7 +228,10 @@ function CompletionArea({
 
   if (!isAvailable) {
     return (
-      <Animated.View entering={FadeIn.duration(400)} style={styles.completionArea}>
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.completionArea}
+      >
         <View style={styles.lockedCard}>
           <MandalaSpin size={48} color={colors.alpha.goldLight} speed="slow" />
           <Text variant="body" color={colors.text.secondary} align="center">
@@ -228,15 +246,25 @@ function CompletionArea({
   }
 
   return (
-    <Animated.View entering={FadeInUp.delay(200).duration(400)} style={styles.completionArea}>
+    <Animated.View
+      entering={FadeInUp.delay(200).duration(400)}
+      style={styles.completionArea}
+    >
       {/* Optional reflection textarea */}
-      <Text variant="label" color={colors.text.secondary} style={styles.reflectionLabel}>
+      <Text
+        variant="label"
+        color={colors.text.secondary}
+        style={styles.reflectionLabel}
+      >
         Your Reflection (optional)
       </Text>
       <TextInput
         style={[
           styles.reflectionInput,
-          { borderColor: reflectionText.length > 0 ? accentColor : colors.alpha.whiteLight },
+          {
+            borderColor:
+              reflectionText.length > 0 ? accentColor : colors.alpha.whiteLight,
+          },
         ]}
         value={reflectionText}
         onChangeText={onReflectionChange}
@@ -247,7 +275,11 @@ function CompletionArea({
         textAlignVertical="top"
         accessibilityLabel="Reflection textarea"
       />
-      <Text variant="caption" color={colors.text.muted} style={styles.charCount}>
+      <Text
+        variant="caption"
+        color={colors.text.muted}
+        style={styles.charCount}
+      >
         {reflectionText.length}/{MAX_REFLECTION_LENGTH}
       </Text>
 
@@ -266,7 +298,9 @@ function CompletionArea({
         <Text variant="caption" color={colors.primary[300]}>
           +{step.xpReward} XP
         </Text>
-        <Text variant="caption" color={colors.text.muted}>{'\u00B7'}</Text>
+        <Text variant="caption" color={colors.text.muted}>
+          {'\u00B7'}
+        </Text>
         <Text variant="caption" color={colors.primary[300]}>
           +{step.karmaReward} Karma
         </Text>
@@ -280,7 +314,10 @@ function CompletionArea({
 // ---------------------------------------------------------------------------
 
 export default function StepPlayerScreen(): React.JSX.Element {
-  const { day, journeyId } = useLocalSearchParams<{ day: string; journeyId: string }>();
+  const { day, journeyId } = useLocalSearchParams<{
+    day: string;
+    journeyId: string;
+  }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -307,8 +344,12 @@ export default function StepPlayerScreen(): React.JSX.Element {
     return detectEnemyKey(data.title, data.description);
   }, [data]);
 
-  const accentColor = enemyKey ? ENEMY_COLORS[enemyKey] ?? colors.primary[500] : colors.primary[500];
-  const gradientVariant = (enemyKey ? ENEMY_GRADIENT_VARIANT[enemyKey] : 'divine') as 'divine' | 'peace' | 'healing' | 'release' | 'renewal';
+  const accentColor = enemyKey
+    ? (ENEMY_COLORS[enemyKey] ?? colors.primary[500])
+    : colors.primary[500];
+  const gradientVariant = (
+    enemyKey ? ENEMY_GRADIENT_VARIANT[enemyKey] : 'divine'
+  ) as 'divine' | 'peace' | 'healing' | 'release' | 'renewal';
 
   const currentStep = useMemo(() => {
     if (!data?.steps) return null;
@@ -320,9 +361,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
 
   const completedStepIndices = useMemo(() => {
     if (!data?.steps) return [];
-    return data.steps
-      .filter((s) => s.isCompleted)
-      .map((s) => s.dayIndex - 1); // SacredStepIndicator uses 0-indexed
+    return data.steps.filter((s) => s.isCompleted).map((s) => s.dayIndex - 1); // SacredStepIndicator uses 0-indexed
   }, [data]);
 
   const dayMeta = DAY_META[dayIndex];
@@ -362,14 +401,25 @@ export default function StepPlayerScreen(): React.JSX.Element {
           // Scroll to top to see celebration
           scrollRef.current?.scrollTo({ y: 0, animated: true });
         },
-      },
+      }
     );
-  }, [currentStep, isCompleted, jId, dayIndex, completeStep, data, updateJourneyProgress]);
+  }, [
+    currentStep,
+    isCompleted,
+    jId,
+    dayIndex,
+    completeStep,
+    data,
+    updateJourneyProgress,
+  ]);
 
   // Loading state
   if (isLoading || !data) {
     return (
-      <DivineGradient variant="divine" style={{ flex: 1, paddingTop: insets.top }}>
+      <DivineGradient
+        variant="divine"
+        style={{ flex: 1, paddingTop: insets.top }}
+      >
         <View style={styles.centerState}>
           <LoadingMandala size={80} />
           <Text variant="bodySmall" color={colors.text.muted}>
@@ -383,10 +433,15 @@ export default function StepPlayerScreen(): React.JSX.Element {
   // Error state
   if (error || !currentStep) {
     return (
-      <DivineGradient variant="divine" style={{ flex: 1, paddingTop: insets.top }}>
+      <DivineGradient
+        variant="divine"
+        style={{ flex: 1, paddingTop: insets.top }}
+      >
         <View style={styles.centerState}>
           <Text variant="body" color={colors.semantic.error}>
-            {currentStep === null ? 'Step not found for this day' : 'Unable to load step'}
+            {currentStep === null
+              ? 'Step not found for this day'
+              : 'Unable to load step'}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted}>
             Please go back and try again
@@ -413,12 +468,18 @@ export default function StepPlayerScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xxxl },
+            {
+              paddingTop: insets.top + spacing.md,
+              paddingBottom: insets.bottom + spacing.xxxl,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
         >
           {/* ---------- Top Navigation ---------- */}
-          <Animated.View entering={FadeInDown.duration(300)} style={styles.topNav}>
+          <Animated.View
+            entering={FadeInDown.duration(300)}
+            style={styles.topNav}
+          >
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -459,12 +520,19 @@ export default function StepPlayerScreen(): React.JSX.Element {
           </Animated.View>
 
           {/* ---------- Step Title ---------- */}
-          <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.titleSection}>
+          <Animated.View
+            entering={FadeInDown.delay(200).duration(500)}
+            style={styles.titleSection}
+          >
             <Text variant="h2" color={colors.divine.aura} align="center">
               {currentStep.title}
             </Text>
             {dayMeta ? (
-              <Text variant="bodySmall" color={colors.text.muted} align="center">
+              <Text
+                variant="bodySmall"
+                color={colors.text.muted}
+                align="center"
+              >
                 {dayMeta.focus}
               </Text>
             ) : null}
@@ -487,7 +555,11 @@ export default function StepPlayerScreen(): React.JSX.Element {
             /* Fallback: render raw content */
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
               <GlowCard variant="divine" style={styles.rawContentCard}>
-                <Text variant="body" color={colors.text.primary} style={styles.rawContentText}>
+                <Text
+                  variant="body"
+                  color={colors.text.primary}
+                  style={styles.rawContentText}
+                >
                   {currentStep.content}
                 </Text>
               </GlowCard>

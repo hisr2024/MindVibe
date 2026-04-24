@@ -27,10 +27,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import {
-  DivineBackground,
-  LoadingMandala,
-} from '@kiaanverse/ui';
+import { DivineBackground, LoadingMandala } from '@kiaanverse/ui';
 import {
   useJourneys,
   useJourneyTemplates,
@@ -109,7 +106,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         },
       });
     },
-    [startJourney, router],
+    [startJourney, router]
   );
 
   const handleJourneyPress = useCallback(
@@ -117,7 +114,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push(`/journey/${journeyId}` as never);
     },
-    [router],
+    [router]
   );
 
   const keyExtractor = useCallback((item: { id: string }) => item.id, []);
@@ -141,7 +138,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         />
       );
     },
-    [handleStartJourney, startJourney.isPending],
+    [handleStartJourney, startJourney.isPending]
   );
 
   const renderActiveItem = useCallback(
@@ -162,7 +159,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         />
       );
     },
-    [handleJourneyPress],
+    [handleJourneyPress]
   );
 
   const renderCompletedItem = useCallback(
@@ -183,7 +180,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         />
       );
     },
-    [handleJourneyPress],
+    [handleJourneyPress]
   );
 
   // Configuration per tab.
@@ -289,7 +286,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         keyExtractor={keyExtractor}
         renderItem={
           tabState.renderItem as unknown as (
-            info: ListRenderItemInfo<{ id: string }>,
+            info: ListRenderItemInfo<{ id: string }>
           ) => React.ReactElement | null
         }
         contentContainerStyle={[

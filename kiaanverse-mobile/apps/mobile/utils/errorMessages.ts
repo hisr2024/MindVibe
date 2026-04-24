@@ -27,12 +27,15 @@ import {
 
 const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   INVALID_CREDENTIALS: 'The email or password is incorrect. Please try again.',
-  EMAIL_NOT_VERIFIED: 'Please verify your email before signing in. Check your inbox.',
+  EMAIL_NOT_VERIFIED:
+    'Please verify your email before signing in. Check your inbox.',
   EMAIL_TAKEN: 'This email is already registered. Try signing in instead.',
   TOKEN_EXPIRED: 'Your session has ended — please sign in again.',
-  NETWORK_ERROR: 'Could not connect to the divine — please check your connection.',
+  NETWORK_ERROR:
+    'Could not connect to the divine — please check your connection.',
   VALIDATION_ERROR: 'Please check your input and try again.',
-  ACCOUNT_LOCKED: 'Your account has been temporarily locked. Please try again later.',
+  ACCOUNT_LOCKED:
+    'Your account has been temporarily locked. Please try again later.',
   UNKNOWN: 'Something unexpected happened. Sakha will be back soon.',
 };
 
@@ -60,7 +63,8 @@ const STATUS_MESSAGES: Record<number, string> = {
 // ---------------------------------------------------------------------------
 
 const GENERIC_ERROR = 'Something unexpected happened. Sakha will be back soon.';
-const OFFLINE_ERROR = 'Could not connect to the divine — please check your connection.';
+const OFFLINE_ERROR =
+  'Could not connect to the divine — please check your connection.';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -114,7 +118,8 @@ export function getErrorMessage(error: unknown): string {
  */
 export function getErrorToastType(error: unknown): 'error' | 'warning' {
   if (isOfflineError(error)) return 'warning';
-  if (isAuthError(error) && error.authCode === 'TOKEN_EXPIRED') return 'warning';
+  if (isAuthError(error) && error.authCode === 'TOKEN_EXPIRED')
+    return 'warning';
   return 'error';
 }
 

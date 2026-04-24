@@ -40,7 +40,11 @@ export interface BridgeTrack {
  *  rejected the add/play calls; suggest retry. */
 export type PlayResult =
   | { readonly ok: true }
-  | { readonly ok: false; readonly reason: 'unavailable'; readonly message: string }
+  | {
+      readonly ok: false;
+      readonly reason: 'unavailable';
+      readonly message: string;
+    }
   | { readonly ok: false; readonly reason: 'error'; readonly message: string };
 
 function isPlayableUrl(url: string): boolean {
@@ -57,7 +61,7 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
     if (__DEV__) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[trackPlayerBridge] playTrack skipped — unplayable url="${track.audioUrl}" for id=${track.id}`,
+        `[trackPlayerBridge] playTrack skipped — unplayable url="${track.audioUrl}" for id=${track.id}`
       );
     }
     return {

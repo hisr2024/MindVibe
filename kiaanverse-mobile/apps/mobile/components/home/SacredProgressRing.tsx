@@ -60,7 +60,13 @@ export function SacredProgressRing({
     <View style={[styles.wrap, { width: size, height: size }, style]}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <Defs>
-          <LinearGradient id="sacredProgressGradient" x1="0" y1="0" x2="1" y2="1">
+          <LinearGradient
+            id="sacredProgressGradient"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1"
+          >
             <Stop offset="0" stopColor="#F0C040" stopOpacity="1" />
             <Stop offset="1" stopColor="#D4A017" stopOpacity="1" />
           </LinearGradient>

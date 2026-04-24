@@ -60,7 +60,7 @@ function BillingToggleInner({
       });
       onChange(next);
     },
-    [onChange, pillX, value],
+    [onChange, pillX, value]
   );
 
   const pillAnimatedStyle = useAnimatedStyle(() => {
@@ -73,12 +73,12 @@ function BillingToggleInner({
 
   return (
     <View style={[styles.container, style]} onLayout={handleLayout}>
-      <Animated.View style={[styles.pill, pillAnimatedStyle]} pointerEvents="none">
+      <Animated.View
+        style={[styles.pill, pillAnimatedStyle]}
+        pointerEvents="none"
+      >
         <LinearGradient
-          colors={[
-            'rgba(212,160,23,0.25)',
-            'rgba(212,160,23,0.12)',
-          ]}
+          colors={['rgba(212,160,23,0.25)', 'rgba(212,160,23,0.12)']}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={StyleSheet.absoluteFill}

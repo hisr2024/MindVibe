@@ -36,7 +36,7 @@ export function PurposeStep({
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onToggle(id);
     },
-    [onToggle],
+    [onToggle]
   );
 
   return (

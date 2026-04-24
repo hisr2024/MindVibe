@@ -9,7 +9,12 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInUp,
+  SlideOutUp,
+} from 'react-native-reanimated';
 import { Text, colors, spacing } from '@kiaanverse/ui';
 
 interface OfflineBannerProps {
@@ -17,18 +22,24 @@ interface OfflineBannerProps {
   pendingCount?: number;
 }
 
-export function OfflineBanner({ isOffline, pendingCount = 0 }: OfflineBannerProps): React.JSX.Element | null {
+export function OfflineBanner({
+  isOffline,
+  pendingCount = 0,
+}: OfflineBannerProps): React.JSX.Element | null {
   const insets = useSafeAreaInsets();
 
   if (!isOffline) return null;
 
-  const message = pendingCount > 0
-    ? `You're offline. ${pendingCount} change${pendingCount === 1 ? '' : 's'} will sync when reconnected.`
-    : "You're offline. Showing cached content.";
+  const message =
+    pendingCount > 0
+      ? `You're offline. ${pendingCount} change${pendingCount === 1 ? '' : 's'} will sync when reconnected.`
+      : "You're offline. Showing cached content.";
 
   return (
     <Animated.View
-      entering={SlideInUp.duration(300).withInitialValues({ transform: [{ translateY: -60 }] })}
+      entering={SlideInUp.duration(300).withInitialValues({
+        transform: [{ translateY: -60 }],
+      })}
       exiting={SlideOutUp.duration(200)}
       style={[styles.container, { paddingTop: insets.top + 4 }]}
     >

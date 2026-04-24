@@ -22,7 +22,11 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
-import { useDeepInsights, useGunaBalance, useEmotionalPatterns } from '@kiaanverse/api';
+import {
+  useDeepInsights,
+  useGunaBalance,
+  useEmotionalPatterns,
+} from '@kiaanverse/api';
 
 /** Color mapping for the three gunas */
 const GUNA_COLORS: Record<string, string> = {
@@ -83,7 +87,11 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                     <View style={styles.gunaLabelRow}>
                       <Text
                         variant="bodySmall"
-                        color={isDominant ? colors.text.primary : colors.text.secondary}
+                        color={
+                          isDominant
+                            ? colors.text.primary
+                            : colors.text.secondary
+                        }
                         style={isDominant ? styles.dominantLabel : undefined}
                       >
                         {GUNA_LABELS[gunaKey]}
@@ -108,7 +116,11 @@ export default function DeepInsightsScreen(): React.JSX.Element {
               })}
 
               {guna.guidance ? (
-                <Text variant="bodySmall" color={colors.text.secondary} style={styles.guidanceText}>
+                <Text
+                  variant="bodySmall"
+                  color={colors.text.secondary}
+                  style={styles.guidanceText}
+                >
                   {guna.guidance}
                 </Text>
               ) : null}
@@ -170,7 +182,11 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                   <Text variant="body" color={colors.divine.aura}>
                     {'\u2022'}
                   </Text>
-                  <Text variant="body" color={colors.text.secondary} style={styles.recText}>
+                  <Text
+                    variant="body"
+                    color={colors.text.secondary}
+                    style={styles.recText}
+                  >
                     {rec}
                   </Text>
                 </View>

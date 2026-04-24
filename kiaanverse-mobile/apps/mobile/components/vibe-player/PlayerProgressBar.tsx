@@ -86,7 +86,7 @@ function PlayerProgressBarInner({
     (e: LayoutChangeEvent) => {
       trackWidth.value = e.nativeEvent.layout.width;
     },
-    [trackWidth],
+    [trackWidth]
   );
 
   const emitHapticOnTick = useCallback((seconds: number) => {
@@ -101,7 +101,7 @@ function PlayerProgressBarInner({
     (seconds: number) => {
       onSeek(Math.max(0, Math.min(duration, seconds)));
     },
-    [duration, onSeek],
+    [duration, onSeek]
   );
 
   /** Convert an x-offset to seconds. */

@@ -62,18 +62,20 @@ interface SacredMirror {
   };
 }
 
-function extractMirror(report: KarmaLytixWeeklyReport | undefined): SacredMirror | null {
+function extractMirror(
+  report: KarmaLytixWeeklyReport | undefined
+): SacredMirror | null {
   if (!report || report.insufficient_data) return null;
-  const patterns = report.patterns_detected as Record<string, unknown> | undefined;
+  const patterns = report.patterns_detected as
+    | Record<string, unknown>
+    | undefined;
   if (!patterns || typeof patterns !== 'object') return null;
   if (!('mirror' in patterns) && !('pattern' in patterns)) return null;
   return patterns as SacredMirror;
 }
 
 function formatDimensionName(key: string): string {
-  return key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ---------------------------------------------------------------------------
@@ -116,7 +118,11 @@ export default function KarmalytixScreen(): React.JSX.Element {
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <GoldenHeader title="Karmalytix" onBack={() => router.back()} />
-        <Text variant="caption" color={colors.primary[500]} style={styles.sanskritSubtitle}>
+        <Text
+          variant="caption"
+          color={colors.primary[500]}
+          style={styles.sanskritSubtitle}
+        >
           कर्म-दर्पण · Dharmic Analysis via Kiaan AI
         </Text>
 
@@ -133,13 +139,24 @@ export default function KarmalytixScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           {/* -- Insufficient data state -- */}
-          {(insufficient || (!isLoading && !mirror)) ? (
-            <Animated.View entering={FadeInDown.duration(500)} style={styles.insufficientCard}>
+          {insufficient || (!isLoading && !mirror) ? (
+            <Animated.View
+              entering={FadeInDown.duration(500)}
+              style={styles.insufficientCard}
+            >
               <Text style={styles.lotus}>{'\u{1FAB7}'}</Text>
-              <Text variant="h2" color={colors.text.primary} style={styles.insufficientTitle}>
+              <Text
+                variant="h2"
+                color={colors.text.primary}
+                style={styles.insufficientTitle}
+              >
                 Your mirror awaits
               </Text>
-              <Text variant="caption" color={colors.text.secondary} style={styles.insufficientSub}>
+              <Text
+                variant="caption"
+                color={colors.text.secondary}
+                style={styles.insufficientSub}
+              >
                 {entriesNeeded > 0
                   ? `Write ${entriesNeeded} more reflection${entriesNeeded === 1 ? '' : 's'} this week and KIAAN will craft your Sacred Mirror from the patterns.`
                   : "Journal for a few days — then return for Sakha's weekly reflection."}
@@ -154,14 +171,26 @@ export default function KarmalytixScreen(): React.JSX.Element {
 
           {/* -- Overall score hero -- */}
           {!insufficient && data ? (
-            <Animated.View entering={FadeInDown.duration(500)} style={styles.scoreHero}>
-              <Text variant="caption" color={colors.text.muted} style={styles.scoreLabel}>
+            <Animated.View
+              entering={FadeInDown.duration(500)}
+              style={styles.scoreHero}
+            >
+              <Text
+                variant="caption"
+                color={colors.text.muted}
+                style={styles.scoreLabel}
+              >
                 KARMIC ALIGNMENT
               </Text>
-              <Text variant="h1" color={colors.primary[500]} style={styles.scoreValue}>
+              <Text
+                variant="h1"
+                color={colors.primary[500]}
+                style={styles.scoreValue}
+              >
                 {data.overall_karma_score}
                 <Text variant="h3" color={colors.text.secondary}>
-                  {' '}/ 100
+                  {' '}
+                  / 100
                 </Text>
               </Text>
               {data.period_start && data.period_end ? (
@@ -173,26 +202,45 @@ export default function KarmalytixScreen(): React.JSX.Element {
           ) : null}
 
           {/* -- Karma dimensions -- */}
-          {!insufficient && data && Object.keys(data.karma_dimensions ?? {}).length > 0 ? (
-            <Animated.View entering={FadeInDown.delay(80).duration(500)} style={styles.section}>
-              <Text variant="label" color={colors.primary[500]} style={styles.sectionLabel}>
+          {!insufficient &&
+          data &&
+          Object.keys(data.karma_dimensions ?? {}).length > 0 ? (
+            <Animated.View
+              entering={FadeInDown.delay(80).duration(500)}
+              style={styles.section}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.sectionLabel}
+              >
                 KARMA DIMENSIONS
               </Text>
               <View style={styles.dimensions}>
                 {Object.entries(data.karma_dimensions).map(([key, value]) => (
                   <View key={key} style={styles.dimensionRow}>
-                    <Text variant="caption" color={colors.text.secondary} style={styles.dimensionName}>
+                    <Text
+                      variant="caption"
+                      color={colors.text.secondary}
+                      style={styles.dimensionName}
+                    >
                       {formatDimensionName(key)}
                     </Text>
                     <View style={styles.dimensionBarTrack}>
                       <View
                         style={[
                           styles.dimensionBarFill,
-                          { width: `${Math.max(0, Math.min(100, Number(value)))}%` },
+                          {
+                            width: `${Math.max(0, Math.min(100, Number(value)))}%`,
+                          },
                         ]}
                       />
                     </View>
-                    <Text variant="caption" color={colors.primary[500]} style={styles.dimensionValue}>
+                    <Text
+                      variant="caption"
+                      color={colors.primary[500]}
+                      style={styles.dimensionValue}
+                    >
                       {value}
                     </Text>
                   </View>
@@ -203,22 +251,44 @@ export default function KarmalytixScreen(): React.JSX.Element {
 
           {/* -- Sacred Mirror 6 sections -- */}
           {mirror?.mirror ? (
-            <Animated.View entering={FadeInDown.delay(160).duration(500)} style={styles.card}>
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Animated.View
+              entering={FadeInDown.delay(160).duration(500)}
+              style={styles.card}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
                 THE MIRROR
               </Text>
-              <Text variant="body" color={colors.text.primary} style={styles.body}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.body}
+              >
                 {mirror.mirror}
               </Text>
             </Animated.View>
           ) : null}
 
           {mirror?.pattern ? (
-            <Animated.View entering={FadeInDown.delay(240).duration(500)} style={styles.card}>
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Animated.View
+              entering={FadeInDown.delay(240).duration(500)}
+              style={styles.card}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
                 PATTERN NOTICED
               </Text>
-              <Text variant="body" color={colors.text.primary} style={styles.body}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.body}
+              >
                 {mirror.pattern}
               </Text>
             </Animated.View>
@@ -229,14 +299,27 @@ export default function KarmalytixScreen(): React.JSX.Element {
               entering={FadeInDown.delay(320).duration(500)}
               style={[styles.card, styles.verseCard]}
             >
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
-                GITA ECHO · BG {mirror.gita_echo.chapter}.{mirror.gita_echo.verse}
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
+                GITA ECHO · BG {mirror.gita_echo.chapter}.
+                {mirror.gita_echo.verse}
               </Text>
-              <Text variant="body" color={colors.text.primary} style={styles.sanskritText}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.sanskritText}
+              >
                 {mirror.gita_echo.sanskrit}
               </Text>
               {mirror.gita_echo.connection ? (
-                <Text variant="caption" color={colors.text.secondary} style={styles.verseConnection}>
+                <Text
+                  variant="caption"
+                  color={colors.text.secondary}
+                  style={styles.verseConnection}
+                >
                   {mirror.gita_echo.connection}
                 </Text>
               ) : null}
@@ -244,33 +327,66 @@ export default function KarmalytixScreen(): React.JSX.Element {
           ) : null}
 
           {mirror?.growth_edge ? (
-            <Animated.View entering={FadeInDown.delay(400).duration(500)} style={styles.card}>
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Animated.View
+              entering={FadeInDown.delay(400).duration(500)}
+              style={styles.card}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
                 GROWTH EDGE
               </Text>
-              <Text variant="body" color={colors.text.primary} style={styles.body}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.body}
+              >
                 {mirror.growth_edge}
               </Text>
             </Animated.View>
           ) : null}
 
           {mirror?.blessing ? (
-            <Animated.View entering={FadeInDown.delay(480).duration(500)} style={styles.card}>
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Animated.View
+              entering={FadeInDown.delay(480).duration(500)}
+              style={styles.card}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
                 BLESSING
               </Text>
-              <Text variant="body" color={colors.text.primary} style={[styles.body, styles.blessing]}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={[styles.body, styles.blessing]}
+              >
                 {mirror.blessing}
               </Text>
             </Animated.View>
           ) : null}
 
           {mirror?.dynamic_wisdom ? (
-            <Animated.View entering={FadeInDown.delay(560).duration(500)} style={[styles.card, styles.wisdomCard]}>
-              <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Animated.View
+              entering={FadeInDown.delay(560).duration(500)}
+              style={[styles.card, styles.wisdomCard]}
+            >
+              <Text
+                variant="label"
+                color={colors.primary[500]}
+                style={styles.cardLabel}
+              >
                 DYNAMIC WISDOM · WISDOM CORE
               </Text>
-              <Text variant="body" color={colors.text.primary} style={styles.body}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                style={styles.body}
+              >
                 {mirror.dynamic_wisdom}
               </Text>
             </Animated.View>
@@ -280,20 +396,33 @@ export default function KarmalytixScreen(): React.JSX.Element {
           {!insufficient ? (
             <View style={styles.actions}>
               <GoldenButton
-                title={generate.isPending ? 'Regenerating…' : 'Ask KIAAN for a fresh mirror'}
+                title={
+                  generate.isPending
+                    ? 'Regenerating…'
+                    : 'Ask KIAAN for a fresh mirror'
+                }
                 onPress={onRegenerate}
                 disabled={generate.isPending}
               />
               <Pressable onPress={onOpenSacred} style={styles.secondaryLink}>
-                <Text variant="caption" color={colors.text.muted} style={styles.secondaryText}>
+                <Text
+                  variant="caption"
+                  color={colors.text.muted}
+                  style={styles.secondaryText}
+                >
                   ← Back to Sacred Reflection
                 </Text>
               </Pressable>
             </View>
           ) : null}
 
-          <Text variant="caption" color={colors.text.muted} style={styles.privacyNote}>
-            {'\u{1F512}'} Karmalytix only reads plaintext mood + tag metadata. Your reflection bodies stay end-to-end encrypted on your device.
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            style={styles.privacyNote}
+          >
+            {'\u{1F512}'} Karmalytix only reads plaintext mood + tag metadata.
+            Your reflection bodies stay end-to-end encrypted on your device.
           </Text>
         </ScrollView>
       </View>

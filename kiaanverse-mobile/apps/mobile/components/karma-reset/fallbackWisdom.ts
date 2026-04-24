@@ -11,10 +11,7 @@
  * Unknown categories fall back to `action`, matching the web exactly.
  */
 
-import type {
-  KarmaCategory,
-  KarmaWisdomResponse,
-} from './types';
+import type { KarmaCategory, KarmaWisdomResponse } from './types';
 
 export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
   action: {
@@ -284,7 +281,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
 };
 
 export function getFallbackWisdom(
-  category: KarmaCategory,
+  category: KarmaCategory
 ): KarmaWisdomResponse {
   return FALLBACK_WISDOM[category] ?? FALLBACK_WISDOM.action;
 }
@@ -295,7 +292,7 @@ export function getFallbackWisdom(
  */
 export function computeLocalXP(
   sankalpaSigned: boolean,
-  actionDharmaCommitted: string[],
+  actionDharmaCommitted: string[]
 ): number {
   let xp = 25; // base for completing the flow
   if (sankalpaSigned) xp += 10;

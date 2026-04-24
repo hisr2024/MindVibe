@@ -93,7 +93,10 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 // Component
 // ---------------------------------------------------------------------------
 
-export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.JSX.Element {
+export function BreathingStep({
+  stepData,
+  onNext,
+}: BreathingStepProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
 
   const inhaleSec = stepData?.inhaleDuration ?? 4;
@@ -171,7 +174,7 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
       }, 1000);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [inhaleSec, holdSec, exhaleSec, restSec, totalCycles],
+    [inhaleSec, holdSec, exhaleSec, restSec, totalCycles]
   );
 
   /**
@@ -215,9 +218,12 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reanimated text prop works at runtime but isn't typed
-  const countdownAnimatedProps = useAnimatedProps(() => ({
-    text: countdownText.value,
-  } as any));
+  const countdownAnimatedProps = useAnimatedProps(
+    () =>
+      ({
+        text: countdownText.value,
+      }) as any
+  );
 
   // ---------------------------------------------------------------------------
   // Render

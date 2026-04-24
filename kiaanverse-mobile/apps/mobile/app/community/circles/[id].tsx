@@ -41,7 +41,11 @@ export default function CircleDetailScreen(): React.JSX.Element {
   const circleId = id ?? '';
 
   const { data: circles } = useCommunityCircles();
-  const { data: posts, isLoading: postsLoading, refetch } = useCommunityPosts(circleId);
+  const {
+    data: posts,
+    isLoading: postsLoading,
+    refetch,
+  } = useCommunityPosts(circleId);
   const joinCircle = useJoinCircle();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -49,7 +53,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
   /** Find circle from the cached circles list */
   const circle = useMemo(
     () => (circles ?? []).find((c) => c.id === circleId),
-    [circles, circleId],
+    [circles, circleId]
   );
 
   const handleJoin = useCallback(async () => {
@@ -69,7 +73,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
 
   const renderPost = useCallback(
     ({ item }: { item: CommunityPost }) => <PostCard post={item} />,
-    [],
+    []
   );
 
   const keyExtractor = useCallback((item: CommunityPost) => item.id, []);
@@ -83,7 +87,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
           </Text>
         </View>
       ) : null,
-    [postsLoading],
+    [postsLoading]
   );
 
   if (!circle) {
@@ -101,7 +105,9 @@ export default function CircleDetailScreen(): React.JSX.Element {
     <Animated.View entering={FadeIn.duration(400)} style={styles.headerSection}>
       {/* Circle icon / avatar placeholder */}
       <View style={styles.circleAvatar}>
-        <Text variant="h1" align="center">{'🔮'}</Text>
+        <Text variant="h1" align="center">
+          {'🔮'}
+        </Text>
       </View>
 
       <Text variant="h1" color={colors.text.primary} align="center">
@@ -137,7 +143,11 @@ export default function CircleDetailScreen(): React.JSX.Element {
 
       <Divider />
 
-      <Text variant="label" color={colors.text.secondary} style={styles.postsLabel}>
+      <Text
+        variant="label"
+        color={colors.text.secondary}
+        style={styles.postsLabel}
+      >
         Posts
       </Text>
     </Animated.View>

@@ -32,7 +32,9 @@ function formatClock(seconds: number): string {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-function StillnessPhaseInner({ onComplete }: StillnessPhaseProps): React.JSX.Element {
+function StillnessPhaseInner({
+  onComplete,
+}: StillnessPhaseProps): React.JSX.Element {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {

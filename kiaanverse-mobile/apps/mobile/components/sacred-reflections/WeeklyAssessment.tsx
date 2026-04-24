@@ -40,7 +40,9 @@ const CHALLENGE_OPTIONS = [
 
 export function WeeklyAssessment(): React.JSX.Element | null {
   const [isDue, setIsDue] = useState<boolean | null>(null);
-  const [weekKey, setWeekKey] = useState<string>(() => getIsoWeekKey(new Date()));
+  const [weekKey, setWeekKey] = useState<string>(() =>
+    getIsoWeekKey(new Date())
+  );
   const [challenge, setChallenge] = useState('');
   const [gitaTeaching, setGitaTeaching] = useState('');
   const [consistency, setConsistency] = useState(0);
@@ -80,7 +82,15 @@ export function WeeklyAssessment(): React.JSX.Element | null {
     } finally {
       setIsSaving(false);
     }
-  }, [weekKey, challenge, gitaTeaching, consistency, pattern, sankalpa, isSaving]);
+  }, [
+    weekKey,
+    challenge,
+    gitaTeaching,
+    consistency,
+    pattern,
+    sankalpa,
+    isSaving,
+  ]);
 
   if (isDue !== true) return null;
 
@@ -115,7 +125,9 @@ export function WeeklyAssessment(): React.JSX.Element | null {
             >
               <Text
                 variant="caption"
-                color={selected ? colors.background.dark : colors.text.secondary}
+                color={
+                  selected ? colors.background.dark : colors.text.secondary
+                }
               >
                 {opt}
               </Text>

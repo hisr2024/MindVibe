@@ -38,7 +38,7 @@ export default function SettingsScreen(): React.JSX.Element {
       void Haptics.selectionAsync();
       updateSettings.mutate({ [key]: value });
     },
-    [updateSettings],
+    [updateSettings]
   );
 
   const handleThemeChange = useCallback(
@@ -46,19 +46,25 @@ export default function SettingsScreen(): React.JSX.Element {
       void Haptics.selectionAsync();
       updateSettings.mutate({ theme });
     },
-    [updateSettings],
+    [updateSettings]
   );
 
   const handleClearCache = useCallback(() => {
-    Alert.alert('Clear Cache', 'This will remove all locally cached data. Continue?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear',
-        onPress: () => {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert(
+      'Clear Cache',
+      'This will remove all locally cached data. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear',
+          onPress: () => {
+            void Haptics.notificationAsync(
+              Haptics.NotificationFeedbackType.Success
+            );
+          },
         },
-      },
-    ]);
+      ]
+    );
   }, []);
 
   const handleSignOut = useCallback(() => {
@@ -68,7 +74,9 @@ export default function SettingsScreen(): React.JSX.Element {
         text: 'Sign Out',
         style: 'destructive',
         onPress: () => {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          void Haptics.notificationAsync(
+            Haptics.NotificationFeedbackType.Warning
+          );
           logout();
         },
       },
@@ -85,10 +93,12 @@ export default function SettingsScreen(): React.JSX.Element {
           text: 'Delete My Account',
           style: 'destructive',
           onPress: () => {
-            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            void Haptics.notificationAsync(
+              Haptics.NotificationFeedbackType.Error
+            );
           },
         },
-      ],
+      ]
     );
   }, []);
 
@@ -101,11 +111,17 @@ export default function SettingsScreen(): React.JSX.Element {
       {/* Notifications */}
       <SectionHeader title="Notifications" />
       <Card style={styles.card}>
-        <SettingRow label="Push Notifications" description="Daily reminders and updates">
+        <SettingRow
+          label="Push Notifications"
+          description="Daily reminders and updates"
+        >
           <Switch
             value={settings?.notifications_enabled ?? true}
             onValueChange={(v) => handleToggle('notifications_enabled', v)}
-            trackColor={{ false: colors.alpha.whiteLight, true: colors.primary[700] }}
+            trackColor={{
+              false: colors.alpha.whiteLight,
+              true: colors.primary[700],
+            }}
             thumbColor={colors.primary[300]}
           />
         </SettingRow>
@@ -119,7 +135,10 @@ export default function SettingsScreen(): React.JSX.Element {
       {/* Language */}
       <SectionHeader title="Language" />
       <Card style={styles.card}>
-        <SettingRow label="Language" description={settings?.language ?? 'English'}>
+        <SettingRow
+          label="Language"
+          description={settings?.language ?? 'English'}
+        >
           <Pressable style={styles.changeButton}>
             <Text variant="caption" color={colors.primary[300]}>
               Change
@@ -136,14 +155,19 @@ export default function SettingsScreen(): React.JSX.Element {
             {THEME_OPTIONS.map((t) => (
               <Pressable
                 key={t}
-                style={[styles.themeChip, currentTheme === t && styles.themeChipActive]}
+                style={[
+                  styles.themeChip,
+                  currentTheme === t && styles.themeChipActive,
+                ]}
                 onPress={() => handleThemeChange(t)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: currentTheme === t }}
               >
                 <Text
                   variant="caption"
-                  color={currentTheme === t ? colors.primary[300] : colors.text.muted}
+                  color={
+                    currentTheme === t ? colors.primary[300] : colors.text.muted
+                  }
                 >
                   {t.charAt(0).toUpperCase() + t.slice(1)}
                 </Text>
@@ -156,20 +180,32 @@ export default function SettingsScreen(): React.JSX.Element {
       {/* Security */}
       <SectionHeader title="Security" />
       <Card style={styles.card}>
-        <SettingRow label="Biometric Login" description="Use Face ID / Fingerprint">
+        <SettingRow
+          label="Biometric Login"
+          description="Use Face ID / Fingerprint"
+        >
           <Switch
             value={settings?.biometric_enabled ?? false}
             onValueChange={(v) => handleToggle('biometric_enabled', v)}
-            trackColor={{ false: colors.alpha.whiteLight, true: colors.primary[700] }}
+            trackColor={{
+              false: colors.alpha.whiteLight,
+              true: colors.primary[700],
+            }}
             thumbColor={colors.primary[300]}
           />
         </SettingRow>
         <Divider />
-        <SettingRow label="Journal Encryption" description="Encrypt all sacred reflections">
+        <SettingRow
+          label="Journal Encryption"
+          description="Encrypt all sacred reflections"
+        >
           <Switch
             value={settings?.journal_encryption ?? true}
             onValueChange={(v) => handleToggle('journal_encryption', v)}
-            trackColor={{ false: colors.alpha.whiteLight, true: colors.primary[700] }}
+            trackColor={{
+              false: colors.alpha.whiteLight,
+              true: colors.primary[700],
+            }}
             thumbColor={colors.primary[300]}
           />
         </SettingRow>
@@ -178,11 +214,17 @@ export default function SettingsScreen(): React.JSX.Element {
       {/* Data */}
       <SectionHeader title="Data" />
       <Card style={styles.card}>
-        <SettingRow label="Offline Mode" description="Cache content for offline access">
+        <SettingRow
+          label="Offline Mode"
+          description="Cache content for offline access"
+        >
           <Switch
             value={settings?.offline_mode ?? true}
             onValueChange={(v) => handleToggle('offline_mode', v)}
-            trackColor={{ false: colors.alpha.whiteLight, true: colors.primary[700] }}
+            trackColor={{
+              false: colors.alpha.whiteLight,
+              true: colors.primary[700],
+            }}
             thumbColor={colors.primary[300]}
           />
         </SettingRow>
@@ -206,7 +248,10 @@ export default function SettingsScreen(): React.JSX.Element {
           </Text>
         </SettingRow>
         <Divider />
-        <Pressable onPress={() => router.push('/settings/privacy')} style={styles.linkRow}>
+        <Pressable
+          onPress={() => router.push('/settings/privacy')}
+          style={styles.linkRow}
+        >
           <Text variant="body" color={colors.text.primary}>
             Your Privacy & Data
           </Text>
@@ -252,7 +297,11 @@ export default function SettingsScreen(): React.JSX.Element {
 /** Section group header */
 function SectionHeader({ title }: { title: string }): React.JSX.Element {
   return (
-    <Text variant="caption" color={colors.text.muted} style={styles.sectionHeader}>
+    <Text
+      variant="caption"
+      color={colors.text.muted}
+      style={styles.sectionHeader}
+    >
       {title.toUpperCase()}
     </Text>
   );

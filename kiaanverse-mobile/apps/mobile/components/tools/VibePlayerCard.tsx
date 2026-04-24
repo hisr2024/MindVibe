@@ -123,7 +123,7 @@ function VibePlayerCardInner({
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onTogglePlay();
     },
-    [onTogglePlay],
+    [onTogglePlay]
   );
 
   const cardAnimatedStyle = useAnimatedStyle(() => ({

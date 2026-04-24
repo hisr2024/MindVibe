@@ -28,7 +28,7 @@ export function SacredTabBar({
       void Haptics.selectionAsync();
       onChange(tab);
     },
-    [active, onChange],
+    [active, onChange]
   );
 
   return (

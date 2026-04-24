@@ -15,10 +15,15 @@ import { Stack } from 'expo-router';
 
 export default function JourneyLayout(): React.JSX.Element {
   return (
-    <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+    <Stack
+      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" />
-      <Stack.Screen name="step/[day]" options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen
+        name="step/[day]"
+        options={{ animation: 'slide_from_bottom' }}
+      />
     </Stack>
   );
 }

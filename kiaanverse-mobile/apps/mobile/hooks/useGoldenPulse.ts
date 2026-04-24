@@ -45,18 +45,18 @@ export function useGoldenPulse({
     scale.value = withRepeat(
       withSequence(
         withTiming(1.08, { duration: half, easing }),
-        withTiming(1, { duration: half, easing }),
+        withTiming(1, { duration: half, easing })
       ),
       -1,
-      false,
+      false
     );
     glow.value = withRepeat(
       withSequence(
         withTiming(1, { duration: half, easing }),
-        withTiming(0.5, { duration: half, easing }),
+        withTiming(0.5, { duration: half, easing })
       ),
       -1,
-      false,
+      false
     );
   }, [continuous, cycleMs, scale, glow]);
 
@@ -66,11 +66,11 @@ export function useGoldenPulse({
     }
     scale.value = withSequence(
       withTiming(1.22, { duration: 220, easing: Easing.out(Easing.cubic) }),
-      withTiming(1, { duration: 460, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 460, easing: Easing.inOut(Easing.sin) })
     );
     glow.value = withSequence(
       withTiming(1.15, { duration: 220, easing: Easing.out(Easing.cubic) }),
-      withTiming(0.5, { duration: 460, easing: Easing.inOut(Easing.sin) }),
+      withTiming(0.5, { duration: 460, easing: Easing.inOut(Easing.sin) })
     );
   }, [hapticOnTrigger, scale, glow]);
 

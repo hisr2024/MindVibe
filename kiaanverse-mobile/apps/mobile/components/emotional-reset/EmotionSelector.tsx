@@ -15,7 +15,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Text, EmotionOrb, GlowCard, SacredDivider, colors, spacing, radii } from '@kiaanverse/ui';
+import {
+  Text,
+  EmotionOrb,
+  GlowCard,
+  SacredDivider,
+  colors,
+  spacing,
+  radii,
+} from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types & Data
@@ -46,7 +54,8 @@ const COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_GAP = spacing.sm;
 const HORIZONTAL_PAD = spacing.lg * 2;
-const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PAD - CARD_GAP * (COLUMNS - 1)) / COLUMNS;
+const CARD_WIDTH =
+  (SCREEN_WIDTH - HORIZONTAL_PAD - CARD_GAP * (COLUMNS - 1)) / COLUMNS;
 
 // ---------------------------------------------------------------------------
 // Props
@@ -76,8 +85,14 @@ const EmotionCard = React.memo(function EmotionCard({
   const borderOpacity = useSharedValue(0);
 
   useEffect(() => {
-    scale.value = withSpring(isSelected ? 1.05 : 1, { damping: 14, stiffness: 160 });
-    borderOpacity.value = withSpring(isSelected ? 1 : 0, { damping: 14, stiffness: 160 });
+    scale.value = withSpring(isSelected ? 1.05 : 1, {
+      damping: 14,
+      stiffness: 160,
+    });
+    borderOpacity.value = withSpring(isSelected ? 1 : 0, {
+      damping: 14,
+      stiffness: 160,
+    });
   }, [isSelected, scale, borderOpacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -126,7 +141,7 @@ export function EmotionSelector({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       onSelect(id);
     },
-    [onSelect],
+    [onSelect]
   );
 
   /** Map selected emotion to EmotionOrb mood. */
@@ -135,7 +150,11 @@ export function EmotionSelector({
   return (
     <View style={styles.grid}>
       <View style={styles.orbCenter}>
-        <EmotionOrb mood={selectedMood} size={80} isAnimating={!!selectedEmotion} />
+        <EmotionOrb
+          mood={selectedMood}
+          size={80}
+          isAnimating={!!selectedEmotion}
+        />
       </View>
       <SacredDivider style={styles.divider} />
       {EMOTIONS.map((emotion) => (
@@ -158,10 +177,28 @@ export function EmotionSelector({
  * Maps an emotion ID to an EmotionOrb mood value.
  */
 function mapEmotionToOrbMood(
-  emotion: string | null,
-): 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful' {
+  emotion: string | null
+):
+  | 'peaceful'
+  | 'joyful'
+  | 'confused'
+  | 'anxious'
+  | 'sad'
+  | 'grateful'
+  | 'angry'
+  | 'hopeful' {
   if (!emotion) return 'peaceful';
-  const map: Record<string, 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'> = {
+  const map: Record<
+    string,
+    | 'peaceful'
+    | 'joyful'
+    | 'confused'
+    | 'anxious'
+    | 'sad'
+    | 'grateful'
+    | 'angry'
+    | 'hopeful'
+  > = {
     anger: 'angry',
     anxiety: 'anxious',
     sadness: 'sad',

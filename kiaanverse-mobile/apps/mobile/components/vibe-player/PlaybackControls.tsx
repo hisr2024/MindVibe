@@ -111,14 +111,30 @@ function RepeatIcon({
   color: string;
 }): React.JSX.Element {
   return (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {/* Top arrow pointing right */}
       <Path d="M4 8 h13 l-3 -3 M17 8 l0 3" />
       {/* Bottom arrow pointing left */}
       <Path d="M20 16 h-13 l3 3 M7 16 l0 -3" />
       {/* Dot in the center of the "1" variant */}
       {mode === 'one' ? (
-        <Line x1={12} y1={11.5} x2={12} y2={12.5} stroke={color} strokeWidth={2.4} />
+        <Line
+          x1={12}
+          y1={11.5}
+          x2={12}
+          y2={12.5}
+          stroke={color}
+          strokeWidth={2.4}
+        />
       ) : null}
     </Svg>
   );
@@ -132,7 +148,15 @@ function BookmarkIcon({
   color: string;
 }): React.JSX.Element {
   return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" stroke={color} strokeWidth={1.6} fill={filled ? color : 'none'} strokeLinejoin="round">
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      stroke={color}
+      strokeWidth={1.6}
+      fill={filled ? color : 'none'}
+      strokeLinejoin="round"
+    >
       <Path d="M6 4 h12 v17 l-6 -4 l-6 4 z" />
     </Svg>
   );
@@ -169,13 +193,10 @@ function PlaybackControlsInner({
     onTogglePlay();
   }, [onTogglePlay]);
 
-  const handleSecondaryPress = useCallback(
-    (fn: () => void) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      fn();
-    },
-    [],
-  );
+  const handleSecondaryPress = useCallback((fn: () => void) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    fn();
+  }, []);
 
   const handleRepeatPress = useCallback(() => {
     void Haptics.selectionAsync();
@@ -191,8 +212,7 @@ function PlaybackControlsInner({
     transform: [{ scale: playScale.value }],
   }));
 
-  const repeatColor =
-    repeatMode === 'off' ? 'rgba(212,160,23,0.4)' : GOLD;
+  const repeatColor = repeatMode === 'off' ? 'rgba(212,160,23,0.4)' : GOLD;
   const bookmarkColor = isBookmarked ? GOLD : 'rgba(212,160,23,0.5)';
 
   return (

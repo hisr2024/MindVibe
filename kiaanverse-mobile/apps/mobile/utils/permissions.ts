@@ -158,15 +158,24 @@ export async function checkBiometricAvailability(): Promise<BiometricType | null
     if (!isEnrolled) return null;
 
     // Detect the specific biometric type
-    const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    const supportedTypes =
+      await LocalAuthentication.supportedAuthenticationTypesAsync();
     if (supportedTypes.length === 0) return null;
 
     // Map expo-local-authentication types to our BiometricType
     // Prefer Face ID over fingerprint on devices that support both
-    if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+    if (
+      supportedTypes.includes(
+        LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+      )
+    ) {
       return 'facial-recognition';
     }
-    if (supportedTypes.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+    if (
+      supportedTypes.includes(
+        LocalAuthentication.AuthenticationType.FINGERPRINT
+      )
+    ) {
       return 'fingerprint';
     }
     if (supportedTypes.includes(LocalAuthentication.AuthenticationType.IRIS)) {

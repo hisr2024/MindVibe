@@ -73,10 +73,14 @@ export function BreathMandala({
 
     const durationFor = (p: BreathPhase): number => {
       switch (p) {
-        case 'inhale':  return pattern.inhale;
-        case 'hold_in': return pattern.holdIn;
-        case 'exhale':  return pattern.exhale;
-        case 'hold_out':return pattern.holdOut;
+        case 'inhale':
+          return pattern.inhale;
+        case 'hold_in':
+          return pattern.holdIn;
+        case 'exhale':
+          return pattern.exhale;
+        case 'hold_out':
+          return pattern.holdOut;
       }
     };
 
@@ -164,7 +168,9 @@ export function BreathMandala({
         </Animated.View>
       </View>
       <Text style={styles.phaseLabel}>{PHASE_LABEL[phase]}</Text>
-      <Text style={styles.roundLabel}>Round {round} of {rounds}</Text>
+      <Text style={styles.roundLabel}>
+        Round {round} of {rounds}
+      </Text>
     </View>
   );
 }

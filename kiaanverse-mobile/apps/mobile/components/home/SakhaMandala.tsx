@@ -36,7 +36,7 @@ export function SakhaMandala({
     rotation.value = withRepeat(
       withTiming(360, { duration: 12_000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
   }, [rotation]);
 
@@ -72,9 +72,33 @@ export function SakhaMandala({
       />
       <Animated.View style={spinStyle}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <Circle cx={cx} cy={cy} r={outerR} stroke={color} strokeWidth={1.25} fill="none" opacity={0.55} />
-          <Circle cx={cx} cy={cy} r={midR} stroke={color} strokeWidth={1} fill="none" opacity={0.4} />
-          <Circle cx={cx} cy={cy} r={innerR} stroke={color} strokeWidth={1} fill="none" opacity={0.55} />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={outerR}
+            stroke={color}
+            strokeWidth={1.25}
+            fill="none"
+            opacity={0.55}
+          />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={midR}
+            stroke={color}
+            strokeWidth={1}
+            fill="none"
+            opacity={0.4}
+          />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={innerR}
+            stroke={color}
+            strokeWidth={1}
+            fill="none"
+            opacity={0.55}
+          />
           <Circle cx={cx} cy={cy} r={2.5} fill={color} opacity={0.9} />
           {/* eight petals connecting innerR → midR */}
           {Array.from({ length: 8 }, (_, i) => {

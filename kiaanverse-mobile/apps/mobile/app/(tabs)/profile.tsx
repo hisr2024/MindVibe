@@ -106,8 +106,18 @@ const MENU_SECTIONS: readonly MenuSection[] = [
   {
     title: 'Subscription',
     items: [
-      { label: 'My Subscription', route: '/(app)/subscription', icon: '✦', gold: true },
-      { label: 'Upgrade Plan', route: '/(app)/subscription/plans', icon: '⬆', gold: true },
+      {
+        label: 'My Subscription',
+        route: '/(app)/subscription',
+        icon: '✦',
+        gold: true,
+      },
+      {
+        label: 'Upgrade Plan',
+        route: '/(app)/subscription/plans',
+        icon: '⬆',
+        gold: true,
+      },
       { label: 'Billing History', route: '/(app)/billing-history', icon: '📋' },
     ],
   },
@@ -184,7 +194,7 @@ export default function ProfileScreen(): React.JSX.Element {
             router.replace('/(auth)/login');
           },
         },
-      ],
+      ]
     );
   }, [logout]);
 
@@ -243,7 +253,10 @@ export default function ProfileScreen(): React.JSX.Element {
                   >
                     <Text style={styles.menuIcon}>{item.icon}</Text>
                     <Text
-                      style={[styles.menuLabel, item.gold ? styles.menuLabelGold : null]}
+                      style={[
+                        styles.menuLabel,
+                        item.gold ? styles.menuLabelGold : null,
+                      ]}
                     >
                       {item.label}
                     </Text>

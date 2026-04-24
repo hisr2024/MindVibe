@@ -65,7 +65,10 @@ interface IntensitySliderProps {
   readonly onChange: (value: number) => void;
 }
 
-function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.Element {
+function IntensitySlider({
+  value,
+  onChange,
+}: IntensitySliderProps): React.JSX.Element {
   const { width: screenWidth } = useWindowDimensions();
   // ScrollView paddingHorizontal is 20, and we give the slider room to breathe.
   const trackWidth = Math.max(screenWidth - 40 - 32, 120);
@@ -74,7 +77,10 @@ function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.E
   const thumbX = useSharedValue(value * segmentWidth);
 
   useEffect(() => {
-    thumbX.value = withSpring(value * segmentWidth, { damping: 20, stiffness: 200 });
+    thumbX.value = withSpring(value * segmentWidth, {
+      damping: 20,
+      stiffness: 200,
+    });
   }, [value, segmentWidth, thumbX]);
 
   const thumbStyle = useAnimatedStyle(() => ({
@@ -90,7 +96,7 @@ function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.E
       void Haptics.selectionAsync();
       onChange(level);
     },
-    [onChange],
+    [onChange]
   );
 
   return (
@@ -116,8 +122,12 @@ function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.E
       <View style={[s.sliderLabels, { width: trackWidth }]}>
         {INTENSITY_POINTS.map((p, i) => (
           <View key={p.value} style={s.sliderLabel}>
-            <Text style={[s.sliderSkt, value === i && s.sliderActive]}>{p.skt}</Text>
-            <Text style={[s.sliderEng, value === i && s.sliderEngActive]}>{p.eng}</Text>
+            <Text style={[s.sliderSkt, value === i && s.sliderActive]}>
+              {p.skt}
+            </Text>
+            <Text style={[s.sliderEng, value === i && s.sliderEngActive]}>
+              {p.eng}
+            </Text>
           </View>
         ))}
       </View>
@@ -135,8 +145,10 @@ export default function ViyogaStep2(): React.JSX.Element {
   const [intensity, setIntensity] = useState<number>(DEFAULT_INTENSITY.value);
   const [wishToSay, setWishToSay] = useState('');
 
-  const currentPoint: IntensityPoint = INTENSITY_POINTS[intensity] ?? DEFAULT_INTENSITY;
-  const canSubmit = separatedFrom.trim().length > 0 && wishToSay.trim().length > 0;
+  const currentPoint: IntensityPoint =
+    INTENSITY_POINTS[intensity] ?? DEFAULT_INTENSITY;
+  const canSubmit =
+    separatedFrom.trim().length > 0 && wishToSay.trim().length > 0;
   const isCalling = status === 'calling';
 
   const handleSubmit = (): void => {
@@ -179,7 +191,9 @@ export default function ViyogaStep2(): React.JSX.Element {
         <Text style={s.question}>How far does this separation feel?</Text>
         <IntensitySlider value={intensity} onChange={setIntensity} />
 
-        <Text style={s.wishQuestion}>What do you wish you could say to them?</Text>
+        <Text style={s.wishQuestion}>
+          What do you wish you could say to them?
+        </Text>
         <TextInput
           style={[s.textInput, s.wishInput]}
           value={wishToSay}

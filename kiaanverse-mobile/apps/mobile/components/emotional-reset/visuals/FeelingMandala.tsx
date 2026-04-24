@@ -21,10 +21,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Svg, { Circle, G } from 'react-native-svg';
-import Animated, {
-  FadeIn,
-  FadeInUp,
-} from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { EMOTIONS, type EmotionalState } from '../types';
 
 interface FeelingMandalaProps {
@@ -55,14 +52,21 @@ export function FeelingMandala({
         const y = cy + Math.sin(angle) * petalR;
         return { emotion, x, y };
       }),
-    [cx, cy, petalR],
+    [cx, cy, petalR]
   );
 
   const intensityColor = selectedEmotion?.glowColor ?? '#D4A017';
 
   return (
     <View style={styles.root}>
-      <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: size,
+          height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         {/* Sacred guide circle */}
         <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
           <G>
@@ -90,12 +94,18 @@ export function FeelingMandala({
           {selectedEmotion ? (
             <>
               <Text
-                style={[styles.centerLabelText, { color: selectedEmotion.glowColor }]}
+                style={[
+                  styles.centerLabelText,
+                  { color: selectedEmotion.glowColor },
+                ]}
               >
                 {selectedEmotion.label}
               </Text>
               <Text
-                style={[styles.centerLabelSkt, { color: selectedEmotion.glowColor }]}
+                style={[
+                  styles.centerLabelSkt,
+                  { color: selectedEmotion.glowColor },
+                ]}
               >
                 {selectedEmotion.sanskrit}
               </Text>
@@ -132,7 +142,9 @@ export function FeelingMandala({
                   backgroundColor: isSelected
                     ? `${emotion.glowColor}22`
                     : 'rgba(255,255,255,0.04)',
-                  transform: [{ scale: pressed ? 0.94 : isSelected ? 1.08 : 1 }],
+                  transform: [
+                    { scale: pressed ? 0.94 : isSelected ? 1.08 : 1 },
+                  ],
                 },
               ]}
             >
@@ -152,7 +164,10 @@ export function FeelingMandala({
 
       {/* Intensity rail — appears only after an emotion is chosen */}
       {selectedEmotion ? (
-        <Animated.View entering={FadeInUp.duration(400)} style={styles.intensityBlock}>
+        <Animated.View
+          entering={FadeInUp.duration(400)}
+          style={styles.intensityBlock}
+        >
           <Text style={styles.intensityPrompt}>How deep does it reach?</Text>
           <View style={styles.intensityRow}>
             {[1, 2, 3, 4, 5].map((n) => {
@@ -170,7 +185,9 @@ export function FeelingMandala({
                   style={({ pressed }) => [
                     styles.intensityDot,
                     {
-                      borderColor: active ? intensityColor : 'rgba(212,160,23,0.3)',
+                      borderColor: active
+                        ? intensityColor
+                        : 'rgba(212,160,23,0.3)',
                       backgroundColor: active
                         ? `${intensityColor}33`
                         : 'rgba(255,255,255,0.04)',
@@ -181,7 +198,11 @@ export function FeelingMandala({
                   <Text
                     style={[
                       styles.intensityNum,
-                      { color: active ? intensityColor : 'rgba(237,232,220,0.55)' },
+                      {
+                        color: active
+                          ? intensityColor
+                          : 'rgba(237,232,220,0.55)',
+                      },
                     ]}
                   >
                     {n}
@@ -191,7 +212,10 @@ export function FeelingMandala({
             })}
           </View>
           {intensity > 0 ? (
-            <Animated.Text entering={FadeIn.duration(300)} style={styles.intensityHint}>
+            <Animated.Text
+              entering={FadeIn.duration(300)}
+              style={styles.intensityHint}
+            >
               {intensity <= 2
                 ? 'A quiet ripple'
                 : intensity <= 4

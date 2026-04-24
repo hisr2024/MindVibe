@@ -19,12 +19,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import {
-  GoldenButton,
-  Text,
-  colors,
-  spacing,
-} from '@kiaanverse/ui';
+import { GoldenButton, Text, colors, spacing } from '@kiaanverse/ui';
 import {
   useGenerateKarmaLytixReport,
   useKarmaLytixWeeklyReport,
@@ -51,9 +46,13 @@ interface SacredMirror {
   readonly dynamic_wisdom?: string;
 }
 
-function extractMirror(report: KarmaLytixWeeklyReport | undefined): SacredMirror | null {
+function extractMirror(
+  report: KarmaLytixWeeklyReport | undefined
+): SacredMirror | null {
   if (!report || report.insufficient_data) return null;
-  const patterns = report.patterns_detected as Record<string, unknown> | undefined;
+  const patterns = report.patterns_detected as
+    | Record<string, unknown>
+    | undefined;
   if (!patterns || typeof patterns !== 'object') return null;
   if (!('mirror' in patterns) && !('pattern' in patterns)) return null;
   return patterns as SacredMirror;
@@ -85,18 +84,30 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
 
   // ---- Empty state (matches the Kiaanverse.com screenshot) ----
   if (!isLoading && (!data || insufficient || !mirror)) {
-    const sub = insufficient && entriesNeeded > 0
-      ? `Write ${entriesNeeded} more reflection${entriesNeeded === 1 ? '' : 's'} this week to unlock your Sacred Mirror.`
-      : COPY.kiaanEmptySub;
+    const sub =
+      insufficient && entriesNeeded > 0
+        ? `Write ${entriesNeeded} more reflection${entriesNeeded === 1 ? '' : 's'} this week to unlock your Sacred Mirror.`
+        : COPY.kiaanEmptySub;
 
     return (
       <ScrollView contentContainerStyle={styles.emptyWrap}>
-        <Animated.View entering={FadeIn.duration(600)} style={styles.emptyInner}>
+        <Animated.View
+          entering={FadeIn.duration(600)}
+          style={styles.emptyInner}
+        >
           <Text style={styles.lotus}>{'\u{1FAB7}'}</Text>
-          <Text variant="h2" color={colors.text.primary} style={styles.emptyTitle}>
+          <Text
+            variant="h2"
+            color={colors.text.primary}
+            style={styles.emptyTitle}
+          >
             {COPY.kiaanEmptyTitle}
           </Text>
-          <Text variant="caption" color={colors.text.secondary} style={styles.emptySub}>
+          <Text
+            variant="caption"
+            color={colors.text.secondary}
+            style={styles.emptySub}
+          >
             {sub}
           </Text>
           <Pressable onPress={onOpenEditor} style={styles.ctaSecondary}>
@@ -113,21 +124,37 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Animated.View entering={FadeIn.duration(500)}>
-        <Text variant="label" color={colors.primary[500]} style={styles.sectionLabel}>
+        <Text
+          variant="label"
+          color={colors.primary[500]}
+          style={styles.sectionLabel}
+        >
           SAKHA'S WEEKLY MIRROR
         </Text>
         {mirror?.mirror ? (
-          <Text variant="body" color={colors.text.primary} style={styles.mirrorText}>
+          <Text
+            variant="body"
+            color={colors.text.primary}
+            style={styles.mirrorText}
+          >
             {mirror.mirror}
           </Text>
         ) : null}
 
         {mirror?.pattern ? (
           <View style={styles.cardSection}>
-            <Text variant="label" color={colors.text.secondary} style={styles.cardLabel}>
+            <Text
+              variant="label"
+              color={colors.text.secondary}
+              style={styles.cardLabel}
+            >
               PATTERN NOTICED
             </Text>
-            <Text variant="body" color={colors.text.primary} style={styles.cardBody}>
+            <Text
+              variant="body"
+              color={colors.text.primary}
+              style={styles.cardBody}
+            >
               {mirror.pattern}
             </Text>
           </View>
@@ -135,14 +162,26 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
 
         {mirror?.gita_echo?.sanskrit ? (
           <View style={[styles.cardSection, styles.verseCard]}>
-            <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Text
+              variant="label"
+              color={colors.primary[500]}
+              style={styles.cardLabel}
+            >
               GITA ECHO · BG {mirror.gita_echo.chapter}.{mirror.gita_echo.verse}
             </Text>
-            <Text variant="body" color={colors.text.primary} style={styles.sanskritText}>
+            <Text
+              variant="body"
+              color={colors.text.primary}
+              style={styles.sanskritText}
+            >
               {mirror.gita_echo.sanskrit}
             </Text>
             {mirror.gita_echo.connection ? (
-              <Text variant="caption" color={colors.text.secondary} style={styles.verseConnection}>
+              <Text
+                variant="caption"
+                color={colors.text.secondary}
+                style={styles.verseConnection}
+              >
                 {mirror.gita_echo.connection}
               </Text>
             ) : null}
@@ -151,10 +190,18 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
 
         {mirror?.blessing ? (
           <View style={styles.cardSection}>
-            <Text variant="label" color={colors.primary[500]} style={styles.cardLabel}>
+            <Text
+              variant="label"
+              color={colors.primary[500]}
+              style={styles.cardLabel}
+            >
               BLESSING
             </Text>
-            <Text variant="body" color={colors.text.primary} style={[styles.cardBody, styles.blessing]}>
+            <Text
+              variant="body"
+              color={colors.text.primary}
+              style={[styles.cardBody, styles.blessing]}
+            >
               {mirror.blessing}
             </Text>
           </View>

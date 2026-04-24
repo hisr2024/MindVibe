@@ -82,7 +82,9 @@ function QualityTile({
             borderColor: isSelected
               ? `${quality.color}80`
               : 'rgba(255,255,255,0.06)',
-            borderTopColor: isSelected ? quality.color : 'rgba(255,255,255,0.06)',
+            borderTopColor: isSelected
+              ? quality.color
+              : 'rgba(255,255,255,0.06)',
             borderTopWidth: isSelected ? 2 : 1,
           },
           style,
@@ -106,10 +108,11 @@ function QualityTile({
 function autoIntention(
   qualityId: string,
   context: KarmaResetContext,
-  wisdom: KarmaWisdomResponse,
+  wisdom: KarmaWisdomResponse
 ): string {
   const quality = DHARMIC_QUALITIES.find((q) => q.id === qualityId);
-  const action = wisdom.actionDharma[0]?.practice || 'act with conscious awareness';
+  const action =
+    wisdom.actionDharma[0]?.practice || 'act with conscious awareness';
   return `Today I align with ${
     quality?.label ?? 'dharma'
   }. In my ${context.category}, I choose to ${action.toLowerCase()}`;
@@ -130,7 +133,7 @@ export function SankalpaPhase({
 
   const [selectedQuality, setSelectedQuality] = useState(defaultQuality);
   const [intentionText, setIntentionText] = useState(() =>
-    autoIntention(defaultQuality, context, wisdom),
+    autoIntention(defaultQuality, context, wisdom)
   );
   const [isEditing, setIsEditing] = useState(false);
 
@@ -142,7 +145,7 @@ export function SankalpaPhase({
         setIntentionText(autoIntention(id, context, wisdom));
       }
     },
-    [isEditing, context, wisdom],
+    [isEditing, context, wisdom]
   );
 
   const handleSeal = useCallback(() => {
@@ -154,7 +157,9 @@ export function SankalpaPhase({
     });
   }, [selectedQuality, intentionText, onComplete]);
 
-  const selectedConfig = DHARMIC_QUALITIES.find((q) => q.id === selectedQuality);
+  const selectedConfig = DHARMIC_QUALITIES.find(
+    (q) => q.id === selectedQuality
+  );
   const accent = selectedConfig?.color ?? '#D4A017';
 
   return (
@@ -203,10 +208,7 @@ export function SankalpaPhase({
         {/* Sankalpa card */}
         <Animated.View
           entering={FadeIn.delay(2300).duration(400)}
-          style={[
-            styles.sankalpaCard,
-            { borderLeftColor: accent },
-          ]}
+          style={[styles.sankalpaCard, { borderLeftColor: accent }]}
         >
           <Text style={styles.sankalpaTag}>My Sankalpa</Text>
           {isEditing ? (

@@ -124,7 +124,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
           });
           setReflection('');
         },
-      },
+      }
     );
   }, [activeStep, completeStep, journeyId]);
 
@@ -270,7 +270,11 @@ function StepRow({
   readonly isCurrent: boolean;
   readonly accent: string;
 }): React.JSX.Element {
-  const dot = step.isCompleted ? '#22c55e' : isCurrent ? accent : 'rgba(255,255,255,0.15)';
+  const dot = step.isCompleted
+    ? '#22c55e'
+    : isCurrent
+      ? accent
+      : 'rgba(255,255,255,0.15)';
   return (
     <View
       style={[

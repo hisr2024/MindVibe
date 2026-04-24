@@ -120,11 +120,11 @@ function Word({ token, index, revealIndex }: WordProps): React.JSX.Element {
     // pile up enormous delays on long responses.
     const delay = Math.max(
       0,
-      (index - Math.max(revealIndex - 6, 0)) * WORD_STAGGER_MS,
+      (index - Math.max(revealIndex - 6, 0)) * WORD_STAGGER_MS
     );
     opacity.value = withDelay(
       delay,
-      withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) })
     );
   }, [index, revealIndex, opacity]);
 
@@ -154,10 +154,10 @@ function StreamingCursor(): React.JSX.Element {
     opacity.value = withRepeat(
       withSequence(
         withTiming(0, { duration: 300, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 300, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 300, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      false,
+      false
     );
   }, [opacity]);
 
@@ -174,14 +174,15 @@ function CompletionShimmer(): React.JSX.Element {
 
   useEffect(() => {
     progress.value = 0;
-    progress.value = withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) });
+    progress.value = withTiming(1, {
+      duration: 900,
+      easing: Easing.inOut(Easing.ease),
+    });
   }, [progress]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value < 1 ? 0.55 : 0,
-    transform: [
-      { translateX: -120 + progress.value * 360 },
-    ],
+    transform: [{ translateX: -120 + progress.value * 360 }],
   }));
 
   return (
@@ -282,7 +283,11 @@ function SakhaMessageInner({
 }
 
 /** Lightweight inline shloka renderer — used inside SakhaMessage bubbles. */
-function InlineShloka({ shloka }: { shloka: SakhaMessageShloka }): React.JSX.Element {
+function InlineShloka({
+  shloka,
+}: {
+  shloka: SakhaMessageShloka;
+}): React.JSX.Element {
   return (
     <View style={styles.shloka}>
       {shloka.sanskrit ? (

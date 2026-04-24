@@ -15,7 +15,9 @@ export interface GoldenDividerProps {
   readonly marginY?: number | undefined;
 }
 
-export function GoldenDivider({ marginY }: GoldenDividerProps): React.JSX.Element {
+export function GoldenDivider({
+  marginY,
+}: GoldenDividerProps): React.JSX.Element {
   return (
     <View style={[styles.wrap, { marginVertical: marginY ?? spacing.md }]}>
       <LinearGradient

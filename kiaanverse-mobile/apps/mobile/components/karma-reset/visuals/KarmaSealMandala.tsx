@@ -56,7 +56,7 @@ function Petal({
   useEffect(() => {
     progress.value = withDelay(
       300 + index * 50,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) })
     );
   }, [progress, index]);
 
@@ -98,7 +98,7 @@ export function KarmaSealMandala({
     wheelRotation.value = withRepeat(
       withTiming(360, { duration: 20000, easing: Easing.linear }),
       -1,
-      false,
+      false
     );
   }, [mandalaOpacity, mandalaScale, wheelRotation]);
 
@@ -112,9 +112,7 @@ export function KarmaSealMandala({
   }));
 
   return (
-    <Animated.View
-      style={[{ width: size, height: size }, mandalaStyle]}
-    >
+    <Animated.View style={[{ width: size, height: size }, mandalaStyle]}>
       <Svg
         width={size}
         height={size}
@@ -122,21 +120,11 @@ export function KarmaSealMandala({
         style={StyleSheet.absoluteFill}
       >
         <Defs>
-          <SvgRadialGradient
-            id="petal-gold"
-            cx="50%"
-            cy="100%"
-            r="80%"
-          >
+          <SvgRadialGradient id="petal-gold" cx="50%" cy="100%" r="80%">
             <Stop offset="0%" stopColor="#FDE68A" stopOpacity={0.9} />
             <Stop offset="100%" stopColor="#D4A017" stopOpacity={0.6} />
           </SvgRadialGradient>
-          <SvgRadialGradient
-            id="petal-saffron"
-            cx="50%"
-            cy="100%"
-            r="80%"
-          >
+          <SvgRadialGradient id="petal-saffron" cx="50%" cy="100%" r="80%">
             <Stop offset="0%" stopColor="#FB923C" stopOpacity={0.9} />
             <Stop offset="100%" stopColor="#F97316" stopOpacity={0.6} />
           </SvgRadialGradient>

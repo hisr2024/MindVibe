@@ -104,28 +104,35 @@ export function ContextPhase({
   const canProceed = useMemo(
     () =>
       category !== null && weight !== null && description.trim().length >= 10,
-    [category, weight, description],
+    [category, weight, description]
   );
 
   const handleSubmit = useCallback(() => {
     if (!canProceed || !category || !weight) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // `whoInvolved` is optional on KarmaResetContext — under
+    // exactOptionalPropertyTypes we must omit it when unset rather than
+    // pass `undefined`.
     onComplete({
       category,
       weight,
       description: description.trim(),
-      whoInvolved,
+      ...(whoInvolved !== undefined && { whoInvolved }),
       timeframe,
     });
-  }, [canProceed, category, weight, description, whoInvolved, timeframe, onComplete]);
+  }, [
+    canProceed,
+    category,
+    weight,
+    description,
+    whoInvolved,
+    timeframe,
+    onComplete,
+  ]);
 
   const wordCount = useMemo(
-    () =>
-      description
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean).length,
-    [description],
+    () => description.trim().split(/\s+/).filter(Boolean).length,
+    [description]
   );
 
   const categoryColor = category ? CATEGORY_COLORS[category] : '#D4A017';
@@ -190,7 +197,9 @@ export function ContextPhase({
                 isActive={whoInvolved === opt.id}
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setWhoInvolved((prev) => (prev === opt.id ? undefined : opt.id));
+                  setWhoInvolved((prev) =>
+                    prev === opt.id ? undefined : opt.id
+                  );
                 }}
               />
             ))}

@@ -13,13 +13,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { Image, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   Easing,
@@ -38,15 +32,9 @@ const TEXT_MUTED = 'rgba(240,235,225,0.55)';
 const GOLD = '#D4A017';
 const AVATAR = 80;
 
-const HERO_GRADIENT = [
-  'rgba(27,79,187,0.30)',
-  'rgba(5,7,20,0)',
-] as const;
+const HERO_GRADIENT = ['rgba(27,79,187,0.30)', 'rgba(5,7,20,0)'] as const;
 
-const AVATAR_GRADIENT = [
-  '#1B4FBB',
-  '#0E7490',
-] as const;
+const AVATAR_GRADIENT = ['#1B4FBB', '#0E7490'] as const;
 
 export interface ProfileHeroProps {
   /** Display name (or "Sacred Seeker" fallback). */
@@ -78,10 +66,10 @@ function ProfileHeroInner({
     ringPulse.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2200, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      false,
+      false
     );
   }, [ringPulse]);
 
@@ -90,8 +78,9 @@ function ProfileHeroInner({
     transform: [{ scale: 1 + ringPulse.value * 0.04 }],
   }));
 
-  const initial =
-    (name && name.trim().length > 0 ? name.trim().charAt(0) : 'S').toUpperCase();
+  const initial = (
+    name && name.trim().length > 0 ? name.trim().charAt(0) : 'S'
+  ).toUpperCase();
 
   return (
     <View
@@ -138,11 +127,7 @@ function ProfileHeroInner({
           )}
         </View>
 
-        <Text
-          style={styles.name}
-          numberOfLines={1}
-          accessibilityRole="text"
-        >
+        <Text style={styles.name} numberOfLines={1} accessibilityRole="text">
           {name}
         </Text>
         {email ? (

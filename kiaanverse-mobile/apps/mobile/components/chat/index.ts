@@ -2,8 +2,15 @@
  * Barrel exports for the Sakha chat UI.
  */
 
-export { ChatHeader, type ChatHeaderHandle, type ChatHeaderProps } from './ChatHeader';
-export { SubMandalaTexture, type SubMandalaTextureProps } from './SubMandalaTexture';
+export {
+  ChatHeader,
+  type ChatHeaderHandle,
+  type ChatHeaderProps,
+} from './ChatHeader';
+export {
+  SubMandalaTexture,
+  type SubMandalaTextureProps,
+} from './SubMandalaTexture';
 export { UserMessage, type UserMessageProps } from './UserMessage';
 export {
   SakhaMessage,

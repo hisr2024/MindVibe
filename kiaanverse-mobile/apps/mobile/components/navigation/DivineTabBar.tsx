@@ -30,12 +30,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -79,7 +74,7 @@ interface SacredTab {
   readonly Icon: SacredIcon;
 }
 
-const TABS: ReadonlyArray<SacredTab> = [
+const TABS: readonly SacredTab[] = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
   { name: 'chat', label: 'Sakha', Icon: LotusDialogIcon },
   // Manuscript glyph = scroll of shlokas; the Shlokas Hub opens to every
@@ -136,14 +131,14 @@ export function DivineTabBar({
       if (isFocused || event.defaultPrevented) return;
       navigation.navigate(route.name);
     },
-    [navigation],
+    [navigation]
   );
 
   const handleLongPress = useCallback(
     (route: { key: string }) => {
       navigation.emit({ type: 'tabLongPress', target: route.key });
     },
-    [navigation],
+    [navigation]
   );
 
   return (
@@ -239,12 +234,12 @@ function TabItemInner({
       // Icon pops once on activation, then rests.
       iconScale.value = withSequence(
         withTiming(1.12, { duration: 200, easing: Easing.out(Easing.quad) }),
-        withSpring(1.0, { damping: 14, stiffness: 160, mass: 0.9 }),
+        withSpring(1.0, { damping: 14, stiffness: 160, mass: 0.9 })
       );
       // Indicator overshoots then settles — the "opening of the threshold".
       dotScale.value = withSequence(
         withTiming(1.2, { duration: 180, easing: Easing.out(Easing.cubic) }),
-        withSpring(1.0, { damping: 10, stiffness: 180, mass: 0.8 }),
+        withSpring(1.0, { damping: 10, stiffness: 180, mass: 0.8 })
       );
       dotOpacity.value = withTiming(1, { duration: 180 });
       glowOpacity.value = withTiming(1, { duration: 300 });
@@ -262,10 +257,12 @@ function TabItemInner({
     // Tap-feedback bounce. We run it in onPress rather than in the navigate
     // path so even blocked taps (already-focused tab) still give a hint of
     // response to the user.
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined
+    );
     pressScale.value = withSequence(
       withSpring(0.88, { damping: 12, stiffness: 200, mass: 0.7 }),
-      withSpring(1.0, { damping: 10, stiffness: 150, mass: 0.8 }),
+      withSpring(1.0, { damping: 10, stiffness: 150, mass: 0.8 })
     );
   }, [pressScale]);
 

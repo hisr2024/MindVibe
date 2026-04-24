@@ -62,17 +62,32 @@ export function SadhanaPhaseFlow({
     >
       {phase === 'greeting' && (
         <View style={styles.phaseContent}>
-          <Text variant="h2" color={colors.divine.aura} align="center" style={styles.sacredText}>
+          <Text
+            variant="h2"
+            color={colors.divine.aura}
+            align="center"
+            style={styles.sacredText}
+          >
             {'🙏'}
           </Text>
           <Text variant="h1" color={colors.text.primary} align="center">
             Namaste, {userName}.
           </Text>
-          <Text variant="body" color={colors.text.secondary} align="center" style={styles.subtitle}>
-            Welcome to your sacred practice.{'\n'}Take a deep breath and settle in.
+          <Text
+            variant="body"
+            color={colors.text.secondary}
+            align="center"
+            style={styles.subtitle}
+          >
+            Welcome to your sacred practice.{'\n'}Take a deep breath and settle
+            in.
           </Text>
           <View style={styles.actionArea}>
-            <GoldenButton title="Begin Practice" onPress={onNextPhase} variant="divine" />
+            <GoldenButton
+              title="Begin Practice"
+              onPress={onNextPhase}
+              variant="divine"
+            />
           </View>
         </View>
       )}
@@ -97,8 +112,14 @@ export function SadhanaPhaseFlow({
                 accessibilityLabel={option.label}
                 accessibilityRole="button"
               >
-                <Text variant="h1" align="center">{option.emoji}</Text>
-                <Text variant="caption" color={colors.text.muted} align="center">
+                <Text variant="h1" align="center">
+                  {option.emoji}
+                </Text>
+                <Text
+                  variant="caption"
+                  color={colors.text.muted}
+                  align="center"
+                >
                   {option.label}
                 </Text>
               </Pressable>
@@ -131,7 +152,12 @@ export function SadhanaPhaseFlow({
                 {/* Sanskrit text would come from verse data — placeholder */}
                 {'॥ श्रीमद्भगवद्गीता ॥'}
               </Text>
-              <Text variant="body" color={colors.text.primary} align="center" style={styles.verseTranslation}>
+              <Text
+                variant="body"
+                color={colors.text.primary}
+                align="center"
+                style={styles.verseTranslation}
+              >
                 Contemplate this wisdom and let it settle within your being.
               </Text>
               <Text variant="caption" color={colors.text.muted} align="center">
@@ -153,7 +179,11 @@ export function SadhanaPhaseFlow({
             Sit with this verse. Let its meaning unfold naturally.
           </Text>
           <View style={styles.actionArea}>
-            <GoldenButton title="I've Contemplated" onPress={onNextPhase} variant="divine" />
+            <GoldenButton
+              title="I've Contemplated"
+              onPress={onNextPhase}
+              variant="divine"
+            />
           </View>
         </View>
       )}

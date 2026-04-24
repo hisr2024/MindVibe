@@ -29,16 +29,16 @@ import type {
 interface UseKarmaResetValue {
   fetchReflectionQuestion: (
     context: KarmaResetContext,
-    questionIndex: 0 | 1 | 2,
+    questionIndex: 0 | 1 | 2
   ) => Promise<KarmaReflectionQuestion>;
   fetchWisdom: (
     context: KarmaResetContext,
-    reflections: KarmaReflectionAnswer[],
+    reflections: KarmaReflectionAnswer[]
   ) => Promise<KarmaWisdomResponse>;
   finishSession: (
     sessionId: string,
     sankalpaSigned: boolean,
-    actionDharmaCommitted: string[],
+    actionDharmaCommitted: string[]
   ) => Promise<KarmaCompleteResponse>;
   isLoadingQuestion: boolean;
   isLoadingWisdom: boolean;
@@ -53,7 +53,7 @@ export function useKarmaReset(): UseKarmaResetValue {
   const fetchReflectionQuestion = useCallback(
     async (
       context: KarmaResetContext,
-      questionIndex: 0 | 1 | 2,
+      questionIndex: 0 | 1 | 2
     ): Promise<KarmaReflectionQuestion> => {
       setIsLoadingQuestion(true);
       try {
@@ -62,13 +62,13 @@ export function useKarmaReset(): UseKarmaResetValue {
         setIsLoadingQuestion(false);
       }
     },
-    [],
+    []
   );
 
   const fetchWisdom = useCallback(
     async (
       context: KarmaResetContext,
-      reflections: KarmaReflectionAnswer[],
+      reflections: KarmaReflectionAnswer[]
     ): Promise<KarmaWisdomResponse> => {
       setIsLoadingWisdom(true);
       try {
@@ -77,27 +77,27 @@ export function useKarmaReset(): UseKarmaResetValue {
         setIsLoadingWisdom(false);
       }
     },
-    [],
+    []
   );
 
   const finishSession = useCallback(
     async (
       sessionId: string,
       sankalpaSigned: boolean,
-      actionDharmaCommitted: string[],
+      actionDharmaCommitted: string[]
     ): Promise<KarmaCompleteResponse> => {
       setIsCompleting(true);
       try {
         return await completeSession(
           sessionId,
           sankalpaSigned,
-          actionDharmaCommitted,
+          actionDharmaCommitted
         );
       } finally {
         setIsCompleting(false);
       }
     },
-    [],
+    []
   );
 
   return {

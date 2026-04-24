@@ -57,46 +57,53 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
 
     sendMutation.mutate(
       { roomId, content: text },
-      { onSuccess: () => setInput('') },
+      { onSuccess: () => setInput('') }
     );
   }, [input, roomId, sendMutation]);
 
   const handleLeave = useCallback(() => {
-    Alert.alert('Leave Room', 'Are you sure you want to leave this wisdom room?', [
-      { text: 'Stay', style: 'cancel' },
-      {
-        text: 'Leave',
-        style: 'destructive',
-        onPress: () => router.back(),
-      },
-    ]);
+    Alert.alert(
+      'Leave Room',
+      'Are you sure you want to leave this wisdom room?',
+      [
+        { text: 'Stay', style: 'cancel' },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: () => router.back(),
+        },
+      ]
+    );
   }, [router]);
 
-  const renderMessage = useCallback(({ item }: { item: WisdomRoomMessage }) => {
-    const isHost = room?.hostName === item.senderName;
-    return (
-      <View style={[styles.messageBubble, isHost && styles.hostBubble]}>
-        <View style={styles.messageHeader}>
-          <Text
-            variant="caption"
-            color={isHost ? colors.primary[300] : colors.text.secondary}
-          >
-            {item.senderName}
+  const renderMessage = useCallback(
+    ({ item }: { item: WisdomRoomMessage }) => {
+      const isHost = room?.hostName === item.senderName;
+      return (
+        <View style={[styles.messageBubble, isHost && styles.hostBubble]}>
+          <View style={styles.messageHeader}>
+            <Text
+              variant="caption"
+              color={isHost ? colors.primary[300] : colors.text.secondary}
+            >
+              {item.senderName}
+            </Text>
+            {isHost ? <Badge label="Host" /> : null}
+          </View>
+          <Text variant="body" color={colors.text.primary}>
+            {item.content}
           </Text>
-          {isHost ? <Badge label="Host" /> : null}
+          <Text variant="caption" color={colors.text.muted}>
+            {new Date(item.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
         </View>
-        <Text variant="body" color={colors.text.primary}>
-          {item.content}
-        </Text>
-        <Text variant="caption" color={colors.text.muted}>
-          {new Date(item.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </Text>
-      </View>
-    );
-  }, [room?.hostName]);
+      );
+    },
+    [room?.hostName]
+  );
 
   const keyExtractor = useCallback((item: WisdomRoomMessage) => item.id, []);
 
@@ -110,7 +117,12 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
       {/* Topic and leave button */}
       <View style={styles.topicRow}>
         {room?.description ? (
-          <Text variant="bodySmall" color={colors.text.secondary} style={styles.topicText} numberOfLines={2}>
+          <Text
+            variant="bodySmall"
+            color={colors.text.secondary}
+            style={styles.topicText}
+            numberOfLines={2}
+          >
             {room.description}
           </Text>
         ) : null}

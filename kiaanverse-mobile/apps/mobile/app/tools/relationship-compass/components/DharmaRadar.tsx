@@ -74,9 +74,16 @@ export interface DharmaRadarProps {
 }
 
 /** polar (deg, radius) → cartesian SVG coords. 0° points up (north). */
-function polarToCart(angleDeg: number, radius: number, scale: number): [number, number] {
+function polarToCart(
+  angleDeg: number,
+  radius: number,
+  scale: number
+): [number, number] {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return [CENTER * scale + radius * scale * Math.cos(rad), CENTER * scale + radius * scale * Math.sin(rad)];
+  return [
+    CENTER * scale + radius * scale * Math.cos(rad),
+    CENTER * scale + radius * scale * Math.sin(rad),
+  ];
 }
 
 function DharmaRadarInner({
@@ -94,15 +101,15 @@ function DharmaRadarInner({
   useEffect(() => {
     polygonOpacity.value = withDelay(
       150,
-      withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) })
     );
     polygonScale.value = withDelay(
       150,
-      withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) })
     );
     dotOpacity.value = withDelay(
       400,
-      withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })
     );
   }, [polygonOpacity, polygonScale, dotOpacity, dharmaValues]);
 
@@ -113,7 +120,7 @@ function DharmaRadarInner({
         const [x, y] = polarToCart(axis.angle, value * MAX_R, scale);
         return { axis, value, x, y };
       }),
-    [dharmaValues, scale],
+    [dharmaValues, scale]
   );
 
   const polygonPoints = points.map((p) => `${p.x},${p.y}`).join(' ');
@@ -182,7 +189,11 @@ function DharmaRadarInner({
         {points.map((p, i) => {
           const dotColor =
             p.value > 0.7 ? '#E8B54A' : p.value >= 0.4 ? '#0E7490' : '#4B5563';
-          const [lx, ly] = polarToCart(p.axis.angle, MAX_R + LABEL_OFFSET, scale);
+          const [lx, ly] = polarToCart(
+            p.axis.angle,
+            MAX_R + LABEL_OFFSET,
+            scale
+          );
           return (
             <React.Fragment key={p.axis.id}>
               <AnimatedCircle

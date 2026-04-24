@@ -46,11 +46,18 @@ interface FireLineProps {
   readonly emphasized: boolean;
 }
 
-function FireLine({ text, delay, emphasized }: FireLineProps): React.JSX.Element {
+function FireLine({
+  text,
+  delay,
+  emphasized,
+}: FireLineProps): React.JSX.Element {
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: LINE_FADE_DURATION_MS }));
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: LINE_FADE_DURATION_MS })
+    );
     return () => {
       cancelAnimation(opacity);
     };
@@ -79,10 +86,13 @@ export default function ViyogaFire(): React.JSX.Element {
   const dropScale = useSharedValue(1);
 
   useEffect(() => {
-    dropOpacity.value = withDelay(DROP_HOLD_MS, withTiming(0, { duration: DROP_DISSOLVE_MS }));
+    dropOpacity.value = withDelay(
+      DROP_HOLD_MS,
+      withTiming(0, { duration: DROP_DISSOLVE_MS })
+    );
     dropScale.value = withDelay(
       DROP_HOLD_MS,
-      withTiming(DROP_DISSOLVE_SCALE, { duration: DROP_DISSOLVE_MS }),
+      withTiming(DROP_DISSOLVE_SCALE, { duration: DROP_DISSOLVE_MS })
     );
 
     const t = setTimeout(() => {

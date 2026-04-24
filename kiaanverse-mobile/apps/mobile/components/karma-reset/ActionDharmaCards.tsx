@@ -43,7 +43,7 @@ function CardRow({
   React.useEffect(() => {
     enter.value = withDelay(
       index * 150,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) })
     );
   }, [enter, index]);
 
@@ -61,9 +61,7 @@ function CardRow({
             ({action.meaning})
           </Animated.Text>
         </View>
-        <Animated.Text style={styles.practice}>
-          {action.practice}
-        </Animated.Text>
+        <Animated.Text style={styles.practice}>{action.practice}</Animated.Text>
         <Animated.Text style={styles.gitaRef}>{action.gitaRef}</Animated.Text>
       </View>
 
@@ -111,15 +109,11 @@ export function ActionDharmaCards({
         const next = new Set(prev);
         if (next.has(index)) next.delete(index);
         else next.add(index);
-        onCommit?.(
-          actions
-            .filter((_, i) => next.has(i))
-            .map((a) => a.concept),
-        );
+        onCommit?.(actions.filter((_, i) => next.has(i)).map((a) => a.concept));
         return next;
       });
     },
-    [actions, onCommit],
+    [actions, onCommit]
   );
 
   return (

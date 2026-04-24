@@ -18,12 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -73,10 +68,14 @@ import {
 
 type ViewMode = 'overview' | 'dimensions' | 'reflection';
 
-const VIEW_MODES: ReadonlyArray<{ key: ViewMode; labelKey: string; fallback: string }> = [
-  { key: 'overview',    labelKey: 'viewOverview',   fallback: 'Overview' },
-  { key: 'dimensions',  labelKey: 'viewDimensions', fallback: 'Dimensions' },
-  { key: 'reflection',  labelKey: 'viewReflection', fallback: 'Sacred Mirror' },
+const VIEW_MODES: readonly {
+  key: ViewMode;
+  labelKey: string;
+  fallback: string;
+}[] = [
+  { key: 'overview', labelKey: 'viewOverview', fallback: 'Overview' },
+  { key: 'dimensions', labelKey: 'viewDimensions', fallback: 'Dimensions' },
+  { key: 'reflection', labelKey: 'viewReflection', fallback: 'Sacred Mirror' },
 ];
 
 interface DimensionMeta {
@@ -87,11 +86,36 @@ interface DimensionMeta {
 }
 
 const DIMENSIONS: readonly DimensionMeta[] = [
-  { key: 'emotional_balance',  label: 'Emotional Balance',    sanskrit: 'भावनात्मक संतुलन', color: '#EF4444' },
-  { key: 'spiritual_growth',   label: 'Spiritual Growth',     sanskrit: 'आध्यात्मिक विकास', color: '#D4A017' },
-  { key: 'consistency',        label: 'Practice Consistency', sanskrit: 'साधना सातत्य',     color: '#10B981' },
-  { key: 'self_awareness',     label: 'Self Awareness',       sanskrit: 'आत्म-जागरूकता',   color: '#8B5CF6' },
-  { key: 'wisdom_integration', label: 'Wisdom Integration',   sanskrit: 'ज्ञान एकीकरण',    color: '#3B82F6' },
+  {
+    key: 'emotional_balance',
+    label: 'Emotional Balance',
+    sanskrit: 'भावनात्मक संतुलन',
+    color: '#EF4444',
+  },
+  {
+    key: 'spiritual_growth',
+    label: 'Spiritual Growth',
+    sanskrit: 'आध्यात्मिक विकास',
+    color: '#D4A017',
+  },
+  {
+    key: 'consistency',
+    label: 'Practice Consistency',
+    sanskrit: 'साधना सातत्य',
+    color: '#10B981',
+  },
+  {
+    key: 'self_awareness',
+    label: 'Self Awareness',
+    sanskrit: 'आत्म-जागरूकता',
+    color: '#8B5CF6',
+  },
+  {
+    key: 'wisdom_integration',
+    label: 'Wisdom Integration',
+    sanskrit: 'ज्ञान एकीकरण',
+    color: '#3B82F6',
+  },
 ];
 
 interface ReflectionSectionMeta {
@@ -101,11 +125,11 @@ interface ReflectionSectionMeta {
 }
 
 const REFLECTION_SECTIONS: readonly ReflectionSectionMeta[] = [
-  { key: 'mirror',      sanskrit: 'दर्पण',             label: 'Mirror' },
-  { key: 'pattern',     sanskrit: 'प्रतिमान',          label: 'Pattern' },
-  { key: 'gita_echo',   sanskrit: 'गीता प्रतिध्वनि',  label: 'Gita Echo' },
-  { key: 'growth_edge', sanskrit: 'विकास किनारा',       label: 'Growth Edge' },
-  { key: 'blessing',    sanskrit: 'आशीर्वाद',          label: 'Blessing' },
+  { key: 'mirror', sanskrit: 'दर्पण', label: 'Mirror' },
+  { key: 'pattern', sanskrit: 'प्रतिमान', label: 'Pattern' },
+  { key: 'gita_echo', sanskrit: 'गीता प्रतिध्वनि', label: 'Gita Echo' },
+  { key: 'growth_edge', sanskrit: 'विकास किनारा', label: 'Growth Edge' },
+  { key: 'blessing', sanskrit: 'आशीर्वाद', label: 'Blessing' },
 ];
 
 // Minimum journaling days required before we commit to generating the
@@ -125,9 +149,11 @@ const MIN_ENTRIES_FOR_REPORT = 3;
  */
 function _mergeServerReflection(
   server: KarmaLytixReflection & Record<string, unknown>,
-  fallback: ReflectionSections,
+  fallback: ReflectionSections
 ): ReflectionSections {
-  const pickString = (key: Exclude<keyof ReflectionSections, 'gita_echo'>): string => {
+  const pickString = (
+    key: Exclude<keyof ReflectionSections, 'gita_echo'>
+  ): string => {
     const value = server[key];
     if (typeof value === 'string' && value.trim().length > 0) return value;
     return fallback[key];
@@ -162,9 +188,9 @@ export default function KarmaLytixScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('analytics');
   const [view, setView] = useState<ViewMode>('overview');
-  const [expandedSection, setExpandedSection] = useState<keyof ReflectionSections | null>(
-    null,
-  );
+  const [expandedSection, setExpandedSection] = useState<
+    keyof ReflectionSections | null
+  >(null);
 
   // -- Server-side Sacred Mirror (preferred when available) ----------------
   // Falls back to the on-device calculator below whenever the backend
@@ -179,15 +205,23 @@ export default function KarmaLytixScreen(): React.JSX.Element {
   const generateReport = useGenerateKarmaLytixReport();
 
   // -- Metadata sources (journal entries + mood trends + weekly summary) ----
-  const { data: journalData, isLoading: journalLoading, refetch: refetchJournal } =
-    useJournalEntries();
-  const { data: moodTrends, isLoading: moodLoading, refetch: refetchMood } =
-    useMoodTrends(7);
+  const {
+    data: journalData,
+    isLoading: journalLoading,
+    refetch: refetchJournal,
+  } = useJournalEntries();
+  const {
+    data: moodTrends,
+    isLoading: moodLoading,
+    refetch: refetchMood,
+  } = useMoodTrends(7);
   const { data: weeklyInsight } = useWeeklyInsights();
   const bookmarkCount = useGitaStore((s) => s.bookmarkedVerseIds.length);
 
   // -- Local assessment + previous-week snapshot -----------------------------
-  const [assessment, setAssessment] = useState<WeeklyAssessmentAnswers | null>(null);
+  const [assessment, setAssessment] = useState<WeeklyAssessmentAnswers | null>(
+    null
+  );
   const [previousSnapshot, setPreviousSnapshot] = useState<
     (KarmaDimensionScores & { overall: number }) | null
   >(null);
@@ -220,7 +254,7 @@ export default function KarmaLytixScreen(): React.JSX.Element {
         assessment,
         now: new Date(),
       }),
-    [journalData, moodTrends, bookmarkCount, assessment],
+    [journalData, moodTrends, bookmarkCount, assessment]
   );
 
   const dimensions = useMemo(
@@ -231,7 +265,7 @@ export default function KarmaLytixScreen(): React.JSX.Element {
         assessment,
         previousOverall: previousSnapshot?.overall ?? null,
       }),
-    [summary, moodTrends, assessment, previousSnapshot],
+    [summary, moodTrends, assessment, previousSnapshot]
   );
 
   const overall = useMemo(() => overallScore(dimensions), [dimensions]);
@@ -242,11 +276,15 @@ export default function KarmaLytixScreen(): React.JSX.Element {
     if (!previousSnapshot) return null;
     return {
       overall: overall - previousSnapshot.overall,
-      emotional_balance: dimensions.emotional_balance - previousSnapshot.emotional_balance,
-      spiritual_growth: dimensions.spiritual_growth - previousSnapshot.spiritual_growth,
+      emotional_balance:
+        dimensions.emotional_balance - previousSnapshot.emotional_balance,
+      spiritual_growth:
+        dimensions.spiritual_growth - previousSnapshot.spiritual_growth,
       consistency: dimensions.consistency - previousSnapshot.consistency,
-      self_awareness: dimensions.self_awareness - previousSnapshot.self_awareness,
-      wisdom_integration: dimensions.wisdom_integration - previousSnapshot.wisdom_integration,
+      self_awareness:
+        dimensions.self_awareness - previousSnapshot.self_awareness,
+      wisdom_integration:
+        dimensions.wisdom_integration - previousSnapshot.wisdom_integration,
     };
   }, [dimensions, overall, previousSnapshot]);
 
@@ -259,18 +297,21 @@ export default function KarmaLytixScreen(): React.JSX.Element {
   //      report yet, returns insufficient_data, or the request failed).
   const localReflection = useMemo(
     () => buildReflectionSections({ summary, scores: dimensions, assessment }),
-    [summary, dimensions, assessment],
+    [summary, dimensions, assessment]
   );
 
   const hasServerReflection = Boolean(
     serverReport &&
-      !serverReport.insufficient_data &&
-      typeof serverReport.patterns_detected?.mirror === 'string',
+    !serverReport.insufficient_data &&
+    typeof serverReport.patterns_detected?.mirror === 'string'
   );
 
   const reflection: ReflectionSections = useMemo(() => {
     if (hasServerReflection) {
-      return _mergeServerReflection(serverReport!.patterns_detected, localReflection);
+      return _mergeServerReflection(
+        serverReport!.patterns_detected,
+        localReflection
+      );
     }
     return localReflection;
   }, [hasServerReflection, serverReport, localReflection]);
@@ -278,8 +319,14 @@ export default function KarmaLytixScreen(): React.JSX.Element {
   // Server gita_echo carries the real Sanskrit + Chapter/Verse pair when
   // Claude has run; fall back to the static lookup otherwise.
   const recommendedVerse = useMemo(() => {
-    const echo = hasServerReflection ? serverReport!.patterns_detected.gita_echo : undefined;
-    if (echo && typeof echo.chapter === 'number' && typeof echo.verse === 'number') {
+    const echo = hasServerReflection
+      ? serverReport!.patterns_detected.gita_echo
+      : undefined;
+    if (
+      echo &&
+      typeof echo.chapter === 'number' &&
+      typeof echo.verse === 'number'
+    ) {
       return {
         chapter: echo.chapter,
         verse: echo.verse,
@@ -305,18 +352,31 @@ export default function KarmaLytixScreen(): React.JSX.Element {
       Object.keys(serverReport.karma_dimensions).length === 5
     ) {
       return {
-        emotional_balance: serverReport.karma_dimensions.emotional_balance ?? dimensions.emotional_balance,
-        spiritual_growth: serverReport.karma_dimensions.spiritual_growth ?? dimensions.spiritual_growth,
-        consistency: serverReport.karma_dimensions.consistency ?? dimensions.consistency,
-        self_awareness: serverReport.karma_dimensions.self_awareness ?? dimensions.self_awareness,
-        wisdom_integration: serverReport.karma_dimensions.wisdom_integration ?? dimensions.wisdom_integration,
+        emotional_balance:
+          serverReport.karma_dimensions.emotional_balance ??
+          dimensions.emotional_balance,
+        spiritual_growth:
+          serverReport.karma_dimensions.spiritual_growth ??
+          dimensions.spiritual_growth,
+        consistency:
+          serverReport.karma_dimensions.consistency ?? dimensions.consistency,
+        self_awareness:
+          serverReport.karma_dimensions.self_awareness ??
+          dimensions.self_awareness,
+        wisdom_integration:
+          serverReport.karma_dimensions.wisdom_integration ??
+          dimensions.wisdom_integration,
       };
     }
     return dimensions;
   }, [serverReport, dimensions]);
 
   const effectiveOverall = useMemo(() => {
-    if (serverReport && !serverReport.insufficient_data && serverReport.overall_karma_score) {
+    if (
+      serverReport &&
+      !serverReport.insufficient_data &&
+      serverReport.overall_karma_score
+    ) {
       return serverReport.overall_karma_score;
     }
     return overall;
@@ -374,8 +434,15 @@ export default function KarmaLytixScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
         >
           {/* Hero */}
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.hero}>
-            <Text variant="devanagariSmall" color={colors.primary[500]} align="center">
+          <Animated.View
+            entering={FadeInDown.duration(400)}
+            style={styles.hero}
+          >
+            <Text
+              variant="devanagariSmall"
+              color={colors.primary[500]}
+              align="center"
+            >
               कर्म विश्लेषण
             </Text>
             <Text
@@ -386,7 +453,7 @@ export default function KarmaLytixScreen(): React.JSX.Element {
             >
               {t(
                 'privacyNote',
-                '🔒 Analyzed from metadata only · Your content is never read',
+                '🔒 Analyzed from metadata only · Your content is never read'
               )}
             </Text>
           </Animated.View>
@@ -416,11 +483,17 @@ export default function KarmaLytixScreen(): React.JSX.Element {
 
           {isLoading ? (
             <View style={styles.center}>
-              <OmLoader size={56} label={t('loading', 'Reading your karma patterns…')} />
+              <OmLoader
+                size={56}
+                label={t('loading', 'Reading your karma patterns…')}
+              />
             </View>
           ) : !hasEnoughData ? (
             <EmptyState
-              entriesNeeded={Math.max(0, MIN_ENTRIES_FOR_REPORT - summary.entry_count)}
+              entriesNeeded={Math.max(
+                0,
+                MIN_ENTRIES_FOR_REPORT - summary.entry_count
+              )}
               onWriteNow={() => router.push('/journal/new')}
             />
           ) : view === 'overview' ? (
@@ -437,7 +510,9 @@ export default function KarmaLytixScreen(): React.JSX.Element {
               reflection={reflection}
               expanded={expandedSection}
               onToggle={handleSectionToggle}
-              kiaanInsight={serverKiaanInsight ?? weeklyInsight?.summary ?? null}
+              kiaanInsight={
+                serverKiaanInsight ?? weeklyInsight?.summary ?? null
+              }
               topInsight={weeklyInsight?.top_insight ?? null}
               recommendedVerse={recommendedVerse}
               summary={summary}
@@ -481,21 +556,31 @@ function EmptyState({
       <Text variant="h3" color={colors.text.primary} align="center">
         {t('emptyTitle', 'Your Sacred Mirror Awaits')}
       </Text>
-      <Text variant="body" color={colors.text.secondary} align="center" style={styles.emptyBody}>
+      <Text
+        variant="body"
+        color={colors.text.secondary}
+        align="center"
+        style={styles.emptyBody}
+      >
         {entriesNeeded === 0
           ? t(
               'emptySubReady',
-              'Let KIAAN illuminate your karmic patterns from this week’s metadata.',
+              'Let KIAAN illuminate your karmic patterns from this week’s metadata.'
             )
           : t(
               'emptySubNeedMore',
-              'Write a few more reflections this week, then return here for your sacred mirror.',
+              'Write a few more reflections this week, then return here for your sacred mirror.'
             )}
       </Text>
-      <Text variant="caption" color={colors.text.muted} align="center" style={styles.emptyNote}>
+      <Text
+        variant="caption"
+        color={colors.text.muted}
+        align="center"
+        style={styles.emptyNote}
+      >
         {t(
           'emptyNote',
-          'Your journal content is never read. KarmaLytix works only from mood labels, tags, and the weekly assessment you complete.',
+          'Your journal content is never read. KarmaLytix works only from mood labels, tags, and the weekly assessment you complete.'
         )}
       </Text>
       <DivineButton
@@ -507,7 +592,11 @@ function EmptyState({
   );
 }
 
-function DeltaBadge({ delta }: { delta: number | undefined }): React.JSX.Element | null {
+function DeltaBadge({
+  delta,
+}: {
+  delta: number | undefined;
+}): React.JSX.Element | null {
   if (delta === undefined || delta === 0) return null;
   const positive = delta > 0;
   return (
@@ -592,9 +681,21 @@ function OverviewView({
         </Text>
         <GoldenDivider style={styles.cardDivider} />
         <View style={styles.metaGrid}>
-          <MetaStat value={summary.entry_count} label={t('statEntries', 'Entries')} sanskrit="प्रविष्टियाँ" />
-          <MetaStat value={summary.journaling_days} label={t('statDays', 'Days')} sanskrit="दिन" />
-          <MetaStat value={summary.verse_bookmarks} label={t('statVerses', 'Verses')} sanskrit="श्लोक" />
+          <MetaStat
+            value={summary.entry_count}
+            label={t('statEntries', 'Entries')}
+            sanskrit="प्रविष्टियाँ"
+          />
+          <MetaStat
+            value={summary.journaling_days}
+            label={t('statDays', 'Days')}
+            sanskrit="दिन"
+          />
+          <MetaStat
+            value={summary.verse_bookmarks}
+            label={t('statVerses', 'Verses')}
+            sanskrit="श्लोक"
+          />
         </View>
         {summary.top_tags.length > 0 ? (
           <View style={styles.topTagsRow}>
@@ -631,7 +732,10 @@ function DimensionsView({
         const score = dimensions[d.key];
         const delta = deltas ? deltas[d.key] : undefined;
         return (
-          <Animated.View key={d.key} entering={FadeInDown.delay(index * 60).duration(360)}>
+          <Animated.View
+            key={d.key}
+            entering={FadeInDown.delay(index * 60).duration(360)}
+          >
             <SacredCard>
               <View style={styles.dimCardHeader}>
                 <View style={styles.dimLabels}>
@@ -700,15 +804,27 @@ function ReflectionView({
           <Text variant="label" color={colors.primary[500]}>
             ✦ {t('kiaanReflection', "KIAAN's Sacred Reflection")}
           </Text>
-          <Text variant="caption" color={colors.text.muted} style={styles.insightSub}>
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            style={styles.insightSub}
+          >
             {t('channelledThrough', 'Channelled through Bhagavad Gita wisdom')}
           </Text>
           <GoldenDivider style={styles.cardDivider} />
-          <Text variant="body" color={colors.text.primary} style={styles.insightBody}>
+          <Text
+            variant="body"
+            color={colors.text.primary}
+            style={styles.insightBody}
+          >
             {kiaanInsight}
           </Text>
           {topInsight ? (
-            <Text variant="bodySmall" color={colors.text.secondary} style={styles.insightTop}>
+            <Text
+              variant="bodySmall"
+              color={colors.text.secondary}
+              style={styles.insightTop}
+            >
               {topInsight}
             </Text>
           ) : null}
@@ -744,7 +860,11 @@ function ReflectionView({
               {isOpen ? (
                 <>
                   <GoldenDivider style={styles.cardDivider} />
-                  <Text variant="body" color={colors.text.primary} style={styles.sectionBody}>
+                  <Text
+                    variant="body"
+                    color={colors.text.primary}
+                    style={styles.sectionBody}
+                  >
                     {content}
                   </Text>
                   {sec.key === 'gita_echo' ? (
@@ -778,7 +898,11 @@ function ReflectionView({
         </Text>
         <GoldenDivider style={styles.cardDivider} />
         {dynamicWisdom ? (
-          <Text variant="body" color={colors.text.primary} style={styles.insightBody}>
+          <Text
+            variant="body"
+            color={colors.text.primary}
+            style={styles.insightBody}
+          >
             {dynamicWisdom}
           </Text>
         ) : (
@@ -786,16 +910,23 @@ function ReflectionView({
             {summary.dominant_mood
               ? t(
                   'dynamicWisdomPending',
-                  "Fresh wisdom for this week's theme will appear here when the KarmaLytix engine finishes its weekly run.",
+                  "Fresh wisdom for this week's theme will appear here when the KarmaLytix engine finishes its weekly run."
                 )
               : t(
                   'dynamicWisdomFirstWeek',
-                  'Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.',
+                  'Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.'
                 )}
           </Text>
         )}
-        <Text variant="caption" color={colors.text.muted} style={styles.dynamicNote}>
-          {t('dynamicNote', 'Generated fresh each week by KIAAN · Grounded in Gita philosophy')}
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          style={styles.dynamicNote}
+        >
+          {t(
+            'dynamicNote',
+            'Generated fresh each week by KIAAN · Grounded in Gita philosophy'
+          )}
         </Text>
       </SacredCard>
 

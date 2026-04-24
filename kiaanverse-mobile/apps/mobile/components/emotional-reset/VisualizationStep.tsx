@@ -13,7 +13,13 @@
  * Scene changes trigger minimal JS-thread re-renders (max 4 over 30s).
  */
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { View, StyleSheet, Dimensions, TextInput } from 'react-native';
 import Animated, {
   FadeIn,
@@ -73,12 +79,15 @@ const PARTICLE_COUNT = 6;
  * Emotion-specific visualization themes providing color, imagery,
  * and guided text tailored to the user's selected emotion.
  */
-const EMOTION_THEMES: Record<string, {
-  color: string;
-  glowColor: string;
-  scenes: string[];
-  title: string;
-}> = {
+const EMOTION_THEMES: Record<
+  string,
+  {
+    color: string;
+    glowColor: string;
+    scenes: string[];
+    title: string;
+  }
+> = {
   anger: {
     color: '#FF6B6B',
     glowColor: 'rgba(255, 107, 107, 0.15)',
@@ -170,7 +179,7 @@ const EMOTION_THEMES: Record<string, {
   frustration: {
     color: '#E17055',
     glowColor: 'rgba(225, 112, 85, 0.12)',
-    title: 'The River\'s Wisdom',
+    title: "The River's Wisdom",
     scenes: [
       'See a powerful river meeting a great boulder in its path...',
       'The river does not fight — it flows around, finding new channels...',
@@ -208,7 +217,7 @@ const EMOTION_THEMES: Record<string, {
       'Visualize a vast ocean with waves rising and falling endlessly...',
       'Dive beneath the surface — deeper, deeper — to the silent floor below...',
       'Here, no current moves. No wave reaches. Only infinite stillness...',
-      'You are not the waves — you are the ocean\'s depth, always at peace...',
+      "You are not the waves — you are the ocean's depth, always at peace...",
     ],
   },
 };
@@ -254,24 +263,36 @@ const SacredParticle = React.memo(function SacredParticle({
       delay,
       withRepeat(
         withSequence(
-          withTiming(-driftAmount, { duration, easing: Easing.inOut(Easing.ease) }),
-          withTiming(driftAmount, { duration, easing: Easing.inOut(Easing.ease) }),
+          withTiming(-driftAmount, {
+            duration,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(driftAmount, {
+            duration,
+            easing: Easing.inOut(Easing.ease),
+          })
         ),
         -1,
-        true,
-      ),
+        true
+      )
     );
 
     opacity.value = withDelay(
       delay,
       withRepeat(
         withSequence(
-          withTiming(0.7, { duration: duration * 0.8, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.15, { duration: duration * 0.8, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.7, {
+            duration: duration * 0.8,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(0.15, {
+            duration: duration * 0.8,
+            easing: Easing.inOut(Easing.ease),
+          })
         ),
         -1,
-        true,
-      ),
+        true
+      )
     );
   }, [floatY, opacity, index]);
 
@@ -311,7 +332,7 @@ export function VisualizationStep({
 
   const theme = useMemo(
     () => EMOTION_THEMES[emotion ?? ''] ?? DEFAULT_THEME,
-    [emotion],
+    [emotion]
   );
 
   // Timer as shared value — updates on UI thread, no JS re-renders
@@ -332,18 +353,24 @@ export function VisualizationStep({
     glowPulse.value = withRepeat(
       withSequence(
         withTiming(0.8, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
-      true,
+      true
     );
 
-    mandalaScale.value = withTiming(1, { duration: 4000, easing: Easing.out(Easing.ease) });
+    mandalaScale.value = withTiming(1, {
+      duration: 4000,
+      easing: Easing.out(Easing.ease),
+    });
   }, [glowPulse, mandalaScale]);
 
   const scenes = useMemo(() => {
     if (stepData?.description) {
-      return [stepData.description, ...(stepData.guidance ? [stepData.guidance] : [])];
+      return [
+        stepData.description,
+        ...(stepData.guidance ? [stepData.guidance] : []),
+      ];
     }
     return theme.scenes;
   }, [stepData, theme.scenes]);
@@ -361,12 +388,14 @@ export function VisualizationStep({
       timerShared.value = remaining;
 
       // Update progress ring
-      progress.value = withTiming(elapsed / VISUALIZATION_DURATION, { duration: 900 });
+      progress.value = withTiming(elapsed / VISUALIZATION_DURATION, {
+        duration: 900,
+      });
 
       // Only trigger JS re-render when scene actually changes (max 4 times)
       const newSceneIndex = Math.min(
         Math.floor(elapsed / sceneInterval),
-        scenes.length - 1,
+        scenes.length - 1
       );
       if (newSceneIndex !== sceneIndexRef.current) {
         sceneIndexRef.current = newSceneIndex;
@@ -394,9 +423,12 @@ export function VisualizationStep({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reanimated text prop works at runtime but isn't typed
-  const timerAnimatedProps = useAnimatedProps(() => ({
-    text: timerText.value,
-  } as any));
+  const timerAnimatedProps = useAnimatedProps(
+    () =>
+      ({
+        text: timerText.value,
+      }) as any
+  );
 
   const glowStyle = useAnimatedStyle(() => ({
     opacity: glowPulse.value,
@@ -411,11 +443,16 @@ export function VisualizationStep({
       progress.value,
       [0, 1],
       [0, 360],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     );
     return {
       transform: [{ rotate: `${rotation}deg` }],
-      opacity: interpolate(progress.value, [0, 0.05], [0, 1], Extrapolation.CLAMP),
+      opacity: interpolate(
+        progress.value,
+        [0, 0.05],
+        [0, 1],
+        Extrapolation.CLAMP
+      ),
     };
   });
 
@@ -455,16 +492,14 @@ export function VisualizationStep({
 
       {/* Progress ring indicator */}
       <Animated.View style={[styles.progressRing, progressStyle]}>
-        <View
-          style={[
-            styles.progressDot,
-            { backgroundColor: theme.color },
-          ]}
-        />
+        <View style={[styles.progressDot, { backgroundColor: theme.color }]} />
       </Animated.View>
 
       {/* Title */}
-      <Animated.View entering={FadeInDown.duration(800)} style={styles.titleContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(800)}
+        style={styles.titleContainer}
+      >
         <Text variant="caption" color={colors.primary[500]} align="center">
           Sacred Visualization
         </Text>

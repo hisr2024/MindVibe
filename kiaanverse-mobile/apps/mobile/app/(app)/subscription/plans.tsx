@@ -32,10 +32,7 @@ import {
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  DivineScreenWrapper,
-  OmLoader,
-} from '@kiaanverse/ui';
+import { DivineScreenWrapper, OmLoader } from '@kiaanverse/ui';
 import {
   apiClient,
   getProducts,
@@ -113,7 +110,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         const data = currentRes?.data;
         const tier = data?.effective_tier ?? data?.plan?.tier ?? 'free';
         const billingFromSku = deriveBillingFromSku(
-          data?.store_product_id ?? null,
+          data?.store_product_id ?? null
         );
         const resolvedBilling: BillingPeriod | null =
           billingFromSku ?? data?.plan?.billing_period ?? null;
@@ -132,12 +129,12 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
   const priceFor = useCallback(
     (tier: PaidTier, period: BillingPeriod): string => {
       const match = products.find(
-        (p) => p.tier === tier && p.billingPeriod === period,
+        (p) => p.tier === tier && p.billingPeriod === period
       );
       if (match) return match.price;
       return TIER_CONFIGS[tier].priceDisplay[period].usd;
     },
-    [products],
+    [products]
   );
 
   const handleSelect = useCallback((tier: SubscriptionTier) => {
@@ -154,7 +151,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
       await purchaseSubscription(tier, billing, {
         onComplete: (result) => {
           void Haptics.notificationAsync(
-            Haptics.NotificationFeedbackType.Success,
+            Haptics.NotificationFeedbackType.Success
           );
           router.replace({
             pathname: '/(app)/subscription/success',
@@ -171,7 +168,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
             Alert.alert(
               'Coming soon 🙏',
               'This plan will be available very soon. Thank you for your patience.',
-              [{ text: 'OK' }],
+              [{ text: 'OK' }]
             );
             return;
           }
@@ -188,16 +185,18 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
     try {
       const result = await restorePurchases();
       if (result.success) {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
         Alert.alert(
           'Purchases restored',
           `Your ${TIER_CONFIGS[result.tier].name} subscription is active.`,
-          [{ text: 'Continue', onPress: () => router.back() }],
+          [{ text: 'Continue', onPress: () => router.back() }]
         );
       } else {
         Alert.alert(
           'Nothing to restore',
-          result.error ?? 'No active subscription found.',
+          result.error ?? 'No active subscription found.'
         );
       }
     } finally {
@@ -276,9 +275,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         <View style={styles.planStack}>
           {ALL_TIERS.map((tier) => {
             const isFree = tier === 'free';
-            const price = isFree
-              ? 'Free'
-              : priceFor(tier as PaidTier, billing);
+            const price = isFree ? 'Free' : priceFor(tier as PaidTier, billing);
             const pricePeriod = isFree
               ? 'forever'
               : billing === 'monthly'
@@ -323,10 +320,9 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
 
         <View style={styles.legal}>
           <Text style={styles.legalText}>
-            Billed via Google Play / App Store. Subscriptions auto-renew
-            unless cancelled at least 24 hours before the end of the
-            current period. Manage or cancel anytime in your store
-            account.
+            Billed via Google Play / App Store. Subscriptions auto-renew unless
+            cancelled at least 24 hours before the end of the current period.
+            Manage or cancel anytime in your store account.
           </Text>
           <View style={styles.legalLinks}>
             <Pressable
@@ -370,15 +366,15 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
             <LinearGradient
               colors={
                 selected === 'free'
-                  ? (['rgba(240,235,225,0.15)', 'rgba(240,235,225,0.08)'] as unknown as string[])
+                  ? ([
+                      'rgba(240,235,225,0.15)',
+                      'rgba(240,235,225,0.08)',
+                    ] as unknown as string[])
                   : (tierIdentity(selected).gradient as unknown as string[])
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={[
-                styles.ctaBtn,
-                ctaMeta.disabled && styles.ctaBtnDisabled,
-              ]}
+              style={[styles.ctaBtn, ctaMeta.disabled && styles.ctaBtnDisabled]}
             >
               <Text style={styles.ctaLabel}>{ctaMeta.label}</Text>
               <Text style={styles.ctaSub}>{ctaMeta.sub}</Text>
@@ -400,10 +396,11 @@ type CtaAction = 'subscribe' | 'upgrade' | 'downgrade' | 'current';
 function resolveCtaAction(
   current: CurrentSubscriptionMini,
   selected: PaidTier,
-  billing: BillingPeriod,
+  billing: BillingPeriod
 ): CtaAction {
   if (current.tier === 'free') return 'subscribe';
-  if (current.tier === selected && current.billing === billing) return 'current';
+  if (current.tier === selected && current.billing === billing)
+    return 'current';
 
   const currentRank = TIER_RANK[current.tier];
   const selectedRank = TIER_RANK[selected];
@@ -440,7 +437,7 @@ function featureListFor(tier: SubscriptionTier): string[] {
         ? '50 KIAAN questions / month'
         : tier === 'sadhak'
           ? '300 KIAAN questions / month'
-          : 'Unlimited KIAAN questions',
+          : 'Unlimited KIAAN questions'
     );
   }
   if (f.kiaanVoiceCompanion) lines.push('Divine Voice Companion');
