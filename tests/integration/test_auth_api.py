@@ -106,6 +106,62 @@ class TestLogin:
         # Check that refresh token cookie was set
         assert "refresh_token" in response.cookies
 
+        # Browsers receive `refresh_token: None` in the body — the cookie
+        # is the source of truth for them.
+        assert data.get("refresh_token") is None
+
+    async def test_login_mobile_client_gets_refresh_token_in_body(
+        self, test_client: AsyncClient, test_user
+    ):
+        """Mobile clients (X-Client: kiaanverse-mobile) cannot read httpOnly
+        cookies from React Native, so the backend must return the rotated
+        refresh_token in the response body for them to store in SecureStore."""
+        response = await test_client.post(
+            "/api/auth/login",
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
+            headers={"X-Client": "kiaanverse-mobile"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("refresh_token"), (
+            "Mobile login must return refresh_token in the body; "
+            "without it, mobile cannot refresh expired access tokens."
+        )
+        # Cookie is still set (belt-and-suspenders) but the body copy is
+        # what mobile actually consumes.
+        assert "refresh_token" in response.cookies
+
+    async def test_refresh_mobile_client_gets_refresh_token_in_body(
+        self, test_client: AsyncClient, test_user
+    ):
+        """Mobile's refresh call must also receive the rotated refresh_token
+        in the body so SecureStore stays in sync across rotations."""
+        # 1. Mobile login — captures the initial refresh_token body copy.
+        login_response = await test_client.post(
+            "/api/auth/login",
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
+            headers={"X-Client": "kiaanverse-mobile"},
+        )
+        assert login_response.status_code == 200
+        initial_refresh = login_response.json().get("refresh_token")
+        assert initial_refresh is not None
+
+        # 2. Mobile refresh — sends the refresh token in the body (not cookie).
+        refresh_response = await test_client.post(
+            "/api/auth/refresh",
+            json={"refresh_token": initial_refresh},
+            headers={"X-Client": "kiaanverse-mobile"},
+        )
+        assert refresh_response.status_code == 200
+        refresh_data = refresh_response.json()
+        assert "access_token" in refresh_data
+        assert refresh_data.get("refresh_token"), (
+            "Mobile refresh must return rotated refresh_token in the body."
+        )
+        # Rotation — new token must differ from the old one.
+        assert refresh_data["refresh_token"] != initial_refresh
+
     async def test_login_wrong_password(self, test_client: AsyncClient, test_user):
         """Test login with wrong password."""
         response = await test_client.post(

@@ -523,8 +523,22 @@ async def _login_impl(
     except Exception:
         pass
 
-    # Return refresh token in body for mobile clients (cookie is also set above)
-    refresh_body = raw_refresh if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None
+    # Return refresh token in body for clients that cannot read httpOnly
+    # cookies. Mobile apps (React Native) cannot access Set-Cookie headers
+    # by design — we identify them via the X-Client header the Kiaanverse
+    # mobile app sets on every request. Browsers keep using the httpOnly
+    # cookie path and never see the body copy.
+    x_client = (request.headers.get("x-client") or "").lower()
+    is_cookieless_client = x_client.startswith("kiaanverse-mobile") or x_client in {
+        "mobile",
+        "android",
+        "ios",
+    }
+    refresh_body = (
+        raw_refresh
+        if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN or is_cookieless_client
+        else None
+    )
 
     logger.info("Login successful: user_id=%s session_id=%s", user_id, session.id)
 
@@ -785,12 +799,27 @@ async def refresh_tokens(
         max_age=expires_in_seconds,
     )
 
+    # Mirror the /login behaviour: mobile clients (identified by the
+    # X-Client header) cannot read httpOnly cookies, so they need the
+    # rotated refresh_token in the response body to keep the SecureStore
+    # copy in sync and survive the next access-token expiry.
+    x_client_refresh = (request.headers.get("x-client") or "").lower()
+    is_cookieless_refresh = (
+        x_client_refresh.startswith("kiaanverse-mobile")
+        or x_client_refresh in {"mobile", "android", "ios"}
+    )
+    return_body_refresh = (
+        new_raw
+        if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN or is_cookieless_refresh
+        else None
+    )
+
     return RefreshOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
         expires_in=expires_in_seconds,
         session_id=str(session_row.id),
-        refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,
+        refresh_token=return_body_refresh,
     )
 
 

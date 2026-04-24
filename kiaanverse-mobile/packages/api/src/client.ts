@@ -103,7 +103,17 @@ export async function refreshAccessToken(): Promise<string | null> {
     const response = await axios.post<RefreshResponse>(
       `${API_CONFIG.baseURL}/api/auth/refresh`,
       { refresh_token: refreshToken },
-      { withCredentials: true, timeout: API_CONFIG.timeout },
+      {
+        withCredentials: true,
+        timeout: API_CONFIG.timeout,
+        // Signal to the backend that we are a cookieless mobile client so
+        // it returns the rotated refresh_token in the body (we cannot read
+        // the httpOnly Set-Cookie from React Native).
+        headers: {
+          'X-Client': 'kiaanverse-mobile',
+          'Content-Type': 'application/json',
+        },
+      },
     );
     const newAccess = response.data?.access_token;
     const newRefresh = response.data?.refresh_token ?? refreshToken;
@@ -339,7 +349,16 @@ function createApiClient(): AxiosInstance {
           const refreshResponse = await axios.post<RefreshResponse>(
             `${API_CONFIG.baseURL}/api/auth/refresh`,
             storedRefreshToken ? { refresh_token: storedRefreshToken } : {},
-            { withCredentials: true },
+            {
+              withCredentials: true,
+              // Same X-Client signal as the standalone refreshAccessToken
+              // helper — tells the backend to return the rotated
+              // refresh_token in the body so SecureStore stays in sync.
+              headers: {
+                'X-Client': 'kiaanverse-mobile',
+                'Content-Type': 'application/json',
+              },
+            },
           );
 
           const newAccessToken = refreshResponse.data.access_token;
