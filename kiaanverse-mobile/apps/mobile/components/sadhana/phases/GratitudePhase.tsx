@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { DivineButton, SacredInput } from '@kiaanverse/ui';
 
@@ -67,7 +67,13 @@ function GratitudePhaseInner({
   const canFinish = mood !== null;
 
   return (
-    <View style={styles.wrap}>
+    <ScrollView
+      style={styles.wrap}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.titleBlock}>
         <Text style={styles.phaseLabel} allowFontScaling={false}>
           PHASE VI
@@ -137,7 +143,7 @@ function GratitudePhaseInner({
           loading={isCompleting}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -147,9 +153,13 @@ export const GratitudePhase = React.memo(GratitudePhaseInner);
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     paddingVertical: 24,
     paddingHorizontal: 20,
     gap: 18,
+    paddingBottom: 32,
   },
   titleBlock: {
     alignItems: 'center',

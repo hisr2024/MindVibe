@@ -9,7 +9,7 @@
  * Phases: Inhale (gold) -> Hold In (cyan) -> Exhale (peacock blue) -> Hold Out (rest)
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -70,8 +70,13 @@ function BreathingOrbComponent({
   /** Countdown seconds remaining in current phase */
   const countdown = useSharedValue(0);
 
-  const phaseLabel = useSharedValue<(typeof PHASE_LABELS)[number]>(PHASE_LABELS[0]);
+  // React state so the phase label re-renders as the breath walks through
+  // Inhale -> Hold -> Exhale -> Rest. A SharedValue alone does NOT drive
+  // React re-renders, which is why the label previously looked frozen at
+  // "Breathe In…" for the entire session.
+  const [visibleLabel, setVisibleLabel] = useState<string>(PHASE_LABELS[0]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tickTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const activeRef = useRef(isActive);
   activeRef.current = isActive;
 
@@ -80,6 +85,10 @@ function BreathingOrbComponent({
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    for (const t of tickTimersRef.current) {
+      clearTimeout(t);
+    }
+    tickTimersRef.current = [];
   }, []);
 
   /** Run a single breathing cycle, then recurse if still active. */
@@ -94,9 +103,11 @@ function BreathingOrbComponent({
       const dur = durations[idx] ?? 0;
       const label = PHASE_LABELS[idx] ?? PHASE_LABELS[0];
 
-      // Update phase index and label
+      // Update phase index and label. The React state setter is what
+      // actually drives the UI — without this the <Text> below would be
+      // pinned at PHASE_LABELS[0] forever.
       phaseIndex.value = idx;
-      phaseLabel.value = label;
+      setVisibleLabel(label);
       colorProgress.value = withTiming(idx, { duration: dur, easing: Easing.inOut(Easing.ease) });
       countdown.value = Math.round(dur / 1000);
 
@@ -112,6 +123,20 @@ function BreathingOrbComponent({
       }
       // Phase 3 (holdOut): stay at contracted state
 
+      // Skip zero-duration phases cleanly (e.g. holdOut: 0 in 4-7-8) so we
+      // never sit on a frame for 0 ms and never race onto the next phase.
+      if (dur <= 0) {
+        const nextIdx = idx + 1;
+        if (nextIdx < 4) {
+          runPhase(nextIdx);
+        } else {
+          if (onCycleComplete) runOnJS(onCycleComplete)();
+          colorProgress.value = 0;
+          runCycle();
+        }
+        return;
+      }
+
       // Countdown timer ticks
       const tickInterval = 1000;
       let remaining = Math.round(dur / 1000);
@@ -122,7 +147,7 @@ function BreathingOrbComponent({
         }
       };
       for (let t = 1; t <= remaining; t++) {
-        setTimeout(tick, t * tickInterval);
+        tickTimersRef.current.push(setTimeout(tick, t * tickInterval));
       }
 
       // Schedule next phase
@@ -144,7 +169,7 @@ function BreathingOrbComponent({
     };
 
     runPhase(0);
-  }, [pattern, onCycleComplete, phaseIndex, phaseLabel, colorProgress, countdown, scale, opacity]);
+  }, [pattern, onCycleComplete, phaseIndex, colorProgress, countdown, scale, opacity]);
 
   useEffect(() => {
     if (isActive) {
@@ -155,12 +180,12 @@ function BreathingOrbComponent({
       scale.value = withTiming(1.0, { duration: 400 });
       opacity.value = withTiming(0.6, { duration: 400 });
       colorProgress.value = withTiming(0, { duration: 400 });
-      phaseLabel.value = PHASE_LABELS[0];
+      setVisibleLabel(PHASE_LABELS[0]);
       countdown.value = 0;
     }
 
     return clearTimers;
-  }, [isActive, runCycle, clearTimers, scale, opacity, colorProgress, phaseLabel, countdown]);
+  }, [isActive, runCycle, clearTimers, scale, opacity, colorProgress, countdown]);
 
   const orbAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -221,10 +246,11 @@ function BreathingOrbComponent({
         </Animated.View>
       </View>
 
-      {/* Phase label */}
+      {/* Phase label — driven by visibleLabel so Inhale/Hold/Exhale/Rest all
+          actually appear in turn. */}
       <Animated.View style={[styles.labelContainer, phaseLabelStyle]}>
         <Text variant="body" color={colors.text.secondary} align="center">
-          {isActive ? PHASE_LABELS[0] : 'Tap to begin'}
+          {isActive ? visibleLabel : 'Tap to begin'}
         </Text>
       </Animated.View>
     </View>
