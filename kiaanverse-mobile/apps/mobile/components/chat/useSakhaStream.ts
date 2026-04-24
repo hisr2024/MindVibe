@@ -126,6 +126,8 @@ const AUTH_ERROR_TEXT =
   'Your session has expired. Please sign in again to continue our dialogue.';
 const COLD_START_TEXT =
   'I am waking from deep meditation (server cold start). Please ask again in a moment.';
+const NO_CREDENTIALS_TEXT =
+  'To speak with Sakha, please sign in with your email. (Developer Login skips the server session and cannot start a dialogue.)';
 
 export function useSakhaStream(
   options: UseSakhaStreamOptions = {},
@@ -242,15 +244,17 @@ export function useSakhaStream(
       };
 
       const finishStreamingFailure = (
-        reason: 'network' | 'auth' | 'server' | 'cold_start',
+        reason: 'network' | 'auth' | 'server' | 'cold_start' | 'no_credentials',
         activeXhr: XMLHttpRequest,
       ): void => {
         const errorText =
-          reason === 'auth'
-            ? AUTH_ERROR_TEXT
-            : reason === 'cold_start'
-              ? COLD_START_TEXT
-              : CONNECTION_ERROR_TEXT;
+          reason === 'no_credentials'
+            ? NO_CREDENTIALS_TEXT
+            : reason === 'auth'
+              ? AUTH_ERROR_TEXT
+              : reason === 'cold_start'
+                ? COLD_START_TEXT
+                : CONNECTION_ERROR_TEXT;
         const id = assistantIdRef.current;
         if (id) {
           setMessages((prev) =>
@@ -302,14 +306,24 @@ export function useSakhaStream(
             // the "Your session has expired" copy. This mirrors the
             // apiClient's axios interceptor so SSE has the same resilience
             // as regular authenticated POSTs.
+            //
+            // Special case: if we attempted the request without any token to
+            // begin with, a refresh will also fail (there's nothing to
+            // refresh from). In that case we show the clearer "please sign
+            // in with your email" copy — this is the devLogin path, where
+            // the app has `status: authenticated` locally but no backend
+            // session exists.
             if ((status === 401 || status === 403) && !hasRetriedAfterRefresh) {
               hasRetriedAfterRefresh = true;
+              const hadInitialToken = authToken !== null && authToken.length > 0;
               void (async () => {
                 const refreshed = await refreshAccessToken();
                 if (refreshed) {
                   openAndSend(refreshed);
-                } else {
+                } else if (hadInitialToken) {
                   finishStreamingFailure('auth', x);
+                } else {
+                  finishStreamingFailure('no_credentials', x);
                 }
               })();
               return;
