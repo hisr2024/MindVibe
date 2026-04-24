@@ -204,12 +204,21 @@ export default function JournalDetailScreen(): React.JSX.Element {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
-    if (editMood) {
+    // Keep the mood id in tags too so the legacy card-level filter keeps
+    // finding it, but also send it through the dedicated `moods` wire so
+    // KarmaLytix's mood_labels column stays accurate after an edit.
+    const moods: string[] = editMood ? [editMood] : [];
+    if (editMood && !tags.includes(editMood)) {
       tags.unshift(editMood);
     }
 
     try {
-      await updateJournal.mutateAsync({ id: id ?? '', content_encrypted: contentEncrypted, tags });
+      await updateJournal.mutateAsync({
+        id: id ?? '',
+        content_encrypted: contentEncrypted,
+        moods,
+        tags,
+      });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setIsEditing(false);
     } catch {

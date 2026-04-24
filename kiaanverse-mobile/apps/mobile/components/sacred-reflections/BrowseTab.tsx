@@ -175,7 +175,13 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
   const filtered = useMemo(() => {
     let result = entries;
     if (activeFilter !== 'all') {
-      result = result.filter((e) => e.tags.includes(activeFilter));
+      // Prefer the structured moods[] column so the filter keeps working even
+      // if we stop mirroring the mood id into tags[] in a future release.
+      // Fall back to tags so journals written before the moods[]/tags[]
+      // split (shipped alongside this patch) still group correctly.
+      result = result.filter(
+        (e) => e.moods?.includes(activeFilter) || e.tags.includes(activeFilter),
+      );
     }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
@@ -202,7 +208,18 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
 
   const renderEntry = useCallback(
     ({ item }: { item: JournalEntry }) => {
-      const moodId = item.tags.find((t) => t in MOOD_BY_ID) as MoodId | undefined;
+      // Mood resolution order:
+      //   1. Structured moods[] column (authoritative since Sacred Reflections
+      //      writes moods & tags separately to match the backend contract).
+      //   2. Tags fallback for entries written before the split.
+      //   3. null → no mood pill rendered.
+      const moodFromColumn = (item.moods ?? []).find(
+        (m) => m in MOOD_BY_ID,
+      ) as MoodId | undefined;
+      const moodFromTags = item.tags.find((t) => t in MOOD_BY_ID) as
+        | MoodId
+        | undefined;
+      const moodId = moodFromColumn ?? moodFromTags;
       const mood = moodId ? MOOD_BY_ID[moodId] : null;
       const date = new Date(item.created_at).toLocaleDateString(undefined, {
         month: 'short',
@@ -318,22 +335,26 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         {BROWSE_FILTER_IDS.map((id) => {
           const isActive = activeFilter === id;
           const mood = id === 'all' ? null : MOOD_BY_ID[id];
+          const chipLabel = mood
+            ? `${mood.label.charAt(0)}${mood.label.slice(1).toLowerCase()}`
+            : 'All';
           return (
             <Pressable
               key={id}
               onPress={() => handleFilterPress(id)}
               style={[styles.filterChip, isActive && styles.filterChipActive]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`Filter ${chipLabel}`}
             >
-              {mood ? (
-                <Text style={styles.filterEmoji}>{mood.emoji}</Text>
-              ) : (
-                <Text style={styles.filterEmoji}>{'\u{2728}'}</Text>
-              )}
+              <Text style={styles.filterEmoji}>
+                {mood ? mood.emoji : '\u{2728}'}
+              </Text>
               <Text
                 variant="caption"
                 color={isActive ? colors.background.dark : colors.text.secondary}
               >
-                {id === 'all' ? 'All' : mood?.label.charAt(0) + mood!.label.slice(1).toLowerCase()}
+                {chipLabel}
               </Text>
             </Pressable>
           );

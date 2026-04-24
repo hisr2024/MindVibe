@@ -74,13 +74,27 @@ jest.mock('react-native-reanimated', () => {
     },
     // Animated.View renders as a plain View in tests
     Animated: { View, Text: require('react-native').Text },
-    // Layout animations — used by Toast and OfflineBanner
+    // Layout animations — used by Toast, OfflineBanner, and the
+    // Sacred Reflections / KarmaLytix surfaces. `FadeInDown` is what the
+    // karmalytix screen chains `.duration(...)` on, so it must be a mock
+    // builder too; missing builders silently return `undefined` and then
+    // any chained call crashes the render.
     FadeIn: createAnimationMock(),
     FadeOut: createAnimationMock(),
+    FadeInDown: createAnimationMock(),
+    FadeInUp: createAnimationMock(),
+    FadeOutDown: createAnimationMock(),
+    FadeOutUp: createAnimationMock(),
     SlideInUp: createAnimationMock(),
     SlideOutUp: createAnimationMock(),
     SlideInDown: createAnimationMock(),
     SlideOutDown: createAnimationMock(),
+    SlideInLeft: createAnimationMock(),
+    SlideOutLeft: createAnimationMock(),
+    SlideInRight: createAnimationMock(),
+    SlideOutRight: createAnimationMock(),
+    ZoomIn: createAnimationMock(),
+    ZoomOut: createAnimationMock(),
     // Shared value hooks
     useSharedValue: (initial: unknown) => ({ value: initial }),
     useAnimatedStyle: (fn: () => Record<string, unknown>) => fn(),
@@ -177,6 +191,11 @@ jest.mock('expo-av', () => ({
       }),
     },
     setAudioModeAsync: jest.fn(),
+    // useVoiceRecorder reads permission state on mount and again on start.
+    // Default to "granted" so recorder-dependent tests can drive the state
+    // machine without needing per-test overrides.
+    requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+    getPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
     AndroidOutputFormat: { MPEG_4: 2 },
     AndroidAudioEncoder: { AAC: 3 },
     IOSOutputFormat: { MPEG4AAC: 'aac' },

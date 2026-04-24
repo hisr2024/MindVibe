@@ -32,6 +32,7 @@ interface _EncryptedPayloadShape {
 
 function _packJournalEntry(entry: {
   content_encrypted: string;
+  moods?: string[];
   tags?: string[];
 }): Record<string, unknown> {
   const encryptedContent: _EncryptedPayloadShape = {
@@ -42,6 +43,13 @@ function _packJournalEntry(entry: {
   };
   return {
     content: encryptedContent,
+    // Backend's KarmaLytix pipeline (services/karmalytix_service.py) scans
+    // JournalEntry.mood_labels *only* for dominant-mood inference. Passing
+    // moods through the same `tags` bucket the Editor used to produce
+    // silently nulled out mood_labels and degraded the Sacred Mirror to an
+    // empty-state output. Splitting here is the minimal fix that keeps the
+    // existing Editor call sites working while restoring the contract.
+    moods: entry.moods ?? [],
     tags: entry.tags ?? [],
     client_updated_at: new Date().toISOString(),
   };
@@ -50,6 +58,7 @@ function _packJournalEntry(entry: {
 function _unpackJournalEntry(raw: unknown): {
   id: string;
   content_encrypted: string;
+  moods: string[];
   tags: string[];
   mood_tag?: string;
   created_at: string;
@@ -67,6 +76,7 @@ function _unpackJournalEntry(raw: unknown): {
   const result: {
     id: string;
     content_encrypted: string;
+    moods: string[];
     tags: string[];
     mood_tag?: string;
     created_at: string;
@@ -74,6 +84,7 @@ function _unpackJournalEntry(raw: unknown): {
   } = {
     id: String(row.id ?? ''),
     content_encrypted: String(ciphertext),
+    moods,
     tags,
     created_at: String(row.created_at ?? new Date().toISOString()),
   };
@@ -166,7 +177,11 @@ export const api = {
       const entries = (res.data ?? []).map(_unpackJournalEntry);
       return { ...res, data: { entries, total: entries.length } };
     },
-    create: async (entry: { content_encrypted: string; tags?: string[] }) => {
+    create: async (entry: {
+      content_encrypted: string;
+      moods?: string[];
+      tags?: string[];
+    }) => {
       const payload = _packJournalEntry(entry);
       const res = await apiClient.post<Record<string, unknown>>(
         '/api/journal/entries',
@@ -182,7 +197,11 @@ export const api = {
     },
     update: async (
       entryId: string,
-      entry: { content_encrypted: string; tags?: string[] },
+      entry: {
+        content_encrypted: string;
+        moods?: string[];
+        tags?: string[];
+      },
     ) => {
       const payload = _packJournalEntry(entry);
       const res = await apiClient.put<Record<string, unknown>>(

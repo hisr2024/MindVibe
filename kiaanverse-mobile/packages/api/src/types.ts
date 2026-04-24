@@ -884,6 +884,10 @@ export interface JournalEntry {
   title?: string;
   content_encrypted: string;
   content_preview?: string;
+  /** Structured mood labels surfaced by the backend's JournalEntry.mood_labels
+   *  column. The Editor writes exactly one mood per reflection today, but the
+   *  wire shape is an array to leave room for multi-mood future use. */
+  moods: string[];
   tags: string[];
   mood_tag?: string;
   created_at: string;

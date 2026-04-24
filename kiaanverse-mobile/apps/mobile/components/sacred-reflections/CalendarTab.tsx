@@ -63,14 +63,19 @@ function computeStreaks(entries: readonly JournalEntry[]): {
     }
   }
 
-  // Longest streak (scan all unique days sorted ascending)
-  const sorted = [...days]
-    .map((k) => k.split('-').map(Number))
-    .sort((a, b) => {
-      if (a[0] !== b[0]) return a[0] - b[0];
-      if (a[1] !== b[1]) return a[1] - b[1];
-      return a[2] - b[2];
-    });
+  // Longest streak (scan all unique days sorted ascending). `dayKey()`
+  // always produces `YYYY-MM-DD`, so the parsed tuple is guaranteed to have
+  // exactly three numeric segments — the explicit triple destructure keeps
+  // the TS compiler from widening each segment to `number | undefined`.
+  const sorted: Array<readonly [number, number, number]> = [...days].map((k) => {
+    const [y, m, d] = k.split('-').map(Number);
+    return [y ?? 0, m ?? 0, d ?? 0] as const;
+  });
+  sorted.sort((a, b) => {
+    if (a[0] !== b[0]) return a[0] - b[0];
+    if (a[1] !== b[1]) return a[1] - b[1];
+    return a[2] - b[2];
+  });
 
   let longest = 0;
   let run = 0;
