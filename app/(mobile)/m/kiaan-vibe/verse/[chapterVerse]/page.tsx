@@ -199,7 +199,7 @@ export default function VerseReaderPage() {
             className="text-[10px] tracking-[0.1em] uppercase font-[family-name:var(--font-ui)]"
             style={{ color: '#D4A017' }}
           >
-            BG {chapterNum}.{verseNum} \u00B7 {chapter.transliteration}
+            BG {chapterNum}.{verseNum} {'·'} {chapter.transliteration}
           </span>
           <div className="flex gap-2">
             <motion.button

@@ -73,7 +73,7 @@ export function VerseRevelation({
 
       {reference && (
         <p className="sacred-label text-right mt-2">
-          Chapter {reference}
+          {/^chapter\b/i.test(reference.trim()) ? reference : `Chapter ${reference}`}
         </p>
       )}
     </div>
