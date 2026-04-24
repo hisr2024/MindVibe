@@ -11,7 +11,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Kiaanverse',
   slug: 'kiaanverse',
-  version: '1.2.0',
+  // 1.3.0 bundles native additions that landed after the 1.2.0 Play build:
+  // expo-document-picker (Vibe Player "My Music" import) and the transitive
+  // native pieces pulled in by the Sacred Reflections / Sakha chat PRs. With
+  // runtimeVersion: { policy: 'appVersion' } every OTA is scoped to the
+  // `version` string, so bumping from 1.2.0 → 1.3.0 prevents expo-updates
+  // from pushing JS that imports new native modules to APKs compiled before
+  // those modules existed. The matching versionCode bump is required by Play.
+  version: '1.3.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'kiaanverse',
@@ -61,7 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   android: {
     package: 'com.kiaanverse.app',
-    versionCode: 20,
+    versionCode: 21,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop

@@ -1,5 +1,21 @@
 # MindVibe Mobile Apps 📱
 
+> **⚠️ STATUS — READ BEFORE MERGING HERE**
+>
+> The Android app that ships to Google Play (`com.kiaanverse.app`) is the
+> **Expo app at `kiaanverse-mobile/apps/mobile/`**, NOT this directory.
+>
+> The native Kotlin/Compose app in `mobile/android/` (`com.mindvibe.app`)
+> is an **experimental parallel port**: no CI builds it, no workflow
+> submits it to Google Play, and no installed device receives updates
+> from it. PRs merged into this directory do **not** reach users.
+>
+> If you're porting a feature that users should see, put it in
+> `kiaanverse-mobile/apps/mobile/` (Expo + React Native). Shipping rules
+> for that app live in `kiaanverse-mobile/apps/mobile/README.md`
+> (OTA vs. APK — "merged but not on my phone" is almost always a
+> version-bump problem; see that README).
+
 This directory contains the infrastructure and codebase for MindVibe's native Android and iOS applications.
 
 ## 📁 Directory Structure

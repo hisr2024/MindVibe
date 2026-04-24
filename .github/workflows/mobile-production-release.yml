@@ -4,6 +4,31 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  # Manual dispatch lets maintainers trigger a build without cutting a tag —
+  # useful when you need to rebuild with --clear-cache after a dependency
+  # change (e.g. a new native Expo module) without re-submitting to Play.
+  # With `submit: false` you can also verify a build before the store cut.
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'EAS build platform'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      clear_cache:
+        description: 'Pass --clear-cache to eas build (fresh native build, slower)'
+        required: false
+        default: true
+        type: boolean
+      submit:
+        description: 'Submit to store after build (uncheck for build-only verification)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -33,16 +58,31 @@ jobs:
       - name: Setup EAS CLI
         run: npm install -g eas-cli
 
-      - name: Build production (all platforms)
+      - name: Build production
         working-directory: kiaanverse-mobile/apps/mobile
-        run: eas build --platform all --profile production --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # Tag-triggered runs build all platforms without cache bust — the
+          # normal path. Manual dispatch honours the inputs above.
+          PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+          CLEAR_CACHE: ${{ github.event.inputs.clear_cache || 'false' }}
+        run: |
+          EXTRA=""
+          if [ "$CLEAR_CACHE" = "true" ]; then
+            EXTRA="--clear-cache"
+            echo "::notice::Building with --clear-cache (fresh native build)"
+          fi
+          echo "Running: eas build --platform $PLATFORM --profile production --non-interactive $EXTRA"
+          eas build --platform "$PLATFORM" --profile production --non-interactive $EXTRA
 
   submit:
     name: Submit to App Stores
     runs-on: ubuntu-latest
     needs: build
+    # Tag-triggered runs always submit. Manual dispatch submits only when the
+    # operator opts in — this lets you rebuild with --clear-cache and inspect
+    # the artifact before committing to a store upload.
+    if: ${{ github.event_name == 'push' || github.event.inputs.submit == 'true' }}
 
     steps:
       - name: Checkout code
@@ -68,12 +108,16 @@ jobs:
         run: npm install -g eas-cli
 
       - name: Submit to Google Play Store
+        # Skip when a manual dispatch targeted iOS only.
+        if: ${{ github.event_name == 'push' || github.event.inputs.platform != 'ios' }}
         working-directory: kiaanverse-mobile/apps/mobile
         run: eas submit --platform android --profile production --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Submit to Apple App Store
+        # Skip when a manual dispatch targeted Android only.
+        if: ${{ github.event_name == 'push' || github.event.inputs.platform != 'android' }}
         working-directory: kiaanverse-mobile/apps/mobile
         run: eas submit --platform ios --profile production --non-interactive
         env:
