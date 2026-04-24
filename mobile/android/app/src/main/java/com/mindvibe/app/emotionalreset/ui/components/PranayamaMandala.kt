@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,7 +49,7 @@ fun PranayamaMandala(
     modifier: Modifier = Modifier,
 ) {
     var beat by remember { mutableStateOf(BreathBeat.Inhale) }
-    var round by remember { mutableIntStateOf(1) }
+    var round by remember { mutableStateOf(1) }
     var target by remember { mutableStateOf(0.4f) } // 0.4 min .. 1.0 max
 
     val scale by animateFloatAsState(

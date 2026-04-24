@@ -47,7 +47,12 @@ fun EmotionalResetHost(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     BackHandler(enabled = state.phase != EmotionalResetPhase.Ceremony) {
-        if (!viewModel.stepBack()) onExit()
+        if (!viewModel.stepBack()) {
+            // Reset the ritual so a fresh session starts next time, matching
+            // the web — kiaanverse.com/m/emotional-reset re-mounts on nav.
+            viewModel.returnToSakha()
+            onExit()
+        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
