@@ -53,14 +53,67 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          # We need the previous commit so the native-change guard below can
+          # diff HEAD against HEAD^ for package.json / app.config.ts changes.
+          fetch-depth: 2
+
+      - name: Guard — refuse OTA if native layer changed without version bump
+        id: native_guard
+        run: |
+          # When a commit adds/removes a native Expo module (package.json) or
+          # edits the native blocks of app.config.ts (permissions, plugins,
+          # bundle ids, versionCode/version), OTA is NOT a safe delivery
+          # mechanism — users on the old APK lack the corresponding native
+          # code. Require a companion version bump in the SAME commit, which
+          # flips the runtimeVersion (policy: appVersion) and partitions the
+          # new JS bundle away from the old APK's OTA train.
+          NATIVE_FILES_CHANGED=$(git diff --name-only HEAD^ HEAD -- \
+            kiaanverse-mobile/apps/mobile/package.json \
+            kiaanverse-mobile/apps/mobile/app.config.ts \
+            kiaanverse-mobile/apps/mobile/plugins/ \
+            'kiaanverse-mobile/apps/mobile/android/**' \
+            'kiaanverse-mobile/apps/mobile/ios/**' \
+            || true)
+
+          if [ -z "$NATIVE_FILES_CHANGED" ]; then
+            echo "No native-layer changes — safe to OTA."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Native-layer files changed:"
+          echo "$NATIVE_FILES_CHANGED"
+
+          # A version bump in app.config.ts means the PR author consciously
+          # cut a new APK train. In that case OTA is still useful (it would
+          # target the NEW runtimeVersion once the APK is published) but it's
+          # also harmless to skip — the Play release flow will publish its
+          # own bundle. Be conservative and skip.
+          if echo "$NATIVE_FILES_CHANGED" | grep -q 'app.config.ts'; then
+            VERSION_BUMPED=$(git diff HEAD^ HEAD -- \
+              kiaanverse-mobile/apps/mobile/app.config.ts \
+              | grep -E "^[+][^+].*(version:[[:space:]]*'|versionCode:[[:space:]])" \
+              || true)
+            if [ -n "$VERSION_BUMPED" ]; then
+              echo "::notice::app.config.ts version bumped — skipping OTA, tag a v*.*.* release to ship native changes."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "::error::Native layer changed without a version bump in app.config.ts."
+          echo "::error::Publishing an OTA here would push JS that imports native modules the installed APK doesn't have."
+          echo "::error::Either (a) bump version + versionCode in app.config.ts and tag a v*.*.* release, or (b) add [skip ota] to the commit message if the change is truly native-only."
+          exit 1
 
       - name: Setup pnpm
+        if: steps.native_guard.outputs.skip != 'true'
         uses: pnpm/action-setup@v4
         with:
           version: 9.1.0
 
       - name: Setup Node.js
+        if: steps.native_guard.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -68,13 +121,16 @@ jobs:
           cache-dependency-path: kiaanverse-mobile/pnpm-lock.yaml
 
       - name: Install dependencies
+        if: steps.native_guard.outputs.skip != 'true'
         working-directory: kiaanverse-mobile
         run: pnpm install --frozen-lockfile
 
       - name: Setup EAS CLI
+        if: steps.native_guard.outputs.skip != 'true'
         run: npm install -g eas-cli
 
       - name: Verify EXPO_TOKEN is set
+        if: steps.native_guard.outputs.skip != 'true'
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
@@ -84,6 +140,7 @@ jobs:
           fi
 
       - name: Publish OTA update to production channel
+        if: steps.native_guard.outputs.skip != 'true'
         working-directory: kiaanverse-mobile/apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
