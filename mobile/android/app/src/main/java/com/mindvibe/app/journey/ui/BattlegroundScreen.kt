@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -232,7 +233,7 @@ private fun ViceCard(vice: Vice, onOpen: () -> Unit) {
                             .clip(RoundedCornerShape(50))
                             .background(vice.accent),
                     )
-                    Spacer(Modifier.size(width = 4.dp, height = 0.dp))
+                    Spacer(Modifier.width(4.dp))
                     Text(
                         if (anyActive) "ACTIVE" else "DORMANT",
                         style = MaterialTheme.typography.labelSmall.copy(
