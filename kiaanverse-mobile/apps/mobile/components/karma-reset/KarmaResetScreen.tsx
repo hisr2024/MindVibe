@@ -42,7 +42,8 @@ import type {
 
 function newSessionId(): string {
   // expo-crypto is already a dep; randomUUID works on all supported RN runtimes
-  const uuid = (ExpoCrypto as unknown as { randomUUID?: () => string }).randomUUID;
+  const uuid = (ExpoCrypto as unknown as { randomUUID?: () => string })
+    .randomUUID;
   if (typeof uuid === 'function') return uuid();
   return `kr-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6).toString(36)}`;
 }
@@ -83,7 +84,7 @@ export function KarmaResetScreen(): React.JSX.Element {
       updateSession({ context: ctx });
       setPhase('reflection');
     },
-    [updateSession],
+    [updateSession]
   );
 
   const handleReflectionComplete = useCallback(
@@ -91,7 +92,7 @@ export function KarmaResetScreen(): React.JSX.Element {
       updateSession({ reflections: refs });
       setPhase('wisdom');
     },
-    [updateSession],
+    [updateSession]
   );
 
   const handleWisdomComplete = useCallback(
@@ -99,7 +100,7 @@ export function KarmaResetScreen(): React.JSX.Element {
       updateSession({ wisdom });
       setPhase('sankalpa');
     },
-    [updateSession],
+    [updateSession]
   );
 
   const handleSankalpaComplete = useCallback(
@@ -107,7 +108,7 @@ export function KarmaResetScreen(): React.JSX.Element {
       updateSession({ sankalpa, completedAt: new Date() });
       setPhase('seal');
     },
-    [updateSession],
+    [updateSession]
   );
 
   // Fade-in every time `phase` changes — gives the illusion of a
@@ -122,7 +123,7 @@ export function KarmaResetScreen(): React.JSX.Element {
       withTiming(1, {
         duration: 600,
         easing: Easing.bezier(0, 0.8, 0.2, 1),
-      }),
+      })
     );
   }, [phase, fade]);
 
@@ -130,6 +131,8 @@ export function KarmaResetScreen(): React.JSX.Element {
 
   const sealSession = useMemo((): KarmaResetSession | null => {
     if (!session.context) return null;
+    // `completedAt` is an optional field (no `undefined` allowed under
+    // exactOptionalPropertyTypes), so spread it in only when set.
     return {
       sessionId: session.sessionId,
       phase: 'seal',
@@ -140,7 +143,9 @@ export function KarmaResetScreen(): React.JSX.Element {
       xpAwarded: session.xpAwarded,
       streakCount: session.streakCount,
       startedAt: session.startedAt,
-      completedAt: session.completedAt,
+      ...(session.completedAt !== undefined && {
+        completedAt: session.completedAt,
+      }),
     };
   }, [session]);
 
