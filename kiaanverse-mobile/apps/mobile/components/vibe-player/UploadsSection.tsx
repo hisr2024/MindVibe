@@ -33,6 +33,9 @@ import {
   type UserTrack,
 } from './userUploads';
 
+// React Native/Expo global — available at runtime, not in @types/react-native.
+declare const __DEV__: boolean;
+
 const GOLD = '#D4A017';
 const GOLD_SOFT = 'rgba(212,160,23,0.28)';
 const SACRED_WHITE = '#F5F0E8';
