@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -5,6 +7,21 @@ plugins {
     id("com.google.devtools.ksp")
     kotlin("kapt")
 }
+
+// ---------------------------------------------------------------------------
+// Release signing — loaded from keystore.properties so secrets never enter git.
+// Copy keystore.properties.example to keystore.properties and fill in values,
+// or export the matching env vars before running ./gradlew bundleRelease.
+// ---------------------------------------------------------------------------
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+fun prop(key: String, env: String): String? =
+    keystoreProperties.getProperty(key) ?: System.getenv(env)
 
 android {
     namespace = "com.mindvibe.app"
@@ -26,6 +43,18 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000\"")
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = prop("RELEASE_STORE_FILE", "MINDVIBE_RELEASE_STORE_FILE")
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = prop("RELEASE_STORE_PASSWORD", "MINDVIBE_RELEASE_STORE_PASSWORD")
+                keyAlias = prop("RELEASE_KEY_ALIAS", "MINDVIBE_RELEASE_KEY_ALIAS")
+                keyPassword = prop("RELEASE_KEY_PASSWORD", "MINDVIBE_RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -35,6 +64,13 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "API_BASE_URL", "\"https://api.kiaanverse.com\"")
+
+            // Only apply signingConfig when a keystore is actually configured;
+            // otherwise ./gradlew bundleRelease would fail with a null path
+            // during CI / review runs.
+            if (prop("RELEASE_STORE_FILE", "MINDVIBE_RELEASE_STORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -53,7 +89,9 @@ android {
         freeCompilerArgs += listOf(
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"
         )
     }
 
