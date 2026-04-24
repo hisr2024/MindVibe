@@ -205,7 +205,13 @@ async function login(email: string, password: string): Promise<LoginResult> {
       { email, password },
     );
 
-    const refreshToken = extractRefreshTokenFromResponse(response);
+    // React Native's HTTP stack does not expose httpOnly Set-Cookie headers
+    // to JavaScript, so the cookie-based refresh token path never works on
+    // mobile. Prefer the body field (which the backend returns for clients
+    // that send `X-Client: kiaanverse-mobile`); fall back to Set-Cookie
+    // extraction for web / tests / future platforms that surface it.
+    const refreshToken =
+      response.data.refresh_token ?? extractRefreshTokenFromResponse(response);
 
     return {
       loginResponse: response.data,

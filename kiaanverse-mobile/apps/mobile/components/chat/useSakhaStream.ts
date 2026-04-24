@@ -21,17 +21,37 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { API_CONFIG } from '@kiaanverse/api';
+import {
+  API_CONFIG,
+  getCurrentAccessToken,
+  refreshAccessToken,
+} from '@kiaanverse/api';
 
 /**
  * SecureStore key under which the authStore persists the access JWT.
  * Duplicated here (rather than imported) because the chat components belong
  * to the mobile app, which should not depend on the store package for a
  * single constant. If the key ever changes in authStore.ts, update here too.
+ *
+ * Used as a last-resort fallback when the apiClient's TokenManager has not
+ * yet been wired (e.g. during very early app startup). Normal reads go
+ * through `getCurrentAccessToken` so the stream shares the exact same
+ * token source — and refresh cadence — as regular authenticated requests.
  */
 const ACCESS_TOKEN_STORAGE_KEY = 'kiaanverse_access_token';
 
-async function readAccessTokenFromSecureStore(): Promise<string | null> {
+/** Best-effort token read. Order:
+ *  1. apiClient's TokenManager (authoritative; kept fresh by the 401 interceptor).
+ *  2. Direct SecureStore read (fallback for the tiny window before the
+ *     TokenManager is registered on app startup).
+ */
+async function readAuthToken(): Promise<string | null> {
+  try {
+    const fromClient = await getCurrentAccessToken();
+    if (fromClient) return fromClient;
+  } catch {
+    /* fall through */
+  }
   try {
     return await SecureStore.getItemAsync(ACCESS_TOKEN_STORAGE_KEY);
   } catch {
@@ -106,6 +126,8 @@ const AUTH_ERROR_TEXT =
   'Your session has expired. Please sign in again to continue our dialogue.';
 const COLD_START_TEXT =
   'I am waking from deep meditation (server cold start). Please ask again in a moment.';
+const NO_CREDENTIALS_TEXT =
+  'To speak with Sakha, please sign in with your email. (Developer Login skips the server session and cannot start a dialogue.)';
 
 export function useSakhaStream(
   options: UseSakhaStreamOptions = {},
@@ -179,18 +201,17 @@ export function useSakhaStream(
       setStreaming(true);
 
       // 3. Resolve bearer token. Prefer the caller-supplied getter (tests,
-      // custom flows) and otherwise fall back to the access token the
-      // authStore persisted to SecureStore. Without this fallback the SSE
-      // request went out unauthenticated — the backend rejected it with 401
-      // and the UI showed the "connection wavered" error even though the
-      // network and backend were both healthy.
+      // custom flows); otherwise go through the apiClient's TokenManager so
+      // we share the same token source — and refresh cadence — as regular
+      // authenticated requests. A last-resort SecureStore read covers the
+      // narrow window before the TokenManager has been registered on boot.
       let token: string | null = null;
       try {
         if (getAccessToken) {
           const resolved = await getAccessToken();
           token = resolved ?? null;
         } else {
-          token = await readAccessTokenFromSecureStore();
+          token = await readAuthToken();
         }
       } catch {
         token = null;
@@ -205,19 +226,11 @@ export function useSakhaStream(
         );
       }
 
-      // 4. Open the streaming XHR.
-      const url = `${baseUrl ?? API_CONFIG.baseURL}/api/chat/message/stream`;
-      const xhr = new XMLHttpRequest();
-      xhrRef.current = xhr;
-
+      // 4. Open the streaming XHR. Wrapped in a local function so we can
+      // retry once with a refreshed token if the server returns 401/403.
+      let hasRetriedAfterRefresh = false;
       let cursor = 0;
       let fullText = '';
-
-      xhr.open('POST', url, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Accept', 'text/event-stream');
-      xhr.setRequestHeader('X-Client', 'kiaanverse-mobile');
-      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
       const finishStreamingSuccess = (): void => {
         setMessages((prev) =>
@@ -230,13 +243,18 @@ export function useSakhaStream(
         streamCompleteCallbackRef.current?.();
       };
 
-      const finishStreamingFailure = (reason: 'network' | 'auth' | 'server' | 'cold_start'): void => {
+      const finishStreamingFailure = (
+        reason: 'network' | 'auth' | 'server' | 'cold_start' | 'no_credentials',
+        activeXhr: XMLHttpRequest,
+      ): void => {
         const errorText =
-          reason === 'auth'
-            ? AUTH_ERROR_TEXT
-            : reason === 'cold_start'
-              ? COLD_START_TEXT
-              : CONNECTION_ERROR_TEXT;
+          reason === 'no_credentials'
+            ? NO_CREDENTIALS_TEXT
+            : reason === 'auth'
+              ? AUTH_ERROR_TEXT
+              : reason === 'cold_start'
+                ? COLD_START_TEXT
+                : CONNECTION_ERROR_TEXT;
         const id = assistantIdRef.current;
         if (id) {
           setMessages((prev) =>
@@ -254,7 +272,7 @@ export function useSakhaStream(
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
           // eslint-disable-next-line no-console
           console.error(
-            `[SakhaStream] failed (${reason}) status=${xhr.status} response=${xhr.responseText?.slice(0, 200) ?? ''}`,
+            `[SakhaStream] failed (${reason}) status=${activeXhr.status} response=${activeXhr.responseText?.slice(0, 200) ?? ''}`,
           );
         }
         setError(errorText);
@@ -262,88 +280,141 @@ export function useSakhaStream(
         xhrRef.current = null;
       };
 
-      xhr.onreadystatechange = () => {
-        // 3 = LOADING (incremental responseText is available).
-        if (xhr.readyState !== 3 && xhr.readyState !== 4) return;
-        if (xhr.readyState === 4 && xhr.status >= 400) {
-          // Translate the HTTP status into the most useful recovery hint:
-          //   401 → sign in again; 502/503/504 → cold-start retry; else → generic.
-          const status = xhr.status;
-          if (status === 401 || status === 403) {
-            finishStreamingFailure('auth');
-          } else if (status === 502 || status === 503 || status === 504) {
-            finishStreamingFailure('cold_start');
-          } else {
-            finishStreamingFailure('server');
+      const openAndSend = (authToken: string | null): void => {
+        const url = `${baseUrl ?? API_CONFIG.baseURL}/api/chat/message/stream`;
+        const x = new XMLHttpRequest();
+        xhrRef.current = x;
+        // Reset the SSE parse state every time we (re)open so the retry
+        // path never double-emits tokens that the failed attempt already
+        // surfaced to the UI.
+        cursor = 0;
+        fullText = '';
+
+        x.open('POST', url, true);
+        x.setRequestHeader('Content-Type', 'application/json');
+        x.setRequestHeader('Accept', 'text/event-stream');
+        x.setRequestHeader('X-Client', 'kiaanverse-mobile');
+        if (authToken) x.setRequestHeader('Authorization', `Bearer ${authToken}`);
+
+        x.onreadystatechange = () => {
+          // 3 = LOADING (incremental responseText is available).
+          if (x.readyState !== 3 && x.readyState !== 4) return;
+          if (x.readyState === 4 && x.status >= 400) {
+            const status = x.status;
+
+            // On 401/403, try exactly one silent refresh before surfacing
+            // the "Your session has expired" copy. This mirrors the
+            // apiClient's axios interceptor so SSE has the same resilience
+            // as regular authenticated POSTs.
+            //
+            // Special case: if we attempted the request without any token to
+            // begin with, a refresh will also fail (there's nothing to
+            // refresh from). In that case we show the clearer "please sign
+            // in with your email" copy — this is the devLogin path, where
+            // the app has `status: authenticated` locally but no backend
+            // session exists.
+            if ((status === 401 || status === 403) && !hasRetriedAfterRefresh) {
+              hasRetriedAfterRefresh = true;
+              const hadInitialToken = authToken !== null && authToken.length > 0;
+              void (async () => {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                  openAndSend(refreshed);
+                } else if (hadInitialToken) {
+                  finishStreamingFailure('auth', x);
+                } else {
+                  finishStreamingFailure('no_credentials', x);
+                }
+              })();
+              return;
+            }
+
+            if (status === 401 || status === 403) {
+              finishStreamingFailure('auth', x);
+            } else if (status === 502 || status === 503 || status === 504) {
+              finishStreamingFailure('cold_start', x);
+            } else {
+              finishStreamingFailure('server', x);
+            }
+            return;
           }
-          return;
-        }
 
-        const raw = xhr.responseText;
-        const { frames, nextCursor } = parseSSEFrames(raw, cursor);
-        cursor = nextCursor;
+          const raw = x.responseText;
+          const { frames, nextCursor } = parseSSEFrames(raw, cursor);
+          cursor = nextCursor;
 
-        let sawDone = false;
+          let sawDone = false;
 
-        for (const frame of frames) {
-          try {
-            const event = JSON.parse(frame) as {
-              word?: string;
-              done?: boolean;
-              session_id?: string;
-              sessionId?: string;
-              verseRefs?: unknown;
-            };
-            if (event.session_id && !sessionId) setSessionId(event.session_id);
-            if (event.sessionId && !sessionId) setSessionId(event.sessionId);
-            if (event.done) {
-              sawDone = true;
-              break;
+          for (const frame of frames) {
+            try {
+              const event = JSON.parse(frame) as {
+                word?: string;
+                done?: boolean;
+                session_id?: string;
+                sessionId?: string;
+                verseRefs?: unknown;
+                error?: string;
+                message?: string;
+              };
+              if (event.session_id && !sessionId) setSessionId(event.session_id);
+              if (event.sessionId && !sessionId) setSessionId(event.sessionId);
+              // Quota / service-unavailable frames the backend emits
+              // occasionally carry an `error` field and a human message.
+              if (event.error && typeof event.message === 'string') {
+                appendAssistantText(event.message);
+                fullText += event.message;
+              }
+              if (event.done) {
+                sawDone = true;
+                break;
+              }
+              if (event.word) {
+                fullText += event.word;
+                appendAssistantText(event.word);
+              }
+            } catch {
+              // Legacy plain-text format.
+              if (frame === '[DONE]') {
+                sawDone = true;
+                break;
+              }
+              const space =
+                fullText.length > 0 && !frame.startsWith(' ') ? ' ' : '';
+              fullText += space + frame;
+              appendAssistantText(space + frame);
             }
-            if (event.word) {
-              fullText += event.word;
-              appendAssistantText(event.word);
-            }
-          } catch {
-            // Legacy plain-text format.
-            if (frame === '[DONE]') {
-              sawDone = true;
-              break;
-            }
-            const space =
-              fullText.length > 0 && !frame.startsWith(' ') ? ' ' : '';
-            fullText += space + frame;
-            appendAssistantText(space + frame);
           }
-        }
 
-        if (sawDone || xhr.readyState === 4) {
-          finishStreamingSuccess();
+          if (sawDone || x.readyState === 4) {
+            finishStreamingSuccess();
+          }
+        };
+
+        x.onerror = () => finishStreamingFailure('network', x);
+        x.ontimeout = () => finishStreamingFailure('cold_start', x);
+        x.onabort = () => {
+          // Aborts set isStreaming false silently — no error toast.
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, isStreaming: false } : m,
+            ),
+          );
+          setStreaming(false);
+        };
+
+        try {
+          x.send(
+            JSON.stringify({
+              message: trimmed,
+              session_id: sessionId ?? undefined,
+            }),
+          );
+        } catch {
+          finishStreamingFailure('network', x);
         }
       };
 
-      xhr.onerror = () => finishStreamingFailure('network');
-      xhr.ontimeout = () => finishStreamingFailure('cold_start');
-      xhr.onabort = () => {
-        // Aborts set isStreaming false silently — no error toast.
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, isStreaming: false } : m,
-          ),
-        );
-        setStreaming(false);
-      };
-
-      try {
-        xhr.send(
-          JSON.stringify({
-            message: trimmed,
-            session_id: sessionId ?? undefined,
-          }),
-        );
-      } catch {
-        finishStreamingFailure('network');
-      }
+      openAndSend(token);
     },
     [appendAssistantText, baseUrl, getAccessToken, sessionId, streaming],
   );
