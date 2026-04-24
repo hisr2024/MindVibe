@@ -81,7 +81,10 @@ export function CompassSealChamber({
   };
   const goSakha = () => {
     if (onTalkToSakha) return onTalkToSakha();
-    router.push('/wellness' as never);
+    // Sakha lives in the chat tab, not /wellness — the previous fallback
+    // silently dropped users on the mood screen when they tapped
+    // "Talk to Sakha" without an override handler.
+    router.push('/chat' as never);
   };
 
   return (
