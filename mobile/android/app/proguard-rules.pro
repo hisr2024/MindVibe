@@ -29,6 +29,7 @@
 # Data models
 -keep class com.mindvibe.app.data.** { *; }
 -keep class com.mindvibe.app.domain.model.** { *; }
+-keep class com.mindvibe.app.journey.model.** { *; }
 
 # Room
 -keep class * extends androidx.room.RoomDatabase

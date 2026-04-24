@@ -67,11 +67,11 @@ interface DailyWisdom {
 }
 
 const FALLBACK_WISDOM: DailyWisdom = {
-  sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन',
-  transliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
-  translation: 'You have the right to perform your actions, but you are not entitled to the fruits of the actions.',
-  chapter: 2,
-  verse: 47,
+  sanskrit: 'यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥',
+  transliteration: 'yadā yadā hi dharmasya glānir bhavati bhārata abhyutthānam adharmasya tadātmānaṁ sṛjāmy aham',
+  translation: 'When injustice rises, so does the force that corrects it. Be part of that force.',
+  chapter: 4,
+  verse: 7,
 }
 
 export default function SacredMobileHomePage() {
@@ -396,12 +396,13 @@ export default function SacredMobileHomePage() {
             whileTap={{ scale: 0.98 }}
             onClick={() => handleNavigate('/m/wisdom')}
             className="w-full text-left"
+            aria-label="Open Today's Wisdom"
           >
             <VerseRevelation
               sanskrit={dailyWisdom.sanskrit}
               transliteration={dailyWisdom.transliteration}
               meaning={dailyWisdom.translation}
-              reference={`${dailyWisdom.chapter}.${dailyWisdom.verse}`}
+              reference={`Chapter ${dailyWisdom.chapter}, Verse ${dailyWisdom.verse}`}
             />
           </motion.button>
         </motion.section>

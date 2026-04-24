@@ -46,14 +46,14 @@ const WISDOM_THEMES = [
   { id: 'detachment', label: 'Letting Go', emoji: '🍃', gradient: 'from-green-500/15 to-emerald-500/15', border: 'border-green-500/20' },
 ]
 
-// Fallback verse when API is unavailable
+// Fallback verse when API is unavailable — matches the Sakha home shloka
 const FALLBACK_VERSE: DailyVerse = {
-  chapter: 2,
-  verse: 47,
-  sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।',
-  translation: 'You have the right to perform your actions, but you are not entitled to the fruits of the actions.',
-  commentary: 'This verse teaches us to focus on the effort, not the outcome. When we release attachment to results, we find freedom in every action.',
-  theme: 'action',
+  chapter: 4,
+  verse: 7,
+  sanskrit: 'यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥',
+  translation: 'When injustice rises, so does the force that corrects it. Be part of that force.',
+  commentary: 'Whenever there is a decline of Dharma, O Arjuna, and an uprising of Adharma, then I incarnate myself. Let this courage live in you today.',
+  theme: 'courage',
 }
 
 export default function MobileWisdomPage() {
