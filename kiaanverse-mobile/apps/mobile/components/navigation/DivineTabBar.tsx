@@ -2,15 +2,15 @@
  * DivineTabBar — Kiaanverse bottom tab bar (5 sacred doorways).
  *
  * Tab order:
- *   Home · Sakha · Journeys · Journal · Profile
+ *   Home · Sakha · Shlokas · Journal · Profile
  *
- * Shlokas used to occupy slot 3; it now lives inside the Vibe Player (via
- * the Daily Verse banner) and is still reachable through the legacy
- * `/(tabs)/shlokas/*` routes. Journeys was promoted from a sub-tab of
- * Journal to its own top-level slot so the षड्रिपु flow is one tap away.
- * The icon list is recycled from the existing set — ChakraColumn (was
- * Journal) now signals the journey progression, and Manuscript (was
- * Shlokas) signals the written journal.
+ * Slot 3 is now the Shlokas Sacred Hub (scriptures + every sacred tool
+ * + Wisdom Rooms + Sacred Reflections + KIAAN Vibe Player). Its glyph is
+ * the ManuscriptIcon — the scroll carries the "sacred utterance" meaning
+ * that anchors the hub. The Journal tab takes the ChakraColumnIcon (the
+ * seven stacked chakras read as an inward ascent through one's own
+ * reflections). Journeys is still a full route; it's reached from Home's
+ * "Browse Sacred Catalog" CTA rather than occupying tab-bar real estate.
  *
  * Visual specification:
  * - Dark navy background: rgba(5,7,20,0.97).
@@ -82,13 +82,13 @@ interface SacredTab {
 const TABS: ReadonlyArray<SacredTab> = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
   { name: 'chat', label: 'Sakha', Icon: LotusDialogIcon },
-  // ChakraColumn's seven stacked chakras read as progression / ascent —
-  // the visual cue for the षड्रिपु journey sequence.
-  { name: 'journeys', label: 'Journeys', Icon: ChakraColumnIcon },
-  // ManuscriptIcon carries the written / reflection meaning. It was
-  // originally used for Shlokas; now that Shlokas has moved inside the
-  // Vibe Player, the manuscript glyph fits the diary better.
-  { name: 'journal', label: 'Journal', Icon: ManuscriptIcon },
+  // Manuscript glyph = scroll of shlokas; the Shlokas Hub opens to every
+  // sacred scripture and instrument so the written-word metaphor fits.
+  { name: 'shlokas', label: 'Shlokas', Icon: ManuscriptIcon },
+  // ChakraColumn's seven stacked chakras read as an inward ascent — a
+  // fitting cue for the reflection-and-journal practice of Sacred
+  // Reflections (the Journal tab's content).
+  { name: 'journal', label: 'Journal', Icon: ChakraColumnIcon },
   { name: 'profile', label: 'Profile', Icon: MeditatorIcon },
 ] as const;
 
