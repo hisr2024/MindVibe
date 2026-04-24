@@ -26,8 +26,9 @@ import {
   Text,
   colors,
   spacing,
+  useVoiceRecorder,
 } from '@kiaanverse/ui';
-import { useCreateJournal } from '@kiaanverse/api';
+import { api, useCreateJournal } from '@kiaanverse/api';
 
 import {
   COPY,
@@ -49,21 +50,39 @@ interface EditorTabProps {
 }
 
 /**
- * Merge mood / time-of-day / user tags into the plaintext metadata payload
- * the server will index. Mood stays first so legacy filters keep working.
+ * Build the moods[] + tags[] metadata the server will index.
+ *
+ * The backend's KarmaLytix pipeline (karmalytix_service._get_mood_data)
+ * scans JournalEntry.mood_labels only; anything dropped into tags[] is
+ * invisible to mood analytics. Prior to this split, mood was pushed into
+ * the same tags bucket and dominant_mood was permanently None — that's
+ * what shipped as the "broken" Sacred Mirror. We separate them here and
+ * also keep the mood id in tags[] so the Browse filter (which filters on
+ * plaintext tag strings) keeps working unchanged.
  */
-function buildTagsPayload(opts: {
+export function buildMetadataPayload(opts: {
   mood: MoodId | null;
   userTags: readonly SacredTag[];
   timeOfDay: string;
-}): string[] {
+}): { moods: string[]; tags: string[] } {
+  const moods: string[] = opts.mood ? [opts.mood] : [];
   const tags: string[] = [];
-  if (opts.mood) tags.push(opts.mood);
+  if (opts.mood) tags.push(opts.mood); // kept for BrowseTab filter compat
   tags.push(`time:${opts.timeOfDay}`);
   for (const tag of opts.userTags) {
     if (!tags.includes(tag)) tags.push(tag);
   }
-  return tags;
+  return { moods, tags };
+}
+
+// Transcription function bound to the KIAAN /api/kiaan/transcribe endpoint.
+// Defined at module scope so the useVoiceRecorder hook receives a stable
+// reference (its internal callbacks re-run when `transcribe` changes).
+async function transcribeAudio(
+  formData: FormData,
+): Promise<{ transcript: string; confidence: number }> {
+  const { data } = await api.voice.transcribe(formData);
+  return data;
 }
 
 export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
@@ -73,6 +92,16 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
   const [body, setBody] = useState('');
   const [selectedTags, setSelectedTags] = useState<SacredTag[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const {
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    isRecording,
+    status: voiceStatus,
+    durationSeconds,
+    error: voiceError,
+  } = useVoiceRecorder({ transcribe: transcribeAudio });
 
   const handleMoodPress = useCallback((id: MoodId) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -87,6 +116,36 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
       return [...prev, tag];
     });
   }, []);
+
+  // ---- Voice dictation: tap to start, tap again to stop+transcribe ----
+  const handleVoicePress = useCallback(async () => {
+    if (voiceStatus === 'transcribing') return;
+    if (isRecording) {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      const result = await stopRecording();
+      if (result && result.transcript) {
+        // Append — never replace — so the user's typed reflection is safe.
+        setBody((prev) => {
+          const sep = prev.trim().length === 0 ? '' : '\n\n';
+          return `${prev}${sep}${result.transcript}`;
+        });
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else if (voiceError) {
+        Alert.alert('Voice unavailable', voiceError);
+      }
+      return;
+    }
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await startRecording();
+  }, [isRecording, voiceStatus, voiceError, startRecording, stopRecording]);
+
+  // Cancel any in-flight recording if the component unmounts mid-flow —
+  // the hook itself already unloads on unmount, this is just belt-and-braces.
+  React.useEffect(() => {
+    return () => {
+      if (isRecording) void cancelRecording();
+    };
+  }, [cancelRecording, isRecording]);
 
   const handleOffer = useCallback(async () => {
     if (!mood) {
@@ -106,7 +165,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         ? `${title.trim()}\n\n${body.trim()}`
         : body.trim();
       const ciphertext = await encryptReflection(payload);
-      const tags = buildTagsPayload({
+      const { moods, tags } = buildMetadataPayload({
         mood,
         userTags: selectedTags,
         timeOfDay: getWritingTimeOfDay(now.getHours()),
@@ -115,7 +174,11 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
       // decoding the date client-side.
       tags.push(`week:${getIsoWeekKey(now)}`);
 
-      await createJournal.mutateAsync({ content_encrypted: ciphertext, tags });
+      await createJournal.mutateAsync({
+        content_encrypted: ciphertext,
+        moods,
+        tags,
+      });
 
       setMood(null);
       setTitle('');
@@ -219,24 +282,42 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
             textAlignVertical="top"
             maxLength={10_000}
           />
-          {/* Voice mic affordance — hookup to /api/kiaan/transcribe comes in
-              a later step; visually matches the Kiaanverse.com web UI. */}
+          {/* Voice mic affordance — tap once to start, again to stop &
+              transcribe. The transcript is appended to the body so anything
+              already typed survives. Visually mirrors the Kiaanverse.com
+              microphone bubble but the tap action is fully live. */}
           <Pressable
-            style={styles.micButton}
+            style={[
+              styles.micButton,
+              isRecording && styles.micButtonActive,
+              voiceStatus === 'transcribing' && styles.micButtonBusy,
+            ]}
             accessibilityRole="button"
-            accessibilityLabel="Voice dictation (coming soon)"
-            onPress={() =>
-              Alert.alert('Voice coming soon', 'Voice dictation will arrive in the next release.')
+            accessibilityLabel={
+              isRecording
+                ? 'Stop recording and transcribe'
+                : voiceStatus === 'transcribing'
+                  ? 'Transcribing your reflection'
+                  : 'Start voice dictation'
             }
+            accessibilityState={{ busy: voiceStatus === 'transcribing' }}
+            disabled={voiceStatus === 'transcribing'}
+            onPress={handleVoicePress}
           >
-            <Text style={styles.micIcon}>{'\u{1F399}\u{FE0F}'}</Text>
+            <Text style={styles.micIcon}>
+              {isRecording ? '■' : '\u{1F399}\u{FE0F}'}
+            </Text>
           </Pressable>
         </View>
 
         <Text variant="caption" color={colors.text.muted} style={styles.wordCount}>
-          {wordCount === 0
-            ? 'Begin writing...'
-            : `✨ ${wordCount} word${wordCount === 1 ? '' : 's'} offered`}
+          {isRecording
+            ? `\u{1F534} Recording · ${durationSeconds}s — tap ■ to stop`
+            : voiceStatus === 'transcribing'
+              ? '\u{1F4AC} Transcribing your words…'
+              : wordCount === 0
+                ? 'Begin writing...'
+                : `✨ ${wordCount} word${wordCount === 1 ? '' : 's'} offered`}
         </Text>
 
         {/* ---- Tag chips ---- */}
@@ -358,7 +439,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.divine.krishna,
   },
-  micIcon: { fontSize: 18 },
+  micButtonActive: {
+    backgroundColor: colors.semantic.error,
+    borderColor: colors.semantic.error,
+  },
+  micButtonBusy: {
+    backgroundColor: colors.alpha.goldLight,
+    borderColor: colors.primary[500],
+    opacity: 0.7,
+  },
+  micIcon: { fontSize: 18, color: colors.text.primary },
   wordCount: {
     paddingVertical: spacing.xs,
   },

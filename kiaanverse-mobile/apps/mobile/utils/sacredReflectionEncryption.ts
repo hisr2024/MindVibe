@@ -17,9 +17,26 @@ import * as SecureStore from 'expo-secure-store';
 
 const ENCRYPTION_KEY_ALIAS = 'mindvibe_journal_key';
 
-const HAS_SUBTLE_CRYPTO =
-  typeof globalThis.crypto !== 'undefined' &&
-  typeof globalThis.crypto.subtle !== 'undefined';
+/**
+ * Probe for SubtleCrypto at call time rather than module load time.
+ *
+ * Node 22 ships `globalThis.crypto`, so capturing this as a constant at
+ * import time meant our Jest fallback tests (which nullify the global in
+ * `beforeAll`) couldn't force the legacy path — the module was already
+ * locked to the SubtleCrypto branch. Checking at call time also lets us
+ * survive runtime permission failures where `crypto.subtle` throws.
+ */
+function hasSubtleCrypto(): boolean {
+  try {
+    return (
+      typeof globalThis.crypto !== 'undefined' &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      typeof (globalThis.crypto as any).subtle !== 'undefined'
+    );
+  } catch {
+    return false;
+  }
+}
 
 async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
   let keyBase64 = await SecureStore.getItemAsync(ENCRYPTION_KEY_ALIAS);
@@ -28,7 +45,7 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
     keyBase64 = btoa(String.fromCharCode(...keyBytes));
     await SecureStore.setItemAsync(ENCRYPTION_KEY_ALIAS, keyBase64);
   }
-  if (!HAS_SUBTLE_CRYPTO) return keyBase64;
+  if (!hasSubtleCrypto()) return keyBase64;
   const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
   return globalThis.crypto.subtle.importKey(
     'raw',
@@ -40,7 +57,7 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
 }
 
 export async function encryptReflection(plaintext: string): Promise<string> {
-  if (!HAS_SUBTLE_CRYPTO) {
+  if (!hasSubtleCrypto()) {
     const hash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       plaintext,
@@ -65,14 +82,16 @@ export async function encryptReflection(plaintext: string): Promise<string> {
 export async function decryptReflection(ciphertext: string): Promise<string> {
   if (ciphertext.includes(':')) {
     // Legacy reversible-base64 fallback — decode the base64 half only.
-    const [b64] = ciphertext.split(':');
+    // `split(':')[0]` is `string | undefined` under noUncheckedIndexedAccess;
+    // the includes(':') guard proves it exists, we coalesce for the type.
+    const b64 = ciphertext.split(':')[0] ?? '';
     try {
       return decodeURIComponent(escape(atob(b64)));
     } catch {
       return '';
     }
   }
-  if (!HAS_SUBTLE_CRYPTO) return '';
+  if (!hasSubtleCrypto()) return '';
   try {
     const key = (await getOrCreateEncryptionKey()) as CryptoKey;
     const combined = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));

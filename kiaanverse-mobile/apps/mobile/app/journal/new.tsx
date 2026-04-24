@@ -238,9 +238,14 @@ export default function NewJournalScreen(): React.JSX.Element {
         userTags: selectedTags,
         timeOfDay: getWritingTimeOfDay(new Date().getHours()),
       });
+      // Split the mood id into its own `moods` wire so the backend populates
+      // JournalEntry.mood_labels (the column KarmaLytix reads from). The id
+      // also stays in `tags` for legacy filter compatibility.
+      const moods: string[] = mood ? [mood] : [];
 
       await createJournal.mutateAsync({
         content_encrypted: contentEncrypted,
+        moods,
         tags,
       });
 

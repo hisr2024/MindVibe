@@ -1665,7 +1665,11 @@ export function useJournalEntry(id: string): UseQueryResult<JournalEntry> {
   });
 }
 
-export function useCreateJournal(): UseMutationResult<JournalEntry, Error, { content_encrypted: string; tags?: string[] }> {
+export function useCreateJournal(): UseMutationResult<
+  JournalEntry,
+  Error,
+  { content_encrypted: string; moods?: string[]; tags?: string[] }
+> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (entry) => {
@@ -1678,7 +1682,11 @@ export function useCreateJournal(): UseMutationResult<JournalEntry, Error, { con
   });
 }
 
-export function useUpdateJournal(): UseMutationResult<JournalEntry, Error, { id: string; content_encrypted: string; tags?: string[] }> {
+export function useUpdateJournal(): UseMutationResult<
+  JournalEntry,
+  Error,
+  { id: string; content_encrypted: string; moods?: string[]; tags?: string[] }
+> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...entry }) => {
