@@ -5,10 +5,10 @@
  * Sacred design system with category filtering, track grid, and featured section.
  */
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Search, Music2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Search, Music2, Upload, Trash2, Plus, AlertCircle, Loader2 } from 'lucide-react'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { GitaBanner } from '@/components/mobile/vibe/GitaBanner'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
@@ -19,11 +19,20 @@ import {
   searchTracks,
   formatDuration,
 } from '@/lib/kiaan-vibe/meditation-library'
-import type { MeditationCategory, Track } from '@/lib/kiaan-vibe/types'
+import {
+  getAllUploadedTracks,
+  uploadTrack,
+  deleteUploadedTrack,
+  audioFileLooksValid,
+  ACCEPTED_AUDIO_ACCEPT_ATTR,
+  MAX_UPLOAD_SIZE,
+} from '@/lib/kiaan-vibe/persistence'
+import type { MeditationCategory, Track, UploadedTrackMeta } from '@/lib/kiaan-vibe/types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 const CATEGORIES: { id: string; label: string; icon: string }[] = [
   { id: 'all',       label: 'All',       icon: '\u2726' },
+  { id: 'uploads',   label: 'My Music',  icon: '\u266b' },
   { id: 'gita',      label: 'Gita',      icon: '\u2638\uFE0F' },
   { id: 'mantra',    label: 'Mantra',    icon: '\uD83D\uDD49' },
   { id: 'ambient',   label: 'Ambient',   icon: '\u25CE' },
@@ -33,6 +42,19 @@ const CATEGORIES: { id: string; label: string; icon: string }[] = [
   { id: 'sleep',     label: 'Sleep',     icon: '\u263D' },
   { id: 'spiritual', label: 'Spiritual', icon: '\u2727' },
 ]
+
+/** Convert uploaded track metadata into a player-ready Track. */
+function uploadToTrack(u: UploadedTrackMeta): Track {
+  return {
+    id: u.id,
+    title: u.title,
+    artist: u.artist || 'My Music',
+    sourceType: 'upload',
+    src: `indexeddb://${u.id}`,
+    duration: u.duration,
+    createdAt: u.createdAt,
+  }
+}
 
 function TrackCard({ track, isCurrentTrack, isPlaying, onPlay }: {
   track: Track
@@ -117,20 +139,53 @@ export default function MobileKiaanVibePage() {
   const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [uploads, setUploads] = useState<UploadedTrackMeta[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const { triggerHaptic } = useHapticFeedback()
   const { currentTrack, isPlaying, play, setQueue, gitaLang, setGitaLang } = usePlayerStore()
 
-  const filteredTracks = useMemo(() => {
+  // Load uploaded tracks once on mount and refresh whenever an upload finishes.
+  useEffect(() => {
+    let cancelled = false
+    getAllUploadedTracks()
+      .then((list) => {
+        if (cancelled) return
+        list.sort((a, b) => b.createdAt - a.createdAt)
+        setUploads(list)
+      })
+      .catch(() => { /* surfaces via empty list */ })
+    return () => { cancelled = true }
+  }, [])
+
+  const uploadedTracks = useMemo<Track[]>(
+    () => uploads.map(uploadToTrack),
+    [uploads],
+  )
+
+  const filteredTracks = useMemo<Track[]>(() => {
     if (searchQuery.trim()) {
-      return searchTracks(searchQuery)
+      const q = searchQuery.toLowerCase()
+      const fromUploads = uploadedTracks.filter(
+        (t) => t.title.toLowerCase().includes(q) || (t.artist || '').toLowerCase().includes(q),
+      )
+      return [...fromUploads, ...searchTracks(searchQuery)]
+    }
+    if (selectedCategory === 'uploads') {
+      return uploadedTracks
     }
     if (selectedCategory === 'all') {
-      return getAllTracks()
+      // Surface the user's own music FIRST so they always see it.
+      return [...uploadedTracks, ...getAllTracks()]
     }
     return getTracksByCategory(selectedCategory as MeditationCategory)
-  }, [selectedCategory, searchQuery])
+  }, [selectedCategory, searchQuery, uploadedTracks])
 
-  const allTracks = useMemo(() => getAllTracks(), [])
+  const allTracks = useMemo<Track[]>(
+    () => [...uploadedTracks, ...getAllTracks()],
+    [uploadedTracks],
+  )
 
   // Featured tracks = first 6 from all
   const featuredTracks = useMemo(() => allTracks.slice(0, 6), [allTracks])
@@ -141,6 +196,65 @@ export default function MobileKiaanVibePage() {
     setQueue(trackList, index >= 0 ? index : 0)
     play(track)
   }, [triggerHaptic, setQueue, play])
+
+  const handleUploadClick = useCallback(() => {
+    triggerHaptic('selection')
+    setUploadError(null)
+    fileInputRef.current?.click()
+  }, [triggerHaptic])
+
+  const handleFilesSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    setUploadError(null)
+    let lastError: string | null = null
+
+    for (const file of Array.from(files)) {
+      try {
+        if (!audioFileLooksValid(file)) {
+          lastError = `${file.name} isn't a recognised audio format.`
+          continue
+        }
+        if (file.size > MAX_UPLOAD_SIZE) {
+          lastError = `${file.name} is too large (max ${(MAX_UPLOAD_SIZE / 1024 / 1024).toFixed(0)}MB).`
+          continue
+        }
+        const track = await uploadTrack(file)
+        setUploads((prev) => [
+          {
+            id: track.id,
+            title: track.title,
+            artist: track.artist,
+            duration: track.duration,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type || 'audio/unknown',
+            createdAt: track.createdAt,
+          },
+          ...prev,
+        ])
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : `Upload failed: ${file.name}`
+      }
+    }
+
+    if (lastError) setUploadError(lastError)
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    triggerHaptic('medium')
+  }, [triggerHaptic])
+
+  const handleDeleteUpload = useCallback(async (id: string) => {
+    triggerHaptic('selection')
+    try {
+      await deleteUploadedTrack(id)
+      setUploads((prev) => prev.filter((u) => u.id !== id))
+    } catch {
+      setUploadError('Could not delete this track. Please try again.')
+    }
+  }, [triggerHaptic])
 
   return (
     <MobileAppShell title="KIAAN Vibe" showBack>
@@ -182,9 +296,97 @@ export default function MobileKiaanVibePage() {
             >
               <span className="text-sm">{cat.icon}</span>
               {cat.label}
+              {cat.id === 'uploads' && uploads.length > 0 && (
+                <span
+                  className="ml-1 text-[10px] px-1.5 rounded-full font-[family-name:var(--font-ui)]"
+                  style={{
+                    background: selectedCategory === cat.id ? 'rgba(5,7,20,0.25)' : 'rgba(212,160,23,0.18)',
+                    color: selectedCategory === cat.id ? '#050714' : '#D4A017',
+                  }}
+                >
+                  {uploads.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
+
+        {/* Hidden file input for native picker — accepts the broadest set of audio formats */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPTED_AUDIO_ACCEPT_ATTR}
+          multiple
+          onChange={handleFilesSelected}
+          className="hidden"
+          aria-hidden="true"
+        />
+
+        {/* Upload card — always visible so users can drop their own music in */}
+        <div className="mb-4">
+          <button
+            onClick={handleUploadClick}
+            disabled={uploading}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all"
+            style={{
+              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+              border: '1px dashed rgba(212,160,23,0.4)',
+              opacity: uploading ? 0.6 : 1,
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(212,160,23,0.12)' }}
+            >
+              {uploading ? (
+                <Loader2 className="w-5 h-5 text-[#D4A017] animate-spin" />
+              ) : (
+                <Upload className="w-5 h-5 text-[#D4A017]" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] text-[#EDE8DC] font-[family-name:var(--font-ui)]" style={{ fontWeight: 500 }}>
+                {uploading ? 'Uploading…' : 'Upload your own music'}
+              </p>
+              <p className="text-[11px] text-[#6B6355] truncate font-[family-name:var(--font-ui)]">
+                MP3 · M4A · AAC · WAV · OGG · Opus · FLAC · WebM · up to {(MAX_UPLOAD_SIZE / 1024 / 1024).toFixed(0)}MB
+              </p>
+            </div>
+            {!uploading && (
+              <Plus className="w-5 h-5 text-[#D4A017] flex-shrink-0" />
+            )}
+          </button>
+        </div>
+
+        {/* Upload error toast */}
+        <AnimatePresence>
+          {uploadError && (
+            <motion.div
+              key="upload-error"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mb-4 flex items-start gap-2 rounded-xl px-3 py-2"
+              style={{
+                background: 'rgba(220,38,38,0.10)',
+                border: '1px solid rgba(220,38,38,0.25)',
+              }}
+              role="alert"
+            >
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="flex-1 text-[12px] text-red-300 font-[family-name:var(--font-ui)]">
+                {uploadError}
+              </p>
+              <button
+                onClick={() => setUploadError(null)}
+                className="text-red-300/80 hover:text-red-300 px-1"
+                aria-label="Dismiss error"
+              >
+                ×
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Gita Banner (shown when 'all' or 'gita' selected, no search) */}
         {(selectedCategory === 'all' || selectedCategory === 'gita') && !searchQuery && (
@@ -256,8 +458,73 @@ export default function MobileKiaanVibePage() {
           </div>
         )}
 
-        {/* Track grid (2 columns) — hidden when 'gita' category is selected */}
-        {selectedCategory !== 'gita' && (
+        {/* Uploads list — selectable category with delete control per row */}
+        {selectedCategory === 'uploads' && !searchQuery && (
+          uploads.length > 0 ? (
+            <div className="space-y-2">
+              {uploads.map((u) => {
+                const track = uploadToTrack(u)
+                const isCurrent = currentTrack?.id === u.id
+                return (
+                  <div
+                    key={u.id}
+                    className="flex items-center gap-3 rounded-xl px-3 py-3"
+                    style={{
+                      background: isCurrent
+                        ? 'linear-gradient(145deg, rgba(212,160,23,0.18), rgba(212,160,23,0.06))'
+                        : 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                      border: isCurrent
+                        ? '1px solid rgba(212,160,23,0.4)'
+                        : '1px solid rgba(212,160,23,0.08)',
+                    }}
+                  >
+                    <button
+                      onClick={() => handlePlayTrack(track, uploadedTracks)}
+                      className="flex-1 flex items-center gap-3 text-left min-w-0"
+                    >
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(212,160,23,0.12)' }}
+                      >
+                        <Music2 className="w-5 h-5 text-[#D4A017]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] text-[#EDE8DC] truncate font-[family-name:var(--font-ui)]" style={{ fontWeight: 500 }}>
+                          {u.title}
+                        </p>
+                        <p className="text-[11px] text-[#6B6355] truncate font-[family-name:var(--font-ui)]">
+                          {u.duration ? formatDuration(u.duration) : 'Unknown duration'}
+                          {' · '}
+                          {(u.fileSize / 1024 / 1024).toFixed(1)} MB
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUpload(u.id)}
+                      className="p-2 text-[#6B6355] hover:text-red-400 transition-colors"
+                      aria-label={`Delete ${u.title}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Music2 className="w-10 h-10 text-[#D4A017]/40 mx-auto mb-3" />
+              <p className="text-sm text-[#B8AE98] font-[family-name:var(--font-divine)]">
+                No uploads yet
+              </p>
+              <p className="text-xs text-[#6B6355] mt-1 font-[family-name:var(--font-ui)]">
+                Tap “Upload your own music” above to add tracks
+              </p>
+            </div>
+          )
+        )}
+
+        {/* Standard 2-column track grid for everything except gita and uploads */}
+        {selectedCategory !== 'gita' && selectedCategory !== 'uploads' && (
           <div className="grid grid-cols-2 gap-3">
             {filteredTracks.map(track => (
               <TrackCard
@@ -292,8 +559,8 @@ export default function MobileKiaanVibePage() {
           </div>
         )}
 
-        {/* Empty state */}
-        {selectedCategory !== 'gita' && filteredTracks.length === 0 && (
+        {/* Empty state — only for non-gita / non-uploads views */}
+        {selectedCategory !== 'gita' && selectedCategory !== 'uploads' && filteredTracks.length === 0 && (
           <div className="text-center py-16">
             <p className="text-lg text-[#6B6355] font-[family-name:var(--font-divine)]">No tracks found</p>
             <p className="text-xs text-[#6B6355]/60 mt-1 font-[family-name:var(--font-ui)]">

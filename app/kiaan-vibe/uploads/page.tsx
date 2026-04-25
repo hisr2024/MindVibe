@@ -23,15 +23,12 @@ import {
   getAllUploadedTracks,
   uploadTrack,
   deleteUploadedTrack,
-  getAudioBlobUrl,
+  audioFileLooksValid,
+  ACCEPTED_AUDIO_ACCEPT_ATTR,
+  MAX_UPLOAD_SIZE,
 } from '@/lib/kiaan-vibe/persistence'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
 import type { Track, UploadedTrackMeta } from '@/lib/kiaan-vibe/types'
-
-// Accepted audio formats
-const ACCEPTED_FORMATS = ['audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg', 'audio/webm']
-const ACCEPTED_EXTENSIONS = '.mp3,.m4a,.wav,.ogg,.webm'
-const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
 
 export default function UploadsPage() {
   const { currentTrack, play, setQueue } = usePlayerStore()
@@ -64,42 +61,36 @@ export default function UploadsPage() {
     setError(null)
     setUploading(true)
 
-    try {
-      for (const file of files) {
-        // Validate file type
-        if (!ACCEPTED_FORMATS.includes(file.type)) {
-          setError(`Unsupported format: ${file.name}. Use MP3, M4A, WAV, or OGG.`)
+    let lastError: string | null = null
+    for (const file of files) {
+      try {
+        if (!audioFileLooksValid(file)) {
+          lastError = `Unsupported format: ${file.name}. Try MP3, M4A, WAV, OGG, FLAC, AAC, or Opus.`
           continue
         }
-
-        // Validate file size
-        if (file.size > MAX_FILE_SIZE) {
-          setError(`File too large: ${file.name}. Maximum size is 100MB.`)
+        if (file.size > MAX_UPLOAD_SIZE) {
+          lastError = `${file.name} is too large (max ${(MAX_UPLOAD_SIZE / 1024 / 1024).toFixed(0)}MB).`
           continue
         }
-
-        // Upload the file
         const track = await uploadTrack(file)
-        if (track) {
-          setUploads((prev) => [
-            {
-              id: track.id,
-              title: track.title,
-              artist: track.artist,
-              duration: track.duration,
-              fileName: file.name,
-              fileSize: file.size,
-              mimeType: file.type,
-              createdAt: track.createdAt,
-            },
-            ...prev,
-          ])
-        }
+        setUploads((prev) => [
+          {
+            id: track.id,
+            title: track.title,
+            artist: track.artist,
+            duration: track.duration,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type || 'audio/unknown',
+            createdAt: track.createdAt,
+          },
+          ...prev,
+        ])
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : `Upload failed: ${file.name}`
       }
-    } catch (err) {
-      console.error('Upload failed:', err)
-      setError('Upload failed. Please try again.')
     }
+    if (lastError) setError(lastError)
 
     setUploading(false)
 
@@ -123,40 +114,30 @@ export default function UploadsPage() {
 
   const handlePlay = async (upload: UploadedTrackMeta, index: number) => {
     try {
-      // Get blob URL for playback
-      const blobUrl = await getAudioBlobUrl(upload.id)
-      if (!blobUrl) {
-        setError('Failed to load audio file')
-        return
-      }
-
+      // Use the indexeddb:// scheme — the player store resolves it to a
+      // fresh Blob URL at play time (and revokes the previous one). This
+      // avoids leaking blob URLs and works after the user reloads the page.
       const track: Track = {
         id: upload.id,
         title: upload.title,
         artist: upload.artist,
         sourceType: 'upload',
-        src: blobUrl,
+        src: `indexeddb://${upload.id}`,
         duration: upload.duration,
         createdAt: upload.createdAt,
       }
 
-      // Create tracks array from all uploads
-      const allTracks: Track[] = await Promise.all(
-        uploads.map(async (u) => {
-          const url = await getAudioBlobUrl(u.id)
-          return {
-            id: u.id,
-            title: u.title,
-            artist: u.artist,
-            sourceType: 'upload' as const,
-            src: url || '',
-            duration: u.duration,
-            createdAt: u.createdAt,
-          }
-        })
-      )
+      const allTracks: Track[] = uploads.map((u) => ({
+        id: u.id,
+        title: u.title,
+        artist: u.artist,
+        sourceType: 'upload' as const,
+        src: `indexeddb://${u.id}`,
+        duration: u.duration,
+        createdAt: u.createdAt,
+      }))
 
-      setQueue(allTracks.filter((t) => t.src), index)
+      setQueue(allTracks, index)
       play(track)
     } catch (err) {
       console.error('Playback failed:', err)
@@ -195,7 +176,7 @@ export default function UploadsPage() {
         <input
           ref={fileInputRef}
           type="file"
-          accept={ACCEPTED_EXTENSIONS}
+          accept={ACCEPTED_AUDIO_ACCEPT_ATTR}
           multiple
           onChange={handleFileSelect}
           className="hidden"
@@ -213,7 +194,7 @@ export default function UploadsPage() {
             </div>
             <p className="text-white font-medium mb-1">Upload Audio Files</p>
             <p className="text-sm text-white/70">
-              MP3, M4A, WAV, OGG up to 100MB
+              MP3, M4A, AAC, WAV, OGG, Opus, FLAC, WebM &amp; more — up to {(MAX_UPLOAD_SIZE / 1024 / 1024).toFixed(0)}MB
             </p>
             <button className="mt-4 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-medium hover:bg-orange-400 transition-colors">
               <Plus className="w-4 h-4 inline mr-1" />

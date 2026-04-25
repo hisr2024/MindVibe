@@ -58,30 +58,77 @@ function getContext(): AudioContext {
   }
   if (!_ctx) {
     const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    if (!Ctor) {
+      throw new Error('Web Audio API not supported in this browser')
+    }
     _ctx = new Ctor()
   }
   return _ctx
 }
 
-/**
- * Mobile browsers suspend the AudioContext until a user gesture resumes it.
- * Call this from inside a click/tap handler to unlock audio.
- */
-export async function unlockAudio(): Promise<void> {
+/** True once the AudioContext has been resumed at least once. */
+let _audioUnlocked = false
+
+/** Tells callers whether the AudioContext is currently running. */
+export function isAudioContextRunning(): boolean {
+  if (typeof window === 'undefined') return false
   try {
-    const ctx = getContext()
-    if (ctx.state === 'suspended') {
-      await ctx.resume()
-    }
-    // Play a tiny silent buffer to fully unlock iOS Safari.
-    const buffer = ctx.createBuffer(1, 1, 22050)
-    const src = ctx.createBufferSource()
-    src.buffer = buffer
-    src.connect(ctx.destination)
-    src.start(0)
+    return getContext().state === 'running'
   } catch {
-    // Ignore - will retry on next interaction
+    return false
   }
+}
+
+/**
+ * Mobile browsers (iOS Safari, Chrome Android) suspend the AudioContext
+ * until a user gesture resumes it. Call this from inside a click/tap
+ * handler. Idempotent and safe to call multiple times.
+ *
+ * Returns `true` when the context is verifiably running afterwards.
+ *
+ * IMPORTANT: callers MUST `await` this before scheduling any oscillators —
+ * starting nodes on a suspended context on Android Chrome produces silence
+ * because `currentTime` does not advance until resume() actually settles.
+ */
+export async function unlockAudio(): Promise<boolean> {
+  if (typeof window === 'undefined') return false
+  let ctx: AudioContext
+  try {
+    ctx = getContext()
+  } catch {
+    return false
+  }
+  try {
+    if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+      // Race the resume() against a 1.5s timeout — some Chrome Android builds
+      // never settle the promise if no user gesture is in progress, which would
+      // otherwise hang play() forever.
+      await Promise.race([
+        ctx.resume(),
+        new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+      ])
+    }
+    // Tiny silent buffer to fully prime the audio pipeline (iOS Safari quirk).
+    try {
+      const buffer = ctx.createBuffer(1, 1, 22050)
+      const src = ctx.createBufferSource()
+      src.buffer = buffer
+      src.connect(ctx.destination)
+      src.start(0)
+    } catch { /* ignore - non-fatal */ }
+    _audioUnlocked = ctx.state === 'running'
+    return _audioUnlocked
+  } catch {
+    return _audioUnlocked
+  }
+}
+
+/**
+ * Synchronous check — does NOT trigger a resume, just reports last state.
+ * Useful for telling users "tap anywhere to enable sound".
+ */
+export function wasAudioUnlocked(): boolean {
+  return _audioUnlocked
 }
 
 // ============ Noise generators ============
@@ -448,13 +495,25 @@ function startPreset(preset: SynthPreset, out: GainNode, ctx: AudioContext): Pre
 
 export function playSynth(preset: SynthPreset, volume = 0.7): SynthHandle {
   const ctx = getContext()
+
+  // If the context is still suspended (caller forgot to await unlockAudio),
+  // try a synchronous resume() so oscillators schedule on a running clock.
+  // Without this, Chrome Android keeps `currentTime` frozen and the entire
+  // playback graph runs in silence even after the user gestures.
+  if (ctx.state === 'suspended') {
+    void ctx.resume()
+  }
+
   const master = ctx.createGain()
-  master.gain.value = 0
+  // Start at a small non-zero value so the gain node is immediately part of
+  // an active signal path (some Chromium builds optimize away nodes that ramp
+  // from absolute zero on a freshly-resumed context).
+  master.gain.value = 0.0001
   master.connect(ctx.destination)
-  // Gentle fade-in over 1.5s prevents clicks
+  // Gentle fade-in over 0.8s prevents clicks while still feeling responsive.
   const now = ctx.currentTime
-  master.gain.setValueAtTime(0, now)
-  master.gain.linearRampToValueAtTime(volume, now + 1.5)
+  master.gain.setValueAtTime(0.0001, now)
+  master.gain.exponentialRampToValueAtTime(Math.max(volume, 0.05), now + 0.8)
 
   const internals = startPreset(preset, master, ctx)
 
@@ -465,8 +524,8 @@ export function playSynth(preset: SynthPreset, volume = 0.7): SynthHandle {
     stop: () => {
       const stopTime = ctx.currentTime + 0.4
       master.gain.cancelScheduledValues(ctx.currentTime)
-      master.gain.setValueAtTime(master.gain.value, ctx.currentTime)
-      master.gain.linearRampToValueAtTime(0, stopTime)
+      master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), ctx.currentTime)
+      master.gain.exponentialRampToValueAtTime(0.0001, stopTime)
       internals.sources.forEach(s => {
         try { s.stop(stopTime + 0.05) } catch { /* already stopped */ }
       })
@@ -478,14 +537,18 @@ export function playSynth(preset: SynthPreset, volume = 0.7): SynthHandle {
     setVolume: (v: number) => {
       stored = v
       if (!paused) {
+        const target = Math.max(v, 0.0001)
         master.gain.cancelScheduledValues(ctx.currentTime)
-        master.gain.linearRampToValueAtTime(v, ctx.currentTime + 0.1)
+        master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), ctx.currentTime)
+        master.gain.exponentialRampToValueAtTime(target, ctx.currentTime + 0.1)
       }
     },
     setPaused: (p: boolean) => {
       paused = p
+      const target = p ? 0.0001 : Math.max(stored, 0.0001)
       master.gain.cancelScheduledValues(ctx.currentTime)
-      master.gain.linearRampToValueAtTime(p ? 0 : stored, ctx.currentTime + 0.2)
+      master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), ctx.currentTime)
+      master.gain.exponentialRampToValueAtTime(target, ctx.currentTime + 0.2)
     },
   }
 }

@@ -22,6 +22,7 @@ import {
   unlockAudio,
   type SynthHandle,
 } from './audio-synth'
+import { getAudioBlob } from './persistence'
 
 // Initial state
 const initialState = {
@@ -165,6 +166,22 @@ function cancelBrowserTTS(): void {
  */
 function isApiSourceTrack(track: Track): boolean {
   return track.src.startsWith('/api/voice/')
+}
+
+/**
+ * Resolve a track's playable URL. Uploaded tracks store `indexeddb://<id>`
+ * which is not a real URL — we must read the Blob from IndexedDB and create
+ * an Object URL the <audio> element understands. Returns the original src
+ * for any other scheme.
+ */
+async function resolvePlayableSrc(track: Track): Promise<string | null> {
+  if (!track.src.startsWith('indexeddb://')) {
+    return track.src
+  }
+  const id = track.src.slice('indexeddb://'.length)
+  const blob = await getAudioBlob(id)
+  if (!blob) return null
+  return URL.createObjectURL(blob)
 }
 
 /**
@@ -318,10 +335,12 @@ export const usePlayerStore = create<PlayerStore>()(
       const state = get()
       const audio = getAudioElement()
 
-      // Unlock AudioContext on every play(). unlockAudio() is idempotent and
-      // this catches the first user gesture on mobile browsers that require
-      // it to start any audio.
-      void unlockAudio()
+      // Unlock AudioContext on every play() AND wait for resume() to settle.
+      // On Android Chrome, scheduling oscillators on a still-suspended context
+      // produces silent playback because `currentTime` does not advance until
+      // the resume promise resolves. Awaiting here is the single most
+      // important line of this whole player on mobile.
+      await unlockAudio()
 
       // Cancel any active browser TTS before starting new playback
       cancelBrowserTTS()
@@ -475,18 +494,44 @@ export const usePlayerStore = create<PlayerStore>()(
         return
       }
 
-      // Standard tracks (meditation music, etc.) - direct audio element playback
-      audio.src = targetTrack.src
+      // Standard tracks (meditation music, uploaded files, etc.)
+      // Resolve indexeddb:// scheme to a real Blob URL so the audio element
+      // can actually load it.
+      const playableSrc = await resolvePlayableSrc(targetTrack)
+      if (!playableSrc) {
+        console.warn('[PlayerStore] Could not resolve track source:', targetTrack.id)
+        set({
+          isPlaying: false,
+          isLoading: false,
+          audioError: 'This audio file is no longer available. It may have been removed.',
+        })
+        markTrackUnavailable(targetTrack.id)
+        return
+      }
+
+      // Track the blob URL so we can revoke it later (uploaded tracks).
+      if (playableSrc.startsWith('blob:')) {
+        activeBlobUrl = playableSrc
+      }
+
+      audio.src = playableSrc
 
       try {
         await safePlay(audio)
-        set({ isPlaying: true, isLoading: false })
+        set({ isPlaying: true, isLoading: false, audioError: null })
+        markTrackAvailable(targetTrack.id)
         updateMediaSession(targetTrack)
       } catch (error) {
         // AbortError is benign - another play() call interrupted this one
         if (error instanceof DOMException && error.name === 'AbortError') return
         console.warn('[PlayerStore] Play error:', error)
-        set({ isPlaying: false, isLoading: false })
+        set({
+          isPlaying: false,
+          isLoading: false,
+          audioError: error instanceof Error
+            ? `Could not play audio: ${error.message}`
+            : 'Could not play this track.',
+        })
       }
     },
 

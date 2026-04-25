@@ -355,68 +355,170 @@ export async function deletePlaylist(id: string): Promise<void> {
 // ============ Upload Helper ============
 
 /**
- * Upload and save a track from a File
+ * Comprehensive list of audio MIME types we accept for upload.
+ *
+ * Browsers report wildly inconsistent MIME types for the same file
+ * (e.g. m4a may be `audio/mp4`, `audio/x-m4a`, `audio/aac`, or empty).
+ * We accept the union of every common variant. Files with an empty
+ * MIME type are accepted too — `audioFileLooksValid()` falls back to
+ * extension-based validation.
  */
-export async function uploadTrack(file: File): Promise<Track | null> {
-  try {
-    const id = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+export const ACCEPTED_AUDIO_MIME_TYPES: readonly string[] = [
+  // MP3
+  'audio/mpeg', 'audio/mp3', 'audio/mpeg3', 'audio/x-mpeg-3',
+  // MP4 / AAC / M4A
+  'audio/mp4', 'audio/x-m4a', 'audio/m4a', 'audio/aac', 'audio/x-aac', 'audio/aacp',
+  // WAV
+  'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/x-pn-wav', 'audio/vnd.wave',
+  // OGG / Vorbis / Opus
+  'audio/ogg', 'audio/oga', 'audio/vorbis', 'audio/opus', 'audio/x-opus',
+  // FLAC
+  'audio/flac', 'audio/x-flac',
+  // WebM
+  'audio/webm', 'audio/weba',
+  // 3GPP
+  'audio/3gpp', 'audio/3gpp2', 'audio/amr', 'audio/amr-wb',
+  // MIDI
+  'audio/midi', 'audio/x-midi', 'audio/mid',
+  // WMA
+  'audio/x-ms-wma', 'audio/ms-wma',
+  // Generic / catch-all
+  'audio/basic', 'audio/L16', 'audio/L24',
+]
 
-    // Extract basic metadata from filename
-    const fileName = file.name
-    const title = fileName.replace(/\.[^/.]+$/, '') // Remove extension
+/**
+ * Common audio file extensions we accept (lowercase, with leading dot).
+ * Used as a fallback when the browser's MIME detection is unreliable.
+ */
+export const ACCEPTED_AUDIO_EXTENSIONS: readonly string[] = [
+  '.mp3', '.m4a', '.m4b', '.mp4', '.aac', '.aacp',
+  '.wav', '.wave',
+  '.ogg', '.oga', '.opus',
+  '.flac',
+  '.webm', '.weba',
+  '.3gp', '.3gpp', '.amr',
+  '.mid', '.midi',
+  '.wma',
+  '.aiff', '.aif',
+]
 
-    // Save the blob
-    await saveAudioBlob(id, file)
+/**
+ * Comma-separated `accept` attribute string for `<input type="file">`.
+ * Includes both MIME types AND extensions (browsers honor either).
+ */
+export const ACCEPTED_AUDIO_ACCEPT_ATTR: string = [
+  ...ACCEPTED_AUDIO_MIME_TYPES,
+  ...ACCEPTED_AUDIO_EXTENSIONS,
+  'audio/*', // Final wildcard catches anything browser identifies as audio
+].join(',')
 
-    // Create metadata
-    const meta: UploadedTrackMeta = {
-      id,
-      title,
-      fileName,
-      fileSize: file.size,
-      mimeType: file.type,
-      createdAt: Date.now(),
-    }
+/**
+ * Validate a File looks like an audio file we can play.
+ * Accepts if EITHER the MIME type matches OR the extension matches.
+ * This is intentionally permissive — the audio element decides at play time
+ * whether the codec is supported, and a friendly error is shown if not.
+ */
+export function audioFileLooksValid(file: File): boolean {
+  if (!file) return false
+  const mime = (file.type || '').toLowerCase()
+  if (mime.startsWith('audio/')) return true
+  if (ACCEPTED_AUDIO_MIME_TYPES.includes(mime)) return true
+  const lower = file.name.toLowerCase()
+  return ACCEPTED_AUDIO_EXTENSIONS.some((ext) => lower.endsWith(ext))
+}
 
-    // Get duration (optional, may fail)
+/** Maximum upload size — 250MB covers long mantra recordings without abuse. */
+export const MAX_UPLOAD_SIZE = 250 * 1024 * 1024
+
+/**
+ * Upload and save a track from a File. Accepts the full spectrum of
+ * audio formats listed in ACCEPTED_AUDIO_MIME_TYPES / ACCEPTED_AUDIO_EXTENSIONS.
+ *
+ * Throws (rather than returning null) so callers can surface specific errors
+ * like "file too large" or "unsupported format" to the user.
+ */
+export async function uploadTrack(file: File): Promise<Track> {
+  if (!file) {
+    throw new Error('No file provided')
+  }
+  if (file.size === 0) {
+    throw new Error(`${file.name} is empty (0 bytes).`)
+  }
+  if (file.size > MAX_UPLOAD_SIZE) {
+    const mb = (MAX_UPLOAD_SIZE / 1024 / 1024).toFixed(0)
+    throw new Error(`${file.name} is too large. Maximum ${mb}MB.`)
+  }
+  if (!audioFileLooksValid(file)) {
+    throw new Error(`${file.name} does not look like an audio file.`)
+  }
+
+  const id = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+  // Pretty-print the title from the filename: drop the extension and
+  // turn separators into spaces so "om_chant.mp3" → "om chant".
+  const fileName = file.name
+  const title = fileName
+    .replace(/\.[^/.]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .trim() || fileName
+
+  // Save the blob first — even if metadata extraction fails, the audio is safe.
+  await saveAudioBlob(id, file)
+
+  // Build base metadata
+  const meta: UploadedTrackMeta = {
+    id,
+    title,
+    fileName,
+    fileSize: file.size,
+    mimeType: file.type || 'audio/unknown',
+    createdAt: Date.now(),
+  }
+
+  // Try to extract duration via a hidden <audio> element.
+  // This is best-effort: some formats (e.g. raw WAV without a header,
+  // certain WebM variants) don't expose duration, but the file still plays.
+  if (typeof window !== 'undefined' && typeof Audio !== 'undefined') {
     try {
       const audio = new Audio()
+      audio.preload = 'metadata'
       const blobUrl = URL.createObjectURL(file)
       audio.src = blobUrl
 
-      await new Promise<void>((resolve, reject) => {
-        audio.addEventListener('loadedmetadata', () => {
-          meta.duration = audio.duration
+      await new Promise<void>((resolve) => {
+        const cleanup = () => {
           URL.revokeObjectURL(blobUrl)
+          audio.removeEventListener('loadedmetadata', onMeta)
+          audio.removeEventListener('error', onErr)
+        }
+        const onMeta = () => {
+          if (Number.isFinite(audio.duration) && audio.duration > 0) {
+            meta.duration = audio.duration
+          }
+          cleanup()
           resolve()
-        })
-        audio.addEventListener('error', () => {
-          URL.revokeObjectURL(blobUrl)
-          reject(new Error('Failed to load audio metadata'))
-        })
+        }
+        const onErr = () => { cleanup(); resolve() } // Resolve, not reject
+        audio.addEventListener('loadedmetadata', onMeta)
+        audio.addEventListener('error', onErr)
+        // Hard timeout — never block the upload UI on a slow decoder.
+        setTimeout(() => { cleanup(); resolve() }, 4000)
       })
     } catch {
-      // Duration extraction failed, continue without it
+      // Duration extraction failed — continue without it.
     }
+  }
 
-    // Save metadata
-    await saveTrackMeta(meta)
+  await saveTrackMeta(meta)
 
-    // Return as Track
-    const track: Track = {
-      id: meta.id,
-      title: meta.title,
-      artist: meta.artist,
-      sourceType: 'upload',
-      src: `indexeddb://${id}`, // Special protocol for our uploaded tracks
-      duration: meta.duration,
-      createdAt: meta.createdAt,
-    }
-
-    return track
-  } catch (error) {
-    console.warn('[Persistence] Failed to upload track:', error)
-    return null
+  return {
+    id: meta.id,
+    title: meta.title,
+    artist: meta.artist,
+    sourceType: 'upload',
+    src: `indexeddb://${id}`, // Resolved by the player store at play time.
+    duration: meta.duration,
+    createdAt: meta.createdAt,
   }
 }
 
