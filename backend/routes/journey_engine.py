@@ -52,6 +52,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.settings import settings as _settings
 from backend.deps import get_current_user, get_db
 from backend.services.journey_engine import (
     JourneyEngineService,
@@ -1095,24 +1096,53 @@ async def complete_step(
                 },
             )
 
-        # Sakha wisdom: synthesise a deterministic templated response from
-        # the canonical enemy verse. This is the only place we read the
-        # journey stats post-commit, and the failure path is non-fatal — if
-        # we can't fetch the journey for any reason, the response just falls
-        # back to the empty defaults on CompletionResponse and the client
-        # gracefully degrades to its legacy "reload journey" behaviour.
+        # Sakha wisdom: by default we synthesise a deterministic templated
+        # response from the canonical enemy verse. When ENABLE_AI_SAKHA_RESPONSE
+        # is on, we first try a wisdom-grounded LLM response that draws
+        # exclusively from the Wisdom Core (701-verse GitaWisdomCore +
+        # ModernExamplesDB). The contract returned to clients is identical
+        # in both modes, so flipping the flag never breaks Android / web.
+        # The failure path is non-fatal at every layer — any exception or
+        # AI refusal silently falls through to the deterministic body.
         ai_response = ""
         mastery_delta = 0
         try:
             stats = await service.get_journey(user_id, journey_id)
             enemy_tag = stats.primary_enemies[0] if stats.primary_enemies else None
-            ai_response, mastery_delta = _build_sakha_response(
-                enemy_tag,
-                day_completed=result["day_completed"],
-                total_days=stats.total_days or 1,
-                journey_complete=result["journey_complete"],
-                has_reflection=bool(request.reflection and request.reflection.strip()),
-            )
+            sacred = _sacred_for_enemy(enemy_tag) if enemy_tag else None
+
+            ai_result: tuple[str, int] | None = None
+            if _settings.ENABLE_AI_SAKHA_RESPONSE:
+                from backend.services.journey_engine.sakha_wisdom_generator import (
+                    SakhaContext,
+                    generate_ai_sakha,
+                )
+
+                ai_result = await generate_ai_sakha(
+                    SakhaContext(
+                        enemy_tag=enemy_tag,
+                        day_completed=result["day_completed"],
+                        total_days=stats.total_days or 1,
+                        journey_complete=result["journey_complete"],
+                        has_reflection=bool(
+                            request.reflection and request.reflection.strip()
+                        ),
+                        reflection_text=(request.reflection or None),
+                    ),
+                    sacred=sacred,
+                    settings=_settings,
+                )
+
+            if ai_result is not None:
+                ai_response, mastery_delta = ai_result
+            else:
+                ai_response, mastery_delta = _build_sakha_response(
+                    enemy_tag,
+                    day_completed=result["day_completed"],
+                    total_days=stats.total_days or 1,
+                    journey_complete=result["journey_complete"],
+                    has_reflection=bool(request.reflection and request.reflection.strip()),
+                )
         except Exception:  # pragma: no cover — defensive
             logger.exception(
                 "[complete_step] failed to build sakha response for journey %s",
