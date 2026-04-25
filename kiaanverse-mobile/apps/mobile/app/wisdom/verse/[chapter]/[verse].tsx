@@ -131,6 +131,41 @@ const VOICES: readonly [VoiceConfig, ...VoiceConfig[]] = [
 
 const DEFAULT_VOICE_ID = 'divine-krishna';
 
+// ── Chapter metadata (1:1 mirror of GITA_MOBILE_CHAPTERS in
+// lib/kiaan-vibe/gita-library.ts on the web) ─────────────────────────────
+//
+// The bundled Gita corpus stores chapter names like "The Yoga of Knowledge
+// and Renunciation". The web Wisdom reader uses a hand-curated short
+// English title ("Knowledge & Renunciation") and the IAST chapter
+// transliteration ("Jnana Karma Sannyas Yoga") for the header sub-row. We
+// embed the same table so the native screen renders identical text instead
+// of an ad-hoc derivation from the corpus name.
+interface ChapterMeta {
+  readonly transliteration: string;
+  readonly english: string;
+}
+
+const CHAPTER_META: Record<number, ChapterMeta> = {
+  1: { transliteration: 'Arjuna Vishada Yoga', english: "Arjuna's Dejection" },
+  2: { transliteration: 'Sankhya Yoga', english: 'Transcendental Knowledge' },
+  3: { transliteration: 'Karma Yoga', english: 'Path of Action' },
+  4: { transliteration: 'Jnana Karma Sannyas Yoga', english: 'Knowledge & Renunciation' },
+  5: { transliteration: 'Karma Sannyas Yoga', english: 'Renunciation of Action' },
+  6: { transliteration: 'Atma Samyama Yoga', english: 'Self-Mastery through Meditation' },
+  7: { transliteration: 'Jnana Vijnana Yoga', english: 'Knowledge of the Absolute' },
+  8: { transliteration: 'Aksara Brahma Yoga', english: 'Attaining the Supreme' },
+  9: { transliteration: 'Raja Vidya Raja Guhya Yoga', english: 'The Royal Knowledge' },
+  10: { transliteration: 'Vibhuti Yoga', english: 'Divine Manifestations' },
+  11: { transliteration: 'Vishwarupa Darsana Yoga', english: 'The Universal Form' },
+  12: { transliteration: 'Bhakti Yoga', english: 'Path of Devotion' },
+  13: { transliteration: 'Kshetra Yoga', english: 'Field & Knower of Field' },
+  14: { transliteration: 'Guna Traya Yoga', english: 'The Three Modes of Nature' },
+  15: { transliteration: 'Purushottama Yoga', english: 'The Supreme Person' },
+  16: { transliteration: 'Daivasura Yoga', english: 'Divine & Demonic Qualities' },
+  17: { transliteration: 'Shraddha Traya Yoga', english: 'Three Types of Faith' },
+  18: { transliteration: 'Moksha Sannyas Yoga', english: 'Liberation Through Renunciation' },
+};
+
 export default function ReadMoreVerseScreen(): React.JSX.Element {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -220,21 +255,19 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
     verseData?.transliteration ?? fallbackVerse?.transliteration ?? '';
   const translation = verseData?.translation ?? fallbackVerse?.english ?? '';
 
+  // Curated chapter metadata mirrors the web Wisdom reader exactly. Falls
+  // back to the bundled corpus name only if a chapter index is somehow
+  // missing from the table (shouldn't happen — all 18 are present).
+  const curatedMeta = CHAPTER_META[chapterNum];
   const chapterEnglish =
+    curatedMeta?.english ??
     chapterMeta?.nameEnglish?.replace(/^The Yoga of\s+/i, '') ??
     `Chapter ${chapterNum}`;
+  const chapterUpperLatin = useMemo(
+    () => (curatedMeta?.transliteration ?? '').toUpperCase(),
+    [curatedMeta],
+  );
   const chapterSanskritName = chapterMeta?.nameSanskrit ?? '';
-  // The web shows "JNANA KARMA SANNYAS YOGA" (uppercase Latin name), not
-  // the Devanagari. We synthesise the same value by pulling the english
-  // name and removing the leading "The Yoga of …" / trailing "…" words.
-  const chapterUpperLatin = useMemo(() => {
-    const raw = chapterMeta?.nameEnglish ?? '';
-    return raw
-      .replace(/^The Yoga of\s+/i, '')
-      .replace(/[^A-Za-z\s]/g, '')
-      .trim()
-      .toUpperCase();
-  }, [chapterMeta]);
 
   // ── Listen ──────────────────────────────────────────────────────────────
   const handleListen = useCallback(() => {
