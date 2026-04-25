@@ -128,6 +128,8 @@ export type {
   JourneyCategory,
   WisdomJourneyStep,
   WisdomJourneyDetail,
+  JourneyModernExample,
+  JourneyPracticeBlock,
   StepCompletionResult,
   UserJourneyProgress,
   Journey,

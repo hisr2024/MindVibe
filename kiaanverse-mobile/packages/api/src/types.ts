@@ -357,15 +357,60 @@ export type JourneyDifficulty = 'beginner' | 'intermediate' | 'advanced';
 /** Category for wisdom journey paths */
 export type JourneyCategory = 'beginner_paths' | 'deep_dives' | '21_day_challenges';
 
+/**
+ * Modern real-life example for the "In Today's World" card. Mirrors the
+ * backend ModernExampleOut payload — every step exposes a deterministically
+ * picked example (per enemy + day) so the UI can always render the
+ * 6-card sequence (Verse → Teaching → Today's World → Reflection →
+ * Practice → Micro-Commitment).
+ */
+export interface JourneyModernExample {
+  category: string;
+  scenario: string;
+  howEnemyManifests: string;
+  gitaVerseRef: { chapter: number; verse: number };
+  gitaWisdom: string;
+  practicalAntidote: string;
+  reflectionQuestion: string;
+}
+
+/** Structured practice block for the daily step. */
+export interface JourneyPracticeBlock {
+  name?: string;
+  durationMinutes?: number;
+  instructions: string[];
+}
+
 /** A step within a wisdom journey with type-specific content */
 export interface WisdomJourneyStep {
   id: string;
   dayIndex: number;
   title: string;
   type: JourneyStepType;
+  /** Raw teaching/lesson body — kept for backwards compatibility. */
   content: string;
+  /** Chapter.Verse reference, e.g. "2.47". */
   verseRef?: string;
+  /** Sanskrit (Devanagari) verse text. */
+  verseSanskrit?: string;
+  /** Romanised IAST/ITRANS transliteration. */
+  verseTransliteration?: string;
+  /** English translation of the verse. */
+  verseTranslation?: string;
+  /** Hindi translation of the verse (toggle in VerseCard). */
+  verseHindi?: string;
+  /** Joined guided reflection prompts (legacy). */
   reflection?: string;
+  /** Structured guided-reflection prompts. */
+  reflectionPrompts?: string[];
+  /** Modern real-life "In Today's World" example. */
+  modernExample?: JourneyModernExample;
+  /** Structured daily practice (name, duration, numbered instructions). */
+  practice?: JourneyPracticeBlock;
+  /** Single-sentence micro-commitment — the day's vow. */
+  microCommitment?: string;
+  /** Optional safety / trigger note. */
+  safetyNote?: string;
   isCompleted: boolean;
   /** XP earned for completing this step */
   xpReward: number;
