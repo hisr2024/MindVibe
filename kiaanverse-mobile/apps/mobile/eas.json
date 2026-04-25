@@ -38,6 +38,9 @@
         "APP_ENV": "production",
         "EXPO_PUBLIC_ENV": "production",
         "EXPO_PUBLIC_API_BASE_URL": "https://mindvibe-api.onrender.com"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   },

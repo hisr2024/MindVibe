@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Kiaanverse sacred palette (XML side, used by the launch theme). -->
-    <color name="cosmos_black">#FF05060C</color>
-    <color name="deep_indigo">#FF0A0D1F</color>
-    <color name="sacred_gold">#FFF0C040</color>
-    <color name="deep_gold">#FFB98824</color>
-</resources>

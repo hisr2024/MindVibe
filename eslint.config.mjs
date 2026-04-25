@@ -73,7 +73,6 @@ const eslintConfig = [
       'vendor/**',
       'public/vad/**',
       'scripts/**',
-      'mobile/react-native/**',
       'native/**',
       // kiaanverse-mobile is a separate React Native workspace with its own
       // pnpm-workspace.yaml, its own ESLint configs, and its own CI job
