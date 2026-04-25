@@ -7,7 +7,6 @@ import com.mindvibe.app.journey.model.SakhaReflection
 import com.mindvibe.app.journey.model.Vice
 import com.mindvibe.app.journey.model.WorldScenario
 import java.io.IOException
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -60,21 +59,25 @@ class JourneyEngineRepository @Inject constructor(
     }
 
     /**
-     * Mark a step complete. Always sends a fresh client_token so the
-     * backend's idempotency layer can dedupe accidental retries. Returns
-     * the Sakha wisdom + mastery delta the UI surfaces in the post-
-     * completion card.
+     * Mark a step complete. Returns the Sakha wisdom + mastery delta the
+     * UI surfaces in the post-completion card.
+     *
+     * Idempotency: the backend's complete_step short-circuits a second
+     * call on the same (journey, day) so retries are safe at the data
+     * layer. We don't currently surface explicit dedupe tokens — if we
+     * need them later we'll wire an Idempotency-Key header rather than a
+     * body field (the Pydantic model doesn't accept extras in the body).
      */
     suspend fun completeStep(
         journeyId: String,
         dayIndex: Int,
         reflection: String?,
-        clientToken: String = UUID.randomUUID().toString(),
     ): Result<CompletionResponseDto> = safeCall {
         // Offline / catalog journeys: synthesise the same shape so the UI
-        // can render the Sakha card without diverging code paths.
+        // can render the Sakha card without diverging code paths. Empty
+        // step lists are guarded so a future stub journey can't NPE.
         val local = JourneyContent.journeys.firstOrNull { it.id == journeyId }
-        if (local != null) {
+        if (local != null && local.steps.isNotEmpty()) {
             val step = local.steps[(dayIndex - 1).coerceIn(0, local.steps.lastIndex)]
             return@safeCall CompletionResponseDto(
                 success = true,
@@ -92,7 +95,6 @@ class JourneyEngineRepository @Inject constructor(
                 dayIndex = dayIndex,
                 body = CompleteStepRequest(
                     reflection = reflection?.takeIf { it.isNotBlank() },
-                    clientToken = clientToken,
                 ),
             )
         }

@@ -101,13 +101,23 @@ data class StepDto(
 // =============================================================================
 
 /**
- * Idempotent completion payload. The backend treats `client_token` as the
- * idempotency key — sending the same token twice is safe and yields the
- * same response (so a retry after a network blip never double-credits).
+ * Body for POST /journeys/{id}/steps/{day}/complete.
+ *
+ * Mirrors backend `CompleteStepRequest` at backend/routes/journey_engine.py
+ * which accepts `reflection` and `check_in` only. We don't currently send
+ * `check_in` from the Android UI — when we wire mood/intensity capture
+ * later, add the field here as `Map<String, Any?>` to match the Pydantic
+ * `dict[str, Any] | None` shape.
+ *
+ * Note on idempotency: the backend's `complete_step` is naturally
+ * idempotent at the data layer (a second complete on the same day
+ * short-circuits to "already completed"), so the client doesn't need to
+ * supply an idempotency token. If we want explicit dedupe later we can
+ * add an `Idempotency-Key` header — putting it in the body would be
+ * silently dropped because the Pydantic model doesn't declare it.
  */
 data class CompleteStepRequest(
     val reflection: String? = null,
-    @SerializedName("client_token") val clientToken: String? = null,
 )
 
 data class CompletionResponseDto(

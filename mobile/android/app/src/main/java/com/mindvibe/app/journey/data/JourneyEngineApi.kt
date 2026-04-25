@@ -86,5 +86,9 @@ interface JourneyEngineApi {
 }
 
 data class StartJourneyRequest(
-    val template_slug: String,
+    // Field name MUST stay snake_case to match the backend Pydantic
+    // StartJourneyRequest.template_id at backend/routes/journey_engine.py.
+    // Renaming the Kotlin property to camelCase would require an explicit
+    // @SerializedName, so we keep the wire name verbatim instead.
+    val template_id: String,
 )

@@ -38,7 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +70,20 @@ fun JourneyDetailScreen(
     journeyId: String,
     onBack: () -> Unit,
 ) {
-    val journey = remember(journeyId) { JourneyContent.journey(journeyId) }
+    // Catalog lookup is nullable now so an unknown id can't crash the
+    // screen. If we somehow land here with an unknown id, fall back to
+    // the first shipped catalog entry — the user sees real content
+    // instead of a blank screen mid-flow.
+    val journey = remember(journeyId) {
+        JourneyContent.journeyOrNull(journeyId) ?: JourneyContent.journeys.first()
+    }
+    if (journey.steps.isEmpty()) {
+        // Defensive: a stub journey with no day steps can't render the
+        // detail body. Show a minimal back-out so the user can return
+        // to the catalog instead of staring at blank space.
+        EmptyJourneyContent(title = journey.title, onBack = onBack)
+        return
+    }
     var selectedDay by remember(journeyId) {
         mutableIntStateOf(journey.currentDay.coerceAtLeast(1))
     }
@@ -76,17 +91,17 @@ fun JourneyDetailScreen(
 
     // Step interaction state — kept hoisted so navigation between days resets.
     var showCompletion by remember(journeyId, selectedDay) {
-        androidx.compose.runtime.mutableStateOf(false)
+        mutableStateOf(false)
     }
     var showReflection by remember(journeyId, selectedDay) {
-        androidx.compose.runtime.mutableStateOf(false)
+        mutableStateOf(false)
     }
     var reflection by remember(journeyId, selectedDay) {
-        androidx.compose.runtime.mutableStateOf("")
+        mutableStateOf("")
     }
-    var isCompleting by remember { androidx.compose.runtime.mutableStateOf(false) }
-    var errorMessage by remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var isCompleting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     // Step is "completable" only on the actual current day of an active journey.
     // When the journey has not started yet (currentDay == 0) we fall back to
@@ -1084,6 +1099,58 @@ private fun SakhaReflectsCard(
                     color = Color(0xFFB8AE98),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
+                ),
+            )
+        }
+    }
+}
+
+// ============================================================================
+// Defensive empty-state — rendered when a journey has zero day steps.
+// ============================================================================
+
+@Composable
+private fun EmptyJourneyContent(title: String, onBack: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineMedium.copy(
+                color = KiaanColors.TextPrimary,
+                fontWeight = FontWeight.Normal,
+                fontSize = 22.sp,
+            ),
+            textAlign = TextAlign.Center,
+        )
+        VSpace(12.dp)
+        Text(
+            "This journey is being prepared. Return to the catalog and try " +
+                "another path while content is finalised.",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = KiaanColors.TextSecondary,
+                lineHeight = 22.sp,
+            ),
+            textAlign = TextAlign.Center,
+        )
+        VSpace(20.dp)
+        Row(
+            Modifier
+                .clip(RoundedCornerShape(14.dp))
+                .background(KiaanColors.SacredGold)
+                .clickable { onBack() }
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Return to Journeys",
+                style = MaterialTheme.typography.labelLarge.copy(
+                    color = Color.Black,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
                 ),
             )
         }

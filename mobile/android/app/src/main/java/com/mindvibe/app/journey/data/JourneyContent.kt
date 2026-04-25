@@ -480,7 +480,18 @@ object JourneyContent {
         ),
     )
 
-    fun journey(id: String): Journey = journeys.first { it.id == id }
+    /**
+     * Look up a journey by id. Returns null when the id isn't in the
+     * shipped catalog — callers are expected to handle the missing
+     * case (the Live wrapper falls through to the engine repository,
+     * which can mint a journey from the live API). Avoiding `.first`
+     * here means a typo'd id never crashes the screen.
+     */
+    fun journeyOrNull(id: String): Journey? = journeys.firstOrNull { it.id == id }
+
+    /** Strict accessor for callers that have already checked the id. */
+    fun journey(id: String): Journey = journeyOrNull(id)
+        ?: error("Unknown catalog journey: $id")
 
     // ----- Today tab --------------------------------------------------------
 
