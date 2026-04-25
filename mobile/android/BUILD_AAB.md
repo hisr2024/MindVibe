@@ -33,10 +33,17 @@ flow — written in Kotlin + Jetpack Compose. It ships with two data paths:
 
 ---
 
-## 2. Generate the Gradle wrapper (one-time)
+## 2. Gradle wrapper
 
-The repo ships `gradle/wrapper/gradle-wrapper.properties` but the binary
-`gradle-wrapper.jar` must be generated locally (it is not checked in). Run:
+The Gradle wrapper artifacts are committed in-tree at:
+
+* `mobile/android/gradlew` (POSIX) and `mobile/android/gradlew.bat` (Windows)
+* `mobile/android/gradle/wrapper/gradle-wrapper.jar` (43 KB)
+* `mobile/android/gradle/wrapper/gradle-wrapper.properties` (pinned to 8.5)
+
+You do NOT need a system Gradle install — the wrapper downloads Gradle
+8.5 on first invocation. If for some reason the artifacts are missing
+(e.g. fresh clone with LFS issues), regenerate them:
 
 ```bash
 cd mobile/android
@@ -44,8 +51,7 @@ gradle wrapper --gradle-version 8.5 --distribution-type bin
 chmod +x gradlew
 ```
 
-Alternatively, opening the project in Android Studio once will auto-generate
-the wrapper artifacts.
+Opening the project in Android Studio also auto-generates them.
 
 ---
 
