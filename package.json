@@ -50,7 +50,7 @@
     "framer-motion": "^12.38.0",
     "idb": "^8.0.3",
     "jspdf": "^4.2.1",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.11.0",
     "next": "16.2.4",
     "next-intl": "^4.5.8",
     "openai": "^6.34.0",
