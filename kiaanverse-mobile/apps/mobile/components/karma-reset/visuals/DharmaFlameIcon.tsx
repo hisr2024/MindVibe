@@ -10,6 +10,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { View } from 'react-native';
 import {
   Canvas,
   Group,
@@ -86,7 +87,10 @@ export function DharmaFlameIcon({
   const innerPath = Skia.Path.MakeFromSVGString(FLAME_INNER);
 
   if (!outerPath || !innerPath) {
-    return <Canvas style={{ width: canvasWidth, height: canvasHeight }} />;
+    // Skia's Canvas type requires children; an empty fallback canvas
+    // would also waste a GPU surface. A plain View is the right
+    // placeholder when the SVG paths fail to parse.
+    return <View style={{ width: canvasWidth, height: canvasHeight }} />;
   }
 
   const originX = canvasWidth / 2;
