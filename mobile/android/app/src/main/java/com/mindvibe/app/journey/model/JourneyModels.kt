@@ -83,8 +83,11 @@ data class WorldScenario(
 /** One Bhagavad Gita verse referenced by a day. */
 data class GitaVerse(
     val citation: String,         // e.g. "BG 16.4"
-    val devanagari: String,       // short fragment shown on cards
-    val transliteration: String,
+    val devanagari: String,       // short fragment shown on cards (1-line)
+    val transliteration: String,  // short fragment for cards (1-line)
+    val fullDevanagari: String = devanagari,         // full multi-line Sanskrit
+    val fullTransliteration: String = transliteration, // full multi-line transliteration
+    val translation: String = "",                     // English translation
 )
 
 /** The SAKHA companion reflection that appears after day completion. */
@@ -106,6 +109,13 @@ data class DayStep(
     val microCommitment: String = "I commit to being mindful of this teaching today.",
     val sakhaOnComplete: SakhaReflection,
     val completed: Boolean = false,
+    /** Sakha-asks question shown above the reflection input, e.g. "What stirs in you?". */
+    val checkInPrompt: String = "What stirs in you after this practice?",
+    /**
+     * Verse anchored to *this* day. When null the journey-level anchor verse
+     * is used. Some journeys rotate verses by day (BG 14.17 on Day 3 of Lobha).
+     */
+    val verse: GitaVerse? = null,
 )
 
 data class Journey(

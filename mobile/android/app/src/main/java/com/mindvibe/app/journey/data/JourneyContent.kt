@@ -27,31 +27,49 @@ object JourneyContent {
         citation = "BG 16.4",
         devanagari = "दम्भो दर्पोऽभिमानश्च क्रोधः…",
         transliteration = "dambho darpo'bhimānaś ca krodhaḥ pāruṣyam…",
+        fullDevanagari = "दम्भो दर्पोऽभिमानश्च क्रोधः पारुष्यमेव च\nअज्ञानं चाभिजातस्य पार्थ सम्पदमासुरीम्",
+        fullTransliteration = "dambho darpo 'bhimānaś ca krodhaḥ pāruṣyam eva ca\najñānaṁ cābhijātasya pārtha sampadam āsurīm",
+        translation = "Hypocrisy, arrogance, self-conceit, anger, harshness and ignorance — these, O Pārtha, are the marks of one born with the demoniac qualities.",
     )
     private val BG_2_63 = GitaVerse(
         citation = "BG 2.63",
         devanagari = "क्रोधाद्भवति संमोहः…",
         transliteration = "krodhād bhavati sammohaḥ",
+        fullDevanagari = "क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः\nस्मृतिभ्रंशाद् बुद्धिनाशो बुद्धिनाशात्प्रणश्यति",
+        fullTransliteration = "krodhād bhavati sammohaḥ sammohāt smṛti-vibhramaḥ\nsmṛti-bhraṁśād buddhi-nāśo buddhi-nāśāt praṇaśyati",
+        translation = "From anger comes delusion; from delusion, confused memory; from confused memory, the ruin of reason; from the ruin of reason, one is utterly lost.",
     )
     private val BG_14_17 = GitaVerse(
         citation = "BG 14.17",
         devanagari = "लोभः प्रवृत्तिरारम्भः कर्मणाम…",
         transliteration = "lobhaḥ pravṛttir ārambhaḥ karmaṇām…",
+        fullDevanagari = "लोभः प्रवृत्तिरारम्भः कर्मणामशमः स्पृहा\nरजस्येतानि जायन्ते विवृद्धे भरतर्षभ",
+        fullTransliteration = "lobhaḥ pravṛttir ārambhaḥ karmaṇām aśamaḥ spṛhā\nrajasy etāni jāyante vivṛddhe bharatarṣabha",
+        translation = "Greed, ceaseless activity, the undertaking of works, restlessness and craving — these arise when the mode of passion grows, O best of the Bharatas.",
     )
     private val BG_3_37 = GitaVerse(
         citation = "BG 3.37",
         devanagari = "काम एष क्रोध एष…",
         transliteration = "kāma eṣa krodha eṣa rajo-guṇa…",
+        fullDevanagari = "काम एष क्रोध एष रजोगुणसमुद्भवः\nमहाशनो महापाप्मा विद्ध्येनमिह वैरिणम्",
+        fullTransliteration = "kāma eṣa krodha eṣa rajo-guṇa-samudbhavaḥ\nmahāśano mahā-pāpmā viddhy enam iha vairiṇam",
+        translation = "It is desire, it is wrath, born of the mode of passion, all-devouring and most sinful — know this to be the enemy here in this world.",
     )
     private val BG_12_13 = GitaVerse(
         citation = "BG 12.13",
         devanagari = "अद्वेष्टा सर्वभूतानां मैत्रः करुण ए…",
         transliteration = "adveṣṭā sarva-bhūtānāṁ maitraḥ…",
+        fullDevanagari = "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च\nनिर्ममो निरहंकारः समदुःखसुखः क्षमी",
+        fullTransliteration = "adveṣṭā sarva-bhūtānāṁ maitraḥ karuṇa eva ca\nnirmamo nirahaṅkāraḥ sama-duḥkha-sukhaḥ kṣamī",
+        translation = "He who hates no being, who is friendly and compassionate to all, free from possessiveness and ego, even-minded in pain and pleasure — he is dear to Me.",
     )
     private val BG_18_66 = GitaVerse(
         citation = "BG 18.66",
         devanagari = "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज",
         transliteration = "sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja",
+        fullDevanagari = "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज\nअहं त्वा सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः",
+        fullTransliteration = "sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja\nahaṁ tvā sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ",
+        translation = "Abandon all varieties of dharma and just surrender unto Me. I shall deliver you from all sinful reactions. Do not fear.",
     )
 
     // ----- SAKHA reflections ------------------------------------------------
