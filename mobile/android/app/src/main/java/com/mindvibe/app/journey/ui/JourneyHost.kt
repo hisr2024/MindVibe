@@ -97,7 +97,7 @@ fun JourneyHost() {
                 }
             }
 
-            is Screen.Detail -> JourneyDetailScreen(
+            is Screen.Detail -> JourneyDetailLive(
                 journeyId = s.journeyId,
                 onBack = { screen = Screen.Home },
             )
