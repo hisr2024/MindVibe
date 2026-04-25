@@ -15,6 +15,7 @@ import { api } from './endpoints';
 import { API_CONFIG } from './config';
 import { gitaCache } from './cache/gitaCache';
 import { parseArdhaResponse, humaniseEmotion } from './ardha/parser';
+import { getLocalChapter, getLocalVerse } from './localGita';
 import type {
   AnalyticsDashboard,
   ArdhaResult,
@@ -77,15 +78,20 @@ type ChatResult = { response: string; session_id: string };
 // Query Keys
 // ---------------------------------------------------------------------------
 
+// Bump `GITA_CACHE_VERSION` whenever the local Gita corpus changes shape so
+// that React Query's persisted cache (24 h TTL via createAppPersister) drops
+// any stale placeholder rows it captured before the local corpus shipped.
+const GITA_CACHE_VERSION = 'v2-local-corpus';
+
 export const queryKeys = {
   profile: ['profile'] as const,
-  gitaChapters: ['gita', 'chapters'] as const,
-  gitaChapter: (id: number) => ['gita', 'chapter', id] as const,
-  gitaVerse: (chapter: number, verse: number) => ['gita', 'verse', chapter, verse] as const,
-  gitaSearch: (query: string) => ['gita', 'search', query] as const,
-  gitaSearchFull: (keyword: string) => ['gita', 'searchFull', keyword] as const,
-  gitaVerseDetail: (chapter: number, verse: number) => ['gita', 'verseDetail', chapter, verse] as const,
-  gitaTranslations: (verseId: string) => ['gita', 'translations', verseId] as const,
+  gitaChapters: ['gita', GITA_CACHE_VERSION, 'chapters'] as const,
+  gitaChapter: (id: number) => ['gita', GITA_CACHE_VERSION, 'chapter', id] as const,
+  gitaVerse: (chapter: number, verse: number) => ['gita', GITA_CACHE_VERSION, 'verse', chapter, verse] as const,
+  gitaSearch: (query: string) => ['gita', GITA_CACHE_VERSION, 'search', query] as const,
+  gitaSearchFull: (keyword: string) => ['gita', GITA_CACHE_VERSION, 'searchFull', keyword] as const,
+  gitaVerseDetail: (chapter: number, verse: number) => ['gita', GITA_CACHE_VERSION, 'verseDetail', chapter, verse] as const,
+  gitaTranslations: (verseId: string) => ['gita', GITA_CACHE_VERSION, 'translations', verseId] as const,
   journeyTemplates: ['journeys', 'templates'] as const,
   journeys: (status?: string) => ['journeys', 'list', status] as const,
   journey: (id: string) => ['journeys', 'detail', id] as const,
@@ -168,7 +174,7 @@ export function useGitaChapters(): UseQueryResult<GitaChapter[]> {
   return useQuery({
     queryKey: queryKeys.gitaChapters,
     queryFn: () =>
-      fetchWithGitaCache('chapters:all', async () => {
+      fetchWithGitaCache('v2:chapters:all', async () => {
         const { data } = await api.gita.chapters();
         const raw = data as Array<{ chapter: number; name: string; summary: string; verse_count: number }>;
         return raw.map((ch): GitaChapter => ({
@@ -186,7 +192,7 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
   return useQuery({
     queryKey: queryKeys.gitaChapter(chapterId),
     queryFn: () =>
-      fetchWithGitaCache(`chapter:${chapterId}`, async () => {
+      fetchWithGitaCache(`v2:chapter:${chapterId}`, async () => {
         const { data } = await api.gita.chapter(chapterId);
         const raw = data as { chapter: number; name: string; summary: string; verse_count: number; verses: GitaVerse[]; themes: string[] };
         return {
@@ -245,11 +251,23 @@ export function useGitaVerse(chapter: number, verse: number): UseQueryResult<Git
   return useQuery({
     queryKey: queryKeys.gitaVerse(chapter, verse),
     queryFn: () =>
-      fetchWithGitaCache(`verse:${chapter}:${verse}`, async () => {
+      fetchWithGitaCache(`v2:verse:${chapter}:${verse}`, async () => {
+        // Prefer the bundled local corpus — it has all 700 verses with
+        // real Sanskrit / English / Hindi text. Backend is only consulted
+        // for verses that aren't in the local file (shouldn't happen) or
+        // for theme/principle metadata which the UI doesn't need here.
+        const local = getLocalVerse(chapter, verse);
+        if (local) {
+          return {
+            id: local.verseId,
+            chapter: local.chapter,
+            verse: local.verse,
+            sanskrit: local.sanskrit,
+            transliteration: local.transliteration,
+            translation: local.english,
+          } as GitaVerse;
+        }
         const { data } = await api.gita.verse(chapter, verse);
-        // The backend may or may not include transliteration (it is in the
-        // Pydantic VerseSummary but not VerseDetail as of today); read it
-        // either way so the UI picks it up once the backend ships it.
         const raw = data as {
           verse: {
             chapter: number;
@@ -264,9 +282,6 @@ export function useGitaVerse(chapter: number, verse: number): UseQueryResult<Git
         };
         const v = raw.verse;
         if (isPlaceholderVerse(v)) {
-          // Remap to BG 2.47 rather than returning the placeholder. The
-          // user sees a real shloka; analytics can still detect the remap
-          // via the returned `id` differing from the requested chapter.verse.
           return BG_2_47_FALLBACK;
         }
         return {
@@ -315,28 +330,126 @@ export function useGitaSearchFull(keyword: string): UseQueryResult<GitaSearchRes
   });
 }
 
-/** Detailed verse with related verses from backend. */
+/** Detailed verse with related verses from backend.
+ *  Local corpus (sa.json + en.json + hi.json) provides full text; the backend
+ *  contributes optional metadata (theme, principle, related_verses) when
+ *  reachable. We always return *something* with real verse text so the UI
+ *  never shows the seed-row placeholder ("teaches wisdom on …").
+ */
 export function useGitaVerseDetail(chapter: number, verse: number): UseQueryResult<GitaVerseResponse> {
   return useQuery({
     queryKey: queryKeys.gitaVerseDetail(chapter, verse),
     queryFn: () =>
-      fetchWithGitaCache(`verseDetail:${chapter}:${verse}`, async () => {
-        const { data } = await api.gita.verse(chapter, verse);
-        return data as GitaVerseResponse;
+      fetchWithGitaCache(`v2:verseDetail:${chapter}:${verse}`, async () => {
+        const local = getLocalVerse(chapter, verse);
+        let backend: GitaVerseResponse | null = null;
+        try {
+          const { data } = await api.gita.verse(chapter, verse);
+          backend = data as GitaVerseResponse;
+        } catch {
+          // Backend unreachable — local data alone is enough for the UI.
+        }
+
+        if (!local && backend) {
+          // No local match (shouldn't happen for 1-18.X) — return backend.
+          if (isPlaceholderVerse(backend.verse)) {
+            return {
+              ...backend,
+              verse: {
+                ...backend.verse,
+                sanskrit: BG_2_47_FALLBACK.sanskrit,
+                english: BG_2_47_FALLBACK.translation,
+              },
+            };
+          }
+          return backend;
+        }
+
+        if (!local && !backend) {
+          // Catastrophic fallback — should never happen with the bundled corpus.
+          return {
+            verse: {
+              chapter,
+              verse,
+              verse_id: `${chapter}.${verse}`,
+              sanskrit: BG_2_47_FALLBACK.sanskrit,
+              english: BG_2_47_FALLBACK.translation,
+              hindi: '',
+              theme: '',
+              principle: null,
+            },
+            related_verses: [],
+          };
+        }
+
+        // local is defined here. Merge: local overrides backend's verse text,
+        // backend supplies metadata (theme, principle, related_verses) when
+        // available.
+        return {
+          verse: {
+            chapter: local!.chapter,
+            verse: local!.verse,
+            verse_id: local!.verseId,
+            sanskrit: local!.sanskrit,
+            english: local!.english,
+            hindi: local!.hindi,
+            theme: backend?.verse?.theme ?? '',
+            principle: backend?.verse?.principle ?? null,
+          },
+          related_verses: backend?.related_verses ?? [],
+        };
       }),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours — verses are immutable
     enabled: chapter > 0 && verse > 0,
   });
 }
 
-/** All translations for a verse. */
+/** All translations for a verse.
+ *  Always returns the bundled corpus first so transliteration + Hindi appear
+ *  even when the backend is unreachable.
+ */
 export function useGitaTranslations(verseId: string): UseQueryResult<GitaTranslationSet> {
   return useQuery({
     queryKey: queryKeys.gitaTranslations(verseId),
     queryFn: () =>
-      fetchWithGitaCache(`translations:${verseId}`, async () => {
-        const { data } = await api.gita.translations(verseId);
-        return data as GitaTranslationSet;
+      fetchWithGitaCache(`v2:translations:${verseId}`, async () => {
+        const [chapterStr, verseStr] = verseId.split('.');
+        const chapter = Number(chapterStr);
+        const verse = Number(verseStr);
+        const local = Number.isFinite(chapter) && Number.isFinite(verse)
+          ? getLocalVerse(chapter, verse)
+          : undefined;
+
+        let backend: GitaTranslationSet | null = null;
+        try {
+          const { data } = await api.gita.translations(verseId);
+          backend = data as GitaTranslationSet;
+        } catch {
+          // Backend unreachable — local data alone is enough.
+        }
+
+        if (!local && backend) return backend;
+        if (!local && !backend) {
+          throw new Error(`Translations for ${verseId} unavailable`);
+        }
+
+        // local is defined here. Merge: prefer local for verse text fields;
+        // keep any extra translation languages the backend may return.
+        const baseTranslations: Record<string, string> = backend?.translations ?? {};
+        return {
+          verse_id: local!.verseId,
+          chapter: local!.chapter,
+          verse: local!.verse,
+          theme: backend?.theme ?? '',
+          principle: backend?.principle ?? null,
+          translations: {
+            ...baseTranslations,
+            sanskrit: local!.sanskrit,
+            transliteration: local!.transliteration,
+            english: local!.english,
+            hindi: local!.hindi,
+          },
+        } satisfies GitaTranslationSet;
       }),
     staleTime: 1000 * 60 * 60 * 24,
     // Skip while the route params are still resolving — otherwise the first
@@ -346,14 +459,50 @@ export function useGitaTranslations(verseId: string): UseQueryResult<GitaTransla
   });
 }
 
-/** Chapter detail with verse listing — uses the existing useGitaChapter with proper typing. */
+/** Chapter detail with verse listing.
+ *
+ *  Local corpus (sa.json + en.json + hi.json) is the source of truth for
+ *  every verse — sanskrit, transliteration, english preview — so the user
+ *  never sees the backend's seed-row placeholders ("teaches wisdom on …").
+ *  When the backend is reachable, its `summary` and `themes` are folded in.
+ */
 export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChapterDetail> {
   return useQuery({
     queryKey: queryKeys.gitaChapter(chapterId),
     queryFn: () =>
-      fetchWithGitaCache(`chapterDetail:${chapterId}`, async () => {
-        const { data } = await api.gita.chapter(chapterId);
-        return data as GitaChapterDetail;
+      fetchWithGitaCache(`v2:chapterDetail:${chapterId}`, async () => {
+        const local = getLocalChapter(chapterId);
+        let backend: GitaChapterDetail | null = null;
+        try {
+          const { data } = await api.gita.chapter(chapterId);
+          backend = data as GitaChapterDetail;
+        } catch {
+          // Backend unreachable — local data alone is enough.
+        }
+
+        if (!local) {
+          // Should be impossible for chapters 1-18, but defend anyway.
+          if (backend) return backend;
+          throw new Error(`Chapter ${chapterId} not available offline or online`);
+        }
+
+        return {
+          chapter: local.chapter,
+          name: backend?.name ?? local.nameEnglish,
+          summary: backend?.summary ?? local.description,
+          verse_count: local.verseCount,
+          verses: local.verses.map((v) => ({
+            chapter: v.chapter,
+            verse: v.verse,
+            verse_id: v.verseId,
+            theme: '',
+            preview:
+              v.english.length > 120 ? `${v.english.slice(0, 117)}…` : v.english,
+            sanskrit: v.sanskrit,
+            transliteration: v.transliteration,
+          })),
+          themes: backend?.themes ?? [],
+        };
       }),
     staleTime: 1000 * 60 * 60 * 24,
     enabled: chapterId > 0 && chapterId <= 18,
