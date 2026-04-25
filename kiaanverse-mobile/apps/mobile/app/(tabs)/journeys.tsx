@@ -1,45 +1,30 @@
 /**
- * Journeys Tab — standalone षड्रिपु Sacred Journey surface.
+ * Journeys Tab — षड्रिपु Sacred Journeys 4-sub-tab hub.
  *
- * Previously this content lived inside a "Journeys" sub-tab of the Journal
- * hub, which made the dharma-wheel flow three taps deep. Splitting it into
- * a top-level tab matches the product spec (Home · Sakha · Journeys ·
- * Journal · Profile) and gives the six inner enemies the real estate they
- * deserve.
+ * Hosts the JourneysHub orchestrator which renders Today / Journeys /
+ * Battleground / Wisdom inside a single full-screen surface, mirroring
+ * the kiaanverse.com mobile experience 1:1.
  *
- * The actual list + empty state + enemy metadata lives in
- * `components/journal/JourneysView.tsx` — we reuse it as-is so the two
- * surfaces (tab + any future embed) stay in sync. When the Journal hub
- * was dismantled, this was the only consumer left.
+ * The hub manages its own footer sub-tab bar; the parent app's bottom
+ * navigation (Home · Sakha · Shlokas · Journeys · Profile) sits below it.
  */
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DivineBackground, GoldenHeader } from '@kiaanverse/ui';
-import { useTranslation } from '@kiaanverse/i18n';
 
-import { JourneysView } from '../../components/journal/JourneysView';
+import { JourneysHub } from '../../components/journey/hub/JourneysHub';
 
 export default function JourneysTab(): React.JSX.Element {
-  const insets = useSafeAreaInsets();
-  const { t } = useTranslation('navigation');
-
   return (
-    <DivineBackground variant="sacred" style={styles.root}>
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <GoldenHeader title={t('journeys', 'Journeys')} />
-        <JourneysView />
-      </View>
-    </DivineBackground>
+    <View style={styles.root}>
+      <JourneysHub />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
+    backgroundColor: '#050714',
   },
 });

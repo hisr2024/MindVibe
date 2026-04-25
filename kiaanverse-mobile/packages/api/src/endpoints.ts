@@ -251,6 +251,9 @@ export const api = {
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/pause`),
     resume: (journeyId: string) =>
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/resume`),
+    /** Close / abandon a journey (DELETE on the backend, soft-deletes only). */
+    abandon: (journeyId: string) =>
+      apiClient.delete(`/api/journey-engine/journeys/${journeyId}`),
     /** Full journey detail with steps */
     detail: (journeyId: string) =>
       apiClient.get(`/api/journey-engine/journeys/${journeyId}`),

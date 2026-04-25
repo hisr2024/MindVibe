@@ -35,6 +35,7 @@ import type {
   GitaVerse,
   GitaVerseResponse,
   GunaBalance,
+  DashboardData,
   Journey,
   JourneyTemplate,
   JournalEntry,
@@ -70,7 +71,9 @@ import type {
 
 type ProfileData = { id: string; email: string; name?: string; locale?: string; subscription_tier?: string; created_at: string };
 type ChapterDetail = GitaChapter & { verses: GitaVerse[] };
-type DashboardData = { activeJourneys: Journey[]; completedCount: number; streakDays: number };
+// DashboardData is now imported from ./types so the Today/Battleground
+// surfaces can read the full backend projection (active_count, max_active,
+// today_steps, enemy_progress, total_days_practiced).
 type StepResult = { success: boolean; progress: number };
 type MoodResult = { id: number; kiaanResponse?: string };
 type ChatResult = { response: string; session_id: string };
@@ -532,6 +535,10 @@ interface RawTemplate {
   is_free?: boolean;
   icon_name?: string | null;
   color_theme?: string | null;
+  gita_verse_ref?: { chapter: number; verse: number } | null;
+  gita_verse_text?: string | null;
+  modern_context?: string | null;
+  transformation_promise?: string | null;
 }
 
 interface RawJourney {
@@ -549,11 +556,39 @@ interface RawJourney {
   streak_days: number;
 }
 
+interface RawDashboardTodayStep {
+  step_id: string;
+  journey_id: string;
+  day_index: number;
+  step_title: string;
+  teaching?: string;
+  is_completed: boolean;
+}
+
+interface RawEnemyProgress {
+  enemy: string;
+  enemy_label: string;
+  mastery_level: number;
+  journeys_started: number;
+  journeys_completed: number;
+  total_days_practiced: number;
+  current_streak: number;
+  best_streak: number;
+  active_journey_progress_pct?: number;
+  active_journey_id?: string | null;
+  active_journey_day?: number;
+  active_journey_total_days?: number;
+}
+
 interface RawDashboard {
   active_journeys: RawJourney[];
   completed_journeys: number;
   total_days_practiced: number;
   current_streak: number;
+  enemy_progress?: RawEnemyProgress[];
+  today_steps?: RawDashboardTodayStep[];
+  active_count?: number;
+  max_active?: number;
 }
 
 /**
@@ -568,22 +603,22 @@ function _mapDifficulty(d: number | undefined): 'beginner' | 'intermediate' | 'a
 
 function _mapTemplate(t: RawTemplate): JourneyTemplate {
   const enemy = t.primary_enemy_tags?.[0] ?? '';
-  return {
+  const tpl: JourneyTemplate = {
     id: t.id,
+    slug: t.slug,
     title: t.title,
     description: t.description ?? '',
     durationDays: t.duration_days,
-    // The screen's resolveEnemyKey() searches the `category` string for an
-    // enemy name (krodha/bhaya/...), so we surface the primary enemy tag
-    // here. This keeps existing UI logic working without a screen change.
     category: enemy,
-    // Extras consumed by the discover card via a structural cast.
-    ...({
-      slug: t.slug,
-      difficulty: _mapDifficulty(t.difficulty),
-      primaryEnemyTags: t.primary_enemy_tags ?? [],
-    } as Partial<JourneyTemplate>),
+    primaryEnemyTags: t.primary_enemy_tags ?? [],
+    difficulty: _mapDifficulty(t.difficulty),
+    isFree: t.is_free ?? true,
+    gitaVerseRef: t.gita_verse_ref ?? null,
+    gitaVerseText: t.gita_verse_text ?? null,
+    modernContext: t.modern_context ?? null,
+    transformationPromise: t.transformation_promise ?? null,
   };
+  return tpl;
 }
 
 function _mapJourney(j: RawJourney): Journey {
@@ -603,6 +638,9 @@ function _mapJourney(j: RawJourney): Journey {
     currentDay: j.current_day,
     completedSteps: j.days_completed,
     category: j.primary_enemies?.[0] ?? '',
+    primaryEnemies: j.primary_enemies ?? [],
+    progressPercentage: j.progress_percentage,
+    streakDays: j.streak_days,
   };
 }
 
@@ -648,16 +686,51 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   return useQuery({
     queryKey: queryKeys.journeyDashboard,
     queryFn: async () => {
-      // Backend DashboardResponse uses snake_case fields:
-      //   { active_journeys, completed_journeys, current_streak, ... }
-      // The mobile view-model consumes camelCase with renamed fields.
+      // Backend DashboardResponse uses snake_case fields. The mobile
+      // view-model consumes camelCase with renamed fields and joins each
+      // today_step's primary_enemy from its parent journey so the
+      // TodayPracticeCard can theme without a second lookup.
       const { data } = await api.journeys.dashboard();
       const raw = data as Partial<RawDashboard>;
-      return {
-        activeJourneys: (raw.active_journeys ?? []).map(_mapJourney),
+      const activeJourneys = (raw.active_journeys ?? []).map(_mapJourney);
+      const enemyByJourney = new Map<string, string | undefined>();
+      for (const j of activeJourneys) {
+        enemyByJourney.set(j.id, j.primaryEnemies?.[0] ?? j.category);
+      }
+      const todaySteps = (raw.today_steps ?? []).map((s) => ({
+        stepId: s.step_id,
+        journeyId: s.journey_id,
+        dayIndex: s.day_index,
+        stepTitle: s.step_title,
+        teaching: s.teaching ?? '',
+        isCompleted: s.is_completed,
+        primaryEnemy: enemyByJourney.get(s.journey_id),
+      }));
+      const enemyProgress = (raw.enemy_progress ?? []).map((p) => ({
+        enemy: p.enemy,
+        enemyLabel: p.enemy_label,
+        masteryLevel: p.mastery_level,
+        journeysStarted: p.journeys_started,
+        journeysCompleted: p.journeys_completed,
+        totalDaysPracticed: p.total_days_practiced,
+        currentStreak: p.current_streak,
+        bestStreak: p.best_streak,
+        activeJourneyProgressPct: p.active_journey_progress_pct,
+        activeJourneyId: p.active_journey_id ?? null,
+        activeJourneyDay: p.active_journey_day,
+        activeJourneyTotalDays: p.active_journey_total_days,
+      }));
+      const dashboard: DashboardData = {
+        activeJourneys,
         completedCount: raw.completed_journeys ?? 0,
         streakDays: raw.current_streak ?? 0,
+        totalDaysPracticed: raw.total_days_practiced ?? 0,
+        activeCount: raw.active_count ?? activeJourneys.length,
+        maxActive: raw.max_active ?? 5,
+        todaySteps,
+        enemyProgress,
       };
+      return dashboard;
     },
   });
 }
@@ -911,6 +984,51 @@ export function useStartJourney(): UseMutationResult<Journey, Error, string> {
     mutationFn: async (templateId: string) => {
       const { data } = await api.journeys.start(templateId);
       return _mapJourney(data as RawJourney);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['journeys'] });
+    },
+  });
+}
+
+/** Pause an active journey. Backend POST /journeys/{id}/pause. */
+export function usePauseJourney(): UseMutationResult<Journey, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (journeyId: string) => {
+      const { data } = await api.journeys.pause(journeyId);
+      return _mapJourney(data as RawJourney);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['journeys'] });
+    },
+  });
+}
+
+/** Resume a paused journey. Backend POST /journeys/{id}/resume. */
+export function useResumeJourney(): UseMutationResult<Journey, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (journeyId: string) => {
+      const { data } = await api.journeys.resume(journeyId);
+      return _mapJourney(data as RawJourney);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['journeys'] });
+    },
+  });
+}
+
+/**
+ * Close (abandon) a journey. Backend DELETE /journeys/{id} — soft-deletes
+ * via `deleted_at = NOW(), status = 'abandoned'`, never removes the row.
+ * The user's reflections and progress remain recoverable.
+ */
+export function useAbandonJourney(): UseMutationResult<void, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (journeyId: string) => {
+      await api.journeys.abandon(journeyId);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['journeys'] });

@@ -44,7 +44,10 @@ export default function TabsLayout(): React.JSX.Element {
       <Tabs.Screen name="shlokas" options={{ title: t('shlokas') }} />
       <Tabs.Screen name="journal" options={{ title: t('journal') }} />
       <Tabs.Screen name="profile" options={{ title: t('profile') }} />
-      {/* Routable but hidden from the bar — reached from Home's CTA. */}
+      {/* Routable but hidden from the global bar — the journeys hub uses
+          its own internal 4-sub-tab footer (Today / Journeys / Battleground
+          / Wisdom), and is reached from Home's "Browse Sacred Catalog" CTA
+          and from the route /(tabs)/journeys. */}
       <Tabs.Screen
         name="journeys"
         options={{ title: t('journeys'), href: null }}
