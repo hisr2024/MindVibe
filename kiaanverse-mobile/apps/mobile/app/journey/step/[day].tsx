@@ -119,15 +119,18 @@ function detectEnemyKey(title: string, description: string): string | null {
 /**
  * Parse step content into structured sections.
  *
- * The step.content field contains the teaching text. Verse and reflection
- * data come from dedicated WisdomJourneyStep fields. Additional structured
- * data (practice instructions, micro-commitment, safety) may be embedded
- * in the content as markdown-style headers — we parse them out here.
+ * Modern backend deployments expose every section as a typed field on
+ * `WisdomJourneyStep` (verse fields, reflectionPrompts, practice block,
+ * microCommitment, safetyNote, modernExample). This parser:
+ *
+ *   1. Prefers the structured fields when present.
+ *   2. Falls back to markdown-style headers embedded in `content` so legacy
+ *      seed data and offline cache rows still render the 6 cards.
  */
 function parseStepSections(step: WisdomJourneyStep) {
   const content = step.content ?? '';
 
-  // Split content into sections by markdown-style headers
+  // Split content into sections by markdown-style headers (legacy fallback).
   const sections: Record<string, string> = {};
   let currentKey = 'teaching';
   const lines = content.split('\n');
@@ -136,7 +139,6 @@ function parseStepSections(step: WisdomJourneyStep) {
   for (const line of lines) {
     const headerMatch = line.match(/^##?\s*(.+)/);
     if (headerMatch) {
-      // Save buffer to current section
       if (buffer.length > 0) {
         sections[currentKey] = buffer.join('\n').trim();
         buffer.length = 0;
@@ -150,34 +152,57 @@ function parseStepSections(step: WisdomJourneyStep) {
     sections[currentKey] = buffer.join('\n').trim();
   }
 
-  // Extract reflection prompts from the step.reflection field or content
-  const reflectionText =
-    step.reflection ??
-    sections['reflection'] ??
-    sections['guided reflection'] ??
-    '';
-  const reflectionPrompts = reflectionText
-    .split('\n')
-    .map((l) => l.replace(/^\d+\.\s*/, '').trim())
-    .filter(Boolean);
+  // Reflection prompts — prefer the structured array, then the joined
+  // legacy `reflection` string, then the markdown header fallback.
+  let reflectionPrompts: string[] | undefined;
+  if (step.reflectionPrompts && step.reflectionPrompts.length > 0) {
+    reflectionPrompts = step.reflectionPrompts;
+  } else {
+    const reflectionText =
+      step.reflection ??
+      sections['reflection'] ??
+      sections['guided reflection'] ??
+      '';
+    const parsed = reflectionText
+      .split('\n')
+      .map((l) => l.replace(/^\d+\.\s*/, '').trim())
+      .filter(Boolean);
+    if (parsed.length > 0) reflectionPrompts = parsed;
+  }
 
-  // Extract practice instructions
-  const practiceText =
-    sections['practice'] ?? sections["today's practice"] ?? '';
-  const practiceInstructions = practiceText
-    .split('\n')
-    .map((l) => l.replace(/^\d+\.\s*/, '').trim())
-    .filter(Boolean);
+  // Practice instructions — prefer structured block, then header fallback.
+  let practiceInstructions: string[] | undefined;
+  let practiceName: string | undefined;
+  let practiceDuration: string | undefined;
+  if (step.practice && step.practice.instructions.length > 0) {
+    practiceInstructions = step.practice.instructions;
+    practiceName = step.practice.name;
+    if (typeof step.practice.durationMinutes === 'number') {
+      practiceDuration = `${step.practice.durationMinutes} min`;
+    }
+  } else {
+    const practiceText =
+      sections['practice'] ?? sections["today's practice"] ?? '';
+    const parsed = practiceText
+      .split('\n')
+      .map((l) => l.replace(/^\d+\.\s*/, '').trim())
+      .filter(Boolean);
+    if (parsed.length > 0) practiceInstructions = parsed;
+  }
 
   return {
     teaching: sections['teaching'] ?? content,
-    reflectionPrompts:
-      reflectionPrompts.length > 0 ? reflectionPrompts : undefined,
-    practiceInstructions:
-      practiceInstructions.length > 0 ? practiceInstructions : undefined,
+    reflectionPrompts,
+    practiceInstructions,
+    practiceName,
+    practiceDuration,
     microCommitment:
-      sections['micro-commitment'] ?? sections['commitment'] ?? undefined,
+      step.microCommitment ??
+      sections['micro-commitment'] ??
+      sections['commitment'] ??
+      undefined,
     safetyNotes:
+      step.safetyNote ??
       sections['safety'] ??
       sections['safety notes'] ??
       sections['note'] ??
@@ -198,6 +223,8 @@ function CompletionArea({
   onReflectionChange,
   onComplete,
   accentColor,
+  showReflection,
+  onToggleReflection,
 }: {
   readonly step: WisdomJourneyStep;
   readonly isCompleted: boolean;
@@ -207,6 +234,8 @@ function CompletionArea({
   readonly onReflectionChange: (text: string) => void;
   readonly onComplete: () => void;
   readonly accentColor: string;
+  readonly showReflection: boolean;
+  readonly onToggleReflection: () => void;
 }): React.JSX.Element {
   if (isCompleted) {
     return (
@@ -250,38 +279,66 @@ function CompletionArea({
       entering={FadeInUp.delay(200).duration(400)}
       style={styles.completionArea}
     >
-      {/* Optional reflection textarea */}
-      <Text
-        variant="label"
-        color={colors.text.secondary}
-        style={styles.reflectionLabel}
-      >
-        Your Reflection (optional)
-      </Text>
-      <TextInput
+      {/* "Add Reflection (Optional)" toggle — mirrors the web design.
+          Tapping reveals the textarea; tapping again collapses it. */}
+      <Pressable
+        onPress={onToggleReflection}
         style={[
-          styles.reflectionInput,
+          styles.reflectionToggle,
           {
-            borderColor:
-              reflectionText.length > 0 ? accentColor : colors.alpha.whiteLight,
+            borderColor: showReflection
+              ? `${accentColor}66`
+              : colors.alpha.whiteLight,
+            backgroundColor: showReflection
+              ? `${accentColor}14`
+              : colors.alpha.whiteLight,
           },
         ]}
-        value={reflectionText}
-        onChangeText={onReflectionChange}
-        placeholder="What arose for you during this practice? Share your thoughts..."
-        placeholderTextColor={colors.text.muted}
-        multiline
-        maxLength={MAX_REFLECTION_LENGTH}
-        textAlignVertical="top"
-        accessibilityLabel="Reflection textarea"
-      />
-      <Text
-        variant="caption"
-        color={colors.text.muted}
-        style={styles.charCount}
+        accessibilityRole="button"
+        accessibilityLabel={
+          showReflection ? 'Hide reflection input' : 'Add a reflection'
+        }
+        testID="add-reflection-toggle"
       >
-        {reflectionText.length}/{MAX_REFLECTION_LENGTH}
-      </Text>
+        <Text
+          variant="label"
+          color={showReflection ? accentColor : colors.text.secondary}
+          align="center"
+        >
+          {showReflection ? 'Hide Reflection' : 'Add Reflection (Optional)'}
+        </Text>
+      </Pressable>
+
+      {showReflection ? (
+        <>
+          <TextInput
+            style={[
+              styles.reflectionInput,
+              {
+                borderColor:
+                  reflectionText.length > 0
+                    ? accentColor
+                    : colors.alpha.whiteLight,
+              },
+            ]}
+            value={reflectionText}
+            onChangeText={onReflectionChange}
+            placeholder="What stirs in you after this practice?"
+            placeholderTextColor={colors.text.muted}
+            multiline
+            maxLength={MAX_REFLECTION_LENGTH}
+            textAlignVertical="top"
+            accessibilityLabel="Reflection textarea"
+          />
+          <Text
+            variant="caption"
+            color={colors.text.muted}
+            style={styles.charCount}
+          >
+            {reflectionText.length}/{MAX_REFLECTION_LENGTH}
+          </Text>
+        </>
+      ) : null}
 
       {/* Complete button */}
       <GoldenButton
@@ -329,6 +386,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
   const { updateJourneyProgress } = useJourneyStore();
 
   const [reflectionText, setReflectionText] = useState('');
+  const [showReflection, setShowReflection] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [celebration, setCelebration] = useState<{
     xp: number;
@@ -540,12 +598,19 @@ export default function StepPlayerScreen(): React.JSX.Element {
 
           <SacredDivider />
 
-          {/* ---------- Step Content Sections ---------- */}
+          {/* ---------- Step Content Sections (canonical 6 cards) ---------- */}
           {parsedSections ? (
             <StepContent
               teaching={parsedSections.teaching}
               verseRef={currentStep.verseRef}
+              sanskrit={currentStep.verseSanskrit}
+              transliteration={currentStep.verseTransliteration}
+              englishTranslation={currentStep.verseTranslation}
+              hindiTranslation={currentStep.verseHindi}
+              modernExample={currentStep.modernExample}
               reflectionPrompts={parsedSections.reflectionPrompts}
+              practiceName={parsedSections.practiceName}
+              practiceDuration={parsedSections.practiceDuration}
               practiceInstructions={parsedSections.practiceInstructions}
               microCommitment={parsedSections.microCommitment}
               safetyNotes={parsedSections.safetyNotes}
@@ -576,6 +641,11 @@ export default function StepPlayerScreen(): React.JSX.Element {
             onReflectionChange={setReflectionText}
             onComplete={handleComplete}
             accentColor={accentColor}
+            showReflection={showReflection}
+            onToggleReflection={() => {
+              Haptics.selectionAsync();
+              setShowReflection((s) => !s);
+            }}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -682,8 +752,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingVertical: spacing.xl,
   },
-  reflectionLabel: {
-    marginBottom: spacing.xxs,
+  reflectionToggle: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   reflectionInput: {
     backgroundColor: colors.alpha.whiteLight,

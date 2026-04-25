@@ -59,6 +59,7 @@ import type {
   WeeklyInsight,
   WisdomJourneyDetail,
   WisdomJourneyStep,
+  JourneyPracticeBlock,
   WisdomRoom,
   WisdomRoomMessage,
 } from './types';
@@ -665,6 +666,32 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
  * Backend step response (GET /journeys/{id}/steps/{day_index}).
  * Mirrors StepResponse in backend/routes/journey_engine.py.
  */
+interface RawVerse {
+  chapter: number;
+  verse: number;
+  sanskrit?: string | null;
+  hindi?: string | null;
+  english?: string;
+  transliteration?: string | null;
+  theme?: string | null;
+}
+
+interface RawModernExample {
+  category: string;
+  scenario: string;
+  how_enemy_manifests: string;
+  gita_verse_ref: { chapter: number; verse: number };
+  gita_wisdom: string;
+  practical_antidote: string;
+  reflection_question: string;
+}
+
+interface RawPractice {
+  name?: string;
+  duration_minutes?: number;
+  instructions?: unknown;
+}
+
 interface RawStep {
   step_id: string;
   journey_id: string;
@@ -673,12 +700,39 @@ interface RawStep {
   teaching: string;
   guided_reflection?: string[];
   verse_refs?: Array<{ chapter: number; verse: number }>;
+  verses?: RawVerse[];
+  practice?: RawPractice | null;
+  micro_commitment?: string | null;
+  safety_note?: string | null;
   is_completed: boolean;
+  /** Flattened sacred fields from the backend. */
+  verse_ref?: { chapter: number; verse: number } | null;
+  verse_sanskrit?: string | null;
+  verse_transliteration?: string | null;
+  verse_translation?: string | null;
+  reflection_prompt?: string | null;
+  modern_example?: RawModernExample | null;
 }
 
 function _mapStep(s: RawStep): WisdomJourneyStep {
-  const firstVerse = s.verse_refs?.[0];
-  const reflectionText = (s.guided_reflection ?? []).join('\n\n');
+  // Prefer the flattened sacred fields populated by the backend's
+  // _step_to_response helper, falling back to the legacy verses[] payload
+  // so older deployments remain renderable.
+  const flatRef = s.verse_ref ?? null;
+  const firstLegacyVerse = s.verses?.[0];
+  const refSource = flatRef ?? firstLegacyVerse ?? s.verse_refs?.[0] ?? null;
+
+  const reflectionPrompts = Array.isArray(s.guided_reflection)
+    ? s.guided_reflection.filter((p): p is string => typeof p === 'string' && p.trim().length > 0)
+    : [];
+  const reflectionText = reflectionPrompts.join('\n\n');
+
+  const sanskrit = s.verse_sanskrit ?? firstLegacyVerse?.sanskrit ?? undefined;
+  const transliteration =
+    s.verse_transliteration ?? firstLegacyVerse?.transliteration ?? undefined;
+  const translation = s.verse_translation ?? firstLegacyVerse?.english ?? undefined;
+  const hindi = firstLegacyVerse?.hindi ?? undefined;
+
   const step: WisdomJourneyStep = {
     id: s.step_id,
     dayIndex: s.day_index,
@@ -691,8 +745,57 @@ function _mapStep(s: RawStep): WisdomJourneyStep {
     xpReward: 10,
     karmaReward: 5,
   };
-  if (firstVerse) step.verseRef = `${firstVerse.chapter}.${firstVerse.verse}`;
+  if (refSource) step.verseRef = `${refSource.chapter}.${refSource.verse}`;
+  if (sanskrit) step.verseSanskrit = sanskrit;
+  if (transliteration) step.verseTransliteration = transliteration;
+  if (translation) step.verseTranslation = translation;
+  if (hindi) step.verseHindi = hindi;
   if (reflectionText) step.reflection = reflectionText;
+  if (reflectionPrompts.length > 0) step.reflectionPrompts = reflectionPrompts;
+
+  if (s.modern_example) {
+    const me = s.modern_example;
+    step.modernExample = {
+      category: me.category,
+      scenario: me.scenario,
+      howEnemyManifests: me.how_enemy_manifests,
+      gitaVerseRef: me.gita_verse_ref,
+      gitaWisdom: me.gita_wisdom,
+      practicalAntidote: me.practical_antidote,
+      reflectionQuestion: me.reflection_question,
+    };
+  }
+
+  if (s.practice && typeof s.practice === 'object') {
+    const rawInstructions = Array.isArray(s.practice.instructions)
+      ? s.practice.instructions
+      : [];
+    const instructions = rawInstructions
+      .map((i) => (typeof i === 'string' ? i.trim() : ''))
+      .filter((i): i is string => i.length > 0);
+    if (
+      instructions.length > 0 ||
+      typeof s.practice.name === 'string' ||
+      typeof s.practice.duration_minutes === 'number'
+    ) {
+      const block: JourneyPracticeBlock = { instructions };
+      if (typeof s.practice.name === 'string' && s.practice.name.trim().length > 0) {
+        block.name = s.practice.name.trim();
+      }
+      if (typeof s.practice.duration_minutes === 'number') {
+        block.durationMinutes = s.practice.duration_minutes;
+      }
+      step.practice = block;
+    }
+  }
+
+  if (typeof s.micro_commitment === 'string' && s.micro_commitment.trim().length > 0) {
+    step.microCommitment = s.micro_commitment.trim();
+  }
+  if (typeof s.safety_note === 'string' && s.safety_note.trim().length > 0) {
+    step.safetyNote = s.safety_note.trim();
+  }
+
   return step;
 }
 

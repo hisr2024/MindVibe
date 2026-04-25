@@ -1,10 +1,16 @@
 /**
- * StepContent — Full step content renderer for the daily journey experience.
+ * StepContent — Canonical 6-card daily journey renderer.
  *
- * Renders all sections of a journey step: teaching, verse, reflection prompts,
- * practice instructions, micro-commitment, and safety notes. Each section is
- * wrapped in a themed GlowCard with an icon-accented left border.
+ * Renders the six fixed cards every journey step must surface, in this exact
+ * order:
+ *   1. Verse        — Sanskrit + transliteration + English translation.
+ *   2. Teaching     — The day's lesson body.
+ *   3. Today's World — Modern real-life example + Gita implementation.
+ *   4. Reflection   — Numbered guided-reflection prompts.
+ *   5. Practice     — Daily practice with duration + numbered steps.
+ *   6. Micro-Commitment — One-line vow for the day.
  *
+ * An optional safety note is rendered after the six cards when applicable.
  * Designed to be embedded inside the step player ScrollView.
  */
 
@@ -20,6 +26,7 @@ import {
   radii,
 } from '@kiaanverse/ui';
 import { VerseCard } from './VerseCard';
+import type { JourneyModernExample } from '@kiaanverse/api';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +45,8 @@ export interface StepContentSection {
   readonly englishTranslation?: string | undefined;
   /** Hindi translation (toggleable in VerseCard). */
   readonly hindiTranslation?: string | undefined;
+  /** "In Today's World" — modern example + Gita implementation. */
+  readonly modernExample?: JourneyModernExample | undefined;
   /** Array of guided reflection prompts. */
   readonly reflectionPrompts?: string[] | undefined;
   /** Practice name / title. */
@@ -76,7 +85,7 @@ function TeachingSection({
             {'\u{1F4D6}'}
           </Text>
           <Text variant="label" color={colors.divine.aura}>
-            Today&apos;s Teaching
+            Teaching
           </Text>
         </View>
         <Text
@@ -87,6 +96,110 @@ function TeachingSection({
           {text}
         </Text>
       </GlowCard>
+    </Animated.View>
+  );
+}
+
+/**
+ * "In Today's World" — Modern real-life example connected to a Gita verse.
+ *
+ * Renders three layers, mirroring the web mobile experience:
+ *   • Scenario      — the everyday situation the user recognises.
+ *   • Manifestation — how the inner enemy shows up in that scenario.
+ *   • Antidote      — the Gita-rooted practical response (with optional
+ *                     verse-ref chip when supplied).
+ */
+function TodaysWorldSection({
+  example,
+  accentColor,
+  delay,
+}: {
+  readonly example: JourneyModernExample;
+  readonly accentColor: string;
+  readonly delay: number;
+}): React.JSX.Element {
+  const verseLabel = example.gitaVerseRef
+    ? `BG ${example.gitaVerseRef.chapter}.${example.gitaVerseRef.verse}`
+    : null;
+
+  return (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
+      <View
+        style={[
+          styles.todaysWorldCard,
+          {
+            borderColor: `${accentColor}33`,
+            borderLeftColor: accentColor,
+          },
+        ]}
+      >
+        <View style={styles.sectionHeader}>
+          <Text variant="h3" color={accentColor}>
+            {'✦'}
+          </Text>
+          <Text variant="label" color={accentColor}>
+            In Today&apos;s World
+          </Text>
+        </View>
+
+        {/* Scenario — the recognisable everyday situation. */}
+        <Text
+          variant="body"
+          color={colors.text.primary}
+          style={styles.todaysWorldScenario}
+        >
+          {example.scenario}
+        </Text>
+
+        {/* How the enemy manifests. */}
+        <Text
+          variant="bodySmall"
+          color={colors.text.secondary}
+          style={styles.todaysWorldManifestation}
+        >
+          {example.howEnemyManifests}
+        </Text>
+
+        {/* Hairline divider mirroring the web treatment. */}
+        <View
+          style={[
+            styles.todaysWorldDivider,
+            { backgroundColor: `${accentColor}33` },
+          ]}
+        />
+
+        {/* Gita implementation — verse chip + wisdom + practical antidote. */}
+        {verseLabel ? (
+          <View
+            style={[
+              styles.verseChip,
+              { backgroundColor: `${accentColor}1A`, borderColor: `${accentColor}55` },
+            ]}
+          >
+            <Text variant="caption" color={accentColor}>
+              {verseLabel}
+            </Text>
+          </View>
+        ) : null}
+
+        {example.gitaWisdom ? (
+          <Text
+            variant="bodySmall"
+            color={colors.text.secondary}
+            style={styles.todaysWorldWisdom}
+          >
+            {example.gitaWisdom}
+          </Text>
+        ) : null}
+
+        <Text
+          variant="body"
+          color={colors.text.primary}
+          style={styles.todaysWorldAntidote}
+        >
+          {example.practicalAntidote}
+        </Text>
+      </View>
     </Animated.View>
   );
 }
@@ -109,7 +222,7 @@ function ReflectionSection({
             {'\u{1F4AD}'}
           </Text>
           <Text variant="label" color={colors.divine.peacock}>
-            Guided Reflection
+            Reflection
           </Text>
         </View>
         {prompts.map((prompt, index) => (
@@ -161,7 +274,7 @@ function PracticeSection({
           </Text>
           <View style={styles.practiceHeaderText}>
             <Text variant="label" color={colors.semantic.success}>
-              {name ?? "Today's Practice"}
+              Practice
             </Text>
             {duration ? (
               <View style={styles.durationBadge}>
@@ -172,6 +285,11 @@ function PracticeSection({
             ) : null}
           </View>
         </View>
+        {name ? (
+          <Text variant="h3" color={colors.text.primary}>
+            {name}
+          </Text>
+        ) : null}
         {instructions.map((instruction, index) => (
           <View key={index} style={styles.numberedItem}>
             <View
@@ -199,7 +317,10 @@ function PracticeSection({
 }
 
 /**
- * Micro-commitment — single inspiring quote centered in a GlowCard.
+ * Micro-commitment — single inspiring quote in a cyan-bordered card.
+ *
+ * Mirrors the web treatment: an uppercase "MICRO COMMITMENT" eyebrow with
+ * the day's vow rendered as an italic, quoted line beneath.
  */
 function MicroCommitmentSection({
   text,
@@ -210,19 +331,23 @@ function MicroCommitmentSection({
 }): React.JSX.Element {
   return (
     <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
-      <GlowCard variant="default" style={styles.commitmentCard}>
-        <Text variant="h3" color={colors.divine.aura} align="center">
-          {'\u{1F3AF}'}
-        </Text>
+      <View style={styles.commitmentCard}>
+        <View style={[styles.sectionHeader, styles.commitmentBorder]}>
+          <Text variant="h3" color={colors.divine.aura}>
+            {'\u{1F3AF}'}
+          </Text>
+          <Text variant="label" color={colors.divine.aura}>
+            Micro Commitment
+          </Text>
+        </View>
         <Text
           variant="body"
-          color={colors.text.secondary}
-          align="center"
+          color={colors.text.primary}
           style={styles.commitmentText}
         >
-          {text}
+          {`“${text}”`}
         </Text>
-      </GlowCard>
+      </View>
     </Animated.View>
   );
 }
@@ -242,7 +367,7 @@ function SafetySection({
       <View style={styles.safetyCard}>
         <View style={[styles.sectionHeader, styles.safetyBorder]}>
           <Text variant="h3" color={colors.semantic.warning}>
-            {'\u26A0\uFE0F'}
+            {'⚠️'}
           </Text>
           <Text variant="label" color={colors.semantic.warning}>
             Please Note
@@ -271,6 +396,7 @@ export function StepContent({
   transliteration,
   englishTranslation,
   hindiTranslation,
+  modernExample,
   reflectionPrompts,
   practiceName,
   practiceDuration,
@@ -280,14 +406,13 @@ export function StepContent({
   accentColor = colors.primary[500],
 }: StepContentSection): React.JSX.Element {
   let delayCounter = 0;
+  const next = () => (delayCounter += 100);
 
   return (
     <View style={styles.container}>
-      {/* Verse Section — the Sacred Heart */}
+      {/* CARD 1 — Verse (English + Sanskrit + Transliteration) */}
       {verseRef ? (
-        <Animated.View
-          entering={FadeInDown.delay((delayCounter += 100)).duration(500)}
-        >
+        <Animated.View entering={FadeInDown.delay(next()).duration(500)}>
           <VerseCard
             verseRef={verseRef}
             sanskrit={sanskrit}
@@ -299,41 +424,40 @@ export function StepContent({
         </Animated.View>
       ) : null}
 
-      {/* Teaching Section */}
-      {teaching ? (
-        <TeachingSection text={teaching} delay={(delayCounter += 100)} />
-      ) : null}
+      {/* CARD 2 — Teaching */}
+      {teaching ? <TeachingSection text={teaching} delay={next()} /> : null}
 
-      {/* Reflection Prompts */}
-      {reflectionPrompts && reflectionPrompts.length > 0 ? (
-        <ReflectionSection
-          prompts={reflectionPrompts}
-          delay={(delayCounter += 100)}
+      {/* CARD 3 — In Today's World (modern example + Gita implementation) */}
+      {modernExample ? (
+        <TodaysWorldSection
+          example={modernExample}
+          accentColor={accentColor}
+          delay={next()}
         />
       ) : null}
 
-      {/* Practice Instructions */}
+      {/* CARD 4 — Reflection */}
+      {reflectionPrompts && reflectionPrompts.length > 0 ? (
+        <ReflectionSection prompts={reflectionPrompts} delay={next()} />
+      ) : null}
+
+      {/* CARD 5 — Practice */}
       {practiceInstructions && practiceInstructions.length > 0 ? (
         <PracticeSection
           name={practiceName}
           duration={practiceDuration}
           instructions={practiceInstructions}
-          delay={(delayCounter += 100)}
+          delay={next()}
         />
       ) : null}
 
-      {/* Micro-Commitment */}
+      {/* CARD 6 — Micro Commitment */}
       {microCommitment ? (
-        <MicroCommitmentSection
-          text={microCommitment}
-          delay={(delayCounter += 100)}
-        />
+        <MicroCommitmentSection text={microCommitment} delay={next()} />
       ) : null}
 
-      {/* Safety Notes */}
-      {safetyNotes ? (
-        <SafetySection text={safetyNotes} delay={(delayCounter += 100)} />
-      ) : null}
+      {/* Optional safety note (after the six required cards). */}
+      {safetyNotes ? <SafetySection text={safetyNotes} delay={next()} /> : null}
 
       <SacredDivider />
     </View>
@@ -367,6 +491,9 @@ const styles = StyleSheet.create({
   },
   practiceBorder: {
     borderLeftColor: colors.semantic.success,
+  },
+  commitmentBorder: {
+    borderLeftColor: colors.divine.aura,
   },
   safetyBorder: {
     borderLeftColor: colors.semantic.warning,
@@ -403,10 +530,49 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 22,
   },
-  commitmentCard: {
+
+  // Today's World
+  todaysWorldCard: {
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderLeftWidth: 3,
     padding: spacing.lg,
     gap: spacing.sm,
-    alignItems: 'center',
+    backgroundColor: colors.alpha.whiteLight,
+  },
+  todaysWorldScenario: {
+    fontStyle: 'italic',
+    lineHeight: 24,
+  },
+  todaysWorldManifestation: {
+    lineHeight: 22,
+  },
+  todaysWorldDivider: {
+    height: 1,
+    marginVertical: spacing.xs,
+  },
+  todaysWorldWisdom: {
+    fontStyle: 'italic',
+    lineHeight: 22,
+  },
+  todaysWorldAntidote: {
+    lineHeight: 24,
+  },
+  verseChip: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    borderRadius: radii.full,
+    borderWidth: 1,
+  },
+
+  commitmentCard: {
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: `${colors.divine.aura}33`,
+    backgroundColor: `${colors.divine.aura}0A`,
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
   commitmentText: {
     fontStyle: 'italic',
