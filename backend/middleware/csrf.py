@@ -141,6 +141,27 @@ class CSRFMiddleware(BaseHTTPMiddleware):
 
         # For state-changing methods, validate CSRF token (unless exempt)
         if method in CSRF_PROTECTED_METHODS and not is_exempt:
+            # Native mobile app (React Native) authenticates with a Bearer
+            # token from SecureStore — it cannot be CSRF'd because a malicious
+            # site cannot read SecureStore or forge an Authorization header
+            # cross-origin. The native HTTP stack on iOS/Android, however,
+            # auto-attaches any cookies the backend has set on prior GETs
+            # (including csrf_token), which would otherwise trigger this
+            # middleware and 403 every chat/tool POST. Identify the mobile
+            # app via the X-Client header it sets on every request and skip.
+            client_header = request.headers.get("X-Client", "").lower()
+            if client_header in {"kiaanverse-mobile", "mindvibe-mobile"}:
+                return await call_next(request)
+
+            # Bearer-auth requests carry their credential in the Authorization
+            # header rather than a cookie. Cross-origin attackers cannot set
+            # arbitrary Authorization headers (CORS forbids it without an
+            # explicit Access-Control-Allow-Headers grant), so CSRF does not
+            # apply. This also covers server-to-server / SDK clients.
+            auth_header = request.headers.get("Authorization", "")
+            if auth_header.lower().startswith("bearer "):
+                return await call_next(request)
+
             # Only skip CSRF if there are absolutely no auth cookies present
             # (i.e., this is a purely stateless API call with no browser session)
             has_auth_cookies = (
