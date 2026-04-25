@@ -314,6 +314,9 @@ export interface KarmaAwardPayload {
 
 export type JourneyStatus = 'available' | 'active' | 'paused' | 'completed' | 'abandoned';
 
+/** Difficulty bucket the UI surfaces — derived from the backend's 1-5 integer. */
+export type JourneyDifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+
 export interface Journey {
   id: string;
   title: string;
@@ -322,8 +325,15 @@ export interface Journey {
   status: JourneyStatus;
   currentDay: number;
   completedSteps: number;
+  /** First primary-enemy tag the journey targets (e.g. "kama"). */
   category: string;
-  thumbnailUrl?: string;
+  /** All primary-enemy tags from the backend, in order. */
+  primaryEnemies?: string[] | undefined;
+  /** Backend-reported progress percentage (0-100). */
+  progressPercentage?: number | undefined;
+  /** Per-journey streak (consecutive practice days). */
+  streakDays?: number | undefined;
+  thumbnailUrl?: string | undefined;
 }
 
 export interface JourneyStep {
@@ -337,11 +347,67 @@ export interface JourneyStep {
 
 export interface JourneyTemplate {
   id: string;
+  /** URL-safe template slug (e.g. "taming-desire"). */
+  slug?: string | undefined;
   title: string;
   description: string;
   durationDays: number;
+  /** First primary-enemy tag (e.g. "kama"). */
   category: string;
-  thumbnailUrl?: string;
+  /** All primary-enemy tags. */
+  primaryEnemyTags?: string[] | undefined;
+  difficulty?: JourneyDifficultyLevel | undefined;
+  isFree?: boolean | undefined;
+  /** Sacred enrichment derived server-side from the primary enemy tag. */
+  gitaVerseRef?: { chapter: number; verse: number } | null | undefined;
+  gitaVerseText?: string | null | undefined;
+  modernContext?: string | null | undefined;
+  transformationPromise?: string | null | undefined;
+  thumbnailUrl?: string | undefined;
+}
+
+/** Lightweight today-step projection from DashboardResponse.today_steps. */
+export interface DashboardTodayStep {
+  stepId: string;
+  journeyId: string;
+  dayIndex: number;
+  stepTitle: string;
+  teaching: string;
+  isCompleted: boolean;
+  /** First primary-enemy tag of the parent journey (already joined). */
+  primaryEnemy?: string | undefined;
+}
+
+/** Per-enemy progress projection from DashboardResponse.enemy_progress. */
+export interface EnemyMasteryProgress {
+  enemy: string;
+  enemyLabel: string;
+  masteryLevel: number;
+  journeysStarted: number;
+  journeysCompleted: number;
+  totalDaysPracticed: number;
+  currentStreak: number;
+  bestStreak: number;
+  /** % into the user's CURRENT active journey for this enemy (0 when none). */
+  activeJourneyProgressPct?: number | undefined;
+  activeJourneyId?: string | null | undefined;
+  activeJourneyDay?: number | undefined;
+  activeJourneyTotalDays?: number | undefined;
+}
+
+/** Full Today/Battleground dashboard view-model. */
+export interface DashboardData {
+  activeJourneys: Journey[];
+  completedCount: number;
+  /** Account-wide streak. */
+  streakDays: number;
+  totalDaysPracticed: number;
+  /** Backend-authoritative active count (used for "N/5" indicator). */
+  activeCount: number;
+  /** Configured limit (defaults to 5). */
+  maxActive: number;
+  todaySteps: DashboardTodayStep[];
+  enemyProgress: EnemyMasteryProgress[];
 }
 
 // ---------------------------------------------------------------------------

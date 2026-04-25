@@ -2,15 +2,20 @@
  * DivineTabBar — Kiaanverse bottom tab bar (5 sacred doorways).
  *
  * Tab order:
- *   Home · Sakha · Shlokas · Journal · Profile
+ *   Home · Sakha · Sacred Tools · Journal · Profile
  *
- * Slot 3 is now the Shlokas Sacred Hub (scriptures + every sacred tool
- * + Wisdom Rooms + Sacred Reflections + KIAAN Vibe Player). Its glyph is
- * the ManuscriptIcon — the scroll carries the "sacred utterance" meaning
- * that anchors the hub. The Journal tab takes the ChakraColumnIcon (the
- * seven stacked chakras read as an inward ascent through one's own
- * reflections). Journeys is still a full route; it's reached from Home's
- * "Browse Sacred Catalog" CTA rather than occupying tab-bar real estate.
+ * Slot 3 is the Sacred Tools hub — a single doorway that opens to every
+ * sacred instrument the user has: the Bhagavad Gita scriptures, the
+ * wellness/wisdom tools (Ardha, Viyoga, Relationship Compass, Emotional
+ * Reset, Karma Reset), Journeys (षड्रिपु — the inner battlefield),
+ * Wisdom Rooms, Sacred Reflections, and the KIAAN Vibe Player. Its glyph
+ * is the ManuscriptIcon — the scroll carries the "sacred utterance"
+ * meaning that anchors every tool below it. The route file is still
+ * `shlokas/` so deep links of the form `/shlokas/[chapter]/[verse]` keep
+ * resolving to the Gita verse view.
+ *
+ * The Journal tab takes the ChakraColumnIcon (the seven stacked chakras
+ * read as an inward ascent through one's own reflections).
  *
  * Visual specification:
  * - Dark navy background: rgba(5,7,20,0.97).
@@ -77,9 +82,12 @@ interface SacredTab {
 const TABS: readonly SacredTab[] = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
   { name: 'chat', label: 'Sakha', Icon: LotusDialogIcon },
-  // Manuscript glyph = scroll of shlokas; the Shlokas Hub opens to every
-  // sacred scripture and instrument so the written-word metaphor fits.
-  { name: 'shlokas', label: 'Shlokas', Icon: ManuscriptIcon },
+  // Manuscript glyph = scroll of shlokas; the Sacred Tools hub opens to
+  // every sacred scripture, every wellness/wisdom instrument, the
+  // Journeys (षड्रिपु) experience, and the Vibe Player — the
+  // written-word/utterance metaphor still anchors all of it. Route name
+  // remains 'shlokas' so existing deep links keep resolving.
+  { name: 'shlokas', label: 'Sacred Tools', Icon: ManuscriptIcon },
   // ChakraColumn's seven stacked chakras read as an inward ascent — a
   // fitting cue for the reflection-and-journal practice of Sacred
   // Reflections (the Journal tab's content).

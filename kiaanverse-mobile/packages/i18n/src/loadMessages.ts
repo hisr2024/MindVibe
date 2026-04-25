@@ -56,10 +56,12 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
   navigation: {
     home: 'Home',
     chat: 'Sakha',
-    // `shlokas` is kept for back-compat — the route still exists and is
-    // reachable from the Vibe Player's Daily Verse banner, but it is no
-    // longer a bottom-tab item.
-    shlokas: 'Shlokas',
+    // The middle tab is now "Sacred Tools" — a hub that contains the
+    // Bhagavad Gita, every wellness/wisdom instrument, Wisdom Rooms,
+    // Sacred Reflections, Journeys, and the KIAAN Vibe Player. The
+    // route file is still `shlokas/` so deep links of the form
+    // `/shlokas/[chapter]/[verse]` keep resolving to the Gita verse view.
+    shlokas: 'Sacred Tools',
     journeys: 'Journeys',
     journal: 'Journal',
     profile: 'Profile',

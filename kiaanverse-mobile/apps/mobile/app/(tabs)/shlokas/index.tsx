@@ -1,32 +1,28 @@
 /**
- * Shlokas Tab — Sacred Hub
+ * Sacred Tools Hub — slot 3 of the 5-doorway bottom bar.
  *
- * The middle tab of the 5-doorway bottom bar. Replaces the old bare Gita
- * verse browser with a composed hub that surfaces every sacred instrument
- * the user has at their disposal:
+ * One doorway, every sacred instrument the user has at their disposal:
  *
  *   SACRED SCRIPTURES  — Bhagavad Gita (18-chapter browser)
- *   HEALING TOOLS      — Emotional Reset, Karma Reset
  *   WISDOM TOOLS       — Ardha, Viyoga, Relationship Compass
- *   SACRED COMMUNITY   — Wisdom Room, Sacred Reflections
+ *   HEALING TOOLS      — Emotional Reset, Karma Reset
+ *   SACRED PATHS       — Wisdom Rooms, Journeys (षड्रिपु — the inner
+ *                        battlefield), Sacred Reflections
  *   SACRED SOUND       — KIAAN Vibe Player (full-width, elevated)
+ *
+ * The route file is still `shlokas/` so deep links of the form
+ * `/shlokas/[chapter]/[verse]` keep resolving to the Gita verse view.
  *
  * Every card is a `ToolCard` (96 px) with a semantic left-accent stripe,
  * tinted icon bubble, Devanagari label, and one-line description. The
- * Gita browser card routes into `/shlokas/gita` (the renamed former
- * `index.tsx`); the deep-link routes `/shlokas/[chapter]/[verse]` are
- * untouched so existing push notifications and Daily-Verse banners still
- * resolve.
+ * Gita browser card routes into `/shlokas/gita`; the Journeys card
+ * routes into `/(tabs)/journeys` which opens the four-sub-tab षड्रिपु
+ * Journeys hub (Today / Journeys / Battleground / Wisdom).
  *
  * Entrance choreography matches the Tools Dashboard pattern:
  *   - Each section (header + cards) is staggered by 100 ms.
  *   - Cards within a section stagger by an additional 60 ms per card.
  *   - Lotus-bloom easing at NATURAL duration.
- *
- * This screen is the source of truth for the "Shlokas" doorway — when the
- * user taps the middle tab, this is what they see. The old `/tools` route
- * (and `/tools/index.tsx`) is kept as an alternate surface for deep links
- * and intentionally mirrors a subset of these sections.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -78,27 +74,7 @@ const SCRIPTURE_TOOLS: readonly ToolDescriptor[] = [
   },
 ];
 
-const HEALING_TOOLS: readonly ToolDescriptor[] = [
-  {
-    id: 'emotional-reset',
-    name: 'Emotional Reset',
-    sanskrit: 'भावनात्मक पुनर्स्थापना',
-    description: 'Release and transform emotions',
-    color: ANGER_RED,
-    icon: '🔥',
-    route: '/tools/emotional-reset',
-  },
-  {
-    id: 'karma-reset',
-    name: 'Karma Reset',
-    sanskrit: 'कर्म पुनर्निर्धारण',
-    description: 'Heal karmic patterns',
-    color: DELUSION_PURPLE,
-    icon: '☸',
-    route: '/tools/karma-reset',
-  },
-];
-
+// Order honours the user's spec: Ardha → Viyoga → Relationship Compass.
 const WISDOM_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'ardha',
@@ -129,15 +105,48 @@ const WISDOM_TOOLS: readonly ToolDescriptor[] = [
   },
 ];
 
-const COMMUNITY_TOOLS: readonly ToolDescriptor[] = [
+const HEALING_TOOLS: readonly ToolDescriptor[] = [
+  {
+    id: 'emotional-reset',
+    name: 'Emotional Reset',
+    sanskrit: 'भावनात्मक पुनर्स्थापना',
+    description: 'Release and transform emotions',
+    color: ANGER_RED,
+    icon: '🔥',
+    route: '/tools/emotional-reset',
+  },
+  {
+    id: 'karma-reset',
+    name: 'Karma Reset',
+    sanskrit: 'कर्म पुनर्निर्धारण',
+    description: 'Heal karmic patterns',
+    color: DELUSION_PURPLE,
+    icon: '☸',
+    route: '/tools/karma-reset',
+  },
+];
+
+// Sacred Paths — the long-form practices of community, the inner
+// battlefield, and reflection. Order mirrors the user's spec:
+// Wisdom Rooms → Journeys → Sacred Reflections.
+const PATH_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'wisdom-rooms',
-    name: 'Wisdom Room',
+    name: 'Wisdom Rooms',
     sanskrit: 'ज्ञान कक्ष',
     description: 'Sacred circles of seekers',
     color: GREED_GREEN,
     icon: '🏛',
     route: '/wisdom-rooms',
+  },
+  {
+    id: 'journeys',
+    name: 'Journeys',
+    sanskrit: 'षड्रिपु',
+    description: 'The inner battlefield · 6 enemies',
+    color: ANGER_RED,
+    icon: '⚔️',
+    route: '/(tabs)/journeys',
   },
   {
     id: 'sacred-reflections',
@@ -150,7 +159,7 @@ const COMMUNITY_TOOLS: readonly ToolDescriptor[] = [
   },
 ];
 
-export default function ShlokasHubScreen(): React.JSX.Element {
+export default function SacredToolsHubScreen(): React.JSX.Element {
   const router = useRouter();
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
@@ -172,15 +181,16 @@ export default function ShlokasHubScreen(): React.JSX.Element {
     () =>
       [
         { title: 'Sacred Scriptures', tools: SCRIPTURE_TOOLS },
-        { title: 'Healing Tools', tools: HEALING_TOOLS },
         { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
-        { title: 'Sacred Community', tools: COMMUNITY_TOOLS },
+        { title: 'Healing Tools', tools: HEALING_TOOLS },
+        { title: 'Sacred Paths', tools: PATH_TOOLS },
       ] as const,
     []
   );
 
   // Sacred Sound (Vibe Player) is the final section and gets the last
-  // entrance slot so the delay chain is 0 / 100 / 200 / 300 / 400 ms.
+  // entrance slot so the delay chain stays in step with the four sections
+  // above it.
   const vibePlayerDelay = SECTION_STAGGER_MS * sections.length;
 
   return (
@@ -191,10 +201,10 @@ export default function ShlokasHubScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text style={styles.title} accessibilityRole="header">
-            Shlokas
+            Sacred Tools
           </Text>
           <Text style={styles.subtitle}>
-            Sacred scriptures & instruments for transformation
+            Every scripture and instrument for inner transformation
           </Text>
         </View>
 
