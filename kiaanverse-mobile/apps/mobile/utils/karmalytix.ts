@@ -65,8 +65,13 @@ export interface WeeklyAssessmentAnswers {
 }
 
 export function getIsoWeekKey(date: Date): string {
+  // Use UTC accessors throughout. Mixing local accessors (getFullYear /
+  // getMonth / getDate) with Date.UTC() makes the result depend on the
+  // user's timezone — e.g. 2026-01-04T23:59:59Z is Sunday in UTC but
+  // Monday 00:59:59 in CET, which would shift this Sunday into W02
+  // instead of W01. ISO week keys must be deterministic per Date instance.
   const d = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   );
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
