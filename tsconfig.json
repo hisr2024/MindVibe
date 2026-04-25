@@ -61,7 +61,6 @@
     "out",
     "dist",
     "native",
-    "mobile/react-native",
     "kiaanverse-mobile",
     "lib/voice/moonshine-worker.ts",
     "lib/voice/whisper-worker.ts",
