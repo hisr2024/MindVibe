@@ -222,16 +222,22 @@ private fun ViceCard(
 ) {
     // Live data wins. When unavailable, fall back to the catalog so the
     // card still has something to render (offline review build / first
-    // launch before the dashboard call returns).
+    // launch before the dashboard call returns). The catalog ships
+    // templates for 5 of the 6 śaḍripus today (Moha has none yet), so
+    // `catalog` is null for Vice.Moha — every read below must tolerate
+    // that. Using `firstOrNull` here is what keeps the Battleground tab
+    // from crashing on cold launch.
     val journeys: List<Journey> = JourneyContent.journeys.filter { it.vice == vice }
     val catalogActive = journeys.any { it.isActive }
-    val catalog = journeys.firstOrNull { it.isActive } ?: journeys.first()
+    val catalog: Journey? = journeys.firstOrNull { it.isActive } ?: journeys.firstOrNull()
 
     val anyActive = live?.hasActiveJourney ?: catalogActive
     val totalDays = live?.activeJourneyTotalDays?.takeIf { it > 0 }
-        ?: catalog.durationDays
+        ?: catalog?.durationDays
+        ?: 0
     val progressed = live?.activeJourneyDay?.takeIf { it > 0 }
-        ?: catalog.currentDay.coerceIn(0, totalDays)
+        ?: catalog?.currentDay?.coerceIn(0, totalDays)
+        ?: 0
     val progress = if (live?.activeJourneyProgressPct != null && live.activeJourneyProgressPct > 0)
         live.activeJourneyProgressPct / 100f
     else if (totalDays > 0) progressed.toFloat() / totalDays
