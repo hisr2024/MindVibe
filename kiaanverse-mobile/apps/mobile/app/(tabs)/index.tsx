@@ -417,6 +417,16 @@ function DailyVerseCard(): React.JSX.Element {
     toggleBookmark(verse.id);
   };
 
+  // Tapping anywhere on the verse card body (outside Ask Sakha / bookmark)
+  // opens the Wisdom landing — matches the web's
+  // "Today's Shloka chip → /m/wisdom" flow at app/(mobile)/m/page.tsx.
+  const openWisdom = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined
+    );
+    router.push('/wisdom' as never);
+  };
+
   return (
     <Reanimated.View style={[s.verseCardWrapper, animStyle]}>
       {/* 2px gold shimmer top edge — transparent → gold → transparent. */}
@@ -433,7 +443,13 @@ function DailyVerseCard(): React.JSX.Element {
         style={s.verseCardTopBar}
       />
 
-      <View style={s.verseCardBody}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={openWisdom}
+        accessibilityRole="button"
+        accessibilityLabel="Open Today's Wisdom"
+      >
+        <View style={s.verseCardBody}>
         {/* Label — "Today's Shloka" in Devanagari */}
         <Text style={s.verseLabel}>आज का श्लोक</Text>
 
@@ -492,7 +508,8 @@ function DailyVerseCard(): React.JSX.Element {
             </View>
           </>
         )}
-      </View>
+        </View>
+      </TouchableOpacity>
     </Reanimated.View>
   );
 }

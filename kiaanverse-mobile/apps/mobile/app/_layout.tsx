@@ -436,6 +436,9 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="community" />
           <Stack.Screen name="wisdom-rooms" />
 
+          {/* Wisdom — Today's Wisdom landing + Read More verse reader */}
+          <Stack.Screen name="wisdom" />
+
           {/* Karma Footprint */}
           <Stack.Screen name="karma-footprint" />
 
