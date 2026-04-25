@@ -32,9 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mindvibe.app.journey.data.DailyWisdomContent
 import com.mindvibe.app.journey.data.JourneyContent
 import com.mindvibe.app.journey.model.WeeklyStatus
 import com.mindvibe.app.journey.model.WeeklyTeaching
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import com.mindvibe.app.journey.ui.components.GoldDivider
 import com.mindvibe.app.journey.ui.components.SectionEyebrow
 import com.mindvibe.app.journey.ui.components.SerifItalic
@@ -50,11 +54,51 @@ fun WisdomScreen() {
             .padding(horizontal = 20.dp)
             .padding(top = 16.dp, bottom = 24.dp),
     ) {
+        WisdomHeroHeader()
+        VSpace(20.dp)
         SakhaReflectionCard()
         VSpace(28.dp)
         ThisWeeksTeachingsSection()
         VSpace(28.dp)
         FooterShloka()
+    }
+}
+
+/** Date-stamped hero header — "आज का ज्ञान" + "Today's Divine Wisdom". */
+@Composable
+private fun WisdomHeroHeader() {
+    val today = LocalDate.now()
+    val dateLine = today.format(
+        DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.ENGLISH),
+    )
+    Column(
+        Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "आज का ज्ञान",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                color = KiaanColors.SacredGold,
+                fontStyle = FontStyle.Italic,
+                fontSize = 22.sp,
+            ),
+        )
+        VSpace(4.dp)
+        Text(
+            "Today's Divine Wisdom",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = KiaanColors.TextSecondary,
+                fontSize = 12.sp,
+            ),
+        )
+        VSpace(2.dp)
+        Text(
+            dateLine,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = KiaanColors.TextMuted,
+                fontSize = 10.sp,
+            ),
+        )
     }
 }
 
@@ -64,7 +108,10 @@ fun WisdomScreen() {
 
 @Composable
 private fun SakhaReflectionCard() {
-    val w = JourneyContent.wisdomTeaching
+    // Daily rotation. The catalog `JourneyContent.wisdomTeaching` is the
+    // anchor "ultimate teaching" used as fallback if the rotation list is
+    // ever empty. In practice DailyWisdomContent ships 25 curated verses.
+    val verse = DailyWisdomContent.forDate()
     Column(
         Modifier
             .fillMaxWidth()
@@ -82,18 +129,30 @@ private fun SakhaReflectionCard() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            w.verse.citation,
+            verse.citation,
             style = MaterialTheme.typography.labelSmall.copy(
                 color = KiaanColors.SacredGold,
                 letterSpacing = 2.sp,
                 fontSize = 12.sp,
             ),
         )
+        VSpace(8.dp)
+        // Sanskrit transliteration on its own line, italic
+        Text(
+            verse.sanskrit,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = KiaanColors.SacredGold.copy(alpha = 0.85f),
+                fontStyle = FontStyle.Italic,
+                fontSize = 13.sp,
+                lineHeight = 22.sp,
+            ),
+            textAlign = TextAlign.Center,
+        )
         VSpace(12.dp)
         GoldDivider()
         VSpace(18.dp)
         Text(
-            w.translation,
+            verse.translation,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = KiaanColors.TextSecondary,
                 lineHeight = 26.sp,
@@ -110,7 +169,6 @@ private fun SakhaReflectionCard() {
             SectionEyebrow("Sakha's Reflection", color = KiaanColors.SacredGold)
         }
         VSpace(14.dp)
-        // Left gold rail
         Row {
             Box(
                 Modifier
@@ -120,7 +178,7 @@ private fun SakhaReflectionCard() {
             )
             Spacer(Modifier.width(12.dp))
             SerifItalic(
-                text = w.reflection,
+                text = verse.kiaanReflection,
                 fontSize = 17.sp,
                 color = KiaanColors.TextPrimary,
             )
@@ -142,7 +200,7 @@ private fun SakhaReflectionCard() {
             )
             VSpace(8.dp)
             SerifItalic(
-                text = w.sitWithQuestion,
+                text = verse.contemplation,
                 fontSize = 19.sp,
                 color = KiaanColors.TextPrimary,
             )
@@ -165,14 +223,28 @@ private fun SakhaReflectionCard() {
 private fun ThisWeeksTeachingsSection() {
     SectionEyebrow("This Week's Teachings")
     VSpace(12.dp)
+    val today = LocalDate.now()
     Row(
         Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        JourneyContent.weeklyTeachings.forEach { tile ->
-            WeekTile(tile = tile)
+        DailyWisdomContent.lastSevenDays(today).forEach { (date, _verse) ->
+            val short = date.dayOfWeek
+                .getDisplayName(java.time.format.TextStyle.SHORT, Locale.ENGLISH)
+            val status = when {
+                date.isEqual(today) -> WeeklyStatus.Today
+                date.isBefore(today) -> WeeklyStatus.Past
+                else -> WeeklyStatus.Upcoming
+            }
+            WeekTile(
+                tile = WeeklyTeaching(
+                    dayOfWeekShort = short,
+                    dayOfMonth = date.dayOfMonth,
+                    status = status,
+                ),
+            )
         }
     }
 }

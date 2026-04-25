@@ -35,19 +35,33 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.mindvibe.app.journey.data.JourneyContent
 import com.mindvibe.app.journey.model.Journey
 import com.mindvibe.app.journey.model.Vice
 import com.mindvibe.app.journey.ui.components.LinearProgressRail
 import com.mindvibe.app.journey.ui.components.VSpace
+import com.mindvibe.app.journey.viewmodel.BattlegroundViewModel
+import com.mindvibe.app.journey.viewmodel.EnemyProgress
 import com.mindvibe.app.ui.theme.KiaanColors
 
 /**
  * Battleground tab: the six inner adversaries laid out as a sacred
  * hexagonal mandala with 2-column progress cards below.
+ *
+ * Live data flows in from [BattlegroundViewModel] which calls
+ * /api/journey-engine/dashboard. When the call hasn't completed (or fails
+ * silently, e.g. unauthenticated review build), the ViceCard falls back
+ * to the local catalog so the screen is never blank.
  */
 @Composable
-fun BattlegroundScreen(onOpenJourney: (String) -> Unit) {
+fun BattlegroundScreen(
+    onOpenJourney: (String) -> Unit,
+    viewModel: BattlegroundViewModel = hiltViewModel(),
+) {
+    val ui by viewModel.state.collectAsState()
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
@@ -61,10 +75,19 @@ fun BattlegroundScreen(onOpenJourney: (String) -> Unit) {
             Spacer(Modifier.height(6.dp))
         }
         items(Vice.values().toList()) { vice ->
-            ViceCard(vice = vice, onOpen = {
-                val firstJourney = JourneyContent.journeys.firstOrNull { it.vice == vice }
-                if (firstJourney != null) onOpenJourney(firstJourney.id)
-            })
+            ViceCard(
+                vice = vice,
+                live = ui.byVice[vice],
+                onOpen = {
+                    // Prefer the live active journey id; fall back to the
+                    // first catalog journey of this vice so taps always
+                    // navigate somewhere (works in offline review builds).
+                    val liveId = ui.byVice[vice]?.activeJourneyId
+                    val targetId = liveId
+                        ?: JourneyContent.journeys.firstOrNull { it.vice == vice }?.id
+                    if (targetId != null) onOpenJourney(targetId)
+                },
+            )
         }
     }
 }
@@ -192,14 +215,27 @@ private fun hexPoints(cx: Float, cy: Float, r: Float): List<Offset> =
 // ============================================================================
 
 @Composable
-private fun ViceCard(vice: Vice, onOpen: () -> Unit) {
-    // Aggregate progress across all journeys of this vice
+private fun ViceCard(
+    vice: Vice,
+    live: EnemyProgress?,
+    onOpen: () -> Unit,
+) {
+    // Live data wins. When unavailable, fall back to the catalog so the
+    // card still has something to render (offline review build / first
+    // launch before the dashboard call returns).
     val journeys: List<Journey> = JourneyContent.journeys.filter { it.vice == vice }
-    val anyActive = journeys.any { it.isActive }
-    val representative = journeys.firstOrNull { it.isActive } ?: journeys.first()
-    val totalDays = 30
-    val progressed = representative.currentDay.coerceIn(0, totalDays)
-    val progress = progressed.toFloat() / totalDays
+    val catalogActive = journeys.any { it.isActive }
+    val catalog = journeys.firstOrNull { it.isActive } ?: journeys.first()
+
+    val anyActive = live?.hasActiveJourney ?: catalogActive
+    val totalDays = live?.activeJourneyTotalDays?.takeIf { it > 0 }
+        ?: catalog.durationDays
+    val progressed = live?.activeJourneyDay?.takeIf { it > 0 }
+        ?: catalog.currentDay.coerceIn(0, totalDays)
+    val progress = if (live?.activeJourneyProgressPct != null && live.activeJourneyProgressPct > 0)
+        live.activeJourneyProgressPct / 100f
+    else if (totalDays > 0) progressed.toFloat() / totalDays
+    else 0f
 
     Column(
         Modifier
