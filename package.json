@@ -35,7 +35,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-pdf/renderer": "^3.4.5",
     "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
+    "@react-three/fiber": "^9.6.0",
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/xr": "^6.6.29",
     "@ricky0123/vad-web": "^0.0.30",
