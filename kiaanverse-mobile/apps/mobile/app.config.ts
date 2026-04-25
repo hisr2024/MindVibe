@@ -113,6 +113,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   plugins: [
     './plugins/with-expo-modules-core-patch',
+    // Fixes silent audio in Android AAB builds: injects R8 keep rules for
+    // react-native-track-player + ExoPlayer / Media3 and ensures the
+    // MusicService declares foregroundServiceType="mediaPlayback" (required
+    // by Android 14+ targeting SDK 34/35; without it the foreground service
+    // is killed before the first audio buffer is decoded). See the plugin's
+    // header comment for the full failure analysis.
+    './plugins/with-track-player-android',
     'expo-router',
     'expo-splash-screen',
     [
@@ -123,6 +130,30 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           compileSdkVersion: 35,
           enableProguardInReleaseBuilds: true,
           enableShrinkResourcesInReleaseBuilds: true,
+          // Primary path for keep rules — `expo-build-properties` writes
+          // these into `android/app/proguard-rules.pro` during prebuild
+          // before any other plugin's dangerous-mod runs. The
+          // `with-track-player-android` plugin appends the same block as
+          // a fail-safe in case this property is ignored by an older
+          // expo-build-properties version. Stripping any of these classes
+          // breaks audio output silently in release builds.
+          extraProguardRules: [
+            '# react-native-track-player audio pipeline (keep — see app.config.ts)',
+            '-keep class com.doublesymmetry.** { *; }',
+            '-keep interface com.doublesymmetry.** { *; }',
+            '-keep class com.guichaguri.trackplayer.** { *; }',
+            '-keep interface com.guichaguri.trackplayer.** { *; }',
+            '-keep class com.doublesymmetry.kotlinaudio.** { *; }',
+            '-keep interface com.doublesymmetry.kotlinaudio.** { *; }',
+            '-keep class androidx.media.** { *; }',
+            '-keep class androidx.media3.** { *; }',
+            '-keep interface androidx.media3.** { *; }',
+            '-keep class com.google.android.exoplayer2.** { *; }',
+            '-keep interface com.google.android.exoplayer2.** { *; }',
+            '-dontwarn com.google.android.exoplayer2.**',
+            '-dontwarn androidx.media3.**',
+            '-keep class * extends androidx.media.session.MediaButtonReceiver { *; }',
+          ].join('\n'),
         },
       },
     ],

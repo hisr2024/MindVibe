@@ -71,11 +71,12 @@ export function registerPlaybackService(): void {
  * call, otherwise native throws "The player is not initialized. Call
  * setupPlayer first."
  *
- * Errors are swallowed and logged in __DEV__ only. Failing to set up the
- * player is non-fatal — the in-app UI remains usable; only audio playback
- * is disabled. The alternative (throwing) would crash the root layout on
- * every cold start if the OS denies the audio session (rare, but happens
- * on tvOS simulators and during CI).
+ * Errors are swallowed and logged via console.warn (captured as a Sentry
+ * breadcrumb in production). Failing to set up the player is non-fatal —
+ * the in-app UI remains usable; only audio playback is disabled. The
+ * alternative (throwing) would crash the root layout on every cold start
+ * if the OS denies the audio session (rare, but happens on tvOS simulators
+ * and during CI).
  */
 export async function setupTrackPlayer(): Promise<void> {
   if (isSetup) return;
@@ -117,13 +118,31 @@ export async function setupTrackPlayer(): Promise<void> {
       backwardJumpInterval: 15,
     });
 
+    // Defensive volume reset. On Android, react-native-track-player's
+    // internal volume can start at 0 when the OS restores a stale media
+    // session from a previous app lifecycle (e.g. user paused at vol=0,
+    // OS killed the app, foreground service is recreated and inherits the
+    // muted state). The JS layer reports state=Playing but no audio is
+    // emitted — which is exactly the silent-AAB symptom users hit. Setting
+    // volume explicitly here is cheap and idempotent, and recovers the
+    // session unconditionally.
+    try {
+      await TrackPlayer.setVolume(1.0);
+    } catch {
+      // setVolume can throw "Player is not initialized" on a transient
+      // race — non-fatal because the player will pick up the host audio
+      // stream's default volume on first play().
+    }
+
     isSetup = true;
   } catch (err) {
-    if (__DEV__) {
-      // "The player has already been initialized" is benign — the user hit
-      // Fast Refresh. Any other error means audio won't work but the app
-      // otherwise functions normally.
-      console.warn('[trackPlayerSetup] setupPlayer failed:', err);
-    }
+    // Log unconditionally (not just __DEV__) — production AAB users hitting
+    // this would otherwise see a player that loads tracks but emits no
+    // sound, with no breadcrumb in Sentry to diagnose. console.warn is
+    // captured by @sentry/react-native as a breadcrumb on the next event.
+    // "The player has already been initialized" is benign on Fast Refresh
+    // but harmless to log.
+    // eslint-disable-next-line no-console
+    console.warn('[trackPlayerSetup] setupPlayer failed:', err);
   }
 }
