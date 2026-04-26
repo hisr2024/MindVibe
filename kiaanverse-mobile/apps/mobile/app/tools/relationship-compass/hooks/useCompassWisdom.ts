@@ -133,9 +133,29 @@ function splitIntoSteps(
   fallback: CompassTransmission
 ): readonly CompassTransmissionStep[] {
   // Split at sentence boundaries that precede a capital letter (English
-  // upper-case OR any Devanagari letter, both covered by \p{Lu}/\p{L}).
-  const sentences = guidance
-    .split(/(?<=[.!?])\s+(?=\p{Lu}|\p{L})/u)
+  // upper-case A-Z) or any Devanagari letter (U+0900–U+097F).
+  //
+  // The previous implementation used `/(?<=[.!?])\s+(?=\p{Lu}|\p{L})/u`,
+  // which combined a lookbehind assertion AND Unicode property escapes —
+  // BOTH unsupported by Hermes (the engine used in our Android release
+  // builds). On Hermes the regex literal threw a `SyntaxError` the first
+  // time `splitIntoSteps` ran, the surrounding try/catch silently swapped
+  // in the offline fallback, and every API response was discarded — users
+  // saw the canned offline transmission no matter what the backend
+  // actually returned.
+  //
+  // Hermes-safe replacement strategy: replace the boundary with a sentinel
+  // string using a forward-only regex (lookahead is supported, lookbehind
+  // is not) and explicit Unicode ranges (no `\p{...}`), then split on the
+  // sentinel. The captured punctuation `$1` is preserved so sentences
+  // keep their terminators.
+  const SENTINEL = '__COMPASS_SPLIT__';
+  const marked = guidance.replace(
+    /([.!?])\s+(?=[A-Zऀ-ॿ])/g,
+    `$1${SENTINEL}`
+  );
+  const sentences = marked
+    .split(SENTINEL)
     .map((s) => s.trim())
     .filter(Boolean);
 

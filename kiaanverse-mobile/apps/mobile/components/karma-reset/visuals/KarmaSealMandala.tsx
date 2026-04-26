@@ -52,6 +52,9 @@ function Petal({
 }: PetalProps): React.JSX.Element {
   const progress = useSharedValue(0);
   const angle = (360 / PETAL_COUNT) * index;
+  const targetRx = petalWidth / 2;
+  const targetRy = petalLength / 2;
+  const targetCy = -petalLength / 2 - 8;
 
   useEffect(() => {
     progress.value = withDelay(
@@ -60,20 +63,35 @@ function Petal({
     );
   }, [progress, index]);
 
-  // react-native-svg reads `opacity` and `transform` from animatedProps
+  // Animation strategy (Android-release-safe):
+  //   - Rotation per petal is FIXED — rendered as a static SVG `transform`
+  //     prop on the AnimatedEllipse. Static transforms travel through the
+  //     standard Fabric props path, parsed by react-native-svg at mount.
+  //   - The "bloom from centre" effect is reproduced by interpolating
+  //     numeric SVG props (`rx`, `ry`, `cy`, `opacity`) from 0 → final
+  //     value. As `progress` goes 0 → 1 the petal grows AND moves outward
+  //     along its rotated axis, producing the same visual as the previous
+  //     `scale(progress)` transform.
+  //   - The previous animated SVG `transform` STRING was crashing
+  //     react-native-svg's ViewManager on Hermes release builds — the
+  //     Reanimated worklet writes the partial string to the UI thread via
+  //     JSI and the SVG ViewManager NPEs while parsing it.
   const animatedProps = useAnimatedProps(() => ({
     opacity: progress.value,
-    transform: `rotate(${angle}) scale(${progress.value})`,
+    rx: targetRx * progress.value,
+    ry: targetRy * progress.value,
+    cy: targetCy * progress.value,
   }));
 
   return (
     <AnimatedEllipse
       cx={0}
-      cy={-petalLength / 2 - 8}
-      rx={petalWidth / 2}
-      ry={petalLength / 2}
+      cy={0}
+      rx={0}
+      ry={0}
       fill={isGold ? 'url(#petal-gold)' : 'url(#petal-saffron)'}
       animatedProps={animatedProps}
+      transform={`rotate(${angle})`}
     />
   );
 }

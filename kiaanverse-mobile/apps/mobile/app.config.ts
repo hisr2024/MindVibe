@@ -18,9 +18,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   //     NoClassDefFoundError on the first render of the screen);
   //   • Hermes-safe date formatting in the Seal + Gita Counsel chambers
   //     (Intl.DateTimeFormat / toLocaleDateString were aborting render);
-  //   • numeric-only animated props for the SVG chamber animations
-  //     (animating SVG transform strings via useAnimatedProps was NPE-ing
-  //     react-native-svg's ViewManager off the UI thread).
+  //   • numeric-only animated props for the SVG chamber animations in both
+  //     Relationship Compass (CompassRose, DharmaRadar) and Karma Reset
+  //     (KarmaSealMandala) — animating SVG transform strings via
+  //     useAnimatedProps was NPE-ing react-native-svg's ViewManager off
+  //     the UI thread;
+  //   • Hermes-safe sentence splitter in useCompassWisdom (the previous
+  //     regex used lookbehind + Unicode property escapes, both unsupported
+  //     by Hermes — every API response was being silently swapped for the
+  //     offline fallback because the regex literal threw SyntaxError).
   // 1.3.0 bundled native additions (expo-document-picker, Sakha chat).
   // runtimeVersion: { policy: 'appVersion' } scopes OTAs to `version`, so
   // bumping prevents expo-updates from pushing the new JS to the broken
