@@ -28,33 +28,44 @@
  */
 
 /**
- * Stable category-keyed identifiers. Mirrors the suggested filenames in
- * `assets/audio/README.md`.
+ * Stable identifiers for every bundled track.
+ *
+ * Three are explicitly identified Sanskrit / Vedic mantras:
+ *   - 'gayatri'        — Sounova Music Gayatri Mantra (~7m26s)
+ *   - 'shanti-mantra'  — Shanti (peace) Mantra (~2m49s)
+ *   - 'om-hanumate'    — Om Hanumate Namaha (Hanuman bhakti, ~1m15s)
+ *
+ * Four are generic mantra slots (`mantra-001` .. `mantra-004`). They
+ * were uploaded with non-ASCII filenames that were stripped on transit,
+ * so they ship under neutral names until each one is identified and
+ * given a descriptive key.
  */
 export type BundledAudioKey =
-  | 'om-chant'
   | 'gayatri'
-  | 'tibetan-bowls'
-  | 'rain'
-  | 'forest'
-  | 'solfeggio-528hz';
+  | 'shanti-mantra'
+  | 'om-hanumate'
+  | 'mantra-001'
+  | 'mantra-002'
+  | 'mantra-003'
+  | 'mantra-004';
 
 /**
- * Metro asset ids for every bundled audio file. Empty until MP3s are
- * added to `assets/audio/`.
+ * Metro asset ids for every bundled audio file.
  *
- * To activate a row: drop the matching MP3 in `assets/audio/` and remove
- * the `// ` from the start of its line.
+ * Each `require()` resolves to a `number` (the Metro asset id) at bundle
+ * time. The `as number` cast is structural — it satisfies TypeScript
+ * without leaking `require`'s loose `any` typing into the registry.
  */
 export const BUNDLED_AUDIO_REGISTRY: Readonly<
   Partial<Record<BundledAudioKey, number>>
 > = {
-  // 'om-chant': require('../../assets/audio/om-chant.mp3') as number,
-  // 'gayatri': require('../../assets/audio/gayatri.mp3') as number,
-  // 'tibetan-bowls': require('../../assets/audio/tibetan-bowls.mp3') as number,
-  // 'rain': require('../../assets/audio/rain.mp3') as number,
-  // 'forest': require('../../assets/audio/forest.mp3') as number,
-  // 'solfeggio-528hz': require('../../assets/audio/solfeggio-528hz.mp3') as number,
+  'gayatri': require('../../assets/audio/gayatri.mp3') as number,
+  'shanti-mantra': require('../../assets/audio/shanti-mantra.mp3') as number,
+  'om-hanumate': require('../../assets/audio/om-hanumate.mp3') as number,
+  'mantra-001': require('../../assets/audio/mantra-001.mp3') as number,
+  'mantra-002': require('../../assets/audio/mantra-002.mp3') as number,
+  'mantra-003': require('../../assets/audio/mantra-003.mp3') as number,
+  'mantra-004': require('../../assets/audio/mantra-004.mp3') as number,
 };
 
 /**

@@ -23,38 +23,38 @@ bundled asset (this folder)     ← guaranteed to play, even offline
 SoundHelix HTTPS fallback       ← variety, requires network
 ```
 
-Until you drop MP3s in this folder, the registry is empty and the player
-silently skips this tier — current SoundHelix-based playback continues.
-The moment you add a file **and** wire it in `bundledAudioRegistry.ts`,
-the player picks it up automatically with no further code changes.
+## Currently bundled (~29 MB total)
 
-## What to add
+| Filename             | Length  | Size   | Category default | Identified as              |
+|----------------------|---------|--------|------------------|----------------------------|
+| `gayatri.mp3`        | ~7m26s  | 6.9 MB | `mantra`         | Gayatri Mantra (Sounova)   |
+| `shanti-mantra.mp3`  | ~2m49s  | 2.6 MB | `chanting`       | Shanti Mantra              |
+| `om-hanumate.mp3`    | ~1m15s  | 1.2 MB | `meditation`     | Om Hanumate Namaha (Kals)  |
+| `mantra-001.mp3`     | ~4m51s  | 4.5 MB | _(unmapped)_     | _to be identified_         |
+| `mantra-002.mp3`     | ~5m37s  | 5.2 MB | _(unmapped)_     | _to be identified_         |
+| `mantra-003.mp3`     | ~4m6s   | 3.8 MB | _(unmapped)_     | _to be identified_         |
+| `mantra-004.mp3`     | ~4m51s  | 4.5 MB | _(unmapped)_     | _to be identified_         |
 
-Six short, seamlessly-looping tracks. The Vibe Player uses
-`repeatMode = 'one'` so a 60–180 second loop fills any session length:
-
-| Filename                | Category   | Suggested length | Source/search keyword       |
-|-------------------------|------------|------------------|-----------------------------|
-| `om-chant.mp3`          | mantra     | 60–180 s         | "Om mantra" / "Om chant"    |
-| `gayatri.mp3`           | mantra     | 60–180 s         | "Gayatri Mantra"            |
-| `tibetan-bowls.mp3`     | meditation | 60–180 s         | "Tibetan singing bowls"     |
-| `rain.mp3`              | ambient    | 60–180 s         | "rain ambient" / "rainfall" |
-| `forest.mp3`            | ambient    | 60–180 s         | "forest birds" / "morning"  |
-| `solfeggio-528hz.mp3`   | meditation | 60–180 s         | "528Hz" / "solfeggio drone" |
+The four `mantra-NNN.mp3` files were uploaded with non-ASCII filenames
+(Hindi/Sanskrit) that got stripped on transit. They ship inside the APK
+and are reachable via explicit `bundledAudioKey`, but no category points
+at them yet. Once each is identified, rename to a descriptive filename
+(e.g. `mahamrityunjaya.mp3`) and update both `bundledAudioRegistry.ts`
+and the `CATEGORY_BUNDLED_KEY` map in `audioFallbacks.ts`.
 
 ## Audio specification
 
 - **Format**: MP3, 128 kbps minimum (192 kbps preferred), 44.1 kHz.
 - **Channels**: stereo or mono — both work.
-- **Length**: 60–180 seconds. Longer files inflate the APK without benefit
-  because the looper handles repetition for free.
+- **Length**: 60–180 seconds is ideal because the player loops; longer
+  files (like the 7-minute Gayatri included here) are fine but inflate
+  the APK without playback benefit.
 - **Loop**: seamless. The first 0.5 s and last 0.5 s should match in
   amplitude so the wraparound is inaudible. Audacity → *Effect → Repeat*
   → listen for the click is the cheapest QA pass.
-- **Loudness**: target −16 LUFS. Avoid hard limiters; meditation audio
-  should breathe.
-- **Total budget**: ~10–12 MB across all 6 files. Play Store APK cap is
-  150 MB single APK; we have plenty of headroom.
+- **Loudness**: target −16 LUFS. Avoid hard limiters.
+- **Total budget**: Play Store APK cap is 150 MB; current bundle uses
+  ~29 MB across 7 files, leaving plenty of headroom.
 
 ## License — IMPORTANT
 
@@ -63,6 +63,8 @@ attribution requirements**. Recommended sources, in order:
 
 1. **[Pixabay Music](https://pixabay.com/music/)** — Pixabay license,
    commercial use, no attribution required, no signup. **First choice.**
+   The `gayatri.mp3` (Sounova Music #493174) and `om-hanumate.mp3` (Kals
+   Stock Media #447279) here are from Pixabay.
 2. **[Free Music Archive](https://freemusicarchive.org/)** — filter to
    *CC0* (public domain dedication) only. CC-BY-NC tracks are NOT safe
    for a Play Store app that could ever monetize.
@@ -73,32 +75,23 @@ attribution requirements**. Recommended sources, in order:
 mis-tagged as public domain but are actually copyrighted recordings of
 mantras / kirtans. Legal risk is real.
 
-## Wiring the files in
+## Adding a new file
 
-Once a file lives in this folder, add **one line** to
-`apps/mobile/components/vibe-player/bundledAudioRegistry.ts`:
+1. Drop `<filename>.mp3` into this folder.
+2. Add a key to the `BundledAudioKey` union in
+   `apps/mobile/components/vibe-player/bundledAudioRegistry.ts`.
+3. Add a row to `BUNDLED_AUDIO_REGISTRY` referencing the file.
+4. (Optional) Map a category → that key in
+   `apps/mobile/components/vibe-player/audioFallbacks.ts:CATEGORY_BUNDLED_KEY`
+   so every track in that category prefers the new bundled file.
+5. Run `pnpm -r typecheck && pnpm -r test`. Build, ship.
 
-```ts
-export const BUNDLED_AUDIO_REGISTRY: Readonly<Record<string, number>> = {
-  // After dropping om-chant.mp3 into assets/audio/, uncomment:
-  // 'om-chant': require('../../assets/audio/om-chant.mp3'),
-  // 'gayatri': require('../../assets/audio/gayatri.mp3'),
-  // 'tibetan-bowls': require('../../assets/audio/tibetan-bowls.mp3'),
-  // 'rain': require('../../assets/audio/rain.mp3'),
-  // 'forest': require('../../assets/audio/forest.mp3'),
-  // 'solfeggio-528hz': require('../../assets/audio/solfeggio-528hz.mp3'),
-};
-```
+## Renaming an existing file
 
-That's it. The fallback chain in `audioFallbacks.ts` consults this
-registry first — bundled assets immediately become the preferred source
-for every track in their category. Run `pnpm typecheck && pnpm lint`,
-build, ship.
+When `mantra-001.mp3` etc. get identified, update **all three** of:
 
-## Why this is empty today
+- The actual filename in this folder.
+- The corresponding key in `BundledAudioKey` and `BUNDLED_AUDIO_REGISTRY`.
+- Any reference in `CATEGORY_BUNDLED_KEY` or per-track overrides.
 
-I (the engineer wiring this up) cannot legally source and commit the audio
-files myself. The runway is laid; whoever owns the Play Store release
-adds the files when ready. Current behaviour — SoundHelix HTTPS fallback —
-continues until then, so users always hear *something* when they tap a
-track.
+TypeScript catches mismatches at compile time, so the rename is safe.
