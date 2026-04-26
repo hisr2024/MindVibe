@@ -20,11 +20,31 @@
  * missing `audioUrl`.
  */
 
-import TrackPlayer, {
-  State,
-  type Track as RnTpTrack,
-} from 'react-native-track-player';
+import TrackPlayer, { State } from 'react-native-track-player';
 import { setupTrackPlayer } from '../../services/trackPlayerSetup';
+import {
+  isLikelyPlayableUrl,
+  resolvePlayableAudioSource,
+  type PlayableSource,
+} from './audioFallbacks';
+import type { BundledAudioKey } from './bundledAudioRegistry';
+
+/**
+ * Shape of the object we hand to `TrackPlayer.add()`. RNTP's published
+ * type for `AddTrack.url` is `string | ResourceObject` (where
+ * `ResourceObject = number`, the Metro asset id), but its `Track.url` is
+ * narrowed to `string` and the intersection collapses back. We declare
+ * the shape we actually pass — RNTP accepts numeric urls at runtime, the
+ * narrowing is only a published-type quirk.
+ */
+interface RnTpAddTrackInput {
+  readonly id: string;
+  readonly url: string | number;
+  readonly title: string;
+  readonly artist: string;
+  readonly duration: number;
+  readonly artwork?: string;
+}
 
 declare const __DEV__: boolean;
 
@@ -35,6 +55,24 @@ export interface BridgeTrack {
   readonly audioUrl: string;
   readonly duration: number;
   readonly artworkUrl?: string | null;
+  /**
+   * Optional category hint — used by the bridge to pick a known-good
+   * substitute URL when `audioUrl` is empty/non-playable, instead of
+   * surfacing an "isn't hosted yet" alert and going silent.
+   */
+  readonly category?: string;
+  /**
+   * Optional caller-provided backup URL. When set, the bridge retries
+   * playback with this URL if the primary one fails to start within the
+   * watchdog window. Useful for testing on flaky networks.
+   */
+  readonly fallbackAudioUrl?: string;
+  /**
+   * Optional bundled-audio key. When the matching MP3 has been wired in
+   * `bundledAudioRegistry.ts`, the bridge prefers the local asset over
+   * any remote URL — so meditation playback works offline.
+   */
+  readonly bundledAudioKey?: BundledAudioKey;
 }
 
 /** Outcome of a play attempt. `unavailable` = no hosted audio yet; the UI
@@ -49,12 +87,38 @@ export type PlayResult =
     }
   | { readonly ok: false; readonly reason: 'error'; readonly message: string };
 
-function isPlayableUrl(url: string): boolean {
-  // TrackPlayer accepts absolute http(s) URLs and `file://` / `asset://`
-  // local schemes. Anything else (relative paths like `/audio/om.mp3`,
-  // empty strings) will fail silently at play time, which is the exact
-  // bug users hit when the backend shipped unhosted audio.
-  return /^(https?:|file:|asset:)/i.test(url);
+/**
+ * Build the RNTP track entry for a given source. `source` is either an
+ * absolute URI string or a Metro asset id (number) returned by
+ * `require('./foo.mp3')`. RNTP's `AddTrack.url` accepts both natively, so
+ * bundled-asset playback works without any caller knowing it's local.
+ */
+function buildRnTrack(track: BridgeTrack, source: PlayableSource): RnTpAddTrackInput {
+  return {
+    id: track.id,
+    url: source,
+    title: track.title,
+    artist: track.artist,
+    duration: track.duration,
+    ...(track.artworkUrl ? { artwork: track.artworkUrl } : {}),
+  };
+}
+
+/**
+ * Defensive volume reset. Audio-focus duck events on Android occasionally
+ * leave RNTP's internal volume at 0 even after the OS hands focus back.
+ * Without this, every subsequent `play()` looks "successful" but the user
+ * hears silence — exactly the failure mode the Play Store APK was hitting.
+ *
+ * Wrapped in try/catch because `setVolume` is a no-op on iOS in some RNTP
+ * versions and we don't want a benign rejection to fail playback.
+ */
+async function ensureAudible(): Promise<void> {
+  try {
+    await TrackPlayer.setVolume(1);
+  } catch {
+    // ignore — best-effort
+  }
 }
 
 /** Load a single track into TrackPlayer's queue and start playback.
@@ -64,56 +128,92 @@ function isPlayableUrl(url: string): boolean {
  *      always ready. This is a no-op when setup already completed in
  *      `_layout.tsx`, but covers the deep-link / cold-start path where the
  *      Vibe Player screen mounts before the layout effect has finished.
+ *    - We coerce `track.audioUrl` through `resolvePlayableAudioSource` so
+ *      a bad value from the API (empty, relative, `synth://`) is
+ *      automatically replaced with a bundled asset (preferred — works
+ *      offline) or a known-good HTTPS URL (fallback) keyed off the track's
+ *      category. Earlier versions surfaced a "coming soon" Alert here and
+ *      stayed silent — that was the user-visible "no sound" bug on the
+ *      Play Store APK whenever the backend shipped sparse track metadata.
+ *    - We force `setVolume(1)` before `play()` to recover from stuck-at-zero
+ *      volume after audio-focus duck events.
  *    - After `play()` we poll the State for ~1.5 s. If RNTP never reaches
  *      Playing/Buffering/Loading, the URL is unreachable on this network
  *      (Android often returns no error in that case — it just sits silent).
- *      We surface that as an `error` so the user gets actionable feedback
- *      instead of a UI that claims "playing" with no sound.
+ *      We retry ONCE with the backup URL before giving up. Only if BOTH
+ *      attempts fail do we report `error` to the caller.
  */
 export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
-  if (!isPlayableUrl(track.audioUrl)) {
-    if (__DEV__) {
+  // Resolve to a guaranteed-playable source up front. `primary` may be a
+  // bundled asset id (number) when an MP3 has been wired up locally, or
+  // an HTTPS URL otherwise. `backup` is always a remote URL so a retry
+  // can recover from any local-asset issue.
+  const explicitFallback = isLikelyPlayableUrl(track.fallbackAudioUrl)
+    ? (track.fallbackAudioUrl as string)
+    : undefined;
+  const { primary, backup } = resolvePlayableAudioSource({
+    audioUrl: track.audioUrl,
+    ...(track.category ? { category: track.category } : {}),
+    ...(track.bundledAudioKey ? { bundledAudioKey: track.bundledAudioKey } : {}),
+  });
+
+  if (__DEV__) {
+    const desc = typeof primary === 'number'
+      ? `bundled-asset:${primary}`
+      : primary;
+    if (desc !== track.audioUrl) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[trackPlayerBridge] playTrack skipped — unplayable url="${track.audioUrl}" for id=${track.id}`
+        `[trackPlayerBridge] resolved track id=${track.id} → "${desc}" (original audioUrl="${track.audioUrl}")`
       );
     }
-    return {
-      ok: false,
-      reason: 'unavailable',
-      message: `"${track.title}" isn't hosted yet. It'll arrive in a future update.`,
-    };
   }
 
   try {
     // Ensure native is initialised even on deep-link cold start where
     // _layout's setup effect may not have completed yet.
     await setupTrackPlayer();
+    await ensureAudible();
 
+    // ── Attempt 1: primary URL ──
     await TrackPlayer.reset();
-    const rnTrack: RnTpTrack = {
-      id: track.id,
-      url: track.audioUrl,
-      title: track.title,
-      artist: track.artist,
-      duration: track.duration,
-      ...(track.artworkUrl ? { artwork: track.artworkUrl } : {}),
-    };
-    await TrackPlayer.add(rnTrack);
+    // The structural cast unblocks RNTP's overly-narrow .d.ts; numeric
+    // urls are handled correctly at runtime (used by every RN audio
+    // tutorial that loads `require('./foo.mp3')`).
+    await TrackPlayer.add(buildRnTrack(track, primary) as unknown as Parameters<typeof TrackPlayer.add>[0]);
     await TrackPlayer.play();
 
-    // Confirm playback actually engaged (poll up to ~1.5 s). Catches the
-    // silent-failure mode where Android resolves play() but never buffers.
-    const playable = await waitForPlayableState(1500);
-    if (!playable) {
-      return {
-        ok: false,
-        reason: 'error',
-        message:
-          'The audio source did not respond. Check your internet connection and try again.',
-      };
+    if (await waitForPlayableState(1500)) {
+      return { ok: true };
     }
-    return { ok: true };
+
+    // ── Attempt 2: caller-supplied fallback (if any), then category backup ──
+    const retryUrl = explicitFallback ?? backup;
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[trackPlayerBridge] primary url did not engage — retrying with "${retryUrl}"`
+      );
+    }
+    try {
+      await TrackPlayer.reset();
+      await ensureAudible();
+      await TrackPlayer.add(buildRnTrack(track, retryUrl) as unknown as Parameters<typeof TrackPlayer.add>[0]);
+      await TrackPlayer.play();
+      if (await waitForPlayableState(2500)) {
+        return { ok: true };
+      }
+    } catch (retryErr) {
+      // eslint-disable-next-line no-console
+      console.warn('[trackPlayerBridge] retry failed:', retryErr);
+    }
+
+    return {
+      ok: false,
+      reason: 'error',
+      message:
+        'The audio source did not respond. Check your internet connection and try again — or tap "Add your music" to play a track from your device.',
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     // Always log — production users hitting this would otherwise see a
