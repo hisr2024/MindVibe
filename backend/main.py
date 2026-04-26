@@ -938,6 +938,17 @@ async def shutdown():
     except Exception as e:
         startup_logger.info(f"⚠️ Error stopping KIAAN scheduler: {e}")
 
+    # Drain Dynamic Wisdom Corpus batch buffer so no in-flight deliveries are lost
+    try:
+        from backend.services.dynamic_wisdom_corpus import (
+            get_dynamic_wisdom_corpus,
+        )
+
+        await get_dynamic_wisdom_corpus().stop()
+        startup_logger.info("✅ Dynamic Wisdom Corpus buffer drained")
+    except Exception as e:
+        startup_logger.info(f"⚠️ Error draining Dynamic Wisdom buffer: {e}")
+
     # Dispose database engine
     try:
         await engine.dispose()
@@ -1359,6 +1370,20 @@ try:
 except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin KIAAN Analytics router: {e}")
+
+try:
+    from backend.routes.admin.wisdom_telemetry import (
+        router as admin_wisdom_telemetry_router,
+    )
+
+    app.include_router(admin_wisdom_telemetry_router)
+    _startup_status["routers_loaded"] += 1
+    admin_routers_loaded.append("wisdom_telemetry")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load Admin Wisdom Telemetry router: {e}"
+    )
 
 try:
     from backend.routes.admin.voice_analytics import (
