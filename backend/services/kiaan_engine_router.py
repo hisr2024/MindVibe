@@ -14,7 +14,7 @@ import re
 import logging
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 # Optional: transformer-based sentiment for richer emotion detection
 try:
@@ -57,9 +57,9 @@ class RoutingDecision:
     # Downstream consumers (wisdom_engine.generate_response, prompt loader) use
     # these to render a 30–45s spoken arc instead of a 4-part textual response.
     voice_mode: bool = False
-    voice_render_mode: Optional[str] = None  # "voice" | "text"
-    voice_target_duration_sec: Optional[int] = None  # 30 | 45 | 60 cap
-    voice_engine_bias: Optional[str] = None  # explanation of bias applied
+    voice_render_mode: str | None = None  # "voice" | "text"
+    voice_target_duration_sec: int | None = None  # 30 | 45 | 60 cap
+    voice_engine_bias: str | None = None  # explanation of bias applied
 
 
 class EngineRouter:
@@ -110,7 +110,7 @@ class EngineRouter:
     def route(
         self,
         query: str,
-        context: Optional[Dict] = None,
+        context: dict | None = None,
         *,
         voice_mode: bool = False,
     ) -> RoutingDecision:

@@ -16,9 +16,9 @@ from __future__ import annotations
 import asyncio
 
 from backend.services.dynamic_wisdom_corpus import (
-    DynamicWisdomCorpus,
     VALID_DELIVERY_CHANNELS,
     VOICE_OUTCOME_KEYS,
+    DynamicWisdomCorpus,
     _PendingDelivery,
     _validate_voice_outcomes,
 )

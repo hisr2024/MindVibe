@@ -32,8 +32,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +147,7 @@ HELPLINES: dict[str, tuple[Helpline, ...]] = {
 }
 
 
-def helplines_for_region(region: Optional[str]) -> list[dict[str, str | bool]]:
+def helplines_for_region(region: str | None) -> list[dict[str, str | bool]]:
     """Return helpline list for a region, falling back to GLOBAL."""
     region = (region or "GLOBAL").upper()
     selected = HELPLINES.get(region) or HELPLINES["GLOBAL"]
@@ -173,7 +172,7 @@ CRISIS_AUDIO_BY_LANG: dict[str, str] = {
 }
 
 
-def crisis_audio_for_language(language: Optional[str]) -> str:
+def crisis_audio_for_language(language: str | None) -> str:
     """Return path to pre-rendered crisis routing audio for a language."""
     lang = (language or "en").lower().split("-")[0]
     return CRISIS_AUDIO_BY_LANG.get(lang, CRISIS_AUDIO_BY_LANG["en"])
@@ -181,7 +180,7 @@ def crisis_audio_for_language(language: Optional[str]) -> str:
 
 # ─── Scanner result ──────────────────────────────────────────────────────
 
-class CrisisSeverity(str, Enum):
+class CrisisSeverity(StrEnum):
     """Severity bucket — used for triage logic and analytics, never for gating."""
     IDEATION = "ideation"      # "want to die", "no reason to live"
     METHOD = "method"          # "overdose", "hang myself"
@@ -260,15 +259,15 @@ class CrisisPartialScanner:
         self,
         session_id: str,
         *,
-        region: Optional[str] = None,
-        language: Optional[str] = None,
+        region: str | None = None,
+        language: str | None = None,
     ) -> None:
         self.session_id = session_id
         self.region = (region or "GLOBAL").upper()
         self.language = (language or "en").lower().split("-")[0]
         self._state = _ScannerState()
 
-    def scan(self, partial_text: str, seq: int = 0) -> Optional[CrisisHit]:
+    def scan(self, partial_text: str, seq: int = 0) -> CrisisHit | None:
         """Scan a single transcript.partial. Returns a hit or None.
 
         Once latched (first hit), subsequent calls return the same hit
@@ -345,8 +344,8 @@ class CrisisPartialScanner:
 def get_scanner_for_session(
     session_id: str,
     *,
-    region: Optional[str] = None,
-    language: Optional[str] = None,
+    region: str | None = None,
+    language: str | None = None,
 ) -> CrisisPartialScanner:
     """Build a fresh scanner for a session. Always returns a new instance —
     a stale latched scanner from a prior session must never leak."""

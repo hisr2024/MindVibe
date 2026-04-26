@@ -21,8 +21,8 @@ os.environ.setdefault("KIAAN_PROMPT_LOADER_TEST", "1")
 
 from backend.services.prompt_loader import (  # noqa: E402
     PERSONA_VERSION_FILE,
-    PromptDriftError,
     SAKHA_VOICE_PROMPT,
+    PromptDriftError,
     get_persona,
     get_persona_version,
     get_prompt_text,

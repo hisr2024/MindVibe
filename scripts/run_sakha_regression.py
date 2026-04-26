@@ -44,23 +44,21 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 # Make the repo importable when run from anywhere
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_REPO_ROOT))
 
 from backend.services.gita_wisdom_filter import (  # noqa: E402
-    StreamingGitaFilter,
     StreamingFilterVerdict,
+    StreamingGitaFilter,
 )
 from backend.services.prompt_loader import (  # noqa: E402
     RegressionCase,
-    load_regression_set,
-    get_prompt_text,
     get_persona_version,
+    get_prompt_text,
+    load_regression_set,
 )
-
 
 # ─── Synthetic Sakha response (offline mode) ──────────────────────────────
 
@@ -138,7 +136,7 @@ class CaseResult:
     passed: bool
     verdict: str
     score: float
-    failure_reason: Optional[str]
+    failure_reason: str | None
     missing_signals: list[str]
     forbidden_hits: list[str]
     response_excerpt: str
