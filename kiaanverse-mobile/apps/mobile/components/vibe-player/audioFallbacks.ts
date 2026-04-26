@@ -153,7 +153,7 @@ export function resolveAudioUrlWithBackup(
  *   1. An explicit `bundledAudioKey` on the track wins (used by built-ins
  *      that ship with a specific recording).
  *   2. Otherwise, fall back to the category-keyed mapping
- *      ('mantra' → 'om-chant' etc).
+ *      ('mantra' → 'gayatri' etc, see CATEGORY_BUNDLED_KEY).
  *   3. If the registry has no entry for that key (no MP3 wired up), return
  *      null so callers fall through to the remote URL chain.
  */

@@ -55,7 +55,13 @@ export type BundledAudioKey =
  * Each `require()` resolves to a `number` (the Metro asset id) at bundle
  * time. The `as number` cast is structural — it satisfies TypeScript
  * without leaking `require`'s loose `any` typing into the registry.
+ *
+ * `require()` (rather than `import`) is the React Native-canonical way to
+ * reference binary asset bundles — Metro inlines the asset id at build
+ * time and there is no ESM equivalent. The rule is disabled for this
+ * block only.
  */
+/* eslint-disable @typescript-eslint/no-var-requires, global-require */
 export const BUNDLED_AUDIO_REGISTRY: Readonly<
   Partial<Record<BundledAudioKey, number>>
 > = {
@@ -67,6 +73,7 @@ export const BUNDLED_AUDIO_REGISTRY: Readonly<
   'mantra-003': require('../../assets/audio/mantra-003.mp3') as number,
   'mantra-004': require('../../assets/audio/mantra-004.mp3') as number,
 };
+/* eslint-enable @typescript-eslint/no-var-requires, global-require */
 
 /**
  * Look up a bundled asset id by key. Returns `null` when no MP3 has been

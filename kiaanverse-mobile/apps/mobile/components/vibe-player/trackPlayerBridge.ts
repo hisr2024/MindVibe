@@ -128,12 +128,13 @@ async function ensureAudible(): Promise<void> {
  *      always ready. This is a no-op when setup already completed in
  *      `_layout.tsx`, but covers the deep-link / cold-start path where the
  *      Vibe Player screen mounts before the layout effect has finished.
- *    - We coerce `track.audioUrl` through `resolveAudioUrlWithBackup` so a
- *      bad value from the API (empty, relative, `synth://`) is automatically
- *      replaced with a known-good HTTPS URL keyed off the track's category.
- *      Earlier versions surfaced a "coming soon" Alert here and stayed
- *      silent — that was the user-visible "no sound" bug on the Play
- *      Store APK whenever the backend shipped sparse track metadata.
+ *    - We coerce `track.audioUrl` through `resolvePlayableAudioSource` so
+ *      a bad value from the API (empty, relative, `synth://`) is
+ *      automatically replaced with a bundled asset (preferred — works
+ *      offline) or a known-good HTTPS URL (fallback) keyed off the track's
+ *      category. Earlier versions surfaced a "coming soon" Alert here and
+ *      stayed silent — that was the user-visible "no sound" bug on the
+ *      Play Store APK whenever the backend shipped sparse track metadata.
  *    - We force `setVolume(1)` before `play()` to recover from stuck-at-zero
  *      volume after audio-focus duck events.
  *    - After `play()` we poll the State for ~1.5 s. If RNTP never reaches
