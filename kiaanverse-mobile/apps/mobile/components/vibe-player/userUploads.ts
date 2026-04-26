@@ -24,6 +24,40 @@ import type { MeditationTrack } from '@kiaanverse/api';
 const UPLOADS_DIR = FileSystem.documentDirectory + 'vibe-uploads/';
 const MANIFEST_PATH = UPLOADS_DIR + 'manifest.json';
 
+/**
+ * The widest reasonable set of audio file extensions. Validated as a fall-
+ * back when the OS picker reports a non-audio MIME type (some Android OEMs
+ * — MIUI, ColorOS, OneUI — return `application/octet-stream` for ordinary
+ * MP3s if the user picked them through the "Recent Files" path, which made
+ * `audio/*` filtering hide perfectly playable files from the picker).
+ */
+export const ACCEPTED_AUDIO_EXTENSIONS: readonly string[] = [
+  '.mp3', '.m4a', '.m4b', '.mp4', '.aac', '.aacp',
+  '.wav', '.wave',
+  '.ogg', '.oga', '.opus',
+  '.flac',
+  '.webm', '.weba',
+  '.3gp', '.3gpp', '.amr',
+  '.mid', '.midi',
+  '.wma',
+  '.aiff', '.aif', '.caf',
+];
+
+function hasAudioExtension(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const lower = name.toLowerCase();
+  return ACCEPTED_AUDIO_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
+
+function looksLikeAudio(asset: {
+  readonly name: string;
+  readonly mimeType: string | null | undefined;
+}): boolean {
+  const mime = (asset.mimeType ?? '').toLowerCase();
+  if (mime.startsWith('audio/')) return true;
+  return hasAudioExtension(asset.name);
+}
+
 export interface UserTrack extends MeditationTrack {
   /** Absolute file:// URI to the copied audio asset. */
   audioUrl: string;
@@ -84,13 +118,38 @@ export async function listUserTracks(): Promise<readonly UserTrack[]> {
  * Open the system file picker for audio. On success, copies the chosen
  * file into the sandbox and registers it in the manifest. Returns the
  * new UserTrack, or null if the user cancelled.
+ *
+ * Robustness on Android:
+ *   - First pass uses an audio-only MIME filter so the system picker
+ *     pre-filters to audio.
+ *   - If the user cancels (e.g. because every file is greyed out, which
+ *     happens on some OEM builds that mis-tag MP3 / FLAC), a second pass
+ *     opens the picker with the all-files filter. The picked file is then
+ *     validated by extension instead of MIME, so `application/octet-stream`
+ *     and friends still pass through.
+ *
+ * Throws when the user explicitly picked a non-audio file in the wide pass
+ * — callers can show that as "unsupported file" without conflating it
+ * with a normal cancellation.
  */
 export async function pickAndImportAudio(): Promise<UserTrack | null> {
-  const result = await DocumentPicker.getDocumentAsync({
+  // ── Pass 1: strict audio/* picker ──
+  let result = await DocumentPicker.getDocumentAsync({
     type: 'audio/*',
     copyToCacheDirectory: true,
     multiple: false,
   });
+
+  // ── Pass 2: fall back to */* on cancel so users on quirky Android OEMs
+  //   that hide MP3s under audio/* still have a path to upload music. We
+  //   validate by extension below.
+  if (result.canceled) {
+    result = await DocumentPicker.getDocumentAsync({
+      type: '*/*',
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+  }
 
   if (result.canceled || result.assets.length === 0) {
     return null;
@@ -98,6 +157,15 @@ export async function pickAndImportAudio(): Promise<UserTrack | null> {
 
   const asset = result.assets[0];
   if (!asset) return null;
+
+  // Validate by extension when MIME is missing/unreliable. If the user
+  // picked something that isn't audio at all (a PDF, an image), throw
+  // a clear error so the caller can show it.
+  if (!looksLikeAudio({ name: asset.name, mimeType: asset.mimeType })) {
+    throw new Error(
+      `${asset.name} is not a recognised audio format. Try MP3, M4A, WAV, OGG, Opus, FLAC, AAC or WebM.`
+    );
+  }
 
   await ensureUploadsDir();
 

@@ -440,6 +440,13 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         duration: track.duration,
       };
 
+      // Pick a per-category SoundHelix URL as an explicit fallback so a CDN
+      // hiccup on the primary request doesn't take the player down. The
+      // bridge ALSO substitutes when audioUrl itself is empty/non-playable.
+      const builtinFallback =
+        BUILTIN_TRACKS.find((b) => b.category === track.category)?.audioUrl ??
+        BUILTIN_TRACKS[0]?.audioUrl;
+
       void playTrack({
         id: track.id,
         title: track.title,
@@ -447,6 +454,8 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         audioUrl: track.audioUrl,
         duration: track.duration,
         artworkUrl: track.artworkUrl ?? null,
+        category: track.category,
+        ...(builtinFallback ? { fallbackAudioUrl: builtinFallback } : {}),
       }).then((result) => {
         if (result.ok) {
           setTrack(vibeTrack);
@@ -456,17 +465,14 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
           router.push('/vibe-player/player');
           return;
         }
-        if (result.reason === 'unavailable') {
-          Alert.alert(
-            'Audio not available',
-            `${result.message}\n\nTip: tap "Add your music" to play any track from your device.`,
-            [{ text: 'OK', style: 'default' }]
-          );
-        } else {
-          Alert.alert('Playback error', result.message, [
-            { text: 'OK', style: 'default' },
-          ]);
-        }
+        // Both `unavailable` and `error` now reach here only after the
+        // bridge has already tried the primary URL AND its category-keyed
+        // fallback. Surface a single, actionable error.
+        Alert.alert(
+          'Playback error',
+          `${result.message}\n\nTip: tap "Add your music" to play tracks straight from your device.`,
+          [{ text: 'OK', style: 'default' }]
+        );
       });
     },
     [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router]
