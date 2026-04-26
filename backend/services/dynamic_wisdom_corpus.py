@@ -139,6 +139,9 @@ class _PendingDelivery:
     mood_intensity_at_delivery: float | None
     phase_at_delivery: str
     theme_used: str | None
+    # Voice 1.0.0: which surface delivered this wisdom. Persisted to enable
+    # per-channel effectiveness analysis without forking the learning system.
+    delivery_channel: str = "text"
     delivered_at: datetime.datetime = field(
         default_factory=lambda: datetime.datetime.now(datetime.UTC)
     )
@@ -154,8 +157,48 @@ class _PendingDelivery:
             "mood_intensity_at_delivery": self.mood_intensity_at_delivery,
             "phase_at_delivery": self.phase_at_delivery,
             "theme_used": self.theme_used,
+            "delivery_channel": self.delivery_channel,
             "delivered_at": self.delivered_at,
         }
+
+
+# ─── Voice channel constants ─────────────────────────────────────────────
+VALID_DELIVERY_CHANNELS: frozenset[str] = frozenset({
+    "text", "voice_android", "voice_web", "voice_ios",
+})
+
+VOICE_OUTCOME_KEYS: frozenset[str] = frozenset({
+    "completed_listening",        # bool — user heard the response without barge-in
+    "tapped_follow_up_practice",  # bool — user tapped a suggested next action
+    "session_continued",          # bool — user asked another question after this one
+    "time_to_next_session_hours", # float — gap until user returns; None if not yet
+    "barge_in_at_token_index",    # int | None — where the user interrupted
+    "filter_pass_rate",           # float — 0-1, fraction of sentences that passed filter
+    "first_audio_byte_ms",        # int — first-byte latency for this turn
+    "tier_used",                  # str — "openai" | "template" | "verse_only"
+    "cache_hit",                  # bool — TTS audio cache hit
+})
+
+
+def _validate_voice_outcomes(outcomes: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Drop unknown keys and clamp ranges so downstream analytics stay clean."""
+    if not outcomes:
+        return None
+    cleaned: dict[str, Any] = {}
+    for k, v in outcomes.items():
+        if k not in VOICE_OUTCOME_KEYS:
+            continue
+        if k == "filter_pass_rate" and isinstance(v, (int, float)):
+            cleaned[k] = max(0.0, min(1.0, float(v)))
+        elif k in ("first_audio_byte_ms", "barge_in_at_token_index") and isinstance(v, (int, float)):
+            cleaned[k] = max(0, int(v))
+        elif k == "time_to_next_session_hours" and isinstance(v, (int, float)):
+            cleaned[k] = max(0.0, float(v))
+        elif k == "tier_used" and isinstance(v, str):
+            cleaned[k] = v[:32]
+        elif k in ("completed_listening", "tapped_follow_up_practice", "session_continued", "cache_hit"):
+            cleaned[k] = bool(v)
+    return cleaned or None
 
 
 class DynamicWisdomCorpus:
@@ -197,6 +240,18 @@ class DynamicWisdomCorpus:
             "selections_no_data": 0,
             "cache_hits": 0,
             "cache_misses": 0,
+            # ─── Voice 1.0.0 counters ────────────────────────────────
+            "voice_deliveries_total": 0,
+            "voice_outcomes_total": 0,
+            "voice_completed_listening_count": 0,
+            "voice_barge_in_count": 0,
+            "voice_filter_pass_count": 0,
+            "voice_filter_fail_count": 0,
+            "voice_tier_fallback_count": 0,
+            "voice_first_byte_ms_sum": 0,
+            "voice_first_byte_ms_count": 0,
+            "voice_cache_hit_count": 0,
+            "voice_cache_miss_count": 0,
         }
 
     async def get_effectiveness_weighted_verse(
@@ -344,6 +399,8 @@ class DynamicWisdomCorpus:
         mood_intensity: float,
         phase: str,
         theme: str | None = None,
+        *,
+        delivery_channel: str = "text",
     ) -> None:
         """Buffer a wisdom delivery for batch flush to the DB.
 
@@ -355,8 +412,21 @@ class DynamicWisdomCorpus:
         Outcomes (filled later by record_wisdom_outcome) trigger an immediate
         flush so the lookup finds a matching row.
 
+        Args:
+            delivery_channel: which surface delivered this wisdom. Voice 1.0.0
+                accepts "text", "voice_android", "voice_web", "voice_ios".
+                Unknown values fall back to "text" with a warning so a typo
+                in a caller never poisons analytics.
+
         The `db` parameter is accepted for API compatibility but unused.
         """
+        if delivery_channel not in VALID_DELIVERY_CHANNELS:
+            logger.warning(
+                "DynamicWisdom: unknown delivery_channel=%r — coercing to 'text'",
+                delivery_channel,
+            )
+            delivery_channel = "text"
+
         pending = _PendingDelivery(
             user_id=user_id,
             session_id=session_id,
@@ -366,7 +436,13 @@ class DynamicWisdomCorpus:
             mood_intensity_at_delivery=mood_intensity,
             phase_at_delivery=phase,
             theme_used=theme,
+            delivery_channel=delivery_channel,
         )
+
+        # Voice-channel deliveries get an extra counter increment so admin
+        # telemetry can show voice volume without an extra DB query.
+        if delivery_channel.startswith("voice_"):
+            self._metrics["voice_deliveries_total"] += 1
 
         async with self._buffer_lock:
             self._delivery_buffer.append(pending)
@@ -404,6 +480,8 @@ class DynamicWisdomCorpus:
         mood_after: str,
         user_response: str | None = None,
         session_continued: bool = True,
+        *,
+        voice_specific_outcomes: dict[str, Any] | None = None,
     ) -> None:
         """Record the outcome after wisdom was delivered.
 
@@ -412,12 +490,22 @@ class DynamicWisdomCorpus:
 
         Flushes the delivery buffer first to guarantee the matching delivery
         row is visible in the DB before the lookup.
+
+        Args:
+            voice_specific_outcomes: optional dict with voice-channel signals
+                (completed_listening, tapped_follow_up_practice, session_continued,
+                time_to_next_session_hours, barge_in_at_token_index, filter_pass_rate,
+                first_audio_byte_ms, tier_used, cache_hit). Unknown keys are
+                silently dropped; ranges are clamped. Stored verbatim in the
+                voice_specific_outcomes JSON column for later analytics.
         """
         from backend.models.wisdom import WisdomEffectiveness
 
         # Flush any pending deliveries so the lookup below can find this
         # session's most recent delivery.
         await self._flush_buffer()
+
+        cleaned_voice = _validate_voice_outcomes(voice_specific_outcomes)
 
         try:
             # Find the most recent unresolved delivery for this user/session
@@ -462,13 +550,25 @@ class DynamicWisdomCorpus:
             record.effectiveness = engagement
             record.outcome_recorded_at = datetime.datetime.now(datetime.timezone.utc)
 
+            # Voice-channel outcomes
+            if cleaned_voice is not None:
+                record.voice_specific_outcomes = cleaned_voice
+                self._update_voice_metrics(cleaned_voice)
+                self._metrics["voice_outcomes_total"] += 1
+
             await db.flush()
 
             self._metrics["outcomes_recorded"] += 1
             logger.info(
-                f"DynamicWisdom: Outcome for verse {record.verse_ref}: "
-                f"mood {mood_before}→{mood_after}, "
-                f"improved={mood_improved}, effectiveness={engagement:.2f}"
+                "DynamicWisdom: Outcome for verse %s: mood %s→%s, "
+                "improved=%s, effectiveness=%.2f, channel=%s%s",
+                record.verse_ref,
+                mood_before,
+                mood_after,
+                mood_improved,
+                engagement,
+                getattr(record, "delivery_channel", "text"),
+                f", voice_signals={list(cleaned_voice.keys())}" if cleaned_voice else "",
             )
 
             # Invalidate cache so next selection uses fresh data
@@ -477,6 +577,32 @@ class DynamicWisdomCorpus:
         except Exception as e:
             self._metrics["outcomes_failed"] += 1
             logger.warning(f"DynamicWisdom: Failed to record outcome: {e}")
+
+    def _update_voice_metrics(self, outcomes: dict[str, Any]) -> None:
+        """Roll voice-specific outcome signals into the cumulative counter
+        dict. Called from record_wisdom_outcome after validation. Each call
+        is O(1) — no DB I/O."""
+        if outcomes.get("completed_listening"):
+            self._metrics["voice_completed_listening_count"] += 1
+        if outcomes.get("barge_in_at_token_index") is not None:
+            self._metrics["voice_barge_in_count"] += 1
+        first_byte = outcomes.get("first_audio_byte_ms")
+        if isinstance(first_byte, int) and first_byte > 0:
+            self._metrics["voice_first_byte_ms_sum"] += first_byte
+            self._metrics["voice_first_byte_ms_count"] += 1
+        filter_rate = outcomes.get("filter_pass_rate")
+        if isinstance(filter_rate, (int, float)):
+            if filter_rate >= 1.0:
+                self._metrics["voice_filter_pass_count"] += 1
+            else:
+                self._metrics["voice_filter_fail_count"] += 1
+        tier = outcomes.get("tier_used")
+        if tier and tier != "openai":
+            self._metrics["voice_tier_fallback_count"] += 1
+        if outcomes.get("cache_hit"):
+            self._metrics["voice_cache_hit_count"] += 1
+        elif outcomes.get("cache_hit") is False:
+            self._metrics["voice_cache_miss_count"] += 1
 
     def _compute_engagement_score(
         self,
@@ -766,7 +892,65 @@ class DynamicWisdomCorpus:
                 "batch_flush_interval_sec": BATCH_FLUSH_INTERVAL_SEC,
                 "effectiveness_cache_ttl_sec": _EFFECTIVENESS_CACHE_TTL,
             },
+            "voice": self._voice_runtime_dimensions(),
         }
+
+    def _voice_runtime_dimensions(self) -> dict[str, Any]:
+        """Voice-channel runtime metrics for the admin telemetry dashboard.
+
+        Returns derived rates (filter_pass_rate, completion_rate, etc.) on
+        top of the raw counters so the dashboard doesn't have to recompute.
+        All ratios return None until at least one event has been recorded —
+        a "0/0" displayed as 0% misleads operators."""
+        m = self._metrics
+        deliveries = int(m["voice_deliveries_total"])
+        outcomes = int(m["voice_outcomes_total"])
+        first_byte_count = int(m["voice_first_byte_ms_count"])
+        cache_total = int(m["voice_cache_hit_count"] + m["voice_cache_miss_count"])
+        filter_total = int(m["voice_filter_pass_count"] + m["voice_filter_fail_count"])
+        completion_total = int(m["voice_completed_listening_count"] + m["voice_barge_in_count"])
+
+        return {
+            "deliveries_total": deliveries,
+            "outcomes_total": outcomes,
+            "completed_listening_count": int(m["voice_completed_listening_count"]),
+            "barge_in_count": int(m["voice_barge_in_count"]),
+            "tier_fallback_count": int(m["voice_tier_fallback_count"]),
+            "first_byte_ms_avg": (
+                round(m["voice_first_byte_ms_sum"] / first_byte_count, 1)
+                if first_byte_count > 0 else None
+            ),
+            "completed_listening_rate": (
+                round(
+                    m["voice_completed_listening_count"] / completion_total, 3
+                ) if completion_total > 0 else None
+            ),
+            "barge_in_rate": (
+                round(m["voice_barge_in_count"] / completion_total, 3)
+                if completion_total > 0 else None
+            ),
+            "filter_pass_rate": (
+                round(m["voice_filter_pass_count"] / filter_total, 3)
+                if filter_total > 0 else None
+            ),
+            "tier_fallback_rate": (
+                round(m["voice_tier_fallback_count"] / outcomes, 3)
+                if outcomes > 0 else None
+            ),
+            "cache_hit_rate": (
+                round(m["voice_cache_hit_count"] / cache_total, 3)
+                if cache_total > 0 else None
+            ),
+        }
+
+    def get_voice_metrics(self) -> dict[str, Any]:
+        """Public accessor for the voice-channel telemetry.
+
+        This is what the admin endpoint surfaces under
+        /api/admin/wisdom-telemetry/voice — separate from the full runtime
+        dump so the dashboard can update voice and non-voice independently.
+        """
+        return self._voice_runtime_dimensions()
 
     async def get_corpus_stats(self, db: AsyncSession) -> dict[str, Any]:
         """Get statistics about the dynamic wisdom corpus effectiveness data."""

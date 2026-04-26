@@ -312,6 +312,23 @@ class WisdomEffectiveness(Base):
     # Computed effectiveness (0.0 to 1.0, updated by feedback loop)
     effectiveness: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
 
+    # ─── Voice-channel telemetry (Wisdom v3.1, voice 1.0.0) ────────────
+    # delivery_channel: which surface delivered this wisdom. Used for per-
+    # channel effectiveness analysis without forking the learning system.
+    # Values: "text" (default for back-compat), "voice_android", "voice_web",
+    #         "voice_ios" (future).
+    delivery_channel: Mapped[str] = mapped_column(
+        String(32), nullable=False, server_default="text", default="text", index=True
+    )
+
+    # Voice-specific outcome signals (only populated when delivery_channel
+    # starts with "voice_"). Stored as a JSON blob to avoid schema churn for
+    # future signals (e.g. completed_listening, tapped_follow_up_practice,
+    # session_continued, time_to_next_session_hours).
+    voice_specific_outcomes: Mapped[dict | None] = mapped_column(
+        JSON, nullable=True, default=None
+    )
+
     delivered_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), index=True
     )
