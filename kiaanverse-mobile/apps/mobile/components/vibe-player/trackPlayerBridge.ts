@@ -20,15 +20,31 @@
  * missing `audioUrl`.
  */
 
-import TrackPlayer, {
-  State,
-  type Track as RnTpTrack,
-} from 'react-native-track-player';
+import TrackPlayer, { State } from 'react-native-track-player';
 import { setupTrackPlayer } from '../../services/trackPlayerSetup';
 import {
   isLikelyPlayableUrl,
-  resolveAudioUrlWithBackup,
+  resolvePlayableAudioSource,
+  type PlayableSource,
 } from './audioFallbacks';
+import type { BundledAudioKey } from './bundledAudioRegistry';
+
+/**
+ * Shape of the object we hand to `TrackPlayer.add()`. RNTP's published
+ * type for `AddTrack.url` is `string | ResourceObject` (where
+ * `ResourceObject = number`, the Metro asset id), but its `Track.url` is
+ * narrowed to `string` and the intersection collapses back. We declare
+ * the shape we actually pass — RNTP accepts numeric urls at runtime, the
+ * narrowing is only a published-type quirk.
+ */
+interface RnTpAddTrackInput {
+  readonly id: string;
+  readonly url: string | number;
+  readonly title: string;
+  readonly artist: string;
+  readonly duration: number;
+  readonly artwork?: string;
+}
 
 declare const __DEV__: boolean;
 
@@ -51,6 +67,12 @@ export interface BridgeTrack {
    * watchdog window. Useful for testing on flaky networks.
    */
   readonly fallbackAudioUrl?: string;
+  /**
+   * Optional bundled-audio key. When the matching MP3 has been wired in
+   * `bundledAudioRegistry.ts`, the bridge prefers the local asset over
+   * any remote URL — so meditation playback works offline.
+   */
+  readonly bundledAudioKey?: BundledAudioKey;
 }
 
 /** Outcome of a play attempt. `unavailable` = no hosted audio yet; the UI
@@ -66,13 +88,15 @@ export type PlayResult =
   | { readonly ok: false; readonly reason: 'error'; readonly message: string };
 
 /**
- * Build the RNTP track entry for a given URL. Pulled into a helper so
- * `playTrack` can re-use it for the retry pass without duplicating fields.
+ * Build the RNTP track entry for a given source. `source` is either an
+ * absolute URI string or a Metro asset id (number) returned by
+ * `require('./foo.mp3')`. RNTP's `AddTrack.url` accepts both natively, so
+ * bundled-asset playback works without any caller knowing it's local.
  */
-function buildRnTrack(track: BridgeTrack, url: string): RnTpTrack {
+function buildRnTrack(track: BridgeTrack, source: PlayableSource): RnTpAddTrackInput {
   return {
     id: track.id,
-    url,
+    url: source,
     title: track.title,
     artist: track.artist,
     duration: track.duration,
@@ -119,21 +143,29 @@ async function ensureAudible(): Promise<void> {
  *      attempts fail do we report `error` to the caller.
  */
 export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
-  // Resolve to a guaranteed-playable URL up front. The backup is used for
-  // the single retry pass if the primary URL fails the watchdog.
+  // Resolve to a guaranteed-playable source up front. `primary` may be a
+  // bundled asset id (number) when an MP3 has been wired up locally, or
+  // an HTTPS URL otherwise. `backup` is always a remote URL so a retry
+  // can recover from any local-asset issue.
   const explicitFallback = isLikelyPlayableUrl(track.fallbackAudioUrl)
     ? (track.fallbackAudioUrl as string)
     : undefined;
-  const { primary, backup } = resolveAudioUrlWithBackup({
+  const { primary, backup } = resolvePlayableAudioSource({
     audioUrl: track.audioUrl,
     ...(track.category ? { category: track.category } : {}),
+    ...(track.bundledAudioKey ? { bundledAudioKey: track.bundledAudioKey } : {}),
   });
 
-  if (__DEV__ && primary !== track.audioUrl) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[trackPlayerBridge] substituted unplayable url="${track.audioUrl}" → "${primary}" for id=${track.id}`
-    );
+  if (__DEV__) {
+    const desc = typeof primary === 'number'
+      ? `bundled-asset:${primary}`
+      : primary;
+    if (desc !== track.audioUrl) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[trackPlayerBridge] resolved track id=${track.id} → "${desc}" (original audioUrl="${track.audioUrl}")`
+      );
+    }
   }
 
   try {
@@ -144,7 +176,10 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
 
     // ── Attempt 1: primary URL ──
     await TrackPlayer.reset();
-    await TrackPlayer.add(buildRnTrack(track, primary));
+    // The structural cast unblocks RNTP's overly-narrow .d.ts; numeric
+    // urls are handled correctly at runtime (used by every RN audio
+    // tutorial that loads `require('./foo.mp3')`).
+    await TrackPlayer.add(buildRnTrack(track, primary) as unknown as Parameters<typeof TrackPlayer.add>[0]);
     await TrackPlayer.play();
 
     if (await waitForPlayableState(1500)) {
@@ -162,7 +197,7 @@ export async function playTrack(track: BridgeTrack): Promise<PlayResult> {
     try {
       await TrackPlayer.reset();
       await ensureAudible();
-      await TrackPlayer.add(buildRnTrack(track, retryUrl));
+      await TrackPlayer.add(buildRnTrack(track, retryUrl) as unknown as Parameters<typeof TrackPlayer.add>[0]);
       await TrackPlayer.play();
       if (await waitForPlayableState(2500)) {
         return { ok: true };

@@ -24,6 +24,11 @@
  * required.
  */
 
+import {
+  getBundledAudioId,
+  type BundledAudioKey,
+} from './bundledAudioRegistry';
+
 /**
  * Loose track shape used by every helper here. We deliberately accept a
  * permissive `category: string` rather than reusing the API's narrow union
@@ -33,7 +38,23 @@
 export interface FallbackTrackInput {
   readonly audioUrl?: string | null;
   readonly category?: string;
+  /**
+   * Optional explicit override of the bundled-audio key. When set, the
+   * resolver looks up this key in the bundled registry FIRST, before any
+   * category-based mapping or the remote audioUrl. Used by built-in
+   * tracks that ship with a known-good local recording.
+   */
+  readonly bundledAudioKey?: BundledAudioKey;
 }
+
+/**
+ * What `react-native-track-player` is willing to accept as a `Track.url`:
+ * either an absolute string URI (https/file/asset) or a Metro asset id
+ * returned by `require('./foo.mp3')`. We thread this union through the
+ * resolver so bundled audio plays without any callers having to know
+ * whether they're playing from disk or from a CDN.
+ */
+export type PlayableSource = string | number;
 
 /** A bare HTTPS source we know plays on Android + iOS today. */
 const SOUNDHELIX = (n: number): string =>
@@ -49,6 +70,22 @@ const CATEGORY_FALLBACK: Readonly<Record<string, string>> = {
   meditation: SOUNDHELIX(5),
   chanting: SOUNDHELIX(6),
   ambient: SOUNDHELIX(7),
+};
+
+/**
+ * Per-category preferred bundled-audio key. When the matching MP3 has
+ * been dropped into `assets/audio/` AND wired in `bundledAudioRegistry.ts`,
+ * the resolver returns it as the primary source — strictly preferred over
+ * any remote URL because it works offline and has no CDN risk.
+ *
+ * Empty registry → these lookups return null → resolver falls through to
+ * the existing string-URL chain. Zero behaviour change until files arrive.
+ */
+const CATEGORY_BUNDLED_KEY: Readonly<Record<string, BundledAudioKey>> = {
+  mantra: 'om-chant',
+  meditation: 'tibetan-bowls',
+  chanting: 'gayatri',
+  ambient: 'rain',
 };
 
 /** Universal last-resort URL when the category is unknown. */
@@ -106,5 +143,61 @@ export function resolveAudioUrlWithBackup(
     SOUNDHELIX(9),
   ];
   const backup = candidates.find((u) => u !== primary) ?? ULTIMATE_FALLBACK;
+  return { primary, backup };
+}
+
+/**
+ * Look up a bundled asset id for this track, if one is available.
+ *   1. An explicit `bundledAudioKey` on the track wins (used by built-ins
+ *      that ship with a specific recording).
+ *   2. Otherwise, fall back to the category-keyed mapping
+ *      ('mantra' → 'om-chant' etc).
+ *   3. If the registry has no entry for that key (no MP3 wired up), return
+ *      null so callers fall through to the remote URL chain.
+ */
+function resolveBundledAudio(track: FallbackTrackInput): number | null {
+  if (track.bundledAudioKey) {
+    const direct = getBundledAudioId(track.bundledAudioKey);
+    if (direct !== null) return direct;
+  }
+  if (track.category) {
+    const byCat = CATEGORY_BUNDLED_KEY[track.category];
+    if (byCat) {
+      const id = getBundledAudioId(byCat);
+      if (id !== null) return id;
+    }
+  }
+  return null;
+}
+
+/**
+ * Full playable-source resolver with offline-first preference.
+ *
+ *   primary  =  bundled MP3 (if registered)  ||  remote URL via resolvePlayableAudioUrl
+ *   backup   =  remote URL                   (always a string, never bundled)
+ *
+ * The backup is intentionally a remote URL even when the primary is a
+ * bundled asset, because the most plausible "primary failed" cases are
+ * codec rejection (rare on modern Android) or a corrupt asset shipped in
+ * a bad build — both of which are best recovered from with a network
+ * fetch. When no bundled assets are wired yet, primary becomes the
+ * remote URL and backup is a different remote URL (the existing pre-
+ * bundling behaviour).
+ */
+export function resolvePlayableAudioSource(
+  track: FallbackTrackInput
+): { readonly primary: PlayableSource; readonly backup: string } {
+  const bundled = resolveBundledAudio(track);
+  if (bundled !== null) {
+    // Backup must be a remote URL — bundled assets cannot retry through
+    // a different bundled asset cleanly, and a network fetch is the only
+    // recovery path that actually addresses the failure modes (corrupt
+    // bundle, codec issue) where a bundled asset would fail to play.
+    const remoteFallback = resolvePlayableAudioUrl(track);
+    return { primary: bundled, backup: remoteFallback };
+  }
+  // No bundled asset registered for this track — degrade to the existing
+  // remote-URL chain.
+  const { primary, backup } = resolveAudioUrlWithBackup(track);
   return { primary, backup };
 }
