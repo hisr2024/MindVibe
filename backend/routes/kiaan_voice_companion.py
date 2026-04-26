@@ -2478,3 +2478,200 @@ async def stream_voice_response(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ─── Sakha Voice mode (native Android client) ─────────────────────────────
+
+
+class SakhaVoiceStreamRequest(BaseModel):
+    """Request body for the native Sakha Voice mode SSE endpoint.
+
+    Mirrors the contract enforced by the Android client in
+    native/android/voice/sakha/SakhaSseClient.kt. Extra fields are tolerated
+    (Pydantic v2 ignores unknown fields by default) so older clients can
+    still talk to a newer server without 422-ing.
+    """
+
+    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    language: str = Field(default="en", max_length=8)
+    session_id: str | None = Field(default=None, max_length=64)
+    mood_hint: str | None = Field(default=None, max_length=32)
+    turn_count: int = Field(default=1, ge=1, le=999)
+
+    @field_validator("message")
+    @classmethod
+    def _sanitise_message(cls, v: str) -> str:
+        # Strip raw HTML; keep Devanagari + diacritics intact.
+        v = html.escape(v.strip())
+        v = re.sub(r"<[^>]+>", "", v)
+        return v
+
+
+@router.post("/sakha/stream")
+@limiter.limit("30/minute")
+async def stream_sakha_voice_response(
+    request: Request,
+    body: SakhaVoiceStreamRequest,
+    user_id: str = Depends(get_current_user),
+):
+    """SSE endpoint for the native Sakha Voice mode.
+
+    Pipeline per turn:
+        1. Detect mood from the user's message (companion_friend_engine).
+        2. Retrieve up to 2 contextual Gita verses (SakhaWisdomEngine).
+        3. Build the Sakha persona system prompt with the verses inline.
+        4. Stream OpenAI tokens; emit sentence-grouped TTS chunks for the
+           on-device pause-aware player.
+
+    SSE frame types (kept stable; client parser expects these):
+        engine        { engine, mood, intensity }
+        verse         { ref, sanskrit, translation }     (optional, 0-2x)
+        token         { text }                           (per-delta from LLM)
+        tts_chunk     { text }                           (sentence boundary)
+        done          {}
+        error         { message, code? }
+
+    On retrieval failure with no usable verse, the model itself emits the
+    `FILTER_FAIL: no_retrieval` sentinel inside its prose (per persona spec)
+    and the on-device parser handles the soft template fallback.
+    """
+    import json as _json
+
+    # Local imports keep cold-start fast for unrelated routes that import
+    # this module purely to register handlers.
+    from backend.routes.guidance import _generate_response_streaming
+    from backend.services.companion_friend_engine import detect_mood
+    from backend.services.sakha_voice_persona import (
+        build_sakha_system_prompt,
+        select_engine_for_mood,
+    )
+    from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
+
+    text = body.message.strip()[:MAX_MESSAGE_LENGTH]
+    if not text:
+        raise HTTPException(status_code=400, detail="Message is required")
+
+    # Mood: prefer client hint when supplied (the device's AVFoundation
+    # prosody analyzer can disagree with text-only detection on sarcasm /
+    # masked affect), otherwise infer from the transcript.
+    if body.mood_hint and body.mood_hint.lower() in (
+        "anxious", "sad", "angry", "lonely", "confused",
+        "grieving", "joyful", "seeking", "guilty", "numb", "neutral",
+    ):
+        mood = body.mood_hint.lower()
+        intensity_raw = 0.6
+    else:
+        mood, intensity_raw = detect_mood(text)
+    mood_intensity = max(1, min(10, int(round(intensity_raw * 10))))
+
+    engine = select_engine_for_mood(mood, body.turn_count)
+
+    # Retrieve up to 2 contextual verses. The first slot is the primary;
+    # the model is allowed to weave the second as supporting backdrop only.
+    sakha_engine = get_sakha_wisdom_engine()
+    retrieved: list[dict] = []
+    if sakha_engine and sakha_engine.get_verse_count() > 0:
+        primary = sakha_engine.get_contextual_verse(
+            mood=mood,
+            user_message=text,
+            phase="guide" if engine == "GUIDANCE" else "connect",
+            mood_intensity=intensity_raw,
+        )
+        if primary:
+            retrieved.append(primary)
+
+    system_prompt = build_sakha_system_prompt(
+        engine=engine,
+        mood=mood,
+        mood_intensity=mood_intensity,
+        language=body.language,
+        retrieved_verses=retrieved,
+    )
+
+    async def event_generator():
+        try:
+            # 1. Engine selection up-front so the UI can adapt the mandala.
+            yield (
+                "data: "
+                + _json.dumps({
+                    "type": "engine",
+                    "engine": engine,
+                    "mood": mood,
+                    "intensity": mood_intensity,
+                })
+                + "\n\n"
+            )
+
+            # 2. Verse metadata so the UI can render a citation card.
+            for v in retrieved:
+                ref = f"{v.get('chapter', '?')}.{v.get('verse', '?')}"
+                yield (
+                    "data: "
+                    + _json.dumps({
+                        "type": "verse",
+                        "ref": ref,
+                        "sanskrit": v.get("sanskrit", ""),
+                        "translation": v.get("english")
+                        or v.get("translation", ""),
+                    })
+                    + "\n\n"
+                )
+
+            # 3. Stream model tokens, plus sentence-aligned tts_chunk frames.
+            sentence_buffer = ""
+            async for token in _generate_response_streaming(
+                system_prompt=system_prompt,
+                user_payload={
+                    "user_latest": text,
+                    "language": body.language,
+                    "mood": mood,
+                    "engine": engine,
+                },
+                temperature=0.55 if engine == "FRIEND" else 0.45,
+                max_tokens=320 if engine == "GUIDANCE" else 220,
+            ):
+                if not token:
+                    continue
+                yield "data: " + _json.dumps({"type": "token", "text": token}) + "\n\n"
+                sentence_buffer += token
+                stripped = sentence_buffer.rstrip()
+                if stripped and stripped[-1] in ".!?।॥":
+                    chunk_text = sentence_buffer.strip()
+                    if chunk_text:
+                        yield (
+                            "data: "
+                            + _json.dumps({"type": "tts_chunk", "text": chunk_text})
+                            + "\n\n"
+                        )
+                    sentence_buffer = ""
+
+            remaining = sentence_buffer.strip()
+            if remaining:
+                yield (
+                    "data: "
+                    + _json.dumps({"type": "tts_chunk", "text": remaining})
+                    + "\n\n"
+                )
+
+            yield "data: " + _json.dumps({"type": "done"}) + "\n\n"
+
+        except Exception as e:
+            logger.error(f"Sakha voice stream failed: {e}", exc_info=True)
+            yield (
+                "data: "
+                + _json.dumps({
+                    "type": "error",
+                    "message": "Sakha voice stream failed",
+                })
+                + "\n\n"
+            )
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
