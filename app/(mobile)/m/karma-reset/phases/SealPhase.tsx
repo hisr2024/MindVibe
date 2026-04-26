@@ -12,6 +12,7 @@ import { MobileWordReveal } from '@/components/mobile/MobileWordReveal'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { KarmaSealMandala } from '../visuals/KarmaSealMandala'
 import { KarmaXPSeal } from '../components/KarmaXPSeal'
+import { DharmaFlameIcon } from '../visuals/DharmaFlameIcon'
 import { useKarmaReset } from '../hooks/useKarmaReset'
 import type { KarmaResetSession } from '../types'
 
@@ -31,25 +32,47 @@ export function SealPhase({ session }: SealPhaseProps) {
   const [xpAwarded, setXpAwarded] = useState(25)
   const [streakCount, setStreakCount] = useState(1)
   const completedRef = useRef(false)
+  const isMountedRef = useRef(true)
 
-  // Complete session via API
+  // Track mount state so async API resolutions never call setState on a
+  // teardown component — that was the primary cause of the post-completion
+  // crash on Android WebView, which surfaces unhandled errors as native crashes.
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  // Complete session via API. Use only the stable sessionId in deps so this
+  // never re-fires when the session object reference changes.
+  const sessionId = session?.sessionId
+  const sankalpaSealed = session?.sankalpa?.sealed ?? false
+
   useEffect(() => {
     if (completedRef.current) return
     completedRef.current = true
 
     const complete = async () => {
-      const result = await finishSession(
-        session.sessionId,
-        session.sankalpa?.sealed ?? false,
-        []
-      )
-      if (result) {
-        setXpAwarded(result.xpAwarded)
-        setStreakCount(result.streakCount)
+      try {
+        if (!sessionId) return
+        const result = await finishSession(sessionId, sankalpaSealed, [])
+        if (!isMountedRef.current || !result) return
+        if (typeof result.xpAwarded === 'number') {
+          setXpAwarded(result.xpAwarded)
+        }
+        if (typeof result.streakCount === 'number') {
+          setStreakCount(result.streakCount)
+        }
+      } catch (err) {
+        // Ceremony must not crash even if the API throws synchronously.
+        // The fallback values (25 XP, streak 1) already in state are used.
+        // eslint-disable-next-line no-console
+        console.warn('[SealPhase] finishSession failed:', err)
       }
     }
     complete()
-  }, [session, finishSession])
+  }, [sessionId, sankalpaSealed, finishSession])
 
   // Staggered reveal sequence
   useEffect(() => {
@@ -62,15 +85,33 @@ export function SealPhase({ session }: SealPhaseProps) {
     return () => timers.forEach(clearTimeout)
   }, [])
 
+  const safePush = useCallback(
+    (path: string) => {
+      try {
+        router.push(path)
+      } catch {
+        // Fallback for environments where the App Router isn't ready
+        // (e.g., Android WebView during a fast page swap).
+        if (typeof window !== 'undefined') {
+          window.location.href = path
+        }
+      }
+    },
+    [router],
+  )
+
   const handleReturn = useCallback(() => {
     triggerHaptic('medium')
-    router.push('/m')
-  }, [triggerHaptic, router])
+    safePush('/m')
+  }, [triggerHaptic, safePush])
 
   const handleJournal = useCallback(() => {
     triggerHaptic('light')
-    router.push('/m/journal')
-  }, [triggerHaptic, router])
+    safePush('/m/journal')
+  }, [triggerHaptic, safePush])
+
+  // Live garland — 5 diyas flickering on the completion screen.
+  const garlandFlames = [0, 1, 2, 3, 4]
 
   return (
     <div
@@ -87,6 +128,39 @@ export function SealPhase({ session }: SealPhaseProps) {
     >
       {/* Mandala */}
       <KarmaSealMandala size={180} />
+
+      {/* Live diya garland — 5 lamps gently flicker on completion */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
+        aria-hidden="true"
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          gap: 18,
+          marginTop: 18,
+          minHeight: 56,
+        }}
+      >
+        {garlandFlames.map((i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 + i * 0.12, duration: 0.4 }}
+          >
+            <DharmaFlameIcon
+              size={i === 2 ? 26 : 20}
+              intensity={i === 2 ? 'bright' : 'normal'}
+              color="#F0C040"
+              animate
+              phase={i}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
 
       {/* Completion messages */}
       {showMessage && (

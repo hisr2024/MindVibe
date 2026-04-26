@@ -37,7 +37,11 @@ export function EntryPhase({ onComplete }: EntryPhaseProps) {
     return () => timers.forEach(clearTimeout)
   }, [reduceMotion, onComplete])
 
-  const sanskritChars = ['क', 'र्म']
+  // Render the whole word as a single shaped unit so Devanagari conjuncts
+  // (e.g. र्म reph + ma) are not broken by the OS text shaper. Splitting
+  // into separate spans previously caused the half-form of र to drop and
+  // the word to look like "कम" on some Android WebViews.
+  const karmaWord = 'कर्म'
 
   return (
     <div
@@ -65,38 +69,37 @@ export function EntryPhase({ onComplete }: EntryPhaseProps) {
         <DharmaFlameIcon size={48} intensity="bright" animate />
       </motion.div>
 
-      {/* Sanskrit "कर्म" — letter by letter */}
+      {/* Sanskrit "कर्म" — single shaped word with blur-in reveal */}
       <AnimatePresence>
         {(step === 'sanskrit' || step === 'subtitle' || step === 'shrink') && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, filter: 'blur(6px)', scale: 0.96 }}
+            animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.45, ease: [0, 0.8, 0.2, 1] }}
             style={{
               marginTop: 16,
-              display: 'flex',
-              gap: 2,
+              padding: '0 12px',
+              textAlign: 'center',
+              lineHeight: 1.1,
             }}
           >
-            {sanskritChars.map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, filter: 'blur(0px)' }}
-                transition={{ delay: i * 0.08, duration: 0.25 }}
-                style={{
-                  fontFamily: 'var(--font-divine, Cormorant Garamond, serif)',
-                  fontWeight: 300,
-                  fontSize: 52,
-                  color: '#F0C040',
-                  letterSpacing: '0.08em',
-                  textShadow: '0 0 20px rgba(212,160,23,0.6)',
-                }}
-              >
-                {char}
-              </motion.span>
-            ))}
+            <span
+              lang="hi"
+              style={{
+                fontFamily:
+                  '"Noto Sans Devanagari", "Noto Serif Devanagari", "Tiro Devanagari Sanskrit", "Sanskrit Text", "Mangal", var(--font-divine, Cormorant Garamond), serif',
+                fontWeight: 500,
+                fontSize: 56,
+                color: '#F0C040',
+                letterSpacing: 'normal',
+                textShadow: '0 0 20px rgba(212,160,23,0.6)',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+              }}
+            >
+              {karmaWord}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
