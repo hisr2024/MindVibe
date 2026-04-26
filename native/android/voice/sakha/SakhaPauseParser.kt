@@ -122,30 +122,47 @@ class SakhaPauseParser {
             // There's a '<' somewhere. Try to parse a marker starting there.
             val parsed = parsePauseMarker(markerStart)
             if (parsed == null) {
-                // Could be incomplete (e.g. "<pau"). If we are not forcing
-                // and there's no '>' yet, keep buffering — but only if the
-                // tail is short enough to plausibly become a marker. If the
-                // tail is longer than any marker could be, treat the '<' as
-                // literal text and move on.
-                val tail = buffer.length - markerStart
-                if (!force && tail <= LONGEST_PARTIAL_MARKER && buffer.indexOf('>', markerStart) < 0) {
-                    // Flush everything before the '<' as speakable, keep the
-                    // tail in the buffer for the next feed.
+                // No valid pause marker at this position. Two cases:
+                //
+                // 1) The `<` could be the start of an *incomplete* marker
+                //    that the next chunk will complete (e.g. "<pau"). We
+                //    detect this by: not forcing AND no `>` yet AND the
+                //    tail is short enough to plausibly become a marker.
+                //    In that case, flush prose before the `<` and keep the
+                //    tail buffered for the next feed.
+                //
+                // 2) Otherwise the `<` is part of a different (unknown)
+                //    tag, e.g. "<not-a-pause>". The model is only supposed
+                //    to emit pause markers, so any other tag is dropped
+                //    cleanly: we keep the prose around it and skip past
+                //    the `>`. We do NOT speak "<", "not-a-pause", or ">"
+                //    as literal text — that would mangle TTS prosody.
+                val closeIdx = buffer.indexOf('>', markerStart)
+                if (!force && closeIdx < 0 && (buffer.length - markerStart) <= LONGEST_PARTIAL_MARKER) {
                     if (markerStart > 0) {
                         val pre = buffer.substring(0, markerStart)
                         buffer.delete(0, markerStart)
                         emitSpeakable(events, pre)
-                    } else {
-                        // Buffer is just an incomplete marker — wait.
-                        break
                     }
                     break
                 }
 
-                // Either we are forcing or the '<' is just literal noise.
-                // Flush the '<' as text and continue.
-                emitSpeakable(events, "<")
-                buffer.delete(0, markerStart + 1)
+                // Drop the unknown tag inline; preserve surrounding prose.
+                if (closeIdx < 0) {
+                    // Forced flush with no closer ever arrived — treat the
+                    // `<` and trailing junk as literal text rather than
+                    // dropping it silently.
+                    val pre = buffer.toString()
+                    buffer.setLength(0)
+                    emitSpeakable(events, pre)
+                    break
+                }
+                // Splice prose around the unknown tag together.
+                val before = buffer.substring(0, markerStart)
+                val after = buffer.substring(closeIdx + 1)
+                buffer.setLength(0)
+                buffer.append(before)
+                buffer.append(after)
                 continue
             }
 

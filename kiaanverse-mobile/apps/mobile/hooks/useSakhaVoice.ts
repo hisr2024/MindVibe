@@ -153,14 +153,16 @@ function reducer(prev: SakhaVoiceSnapshot, action: Action): SakhaVoiceSnapshot {
       };
     case 'pause':
       return prev; // metadata only
-    case 'verse':
-      return {
-        ...prev,
-        verseCited: {
-          reference: action.payload.reference,
-          sanskrit: action.payload.sanskrit,
-        },
-      };
+    case 'verse': {
+      // exactOptionalPropertyTypes: omit `sanskrit` when undefined rather
+      // than assigning it to undefined — the snapshot type uses optional
+      // (`sanskrit?: string`) which under that flag rejects `undefined`.
+      const verseCited: { reference: string; sanskrit?: string } =
+        action.payload.sanskrit !== undefined
+          ? { reference: action.payload.reference, sanskrit: action.payload.sanskrit }
+          : { reference: action.payload.reference };
+      return { ...prev, verseCited };
+    }
     case 'filter-fail':
       return { ...prev, filterFail: true };
     case 'turn-complete':

@@ -75,13 +75,17 @@ class SakhaSseClient(
     /**
      * Open a Sakha streaming turn. The flow completes when the backend emits
      * [SakhaStreamEvent.Done] or a terminal error.
+     *
+     * @param turnCount 1-based index of this turn in the current session;
+     *                  drives server-side GUIDANCE vs FRIEND engine selection.
      */
     fun stream(
         userText: String,
         sessionId: String?,
         mood: SakhaMood? = null,
+        turnCount: Int = 1,
     ): Flow<SakhaStreamEvent> = callbackFlow {
-        runRequest(userText, sessionId, mood)
+        runRequest(userText, sessionId, mood, turnCount)
         awaitClose {
             inflightCall?.cancel()
             inflightCall = null
@@ -107,6 +111,7 @@ class SakhaSseClient(
         userText: String,
         sessionId: String?,
         mood: SakhaMood?,
+        turnCount: Int,
     ) {
         var attempt = 0
         var token = config.authTokenProvider.invoke()
@@ -114,8 +119,10 @@ class SakhaSseClient(
 
         while (true) {
             attempt++
-            val url = "${config.backendBaseUrl.trimEnd('/')}${config.voiceCompanionPathPrefix}/message"
-            val body = buildRequestBody(userText, sessionId, mood)
+            // Sakha-specific SSE endpoint: returns engine/verse/token/tts_chunk
+            // frames keyed to the persona prompt server-side.
+            val url = "${config.backendBaseUrl.trimEnd('/')}${config.voiceCompanionPathPrefix}/sakha/stream"
+            val body = buildRequestBody(userText, sessionId, mood, turnCount)
 
             val builder = Request.Builder()
                 .url(url)
@@ -261,8 +268,22 @@ class SakhaSseClient(
         }
 
         when (json.optString("type")) {
+            // Plain LLM delta token — feed the parser.
             "token" -> return SakhaStreamEvent.Token(json.optString("text", ""))
-            "tts_chunk" -> return SakhaStreamEvent.Token(json.optString("text", ""))
+            // tts_chunk frames repeat the same content as accumulated tokens
+            // (server-side sentence boundary signalling for web clients that
+            // don't run a parser). The Android pipeline already segments via
+            // SakhaPauseParser, so we must NOT re-feed this content or we'd
+            // double-count and double-speak. Treat as a no-op by returning
+            // null — the SSE consumer skips null frames.
+            "tts_chunk" -> return null
+            // Engine selection from the Sakha streaming endpoint.
+            "engine" -> return SakhaStreamEvent.Engine(
+                engine = SakhaEngine.fromWire(json.optString("engine")),
+                mood = SakhaMood.fromWire(json.optString("mood")),
+                intensity = json.optInt("intensity", 5),
+            )
+            // Legacy frame from the generic /stream endpoint.
             "voice_emotion" -> {
                 val emotion = json.optString("emotion", "neutral")
                 return SakhaStreamEvent.Engine(
@@ -304,14 +325,28 @@ class SakhaSseClient(
     // Request body
     // ------------------------------------------------------------------------
 
-    private fun buildRequestBody(userText: String, sessionId: String?, mood: SakhaMood?): String {
+    /**
+     * Build the request body matching [SakhaVoiceStreamRequest] on the
+     * server (backend/routes/kiaan_voice_companion.py). Pydantic ignores
+     * unknown fields by default, so sending extras is safe; sending a wrong
+     * shape on the *required* fields is not.
+     */
+    /**
+     * Build the request body matching [SakhaVoiceStreamRequest] on the
+     * server (backend/routes/kiaan_voice_companion.py). Pydantic ignores
+     * unknown fields by default, so sending extras is safe; sending a wrong
+     * shape on the *required* fields is not.
+     */
+    private fun buildRequestBody(
+        userText: String,
+        sessionId: String?,
+        mood: SakhaMood?,
+        turnCount: Int,
+    ): String {
         val payload = JSONObject().apply {
             put("message", userText)
             put("language", config.language.wire)
-            put("voice_id", config.sakhaVoiceId)
-            put("content_type", "voice")
-            put("voice_mode", "sakha")
-            put("stream", true)
+            put("turn_count", turnCount.coerceAtLeast(1))
             sessionId?.let { put("session_id", it) }
             mood?.let { put("mood_hint", it.wire) }
         }

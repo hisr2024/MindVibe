@@ -34,7 +34,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.util.Base64
 import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -225,15 +224,30 @@ class SakhaTtsPlayer(
     // Sarvam REST synthesis
     // ------------------------------------------------------------------------
 
+    /**
+     * Synthesise [text] via the backend's `/api/voice-companion/synthesize`
+     * endpoint. The contract there (see VoiceCompanionSynthesizeRequest in
+     * backend/routes/kiaan_voice_companion.py) is:
+     *   request:  { text, mood?, voice_id?, language? }
+     *   response: binary audio bytes   (success path; Content-Type per provider)
+     *           | JSON {fallback_to_browser, browser_config, voice_persona}
+     *             (provider unavailable; we treat as a synthesis miss and let
+     *             the caller fall back to system TTS for non-Sanskrit prose)
+     *
+     * Returns the temp file path on success or null when the backend signals
+     * fallback / errors out. Never throws.
+     */
     private suspend fun synthesise(text: String, isSanskrit: Boolean): File? {
         val url = "${config.backendBaseUrl.trimEnd('/')}${config.voiceCompanionPathPrefix}/synthesize"
         val voiceId = if (isSanskrit) config.sanskritVoiceId else config.sakhaVoiceId
         val body = JSONObject().apply {
             put("text", text)
+            // The backend mood field is a tone hint for prosody — we use
+            // "reverent" for Sanskrit verses and "neutral" for prose so the
+            // server-side voice provider picks the right intonation profile.
+            put("mood", if (isSanskrit) "reverent" else "neutral")
             put("voice_id", voiceId)
             put("language", if (isSanskrit) "sa" else config.language.wire)
-            put("speed", if (isSanskrit) 0.85 else 1.0)
-            put("output_format", "mp3")
         }.toString()
 
         val token = config.authTokenProvider.invoke()
@@ -242,24 +256,25 @@ class SakhaTtsPlayer(
             .post(body.toRequestBody(JSON_MEDIA_TYPE))
             .header("X-Client", "kiaanverse-android-sakha-voice")
             .header("X-Voice-Mode", "sakha")
+            .header("Accept", "audio/*, application/json")
         token?.let { builder.header("Authorization", "Bearer $it") }
 
         return try {
-            val response = httpClient.newCall(builder.build()).execute()
-            response.use { resp ->
+            httpClient.newCall(builder.build()).execute().use { resp ->
                 if (!resp.isSuccessful) {
                     if (config.debugMode) Log.w(TAG, "Synth HTTP ${resp.code}")
                     return null
                 }
-                val contentType = resp.header("Content-Type", "audio/mpeg") ?: "audio/mpeg"
-                val bytes: ByteArray = if (contentType.startsWith("application/json")) {
-                    val json = JSONObject(resp.body?.string() ?: return null)
-                    val b64 = json.optString("audio_base64").ifEmpty { json.optString("audio") }
-                    if (b64.isNullOrEmpty()) return null
-                    Base64.decode(b64, Base64.DEFAULT)
-                } else {
-                    resp.body?.bytes() ?: return null
+                val contentType = resp.header("Content-Type") ?: "audio/mpeg"
+                if (contentType.contains("application/json", ignoreCase = true)) {
+                    // Provider fallback path — backend says "use browser TTS".
+                    // We can't run a browser; signal a miss so the caller
+                    // can use the on-device system TTS for prose.
+                    if (config.debugMode) Log.i(TAG, "Synth fallback signalled; declining for $isSanskrit")
+                    return null
                 }
+                val bytes = resp.body?.bytes() ?: return null
+                if (bytes.isEmpty()) return null
                 writeTempAudio(bytes, contentType)
             }
         } catch (e: Exception) {

@@ -85,6 +85,8 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     val partialTranscript: StateFlow<String> = _partialTranscript.asStateFlow()
 
     private var sessionId: String? = null
+    private var turnCount: Int = 0
+    private var lastFinalTranscript: String = ""
     private var currentEngine: SakhaEngine = SakhaEngine.FRIEND
     private var currentMood: SakhaMood = SakhaMood.NEUTRAL
     private var currentMoodIntensity: Int = 5
@@ -194,6 +196,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
 
     fun resetSession() {
         sessionId = null
+        turnCount = 0
     }
 
     // ========================================================================
@@ -294,6 +297,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
                     setState(SakhaVoiceState.IDLE)
                     return@launch
                 }
+                lastFinalTranscript = text
                 listener.onFinalTranscript(text)
                 openTurn(text)
             }
@@ -314,6 +318,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
         filterFail = false
         firstByteMs = 0L
         firstAudioMs = 0L
+        turnCount += 1
 
         streamJob?.cancel()
         streamJob = scope.launch {
@@ -321,7 +326,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             setState(SakhaVoiceState.REQUESTING)
             val client = sseClient ?: return@launch
             try {
-                client.stream(userText, sessionId, currentMood).collect { event ->
+                client.stream(userText, sessionId, currentMood, turnCount).collect { event ->
                     handleStreamEvent(event)
                 }
                 // Flow completed without explicit Done (e.g. server closed early)
@@ -435,7 +440,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             mood = currentMood,
             moodIntensity = currentMoodIntensity,
             language = config.language,
-            transcriptChars = _partialTranscript.value.length,
+            transcriptChars = lastFinalTranscript.length,
             responseChars = responseChars,
             sttDurationMs = sttMs,
             firstByteMs = firstByteMs,

@@ -14,6 +14,7 @@ package com.mindvibe.kiaan.voice.sakha.test
 import com.mindvibe.kiaan.voice.sakha.PauseEvent
 import com.mindvibe.kiaan.voice.sakha.SakhaPauseParser
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -63,11 +64,14 @@ class SakhaPauseParserTest {
     }
 
     @Test
-    fun `unknown angle-tag is treated as literal text`() {
+    fun `unknown angle-tag is dropped while surrounding prose is kept`() {
         val parser = SakhaPauseParser()
         val events = parser.feed("hello <not-a-pause> there.")
         val text = events.filterIsInstance<PauseEvent.Speak>().joinToString(" ") { it.text }
+        // Surrounding prose must survive…
         assertTrue("got: $text", text.contains("hello") && text.contains("there"))
+        // …and the unknown tag must NOT be spoken as literal text.
+        assertFalse("tag leaked into TTS: $text", text.contains("not-a-pause"))
     }
 
     // ------------------------------------------------------------------------
