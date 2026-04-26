@@ -32,6 +32,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { GoldenButton } from '@kiaanverse/ui';
 
 import type { CompassTransmission } from '../hooks/useCompassWisdom';
+import { formatShortDateTime } from '../utils/formatDate';
 
 /**
  * Optional clipboard support — `expo-clipboard` may or may not be linked
@@ -274,11 +275,14 @@ export function GitaCounselChamber({
     });
   }, [isSpeaking, transmission]);
 
-  const formattedTimestamp = useMemo(() => {
-    if (!transmission) return '';
-    const d = new Date(transmission.generatedAt);
-    return `${d.toLocaleDateString('en-IN')}, ${d.toLocaleTimeString('en-IN', { hour12: false })}`;
-  }, [transmission]);
+  // Hermes-safe formatting — see utils/formatDate.ts. The previous
+  // toLocaleDateString / toLocaleTimeString calls could throw on Android
+  // release builds when the bundled ICU data is missing the requested
+  // locale, taking the screen down with them.
+  const formattedTimestamp = useMemo(
+    () => (transmission ? formatShortDateTime(transmission.generatedAt) : ''),
+    [transmission]
+  );
 
   if (loading || !transmission) {
     return (

@@ -95,23 +95,25 @@ function DharmaRadarInner({
 }: DharmaRadarProps): React.JSX.Element {
   const scale = size / VIEWPORT;
   const polygonOpacity = useSharedValue(0);
-  const polygonScale = useSharedValue(0);
   const dotOpacity = useSharedValue(0);
 
   useEffect(() => {
+    // Polygon fades in. The previous "bloom from centre" effect was driven
+    // by an animated SVG transform string fed through `useAnimatedProps`,
+    // which crashed react-native-svg's native ViewManager on Android release
+    // builds (the worklet writes the prop directly to the UI thread, the
+    // ViewManager NPEs while parsing the partially-applied transform). We
+    // animate only the numeric `opacity` prop here; the visual is a soft
+    // fade-in instead of a scale-up bloom.
     polygonOpacity.value = withDelay(
       150,
       withTiming(1, { duration: 480, easing: Easing.out(Easing.cubic) })
-    );
-    polygonScale.value = withDelay(
-      150,
-      withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) })
     );
     dotOpacity.value = withDelay(
       400,
       withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })
     );
-  }, [polygonOpacity, polygonScale, dotOpacity, dharmaValues]);
+  }, [polygonOpacity, dotOpacity, dharmaValues]);
 
   const points = useMemo(
     () =>
@@ -127,7 +129,6 @@ function DharmaRadarInner({
 
   const polygonAnimProps = useAnimatedProps(() => ({
     opacity: polygonOpacity.value,
-    transform: `scale(${polygonScale.value}) translate(${(1 - polygonScale.value) * CENTER * scale}, ${(1 - polygonScale.value) * CENTER * scale})`,
   }));
 
   const dotAnimProps = useAnimatedProps(() => ({ opacity: dotOpacity.value }));

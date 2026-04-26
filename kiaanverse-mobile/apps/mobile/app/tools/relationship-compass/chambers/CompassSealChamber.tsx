@@ -24,6 +24,7 @@ import { GoldenButton } from '@kiaanverse/ui';
 
 import { CompassRose } from '../components/CompassRose';
 import type { GunaName } from '../hooks/useGunaCalculation';
+import { formatLongDate } from '../utils/formatDate';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -66,13 +67,10 @@ export function CompassSealChamber({
   const dominantLabel =
     dominantGuna.charAt(0).toUpperCase() + dominantGuna.slice(1);
 
-  const formattedDate = useMemo(() => {
-    return new Intl.DateTimeFormat('en-IN', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(new Date(sealedAt));
-  }, [sealedAt]);
+  // Hermes-safe formatting — see utils/formatDate.ts. Using Intl.DateTimeFormat
+  // here was crashing the Play Store AAB build the moment the Seal chamber
+  // rendered, taking the whole app down.
+  const formattedDate = useMemo(() => formatLongDate(sealedAt), [sealedAt]);
 
   const goHome = () => router.replace('/(tabs)' as never);
   const goJournal = () => {
