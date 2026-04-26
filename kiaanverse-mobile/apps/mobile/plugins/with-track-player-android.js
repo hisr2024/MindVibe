@@ -2,7 +2,10 @@
  * with-track-player-android.js
  *
  * Expo Config Plugin — fixes audio playback for `react-native-track-player`
- * in production AAB / signed-APK builds on Android 14+ (targetSdk 34/35).
+ * AND prevents R8/Proguard from stripping the native classes used by the
+ * Relationship Compass screen (react-native-svg + react-native-reanimated +
+ * lottie + Hermes Intl) in production AAB / signed-APK builds on Android
+ * 14+ (targetSdk 34/35).
  *
  * Why this exists
  * ---------------
@@ -88,6 +91,35 @@ const PROGUARD_RULES = [
   '-keep class * extends android.support.v4.media.session.MediaSessionCompat$Callback { *; }',
   '-keep class * extends androidx.media.session.MediaButtonReceiver { *; }',
   '# === end react-native-track-player ===',
+  '',
+  '# === Relationship Compass + Sacred animations (added by with-track-player-android.js) ===',
+  '# react-native-svg — radar chart + compass-rose chambers crash with',
+  '# NoClassDefFoundError when these ViewManager classes are stripped.',
+  '-keep class com.horcrux.svg.** { *; }',
+  '-keep interface com.horcrux.svg.** { *; }',
+  '-dontwarn com.horcrux.svg.**',
+  '# react-native-reanimated — worklet runtime + animated props.',
+  '-keep class com.swmansion.reanimated.** { *; }',
+  '-keep interface com.swmansion.reanimated.** { *; }',
+  '-keep class com.facebook.react.turbomodule.** { *; }',
+  '-dontwarn com.swmansion.reanimated.**',
+  '# react-native-gesture-handler — wired through Reanimated.',
+  '-keep class com.swmansion.gesturehandler.** { *; }',
+  '-keep interface com.swmansion.gesturehandler.** { *; }',
+  '# lottie-react-native — JSON-driven sacred animations.',
+  '-keep class com.airbnb.android.react.lottie.** { *; }',
+  '-keep class com.airbnb.lottie.** { *; }',
+  '-dontwarn com.airbnb.lottie.**',
+  '# Hermes Intl ICU bridge.',
+  '-keep class com.facebook.hermes.intl.** { *; }',
+  '-dontwarn com.facebook.hermes.intl.**',
+  '# React Native core ViewManagers / ReactPackages — autolinked, reflective.',
+  '-keep @com.facebook.react.module.annotations.ReactModule class * { *; }',
+  '-keep @com.facebook.react.module.annotations.ReactModuleList class * { *; }',
+  '-keep class * implements com.facebook.react.bridge.ReactPackage { *; }',
+  '-keep class * extends com.facebook.react.uimanager.ViewManager { *; }',
+  '-keepclassmembers,includedescriptorclasses class * { native <methods>; }',
+  '# === end Relationship Compass + Sacred animations ===',
 ].join('\n');
 
 /**

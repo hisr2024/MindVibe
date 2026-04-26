@@ -33,7 +33,22 @@ export interface CompassRoseProps {
   readonly testID?: string;
 }
 
-/** A single animated petal at a fixed angle. */
+/** A single animated petal at a fixed angle.
+ *
+ * Animation strategy (Android-release-safe):
+ *   - Rotation is FIXED per petal — rendered as a static SVG `transform`
+ *     prop. Static props go through the regular Fabric props path and are
+ *     parsed by react-native-svg synchronously at mount, so they never
+ *     touch the Reanimated UI-thread JSI fast-path.
+ *   - The bloom effect (scale 0 → 1) is implemented by interpolating `rx`
+ *     and `ry` from 0 → final value rather than by animating an SVG
+ *     transform string. Animating numeric SVG props through
+ *     `useAnimatedProps` is well-supported on every react-native-svg /
+ *     Reanimated combination; animating string transforms via the same
+ *     hook crashes the JNI bridge on Hermes release AABs (the ViewManager
+ *     receives a partially-parsed transform off the UI thread and aborts).
+ *   - Opacity is a plain numeric prop, also safe to animate.
+ */
 function Petal({
   angle,
   index,
@@ -43,11 +58,17 @@ function Petal({
   readonly index: number;
   readonly size: number;
 }) {
-  const scale = useSharedValue(0);
+  const grow = useSharedValue(0);
   const opacity = useSharedValue(0);
 
+  const targetRx = size * 0.067;
+  const targetRy = size * 0.23;
+  const cx = size / 2;
+  const cy = size * 0.23;
+  const pivot = size / 2;
+
   useEffect(() => {
-    scale.value = withDelay(
+    grow.value = withDelay(
       index * 80,
       withSpring(1, { damping: 12, stiffness: 120 })
     );
@@ -55,24 +76,24 @@ function Petal({
       index * 80,
       withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })
     );
-  }, [scale, opacity, index]);
+  }, [grow, opacity, index]);
 
   const animatedProps = useAnimatedProps(() => ({
     opacity: opacity.value,
-    transform: `rotate(${angle} ${size / 2} ${size / 2}) scale(${scale.value})`,
+    rx: targetRx * grow.value,
+    ry: targetRy * grow.value,
   }));
 
   return (
     <AnimatedEllipse
       animatedProps={animatedProps}
-      cx={size / 2}
-      cy={size * 0.23}
-      rx={size * 0.067}
-      ry={size * 0.23}
+      cx={cx}
+      cy={cy}
+      rx={0}
+      ry={0}
       fill={PETAL_COLOR}
       fillOpacity={0.7}
-      // Initial transform so petals start at centre (scale 0)
-      transform={`rotate(${angle} ${size / 2} ${size / 2})`}
+      transform={`rotate(${angle} ${pivot} ${pivot})`}
     />
   );
 }

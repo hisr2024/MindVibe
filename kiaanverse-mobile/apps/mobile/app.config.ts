@@ -11,14 +11,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Kiaanverse',
   slug: 'kiaanverse',
-  // 1.3.0 bundles native additions that landed after the 1.2.0 Play build:
-  // expo-document-picker (Vibe Player "My Music" import) and the transitive
-  // native pieces pulled in by the Sacred Reflections / Sakha chat PRs. With
-  // runtimeVersion: { policy: 'appVersion' } every OTA is scoped to the
-  // `version` string, so bumping from 1.2.0 → 1.3.0 prevents expo-updates
-  // from pushing JS that imports new native modules to APKs compiled before
-  // those modules existed. The matching versionCode bump is required by Play.
-  version: '1.3.0',
+  // 1.3.1 ships the Relationship Compass Android-release crash fix:
+  //   • R8/Proguard keep rules for react-native-svg, react-native-reanimated,
+  //     gesture-handler, lottie and the Hermes Intl bridge (without these the
+  //     Compass radar + compass-rose chambers crash the JNI bridge with
+  //     NoClassDefFoundError on the first render of the screen);
+  //   • Hermes-safe date formatting in the Seal + Gita Counsel chambers
+  //     (Intl.DateTimeFormat / toLocaleDateString were aborting render);
+  //   • numeric-only animated props for the SVG chamber animations
+  //     (animating SVG transform strings via useAnimatedProps was NPE-ing
+  //     react-native-svg's ViewManager off the UI thread).
+  // 1.3.0 bundled native additions (expo-document-picker, Sakha chat).
+  // runtimeVersion: { policy: 'appVersion' } scopes OTAs to `version`, so
+  // bumping prevents expo-updates from pushing the new JS to the broken
+  // 1.3.0 APK. The matching versionCode bump is required by Play.
+  version: '1.3.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'kiaanverse',
@@ -68,7 +75,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   android: {
     package: 'com.kiaanverse.app',
-    versionCode: 21,
+    versionCode: 22,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop
@@ -136,7 +143,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           // `with-track-player-android` plugin appends the same block as
           // a fail-safe in case this property is ignored by an older
           // expo-build-properties version. Stripping any of these classes
-          // breaks audio output silently in release builds.
+          // breaks audio output silently in release builds — and, as of
+          // 1.3.1, breaks Relationship Compass on Play Store (the SVG +
+          // Reanimated chambers crash the JNI bridge when their native
+          // classes are stripped, which manifests as instant app shutdown
+          // the moment the user taps the tool).
           extraProguardRules: [
             '# react-native-track-player audio pipeline (keep — see app.config.ts)',
             '-keep class com.doublesymmetry.** { *; }',
@@ -153,6 +164,51 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-dontwarn com.google.android.exoplayer2.**',
             '-dontwarn androidx.media3.**',
             '-keep class * extends androidx.media.session.MediaButtonReceiver { *; }',
+            '',
+            '# react-native-svg (Relationship Compass radar + compass-rose). R8',
+            '# strips the Fabric/JSI ViewManager classes because they are loaded',
+            '# reflectively from JS — the JS bridge instantiates a native view',
+            '# whose class is gone, and the resulting NoClassDefFoundError on',
+            '# the UI thread aborts the app.',
+            '-keep class com.horcrux.svg.** { *; }',
+            '-keep interface com.horcrux.svg.** { *; }',
+            '-dontwarn com.horcrux.svg.**',
+            '',
+            '# react-native-reanimated (worklet runtime + animated props).',
+            '# Reanimated registers C++ JSI bindings on a background thread;',
+            '# stripping its Java entry points crashes the worklet runtime',
+            '# the first time a useSharedValue / useAnimatedProps fires.',
+            '-keep class com.swmansion.reanimated.** { *; }',
+            '-keep interface com.swmansion.reanimated.** { *; }',
+            '-keep class com.facebook.react.turbomodule.** { *; }',
+            '-dontwarn com.swmansion.reanimated.**',
+            '',
+            '# react-native-gesture-handler — wired through Reanimated, same',
+            '# reflective lookup pattern.',
+            '-keep class com.swmansion.gesturehandler.** { *; }',
+            '-keep interface com.swmansion.gesturehandler.** { *; }',
+            '',
+            '# lottie-react-native — used by arrival + sacred animations,',
+            '# loaded by JS class name from JSON specs.',
+            '-keep class com.airbnb.android.react.lottie.** { *; }',
+            '-keep class com.airbnb.lottie.** { *; }',
+            '-dontwarn com.airbnb.lottie.**',
+            '',
+            '# Hermes Intl ICU bridge — keeps `new Intl.DateTimeFormat(...)`',
+            '# from throwing NoClassDefFoundError on stripped builds. Even',
+            '# though we replaced our Intl calls with manual formatters in',
+            '# 1.3.1, third-party libs (date-fns/intl, RN core) may still',
+            '# touch these symbols.',
+            '-keep class com.facebook.hermes.intl.** { *; }',
+            '-dontwarn com.facebook.hermes.intl.**',
+            '',
+            '# React Native core — keep ReactPackage / ReactModule / view',
+            '# manager metadata so autolinked native modules survive R8.',
+            '-keep @com.facebook.react.module.annotations.ReactModule class * { *; }',
+            '-keep @com.facebook.react.module.annotations.ReactModuleList class * { *; }',
+            '-keep class * implements com.facebook.react.bridge.ReactPackage { *; }',
+            '-keep class * extends com.facebook.react.uimanager.ViewManager { *; }',
+            '-keepclassmembers,includedescriptorclasses class * { native <methods>; }',
           ].join('\n'),
         },
       },
