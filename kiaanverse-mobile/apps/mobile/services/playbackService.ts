@@ -18,8 +18,11 @@
  *   - RemotePlay        → resume playback
  *   - RemotePause       → pause playback
  *   - RemoteStop        → stop and clear; the OS hides the now-playing card
- *   - RemoteNext        → skip to next track in TrackPlayer's internal queue
- *   - RemotePrevious    → skip to previous track
+ *   - RemoteNext        → advance the Vibe queue and replay (was previously
+ *                         a direct TrackPlayer.skipToNext, which silently
+ *                         no-op'd because every playTrack() resets RNTP's
+ *                         internal queue to size 1)
+ *   - RemotePrevious    → mirror of RemoteNext for the previous track
  *   - RemoteSeek        → seek to position (in seconds, comes from the OS)
  *   - RemoteJumpForward → jump forward by the configured forwardJumpInterval
  *   - RemoteJumpBackward→ jump backward by the configured backwardJumpInterval
@@ -36,6 +39,10 @@
  */
 
 import TrackPlayer, { Event } from 'react-native-track-player';
+import {
+  playNextInQueue,
+  playPreviousInQueue,
+} from '../components/vibe-player/trackPlayerBridge';
 
 /**
  * Register all remote control event handlers.
@@ -58,12 +65,26 @@ module.exports = async function playbackService(): Promise<void> {
     void TrackPlayer.stop();
   });
 
+  // Lock-screen / AirPods / Bluetooth "next" and "previous" advance the
+  // Zustand queue and replay through the same bridge path the in-app UI
+  // uses. Calling `TrackPlayer.skipToNext()` directly is a no-op here
+  // because every `playTrack()` calls `reset()` and adds a single track —
+  // RNTP's internal queue is permanently size-1.
   TrackPlayer.addEventListener(Event.RemoteNext, () => {
-    void TrackPlayer.skipToNext();
+    void playNextInQueue();
   });
 
   TrackPlayer.addEventListener(Event.RemotePrevious, () => {
-    void TrackPlayer.skipToPrevious();
+    void playPreviousInQueue();
+  });
+
+  // Natural end of a track → advance to the next one in the queue.
+  // Without this, audio just stops at the end of every meditation track
+  // because RNTP's queue is size-1; ExoPlayer fires PlaybackQueueEnded
+  // and there's nothing else loaded. Routing through the bridge means
+  // shuffle / repeat / end-of-queue rules from the store are honored.
+  TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {
+    void playNextInQueue();
   });
 
   TrackPlayer.addEventListener(Event.RemoteSeek, (event) => {

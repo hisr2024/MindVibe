@@ -42,7 +42,7 @@ import {
 import { useRouter } from 'expo-router';
 import { DivineBackground } from '@kiaanverse/ui';
 import { useVibePlayerStore, type RepeatMode } from '@kiaanverse/store';
-import TrackPlayer, { useProgress } from 'react-native-track-player';
+import { useProgress } from 'react-native-track-player';
 
 import {
   PlaybackControls,
@@ -55,6 +55,8 @@ import {
   pause as bridgePause,
   resume as bridgeResume,
   seekTo as bridgeSeekTo,
+  playNextInQueue,
+  playPreviousInQueue,
 } from '../../components/vibe-player/trackPlayerBridge';
 
 const SACRED_WHITE = '#F5F0E8';
@@ -90,8 +92,6 @@ export default function VibePlayerScreen(): React.JSX.Element {
   const isPlaying = useVibePlayerStore((s) => s.isPlaying);
   const repeatMode = useVibePlayerStore((s) => s.repeatMode);
   const togglePlay = useVibePlayerStore((s) => s.togglePlay);
-  const nextTrack = useVibePlayerStore((s) => s.nextTrack);
-  const prevTrack = useVibePlayerStore((s) => s.prevTrack);
   const setRepeatMode = useVibePlayerStore((s) => s.setRepeatMode);
 
   // Live playback position from RNTP. While RNTP isn't loaded (e.g. the
@@ -108,15 +108,20 @@ export default function VibePlayerScreen(): React.JSX.Element {
     else void bridgeResume();
   }, [isPlaying, togglePlay]);
 
+  // `playNextInQueue` / `playPreviousInQueue` advance the store's queue
+  // AND replay the new track on RNTP through the same `playTrack()` path
+  // tapping a tile uses. The previous implementation called the store's
+  // mutators (which only updated Zustand) and then `TrackPlayer.skipToNext()`
+  // (which silently no-op'd because RNTP's queue is always size-1 — every
+  // playTrack starts with reset()). Both halves were broken; one consolidated
+  // call replaces them.
   const handleNext = useCallback(() => {
-    nextTrack();
-    void TrackPlayer.skipToNext().catch(() => undefined);
-  }, [nextTrack]);
+    void playNextInQueue();
+  }, []);
 
   const handlePrev = useCallback(() => {
-    prevTrack();
-    void TrackPlayer.skipToPrevious().catch(() => undefined);
-  }, [prevTrack]);
+    void playPreviousInQueue();
+  }, []);
 
   const handleRepeatCycle = useCallback(() => {
     const next = nextRepeatMode(repeatMode);

@@ -21,6 +21,7 @@
  */
 
 import TrackPlayer, { State } from 'react-native-track-player';
+import { useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
 import { setupTrackPlayer } from '../../services/trackPlayerSetup';
 import {
   isLikelyPlayableUrl,
@@ -285,4 +286,68 @@ export async function seekTo(seconds: number): Promise<void> {
       console.warn('[trackPlayerBridge] seekTo failed:', err);
     }
   }
+}
+
+// ─── Queue-aware navigation ──────────────────────────────────────────────
+//
+// The Vibe Player keeps its catalog queue in the Zustand store
+// (`vibePlayerStore.queue`) — that's what populates the visible track list
+// and what `nextTrack()` / `prevTrack()` advance through. The previous
+// implementation tried to drive transport via `TrackPlayer.skipToNext()`
+// directly, which was broken: `playTrack()` always calls `reset()` and
+// adds a SINGLE track, so RNTP's internal queue is permanently size-1.
+// Skipping in a size-1 queue silently no-ops, which is why the prev/next
+// buttons did nothing on the Play Store APK.
+//
+// The fix is to keep one source of truth — the Zustand queue — and replay
+// each next/prev track through the same `playTrack()` path that already
+// handles URL coercion, bundled-asset preference, watchdog retry, volume
+// reset, and the rest of the resilience layer added in earlier commits.
+// `playNextInQueue` / `playPreviousInQueue` are the public entry points;
+// they're called from the player UI handlers AND from the headless
+// playback service (lock-screen + AirPods), so all transport sources
+// converge on the same code path.
+
+/** Convert a store `VibeTrack` into the bridge's `BridgeTrack` shape. */
+function vibeToBridgeTrack(t: VibeTrack): BridgeTrack {
+  return {
+    id: t.id,
+    title: t.title,
+    artist: t.artist,
+    audioUrl: t.audioUrl,
+    duration: t.duration,
+    ...(t.artworkUrl ? { artworkUrl: t.artworkUrl } : {}),
+  };
+}
+
+/**
+ * Advance the queue by one and replay the new track on RNTP. Honors the
+ * store's existing shuffle / repeat / end-of-queue logic via
+ * `nextTrack()`. Returns the play result, or `null` when there's nothing
+ * to play (empty queue).
+ */
+export async function playNextInQueue(): Promise<PlayResult | null> {
+  const store = useVibePlayerStore.getState();
+  if (store.queue.length === 0) return null;
+
+  store.nextTrack();
+  const next = useVibePlayerStore.getState().currentTrack;
+  if (!next) return null;
+  return playTrack(vibeToBridgeTrack(next));
+}
+
+/**
+ * Mirror of `playNextInQueue` for the previous track. Honors the store's
+ * "if more than ~5% in, restart current" rule via `prevTrack()` — which
+ * resets `progress` without changing `currentTrack`; the replay below
+ * then restarts the same track from position 0.
+ */
+export async function playPreviousInQueue(): Promise<PlayResult | null> {
+  const store = useVibePlayerStore.getState();
+  if (store.queue.length === 0) return null;
+
+  store.prevTrack();
+  const prev = useVibePlayerStore.getState().currentTrack;
+  if (!prev) return null;
+  return playTrack(vibeToBridgeTrack(prev));
 }
