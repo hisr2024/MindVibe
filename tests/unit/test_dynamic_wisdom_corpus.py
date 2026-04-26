@@ -407,3 +407,235 @@ class TestMinimumLearningThreshold:
         """Should limit the number of effectiveness candidates considered."""
         from backend.services.dynamic_wisdom_corpus import TOP_EFFECTIVENESS_CANDIDATES
         assert 5 <= TOP_EFFECTIVENESS_CANDIDATES <= 50
+
+
+class TestConfidenceFactor:
+    """Sample-size confidence weighting (v3.1 enterprise upgrade)."""
+
+    def test_confident_at_target_sample(self):
+        """Verses with the target sample size rank at full effectiveness."""
+        from backend.services.dynamic_wisdom_corpus import (
+            CONFIDENT_SAMPLE_TARGET,
+            _confidence_factor,
+        )
+        assert _confidence_factor(CONFIDENT_SAMPLE_TARGET) == 1.0
+        assert _confidence_factor(CONFIDENT_SAMPLE_TARGET + 10) == 1.0
+
+    def test_floor_for_sparse_data(self):
+        """Single-record verses still rank but only at the floor."""
+        from backend.services.dynamic_wisdom_corpus import (
+            CONFIDENCE_FLOOR,
+            _confidence_factor,
+        )
+        f = _confidence_factor(1)
+        assert f >= CONFIDENCE_FLOOR
+        assert f < 1.0
+
+    def test_zero_records_returns_floor(self):
+        """A verse with no records can't dominate proven ones."""
+        from backend.services.dynamic_wisdom_corpus import (
+            CONFIDENCE_FLOOR,
+            _confidence_factor,
+        )
+        assert _confidence_factor(0) == CONFIDENCE_FLOOR
+
+    def test_monotonically_increasing(self):
+        """Confidence should grow (or hold) as sample size grows."""
+        from backend.services.dynamic_wisdom_corpus import _confidence_factor
+        prev = _confidence_factor(0)
+        for n in range(1, 12):
+            curr = _confidence_factor(n)
+            assert curr >= prev, f"Confidence regressed at n={n}"
+            prev = curr
+
+    def test_proven_verse_outranks_sparse_high_score(self):
+        """A 5-record verse at 0.7 should outrank a 1-record verse at 0.85.
+
+        This is the whole point of confidence weighting: sample size matters.
+        """
+        from backend.services.dynamic_wisdom_corpus import _confidence_factor
+        proven = 0.70 * _confidence_factor(5)
+        sparse = 0.85 * _confidence_factor(1)
+        assert proven > sparse
+
+
+class TestBatchBuffer:
+    """Batch delivery buffer mechanics (v3.1 enterprise upgrade)."""
+
+    def setup_method(self):
+        from backend.services.dynamic_wisdom_corpus import DynamicWisdomCorpus
+        self.corpus = DynamicWisdomCorpus()
+
+    @pytest.mark.asyncio
+    async def test_delivery_lands_in_buffer_not_db(self):
+        """record_wisdom_delivery should buffer in-memory without DB writes."""
+        # Patch SessionLocal so the lazy flush task can't accidentally
+        # touch the DB during the test.
+        with patch("backend.deps.SessionLocal"):
+            await self.corpus.record_wisdom_delivery(
+                db=MagicMock(),
+                user_id="user-1",
+                session_id="sess-1",
+                verse_ref="2.47",
+                principle="Karma Yoga",
+                mood="anxious",
+                mood_intensity=0.6,
+                phase="guide",
+                theme="action",
+            )
+        assert len(self.corpus._delivery_buffer) == 1
+        assert self.corpus._delivery_buffer[0].verse_ref == "2.47"
+        assert self.corpus._metrics["deliveries_buffered"] == 1
+        assert self.corpus._metrics["deliveries_flushed"] == 0
+
+    @pytest.mark.asyncio
+    async def test_flush_drains_buffer(self):
+        """_flush_buffer empties the buffer and increments flushed count."""
+        from backend.services.dynamic_wisdom_corpus import _PendingDelivery
+
+        # Seed three pending deliveries
+        for i in range(3):
+            self.corpus._delivery_buffer.append(
+                _PendingDelivery(
+                    user_id=f"u{i}",
+                    session_id=f"s{i}",
+                    verse_ref=f"2.{i}",
+                    principle=None,
+                    mood_at_delivery="anxious",
+                    mood_intensity_at_delivery=0.5,
+                    phase_at_delivery="guide",
+                    theme_used=None,
+                )
+            )
+
+        # Mock SessionLocal context manager
+        mock_session = AsyncMock()
+        mock_session.commit = AsyncMock()
+        mock_session.add_all = MagicMock()
+        mock_session_cm = AsyncMock()
+        mock_session_cm.__aenter__.return_value = mock_session
+        mock_session_cm.__aexit__.return_value = None
+
+        with patch(
+            "backend.deps.SessionLocal", return_value=mock_session_cm
+        ):
+            flushed = await self.corpus._flush_buffer()
+
+        assert flushed == 3
+        assert len(self.corpus._delivery_buffer) == 0
+        assert self.corpus._metrics["deliveries_flushed"] == 3
+        assert self.corpus._metrics["buffer_flushes"] == 1
+        # Bulk insert path
+        mock_session.add_all.assert_called_once()
+        mock_session.commit.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_flush_failure_requeues_records(self):
+        """If commit fails, records go back to the front of the buffer."""
+        from backend.services.dynamic_wisdom_corpus import _PendingDelivery
+
+        self.corpus._delivery_buffer.append(
+            _PendingDelivery(
+                user_id="u",
+                session_id="s",
+                verse_ref="2.47",
+                principle=None,
+                mood_at_delivery="anxious",
+                mood_intensity_at_delivery=0.5,
+                phase_at_delivery="guide",
+                theme_used=None,
+            )
+        )
+
+        mock_session = AsyncMock()
+        mock_session.commit = AsyncMock(side_effect=Exception("DB down"))
+        mock_session.add_all = MagicMock()
+        mock_session_cm = AsyncMock()
+        mock_session_cm.__aenter__.return_value = mock_session
+        mock_session_cm.__aexit__.return_value = None
+
+        with patch(
+            "backend.deps.SessionLocal", return_value=mock_session_cm
+        ):
+            flushed = await self.corpus._flush_buffer()
+
+        assert flushed == 0
+        assert len(self.corpus._delivery_buffer) == 1
+        assert self.corpus._metrics["buffer_flush_errors"] == 1
+
+    @pytest.mark.asyncio
+    async def test_buffer_overflow_drops_oldest(self):
+        """When the hard cap is exceeded, the oldest records are dropped."""
+        from backend.services.dynamic_wisdom_corpus import (
+            BATCH_MAX_BUFFER_SIZE,
+            _PendingDelivery,
+        )
+        # Pre-seed the buffer at the hard cap so the next add overflows
+        for i in range(BATCH_MAX_BUFFER_SIZE):
+            self.corpus._delivery_buffer.append(
+                _PendingDelivery(
+                    user_id=f"u{i}",
+                    session_id="s",
+                    verse_ref="2.47",
+                    principle=None,
+                    mood_at_delivery="anxious",
+                    mood_intensity_at_delivery=0.5,
+                    phase_at_delivery="guide",
+                    theme_used=None,
+                )
+            )
+
+        # No DB hit — capacity flush is scheduled but won't run because
+        # we don't await it. The overflow path is what's under test.
+        with patch("backend.deps.SessionLocal"):
+            await self.corpus.record_wisdom_delivery(
+                db=MagicMock(),
+                user_id="overflow",
+                session_id="s",
+                verse_ref="3.1",
+                principle=None,
+                mood="anxious",
+                mood_intensity=0.5,
+                phase="guide",
+                theme=None,
+            )
+
+        assert len(self.corpus._delivery_buffer) <= BATCH_MAX_BUFFER_SIZE
+
+
+class TestRuntimeMetrics:
+    """Telemetry counters surfaced via get_runtime_metrics()."""
+
+    def setup_method(self):
+        from backend.services.dynamic_wisdom_corpus import DynamicWisdomCorpus
+        self.corpus = DynamicWisdomCorpus()
+
+    def test_metrics_includes_required_fields(self):
+        m = self.corpus.get_runtime_metrics()
+        for key in (
+            "deliveries_buffered",
+            "deliveries_flushed",
+            "buffer_depth",
+            "buffer_capacity",
+            "selection_hit_rate",
+            "cache_hit_rate",
+            "config",
+        ):
+            assert key in m, f"missing metric: {key}"
+
+    def test_metrics_config_block(self):
+        cfg = self.corpus.get_runtime_metrics()["config"]
+        for key in (
+            "min_records_for_learning",
+            "confident_sample_target",
+            "confidence_floor",
+            "batch_flush_size",
+            "batch_flush_interval_sec",
+        ):
+            assert key in cfg, f"missing config key: {key}"
+
+    def test_hit_rate_handles_zero_division(self):
+        """No selections served → hit rate is None, not 0/0 crash."""
+        m = self.corpus.get_runtime_metrics()
+        assert m["selection_hit_rate"] is None
+        assert m["cache_hit_rate"] is None
