@@ -133,6 +133,37 @@ app = FastAPI(
     description="AI Spiritual Wellness Coach Backend",
 )
 
+# ---------------------------------------------------------------------------
+# Static audio assets — KIAAN Vibe meditation library
+# ---------------------------------------------------------------------------
+# The Vibe Player meditation tracks (`/api/meditation/tracks`) ship audioUrl
+# values like "/audio/gayatri.mp3". Without this mount, those paths 404 in
+# production: the native client resolves them against the API base URL
+# (https://mindvibe-api.onrender.com/audio/gayatri.mp3) and silently fails.
+#
+# Mounting the bundled MP3s here makes every track playable end-to-end. The
+# same files also ship inside the APK as an offline fallback (see
+# kiaanverse-mobile/apps/mobile/assets/audio/), so a slow network or a CDN
+# hiccup never breaks the player.
+#
+# We mount BEFORE middleware so static assets bypass DDoS / CSRF / rate
+# limiting — they're public, immutable, and hit hot. The directory is
+# created on import so missing-folder bugs surface at startup, not at
+# request time.
+import os as _os_for_audio_mount
+
+from fastapi.staticfiles import StaticFiles
+
+_AUDIO_DIR = _os_for_audio_mount.path.join(
+    _os_for_audio_mount.path.dirname(__file__), "static", "audio"
+)
+if _os_for_audio_mount.path.isdir(_AUDIO_DIR):
+    app.mount(
+        "/audio",
+        StaticFiles(directory=_AUDIO_DIR, html=False, check_dir=True),
+        name="vibe-audio",
+    )
+
 # Add DDoS protection middleware (first line of defense)
 app.add_middleware(
     DDoSProtectionMiddleware,

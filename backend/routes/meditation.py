@@ -354,106 +354,92 @@ async def complete_session(
 # Meditation Tracks (curated audio for KIAAN Vibe Player)
 # ---------------------------------------------------------------------------
 
+# Production meditation catalog. Every `audioUrl` here resolves to a real
+# MP3 file mounted by `backend/main.py` at `/audio/*` (the source files
+# live in `backend/static/audio/` and are also bundled inside the APK so
+# the player works offline).
+#
+# When a new MP3 is dropped into `backend/static/audio/`:
+#   1. Add a row below pointing at it.
+#   2. Drop the same file into `kiaanverse-mobile/apps/mobile/assets/audio/`
+#      and wire it into `bundledAudioRegistry.ts` so the native APK can
+#      play it offline too.
+#
+# Three of the seven entries are explicitly identified Sanskrit / Vedic
+# recordings sourced from Pixabay Music (commercial use, no attribution).
+# The remaining four ship under neutral filenames pending identification —
+# they play fine, but their titles are placeholders until each recording
+# is named correctly.
 MEDITATION_TRACKS: list[dict] = [
-    {
-        "id": "track-om-chanting",
-        "title": "Sacred Om Chanting",
-        "artist": "KIAAN Vibe",
-        "duration": 600,
-        "category": "chanting",
-        "audioUrl": "/audio/om-chanting.mp3",
-        "artworkUrl": None,
-        "description": "Deep resonant Om chanting for inner peace and meditation.",
-    },
-    {
-        "id": "track-morning-raaga",
-        "title": "Morning Raaga Meditation",
-        "artist": "KIAAN Vibe",
-        "duration": 900,
-        "category": "ambient",
-        "audioUrl": "/audio/morning-raaga.mp3",
-        "artworkUrl": None,
-        "description": "Gentle morning raaga to awaken your consciousness.",
-    },
     {
         "id": "track-gayatri-mantra",
         "title": "Gayatri Mantra",
         "artist": "KIAAN Vibe",
-        "duration": 480,
+        "duration": 446,
         "category": "mantra",
-        "audioUrl": "/audio/gayatri-mantra.mp3",
+        "audioUrl": "/audio/gayatri.mp3",
         "artworkUrl": None,
         "description": "The sacred Gayatri mantra for spiritual illumination.",
     },
     {
-        "id": "track-tibetan-bowls",
-        "title": "Tibetan Singing Bowls",
+        "id": "track-shanti-mantra",
+        "title": "Shanti Mantra",
         "artist": "KIAAN Vibe",
-        "duration": 1200,
-        "category": "meditation",
-        "audioUrl": "/audio/tibetan-bowls.mp3",
-        "artworkUrl": None,
-        "description": "Resonant singing bowls for deep meditative states.",
-    },
-    {
-        "id": "track-forest-peace",
-        "title": "Forest of Peace",
-        "artist": "KIAAN Vibe",
-        "duration": 1800,
-        "category": "ambient",
-        "audioUrl": "/audio/forest-peace.mp3",
-        "artworkUrl": None,
-        "description": "Natural forest sounds for tranquil meditation.",
-    },
-    {
-        "id": "track-shiva-dhyana",
-        "title": "Shiva Dhyana",
-        "artist": "KIAAN Vibe",
-        "duration": 720,
-        "category": "meditation",
-        "audioUrl": "/audio/shiva-dhyana.mp3",
-        "artworkUrl": None,
-        "description": "Guided Shiva meditation for transcendence and stillness.",
-    },
-    {
-        "id": "track-mahamrityunjaya",
-        "title": "Mahamrityunjaya Mantra",
-        "artist": "KIAAN Vibe",
-        "duration": 540,
-        "category": "mantra",
-        "audioUrl": "/audio/mahamrityunjaya.mp3",
-        "artworkUrl": None,
-        "description": "The great death-conquering mantra for healing and protection.",
-    },
-    {
-        "id": "track-evening-peace",
-        "title": "Evening Peace Ambient",
-        "artist": "KIAAN Vibe",
-        "duration": 1500,
-        "category": "ambient",
-        "audioUrl": "/audio/evening-peace.mp3",
-        "artworkUrl": None,
-        "description": "Gentle ambient sounds for evening wind-down and reflection.",
-    },
-    {
-        "id": "track-kirtan-bliss",
-        "title": "Kirtan Bliss",
-        "artist": "KIAAN Vibe",
-        "duration": 660,
+        "duration": 169,
         "category": "chanting",
-        "audioUrl": "/audio/kirtan-bliss.mp3",
+        "audioUrl": "/audio/shanti-mantra.mp3",
         "artworkUrl": None,
-        "description": "Devotional kirtan chanting to uplift the spirit.",
+        "description": "Vedic chant of peace — Om Shanti, Shanti, Shanti.",
     },
     {
-        "id": "track-chakra-balance",
-        "title": "Chakra Balancing Meditation",
+        "id": "track-om-hanumate",
+        "title": "Om Hanumate Namaha",
         "artist": "KIAAN Vibe",
-        "duration": 1080,
+        "duration": 75,
         "category": "meditation",
-        "audioUrl": "/audio/chakra-balance.mp3",
+        "audioUrl": "/audio/om-hanumate.mp3",
         "artworkUrl": None,
-        "description": "Guided meditation moving through all seven chakras.",
+        "description": "Devotional repetition of the Hanuman beej mantra.",
+    },
+    {
+        "id": "track-vedic-chant-1",
+        "title": "Vedic Chant — I",
+        "artist": "KIAAN Vibe",
+        "duration": 291,
+        "category": "mantra",
+        "audioUrl": "/audio/mantra-001.mp3",
+        "artworkUrl": None,
+        "description": "Classical Sanskrit recitation for meditation practice.",
+    },
+    {
+        "id": "track-vedic-chant-2",
+        "title": "Vedic Chant — II",
+        "artist": "KIAAN Vibe",
+        "duration": 337,
+        "category": "mantra",
+        "audioUrl": "/audio/mantra-002.mp3",
+        "artworkUrl": None,
+        "description": "Classical Sanskrit recitation for meditation practice.",
+    },
+    {
+        "id": "track-vedic-chant-3",
+        "title": "Vedic Chant — III",
+        "artist": "KIAAN Vibe",
+        "duration": 246,
+        "category": "chanting",
+        "audioUrl": "/audio/mantra-003.mp3",
+        "artworkUrl": None,
+        "description": "Classical Sanskrit recitation for devotional chanting.",
+    },
+    {
+        "id": "track-vedic-chant-4",
+        "title": "Vedic Chant — IV",
+        "artist": "KIAAN Vibe",
+        "duration": 291,
+        "category": "chanting",
+        "audioUrl": "/audio/mantra-004.mp3",
+        "artworkUrl": None,
+        "description": "Classical Sanskrit recitation for devotional chanting.",
     },
 ]
 
