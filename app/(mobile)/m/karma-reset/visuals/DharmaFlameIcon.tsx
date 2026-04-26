@@ -16,6 +16,12 @@ interface DharmaFlameIconProps {
   className?: string
   /** Stagger offset (0-3) so a row of flames flickers out of sync. */
   phase?: number
+  /**
+   * Lite variant: drops the halo + rising spark and keeps just the flicker.
+   * Used in dense layouts (like the seal screen) where stacking SVG filters
+   * across many instances pushed Android WebView into GPU OOM territory.
+   */
+  lite?: boolean
 }
 
 const OPACITY_MAP = { dim: 0.55, normal: 0.92, bright: 1.0 }
@@ -27,6 +33,7 @@ export function DharmaFlameIcon({
   animate = true,
   className,
   phase = 0,
+  lite = false,
 }: DharmaFlameIconProps) {
   const opacity = OPACITY_MAP[intensity]
   // Unique IDs per instance — multiple flames on screen must not share gradient/filter IDs.
@@ -103,15 +110,17 @@ export function DharmaFlameIcon({
         </radialGradient>
       </defs>
 
-      {/* Soft halo behind the flame */}
-      <ellipse
-        cx={24}
-        cy={32}
-        rx={22}
-        ry={26}
-        fill={`url(#${haloId})`}
-        className={animate ? `flame-halo-${baseId}` : undefined}
-      />
+      {/* Soft halo behind the flame — skipped in lite mode */}
+      {!lite && (
+        <ellipse
+          cx={24}
+          cy={32}
+          rx={22}
+          ry={26}
+          fill={`url(#${haloId})`}
+          className={animate ? `flame-halo-${baseId}` : undefined}
+        />
+      )}
 
       <g className={animate ? `flame-animate-${baseId}` : undefined}>
         {/* Main flame body */}
@@ -128,8 +137,8 @@ export function DharmaFlameIcon({
         <ellipse cx={24} cy={48} rx={4} ry={7} fill={`url(#${wickId})`} />
       </g>
 
-      {/* Rising spark for liveness */}
-      {animate && (
+      {/* Rising spark for liveness — skipped in lite mode */}
+      {animate && !lite && (
         <circle
           cx={24}
           cy={10}

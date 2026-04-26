@@ -8,7 +8,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { MobileWordReveal } from '@/components/mobile/MobileWordReveal'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { KarmaSealMandala } from '../visuals/KarmaSealMandala'
 import { KarmaXPSeal } from '../components/KarmaXPSeal'
@@ -110,8 +109,11 @@ export function SealPhase({ session }: SealPhaseProps) {
     safePush('/m/journal')
   }, [triggerHaptic, safePush])
 
-  // Live garland — 5 diyas flickering on the completion screen.
-  const garlandFlames = [0, 1, 2, 3, 4]
+  // Live garland — 3 diyas flickering on the completion screen.
+  // Trimmed from 5 to keep GPU pressure low on lower-end Android devices,
+  // which were crashing the WebView when too many SVG/CSS animations stacked
+  // up alongside the mandala spin and KarmaXPSeal counter.
+  const garlandFlames = [0, 1, 2]
 
   return (
     <div
@@ -129,7 +131,8 @@ export function SealPhase({ session }: SealPhaseProps) {
       {/* Mandala */}
       <KarmaSealMandala size={180} />
 
-      {/* Live diya garland — 5 lamps gently flicker on completion */}
+      {/* Live diya garland — 3 lamps gently flicker on completion.
+          Sized + spaced to feel ceremonial without overloading the GPU. */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -139,7 +142,7 @@ export function SealPhase({ session }: SealPhaseProps) {
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
-          gap: 18,
+          gap: 22,
           marginTop: 18,
           minHeight: 56,
         }}
@@ -149,35 +152,47 @@ export function SealPhase({ session }: SealPhaseProps) {
             key={i}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + i * 0.12, duration: 0.4 }}
+            transition={{ delay: 0.6 + i * 0.14, duration: 0.4 }}
           >
             <DharmaFlameIcon
-              size={i === 2 ? 26 : 20}
-              intensity={i === 2 ? 'bright' : 'normal'}
+              size={i === 1 ? 28 : 20}
+              intensity={i === 1 ? 'bright' : 'normal'}
               color="#F0C040"
               animate
               phase={i}
+              lite
             />
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Completion messages */}
+      {/* Completion message — plain motion fade. Previously used
+          MobileWordReveal which applies `filter: blur(2px)` to multiple
+          spans simultaneously; on Android WebView, stacking blur filters
+          on top of the mandala + diyas was a known crash trigger. */}
       {showMessage && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           style={{ textAlign: 'center', marginTop: 24, marginBottom: 16 }}
         >
-          <MobileWordReveal
-            text="Your karma has been met with dharma."
-            speed={65}
-            as="p"
-          />
+          <p
+            style={{
+              fontFamily: 'var(--font-scripture, Crimson Text, serif)',
+              fontStyle: 'italic',
+              fontSize: 18,
+              color: 'var(--sacred-text-primary, #EDE8DC)',
+              lineHeight: 1.5,
+              margin: 0,
+            }}
+          >
+            Your karma has been met with dharma.
+          </p>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.45, duration: 0.4 }}
             style={{
               fontFamily: 'var(--font-scripture, Crimson Text, serif)',
               fontStyle: 'italic',

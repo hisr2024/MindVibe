@@ -20,17 +20,29 @@ export function KarmaXPSeal({ xpAwarded, streakCount }: KarmaXPSealProps) {
   const [showJournalSave, setShowJournalSave] = useState(false)
   const { triggerHaptic } = useHapticFeedback()
 
-  // Animated XP counter — cubic ease-out deceleration
+  // Animated XP counter — cubic ease-out deceleration.
+  // Defensive: guard non-numeric / negative input, clear interval on every
+  // path so a stale interval can never call setState after unmount, and
+  // throttle to ~30 fps which is plenty for a counter and halves the work.
   useEffect(() => {
+    const target = typeof xpAwarded === 'number' && xpAwarded > 0 ? xpAwarded : 0
+    if (target === 0) {
+      setDisplayXP(0)
+      return
+    }
     let frame = 0
-    const totalFrames = 60
+    const totalFrames = 30
     const interval = setInterval(() => {
       frame++
       const eased = 1 - Math.pow(1 - frame / totalFrames, 3)
-      setDisplayXP(Math.round(eased * xpAwarded))
+      setDisplayXP(Math.round(eased * target))
       if (frame >= totalFrames) {
         clearInterval(interval)
-        triggerHaptic('success')
+        try {
+          triggerHaptic('success')
+        } catch {
+          // haptic unavailable — silently continue the ceremony
+        }
       }
     }, 1200 / totalFrames)
     return () => clearInterval(interval)

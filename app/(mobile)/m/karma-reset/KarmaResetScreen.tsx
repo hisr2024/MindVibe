@@ -26,19 +26,24 @@ import type {
   SankalpaSeal,
 } from './types'
 
-/** Lotus-bloom clip-path transition */
+/**
+ * Phase transition. We deliberately avoid `clipPath: circle(...)` because
+ * animating clip-path over a screen full of SVG (mandala + flames) reliably
+ * crashes lower-end Android WebViews — it forces every paint to clip the
+ * full GPU layer tree. A plain opacity+translate fade is buttery smooth.
+ */
 const phaseTransition = {
   initial: {
-    clipPath: 'circle(0% at 50% 50%)',
     opacity: 0,
+    y: 8,
   },
   animate: {
-    clipPath: 'circle(100% at 50% 50%)',
     opacity: 1,
+    y: 0,
   },
   exit: {
     opacity: 0,
-    y: -20,
+    y: -12,
   },
 }
 
