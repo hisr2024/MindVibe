@@ -27,6 +27,7 @@ ENTERPRISE UPGRADES (v3.1):
 """
 
 import asyncio
+import contextlib
 import datetime
 import logging
 import random
@@ -139,7 +140,7 @@ class _PendingDelivery:
     phase_at_delivery: str
     theme_used: str | None
     delivered_at: datetime.datetime = field(
-        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc)
+        default_factory=lambda: datetime.datetime.now(datetime.UTC)
     )
 
     def to_orm_kwargs(self) -> dict[str, Any]:
@@ -334,7 +335,7 @@ class DynamicWisdomCorpus:
 
     async def record_wisdom_delivery(
         self,
-        db: AsyncSession,
+        db: AsyncSession,  # noqa: ARG002 — kept for API back-compat; buffered path doesn't need it
         user_id: str,
         session_id: str,
         verse_ref: str,
@@ -721,10 +722,8 @@ class DynamicWisdomCorpus:
         self._stopped = True
         if self._flush_task and not self._flush_task.done():
             self._flush_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError, Exception):
                 await self._flush_task
-            except (asyncio.CancelledError, Exception):
-                pass
         # Final drain
         await self._flush_buffer()
 

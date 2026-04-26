@@ -14,7 +14,7 @@ All endpoints require KIAAN_ANALYTICS_VIEW. No user content is exposed.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -237,7 +237,7 @@ async def mood_improvement_trend(
     The dashboard renders this as a stacked area + line chart so operators
     can see the learning loop's pulse over time.
     """
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     delivered_at_date = func.date(WisdomEffectiveness.delivered_at)
 
     has_outcome = case(
