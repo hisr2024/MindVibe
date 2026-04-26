@@ -10,6 +10,7 @@
 
 import dynamic from 'next/dynamic'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
+import { MobileErrorBoundary } from '@/components/mobile/MobileErrorBoundary'
 
 const KarmaResetScreen = dynamic(
   () => import('./KarmaResetScreen').then((mod) => ({ default: mod.KarmaResetScreen })),
@@ -33,5 +34,14 @@ const KarmaResetScreen = dynamic(
 )
 
 export default function MobileKarmaResetPage() {
-  return <KarmaResetScreen />
+  // Error boundary turns any unhandled render error into a compassionate
+  // recovery screen instead of letting the Android WebView host crash.
+  return (
+    <MobileErrorBoundary
+      fallbackTitle="Your karma has been received"
+      fallbackMessage="The ceremony completed, but the closing screen needs a moment. Take a breath — your sankalpa is safe."
+    >
+      <KarmaResetScreen />
+    </MobileErrorBoundary>
+  )
 }

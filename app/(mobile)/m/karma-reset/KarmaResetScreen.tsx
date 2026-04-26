@@ -26,31 +26,66 @@ import type {
   SankalpaSeal,
 } from './types'
 
-/** Lotus-bloom clip-path transition */
+/**
+ * Phase transition. We deliberately avoid `clipPath: circle(...)` because
+ * animating clip-path over a screen full of SVG (mandala + flames) reliably
+ * crashes lower-end Android WebViews — it forces every paint to clip the
+ * full GPU layer tree. A plain opacity+translate fade is buttery smooth.
+ */
 const phaseTransition = {
   initial: {
-    clipPath: 'circle(0% at 50% 50%)',
     opacity: 0,
+    y: 8,
   },
   animate: {
-    clipPath: 'circle(100% at 50% 50%)',
     opacity: 1,
+    y: 0,
   },
   exit: {
     opacity: 0,
-    y: -20,
+    y: -12,
   },
+}
+
+/** Generate a session id that works on every Android WebView. crypto.randomUUID
+ *  is only guaranteed in secure contexts (HTTPS or localhost) and is missing
+ *  from older WebViews — calling it there throws and crashes the page. */
+function safeSessionId(): string {
+  if (typeof crypto !== 'undefined') {
+    const c = crypto as Crypto & { randomUUID?: () => string }
+    if (typeof c.randomUUID === 'function') {
+      try {
+        return c.randomUUID()
+      } catch {
+        // fall through to random fallback
+      }
+    }
+    if (typeof c.getRandomValues === 'function') {
+      const bytes = new Uint8Array(16)
+      c.getRandomValues(bytes)
+      bytes[6] = (bytes[6] & 0x0f) | 0x40
+      bytes[8] = (bytes[8] & 0x3f) | 0x80
+      const hex: string[] = []
+      for (let i = 0; i < bytes.length; i++) {
+        hex.push(bytes[i].toString(16).padStart(2, '0'))
+      }
+      return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex
+        .slice(6, 8)
+        .join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`
+    }
+  }
+  return `kr-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 export function KarmaResetScreen() {
   const [phase, setPhase] = useState<KarmaResetPhase>('entry')
-  const [session, setSession] = useState<Partial<KarmaResetSession>>({
-    sessionId: typeof crypto !== 'undefined' ? crypto.randomUUID() : `kr-${Date.now()}`,
+  const [session, setSession] = useState<Partial<KarmaResetSession>>(() => ({
+    sessionId: safeSessionId(),
     startedAt: new Date(),
     reflections: [],
     xpAwarded: 0,
     streakCount: 0,
-  })
+  }))
 
   const updateSession = useCallback((updates: Partial<KarmaResetSession>) => {
     setSession((prev) => ({ ...prev, ...updates }))

@@ -38,9 +38,59 @@ export class MobileErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('MobileErrorBoundary caught error:', error, errorInfo)
 
+    // Surface to Sentry / window error handlers explicitly so a native
+    // Android crash report carries the JS stack trace.
+    try {
+      if (typeof window !== 'undefined') {
+        const w = window as Window & {
+          __mvLastError?: { message: string; stack?: string; componentStack?: string }
+        }
+        w.__mvLastError = {
+          message: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack ?? undefined,
+        }
+      }
+    } catch {
+      // never mask the original error
+    }
+
     // Auto-recover from stale chunk errors (new deployment invalidated old chunks)
     if (isChunkLoadError(error)) {
       if (attemptChunkRecovery()) return
+    }
+  }
+
+  private handleGlobalError = (event: ErrorEvent | PromiseRejectionEvent) => {
+    // Catches errors that React's boundary cannot — async handlers, RAF
+    // callbacks, setTimeout bodies, unhandled promise rejections. Without
+    // this they silently kill the WebView on Android.
+    const error =
+      'reason' in event
+        ? event.reason instanceof Error
+          ? event.reason
+          : new Error(String(event.reason))
+        : event.error instanceof Error
+        ? event.error
+        : new Error(event.message)
+
+    if (isChunkLoadError(error)) {
+      if (attemptChunkRecovery()) return
+    }
+    console.error('[MobileErrorBoundary] window error:', error)
+  }
+
+  componentDidMount(): void {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', this.handleGlobalError)
+      window.addEventListener('unhandledrejection', this.handleGlobalError)
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('error', this.handleGlobalError)
+      window.removeEventListener('unhandledrejection', this.handleGlobalError)
     }
   }
 

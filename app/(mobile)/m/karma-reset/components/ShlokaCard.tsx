@@ -10,9 +10,38 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
-import { splitGraphemes } from '@/lib/splitGraphemes'
 import type { KarmaCategory } from '../types'
 import { CATEGORY_COLORS } from '../types'
+
+// Devanagari font stack — guarantees proper conjunct shaping on Android WebView.
+// Without these the OS may fall back to a font that breaks ligatures like द्ध, र्म, ष्य.
+const DEVANAGARI_FONT_STACK =
+  '"Noto Sans Devanagari", "Noto Serif Devanagari", "Tiro Devanagari Sanskrit", "Sanskrit Text", "Mangal", var(--font-divine, Cormorant Garamond), serif'
+
+/**
+ * Split a Devanagari verse into reveal-friendly tokens while preserving
+ * intra-word grapheme clusters. Each whitespace run becomes its own token
+ * so we can animate words individually but the shaper still sees a full
+ * word and renders the conjuncts correctly.
+ */
+function splitVerseTokens(text: string): Array<{ word: string; isBreak: boolean }> {
+  const tokens: Array<{ word: string; isBreak: boolean }> = []
+  // Keep newlines as explicit breaks; split everything else on whitespace.
+  const lines = text.split(/(\n+)/)
+  for (const line of lines) {
+    if (!line) continue
+    if (/^\n+$/.test(line)) {
+      tokens.push({ word: line, isBreak: true })
+      continue
+    }
+    const parts = line.split(/(\s+)/)
+    for (const part of parts) {
+      if (!part) continue
+      tokens.push({ word: part, isBreak: false })
+    }
+  }
+  return tokens
+}
 
 interface ShlokaCardProps {
   sanskrit: string
@@ -74,29 +103,50 @@ export function ShlokaCard({
         CH.{chapter} · V.{verse} · {chapterName}
       </div>
 
-      {/* Sanskrit — character by character with blur */}
+      {/* Sanskrit — word-by-word reveal that preserves Devanagari conjuncts.
+          Splitting into individual graphemes was breaking ligatures like
+          द्ध, र्म, ष्य and forcing line wraps mid-word. We now render each
+          whitespace-delimited word as a single shaped run. */}
       <div
+        lang="sa"
         style={{
-          fontFamily: 'var(--font-divine, Cormorant Garamond, serif)',
+          fontFamily: DEVANAGARI_FONT_STACK,
           fontSize: 22,
-          fontStyle: 'italic',
-          fontWeight: 300,
+          fontStyle: 'normal',
+          fontWeight: 500,
           color: '#F0C040',
-          lineHeight: 1.8,
+          lineHeight: 1.85,
           marginBottom: 14,
+          wordBreak: 'keep-all',
+          overflowWrap: 'normal',
         }}
       >
         {revealed
-          ? splitGraphemes(sanskrit).map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, filter: 'blur(0px)' }}
-                transition={{ delay: i * 0.07, duration: 0.3 }}
-              >
-                {char}
-              </motion.span>
-            ))
+          ? splitVerseTokens(sanskrit).map((token, i) => {
+              if (token.isBreak) {
+                return (
+                  <React.Fragment key={`br-${i}`}>
+                    {Array.from({ length: token.word.length }).map((_, j) => (
+                      <br key={j} />
+                    ))}
+                  </React.Fragment>
+                )
+              }
+              if (/^\s+$/.test(token.word)) {
+                return <span key={i}>{token.word}</span>
+              }
+              return (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, filter: 'blur(0px)' }}
+                  transition={{ delay: i * 0.12, duration: 0.35 }}
+                  style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                >
+                  {token.word}
+                </motion.span>
+              )
+            })
           : <span style={{ opacity: 0 }}>{sanskrit}</span>}
       </div>
 

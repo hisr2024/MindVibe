@@ -48,7 +48,7 @@ export function KarmaWeightSelector({
           padding: '0 8px',
         }}
       >
-        {KARMA_WEIGHTS.map((w) => {
+        {KARMA_WEIGHTS.map((w, idx) => {
           const isSelected = selected === w.id
           const otherSelected = selected !== null && !isSelected
           return (
@@ -71,15 +71,17 @@ export function KarmaWeightSelector({
                 border: 'none',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
-                opacity: otherSelected ? 0.3 : 1,
+                opacity: otherSelected ? 0.45 : 1,
                 transition: 'opacity 0.2s ease',
               }}
             >
+              {/* Every diya is alive — staggered phase keeps them out of sync */}
               <DharmaFlameIcon
                 size={w.flameSize}
                 intensity={isSelected ? 'bright' : otherSelected ? 'dim' : 'normal'}
                 color={isSelected ? categoryColor : '#D4A017'}
-                animate={isSelected}
+                animate
+                phase={idx}
               />
               <span
                 style={{

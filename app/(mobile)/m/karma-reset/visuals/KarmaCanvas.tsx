@@ -31,20 +31,24 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
   const configRef = useRef(PHASE_CONFIG[phase])
+  const phaseRef = useRef(phase)
 
   // Smoothly transition config on phase change
   useEffect(() => {
     configRef.current = PHASE_CONFIG[phase]
+    phaseRef.current = phase
   }, [phase])
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
     let frame = 0
+    let cancelled = false
 
-    const dpr = window.devicePixelRatio || 1
+    const dpr = Math.min(window.devicePixelRatio || 1, 2) // cap dpr to avoid huge buffers on Android
     const resize = () => {
       canvas.width = window.innerWidth * dpr
       canvas.height = window.innerHeight * dpr
@@ -54,7 +58,7 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps) {
     resize()
     window.addEventListener('resize', resize)
 
-    const draw = () => {
+    const drawFrame = () => {
       const w = window.innerWidth
       const h = window.innerHeight
       const config = configRef.current
@@ -77,16 +81,36 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps) {
       centerGrad.addColorStop(1, `rgba(${config.rgb},0)`)
       ctx.fillStyle = centerGrad
       ctx.fillRect(0, 0, w, h)
-
-      frame++
-      animRef.current = requestAnimationFrame(draw)
     }
 
-    draw()
+    const tick = () => {
+      if (cancelled) return
+      // During the seal phase the screen already has a mandala + flame
+      // garland animating. Running this RAF on top causes GPU pressure that
+      // crashes Android WebView. Paint one final still frame and stop.
+      if (phaseRef.current === 'seal') {
+        drawFrame()
+        animRef.current = 0
+        return
+      }
+      // Throttle to ~30 fps — visually identical for a slow ember pulse,
+      // half the GPU work compared to vsync (60+ fps).
+      drawFrame()
+      frame++
+      animRef.current = window.setTimeout(() => {
+        animRef.current = requestAnimationFrame(tick)
+      }, 33) as unknown as number
+    }
+
+    tick()
 
     return () => {
+      cancelled = true
       window.removeEventListener('resize', resize)
-      cancelAnimationFrame(animRef.current)
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current)
+        clearTimeout(animRef.current)
+      }
     }
   }, [])
 
