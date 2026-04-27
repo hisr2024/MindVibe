@@ -32,8 +32,6 @@
     "clean": "rm -rf .expo dist node_modules/.cache android ios"
   },
   "dependencies": {
-    "@picovoice/cobra-react-native": "^2.0.2",
-    "@picovoice/porcupine-react-native": "^3.0.4",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@sentry/react-native": "~5.33.0",
     "@shopify/react-native-skia": "^1.3.0",
