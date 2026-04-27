@@ -127,8 +127,8 @@ importers:
         version: 5.0.12(@types/react@18.3.28)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.2.3
-        version: 16.2.3
+        specifier: ^16.2.4
+        version: 16.2.4
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.59.1
@@ -822,8 +822,8 @@ packages:
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
 
-  '@next/bundle-analyzer@16.2.3':
-    resolution: {integrity: sha512-aDwW4f4SVqbQDWzSBHQJ1KI6H+lx8oX/vS3xGqzLajUu+KQb7uakK88AIMvRIf7TlIonce67g594rzpxvBuJIw==}
+  '@next/bundle-analyzer@16.2.4':
+    resolution: {integrity: sha512-EAA9xTDv0P1IiUcZaASJJPkNDjRvL7OMTha6XN8MBzALYGfn7I52Mn7vRiyjVfNrtUPi2qiacY+eFVXe3lKCXA==}
 
   '@next/env@16.2.4':
     resolution: {integrity: sha512-dKkkOzOSwFYe5RX6y26fZgkSpVAlIOJKQHIiydQcrWH6y/97+RceSOAdjZ14Qa3zLduVUy0TXcn+EiM6t4rPgw==}
@@ -3166,6 +3166,9 @@ packages:
   es-module-lexer@2.0.0:
     resolution: {integrity: sha512-5POEcUuZybH7IdmGsD8wlf0AI55wMecM9rVBTI/qEAy2c1kTOm3DjFYjrBdI2K3BaJjJYfYFeRtM0t9ssnRuxw==}
 
+  es-module-lexer@2.1.0:
+    resolution: {integrity: sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ==}
+
   es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
     engines: {node: '>= 0.4'}
@@ -4592,6 +4595,10 @@ packages:
 
   postcss@8.5.10:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.12:
+    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -6265,7 +6272,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@next/bundle-analyzer@16.2.3':
+  '@next/bundle-analyzer@16.2.4':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -8846,6 +8853,8 @@ snapshots:
 
   es-module-lexer@2.0.0: {}
 
+  es-module-lexer@2.1.0: {}
+
   es-object-atoms@1.1.1:
     dependencies:
       es-errors: 1.3.0
@@ -10348,6 +10357,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  postcss@8.5.12:
+    dependencies:
+      nanoid: 3.3.11
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+
   postgres-array@2.0.0: {}
 
   postgres-bytea@1.0.1: {}
@@ -11343,7 +11358,7 @@ snapshots:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.12
       rollup: 4.60.2
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -11436,7 +11451,7 @@ snapshots:
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.21.0
-      es-module-lexer: 2.0.0
+      es-module-lexer: 2.1.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
