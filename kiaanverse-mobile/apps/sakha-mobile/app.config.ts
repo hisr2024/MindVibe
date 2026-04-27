@@ -58,6 +58,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     policy: 'appVersion' as const,
   },
 
+  // EAS Update — channel routing handled by eas.json. The URL is the
+  // update server endpoint and is pinned to the EAS project (same UUID
+  // as extra.eas.projectId).
+  updates: {
+    url: 'https://u.expo.dev/2ca58471-88ee-43fe-98ab-cbe9ac502ac5',
+  },
+
   android: {
     package: 'com.kiaanverse.sakha',
     versionCode: 1,
