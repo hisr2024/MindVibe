@@ -175,16 +175,47 @@ class MockTTSProvider:
 # ─── Real provider stubs ──────────────────────────────────────────────────
 
 
+_SARVAM_BASE_URL = os.environ.get(
+    "KIAAN_SARVAM_BASE_URL", "https://api.sarvam.ai"
+)
+_SARVAM_TTS_MODEL = os.environ.get("KIAAN_SARVAM_TTS_MODEL", "bulbul:v2")
+_SARVAM_TTS_HTTP_TIMEOUT_S = float(
+    os.environ.get("KIAAN_SARVAM_HTTP_TIMEOUT_S", "30.0")
+)
+_SARVAM_TTS_CHUNK_BYTES = int(
+    os.environ.get("KIAAN_SARVAM_CHUNK_BYTES", "32768")
+)
+
+# Sarvam expects ISO-639-1 plus a region code. Map our short lang_hints.
+_SARVAM_LANG_CODE: dict[str, str] = {
+    "hi": "hi-IN",
+    "mr": "mr-IN",
+    "bn": "bn-IN",
+    "ta": "ta-IN",
+    "te": "te-IN",
+    "pa": "pa-IN",
+    "gu": "gu-IN",
+    "kn": "kn-IN",
+    "ml": "ml-IN",
+    "sa": "sa-IN",
+    "hi-en": "hi-IN",  # code-mixed English-in-Hindi → Hindi voice
+}
+
+
 class SarvamTTSProvider:
     """Sarvam TTS — Indic + Sanskrit voices.
 
-    Activates when KIAAN_SARVAM_API_KEY is set. Otherwise raises so the
-    router falls back to Mock."""
+    Sarvam's TTS endpoint is a non-streaming REST call: it returns the
+    whole synthesized audio as base64 in a JSON body. We re-chunk that
+    audio into TTSChunks of ~32KB each so downstream consumers (WSS
+    audio.chunk frames) see the same shape they'd see from a true
+    streaming provider.
+
+    voice_id format: 'sarvam:<speaker_name>' (e.g. 'sarvam:meera').
+    """
 
     name = "sarvam"
-    supported_languages = frozenset(
-        {"hi", "mr", "bn", "ta", "te", "pa", "gu", "kn", "ml", "hi-en", "sa"}
-    )
+    supported_languages = frozenset(_SARVAM_LANG_CODE.keys())
 
     def __init__(self) -> None:
         self._api_key = os.environ.get("KIAAN_SARVAM_API_KEY")
@@ -194,6 +225,27 @@ class SarvamTTSProvider:
 
     def supports_voice(self, voice_id: str) -> bool:
         return voice_id.startswith("sarvam:")
+
+    @staticmethod
+    def _parse_voice_id(voice_id: str) -> str:
+        if ":" not in voice_id:
+            raise ValueError(
+                f"SarvamTTSProvider: voice_id missing 'sarvam:' prefix: {voice_id!r}"
+            )
+        prefix, _, raw = voice_id.partition(":")
+        if prefix != "sarvam" or not raw:
+            raise ValueError(
+                f"SarvamTTSProvider: malformed voice_id {voice_id!r} "
+                f"(expected 'sarvam:<speaker>')"
+            )
+        return raw
+
+    @staticmethod
+    def _lang_code(lang_hint: str) -> str:
+        normalized = (lang_hint or "hi").lower()
+        return _SARVAM_LANG_CODE.get(normalized, _SARVAM_LANG_CODE.get(
+            normalized.split("-")[0], "hi-IN"
+        ))
 
     async def synthesize_streaming(
         self,
@@ -207,22 +259,107 @@ class SarvamTTSProvider:
                 f"SarvamTTSProvider: KIAAN_SARVAM_API_KEY not set "
                 f"(text_len={len(text)}, voice_id={voice_id!r}, lang={lang_hint!r})."
             )
+        if not text:
+            return
+
         try:
-            import sarvamai  # noqa: F401  # type: ignore[import-not-found]
-        except ImportError as e:
-            raise RuntimeError("sarvamai SDK not installed") from e
-        # NOTE: real streaming impl deferred — see stt_router.SarvamSTTProvider
-        # for the same rationale.
-        if False:  # pragma: no cover — placeholder to satisfy AsyncIterator
-            yield TTSChunk(seq=0, data=b"")
-        raise NotImplementedError(
-            f"SarvamTTSProvider streaming impl not wired "
-            f"(text_len={len(text)}, voice_id={voice_id!r}, lang={lang_hint!r})."
+            import httpx  # type: ignore[import-not-found]
+        except ImportError as e:  # pragma: no cover
+            raise RuntimeError("httpx not installed") from e
+
+        speaker = self._parse_voice_id(voice_id)
+        url = f"{_SARVAM_BASE_URL.rstrip('/')}/text-to-speech"
+        headers = {
+            "api-subscription-key": self._api_key,
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "inputs": [text],
+            "target_language_code": self._lang_code(lang_hint),
+            "speaker": speaker,
+            "model": _SARVAM_TTS_MODEL,
+            "audio_response_format": "wav",
+            "speech_sample_rate": 22050,
+            "enable_preprocessing": True,
+            "pitch": 0,
+            "pace": 1.0,
+            "loudness": 1.0,
+        }
+
+        started = time.monotonic()
+        timeout = httpx.Timeout(
+            connect=10.0,
+            read=_SARVAM_TTS_HTTP_TIMEOUT_S,
+            write=10.0,
+            pool=10.0,
         )
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(url, headers=headers, json=payload)
+            if resp.status_code != 200:
+                body = resp.text[:500]
+                raise RuntimeError(
+                    f"SarvamTTSProvider: HTTP {resp.status_code} "
+                    f"speaker={speaker!r} body={body!r}"
+                )
+            data = resp.json()
+
+        audios = data.get("audios") or []
+        if not audios:
+            raise RuntimeError(
+                f"SarvamTTSProvider: empty 'audios' in response keys={list(data.keys())}"
+            )
+
+        # Decode + concatenate every clip in audios (typically just one).
+        wav_bytes = bytearray()
+        import base64 as _b64
+        for clip_b64 in audios:
+            wav_bytes.extend(_b64.b64decode(clip_b64))
+
+        # Chunk the WAV into TTSChunks. Mark the final chunk is_final=True.
+        seq = 0
+        view = bytes(wav_bytes)
+        total = len(view)
+        offset = 0
+        while offset < total:
+            end = min(offset + _SARVAM_TTS_CHUNK_BYTES, total)
+            piece = view[offset:end]
+            elapsed = int((time.monotonic() - started) * 1000)
+            yield TTSChunk(
+                seq=seq, data=piece,
+                mime="audio/wav", is_final=(end == total),
+                elapsed_ms=elapsed,
+            )
+            seq += 1
+            offset = end
+
+
+_ELEVENLABS_BASE_URL = os.environ.get(
+    "KIAAN_ELEVENLABS_BASE_URL", "https://api.elevenlabs.io"
+)
+_ELEVENLABS_DEFAULT_MODEL = os.environ.get(
+    "KIAAN_ELEVENLABS_MODEL", "eleven_turbo_v2_5"
+)
+_ELEVENLABS_OUTPUT_FORMAT = os.environ.get(
+    "KIAAN_ELEVENLABS_OUTPUT_FORMAT", "opus_24000_64"
+)
+_ELEVENLABS_HTTP_TIMEOUT_S = float(
+    os.environ.get("KIAAN_ELEVENLABS_HTTP_TIMEOUT_S", "30.0")
+)
+_ELEVENLABS_CHUNK_BYTES = int(
+    os.environ.get("KIAAN_ELEVENLABS_CHUNK_BYTES", "16384")
+)
 
 
 class ElevenLabsTTSProvider:
-    """ElevenLabs TTS — English voice for Sakha."""
+    """ElevenLabs streaming TTS for English Sakha voices.
+
+    Calls /v1/text-to-speech/{voice_id}/stream with audio/opus output and
+    yields TTSChunks as bytes arrive over the HTTP stream. The voice_id
+    is parsed as 'elevenlabs:<elevenlabs_voice_id>' — anything before the
+    colon is the routing prefix; anything after is sent verbatim to
+    ElevenLabs.
+    """
 
     name = "elevenlabs"
     supported_languages = frozenset({"en", "en-US", "en-GB", "en-IN", "en-AU"})
@@ -236,6 +373,21 @@ class ElevenLabsTTSProvider:
     def supports_voice(self, voice_id: str) -> bool:
         return voice_id.startswith("elevenlabs:")
 
+    @staticmethod
+    def _parse_voice_id(voice_id: str) -> str:
+        """Strip the 'elevenlabs:' prefix, return the raw provider voice_id."""
+        if ":" not in voice_id:
+            raise ValueError(
+                f"ElevenLabsTTSProvider: voice_id missing 'elevenlabs:' prefix: {voice_id!r}"
+            )
+        prefix, _, raw = voice_id.partition(":")
+        if prefix != "elevenlabs" or not raw:
+            raise ValueError(
+                f"ElevenLabsTTSProvider: malformed voice_id {voice_id!r} "
+                f"(expected 'elevenlabs:<id>')"
+            )
+        return raw
+
     async def synthesize_streaming(
         self,
         *,
@@ -248,16 +400,77 @@ class ElevenLabsTTSProvider:
                 f"ElevenLabsTTSProvider: KIAAN_ELEVENLABS_API_KEY not set "
                 f"(text_len={len(text)}, voice_id={voice_id!r}, lang={lang_hint!r})."
             )
+        if not text:
+            return
+
         try:
-            import elevenlabs  # noqa: F401  # type: ignore[import-not-found]
-        except ImportError as e:
-            raise RuntimeError("elevenlabs SDK not installed") from e
-        if False:  # pragma: no cover
-            yield TTSChunk(seq=0, data=b"")
-        raise NotImplementedError(
-            f"ElevenLabsTTSProvider streaming impl not wired "
-            f"(text_len={len(text)}, voice_id={voice_id!r}, lang={lang_hint!r})."
+            import httpx  # type: ignore[import-not-found]
+        except ImportError as e:  # pragma: no cover — httpx is in requirements.txt
+            raise RuntimeError("httpx not installed") from e
+
+        eleven_voice_id = self._parse_voice_id(voice_id)
+        url = (
+            f"{_ELEVENLABS_BASE_URL.rstrip('/')}/v1/text-to-speech/"
+            f"{eleven_voice_id}/stream"
+            f"?output_format={_ELEVENLABS_OUTPUT_FORMAT}"
         )
+        headers = {
+            "xi-api-key": self._api_key,
+            "Accept": "audio/ogg",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "text": text,
+            "model_id": _ELEVENLABS_DEFAULT_MODEL,
+            "voice_settings": {
+                "stability": 0.55,
+                "similarity_boost": 0.75,
+                "style": 0.20,
+                "use_speaker_boost": True,
+            },
+        }
+
+        started = time.monotonic()
+        seq = 0
+        timeout = httpx.Timeout(
+            connect=10.0,
+            read=_ELEVENLABS_HTTP_TIMEOUT_S,
+            write=10.0,
+            pool=10.0,
+        )
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            async with client.stream(
+                "POST", url, headers=headers, json=payload,
+            ) as resp:
+                if resp.status_code != 200:
+                    body = (await resp.aread()).decode(errors="replace")[:500]
+                    raise RuntimeError(
+                        f"ElevenLabsTTSProvider: HTTP {resp.status_code} "
+                        f"voice_id={eleven_voice_id!r} body={body!r}"
+                    )
+                buffer = bytearray()
+                async for raw in resp.aiter_bytes(_ELEVENLABS_CHUNK_BYTES):
+                    if not raw:
+                        continue
+                    buffer.extend(raw)
+                    while len(buffer) >= _ELEVENLABS_CHUNK_BYTES:
+                        chunk_data = bytes(buffer[:_ELEVENLABS_CHUNK_BYTES])
+                        del buffer[:_ELEVENLABS_CHUNK_BYTES]
+                        elapsed = int((time.monotonic() - started) * 1000)
+                        yield TTSChunk(
+                            seq=seq, data=chunk_data,
+                            mime="audio/opus", is_final=False,
+                            elapsed_ms=elapsed,
+                        )
+                        seq += 1
+                # Flush any remainder as the final chunk
+                elapsed = int((time.monotonic() - started) * 1000)
+                yield TTSChunk(
+                    seq=seq, data=bytes(buffer),
+                    mime="audio/opus", is_final=True,
+                    elapsed_ms=elapsed,
+                )
 
 
 # ─── Audio cache ──────────────────────────────────────────────────────────
@@ -418,6 +631,7 @@ class TTSRouter:
                 fell_back_to_mock=False,
             )
 
+        # Built-in routing: Indic→Sarvam, English→ElevenLabs.
         if normalized in _INDIC_LANGS_TTS:
             sarvam = SarvamTTSProvider()
             if sarvam.is_configured():
@@ -427,25 +641,46 @@ class TTSRouter:
                     reason=f"indic lang {lang_hint!r} → Sarvam",
                     fell_back_to_mock=False,
                 )
-            return TTSRouterDecision(
-                provider_name="mock",
-                voice_id=voice_id,
-                reason="Sarvam not configured → mock fallback",
-                fell_back_to_mock=True,
-            )
+        else:
+            eleven = ElevenLabsTTSProvider()
+            if eleven.is_configured():
+                return TTSRouterDecision(
+                    provider_name=eleven.name,
+                    voice_id=voice_id,
+                    reason=f"english lang {lang_hint!r} → ElevenLabs",
+                    fell_back_to_mock=False,
+                )
 
-        eleven = ElevenLabsTTSProvider()
-        if eleven.is_configured():
-            return TTSRouterDecision(
-                provider_name=eleven.name,
-                voice_id=voice_id,
-                reason=f"english lang {lang_hint!r} → ElevenLabs",
-                fell_back_to_mock=False,
-            )
+        # Registry fallthrough — let plugin providers claim the lang.
+        from backend.services.voice.provider_registry import (
+            find_provider_by_voice_prefix,
+            find_provider_by_language,
+        )
+        registered = find_provider_by_voice_prefix("tts", voice_id) \
+            or find_provider_by_language("tts", lang_hint)
+        if registered is not None:
+            try:
+                inst = registered.factory()
+                if getattr(inst, "is_configured", lambda: True)():
+                    return TTSRouterDecision(
+                        provider_name=registered.name,
+                        voice_id=voice_id,
+                        reason=f"registered provider {registered.name!r}",
+                        fell_back_to_mock=False,
+                    )
+            except Exception as e:
+                logger.warning(
+                    "voice.tts.registered.factory_failed name=%s err=%s",
+                    registered.name, e,
+                )
+
         return TTSRouterDecision(
             provider_name="mock",
             voice_id=voice_id,
-            reason="ElevenLabs not configured → mock fallback",
+            reason=(
+                f"no configured provider for lang {lang_hint!r} "
+                f"→ mock fallback"
+            ),
             fell_back_to_mock=True,
         )
 
@@ -457,6 +692,19 @@ class TTSRouter:
             return SarvamTTSProvider(), decision
         if decision.provider_name == "elevenlabs":
             return ElevenLabsTTSProvider(), decision
+
+        # Registry-backed provider
+        from backend.services.voice.provider_registry import get_provider
+        registered = get_provider("tts", decision.provider_name)
+        if registered is not None:
+            try:
+                return registered.factory(), decision
+            except Exception as e:  # pragma: no cover — defensive
+                logger.error(
+                    "voice.tts.registered.build_failed name=%s err=%s",
+                    decision.provider_name, e,
+                )
+
         logger.error(
             "TTSRouter: unknown provider %r — falling back to mock",
             decision.provider_name,

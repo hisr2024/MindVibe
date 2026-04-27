@@ -72,21 +72,87 @@ pnpm --filter @kiaanverse/sakha-mobile run submit:android
 
 ## 3. Required environment variables
 
-### Backend (production)
+### Backend (production) — core
 
 | Variable | What | Required? |
 |---|---|---|
 | `OPENAI_API_KEY` | gpt-4o-mini streaming | yes for live LLM |
 | `KIAAN_LLM_PROFILE` | "production" / "preview" | optional |
-| `KIAAN_SARVAM_API_KEY` | Sarvam Saarika STT + TTS | yes for live |
-| `KIAAN_DEEPGRAM_API_KEY` | Deepgram Nova-3 STT (English) | yes for live |
-| `KIAAN_ELEVENLABS_API_KEY` | ElevenLabs TTS (English) | yes for live |
-| `KIAAN_VOICE_MOCK_PROVIDERS` | `1` to force mock STT/TTS/LLM | dev/CI only |
+| `KIAAN_SARVAM_API_KEY` | Sarvam Saarika STT + Bulbul TTS | yes for live Indic |
+| `KIAAN_DEEPGRAM_API_KEY` | Deepgram Nova-3 STT (English) | yes for live English STT |
+| `KIAAN_ELEVENLABS_API_KEY` | ElevenLabs TTS (English) | yes for live English TTS |
+| `KIAAN_VOICE_MOCK_PROVIDERS` | `1` to force mock STT/TTS/LLM (overrides every other key) | dev/CI only |
 | `KIAAN_VOICE_ID_EN` / `_HI` / `_MR` / … | per-language voice ID override | optional |
 | `KIAAN_HELPLINE_OVERRIDES_JSON` | per-region helpline number override | optional |
 | `KIAAN_SAFETY_AUDIO_REQUIRED` | `1` to fail builds on placeholder slots | CI gate |
 | `KIAAN_PROMPT_LOADER_TEST` | `1` to allow `reset_cache_for_tests()` | tests only |
 | `KIAAN_VOICE_QUOTA_TEST` | `1` to allow quota counter reset | tests only |
+
+### Backend — provider tuning (all optional)
+
+| Variable | Default | Notes |
+|---|---|---|
+| `KIAAN_ELEVENLABS_BASE_URL` | `https://api.elevenlabs.io` | swap for proxy / EU region |
+| `KIAAN_ELEVENLABS_MODEL` | `eleven_turbo_v2_5` | latency-optimized turbo model |
+| `KIAAN_ELEVENLABS_OUTPUT_FORMAT` | `opus_24000_64` | 24kHz opus, 64kbps |
+| `KIAAN_ELEVENLABS_HTTP_TIMEOUT_S` | `30.0` | per-request read timeout |
+| `KIAAN_ELEVENLABS_CHUNK_BYTES` | `16384` | audio chunk size for WSS |
+| `KIAAN_SARVAM_BASE_URL` | `https://api.sarvam.ai` | shared by Sarvam STT + TTS |
+| `KIAAN_SARVAM_TTS_MODEL` | `bulbul:v2` | Sarvam TTS model |
+| `KIAAN_SARVAM_STT_MODEL` | `saarika:v2` | Sarvam STT model |
+| `KIAAN_SARVAM_HTTP_TIMEOUT_S` | `30.0` | per-request read timeout |
+| `KIAAN_SARVAM_CHUNK_BYTES` | `32768` | local chunk size (Sarvam returns whole WAV) |
+
+### Adding a new provider (extensibility)
+
+The `backend/services/voice/provider_registry.py` module exposes
+`register_stt_provider`, `register_tts_provider`, `register_llm_provider`.
+
+```python
+# backend/services/voice/providers/google_tts.py
+import os
+from collections.abc import AsyncIterator
+from backend.services.voice.tts_router import TTSChunk
+from backend.services.voice.provider_registry import register_tts_provider
+
+
+class GoogleTTSProvider:
+    name = "google"
+    supported_languages = frozenset({"en", "hi", "mr"})
+
+    def __init__(self) -> None:
+        self._key = os.environ.get("GOOGLE_TTS_KEY")
+
+    def is_configured(self) -> bool:
+        return bool(self._key)
+
+    def supports_voice(self, voice_id: str) -> bool:
+        return voice_id.startswith("google:")
+
+    async def synthesize_streaming(
+        self, *, text: str, voice_id: str, lang_hint: str,
+    ) -> AsyncIterator[TTSChunk]:
+        ...
+
+
+register_tts_provider(
+    "google",
+    GoogleTTSProvider,
+    voice_prefix="google:",
+    languages=frozenset({"en", "hi", "mr"}),
+)
+```
+
+Then import the module once at app startup so the registration runs:
+
+```python
+# backend/main.py
+from backend.services.voice.providers import google_tts  # noqa: F401
+```
+
+Now any voice_id that starts with `google:` (e.g.
+`KIAAN_VOICE_ID_EN=google:en-US-Wavenet-D`) will route to the new
+provider. The Sarvam/ElevenLabs built-ins keep working unchanged.
 
 ### Mobile (EAS secrets)
 

@@ -203,9 +203,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     subprotocol: SUBPROTOCOL,
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
-      // Real projectId is injected by `eas init` on first build. Keeping
-      // a placeholder for static-config validation; eas overrides it.
-      projectId: process.env.EAS_PROJECT_ID ?? 'sakha-placeholder',
+      // Linked to expo.dev/accounts/kiaanverse/projects/sakha-voice-companion.
+      // EAS_PROJECT_ID env var wins so per-environment overrides still work.
+      projectId: process.env.EAS_PROJECT_ID ?? '2ca58471-88ee-43fe-98ab-cbe9ac502ac5',
     },
     // Picovoice access keys are runtime-only. Set via EAS Secrets:
     //   eas secret:create --scope project --name PICOVOICE_ACCESS_KEY ...
