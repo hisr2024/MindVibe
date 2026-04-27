@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "persona_version": "1.0.0",
+  "description": "Pre-rendered Sakha safety audio bundle. Three categories × 10 languages = 30 clips. Each clip is locked to the per-language voice_id in tts_router.DEFAULT_VOICE_IDS so the same Sakha that speaks during a normal turn also speaks the safety messages — no jarring voice switch when the user enters crisis or hits quota.",
+  "languages": ["en", "hi", "mr", "bn", "ta", "te", "pa", "gu", "kn", "ml"],
+  "categories": {
+    "crisis_routing": {
+      "purpose": "Routed when CrisisPartialScanner detects ideation. Plays while the CrisisOverlay mounts; the user is then routed to local helplines.",
+      "served_at": "/static/voice/safety/crisis_routing.{lang}.opus",
+      "english_master_text": "I am right here with you. What you are feeling is real, and there is help — right now, on this phone. Please call the number on your screen. I will wait.",
+      "max_duration_sec": 25,
+      "non_negotiable": true,
+      "filter_check": "must_anchor_with_canonical_warmth_no_clinical_jargon"
+    },
+    "quota_upgrade": {
+      "purpose": "Played gently when a user on a paid tier exhausts daily minutes mid-turn. Free-tier first attempt also plays this.",
+      "served_at": "/static/voice/safety/quota_upgrade.{lang}.opus",
+      "english_master_text": "We have reached the rest of today's voice together. Walk further when it feels right. I am still here in silence.",
+      "max_duration_sec": 18,
+      "non_negotiable": false,
+      "filter_check": "no_pressure_no_countdown"
+    },
+    "silence_hum": {
+      "purpose": "Soft 'मौन में सखा' (Sakha in silence) clip used during offline state and graceful network-loss degradation per spec.",
+      "served_at": "/static/voice/safety/silence_hum.{lang}.opus",
+      "english_master_text": "[Soft, breath-paced sustained tone with a single barely-audible 'हम्म' at end. No words.]",
+      "max_duration_sec": 8,
+      "non_negotiable": false,
+      "filter_check": "no_words_required"
+    }
+  },
+  "slots": [
+    {
+      "id": "crisis_routing.en",
+      "category": "crisis_routing", "lang": "en",
+      "voice_id": "elevenlabs:sakha-en-v1",
+      "path": "backend/static/voice/safety/crisis_routing.en.opus",
+      "expected_duration_sec": 18,
+      "status": "placeholder"
+    },
+    { "id": "crisis_routing.hi", "category": "crisis_routing", "lang": "hi", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.hi.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.mr", "category": "crisis_routing", "lang": "mr", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.mr.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.bn", "category": "crisis_routing", "lang": "bn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.bn.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.ta", "category": "crisis_routing", "lang": "ta", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.ta.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.te", "category": "crisis_routing", "lang": "te", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.te.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.pa", "category": "crisis_routing", "lang": "pa", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.pa.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.gu", "category": "crisis_routing", "lang": "gu", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.gu.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.kn", "category": "crisis_routing", "lang": "kn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.kn.opus", "expected_duration_sec": 18, "status": "placeholder" },
+    { "id": "crisis_routing.ml", "category": "crisis_routing", "lang": "ml", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/crisis_routing.ml.opus", "expected_duration_sec": 18, "status": "placeholder" },
+
+    { "id": "quota_upgrade.en", "category": "quota_upgrade", "lang": "en", "voice_id": "elevenlabs:sakha-en-v1", "path": "backend/static/voice/safety/quota_upgrade.en.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.hi", "category": "quota_upgrade", "lang": "hi", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.hi.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.mr", "category": "quota_upgrade", "lang": "mr", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.mr.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.bn", "category": "quota_upgrade", "lang": "bn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.bn.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.ta", "category": "quota_upgrade", "lang": "ta", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.ta.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.te", "category": "quota_upgrade", "lang": "te", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.te.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.pa", "category": "quota_upgrade", "lang": "pa", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.pa.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.gu", "category": "quota_upgrade", "lang": "gu", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.gu.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.kn", "category": "quota_upgrade", "lang": "kn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.kn.opus", "expected_duration_sec": 14, "status": "placeholder" },
+    { "id": "quota_upgrade.ml", "category": "quota_upgrade", "lang": "ml", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/quota_upgrade.ml.opus", "expected_duration_sec": 14, "status": "placeholder" },
+
+    { "id": "silence_hum.en", "category": "silence_hum", "lang": "en", "voice_id": "elevenlabs:sakha-en-v1", "path": "backend/static/voice/safety/silence_hum.en.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.hi", "category": "silence_hum", "lang": "hi", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.hi.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.mr", "category": "silence_hum", "lang": "mr", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.mr.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.bn", "category": "silence_hum", "lang": "bn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.bn.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.ta", "category": "silence_hum", "lang": "ta", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.ta.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.te", "category": "silence_hum", "lang": "te", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.te.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.pa", "category": "silence_hum", "lang": "pa", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.pa.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.gu", "category": "silence_hum", "lang": "gu", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.gu.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.kn", "category": "silence_hum", "lang": "kn", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.kn.opus", "expected_duration_sec": 6, "status": "placeholder" },
+    { "id": "silence_hum.ml", "category": "silence_hum", "lang": "ml", "voice_id": "sarvam:meera", "path": "backend/static/voice/safety/silence_hum.ml.opus", "expected_duration_sec": 6, "status": "placeholder" }
+  ],
+  "human_asset_required": "Until the human-asset pipeline drops real Opus files into backend/static/voice/safety/, every slot above is marked status='placeholder'. The backend route /static/voice/safety/<file> returns 503 with header X-Sakha-Asset-Status: placeholder for placeholders. Mobile clients gracefully fall back to wisdom_engine._render_voice (Part 2) which renders the spoken-arc text — TTS'd live in the WSS turn — with no audible difference except the slight first-byte latency cost (still under spec budget). When CI must enforce real audio, set KIAAN_SAFETY_AUDIO_REQUIRED=1 — scripts/validate_safety_audio.py will fail the build."
+}

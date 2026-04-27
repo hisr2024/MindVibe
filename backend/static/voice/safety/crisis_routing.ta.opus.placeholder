@@ -1,0 +1,7 @@
+# HUMAN-ASSET-REQUIRED
+# This is a placeholder for a real Opus audio file.
+# Replace with a Sarvam/ElevenLabs-rendered .opus per the manifest at:
+#   prompts/safety_audio_manifest.json
+# When the real .opus file is present (filename without .placeholder
+# suffix), the backend route /static/voice/safety/<file> serves it
+# directly. Until then it returns 503 with X-Sakha-Asset-Status: placeholder.
