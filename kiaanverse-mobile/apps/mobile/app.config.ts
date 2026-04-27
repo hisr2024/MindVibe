@@ -102,6 +102,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       // audio session is killed the moment the user leaves the app.
       'android.permission.FOREGROUND_SERVICE',
       'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+      // Required by SakhaForegroundService.acquireWakeLock() to keep
+      // the CPU awake for the duration of a voice session (capped at
+      // 30 min). Released on session end or when foreground service stops.
+      'android.permission.WAKE_LOCK',
     ],
     intentFilters: [
       {
@@ -133,6 +137,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // is killed before the first audio buffer is decoded). See the plugin's
     // header comment for the full failure analysis.
     './plugins/with-track-player-android',
+    // Sakha Voice Companion — declares the typed mediaPlayback foreground
+    // service in the merged manifest and adds Devanagari notification
+    // strings so backgrounded voice sessions survive Android 14+'s
+    // typed-FGS requirement.
+    './plugins/withKiaanForegroundService',
+    // Sakha Voice Companion — sets AudioAttributes meta-data
+    // (USAGE_ASSISTANCE_SONIFICATION + GAIN_TRANSIENT_MAY_DUCK +
+    // routeBluetooth=true) so the native player ducks foreign music
+    // and routes through BT headsets without restarting the session.
+    './plugins/withKiaanAudioFocus',
     'expo-router',
     'expo-splash-screen',
     [
@@ -170,6 +184,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-dontwarn com.google.android.exoplayer2.**',
             '-dontwarn androidx.media3.**',
             '-keep class * extends androidx.media.session.MediaButtonReceiver { *; }',
+            '',
+            '# Sakha Voice Companion — Kotlin TurboModule + foreground service.',
+            '# Loaded by JS class name through Fabric autolinking, so R8 strips',
+            '# them otherwise; the WSS audio.chunk stream then NoClassDefFoundErrors',
+            '# on the first appendChunk Promise call.',
+            '-keep class com.kiaanverse.sakha.** { *; }',
+            '-keep interface com.kiaanverse.sakha.** { *; }',
+            '-dontwarn com.kiaanverse.sakha.**',
             '',
             '# react-native-svg (Relationship Compass radar + compass-rose). R8',
             '# strips the Fabric/JSI ViewManager classes because they are loaded',

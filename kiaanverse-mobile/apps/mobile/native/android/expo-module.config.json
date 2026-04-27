@@ -1,0 +1,6 @@
+{
+  "platforms": ["android"],
+  "android": {
+    "modules": ["com.kiaanverse.sakha.audio.KiaanAudioPlayerPackage"]
+  }
+}
