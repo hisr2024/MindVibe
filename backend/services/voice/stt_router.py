@@ -201,22 +201,62 @@ class MockSTTProvider:
 # without an explicit env-var opt-in.
 
 
-class SarvamSTTProvider:
-    """Sarvam Saarika streaming STT for Indic languages.
+_SARVAM_STT_BASE_URL = os.environ.get(
+    "KIAAN_SARVAM_BASE_URL", "https://api.sarvam.ai"
+)
+_SARVAM_STT_MODEL = os.environ.get("KIAAN_SARVAM_STT_MODEL", "saarika:v2")
+_SARVAM_STT_HTTP_TIMEOUT_S = float(
+    os.environ.get("KIAAN_SARVAM_HTTP_TIMEOUT_S", "30.0")
+)
+_SARVAM_STT_LANG_CODE: dict[str, str] = {
+    "hi": "hi-IN",
+    "mr": "mr-IN",
+    "bn": "bn-IN",
+    "ta": "ta-IN",
+    "te": "te-IN",
+    "pa": "pa-IN",
+    "gu": "gu-IN",
+    "kn": "kn-IN",
+    "ml": "ml-IN",
+    "hi-en": "hi-IN",
+}
 
-    Activates when KIAAN_SARVAM_API_KEY is set. Otherwise raises at
-    start_session so the router falls back to Mock.
+
+class SarvamSTTProvider:
+    """Sarvam Saarika STT for Indic languages — batch mode on end_of_speech.
+
+    Lifecycle: start_session() — bookkeeping only. feed_audio_chunk() —
+    accumulates the base64 opus chunks into an internal buffer; yields
+    nothing (no partials in this implementation; see runbook for the
+    deferred streaming-WebSocket variant). end_of_speech() — flushes the
+    buffer to Sarvam's /speech-to-text endpoint and yields exactly one
+    is_final=True STTResult with the transcribed text.
+
+    Tradeoff: crisis-routing latency on Indic transcripts is bounded by
+    sarvam round-trip (typically 600-1500ms) instead of the sub-800ms
+    target the streaming variant would provide. Documented in the runbook.
     """
 
     name = "sarvam-saarika"
-    supported_languages = frozenset({"hi", "mr", "bn", "ta", "te", "pa", "gu", "kn", "ml", "hi-en"})
+    supported_languages = frozenset(_SARVAM_STT_LANG_CODE.keys())
 
     def __init__(self) -> None:
         self._api_key = os.environ.get("KIAAN_SARVAM_API_KEY")
-        self._client: object | None = None
+        self._session_id = ""
+        self._lang_hint = "hi"
+        self._buffer = bytearray()
+        self._seq = 0
 
     def is_configured(self) -> bool:
         return bool(self._api_key)
+
+    @staticmethod
+    def _lang_code(lang_hint: str) -> str:
+        normalized = (lang_hint or "hi").lower()
+        return _SARVAM_STT_LANG_CODE.get(
+            normalized,
+            _SARVAM_STT_LANG_CODE.get(normalized.split("-")[0], "hi-IN"),
+        )
 
     async def start_session(self, *, session_id: str, lang_hint: str) -> None:
         if not self._api_key:
@@ -225,41 +265,75 @@ class SarvamSTTProvider:
                 "Either configure the env var or set "
                 "KIAAN_VOICE_MOCK_PROVIDERS=1 to use the mock provider."
             )
-        # Real impl: open Sarvam Saarika websocket connection here.
-        # Lazy-import the SDK so this module loads without sarvam-ai installed.
-        try:
-            import sarvamai  # noqa: F401  # type: ignore[import-not-found]
-        except ImportError as e:
-            raise RuntimeError(
-                "SarvamSTTProvider: sarvamai SDK not installed. "
-                "pip install sarvamai or use mock providers."
-            ) from e
-        # NOTE: real implementation goes here — websocket open, language
-        # config, etc. Not implemented in this commit because the env
-        # cannot reach Sarvam in CI; the orchestrator has full mock
-        # coverage so the WSS endpoint is exercisable without it.
-        raise NotImplementedError(
-            f"SarvamSTTProvider streaming impl not wired (session_id={session_id!r}, "
-            f"lang_hint={lang_hint!r}). Set KIAAN_VOICE_MOCK_PROVIDERS=1 for mock."
-        )
+        self._session_id = session_id
+        self._lang_hint = lang_hint
+        self._buffer = bytearray()
+        self._seq = 0
 
     async def feed_audio_chunk(
         self, *, seq: int, opus_b64: str
     ) -> AsyncIterator[STTResult]:
-        if False:  # pragma: no cover — placeholder to satisfy AsyncIterator
+        # Accumulate; emit no partials in batch mode.
+        import base64 as _b64
+        try:
+            self._buffer.extend(_b64.b64decode(opus_b64))
+        except Exception as e:
+            raise RuntimeError(
+                f"SarvamSTTProvider: cannot base64-decode chunk seq={seq}: {e}"
+            ) from e
+        self._seq = seq
+        if False:  # pragma: no cover — async iterator must yield from a generator
             yield STTResult(text="", is_final=False, seq=seq)
-        raise NotImplementedError(
-            f"SarvamSTTProvider.feed_audio_chunk not wired "
-            f"(seq={seq}, chunk_len={len(opus_b64)})"
-        )
 
     async def end_of_speech(self) -> AsyncIterator[STTResult]:
-        if False:  # pragma: no cover
-            yield STTResult(text="", is_final=True, seq=0)
-        raise NotImplementedError
+        if not self._api_key:
+            raise RuntimeError("SarvamSTTProvider: KIAAN_SARVAM_API_KEY not set")
+
+        try:
+            import httpx  # type: ignore[import-not-found]
+        except ImportError as e:  # pragma: no cover
+            raise RuntimeError("httpx not installed") from e
+
+        if not self._buffer:
+            yield STTResult(text="", is_final=True, seq=self._seq)
+            return
+
+        url = f"{_SARVAM_STT_BASE_URL.rstrip('/')}/speech-to-text"
+        headers = {"api-subscription-key": self._api_key}
+        # Sarvam expects multipart/form-data with the audio file.
+        files = {
+            "file": ("audio.opus", bytes(self._buffer), "audio/opus"),
+        }
+        data = {
+            "language_code": self._lang_code(self._lang_hint),
+            "model": _SARVAM_STT_MODEL,
+        }
+
+        timeout = httpx.Timeout(
+            connect=10.0,
+            read=_SARVAM_STT_HTTP_TIMEOUT_S,
+            write=10.0,
+            pool=10.0,
+        )
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(
+                url, headers=headers, files=files, data=data,
+            )
+            if resp.status_code != 200:
+                body = resp.text[:500]
+                raise RuntimeError(
+                    f"SarvamSTTProvider: HTTP {resp.status_code} "
+                    f"session={self._session_id!r} body={body!r}"
+                )
+            payload = resp.json()
+
+        transcript = (payload.get("transcript") or "").strip()
+        yield STTResult(
+            text=transcript, is_final=True, seq=self._seq,
+        )
 
     async def close(self) -> None:
-        return None
+        self._buffer = bytearray()
 
 
 class DeepgramSTTProvider:
