@@ -202,13 +202,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     schemaVersion: SCHEMA_VERSION,
     subprotocol: SUBPROTOCOL,
     sentryDsn: process.env.SENTRY_DSN ?? '',
-    // EAS projectId — set only when EAS_PROJECT_ID is provided (e.g. via
-    // `eas init` writing it back, or via env). Omitting the field
-    // entirely is required when not set; passing a non-UUID placeholder
-    // makes the EAS GraphQL API reject the build with "Invalid UUID appId".
-    ...(process.env.EAS_PROJECT_ID
-      ? { eas: { projectId: process.env.EAS_PROJECT_ID } }
-      : {}),
+    eas: {
+      // Linked to expo.dev/accounts/kiaanverse/projects/sakha-voice-companion.
+      // EAS_PROJECT_ID env var wins so per-environment overrides still work.
+      projectId: process.env.EAS_PROJECT_ID ?? '2ca58471-88ee-43fe-98ab-cbe9ac502ac5',
+    },
     // Picovoice access keys are runtime-only. Set via EAS Secrets:
     //   eas secret:create --scope project --name PICOVOICE_ACCESS_KEY ...
     picovoice: {
