@@ -9,6 +9,13 @@ web-build/
 # Native builds
 ios/
 android/
+# But keep hand-authored native modules (KiaanAudioPlayer + future iOS).
+# Negations must NOT include trailing slash, and must come AFTER the
+# rule they override. The path is the project root + the per-app
+# `native/` directory — distinct from the Expo-prebuild `android/`
+# output that lives at `apps/<app>/android/`.
+!apps/*/native/
+!apps/*/native/**
 
 # Environment
 .env.local
