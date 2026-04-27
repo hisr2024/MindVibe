@@ -418,3 +418,29 @@ async def flush_buffer(
     corpus = get_dynamic_wisdom_corpus()
     flushed = await corpus._flush_buffer()
     return {"flushed": flushed, "runtime": corpus.get_runtime_metrics()}
+
+
+# ─── Voice channel rollup (Sakha v1.0.0) ─────────────────────────────────
+
+
+@router.get("/voice")
+async def voice_telemetry(
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.KIAAN_ANALYTICS_VIEW)),
+) -> dict[str, Any]:
+    """Voice-channel rollup for the operator dashboard.
+
+    Surfaces the voice-specific dimensions added in Part 3 of the Sakha
+    rollout (delivery_channel + voice_specific_outcomes). All rates
+    return None until at least one event has been recorded — a stale
+    "0%" displayed before any traffic misleads operators about whether
+    the pipeline is healthy.
+
+    Pairs with the wisdom_effectiveness table for historical analysis:
+      • In-process counters: cumulative since process start
+      • Per-day analysis: filter `delivery_channel LIKE 'voice_%'` on
+        wisdom_effectiveness
+    """
+    corpus = get_dynamic_wisdom_corpus()
+    return corpus.get_voice_metrics()

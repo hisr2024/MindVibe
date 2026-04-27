@@ -80,6 +80,10 @@ class PersonaPrompt:
     sha256: str
     source_path: str
     loaded_at_monotonic: float
+    # Wall-clock load time as ISO 8601 UTC. The monotonic value above is
+    # for computing elapsed seconds since load (drift checks); the wall
+    # value here is what we serialize in REST responses.
+    loaded_at_wall_iso: str = ""
 
     def matches_disk(self) -> bool:
         """True if the on-disk file still matches the cached snapshot.
@@ -170,6 +174,7 @@ def _load_prompt_file(path: Path, render_mode: RenderMode, version: str) -> Pers
             f"persona-version {version}. Bump the version everywhere together "
             "or roll the persona-version file back."
         )
+    import datetime as _dt
     import time as _time
     return PersonaPrompt(
         render_mode=render_mode,
@@ -178,6 +183,7 @@ def _load_prompt_file(path: Path, render_mode: RenderMode, version: str) -> Pers
         sha256=_hash_file(path),
         source_path=str(path),
         loaded_at_monotonic=_time.monotonic(),
+        loaded_at_wall_iso=_dt.datetime.now(_dt.UTC).isoformat(),
     )
 
 
