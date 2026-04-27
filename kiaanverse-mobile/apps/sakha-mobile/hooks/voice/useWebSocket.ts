@@ -57,6 +57,16 @@ export function useWebSocket({
   // Stable ref onto the store so dispatch doesn't re-create on every render
   const storeRef = useRef(useVoiceStore.getState);
 
+  const httpBaseUrl = baseUrl.replace(/^ws/, 'http').replace(/\/+$/, '');
+
+  const absolutizeAudioUrl = useCallback(
+    (u: string): string => {
+      if (/^https?:\/\//i.test(u)) return u;
+      return httpBaseUrl + (u.startsWith('/') ? u : '/' + u);
+    },
+    [httpBaseUrl],
+  );
+
   const dispatchFrame = useCallback((frame: ServerFrame) => {
     const store = storeRef.current();
     switch (frame.type) {
@@ -95,7 +105,7 @@ export function useWebSocket({
         store.applyCrisis({
           incidentId: frame.incident_id,
           helpline: frame.helpline,
-          audioUrl: frame.audio_url,
+          audioUrl: absolutizeAudioUrl(frame.audio_url),
           region: frame.region,
           language: frame.language,
         });
@@ -143,7 +153,7 @@ export function useWebSocket({
         // eslint-disable-next-line no-console
         console.warn('[useWebSocket] unknown server frame type', (frame as { type?: string }).type);
     }
-  }, []);
+  }, [absolutizeAudioUrl]);
 
   const sendFrame = useCallback((frame: ClientFrame): boolean => {
     const ws = socketRef.current;
