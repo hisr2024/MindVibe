@@ -626,3 +626,342 @@ def is_gita_grounded(content: str, tool_type: str = "general") -> bool:
     """Quick check if content is Gita-grounded."""
     is_valid, _, _ = gita_wisdom_filter.validate_response(content, tool_type)
     return is_valid
+
+
+# =============================================================================
+# STREAMING FILTER (voice mode)
+# =============================================================================
+#
+# Voice mode cannot wait for a complete LLM response before validating Gita
+# grounding — TTS streaming starts on the first sentence. The StreamingGitaFilter
+# evaluates each finalized sentence as it leaves the LLM, decides pass/fail with
+# the cumulative buffer (because Gita grounding may build across sentences), and
+# emits a verdict the WSS handler uses to either continue streaming to TTS or
+# cancel the stream and fall through the 4-tier fallback.
+
+import re as _re_streaming  # local alias to keep the file's existing `re` import semantics
+
+# Sentence boundary detection: handles ., !, ?, devanagari danda (।), and
+# Sanskrit double-danda (॥). Negative lookahead avoids splitting on
+# abbreviations like "Sri." or "Mr." or chapter refs like "BG 2.47".
+_SENTENCE_END_RE = _re_streaming.compile(
+    r"(?<![A-Z])(?<!\bBG\s\d)(?<!\bBG\s\d\d)"
+    r"([।॥]|[.!?](?=\s+[A-Zअआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह]|\s*$|\n))"
+)
+
+# What must appear in the cumulative buffer for the filter to pass.
+_REQUIRED_GITA_SIGNAL = _re_streaming.compile(
+    r"\b("
+    r"gita|bhagavad|krishna|arjuna|chapter\s+\d+|verse\s+\d+|"
+    r"karma|dharma|atman|vairagya|samatvam|svadharma|"
+    r"abhyasa|nishkama|sthitaprajna|sakshi|viveka|"
+    r"क्षेत्र|आत्मा|कर्म|धर्म|योग|भगवद्"
+    r")\b",
+    _re_streaming.IGNORECASE,
+)
+
+
+class StreamingFilterVerdict(Enum):
+    """Verdict for a single sentence within a streaming response."""
+    PASS = "pass"          # Sentence is fine, route to TTS
+    HOLD = "hold"          # Inconclusive — buffer growing, no verdict yet
+    FAIL = "fail"          # Cumulative buffer rejected — cancel stream
+
+
+@dataclass
+class StreamingFilterResult:
+    """Result of feeding a streaming token chunk to the filter."""
+    verdict: StreamingFilterVerdict
+    completed_sentences: list[str]
+    buffer_remaining: str
+    cumulative_score: float
+    failure_reason: str | None = None
+    fallback_tier: str | None = None  # "template" | "verse_only" | None
+
+
+class StreamingGitaFilter:
+    """Sentence-streaming variant of GitaWisdomFilter for voice mode.
+
+    Designed to be created fresh per WSS turn. The caller feeds it token
+    deltas as they stream from the LLM; the filter buffers until a sentence
+    boundary, evaluates the cumulative buffer, and returns a verdict.
+
+    Key invariants:
+      • Once the filter returns FAIL, the WSS handler MUST cancel the LLM
+        stream, MUST stop sending to TTS, MUST emit prefix_filler audio, and
+        MUST fall through the 4-tier chain (template → verse-only).
+      • A sentence with HOLD verdict is NOT yet sent to TTS — the filter
+        promises the WSS handler that a HOLD sentence is ambiguous and needs
+        more context. The handler must wait for the next sentence boundary.
+      • PASS verdicts are cumulative: once cumulative_score crosses the pass
+        threshold, every subsequent sentence is PASS unless a hard violation
+        (non-canonical verse citation, generic non-Gita advice) appears.
+      • Total filter overhead per sentence: target <8ms p95.
+
+    Threading: not safe for concurrent feed() calls. One filter instance per
+    streaming turn, owned by a single asyncio task.
+    """
+
+    # Score thresholds (calibrated against the regression set in
+    # prompts/sakha.regression.jsonl)
+    PASS_THRESHOLD = 0.30          # cumulative score → PASS verdict
+    EARLY_PASS_THRESHOLD = 0.50    # if first sentence already this good, fast-path PASS
+    HARD_FAIL_THRESHOLD = 0.05     # 3+ sentences below this → FAIL
+    MAX_HOLD_SENTENCES = 3         # after this many HOLDs without crossing PASS, FAIL
+
+    # Hard violations that force immediate FAIL even on first sentence
+    _HARD_VIOLATION_PATTERNS = (
+        # Non-canonical verse citations (BG chapters only go to 18)
+        _re_streaming.compile(r"\bBG\s+(19|20|21|22|23|24|25)\b"),
+        _re_streaming.compile(r"\bChapter\s+(19|20|21|22|23|24|25)\b", _re_streaming.IGNORECASE),
+        # Generic therapy-speak that signals the LLM ignored the prompt
+        _re_streaming.compile(
+            r"\b(as an AI|I'm an AI|I cannot|I am not able to|"
+            r"I don't have feelings|consult a (?:doctor|therapist|professional))\b",
+            _re_streaming.IGNORECASE,
+        ),
+        # Other-tradition citations (Sakha must stay in the Gita)
+        _re_streaming.compile(
+            r"\b(Quran|Bible|Torah|Buddha said|the Christ|hadith|sutra)\b",
+            _re_streaming.IGNORECASE,
+        ),
+    )
+
+    def __init__(
+        self,
+        *,
+        tool_type: str | WisdomTool = WisdomTool.GENERAL,
+        retrieved_verses: list[str] | None = None,
+    ) -> None:
+        """Initialize a fresh streaming filter for a single voice turn.
+
+        Args:
+            tool_type: Which engine/tool produced this response (for tool-specific
+                       scoring rules — same as the non-streaming filter).
+            retrieved_verses: References (e.g. "BG 2.47") that the orchestrator
+                              retrieved and seeded into the LLM context. The
+                              filter rewards citations that match this list and
+                              treats unmatched citations as hard violations.
+        """
+        if isinstance(tool_type, str):
+            try:
+                tool_type = WisdomTool(tool_type.lower())
+            except ValueError:
+                tool_type = WisdomTool.GENERAL
+        self._tool_type: WisdomTool = tool_type
+        self._allowed_verses: set[str] = {
+            v.upper().replace(" ", "") for v in (retrieved_verses or [])
+        }
+
+        self._buffer: str = ""
+        self._cumulative_text: str = ""
+        self._cumulative_score: float = 0.0
+        self._completed_sentences: list[str] = []
+        self._hold_streak: int = 0
+        self._latched_pass: bool = False
+        self._failed: bool = False
+        self._underlying = get_gita_wisdom_filter()
+
+    @property
+    def cumulative_score(self) -> float:
+        return self._cumulative_score
+
+    @property
+    def is_failed(self) -> bool:
+        return self._failed
+
+    def feed(self, delta: str) -> StreamingFilterResult:
+        """Feed a token-delta from the LLM stream.
+
+        Returns a StreamingFilterResult describing what (if any) sentences
+        completed in this delta and the verdict. The WSS handler should:
+          • For each completed_sentence with verdict PASS: send to TTS.
+          • For verdict HOLD: do nothing — wait for more deltas.
+          • For verdict FAIL: cancel stream, emit prefix_filler, fall through.
+        """
+        if self._failed:
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.FAIL,
+                completed_sentences=[],
+                buffer_remaining=self._buffer,
+                cumulative_score=self._cumulative_score,
+                failure_reason="filter already in failed state",
+                fallback_tier="template",
+            )
+
+        if not delta:
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.HOLD,
+                completed_sentences=[],
+                buffer_remaining=self._buffer,
+                cumulative_score=self._cumulative_score,
+            )
+
+        self._buffer += delta
+        completed = self._extract_sentences()
+
+        if not completed:
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.HOLD,
+                completed_sentences=[],
+                buffer_remaining=self._buffer,
+                cumulative_score=self._cumulative_score,
+            )
+
+        # Evaluate each completed sentence against hard violations and
+        # cumulative score.
+        for sentence in completed:
+            self._cumulative_text += " " + sentence
+            self._completed_sentences.append(sentence)
+
+            hard_fail = self._check_hard_violations(sentence)
+            if hard_fail is not None:
+                self._failed = True
+                return StreamingFilterResult(
+                    verdict=StreamingFilterVerdict.FAIL,
+                    completed_sentences=self._completed_sentences[:],
+                    buffer_remaining=self._buffer,
+                    cumulative_score=self._cumulative_score,
+                    failure_reason=hard_fail,
+                    fallback_tier="template",
+                )
+
+            score, _, _ = self._underlying._calculate_wisdom_score(
+                self._cumulative_text, self._tool_type
+            )
+            # Bonus for citing a verse the orchestrator actually retrieved
+            score += self._allowed_verse_bonus(sentence)
+            self._cumulative_score = min(score, 1.0)
+
+        # Decide overall verdict
+        if self._cumulative_score >= self.PASS_THRESHOLD:
+            self._latched_pass = True
+            self._hold_streak = 0
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.PASS,
+                completed_sentences=completed,
+                buffer_remaining=self._buffer,
+                cumulative_score=self._cumulative_score,
+            )
+
+        # Below threshold but no hard fail yet — count as HOLD
+        self._hold_streak += 1
+        if self._hold_streak >= self.MAX_HOLD_SENTENCES:
+            self._failed = True
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.FAIL,
+                completed_sentences=self._completed_sentences[:],
+                buffer_remaining=self._buffer,
+                cumulative_score=self._cumulative_score,
+                failure_reason=(
+                    f"no Gita signal after {self._hold_streak} sentences "
+                    f"(score={self._cumulative_score:.2f})"
+                ),
+                fallback_tier="verse_only",
+            )
+
+        return StreamingFilterResult(
+            verdict=StreamingFilterVerdict.HOLD,
+            completed_sentences=completed,
+            buffer_remaining=self._buffer,
+            cumulative_score=self._cumulative_score,
+        )
+
+    def finalize(self) -> StreamingFilterResult:
+        """Called when the LLM stream ends. Flushes any remaining buffer
+        as a final sentence and returns the terminal verdict."""
+        if self._buffer.strip():
+            tail = self._buffer.strip()
+            self._buffer = ""
+            self._completed_sentences.append(tail)
+            self._cumulative_text += " " + tail
+
+        if self._failed:
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.FAIL,
+                completed_sentences=self._completed_sentences[:],
+                buffer_remaining="",
+                cumulative_score=self._cumulative_score,
+                failure_reason="filter ended in failed state",
+                fallback_tier="template",
+            )
+
+        # Final scoring pass
+        score, _, _ = self._underlying._calculate_wisdom_score(
+            self._cumulative_text, self._tool_type
+        )
+        self._cumulative_score = min(score, 1.0)
+
+        # If the final response has zero Gita signal, fail it
+        if not _REQUIRED_GITA_SIGNAL.search(self._cumulative_text):
+            self._failed = True
+            return StreamingFilterResult(
+                verdict=StreamingFilterVerdict.FAIL,
+                completed_sentences=self._completed_sentences[:],
+                buffer_remaining="",
+                cumulative_score=self._cumulative_score,
+                failure_reason="no required Gita signal in final response",
+                fallback_tier="verse_only",
+            )
+
+        verdict = (
+            StreamingFilterVerdict.PASS
+            if self._cumulative_score >= self.PASS_THRESHOLD or self._latched_pass
+            else StreamingFilterVerdict.FAIL
+        )
+        return StreamingFilterResult(
+            verdict=verdict,
+            completed_sentences=self._completed_sentences[:],
+            buffer_remaining="",
+            cumulative_score=self._cumulative_score,
+            failure_reason=None if verdict == StreamingFilterVerdict.PASS else (
+                "cumulative score below pass threshold"
+            ),
+            fallback_tier=None if verdict == StreamingFilterVerdict.PASS else "verse_only",
+        )
+
+    def _extract_sentences(self) -> list[str]:
+        """Pop completed sentences off the front of the buffer."""
+        completed: list[str] = []
+        while True:
+            match = _SENTENCE_END_RE.search(self._buffer)
+            if not match:
+                break
+            end = match.end()
+            sentence = self._buffer[:end].strip()
+            self._buffer = self._buffer[end:].lstrip()
+            if sentence:
+                completed.append(sentence)
+        return completed
+
+    def _check_hard_violations(self, sentence: str) -> str | None:
+        """Return a failure reason string if the sentence has a hard
+        violation, else None."""
+        for pattern in self._HARD_VIOLATION_PATTERNS:
+            m = pattern.search(sentence)
+            if m:
+                return f"hard violation: {m.group(0)!r}"
+
+        # Any verse citation in the sentence must match the allow-list
+        verse_refs = _re_streaming.findall(
+            r"\bBG\s+(\d{1,2})\.(\d{1,3})\b", sentence
+        )
+        if verse_refs and self._allowed_verses:
+            for ch, vs in verse_refs:
+                normalized = f"BG{ch}.{vs}"
+                if normalized not in self._allowed_verses:
+                    return f"unretrieved verse citation: BG {ch}.{vs}"
+        return None
+
+    def _allowed_verse_bonus(self, sentence: str) -> float:
+        """Reward sentences that cite a verse the orchestrator retrieved."""
+        if not self._allowed_verses:
+            return 0.0
+        verse_refs = _re_streaming.findall(
+            r"\bBG\s+(\d{1,2})\.(\d{1,3})\b", sentence
+        )
+        bonus = 0.0
+        for ch, vs in verse_refs:
+            if f"BG{ch}.{vs}" in self._allowed_verses:
+                bonus += 0.10
+        return bonus

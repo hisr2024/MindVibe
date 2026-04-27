@@ -184,21 +184,42 @@ I can see you're in significant pain right now. Professional help is available i
 
 Your life has value. Please reach out for professional support right now. 💙"""
 
-    def generate_response(self, user_message: str) -> str:
-        """Generate intelligent, personalized response based on Bhagavad Gita principles
+    def generate_response(
+        self,
+        user_message: str,
+        *,
+        render_mode: str = "text",
+    ) -> str:
+        """Generate intelligent, personalized response based on Bhagavad Gita principles.
 
-        All responses follow the mandatory structure:
+        Args:
+            user_message: The user's message.
+            render_mode: "text" (default, full 4-Part structure) or "voice"
+                (conversational arc — same wisdom, different delivery shape).
+                Voice mode produces a 30–45s spoken response: Sanskrit verbatim,
+                medium pause, English/Hindi translation, single conversational
+                sentence connecting verse to feeling, ONE practical suggestion
+                (not three), optional breath cue or soft question. No section
+                labels, no sign-off.
+
+        All text-mode responses follow the mandatory structure:
         - Ancient Wisdom Principle (from Gita)
         - Modern Application
         - Practical Steps (Gita-based)
         - Deeper Understanding (Gita philosophy)
         """
+        if render_mode not in ("text", "voice"):
+            raise ValueError(
+                f"render_mode must be 'text' or 'voice', got {render_mode!r}"
+            )
 
         # Detect concern
         concern = self.analyze_concern(user_message)
 
         # Crisis handling
         if concern == "crisis":
+            if render_mode == "voice":
+                return self._get_crisis_response_voice()
             return self.get_crisis_response()
 
         # Get wisdom framework for concern
@@ -221,6 +242,15 @@ Your life has value. Please reach out for professional support right now. 💙""
         strategy_keys = list(strategy_keys_raw) if strategy_keys_raw else []
         strategies_text = self._format_strategies(strategy_keys)
 
+        # Voice mode: same wisdom, different delivery shape (~30–45s spoken arc)
+        if render_mode == "voice":
+            return self._render_voice(
+                concern=concern,
+                principle_wisdom=principle_wisdom,
+                theme=theme,
+                strategy_keys=strategy_keys,
+            )
+
         # Build Gita-based structured response
         response = f"""**Ancient Wisdom Principle:** {principle_wisdom}
 
@@ -240,6 +270,130 @@ Your life has value. Please reach out for professional support right now. 💙""
 What feels most important to focus on first? 💙"""
 
         return response
+
+    def _render_voice(
+        self,
+        *,
+        concern: str,
+        principle_wisdom: str,
+        theme: dict,
+        strategy_keys: list,
+    ) -> str:
+        """Render the same wisdom as a 30–45s spoken arc.
+
+        Voice rendering rules (per Sakha Voice Companion spec, persona-version 1.0.0):
+          • No section labels — flowing speech, not headings.
+          • Sanskrit verbatim, then `<pause:medium>` SSML hint, then translation.
+          • One practical suggestion only (others surface as on-screen tap-options).
+          • Optional breath cue or soft question — never a sign-off.
+          • `<pause:short|medium|long>` markers are honored by the TTS adapter.
+          • Hard cap 60s (the WSS handler trims if needed).
+
+        The output is plain text with `<pause:*>` SSML hints. The WSS TTS layer
+        converts these to provider-specific break tags.
+        """
+        modern = theme.get("message", "").strip()
+        first_strategy = (
+            self.coping_strategies.get(strategy_keys[0], "")
+            if strategy_keys
+            else ""
+        )
+
+        # Voice-specific opener for each concern. Conversational, not labeled.
+        # We keep Sanskrit grounded in canonical verses — see prompts/sakha.voice.openai.md
+        # for the production system prompt that drives the LLM in WSS mode.
+        opener_by_concern = {
+            "anxiety": (
+                "योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय।"
+                " <pause:medium> Krishna says — be steadfast in yoga, perform action,"
+                " let go of attachment to its fruit."
+            ),
+            "depression": (
+                "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।"
+                " <pause:medium> Lift yourself by your own self — do not let the self sink."
+            ),
+            "loneliness": (
+                "सर्वभूतस्थमात्मानं सर्वभूतानि चात्मनि।"
+                " <pause:medium> The Self in all beings, all beings in the Self — you are never alone."
+            ),
+            "self_doubt": (
+                "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्।"
+                " <pause:medium> Better your own dharma, even imperfect, than another's perfectly performed."
+            ),
+            "stress": (
+                "समत्वं योग उच्यते।"
+                " <pause:medium> Equanimity — that is yoga."
+            ),
+            "overwhelm": (
+                "स्वकर्मणा तमभ्यर्च्य सिद्धिं विन्दति मानवः।"
+                " <pause:medium> Through your own work, offered with reverence, you find perfection."
+            ),
+            "conflict": (
+                "अहिंसा सत्यमक्रोधस्त्यागः शान्तिरपैशुनम्।"
+                " <pause:medium> Non-harm, truth, freedom from anger, letting go, peace, no slander."
+            ),
+            "failure": (
+                "नेहाभिक्रमनाशोऽस्ति प्रत्यवायो न विद्यते।"
+                " <pause:medium> On this path no effort is wasted, no progress is lost."
+            ),
+            "purpose": (
+                "स्वधर्मे निधनं श्रेयः परधर्मो भयावहः।"
+                " <pause:medium> Even falling in your own dharma is a blessing — another's path brings only fear."
+            ),
+            "uncertainty": (
+                "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज।"
+                " <pause:medium> Surrender all paths — and walk forward in trust."
+            ),
+        }
+        opener = opener_by_concern.get(
+            concern,
+            (
+                "तस्मात्सर्वेषु कालेषु मामनुस्मर युध्य च।"
+                " <pause:medium> At all times, remember the Self — and act."
+            ),
+        )
+
+        modern_part = modern or principle_wisdom or ""
+        suggestion = first_strategy or "Take one breath. <pause:short> That is enough for this moment."
+
+        # Soft closer — a breath cue or a question, never a sign-off.
+        closer_by_concern = {
+            "anxiety": "<pause:long>",
+            "depression": "What is one small thing your body is asking for?",
+            "loneliness": "<pause:medium> I am here.",
+            "self_doubt": "What feels truest, when the noise quiets?",
+            "stress": "<pause:long>",
+            "overwhelm": "What is the one next thing — only the next?",
+            "conflict": "What would compassion look like, just for the next minute?",
+            "failure": "<pause:medium> Nothing is lost.",
+            "purpose": "What is yours to do today, however small?",
+            "uncertainty": "<pause:long>",
+        }
+        closer = closer_by_concern.get(concern, "<pause:medium>")
+
+        # Composed arc — readable as plain text, with TTS pause hints inline.
+        arc = (
+            f"{opener} <pause:short> "
+            f"{modern_part} <pause:short> "
+            f"Right now — {suggestion} <pause:short> "
+            f"{closer}"
+        ).strip()
+        return arc
+
+    def _get_crisis_response_voice(self) -> str:
+        """20-second voice arc that routes the user to a helpline.
+
+        The actual helpline audio is pre-rendered (see backend/services/
+        crisis_partial_scanner.py for the audio path lookup). This text is the
+        spoken-arc fallback when no pre-rendered clip is available."""
+        return (
+            "मैं तुम्हारे साथ हूँ। <pause:short> "
+            "I am right here with you. <pause:medium> "
+            "What you are feeling is real, and there is help — right now, on this phone. "
+            "<pause:short> "
+            "Please call the number on your screen. <pause:medium> "
+            "I will wait."
+        )
 
     def _format_strategies(self, strategy_keys: list) -> str:
         """Format coping strategies"""
