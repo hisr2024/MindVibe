@@ -164,6 +164,55 @@ export interface SakhaErrorEvent {
 }
 
 // ============================================================================
+// Verse recitation (multi-language Bhagavad Gita reader)
+// ============================================================================
+
+/**
+ * One spoken segment of a verse recitation. Mirrors the Kotlin
+ * VerseSegment in SakhaTypes.kt. The native side routes
+ * language === 'sa' to the reverent Sanskrit voice; everything else
+ * uses the persona body voice.
+ */
+export interface SakhaVerseSegment {
+  language: SakhaLanguage;
+  text: string;
+}
+
+/**
+ * A request to recite a Gita verse in N languages, in the order supplied.
+ * Mirrors the Kotlin VerseRecitation in SakhaTypes.kt:
+ *
+ *   chapter:                 1..18 (validated native-side)
+ *   verse:                   1..78 (validated native-side)
+ *   segments:                non-empty list of (language, text)
+ *   betweenSegmentsPauseMs:  optional inter-segment pause (default 700)
+ *
+ * Native-side validation rejects out-of-range chapter/verse, empty
+ * segments, or blank text with a `read_verse_invalid` promise rejection.
+ * Runtime conditions like "manager busy" surface via SakhaVoiceError
+ * events instead.
+ */
+export interface SakhaVerseRecitation {
+  chapter: number;
+  verse: number;
+  segments: SakhaVerseSegment[];
+  betweenSegmentsPauseMs?: number;
+}
+
+export interface SakhaVerseReadStartedEvent {
+  citation: string;
+}
+
+export interface SakhaVerseSegmentReadEvent {
+  citation: string;
+  language: SakhaLanguage;
+}
+
+export interface SakhaVerseReadCompleteEvent {
+  citation: string;
+}
+
+// ============================================================================
 // Bridge module surface
 // ============================================================================
 
@@ -176,6 +225,14 @@ export interface SakhaVoiceNativeModule {
   cancelTurn(): Promise<void>;
   resetSession(): Promise<void>;
   shutdown(): Promise<void>;
+
+  /**
+   * Recite a Gita verse in the languages supplied. Resolves on
+   * dispatch; per-segment progress arrives via the
+   * SakhaVoiceVerseSegmentRead / SakhaVoiceVerseReadComplete events.
+   * Rejects only on payload validation errors.
+   */
+  readVerse(recitation: SakhaVerseRecitation): Promise<void>;
 
   // NativeEventEmitter contract
   addListener(eventName: string): void;
@@ -194,6 +251,11 @@ export const SAKHA_VOICE_EVENTS = {
   FILTER_FAIL: 'SakhaVoiceFilterFail',
   TURN_COMPLETE: 'SakhaVoiceTurnComplete',
   ERROR: 'SakhaVoiceError',
+  // Verse recitation (multi-language Gita reader, distinct from
+  // VERSE_CITED which fires during a conversational turn).
+  VERSE_READ_STARTED: 'SakhaVoiceVerseReadStarted',
+  VERSE_SEGMENT_READ: 'SakhaVoiceVerseSegmentRead',
+  VERSE_READ_COMPLETE: 'SakhaVoiceVerseReadComplete',
 } as const;
 
 export type SakhaVoiceEventName =
