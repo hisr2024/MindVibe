@@ -35,6 +35,8 @@ import {
 } from '@kiaanverse/api';
 
 import { useSakhaVoice } from '../hooks/useSakhaVoice';
+import { useSakhaWakeWord } from '../hooks/useSakhaWakeWord';
+import { recite } from '../lib/sakhaVerseLibrary';
 import { HeroMandala } from '../components/chat/HeroMandala';
 import { SubMandalaTexture } from '../components/chat/SubMandalaTexture';
 
@@ -76,6 +78,32 @@ export default function VoiceScreen(): JSX.Element {
     getAccessToken: async () => (await getCurrentAccessToken()) ?? null,
     debug: __DEV__,
   });
+
+  // Wake-word "Hey Sakha" — auto-activates a turn on detection. The
+  // native side handles the SpeechRecognizer lifecycle and pauses
+  // itself during turns to avoid mic contention.
+  const wake = useSakhaWakeWord({
+    initialEnabled: true,
+    onWake: () => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void sakha.activate();
+    },
+  });
+
+  // One-tap verse recitation. Falls through if the verse isn't in the
+  // bundled catalog — caller (a future "Recite verse" button) can
+  // catch and surface a "verse not in offline library" toast.
+  const reciteVerse = useCallback(
+    async (chapter: number, verse: number) => {
+      try {
+        await recite({ chapter, verse });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('reciteVerse failed', err);
+      }
+    },
+    [],
+  );
 
   const breathing = useMemo(
     () => sakha.state === 'LISTENING' || sakha.state === 'SPEAKING' || sakha.state === 'PAUSING',
@@ -176,6 +204,44 @@ export default function VoiceScreen(): JSX.Element {
       {!!sakha.lastError && sakha.state === 'ERROR' && (
         <Text style={styles.errorText}>{sakha.lastError.message}</Text>
       )}
+
+      {/* Wake-word indicator + verse-recite quick action.
+          Both are non-blocking — visible only when relevant. */}
+      <View style={styles.bottomBar}>
+        {wake.isAvailable && (
+          <Pressable
+            onPress={() => {
+              void Haptics.selectionAsync();
+              void wake.setEnabled(!wake.enabled);
+            }}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: wake.enabled }}
+            accessibilityLabel={
+              wake.enabled
+                ? 'Hey Sakha wake word is on. Tap to turn off.'
+                : 'Tap to enable Hey Sakha wake word.'
+            }
+            style={[styles.pill, wake.enabled && styles.pillActive]}
+          >
+            <Text style={[styles.pillText, wake.enabled && styles.pillTextActive]}>
+              {wake.enabled ? '🪔  Hey Sakha · ON' : '🪔  Hey Sakha'}
+            </Text>
+          </Pressable>
+        )}
+
+        <Pressable
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            void reciteVerse(2, 47);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Recite Bhagavad Gita 2.47"
+          accessibilityHint="Sakha will recite the verse in Sanskrit, Hindi, then English."
+          style={styles.pill}
+        >
+          <Text style={styles.pillText}>📖  Recite BG 2.47</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -224,6 +290,35 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     marginBottom: 8,
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    paddingTop: 12,
+    paddingHorizontal: 8,
+  },
+  pill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 160, 23, 0.35)',
+    backgroundColor: 'rgba(212, 160, 23, 0.08)',
+  },
+  pillActive: {
+    borderColor: DIVINE_GOLD,
+    backgroundColor: 'rgba(212, 160, 23, 0.18)',
+  },
+  pillText: {
+    fontSize: 13,
+    color: SOFT_GOLD,
+    letterSpacing: 0.4,
+  },
+  pillTextActive: {
+    color: DIVINE_GOLD,
+    fontWeight: '600',
   },
   streamedText: {
     fontSize: 18,
