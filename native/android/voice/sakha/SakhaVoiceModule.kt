@@ -40,6 +40,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
@@ -142,6 +143,69 @@ class SakhaVoiceModule(
     fun shutdown(promise: Promise) {
         manager.shutdown()
         promise.resolve(null)
+    }
+
+    /**
+     * Recite a Bhagavad Gita verse in N languages. JS payload shape:
+     *
+     *   {
+     *     chapter: number,                          // 1..18
+     *     verse: number,                            // 1..78
+     *     segments: [
+     *       { language: string, text: string },     // language matches SakhaLanguage.wire
+     *       ...
+     *     ],
+     *     betweenSegmentsPauseMs?: number,          // default 700
+     *   }
+     *
+     * Resolves immediately on dispatch. Per-segment progress arrives via
+     * the SakhaVoiceVerseSegmentRead / SakhaVoiceVerseReadComplete events.
+     * Rejects on payload validation errors only — runtime issues like
+     * busy state surface as SakhaVoiceError events.
+     */
+    @ReactMethod
+    fun readVerse(payload: ReadableMap, promise: Promise) {
+        try {
+            val chapter = payload.getInt("chapter")
+            val verse = payload.getInt("verse")
+            val segmentsArr = payload.getArray("segments")
+                ?: throw IllegalArgumentException("readVerse: 'segments' is required")
+            if (segmentsArr.size() == 0) {
+                throw IllegalArgumentException("readVerse: 'segments' must not be empty")
+            }
+            val segments = ArrayList<VerseSegment>(segmentsArr.size())
+            for (i in 0 until segmentsArr.size()) {
+                val seg = segmentsArr.getMap(i)
+                    ?: throw IllegalArgumentException("readVerse: segments[$i] is null")
+                val langWire = seg.getString("language")
+                    ?: throw IllegalArgumentException("readVerse: segments[$i].language is required")
+                val text = seg.getString("text")
+                    ?: throw IllegalArgumentException("readVerse: segments[$i].text is required")
+                if (text.isBlank()) {
+                    throw IllegalArgumentException("readVerse: segments[$i].text is blank")
+                }
+                segments.add(VerseSegment(SakhaLanguage.fromWire(langWire), text))
+            }
+            val pauseMs = if (payload.hasKey("betweenSegmentsPauseMs") &&
+                !payload.isNull("betweenSegmentsPauseMs")
+            ) {
+                payload.getDouble("betweenSegmentsPauseMs").toLong()
+            } else {
+                700L
+            }
+            val recitation = VerseRecitation(
+                chapter = chapter,
+                verse = verse,
+                segments = segments,
+                betweenSegmentsPauseMs = pauseMs,
+            )
+            manager.readVerse(recitation)
+            promise.resolve(null)
+        } catch (e: IllegalArgumentException) {
+            promise.reject("read_verse_invalid", e.message ?: "invalid recitation", e)
+        } catch (t: Throwable) {
+            promise.reject("read_verse_failed", t.message ?: "readVerse failed", t)
+        }
     }
 
     // Required by RN's NativeEventEmitter contract.
@@ -250,6 +314,25 @@ class SakhaVoiceModule(
                 putString("code", error::class.simpleName ?: "Unknown")
                 putString("message", error.message ?: "Unknown")
                 putBoolean("recoverable", error.isRecoverable)
+            })
+        }
+
+        override fun onVerseReadStarted(citation: String) {
+            emit("SakhaVoiceVerseReadStarted", Arguments.createMap().apply {
+                putString("citation", citation)
+            })
+        }
+
+        override fun onVerseSegmentRead(citation: String, language: SakhaLanguage) {
+            emit("SakhaVoiceVerseSegmentRead", Arguments.createMap().apply {
+                putString("citation", citation)
+                putString("language", language.wire)
+            })
+        }
+
+        override fun onVerseReadComplete(citation: String) {
+            emit("SakhaVoiceVerseReadComplete", Arguments.createMap().apply {
+                putString("citation", citation)
             })
         }
     }
