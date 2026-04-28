@@ -119,6 +119,12 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     private var currentVerseRecitation: VerseRecitation? = null
     private var verseSegmentIndex: Int = 0
 
+    // Always-on wake-word detector. Non-null when [enableWakeWord] has
+    // been called; auto-paused while the manager is in any non-IDLE
+    // state (so the conversational STT and the wake STT never contend
+    // for the mic), auto-resumed on return to IDLE.
+    private var wakeDetector: SakhaWakeWordDetector? = null
+
     // ========================================================================
     // Public API
     // ========================================================================
@@ -200,6 +206,8 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             ttsPlayer = null
             sseClient?.cancel()
             sseClient = null
+            wakeDetector?.stop()
+            wakeDetector = null
         }
         setState(SakhaVoiceState.SHUTDOWN)
         scope.cancel()
@@ -208,6 +216,59 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     fun resetSession() {
         sessionId = null
         turnCount = 0
+    }
+
+    /**
+     * Enable always-on wake-word detection. Lazy-creates a
+     * [SakhaWakeWordDetector] keyed off the current [config]
+     * (phrases, cooldown, locale) and starts it if the manager is
+     * currently IDLE.
+     *
+     * If state is non-IDLE (mid-turn / mid-recitation), the detector
+     * is created but not started — [setState] will start it on the
+     * next return to IDLE so we never contend with the conversational
+     * STT for the mic.
+     *
+     * Idempotent — safe to call again to no effect.
+     */
+    fun enableWakeWord() {
+        ensureInitialized()
+        if (!hasRecordPermission()) {
+            listener.onError(SakhaVoiceError.PermissionDenied)
+            return
+        }
+        if (wakeDetector == null) {
+            wakeDetector = SakhaWakeWordDetector(
+                context = context,
+                phrases = config.wakeWordPhrases,
+                cooldownMs = config.wakeWordCooldownMs,
+                locale = config.language.sttLocale,
+                onDetected = { phrase -> handleWakeWordDetected(phrase) },
+                onError = { error ->
+                    scope.launch(Dispatchers.Main) {
+                        listener.onError(SakhaVoiceError.Unknown("wake: ${error.message ?: error::class.simpleName}"))
+                    }
+                },
+                debugMode = config.debugMode,
+            )
+        }
+        if (_state.value == SakhaVoiceState.IDLE) {
+            wakeDetector?.start()
+        }
+    }
+
+    /** Stop + release the wake-word detector. Idempotent. */
+    fun disableWakeWord() {
+        wakeDetector?.stop()
+        wakeDetector = null
+    }
+
+    private fun handleWakeWordDetected(phrase: String) {
+        scope.launch(Dispatchers.Main) { listener.onWakeWord(phrase) }
+        // Auto-activate so the user's next utterance lands in the same
+        // turn — no extra tap needed. activate() is mutex-guarded so a
+        // simultaneous tap-to-begin doesn't create a duplicate turn.
+        activate()
     }
 
     /**
@@ -590,6 +651,22 @@ class SakhaVoiceManager private constructor(private val context: Context) {
         if (next == prev) return
         _state.value = next
         if (config.debugMode) Log.d(TAG, "state $prev → $next")
+
+        // Wake-detector contention management:
+        // - Leaving IDLE → pause the always-on recognizer so the turn
+        //   STT (or verse TTS) has the mic to itself.
+        // - Returning to IDLE → resume the recognizer so the user can
+        //   wake Sakha again with "Hey Sakha".
+        // - SHUTDOWN: leave it stopped; shutdown() handles full release.
+        val detector = wakeDetector
+        if (detector != null && next != SakhaVoiceState.SHUTDOWN) {
+            if (next == SakhaVoiceState.IDLE && prev != SakhaVoiceState.IDLE) {
+                detector.start()
+            } else if (next != SakhaVoiceState.IDLE && detector.isRunning()) {
+                detector.stop()
+            }
+        }
+
         scope.launch(Dispatchers.Main) { listener.onStateChanged(next, prev) }
     }
 
