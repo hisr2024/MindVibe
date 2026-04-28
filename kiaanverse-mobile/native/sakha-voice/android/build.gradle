@@ -89,6 +89,17 @@ dependencies {
     // AndroidX core-ktx — ContextCompat permission checks.
     implementation 'androidx.core:core-ktx:1.13.1'
 
+    // Sibling KIAAN voice module — Sakha consults
+    // KiaanComputeTrinity for battery/thermal-aware processor routing
+    // (wake-word → NPU when available, fallbacks to GPU then CPU based
+    // on thermal state). The ComputeTrinity singleton lives in
+    // com.mindvibe.kiaan.voice and is shared across both modules.
+    //
+    // The dependency direction is sakha → kiaan (one-way). KIAAN does
+    // not reference Sakha — KIAAN is the generic infrastructure tier,
+    // Sakha is the persona built on top of it.
+    implementation project(':kiaan-voice-native')
+
     // Kotlin stdlib (provided by the host but explicit here for IDE
     // resolution).
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.23'
