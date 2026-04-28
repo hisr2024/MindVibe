@@ -176,6 +176,8 @@ export interface SakhaTurnCompleteEvent {
   filterFail: boolean;
   personaGuardTriggered: boolean;
   barged: boolean;
+  /** "NOMINAL" | "FAIR" | "SERIOUS" | "CRITICAL" | undefined */
+  thermalState?: string;
 }
 
 export interface SakhaErrorEvent {

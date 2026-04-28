@@ -333,6 +333,7 @@ class SakhaVoiceModule(
                 putBoolean("filterFail", metrics.filterFail)
                 putBoolean("personaGuardTriggered", metrics.personaGuardTriggered)
                 putBoolean("barged", metrics.barged)
+                metrics.thermalState?.let { putString("thermalState", it) }
             })
         }
 

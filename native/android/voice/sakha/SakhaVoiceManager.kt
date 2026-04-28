@@ -619,6 +619,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             filterFail = filterFail,
             personaGuardTriggered = personaGuardTriggered,
             barged = barged,
+            thermalState = computeAdvisor?.thermalState()?.name,
         )
         scope.launch(Dispatchers.Main) { listener.onTurnComplete(metrics) }
         setState(SakhaVoiceState.IDLE)

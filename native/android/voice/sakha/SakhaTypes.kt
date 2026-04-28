@@ -240,6 +240,14 @@ data class SakhaTurnMetrics(
     val filterFail: Boolean,
     val personaGuardTriggered: Boolean,
     val barged: Boolean,
+    /**
+     * Device thermal classification at turn end. NOMINAL means the
+     * device was comfortable; CRITICAL means the wake-word loop was
+     * silenced and barge-in was disabled. Useful for correlating
+     * latency / quality regressions with device heat. Null if the
+     * compute advisor wasn't yet instantiated for this turn.
+     */
+    val thermalState: String? = null,
 )
 
 // ============================================================================
