@@ -115,7 +115,26 @@ export function useToolInvocation({
     const t = consumeToolInvocation();
     if (!t) return;
     const adjusted = downgradeIfLowConfidence(t);
-    const route = TOOL_ROUTES[adjusted.tool] ?? `/tools/${adjusted.tool.toLowerCase()}`;
+
+    // Fail-closed KIAAN-scope guard. The backend's tool_invocation
+    // frame is supposed to only ever name a tool from the 15-entry
+    // tool_prefill_contracts.py registry, but the mobile client must
+    // not trust that — a compromised model output or a future routing
+    // bug must NOT navigate to an arbitrary in-app path.
+    //
+    // If the tool is not in our explicit allowlist, drop the
+    // invocation and log a warning. The user stays where they are;
+    // no spoofed deep-link, no half-prefilled tool surface.
+    const route = TOOL_ROUTES[adjusted.tool];
+    if (!route) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `useToolInvocation: rejecting out-of-scope tool "${adjusted.tool}". ` +
+        'Sakha may only navigate to the 15 KIAAN tool routes.',
+      );
+      return;
+    }
+
     navigate(route, {
       prefill: adjusted.inputPayload,
       source: 'voice_companion',
