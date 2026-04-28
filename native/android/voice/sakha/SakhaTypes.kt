@@ -173,6 +173,46 @@ data class SakhaVoiceConfig(
 
     /** Verbose logcat. Off in release builds. */
     val debugMode: Boolean = false,
+
+    /**
+     * Wake-word activation. When true, the manager runs a low-power
+     * always-on [SakhaWakeWordDetector] (Android SpeechRecognizer in
+     * offline-preferred mode) while in IDLE state and auto-calls
+     * [SakhaVoiceManager.activate] when one of [wakeWordPhrases] is
+     * heard. The detector pauses on every state-leaving-IDLE so the
+     * conversational STT and the wake STT never contend for the mic.
+     *
+     * Disabled by default — the screen turns it on after RECORD_AUDIO
+     * permission is granted. Off keeps battery + privacy strict.
+     */
+    val enableWakeWord: Boolean = false,
+
+    /**
+     * Phrases the wake detector listens for. Matched case-insensitively
+     * with diacritic + punctuation normalization (see [WakeWordMatcher])
+     * so "Hey, Sakha!" and "हे सखा।" both fire. Order matters — earlier
+     * phrases are preferred when multiple could match (e.g. "hey sakha"
+     * is preferred over the bare "sakha" for telemetry quality).
+     *
+     * Keep this list short — adding too many phrases inflates the
+     * false-positive rate and burns more recognizer CPU.
+     */
+    val wakeWordPhrases: List<String> = listOf(
+        "hey sakha",
+        "namaste sakha",
+        "ok sakha",
+        "sakha",
+        "हे सखा",
+        "सखा",
+    ),
+
+    /**
+     * Minimum gap between successive wake-word fires. Prevents a
+     * single utterance like "hey Sakha, hey Sakha" from triggering
+     * twice. Also gates against the recognizer producing duplicate
+     * partial + final results for the same speech segment.
+     */
+    val wakeWordCooldownMs: Long = 1500L,
 )
 
 // ============================================================================
@@ -254,6 +294,16 @@ interface SakhaVoiceListener {
      * [onVerseReadStarted] — exactly one fires per [readVerse] call.
      */
     fun onVerseReadComplete(citation: String) {}
+
+    /**
+     * Wake-word fired. The detector heard one of the configured phrases
+     * and (in the manager's IDLE state) has already auto-called
+     * [SakhaVoiceManager.activate] — the UI should animate the Shankha
+     * into LISTENING. [phrase] is the matched phrase in normalized form
+     * (e.g. "hey sakha"), useful only for telemetry; never the raw
+     * surrounding user text.
+     */
+    fun onWakeWord(phrase: String) {}
 }
 
 // ============================================================================
