@@ -13,8 +13,8 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Color, Spacing, Type } from '../../lib/theme';
-import { useVoiceStore } from '../../stores/voiceStore';
+import { Color, Spacing, Type } from '../../voice/lib/theme';
+import { useVoiceStore } from '../../voice/stores/voiceStore';
 
 const TIER_PRESET: Record<
   'free' | 'bhakta' | 'sadhak' | 'siddha',

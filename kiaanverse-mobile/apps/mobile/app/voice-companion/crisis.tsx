@@ -14,9 +14,9 @@ import React from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Color, Spacing, Type } from '../../lib/theme';
-import { selectCrisis, useVoiceStore } from '../../stores/voiceStore';
-import { useCrisisHandler } from '../../hooks/voice/useCrisisHandler';
+import { Color, Spacing, Type } from '../../voice/lib/theme';
+import { selectCrisis, useVoiceStore } from '../../voice/stores/voiceStore';
+import { useCrisisHandler } from '../../voice/hooks/useCrisisHandler';
 
 export default function CrisisOverlay() {
   const router = useRouter();

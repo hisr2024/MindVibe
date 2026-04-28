@@ -20,24 +20,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 
-import { Shankha } from '../../components/Shankha';
-import { SacredGeometry } from '../../components/SacredGeometry';
-import { Color, Spacing, Type } from '../../lib/theme';
+import { Shankha } from '../../voice/components/Shankha';
+import { SacredGeometry } from '../../voice/components/SacredGeometry';
+import { Color, Spacing, Type } from '../../voice/lib/theme';
 import {
   selectIsActive,
   selectVoiceState,
   useVoiceStore,
-} from '../../stores/voiceStore';
-import { useVoiceSession } from '../../hooks/voice/useVoiceSession';
-import { useStreamingPlayer } from '../../hooks/voice/useStreamingPlayer';
-import { useAudioFocus } from '../../hooks/voice/useAudioFocus';
-import { useForegroundService } from '../../hooks/voice/useForegroundService';
-import { useCrisisHandler } from '../../hooks/voice/useCrisisHandler';
+} from '../../voice/stores/voiceStore';
+import { useVoiceSession } from '../../voice/hooks/useVoiceSession';
+import { useStreamingPlayer } from '../../voice/hooks/useStreamingPlayer';
+import { useAudioFocus } from '../../voice/hooks/useAudioFocus';
+import { useForegroundService } from '../../voice/hooks/useForegroundService';
+import { useCrisisHandler } from '../../voice/hooks/useCrisisHandler';
 import {
   useToolInvocation,
   type ToolInvocationNavParams,
-} from '../../hooks/voice/useToolInvocation';
-import { useSakhaWakeWord } from '../../hooks/voice/useSakhaWakeWord';
+} from '../../voice/hooks/useToolInvocation';
+import { useSakhaWakeWord } from '../../voice/hooks/useSakhaWakeWord';
 
 const USER_ID_KEY = 'sakha:user_id';
 

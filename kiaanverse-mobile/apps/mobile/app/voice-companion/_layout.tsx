@@ -4,7 +4,7 @@
  */
 
 import { Stack } from 'expo-router';
-import { Color } from '../../lib/theme';
+import { Color } from '../../voice/lib/theme';
 
 export default function VoiceLayout() {
   return (

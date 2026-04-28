@@ -18,8 +18,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { Audio } from 'expo-av';
-import { Color, Spacing, Type } from '../../lib/theme';
-import { useVoiceStore } from '../../stores/voiceStore';
+import { Color, Spacing, Type } from '../../voice/lib/theme';
+import { useVoiceStore } from '../../voice/stores/voiceStore';
 
 const MOOD_PRESETS = [
   'anxious', 'sad', 'lonely', 'angry',
