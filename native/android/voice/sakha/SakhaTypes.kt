@@ -256,3 +256,54 @@ sealed class SakhaVoiceError(message: String) : Exception(message) {
             else -> true
         }
 }
+
+// ============================================================================
+// Verse recitation
+// ============================================================================
+
+/**
+ * One spoken segment of a Bhagavad Gita verse recitation. The
+ * [language] determines TTS routing in [SakhaTtsPlayer]:
+ *
+ *   - SANSKRIT             → sanskritVoiceId (slower, reverent prosody)
+ *   - any other            → sakhaVoiceId   (the persona body voice)
+ *
+ * The [SakhaLanguage] enum already covers en / hi / hinglish / ta / te /
+ * bn / mr / sa, and the TTS player resolves voice id by language without
+ * further branching, so adding Kannada / Gujarati / Malayalam / Punjabi
+ * later only requires an enum entry plus a TTS voice id mapping — never
+ * a reader change.
+ */
+data class VerseSegment(
+    val language: SakhaLanguage,
+    val text: String,
+)
+
+/**
+ * A request to recite a verse in N languages. The reader replays the
+ * segments in the order supplied, so callers choose the study order:
+ * Sanskrit → Hindi → English (the canonical Gita order, most users)
+ * or English → Sanskrit (first-time listeners who want meaning first).
+ *
+ * Inserted between every two consecutive segments is a soft pause
+ * (default 700ms) so the listener can absorb each language before the
+ * next begins. The first and last segment have no extra leading /
+ * trailing pause — the player's natural prosody closes the recitation.
+ */
+data class VerseRecitation(
+    val chapter: Int,
+    val verse: Int,
+    val segments: List<VerseSegment>,
+    val betweenSegmentsPauseMs: Long = 700L,
+) {
+    val citation: String get() = "BG $chapter.$verse"
+
+    init {
+        require(chapter in 1..18) { "BG chapter must be 1..18, was $chapter" }
+        require(verse in 1..78) { "BG verse must be 1..78, was $verse" }
+        require(segments.isNotEmpty()) { "VerseRecitation requires at least one segment" }
+        require(betweenSegmentsPauseMs >= 0) {
+            "betweenSegmentsPauseMs must be non-negative, was $betweenSegmentsPauseMs"
+        }
+    }
+}
