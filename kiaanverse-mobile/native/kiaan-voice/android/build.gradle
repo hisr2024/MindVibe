@@ -1,0 +1,113 @@
+// KIAAN Voice Native — Expo-autolinked Android library.
+//
+// Wraps the existing Kotlin sources at <repo>/native/android/voice/ — the
+// generic on-device tier-1 KIAAN voice stack (KiaanVoiceManager,
+// KiaanComputeTrinity NPU/GPU/CPU router, KiaanWakeWordDetector with
+// TFLite NNAPI/GPU delegates, KiaanEngineOrchestrator for parallel
+// Friend/Guidance/Navigation engines, plus the Phase 1 KiaanVoicePackage
+// scaffold). The Sakha persona-specific Kotlin in the sakha/ subdir
+// belongs to @kiaanverse/sakha-voice-native and is excluded from this
+// module's source set to avoid duplicate compilation / class collisions
+// in the .aab.
+//
+// Built as part of `eas build --profile production --platform android`
+// (signed .aab) when apps/mobile depends on @kiaanverse/kiaan-voice-native
+// (Step 13). The Expo autolinker discovers this via the sibling
+// expo-module.config.json (Step 9) and registers
+// com.mindvibe.kiaan.voice.KiaanVoicePackage in the generated
+// ExpoModulesProvider.kt automatically.
+//
+// Pattern mirrors kiaanverse-mobile/native/sakha-voice/android/build.gradle
+// (Step 4) so AGP / Kotlin / JVM versions stay consistent.
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'com.kiaanverse.kiaan.voice'
+version = '0.0.0'
+
+def TFLITE_VERSION = '2.14.0'
+def COROUTINES_VERSION = '1.7.3'
+
+android {
+    namespace 'com.mindvibe.kiaan.voice'
+    compileSdk safeExtGet('compileSdkVersion', 35)
+    buildToolsVersion safeExtGet('buildToolsVersion', '35.0.0')
+
+    defaultConfig {
+        minSdk safeExtGet('minSdkVersion', 24)
+        targetSdk safeExtGet('targetSdkVersion', 35)
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            // Compile the existing KIAAN Kotlin in place — no copy.
+            // Path is relative to this module's projectDir
+            // (kiaanverse-mobile/native/kiaan-voice/android/).
+            //
+            // The sakha/ subdir belongs to @kiaanverse/sakha-voice-native
+            // (Step 4); compiling it here too would collide on class
+            // names (com.mindvibe.kiaan.voice.sakha.*) at link time.
+            java.srcDirs += '../../../../native/android/voice'
+            java.exclude '**/sakha/**'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // React Native core — provided by the host app at link time.
+    implementation 'com.facebook.react:react-native:+'
+
+    // Expo modules core for autolinking.
+    implementation 'expo.modules:expomodulescore:+'
+
+    // Kotlin coroutines — used by KiaanVoiceManager state machine,
+    // KiaanComputeTrinity dispatcher routing, KiaanWakeWordDetector
+    // recording loop, KiaanEngineOrchestrator parallel inference.
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${COROUTINES_VERSION}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${COROUTINES_VERSION}"
+
+    // TensorFlow Lite — KiaanWakeWordDetector loads kiaan_wakeword.tflite
+    // and runs inference. NnApiDelegate (NPU) lives in the main artifact
+    // since TFLite 2.0+; GpuDelegate is a separate artifact.
+    //
+    // KiaanComputeTrinity routes wake-word/STT/emotion-detection tasks
+    // to NPU first, GPU fallback, CPU last. The .tflite model file
+    // itself isn't bundled in this module — apps/mobile loads it from
+    // its assets/ directory at runtime.
+    implementation "org.tensorflow:tensorflow-lite:${TFLITE_VERSION}"
+    implementation "org.tensorflow:tensorflow-lite-gpu:${TFLITE_VERSION}"
+
+    // AndroidX core-ktx — ContextCompat permission checks for
+    // RECORD_AUDIO + the wake-word foreground capture loop.
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    // Kotlin stdlib (provided by the host but explicit here for IDE
+    // resolution).
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.23'
+}
+
+// safeExtGet is the standard Expo / RN module helper for falling back
+// to a default when the host app didn't define an ext var.
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
