@@ -1,0 +1,7 @@
+{
+  "name": "@kiaanverse/sakha-voice-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Native Android wrapper around native/android/voice/sakha/. Phase 1 scaffold — implementation lands in subsequent steps.",
+  "main": "index.js"
+}
