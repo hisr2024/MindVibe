@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"],
+      "@sakha/lib/*": ["./lib/*"],
+      "@sakha/native/*": ["./native/*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "*.ts",
+    "*.js"
+  ],
+  "exclude": ["node_modules", "android", "ios", ".expo", "dist"]
+}
