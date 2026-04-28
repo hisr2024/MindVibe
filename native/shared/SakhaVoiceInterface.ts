@@ -98,6 +98,27 @@ export interface SakhaVoiceConfig {
 
   /** Verbose native logcat. */
   debugMode?: boolean;
+
+  /**
+   * Enable always-on wake-word detection ("Hey Sakha"). Default false.
+   * Apps should toggle this on once RECORD_AUDIO permission is granted
+   * and the user opts in.
+   */
+  enableWakeWord?: boolean;
+
+  /**
+   * Phrases the wake detector listens for. Order matters — earlier
+   * phrases are preferred when multiple could match. Default:
+   * ['hey sakha', 'namaste sakha', 'ok sakha', 'sakha', 'हे सखा', 'सखा'].
+   */
+  wakeWordPhrases?: string[];
+
+  /**
+   * Minimum gap (ms) between successive wake-word fires. Prevents
+   * a single utterance like "hey Sakha, hey Sakha" from triggering
+   * twice. Default 1500ms.
+   */
+  wakeWordCooldownMs?: number;
 }
 
 // ============================================================================
@@ -155,12 +176,77 @@ export interface SakhaTurnCompleteEvent {
   filterFail: boolean;
   personaGuardTriggered: boolean;
   barged: boolean;
+  /** "NOMINAL" | "FAIR" | "SERIOUS" | "CRITICAL" | undefined */
+  thermalState?: string;
 }
 
 export interface SakhaErrorEvent {
   code: string;
   message: string;
   recoverable: boolean;
+}
+
+// ============================================================================
+// Verse recitation (multi-language Bhagavad Gita reader)
+// ============================================================================
+
+/**
+ * One spoken segment of a verse recitation. Mirrors the Kotlin
+ * VerseSegment in SakhaTypes.kt. The native side routes
+ * language === 'sa' to the reverent Sanskrit voice; everything else
+ * uses the persona body voice.
+ */
+export interface SakhaVerseSegment {
+  language: SakhaLanguage;
+  text: string;
+}
+
+/**
+ * A request to recite a Gita verse in N languages, in the order supplied.
+ * Mirrors the Kotlin VerseRecitation in SakhaTypes.kt:
+ *
+ *   chapter:                 1..18 (validated native-side)
+ *   verse:                   1..78 (validated native-side)
+ *   segments:                non-empty list of (language, text)
+ *   betweenSegmentsPauseMs:  optional inter-segment pause (default 700)
+ *
+ * Native-side validation rejects out-of-range chapter/verse, empty
+ * segments, or blank text with a `read_verse_invalid` promise rejection.
+ * Runtime conditions like "manager busy" surface via SakhaVoiceError
+ * events instead.
+ */
+export interface SakhaVerseRecitation {
+  chapter: number;
+  verse: number;
+  segments: SakhaVerseSegment[];
+  betweenSegmentsPauseMs?: number;
+}
+
+export interface SakhaVerseReadStartedEvent {
+  citation: string;
+}
+
+export interface SakhaVerseSegmentReadEvent {
+  citation: string;
+  language: SakhaLanguage;
+}
+
+export interface SakhaVerseReadCompleteEvent {
+  citation: string;
+}
+
+// ============================================================================
+// Wake word
+// ============================================================================
+
+/**
+ * Wake-word detection fired. The native manager has already auto-called
+ * activate() — the UI should animate into LISTENING. The phrase is the
+ * normalized matched phrase (e.g. "hey sakha"), never the raw user
+ * transcript — privacy-preserving by construction.
+ */
+export interface SakhaWakeWordEvent {
+  phrase: string;
 }
 
 // ============================================================================
@@ -176,6 +262,25 @@ export interface SakhaVoiceNativeModule {
   cancelTurn(): Promise<void>;
   resetSession(): Promise<void>;
   shutdown(): Promise<void>;
+
+  /**
+   * Recite a Gita verse in the languages supplied. Resolves on
+   * dispatch; per-segment progress arrives via the
+   * SakhaVoiceVerseSegmentRead / SakhaVoiceVerseReadComplete events.
+   * Rejects only on payload validation errors.
+   */
+  readVerse(recitation: SakhaVerseRecitation): Promise<void>;
+
+  /**
+   * Begin always-on wake-word detection ("Hey Sakha"). Resolves on
+   * dispatch. Permission failures surface via SakhaVoiceError events.
+   * On a successful match the native manager auto-fires SakhaVoiceWakeWord
+   * and immediately starts a new turn (state → LISTENING).
+   */
+  enableWakeWord(): Promise<void>;
+
+  /** Stop wake-word detection. Resolves on dispatch. Idempotent. */
+  disableWakeWord(): Promise<void>;
 
   // NativeEventEmitter contract
   addListener(eventName: string): void;
@@ -194,6 +299,14 @@ export const SAKHA_VOICE_EVENTS = {
   FILTER_FAIL: 'SakhaVoiceFilterFail',
   TURN_COMPLETE: 'SakhaVoiceTurnComplete',
   ERROR: 'SakhaVoiceError',
+  // Verse recitation (multi-language Gita reader, distinct from
+  // VERSE_CITED which fires during a conversational turn).
+  VERSE_READ_STARTED: 'SakhaVoiceVerseReadStarted',
+  VERSE_SEGMENT_READ: 'SakhaVoiceVerseSegmentRead',
+  VERSE_READ_COMPLETE: 'SakhaVoiceVerseReadComplete',
+  // Wake-word activation (the user said "Hey Sakha" — manager
+  // auto-activated a new turn).
+  WAKE_WORD: 'SakhaVoiceWakeWord',
 } as const;
 
 export type SakhaVoiceEventName =

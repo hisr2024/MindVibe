@@ -16,6 +16,12 @@ android/
 # output that lives at `apps/<app>/android/`.
 !apps/*/native/
 !apps/*/native/**
+# Workspace-level native modules (kiaanverse-mobile/native/*) — same
+# rationale: hand-authored Gradle libraries that wrap the Kotlin
+# sources at <repo>/native/android/voice/. Distinct from any Expo
+# prebuild `android/` output.
+!native/
+!native/**
 
 # Environment
 .env.local

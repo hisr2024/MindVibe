@@ -37,6 +37,7 @@ import {
   useToolInvocation,
   type ToolInvocationNavParams,
 } from '../../hooks/voice/useToolInvocation';
+import { useSakhaWakeWord } from '../../hooks/voice/useSakhaWakeWord';
 
 const USER_ID_KEY = 'sakha:user_id';
 
@@ -90,6 +91,22 @@ export default function VoiceCompanionScreen() {
     [router],
   );
   useToolInvocation({ navigate: navigateForTool });
+
+  // Wake-word hook. Subscribes to the SakhaVoiceWakeWord native event;
+  // when the user says "Hey Sakha" the native side has already started
+  // a turn (state → LISTENING) — we only need to start the WSS session
+  // to feed the audio chunks. This is symmetric with the tap-to-begin
+  // path: handleStart() vs. wake-word both end up at session.start().
+  const wake = useSakhaWakeWord({
+    onWake: () => {
+      if (!userId) return;
+      void (async () => {
+        await audioFocus.acquire();
+        await foregroundService.start();
+        await session.start({ langHint: 'en', userRegion: 'GLOBAL' });
+      })();
+    },
+  });
 
   // Quota gate — if quota check ran and can't start, jump to the sheet
   useEffect(() => {

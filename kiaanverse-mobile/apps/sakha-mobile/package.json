@@ -32,6 +32,7 @@
     "clean": "rm -rf .expo dist node_modules/.cache android ios"
   },
   "dependencies": {
+    "@kiaanverse/sakha-voice-native": "workspace:*",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@sentry/react-native": "~5.33.0",
     "@shopify/react-native-skia": "^1.3.0",

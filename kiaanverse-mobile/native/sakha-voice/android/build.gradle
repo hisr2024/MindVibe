@@ -1,0 +1,112 @@
+// Sakha Voice Native — Expo-autolinked Android library.
+//
+// Wraps the existing Kotlin sources at <repo>/native/android/voice/sakha/
+// (8 files: SakhaVoiceManager, SakhaSseClient, SakhaTtsPlayer,
+// SakhaPauseParser, SakhaPersonaGuard, SakhaTypes, SakhaVoiceModule,
+// SakhaVoicePackage) via a srcDirs entry — no source duplication.
+//
+// Built as part of `eas build --profile production --platform android`
+// (signed .aab). The Expo autolinker discovers this via the sibling
+// expo-module.config.json and includes it in the generated
+// settings.gradle automatically once the host app declares
+// @kiaanverse/sakha-voice-native as a workspace dep (Step 7).
+//
+// Pattern mirrors apps/sakha-mobile/native/android/build.gradle
+// (KiaanAudioPlayer) so AGP / Kotlin / JVM versions stay consistent
+// across the workspace's two native modules.
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'com.kiaanverse.sakha.voice'
+version = '0.0.0'
+
+def OKHTTP_VERSION = '4.12.0'
+def COROUTINES_VERSION = '1.7.3'
+
+android {
+    namespace 'com.mindvibe.kiaan.voice.sakha'
+    compileSdk safeExtGet('compileSdkVersion', 35)
+    buildToolsVersion safeExtGet('buildToolsVersion', '35.0.0')
+
+    defaultConfig {
+        minSdk safeExtGet('minSdkVersion', 24)
+        targetSdk safeExtGet('targetSdkVersion', 35)
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            // Compile yesterday's Sakha Kotlin in place — no copy.
+            // Path is relative to this module's projectDir
+            // (kiaanverse-mobile/native/sakha-voice/android/).
+            //
+            // The exclude keeps the test/ subdir (SakhaPauseParserTest,
+            // SakhaPersonaGuardTest) out of the production .aar — those
+            // get wired into the `test` source set in a later step so
+            // they run via :sakha-voice-native:testDebugUnitTest without
+            // shipping in the .aab.
+            java.srcDirs += '../../../../native/android/voice/sakha'
+            java.exclude '**/test/**'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // React Native core — provided by the host app at link time.
+    implementation 'com.facebook.react:react-native:+'
+
+    // Expo modules core for autolinking.
+    implementation 'expo.modules:expomodulescore:+'
+
+    // Kotlin coroutines — used throughout the Sakha pipeline
+    // (manager state machine, SSE client, TTS player, parser).
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${COROUTINES_VERSION}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${COROUTINES_VERSION}"
+
+    // OkHttp — used by SakhaSseClient (POST + SSE parser) and
+    // SakhaTtsPlayer (Sarvam REST synthesise call).
+    implementation "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
+
+    // AndroidX core-ktx — ContextCompat permission checks.
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    // Sibling KIAAN voice module — Sakha consults
+    // KiaanComputeTrinity for battery/thermal-aware processor routing
+    // (wake-word → NPU when available, fallbacks to GPU then CPU based
+    // on thermal state). The ComputeTrinity singleton lives in
+    // com.mindvibe.kiaan.voice and is shared across both modules.
+    //
+    // The dependency direction is sakha → kiaan (one-way). KIAAN does
+    // not reference Sakha — KIAAN is the generic infrastructure tier,
+    // Sakha is the persona built on top of it.
+    implementation project(':kiaan-voice-native')
+
+    // Kotlin stdlib (provided by the host but explicit here for IDE
+    // resolution).
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.23'
+}
+
+// safeExtGet is the standard Expo / RN module helper for falling back
+// to a default when the host app didn't define an ext var.
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}

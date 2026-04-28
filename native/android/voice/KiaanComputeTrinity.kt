@@ -330,6 +330,9 @@ class KiaanComputeTrinity private constructor(context: Context) {
 
     // ── State Updates ──────────────────────────────────────────────────
 
+    /** Read-only accessor for the current thermal classification. */
+    fun getThermalState(): ThermalState = thermalState
+
     fun updateThermalState(state: ThermalState) {
         val prev = thermalState
         thermalState = state

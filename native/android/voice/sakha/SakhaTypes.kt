@@ -173,6 +173,46 @@ data class SakhaVoiceConfig(
 
     /** Verbose logcat. Off in release builds. */
     val debugMode: Boolean = false,
+
+    /**
+     * Wake-word activation. When true, the manager runs a low-power
+     * always-on [SakhaWakeWordDetector] (Android SpeechRecognizer in
+     * offline-preferred mode) while in IDLE state and auto-calls
+     * [SakhaVoiceManager.activate] when one of [wakeWordPhrases] is
+     * heard. The detector pauses on every state-leaving-IDLE so the
+     * conversational STT and the wake STT never contend for the mic.
+     *
+     * Disabled by default — the screen turns it on after RECORD_AUDIO
+     * permission is granted. Off keeps battery + privacy strict.
+     */
+    val enableWakeWord: Boolean = false,
+
+    /**
+     * Phrases the wake detector listens for. Matched case-insensitively
+     * with diacritic + punctuation normalization (see [WakeWordMatcher])
+     * so "Hey, Sakha!" and "हे सखा।" both fire. Order matters — earlier
+     * phrases are preferred when multiple could match (e.g. "hey sakha"
+     * is preferred over the bare "sakha" for telemetry quality).
+     *
+     * Keep this list short — adding too many phrases inflates the
+     * false-positive rate and burns more recognizer CPU.
+     */
+    val wakeWordPhrases: List<String> = listOf(
+        "hey sakha",
+        "namaste sakha",
+        "ok sakha",
+        "sakha",
+        "हे सखा",
+        "सखा",
+    ),
+
+    /**
+     * Minimum gap between successive wake-word fires. Prevents a
+     * single utterance like "hey Sakha, hey Sakha" from triggering
+     * twice. Also gates against the recognizer producing duplicate
+     * partial + final results for the same speech segment.
+     */
+    val wakeWordCooldownMs: Long = 1500L,
 )
 
 // ============================================================================
@@ -200,6 +240,14 @@ data class SakhaTurnMetrics(
     val filterFail: Boolean,
     val personaGuardTriggered: Boolean,
     val barged: Boolean,
+    /**
+     * Device thermal classification at turn end. NOMINAL means the
+     * device was comfortable; CRITICAL means the wake-word loop was
+     * silenced and barge-in was disabled. Useful for correlating
+     * latency / quality regressions with device heat. Null if the
+     * compute advisor wasn't yet instantiated for this turn.
+     */
+    val thermalState: String? = null,
 )
 
 // ============================================================================
@@ -228,6 +276,42 @@ interface SakhaVoiceListener {
     fun onFilterFail() {}
     fun onTurnComplete(metrics: SakhaTurnMetrics) {}
     fun onError(error: SakhaVoiceError) {}
+
+    /**
+     * A multi-language verse recitation began. Fires synchronously from
+     * [SakhaVoiceManager.readVerse] before the first segment is enqueued
+     * to TTS — drives UI cues like fading in a verse-citation chip.
+     * Distinct from [onVerseCited], which fires when a *conversational*
+     * turn cites a verse mid-reply.
+     *
+     * [citation] is the canonical reference, e.g. "BG 2.47".
+     */
+    fun onVerseReadStarted(citation: String) {}
+
+    /**
+     * One language segment of an active verse recitation finished playing.
+     * Useful for highlighting the current segment in a transcript overlay
+     * as the recitation moves Sanskrit → Hindi → English (or whatever
+     * order the [VerseRecitation] specified).
+     */
+    fun onVerseSegmentRead(citation: String, language: SakhaLanguage) {}
+
+    /**
+     * The full verse recitation finished. The TTS player has drained
+     * the queue and the manager has returned to IDLE. Symmetric with
+     * [onVerseReadStarted] — exactly one fires per [readVerse] call.
+     */
+    fun onVerseReadComplete(citation: String) {}
+
+    /**
+     * Wake-word fired. The detector heard one of the configured phrases
+     * and (in the manager's IDLE state) has already auto-called
+     * [SakhaVoiceManager.activate] — the UI should animate the Shankha
+     * into LISTENING. [phrase] is the matched phrase in normalized form
+     * (e.g. "hey sakha"), useful only for telemetry; never the raw
+     * surrounding user text.
+     */
+    fun onWakeWord(phrase: String) {}
 }
 
 // ============================================================================
@@ -255,4 +339,55 @@ sealed class SakhaVoiceError(message: String) : Exception(message) {
             is QuotaExceeded -> false
             else -> true
         }
+}
+
+// ============================================================================
+// Verse recitation
+// ============================================================================
+
+/**
+ * One spoken segment of a Bhagavad Gita verse recitation. The
+ * [language] determines TTS routing in [SakhaTtsPlayer]:
+ *
+ *   - SANSKRIT             → sanskritVoiceId (slower, reverent prosody)
+ *   - any other            → sakhaVoiceId   (the persona body voice)
+ *
+ * The [SakhaLanguage] enum already covers en / hi / hinglish / ta / te /
+ * bn / mr / sa, and the TTS player resolves voice id by language without
+ * further branching, so adding Kannada / Gujarati / Malayalam / Punjabi
+ * later only requires an enum entry plus a TTS voice id mapping — never
+ * a reader change.
+ */
+data class VerseSegment(
+    val language: SakhaLanguage,
+    val text: String,
+)
+
+/**
+ * A request to recite a verse in N languages. The reader replays the
+ * segments in the order supplied, so callers choose the study order:
+ * Sanskrit → Hindi → English (the canonical Gita order, most users)
+ * or English → Sanskrit (first-time listeners who want meaning first).
+ *
+ * Inserted between every two consecutive segments is a soft pause
+ * (default 700ms) so the listener can absorb each language before the
+ * next begins. The first and last segment have no extra leading /
+ * trailing pause — the player's natural prosody closes the recitation.
+ */
+data class VerseRecitation(
+    val chapter: Int,
+    val verse: Int,
+    val segments: List<VerseSegment>,
+    val betweenSegmentsPauseMs: Long = 700L,
+) {
+    val citation: String get() = "BG $chapter.$verse"
+
+    init {
+        require(chapter in 1..18) { "BG chapter must be 1..18, was $chapter" }
+        require(verse in 1..78) { "BG verse must be 1..78, was $verse" }
+        require(segments.isNotEmpty()) { "VerseRecitation requires at least one segment" }
+        require(betweenSegmentsPauseMs >= 0) {
+            "betweenSegmentsPauseMs must be non-negative, was $betweenSegmentsPauseMs"
+        }
+    }
 }

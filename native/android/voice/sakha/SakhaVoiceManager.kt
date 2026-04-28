@@ -112,6 +112,28 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     private var filterFail: Boolean = false
     private var barged: Boolean = false
 
+    // Active recitation tracking. Non-null only while [readVerse] is in
+    // flight. The internal TTS listener consults these to forward
+    // onSpokenSegment events as onVerseSegmentRead and to fire the final
+    // onVerseReadComplete on the last segment.
+    private var currentVerseRecitation: VerseRecitation? = null
+    private var verseSegmentIndex: Int = 0
+
+    // Always-on wake-word detector. Non-null when [enableWakeWord] has
+    // been called; auto-paused while the manager is in any non-IDLE
+    // state (so the conversational STT and the wake STT never contend
+    // for the mic), auto-resumed on return to IDLE.
+    private var wakeDetector: SakhaWakeWordDetector? = null
+
+    // Compute advisor — reads device thermal / battery state from the
+    // KIAAN ComputeTrinity to gate wake-word + barge-in. Lazy-init on
+    // first access since the Trinity touches PowerManager which costs
+    // a few ms at first creation.
+    private var computeAdvisor: SakhaComputeAdvisor? = null
+    private fun advisor(): SakhaComputeAdvisor {
+        return computeAdvisor ?: SakhaComputeAdvisor(context).also { computeAdvisor = it }
+    }
+
     // ========================================================================
     // Public API
     // ========================================================================
@@ -140,7 +162,11 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             turnMutex.withLock {
                 if (_state.value == SakhaVoiceState.SPEAKING ||
                     _state.value == SakhaVoiceState.PAUSING) {
-                    if (config.allowBargeIn) {
+                    // Barge-in policy: config.allowBargeIn is the user-level
+                    // toggle; advisor.isBargeInAllowed() is the device-level
+                    // override that disables it under thermal pressure (the
+                    // parallel STT + TTS load isn't worth the heat budget).
+                    if (config.allowBargeIn && advisor().isBargeInAllowed()) {
                         barged = true
                         stopSpeakingInternal()
                     } else {
@@ -173,6 +199,10 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             stopListeningInternal()
             stopRequestInternal()
             stopSpeakingInternal()
+            // Drop any active recitation without firing onVerseReadComplete —
+            // the recitation was cancelled, not completed.
+            currentVerseRecitation = null
+            verseSegmentIndex = 0
             setState(SakhaVoiceState.IDLE)
         }
     }
@@ -189,6 +219,8 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             ttsPlayer = null
             sseClient?.cancel()
             sseClient = null
+            wakeDetector?.stop()
+            wakeDetector = null
         }
         setState(SakhaVoiceState.SHUTDOWN)
         scope.cancel()
@@ -197,6 +229,142 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     fun resetSession() {
         sessionId = null
         turnCount = 0
+    }
+
+    /**
+     * Enable always-on wake-word detection. Lazy-creates a
+     * [SakhaWakeWordDetector] keyed off the current [config]
+     * (phrases, cooldown, locale) and starts it if the manager is
+     * currently IDLE.
+     *
+     * If state is non-IDLE (mid-turn / mid-recitation), the detector
+     * is created but not started — [setState] will start it on the
+     * next return to IDLE so we never contend with the conversational
+     * STT for the mic.
+     *
+     * Idempotent — safe to call again to no effect.
+     */
+    fun enableWakeWord() {
+        ensureInitialized()
+        if (!hasRecordPermission()) {
+            listener.onError(SakhaVoiceError.PermissionDenied)
+            return
+        }
+        if (wakeDetector == null) {
+            wakeDetector = SakhaWakeWordDetector(
+                context = context,
+                phrases = config.wakeWordPhrases,
+                cooldownMs = config.wakeWordCooldownMs,
+                locale = config.language.sttLocale,
+                onDetected = { phrase -> handleWakeWordDetected(phrase) },
+                onError = { error ->
+                    scope.launch(Dispatchers.Main) {
+                        listener.onError(SakhaVoiceError.Unknown("wake: ${error.message ?: error::class.simpleName}"))
+                    }
+                },
+                debugMode = config.debugMode,
+            )
+        }
+        // Respect thermal state — on CRITICAL we don't run the
+        // continuous recognizer loop. setState() will restart it on
+        // return to IDLE if thermal recovers.
+        if (_state.value == SakhaVoiceState.IDLE && advisor().isWakeAllowed()) {
+            wakeDetector?.start()
+        }
+    }
+
+    /** Stop + release the wake-word detector. Idempotent. */
+    fun disableWakeWord() {
+        wakeDetector?.stop()
+        wakeDetector = null
+    }
+
+    private fun handleWakeWordDetected(phrase: String) {
+        scope.launch(Dispatchers.Main) { listener.onWakeWord(phrase) }
+        // Auto-activate so the user's next utterance lands in the same
+        // turn — no extra tap needed. activate() is mutex-guarded so a
+        // simultaneous tap-to-begin doesn't create a duplicate turn.
+        activate()
+    }
+
+    /**
+     * Recite a Bhagavad Gita verse in N languages. Distinct from the
+     * conversational turn pipeline:
+     *
+     *   - [activate] / SSE flow: user speaks → Sakha replies (may cite a verse).
+     *   - [readVerse] (this method): user explicitly asks Sakha to recite
+     *     a known verse — no STT, no LLM, no SSE. Pure TTS playback of the
+     *     canonical corpus text the caller supplies.
+     *
+     * Refuses to start mid-conversation (state must be IDLE / ERROR /
+     * SHUTDOWN). Mid-recitation calls are also rejected — finish or
+     * cancel the current one first via [cancelTurn].
+     *
+     * Lifecycle:
+     *   1. [SakhaVoiceListener.onVerseReadStarted] fires synchronously
+     *      from this call.
+     *   2. State transitions to SPEAKING.
+     *   3. [SakhaVerseReader.plan] turns the recitation into ordered
+     *      Speak / Pause events.
+     *   4. Each event is enqueued to the existing [SakhaTtsPlayer]:
+     *      Sanskrit segments route to `sanskritVoiceId` (reverent),
+     *      others to `sakhaVoiceId` (persona body voice). The persona
+     *      guard still runs as defence-in-depth on each segment.
+     *   5. As each segment finishes playing, the internal listener
+     *      forwards [SakhaVoiceListener.onVerseSegmentRead] with the
+     *      language of the segment that just ended.
+     *   6. After the final segment, [SakhaVoiceListener.onVerseReadComplete]
+     *      fires and state returns to IDLE.
+     *
+     * Cancellation: calling [cancelTurn] mid-recitation drops it without
+     * firing onVerseReadComplete. The caller can re-trigger via
+     * [readVerse] after the state settles.
+     */
+    fun readVerse(recitation: VerseRecitation) {
+        ensureInitialized()
+        scope.launch {
+            turnMutex.withLock {
+                val st = _state.value
+                if (st != SakhaVoiceState.IDLE && st != SakhaVoiceState.ERROR) {
+                    listener.onError(
+                        SakhaVoiceError.Unknown("readVerse refused: busy in state=$st")
+                    )
+                    return@withLock
+                }
+                if (currentVerseRecitation != null) {
+                    listener.onError(
+                        SakhaVoiceError.Unknown("readVerse refused: another recitation is in flight")
+                    )
+                    return@withLock
+                }
+
+                currentVerseRecitation = recitation
+                verseSegmentIndex = 0
+
+                withContext(Dispatchers.Main) {
+                    listener.onVerseReadStarted(recitation.citation)
+                }
+
+                setState(SakhaVoiceState.SPEAKING)
+
+                val player = ttsPlayer
+                if (player == null) {
+                    currentVerseRecitation = null
+                    listener.onError(SakhaVoiceError.TtsError("player not initialised"))
+                    setState(SakhaVoiceState.ERROR)
+                    return@withLock
+                }
+
+                player.start()
+                for (event in SakhaVerseReader.plan(recitation)) {
+                    player.enqueue(event)
+                }
+                player.finish()
+                // Per-segment + completion notifications happen via
+                // [internalListener.onSpokenSegment] as the player
+                // drains the queue.
+            }
+        }
     }
 
     // ========================================================================
@@ -451,6 +619,7 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             filterFail = filterFail,
             personaGuardTriggered = personaGuardTriggered,
             barged = barged,
+            thermalState = computeAdvisor?.thermalState()?.name,
         )
         scope.launch(Dispatchers.Main) { listener.onTurnComplete(metrics) }
         setState(SakhaVoiceState.IDLE)
@@ -499,6 +668,22 @@ class SakhaVoiceManager private constructor(private val context: Context) {
         if (next == prev) return
         _state.value = next
         if (config.debugMode) Log.d(TAG, "state $prev → $next")
+
+        // Wake-detector contention management:
+        // - Leaving IDLE → pause the always-on recognizer so the turn
+        //   STT (or verse TTS) has the mic to itself.
+        // - Returning to IDLE → resume the recognizer (only if thermal
+        //   permits) so the user can wake Sakha again with "Hey Sakha".
+        // - SHUTDOWN: leave it stopped; shutdown() handles full release.
+        val detector = wakeDetector
+        if (detector != null && next != SakhaVoiceState.SHUTDOWN) {
+            if (next == SakhaVoiceState.IDLE && prev != SakhaVoiceState.IDLE) {
+                if (advisor().isWakeAllowed()) detector.start()
+            } else if (next != SakhaVoiceState.IDLE && detector.isRunning()) {
+                detector.stop()
+            }
+        }
+
         scope.launch(Dispatchers.Main) { listener.onStateChanged(next, prev) }
     }
 
@@ -513,7 +698,31 @@ class SakhaVoiceManager private constructor(private val context: Context) {
 
     private val internalListener: SakhaVoiceListener = object : SakhaVoiceListener {
         override fun onSpokenSegment(text: String, isSanskrit: Boolean) {
+            // Always forward the raw segment for transcript / haptic UX.
             scope.launch(Dispatchers.Main) { listener.onSpokenSegment(text, isSanskrit) }
+
+            // If a [readVerse] recitation is in flight, also fire the
+            // verse-shaped events. The order in which the player drains
+            // the queue is the same order [SakhaVerseReader.plan] emitted
+            // them, so the segment index is the right way to map back to
+            // the language we sent.
+            val rec = currentVerseRecitation ?: return
+            val idx = verseSegmentIndex
+            if (idx >= rec.segments.size) return
+            val language = rec.segments[idx].language
+            verseSegmentIndex = idx + 1
+            scope.launch(Dispatchers.Main) {
+                listener.onVerseSegmentRead(rec.citation, language)
+            }
+            if (idx == rec.segments.lastIndex) {
+                // Last segment finished → recitation complete.
+                currentVerseRecitation = null
+                verseSegmentIndex = 0
+                scope.launch(Dispatchers.Main) {
+                    listener.onVerseReadComplete(rec.citation)
+                }
+                setState(SakhaVoiceState.IDLE)
+            }
         }
         override fun onPause(durationMs: Long) {
             // Toggle PAUSING during the pause; the next Speak job flips us back.

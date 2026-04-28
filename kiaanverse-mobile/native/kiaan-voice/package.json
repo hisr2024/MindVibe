@@ -1,0 +1,7 @@
+{
+  "name": "@kiaanverse/kiaan-voice-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Native Android wrapper around native/android/voice/ (KiaanVoiceManager, KiaanComputeTrinity NPU/GPU/CPU router, KiaanWakeWordDetector, KiaanEngineOrchestrator). Phase 1 scaffold — implementation lands in subsequent steps.",
+  "main": "index.js"
+}
