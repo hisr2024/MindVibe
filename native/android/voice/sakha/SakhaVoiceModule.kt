@@ -146,6 +146,33 @@ class SakhaVoiceModule(
     }
 
     /**
+     * Begin always-on wake-word detection ("Hey Sakha"). Resolves on
+     * dispatch. Permission failures and runtime issues surface via
+     * SakhaVoiceError events, not promise rejections — same pattern
+     * as activate().
+     */
+    @ReactMethod
+    fun enableWakeWord(promise: Promise) {
+        try {
+            manager.enableWakeWord()
+            promise.resolve(null)
+        } catch (t: Throwable) {
+            promise.reject("enable_wake_word_failed", t.message, t)
+        }
+    }
+
+    /** Stop wake-word detection. Resolves on dispatch. */
+    @ReactMethod
+    fun disableWakeWord(promise: Promise) {
+        try {
+            manager.disableWakeWord()
+            promise.resolve(null)
+        } catch (t: Throwable) {
+            promise.reject("disable_wake_word_failed", t.message, t)
+        }
+    }
+
+    /**
      * Recite a Bhagavad Gita verse in N languages. JS payload shape:
      *
      *   {
@@ -333,6 +360,12 @@ class SakhaVoiceModule(
         override fun onVerseReadComplete(citation: String) {
             emit("SakhaVoiceVerseReadComplete", Arguments.createMap().apply {
                 putString("citation", citation)
+            })
+        }
+
+        override fun onWakeWord(phrase: String) {
+            emit("SakhaVoiceWakeWord", Arguments.createMap().apply {
+                putString("phrase", phrase)
             })
         }
     }
