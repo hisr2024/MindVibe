@@ -125,6 +125,15 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     // for the mic), auto-resumed on return to IDLE.
     private var wakeDetector: SakhaWakeWordDetector? = null
 
+    // Compute advisor — reads device thermal / battery state from the
+    // KIAAN ComputeTrinity to gate wake-word + barge-in. Lazy-init on
+    // first access since the Trinity touches PowerManager which costs
+    // a few ms at first creation.
+    private var computeAdvisor: SakhaComputeAdvisor? = null
+    private fun advisor(): SakhaComputeAdvisor {
+        return computeAdvisor ?: SakhaComputeAdvisor(context).also { computeAdvisor = it }
+    }
+
     // ========================================================================
     // Public API
     // ========================================================================
@@ -153,7 +162,11 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             turnMutex.withLock {
                 if (_state.value == SakhaVoiceState.SPEAKING ||
                     _state.value == SakhaVoiceState.PAUSING) {
-                    if (config.allowBargeIn) {
+                    // Barge-in policy: config.allowBargeIn is the user-level
+                    // toggle; advisor.isBargeInAllowed() is the device-level
+                    // override that disables it under thermal pressure (the
+                    // parallel STT + TTS load isn't worth the heat budget).
+                    if (config.allowBargeIn && advisor().isBargeInAllowed()) {
                         barged = true
                         stopSpeakingInternal()
                     } else {
@@ -252,7 +265,10 @@ class SakhaVoiceManager private constructor(private val context: Context) {
                 debugMode = config.debugMode,
             )
         }
-        if (_state.value == SakhaVoiceState.IDLE) {
+        // Respect thermal state — on CRITICAL we don't run the
+        // continuous recognizer loop. setState() will restart it on
+        // return to IDLE if thermal recovers.
+        if (_state.value == SakhaVoiceState.IDLE && advisor().isWakeAllowed()) {
             wakeDetector?.start()
         }
     }
@@ -655,13 +671,13 @@ class SakhaVoiceManager private constructor(private val context: Context) {
         // Wake-detector contention management:
         // - Leaving IDLE → pause the always-on recognizer so the turn
         //   STT (or verse TTS) has the mic to itself.
-        // - Returning to IDLE → resume the recognizer so the user can
-        //   wake Sakha again with "Hey Sakha".
+        // - Returning to IDLE → resume the recognizer (only if thermal
+        //   permits) so the user can wake Sakha again with "Hey Sakha".
         // - SHUTDOWN: leave it stopped; shutdown() handles full release.
         val detector = wakeDetector
         if (detector != null && next != SakhaVoiceState.SHUTDOWN) {
             if (next == SakhaVoiceState.IDLE && prev != SakhaVoiceState.IDLE) {
-                detector.start()
+                if (advisor().isWakeAllowed()) detector.start()
             } else if (next != SakhaVoiceState.IDLE && detector.isRunning()) {
                 detector.stop()
             }
