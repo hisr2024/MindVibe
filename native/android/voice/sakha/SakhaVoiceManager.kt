@@ -112,6 +112,13 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     private var filterFail: Boolean = false
     private var barged: Boolean = false
 
+    // Active recitation tracking. Non-null only while [readVerse] is in
+    // flight. The internal TTS listener consults these to forward
+    // onSpokenSegment events as onVerseSegmentRead and to fire the final
+    // onVerseReadComplete on the last segment.
+    private var currentVerseRecitation: VerseRecitation? = null
+    private var verseSegmentIndex: Int = 0
+
     // ========================================================================
     // Public API
     // ========================================================================
@@ -173,6 +180,10 @@ class SakhaVoiceManager private constructor(private val context: Context) {
             stopListeningInternal()
             stopRequestInternal()
             stopSpeakingInternal()
+            // Drop any active recitation without firing onVerseReadComplete —
+            // the recitation was cancelled, not completed.
+            currentVerseRecitation = null
+            verseSegmentIndex = 0
             setState(SakhaVoiceState.IDLE)
         }
     }
@@ -197,6 +208,86 @@ class SakhaVoiceManager private constructor(private val context: Context) {
     fun resetSession() {
         sessionId = null
         turnCount = 0
+    }
+
+    /**
+     * Recite a Bhagavad Gita verse in N languages. Distinct from the
+     * conversational turn pipeline:
+     *
+     *   - [activate] / SSE flow: user speaks → Sakha replies (may cite a verse).
+     *   - [readVerse] (this method): user explicitly asks Sakha to recite
+     *     a known verse — no STT, no LLM, no SSE. Pure TTS playback of the
+     *     canonical corpus text the caller supplies.
+     *
+     * Refuses to start mid-conversation (state must be IDLE / ERROR /
+     * SHUTDOWN). Mid-recitation calls are also rejected — finish or
+     * cancel the current one first via [cancelTurn].
+     *
+     * Lifecycle:
+     *   1. [SakhaVoiceListener.onVerseReadStarted] fires synchronously
+     *      from this call.
+     *   2. State transitions to SPEAKING.
+     *   3. [SakhaVerseReader.plan] turns the recitation into ordered
+     *      Speak / Pause events.
+     *   4. Each event is enqueued to the existing [SakhaTtsPlayer]:
+     *      Sanskrit segments route to `sanskritVoiceId` (reverent),
+     *      others to `sakhaVoiceId` (persona body voice). The persona
+     *      guard still runs as defence-in-depth on each segment.
+     *   5. As each segment finishes playing, the internal listener
+     *      forwards [SakhaVoiceListener.onVerseSegmentRead] with the
+     *      language of the segment that just ended.
+     *   6. After the final segment, [SakhaVoiceListener.onVerseReadComplete]
+     *      fires and state returns to IDLE.
+     *
+     * Cancellation: calling [cancelTurn] mid-recitation drops it without
+     * firing onVerseReadComplete. The caller can re-trigger via
+     * [readVerse] after the state settles.
+     */
+    fun readVerse(recitation: VerseRecitation) {
+        ensureInitialized()
+        scope.launch {
+            turnMutex.withLock {
+                val st = _state.value
+                if (st != SakhaVoiceState.IDLE && st != SakhaVoiceState.ERROR) {
+                    listener.onError(
+                        SakhaVoiceError.Unknown("readVerse refused: busy in state=$st")
+                    )
+                    return@withLock
+                }
+                if (currentVerseRecitation != null) {
+                    listener.onError(
+                        SakhaVoiceError.Unknown("readVerse refused: another recitation is in flight")
+                    )
+                    return@withLock
+                }
+
+                currentVerseRecitation = recitation
+                verseSegmentIndex = 0
+
+                withContext(Dispatchers.Main) {
+                    listener.onVerseReadStarted(recitation.citation)
+                }
+
+                setState(SakhaVoiceState.SPEAKING)
+
+                val player = ttsPlayer
+                if (player == null) {
+                    currentVerseRecitation = null
+                    listener.onError(SakhaVoiceError.TtsError("player not initialised"))
+                    setState(SakhaVoiceState.ERROR)
+                    return@withLock
+                }
+
+                player.start()
+                for (event in SakhaVerseReader.plan(recitation)) {
+                    player.enqueue(event)
+                }
+                player.finish()
+                // Per-segment + completion notifications happen via
+                // [internalListener.onSpokenSegment] as the player
+                // drains the queue.
+            }
+        }
     }
 
     // ========================================================================
@@ -513,7 +604,31 @@ class SakhaVoiceManager private constructor(private val context: Context) {
 
     private val internalListener: SakhaVoiceListener = object : SakhaVoiceListener {
         override fun onSpokenSegment(text: String, isSanskrit: Boolean) {
+            // Always forward the raw segment for transcript / haptic UX.
             scope.launch(Dispatchers.Main) { listener.onSpokenSegment(text, isSanskrit) }
+
+            // If a [readVerse] recitation is in flight, also fire the
+            // verse-shaped events. The order in which the player drains
+            // the queue is the same order [SakhaVerseReader.plan] emitted
+            // them, so the segment index is the right way to map back to
+            // the language we sent.
+            val rec = currentVerseRecitation ?: return
+            val idx = verseSegmentIndex
+            if (idx >= rec.segments.size) return
+            val language = rec.segments[idx].language
+            verseSegmentIndex = idx + 1
+            scope.launch(Dispatchers.Main) {
+                listener.onVerseSegmentRead(rec.citation, language)
+            }
+            if (idx == rec.segments.lastIndex) {
+                // Last segment finished → recitation complete.
+                currentVerseRecitation = null
+                verseSegmentIndex = 0
+                scope.launch(Dispatchers.Main) {
+                    listener.onVerseReadComplete(rec.citation)
+                }
+                setState(SakhaVoiceState.IDLE)
+            }
         }
         override fun onPause(durationMs: Long) {
             // Toggle PAUSING during the pause; the next Speak job flips us back.
