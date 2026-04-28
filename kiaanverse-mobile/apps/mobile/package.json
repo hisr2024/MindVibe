@@ -32,6 +32,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@kiaanverse/api": "workspace:*",
     "@kiaanverse/i18n": "workspace:*",
+    "@kiaanverse/kiaan-voice-native": "workspace:*",
     "@kiaanverse/sakha-voice-native": "workspace:*",
     "@kiaanverse/store": "workspace:*",
     "@kiaanverse/ui": "workspace:*",
