@@ -147,6 +147,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // routeBluetooth=true) so the native player ducks foreign music
     // and routes through BT headsets without restarting the session.
     './plugins/withKiaanAudioFocus',
+    // Sakha Voice Companion — Cobra VAD + optional Porcupine wake word
+    // ("Hey Sakha"). ABI splits + BuildConfig.KIAAN_PICOVOICE_ACCESS_KEY
+    // injection. Reads extras.picovoice.accessKey at prebuild.
+    './plugins/withPicovoice',
     'expo-router',
     'expo-splash-screen',
     [
@@ -293,6 +297,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       process.env.EXPO_PUBLIC_API_BASE_URL ??
       process.env.API_BASE_URL ??
       'https://mindvibe-api.onrender.com',
+    // Sakha Voice Companion FINAL.2 version pinning — both client and
+    // backend check these against prompts/persona-version + the WSS
+    // subprotocol. Mismatches close the WSS with code 4001
+    // (PERSONA_MISMATCH) so a stale APK fails fast on app open.
+    personaVersion: '1.1.0',
+    schemaVersion: '1.0.0',
+    subprotocol: 'kiaan-voice-v1',
+    // Picovoice access key (Cobra VAD + optional Porcupine wake-word).
+    // Set via EAS Secrets:
+    //   eas secret:create --scope project --name PICOVOICE_ACCESS_KEY ...
+    // Empty in dev/CI so VAD falls back to energy-threshold detection
+    // and the wake-word remains the on-device SpeechRecognizer.
+    picovoice: {
+      accessKey: process.env.PICOVOICE_ACCESS_KEY ?? '',
+    },
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
       projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',
