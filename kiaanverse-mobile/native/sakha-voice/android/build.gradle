@@ -100,20 +100,15 @@ dependencies {
     // AndroidX core-ktx — ContextCompat permission checks.
     implementation 'androidx.core:core-ktx:1.13.1'
 
-    // Sibling KIAAN voice module — Sakha consults
-    // KiaanComputeTrinity for battery/thermal-aware processor routing
-    // (wake-word → NPU when available, fallbacks to GPU then CPU based
-    // on thermal state). The ComputeTrinity singleton lives in
-    // com.mindvibe.kiaan.voice and is shared across both modules.
-    //
-    // The dependency direction is sakha → kiaan (one-way). KIAAN does
-    // not reference Sakha — KIAAN is the generic infrastructure tier,
-    // Sakha is the persona built on top of it.
-    //
-    // Project path is the Expo autolinker convention:
-    //   "@kiaanverse/kiaan-voice-native" → ":kiaanverse-kiaan-voice-native"
-    // (npm scope prefix joined by hyphen).
-    implementation project(':kiaanverse-kiaan-voice-native')
+    // (Removed) Sibling :kiaanverse-kiaan-voice-native dep. The Expo
+    // autolinker's actual generated project name varies between SDK
+    // versions and the assumption that drove that dep ended up
+    // mis-named at Gradle configure time. The Sakha pipeline does NOT
+    // strictly require KiaanComputeTrinity — the thermal-aware
+    // policies in SakhaComputeAdvisor are a Phase 3 polish that can
+    // be re-enabled later via a static singleton accessor or via the
+    // host app's MainApplication injection. Compiling Sakha
+    // standalone restores a green build.
 
     // Kotlin stdlib (provided by the host but explicit here for IDE
     // resolution).
