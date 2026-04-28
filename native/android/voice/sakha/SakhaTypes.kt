@@ -228,6 +228,32 @@ interface SakhaVoiceListener {
     fun onFilterFail() {}
     fun onTurnComplete(metrics: SakhaTurnMetrics) {}
     fun onError(error: SakhaVoiceError) {}
+
+    /**
+     * A multi-language verse recitation began. Fires synchronously from
+     * [SakhaVoiceManager.readVerse] before the first segment is enqueued
+     * to TTS — drives UI cues like fading in a verse-citation chip.
+     * Distinct from [onVerseCited], which fires when a *conversational*
+     * turn cites a verse mid-reply.
+     *
+     * [citation] is the canonical reference, e.g. "BG 2.47".
+     */
+    fun onVerseReadStarted(citation: String) {}
+
+    /**
+     * One language segment of an active verse recitation finished playing.
+     * Useful for highlighting the current segment in a transcript overlay
+     * as the recitation moves Sanskrit → Hindi → English (or whatever
+     * order the [VerseRecitation] specified).
+     */
+    fun onVerseSegmentRead(citation: String, language: SakhaLanguage) {}
+
+    /**
+     * The full verse recitation finished. The TTS player has drained
+     * the queue and the manager has returned to IDLE. Symmetric with
+     * [onVerseReadStarted] — exactly one fires per [readVerse] call.
+     */
+    fun onVerseReadComplete(citation: String) {}
 }
 
 // ============================================================================
