@@ -85,9 +85,6 @@ dependencies {
     // React Native core — provided by the host app at link time.
     implementation 'com.facebook.react:react-native:+'
 
-    // Expo modules core for autolinking.
-    implementation 'expo.modules:expomodulescore:+'
-
     // Kotlin coroutines — used throughout the Sakha pipeline
     // (manager state machine, SSE client, TTS player, parser).
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${COROUTINES_VERSION}"

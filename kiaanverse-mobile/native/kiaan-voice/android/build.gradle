@@ -88,9 +88,6 @@ dependencies {
     // React Native core — provided by the host app at link time.
     implementation 'com.facebook.react:react-native:+'
 
-    // Expo modules core for autolinking.
-    implementation 'expo.modules:expomodulescore:+'
-
     // Kotlin coroutines — used by KiaanVoiceManager state machine,
     // KiaanComputeTrinity dispatcher routing, KiaanWakeWordDetector
     // recording loop, KiaanEngineOrchestrator parallel inference.
