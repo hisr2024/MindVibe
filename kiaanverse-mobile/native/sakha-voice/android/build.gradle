@@ -48,6 +48,17 @@ android {
         buildConfig true
     }
 
+    // AGP 8 + Gradle 8 require explicit publishing config for library
+    // modules so expo-modules-core's plugin can attach the "release"
+    // SoftwareComponent during autolinking. Without this the
+    // `:expo` aggregator project fails with:
+    //   "Could not get unknown property 'release' for SoftwareComponent container"
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+
     sourceSets {
         main {
             // Compile yesterday's Sakha Kotlin in place — no copy.
@@ -98,7 +109,11 @@ dependencies {
     // The dependency direction is sakha → kiaan (one-way). KIAAN does
     // not reference Sakha — KIAAN is the generic infrastructure tier,
     // Sakha is the persona built on top of it.
-    implementation project(':kiaan-voice-native')
+    //
+    // Project path is the Expo autolinker convention:
+    //   "@kiaanverse/kiaan-voice-native" → ":kiaanverse-kiaan-voice-native"
+    // (npm scope prefix joined by hyphen).
+    implementation project(':kiaanverse-kiaan-voice-native')
 
     // Kotlin stdlib (provided by the host but explicit here for IDE
     // resolution).
