@@ -98,6 +98,27 @@ export interface SakhaVoiceConfig {
 
   /** Verbose native logcat. */
   debugMode?: boolean;
+
+  /**
+   * Enable always-on wake-word detection ("Hey Sakha"). Default false.
+   * Apps should toggle this on once RECORD_AUDIO permission is granted
+   * and the user opts in.
+   */
+  enableWakeWord?: boolean;
+
+  /**
+   * Phrases the wake detector listens for. Order matters — earlier
+   * phrases are preferred when multiple could match. Default:
+   * ['hey sakha', 'namaste sakha', 'ok sakha', 'sakha', 'हे सखा', 'सखा'].
+   */
+  wakeWordPhrases?: string[];
+
+  /**
+   * Minimum gap (ms) between successive wake-word fires. Prevents
+   * a single utterance like "hey Sakha, hey Sakha" from triggering
+   * twice. Default 1500ms.
+   */
+  wakeWordCooldownMs?: number;
 }
 
 // ============================================================================
@@ -213,6 +234,20 @@ export interface SakhaVerseReadCompleteEvent {
 }
 
 // ============================================================================
+// Wake word
+// ============================================================================
+
+/**
+ * Wake-word detection fired. The native manager has already auto-called
+ * activate() — the UI should animate into LISTENING. The phrase is the
+ * normalized matched phrase (e.g. "hey sakha"), never the raw user
+ * transcript — privacy-preserving by construction.
+ */
+export interface SakhaWakeWordEvent {
+  phrase: string;
+}
+
+// ============================================================================
 // Bridge module surface
 // ============================================================================
 
@@ -233,6 +268,17 @@ export interface SakhaVoiceNativeModule {
    * Rejects only on payload validation errors.
    */
   readVerse(recitation: SakhaVerseRecitation): Promise<void>;
+
+  /**
+   * Begin always-on wake-word detection ("Hey Sakha"). Resolves on
+   * dispatch. Permission failures surface via SakhaVoiceError events.
+   * On a successful match the native manager auto-fires SakhaVoiceWakeWord
+   * and immediately starts a new turn (state → LISTENING).
+   */
+  enableWakeWord(): Promise<void>;
+
+  /** Stop wake-word detection. Resolves on dispatch. Idempotent. */
+  disableWakeWord(): Promise<void>;
 
   // NativeEventEmitter contract
   addListener(eventName: string): void;
@@ -256,6 +302,9 @@ export const SAKHA_VOICE_EVENTS = {
   VERSE_READ_STARTED: 'SakhaVoiceVerseReadStarted',
   VERSE_SEGMENT_READ: 'SakhaVoiceVerseSegmentRead',
   VERSE_READ_COMPLETE: 'SakhaVoiceVerseReadComplete',
+  // Wake-word activation (the user said "Hey Sakha" — manager
+  // auto-activated a new turn).
+  WAKE_WORD: 'SakhaVoiceWakeWord',
 } as const;
 
 export type SakhaVoiceEventName =
