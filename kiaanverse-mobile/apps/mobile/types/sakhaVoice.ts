@@ -73,6 +73,12 @@ export interface SakhaVoiceConfig {
   enablePersonaGuard?: boolean;
   speakOnFilterFail?: boolean;
   debugMode?: boolean;
+  /** Wake-word activation ("Hey Sakha"). Default false. */
+  enableWakeWord?: boolean;
+  /** Phrases the wake detector listens for. Order matters. */
+  wakeWordPhrases?: string[];
+  /** Minimum gap (ms) between successive wake-word fires. Default 1500. */
+  wakeWordCooldownMs?: number;
 }
 
 // ============================================================================
@@ -139,6 +145,44 @@ export interface SakhaErrorEvent {
 }
 
 // ============================================================================
+// Verse recitation (multi-language Bhagavad Gita reader)
+// ============================================================================
+
+export interface SakhaVerseSegment {
+  language: SakhaLanguage;
+  text: string;
+}
+
+export interface SakhaVerseRecitation {
+  chapter: number;
+  verse: number;
+  segments: SakhaVerseSegment[];
+  betweenSegmentsPauseMs?: number;
+}
+
+export interface SakhaVerseReadStartedEvent {
+  citation: string;
+}
+
+export interface SakhaVerseSegmentReadEvent {
+  citation: string;
+  language: SakhaLanguage;
+}
+
+export interface SakhaVerseReadCompleteEvent {
+  citation: string;
+}
+
+// ============================================================================
+// Wake word ("Hey Sakha")
+// ============================================================================
+
+export interface SakhaWakeWordEvent {
+  /** Normalized matched phrase (e.g. "hey sakha"). Never the raw transcript. */
+  phrase: string;
+}
+
+// ============================================================================
 // Bridge module surface
 // ============================================================================
 
@@ -151,6 +195,15 @@ export interface SakhaVoiceNativeModule {
   cancelTurn(): Promise<void>;
   resetSession(): Promise<void>;
   shutdown(): Promise<void>;
+
+  /** Recite a Gita verse. Resolves on dispatch; progress via verse events. */
+  readVerse(recitation: SakhaVerseRecitation): Promise<void>;
+
+  /** Begin always-on wake-word detection ("Hey Sakha"). */
+  enableWakeWord(): Promise<void>;
+
+  /** Stop wake-word detection. Idempotent. */
+  disableWakeWord(): Promise<void>;
 
   // NativeEventEmitter contract
   addListener(eventName: string): void;
@@ -169,6 +222,10 @@ export const SAKHA_VOICE_EVENTS = {
   FILTER_FAIL: 'SakhaVoiceFilterFail',
   TURN_COMPLETE: 'SakhaVoiceTurnComplete',
   ERROR: 'SakhaVoiceError',
+  VERSE_READ_STARTED: 'SakhaVoiceVerseReadStarted',
+  VERSE_SEGMENT_READ: 'SakhaVoiceVerseSegmentRead',
+  VERSE_READ_COMPLETE: 'SakhaVoiceVerseReadComplete',
+  WAKE_WORD: 'SakhaVoiceWakeWord',
 } as const;
 
 export type SakhaVoiceEventName =
