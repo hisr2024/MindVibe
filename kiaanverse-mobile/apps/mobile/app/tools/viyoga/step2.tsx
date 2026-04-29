@@ -36,6 +36,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 
 // ── Intensity points — exact copy from the kiaanverse screenshot ──────────
 interface IntensityPoint {
@@ -194,15 +195,14 @@ export default function ViyogaStep2(): React.JSX.Element {
         <Text style={s.wishQuestion}>
           What do you wish you could say to them?
         </Text>
-        <TextInput
+        <ShankhaVoiceInput
           style={[s.textInput, s.wishInput]}
           value={wishToSay}
           onChangeText={setWishToSay}
-          placeholder="I wish..."
-          placeholderTextColor="rgba(212,160,23,0.3)"
+          placeholder="I wish... (or tap the conch to speak)"
           multiline
           numberOfLines={4}
-          textAlignVertical="top"
+          dictationMode="append"
         />
       </ScrollView>
 

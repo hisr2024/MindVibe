@@ -52,6 +52,7 @@ import {
 } from '@kiaanverse/ui';
 import { useTheme } from '@kiaanverse/ui';
 import { useEmotionalResetStore } from '@kiaanverse/store';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -266,22 +267,21 @@ export function ReflectionStep({
               borderStyle,
             ]}
           >
-            <TextInput
+            <ShankhaVoiceInput
               style={[
                 styles.textInput,
                 {
                   color: c.textPrimary,
                 },
               ]}
-              placeholder="Let your thoughts flow freely..."
-              placeholderTextColor={c.textTertiary}
+              placeholder="Let your thoughts flow freely... (or tap the conch to speak)"
               multiline
               value={text}
               onChangeText={handleChangeText}
               maxLength={MAX_CHARS}
               accessibilityLabel="Reflection journal entry"
-              textAlignVertical="top"
               selectionColor={colors.primary[500]}
+              dictationMode="append"
             />
           </Animated.View>
 

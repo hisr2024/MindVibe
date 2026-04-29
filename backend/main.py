@@ -2276,6 +2276,81 @@ except Exception as e:
         f"❌ [ERROR] Failed to load KIAAN Unified Voice Companion router: {e}"
     )
 
+# Load Sakha Voice Companion WSS router (FINAL.2 spec — single streaming
+# pipe, subprotocol kiaan-voice-v1, used by the native Android app at
+# /voice-companion/converse). The web companion uses the REST router
+# above; the Android app uses this WSS endpoint.
+startup_logger.info(
+    "\n[Sakha Voice WSS] Attempting to import voice_companion_wss router..."
+)
+try:
+    from backend.routes.voice_companion_wss import router as sakha_voice_wss_router
+
+    app.include_router(sakha_voice_wss_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info(
+        "✅ [SUCCESS] Sakha Voice WSS router loaded (kiaan-voice-v1 subprotocol)"
+    )
+    startup_logger.info(
+        "   • WS /voice-companion/converse - Streaming voice session for Android"
+    )
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load Sakha Voice WSS router: {e}"
+    )
+
+# Load voice pre-flight REST router (quota + persona-version). The
+# Android client hits /api/voice/quota and /api/voice/persona-version
+# BEFORE opening WSS; without these, sessions cannot start.
+startup_logger.info(
+    "\n[Voice Pre-flight] Attempting to import voice_quota router..."
+)
+try:
+    from backend.routes.voice_quota import router as voice_quota_router
+
+    app.include_router(voice_quota_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info(
+        "✅ [SUCCESS] Voice pre-flight router loaded"
+    )
+    startup_logger.info(
+        "   • GET /api/voice/quota             - Pre-flight subscription check"
+    )
+    startup_logger.info(
+        "   • GET /api/voice/persona-version   - Pre-flight version pin check"
+    )
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load voice pre-flight router: {e}"
+    )
+
+# Load voice safety audio router (crisis routing audio + helpline
+# manifest served as static files for offline-cacheable playback).
+startup_logger.info(
+    "\n[Voice Safety Audio] Attempting to import voice_safety_audio router..."
+)
+try:
+    from backend.routes.voice_safety_audio import router as voice_safety_audio_router
+
+    app.include_router(voice_safety_audio_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info(
+        "✅ [SUCCESS] Voice safety audio router loaded"
+    )
+    startup_logger.info(
+        "   • GET /static/voice/safety/{filename} - Pre-rendered safety audio"
+    )
+    startup_logger.info(
+        "   • GET /api/voice/safety/manifest      - Helpline + audio manifest"
+    )
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load voice safety audio router: {e}"
+    )
+
 # Load KIAAN Friend Mode router (Dual-mode: Best Friend + Gita Guide)
 startup_logger.info(
     "\n[KIAAN Friend Mode] Attempting to import KIAAN Friend Mode router..."

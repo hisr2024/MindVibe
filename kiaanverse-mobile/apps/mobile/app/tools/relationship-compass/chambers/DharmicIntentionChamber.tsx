@@ -16,6 +16,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { GoldenButton } from '@kiaanverse/ui';
+import { ShankhaVoiceInput } from '../../../../voice/components/ShankhaVoiceInput';
 
 import {
   DHARMIC_QUALITIES,
@@ -113,20 +114,20 @@ export function DharmicIntentionChamber({
         entering={FadeInDown.duration(360)}
         style={styles.intentionWrap}
       >
-        <TextInput
+        <ShankhaVoiceInput
           value={intentionText}
           onChangeText={onIntentionTextChange}
           placeholder={
             selectedQuality
-              ? `In my relationship with ${partnerName.trim() || 'them'}, I choose ${selectedQuality.label.toLowerCase()}.`
-              : 'Write your sankalpa here...'
+              ? `In my relationship with ${partnerName.trim() || 'them'}, I choose ${selectedQuality.label.toLowerCase()}. (or tap the conch to speak)`
+              : 'Write your sankalpa here... (or tap the conch to speak)'
           }
-          placeholderTextColor={TEXT_MUTED}
           style={styles.intentionInput}
           multiline
           numberOfLines={3}
           maxLength={280}
           accessibilityLabel="Your intention"
+          dictationMode="append"
         />
       </Animated.View>
 

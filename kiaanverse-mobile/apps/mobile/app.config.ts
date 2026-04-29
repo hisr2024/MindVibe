@@ -307,7 +307,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // backend check these against prompts/persona-version + the WSS
     // subprotocol. Mismatches close the WSS with code 4001
     // (PERSONA_MISMATCH) so a stale APK fails fast on app open.
-    personaVersion: '1.1.0',
+    personaVersion: '1.2.0',
     schemaVersion: '1.0.0',
     subprotocol: 'kiaan-voice-v1',
     // Picovoice access key (Cobra VAD + optional Porcupine wake-word).
