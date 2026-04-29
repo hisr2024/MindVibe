@@ -33,6 +33,7 @@ import logging
 import random
 import re
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -252,6 +253,15 @@ class DynamicWisdomCorpus:
             "voice_first_byte_ms_count": 0,
             "voice_cache_hit_count": 0,
             "voice_cache_miss_count": 0,
+            # FINAL.2 spec calls for `voice_first_byte_ms_p50` and
+            # `voice_first_byte_ms_p95` (not just mean) since latency
+            # distributions are right-skewed — the mean hides the long
+            # tail that actually breaks user experience. We retain the
+            # last N samples in a bounded ring buffer and compute
+            # percentiles on demand. Bounded at 1024 to keep memory
+            # constant; at typical voice traffic this represents
+            # ~30 minutes of recent history per process.
+            "voice_first_byte_ms_samples": deque(maxlen=1024),
         }
 
     async def get_effectiveness_weighted_verse(
@@ -590,6 +600,10 @@ class DynamicWisdomCorpus:
         if isinstance(first_byte, int) and first_byte > 0:
             self._metrics["voice_first_byte_ms_sum"] += first_byte
             self._metrics["voice_first_byte_ms_count"] += 1
+            # Append to the bounded sample buffer for percentile computation
+            # (FINAL.2 spec: voice_first_byte_ms_p50 / p95). The deque is
+            # maxlen-capped, so this is amortized O(1) and memory-bounded.
+            self._metrics["voice_first_byte_ms_samples"].append(first_byte)
         filter_rate = outcomes.get("filter_pass_rate")
         if isinstance(filter_rate, (int, float)):
             if filter_rate >= 1.0:
@@ -910,6 +924,22 @@ class DynamicWisdomCorpus:
         filter_total = int(m["voice_filter_pass_count"] + m["voice_filter_fail_count"])
         completion_total = int(m["voice_completed_listening_count"] + m["voice_barge_in_count"])
 
+        # Compute first-byte latency percentiles from the bounded sample
+        # buffer (FINAL.2 spec: voice_first_byte_ms_p50 / p95). Sorting
+        # ≤1024 ints is sub-millisecond on any machine that runs this
+        # backend; recomputing on every call keeps the implementation
+        # trivially correct (no rolling-quantile state to maintain).
+        samples = m["voice_first_byte_ms_samples"]
+        if len(samples) > 0:
+            ordered = sorted(samples)
+            p50_idx = int(len(ordered) * 0.50)
+            p95_idx = min(int(len(ordered) * 0.95), len(ordered) - 1)
+            first_byte_p50 = ordered[p50_idx]
+            first_byte_p95 = ordered[p95_idx]
+        else:
+            first_byte_p50 = None
+            first_byte_p95 = None
+
         return {
             "deliveries_total": deliveries,
             "outcomes_total": outcomes,
@@ -920,6 +950,9 @@ class DynamicWisdomCorpus:
                 round(m["voice_first_byte_ms_sum"] / first_byte_count, 1)
                 if first_byte_count > 0 else None
             ),
+            "first_byte_ms_p50": first_byte_p50,
+            "first_byte_ms_p95": first_byte_p95,
+            "first_byte_ms_sample_size": len(samples),
             "completed_listening_rate": (
                 round(
                     m["voice_completed_listening_count"] / completion_total, 3
