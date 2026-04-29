@@ -4,7 +4,7 @@
  * Sequential playback queue for the Sakha voice. Two backends:
  *  1. **Sarvam REST** (preferred for prose + verses)
  *     POST {backend}/api/voice-companion/synthesize → audio bytes (base64 in JSON
- *     or raw audio/* depending on tier). Uses MediaPlayer for playback.
+ *     or raw audio bytes depending on tier). Uses MediaPlayer for playback.
  *  2. **Android system TTS** (fallback)
  *     Used when Sarvam fails *and* the language has a system voice. Never used
  *     for Sanskrit — system TTS will mangle it.
