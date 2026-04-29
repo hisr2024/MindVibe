@@ -235,6 +235,43 @@ class SakhaVoiceModule(
         }
     }
 
+    // ------------------------------------------------------------------------
+    // Shankha voice input — one-shot dictation for tool TextInput fields.
+    // Used by the <ShankhaVoiceInput /> component on Ardha, Viyoga,
+    // Relationship Compass, Karma Reset, Emotional Reset, Sakha Chat. This
+    // is *separate* from the always-on wake-word loop and the streaming
+    // voice-companion session — it captures one utterance, returns the
+    // transcript, and shuts the recognizer down.
+    // ------------------------------------------------------------------------
+
+    private val dictation: SakhaDictation by lazy {
+        SakhaDictation(reactContext.applicationContext)
+    }
+
+    @ReactMethod
+    fun dictateOnce(languageTag: String, promise: Promise) {
+        // Run on the IO scope so the JS bridge thread isn't held while the
+        // SpeechRecognizer cycle (~1–10s typical) completes. The dictation
+        // helper itself hops to the main thread internally because
+        // SpeechRecognizer requires it.
+        scope.launch {
+            dictation.dictateOnce(languageTag.ifBlank { "en-US" }) { result ->
+                when (result) {
+                    is SakhaDictation.DictationResult.Success -> {
+                        val map = Arguments.createMap().apply {
+                            putString("transcript", result.transcript)
+                            putString("language", languageTag)
+                        }
+                        promise.resolve(map)
+                    }
+                    is SakhaDictation.DictationResult.Failure -> {
+                        promise.reject(result.code, result.message)
+                    }
+                }
+            }
+        }
+    }
+
     // Required by RN's NativeEventEmitter contract.
     @ReactMethod
     fun addListener(eventName: String) { /* no-op */ }
