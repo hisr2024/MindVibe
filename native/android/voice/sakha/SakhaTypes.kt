@@ -322,7 +322,7 @@ sealed class SakhaVoiceError(message: String) : Exception(message) {
     object PermissionDenied : SakhaVoiceError("RECORD_AUDIO permission not granted")
     object MicrophoneUnavailable : SakhaVoiceError("Microphone not available")
     object SpeechRecognitionUnavailable : SakhaVoiceError("Speech recognition not available")
-    data class NetworkError(val cause: String) : SakhaVoiceError("Network error: $cause")
+    data class NetworkError(val detail: String) : SakhaVoiceError("Network error: $detail")
     data class HttpError(val status: Int, val detail: String) : SakhaVoiceError("HTTP $status: $detail")
     object AuthRequired : SakhaVoiceError("Authentication required")
     object QuotaExceeded : SakhaVoiceError("Daily quota exceeded")
