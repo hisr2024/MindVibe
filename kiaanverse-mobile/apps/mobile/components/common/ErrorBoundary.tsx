@@ -14,7 +14,7 @@
  */
 
 import React, { type ErrorInfo } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { Text, colors, spacing, radii } from '@kiaanverse/ui';
 import { captureError, breadcrumb } from '../../services/errorTracking';
 
@@ -32,6 +32,8 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  /** Toggled when the user taps "Show details" — reveals error.message + stack. */
+  showDetails: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -44,11 +46,11 @@ export class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, showDetails: false };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, showDetails: false };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
@@ -69,11 +71,15 @@ export class ErrorBoundary extends React.Component<
   }
 
   handleRetry = (): void => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, showDetails: false });
+  };
+
+  handleToggleDetails = (): void => {
+    this.setState((prev) => ({ ...prev, showDetails: !prev.showDetails }));
   };
 
   render(): React.ReactNode {
-    const { hasError, error } = this.state;
+    const { hasError, error, showDetails } = this.state;
     const { children, fallback } = this.props;
 
     if (hasError && error) {
@@ -100,6 +106,34 @@ export class ErrorBoundary extends React.Component<
             >
               <Text style={styles.retryText}>Try Again</Text>
             </Pressable>
+
+            <Pressable
+              onPress={this.handleToggleDetails}
+              style={styles.detailsToggle}
+              accessibilityRole="button"
+              accessibilityLabel={showDetails ? 'Hide details' : 'Show details'}
+            >
+              <Text style={styles.detailsToggleText}>
+                {showDetails ? 'Hide details' : 'Show details'}
+              </Text>
+            </Pressable>
+
+            {showDetails ? (
+              <ScrollView style={styles.detailsBox} nestedScrollEnabled>
+                <Text style={styles.detailsLabel}>Error</Text>
+                <Text selectable style={styles.detailsText}>
+                  {error.name}: {error.message}
+                </Text>
+                {error.stack ? (
+                  <>
+                    <Text style={styles.detailsLabel}>Stack</Text>
+                    <Text selectable style={styles.detailsStack}>
+                      {error.stack}
+                    </Text>
+                  </>
+                ) : null}
+              </ScrollView>
+            ) : null}
           </View>
         </View>
       );
@@ -168,5 +202,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.background.dark,
+  },
+  // Details toggle — small text link under the Try Again button. Lets the
+  // user see the actual error.message + stack on screen so release-build
+  // crashes are diagnosable without adb logcat or Sentry access.
+  detailsToggle: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  detailsToggleText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textDecorationLine: 'underline',
+  },
+  detailsBox: {
+    marginTop: spacing.md,
+    maxHeight: 240,
+    width: '100%',
+    backgroundColor: colors.background.dark,
+    borderRadius: radii.sm,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldMedium,
+  },
+  detailsLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+    marginBottom: 2,
+  },
+  detailsText: {
+    fontSize: 12,
+    color: colors.text.primary,
+    fontFamily: 'monospace',
+  },
+  detailsStack: {
+    fontSize: 10,
+    color: colors.text.secondary,
+    fontFamily: 'monospace',
   },
 });
