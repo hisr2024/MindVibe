@@ -17,9 +17,9 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
 } from 'react-native';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -150,18 +150,17 @@ export default function ArdhaInputScreen(): React.JSX.Element {
             </View>
           </View>
 
-          <TextInput
+          <ShankhaVoiceInput
             style={styles.input}
             value={thought}
             onChangeText={setThought}
             placeholder={
-              'Type a thought that troubles you... ARDHA will\nsee through the distortion to the truth beneath.'
+              'Type a thought that troubles you... ARDHA will\nsee through the distortion to the truth beneath.\n\nOr tap the conch to speak.'
             }
-            placeholderTextColor="rgba(212,160,23,0.35)"
             multiline
-            textAlignVertical="top"
             editable={!reframe.isPending}
             maxLength={2000}
+            dictationMode="append"
           />
 
           <ScrollView

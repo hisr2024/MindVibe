@@ -35,6 +35,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useKarmaReset } from '../../../hooks/useKarmaReset';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 import { WordReveal } from '../WordReveal';
 import type {
   KarmaReflectionAnswer,
@@ -308,15 +309,14 @@ export function ReflectionPhase({
               {/* Free text */}
               {showFreeText ? (
                 <Animated.View entering={FadeInDown.duration(200)}>
-                  <TextInput
+                  <ShankhaVoiceInput
                     value={freeText}
                     onChangeText={setFreeText}
-                    placeholder="Share what is in your heart..."
-                    placeholderTextColor="#6B6355"
+                    placeholder="Share what is in your heart... (or tap the conch to speak)"
                     multiline
                     maxLength={500}
-                    textAlignVertical="top"
                     style={styles.freeText}
+                    dictationMode="append"
                   />
                 </Animated.View>
               ) : null}
