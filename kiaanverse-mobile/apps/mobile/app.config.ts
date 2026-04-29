@@ -151,6 +151,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // ("Hey Sakha"). ABI splits + BuildConfig.KIAAN_PICOVOICE_ACCESS_KEY
     // injection. Reads extras.picovoice.accessKey at prebuild.
     './plugins/withPicovoice',
+    // Sakha + KIAAN voice — register the two ReactPackage classes
+    // (KiaanVoicePackage, SakhaVoicePackage) in MainApplication.kt.
+    // These are old-style RN bridge packages, NOT new-API Expo Modules,
+    // so they can't ride the expo-module.config.json `android.modules`
+    // codegen path (which expects `Class<? extends Module>`).
+    './plugins/withKiaanSakhaVoicePackages',
     'expo-router',
     'expo-splash-screen',
     [
