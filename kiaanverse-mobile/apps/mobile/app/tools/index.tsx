@@ -66,6 +66,33 @@ interface ToolDescriptor {
   readonly route: string;
 }
 
+/**
+ * SACRED VOICE — The KIAAN Voice Companion (Sakha).
+ *
+ * The 3-engine voice companion (Friendly / Guidance / Internal Navigation)
+ * placed at the TOP of Sacred Tools because it is the centerpiece of the
+ * KIAANverse experience per FINAL.2 spec. From here the user enters the
+ * /voice-companion canvas (Shankha + sacred geometry, "Tap to begin"
+ * tap-to-start), where Sakha listens, responds in Sanskrit-anchored
+ * modern-secular wisdom, and can navigate them into any tool below
+ * (Emotional Reset, Karma Reset, etc.) with PII-scrubbed prefill via
+ * the INPUT_TO_TOOL contract.
+ *
+ * Iconography: Shankha (शङ्ख) — Krishna's conch.
+ * Color: DIVINE_GOLD — matches the persona's warm-gold register.
+ */
+const SACRED_VOICE_TOOLS: readonly ToolDescriptor[] = [
+  {
+    id: 'voice-companion',
+    name: 'Sakha — Voice Companion',
+    sanskrit: 'सखा',
+    description: 'Speak with the divine friend',
+    color: DIVINE_GOLD,
+    icon: '🐚',
+    route: '/voice-companion',
+  },
+];
+
 const HEALING_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'emotional-reset',
@@ -168,6 +195,11 @@ export default function ToolsDashboardScreen(): React.JSX.Element {
   const sections = useMemo(
     () =>
       [
+        // Sacred Voice goes FIRST — Sakha is the centerpiece of the
+        // KIAANverse experience per FINAL.2 spec. From here the user
+        // enters the voice companion canvas; from there Sakha can
+        // navigate them to any other tool below.
+        { title: 'Sacred Voice', tools: SACRED_VOICE_TOOLS },
         { title: 'Healing Tools', tools: HEALING_TOOLS },
         { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
         { title: 'Karma Insights', tools: INSIGHT_TOOLS },
