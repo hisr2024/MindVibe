@@ -1,67 +1,33 @@
 /**
- * Sakha Verse Library — client-side catalog of anchor Bhagavad Gita verses.
+ * Sakha Verse Library — client-side catalog of anchor Bhagavad Gita verses
+ * for the KIAAN Voice Companion app (apps/mobile).
  *
  * Companion to native/android/voice/sakha/SakhaVerseReader.kt (the pure
  * recitation planner) and SakhaVoiceModule.readVerse (the RN bridge).
- * This file is the JS-side data layer + ergonomic wrapper:
  *
- *   import { recite } from '@sakha/lib/sakha-verse-library';
- *   await recite({ chapter: 2, verse: 47 });          // SA → HI → EN
- *   await recite({ chapter: 2, verse: 47, order: 'sa-only' });
- *   await recite({ chapter: 9, verse: 22, order: ['en','sa','hi'] });
+ *   import { recite } from '../lib/sakhaVerseLibrary';
+ *   await recite({ chapter: 2, verse: 47 });           // SA → HI → EN
+ *   await recite({ chapter: 9, verse: 22, order: 'sa-only' });
+ *   await recite({ chapter: 18, verse: 66, order: ['en','sa'] });
  *
- * Curation rationale:
- * The Sakha persona's wisdom-grounded responses (engine = GUIDANCE)
- * draw from a small set of anchor verses repeatedly — see
- * prompts/sakha.voice.openai.md. This catalog is exactly those anchors,
- * pre-bundled in the .aab so the user can ask "Sakha, recite Gita 2.47"
- * with no network round-trip. The full Gita corpus stays on the backend
- * (GITA_LIBRARY tool route) for verses outside this set.
+ * Curation: 10 anchor verses Sakha's GUIDANCE engine leans on per
+ * prompts/sakha.voice.openai.md. The full Gita corpus stays on the
+ * backend (GITA_LIBRARY tool route) for verses outside this set.
  *
- * Sanskrit text: canonical (public domain, Mahabharata Critical Edition).
- * English/Hindi: plain prose paraphrases of the meaning — NOT verbatim
- * copies of any specific copyrighted translation. Suitable for guided
- * reflection, not scholarly reference.
- *
- * SAKHA_LANGUAGE / SAKHA_VERSE_RECITATION shape:
- * Mirrors native/shared/SakhaVoiceInterface.ts. Mirrored locally rather
- * than imported across the workspace boundary — same convention the
- * adjacent wss-types.ts uses for backend frame mirrors.
+ * Sanskrit text: canonical (public domain).
+ * English/Hindi: plain prose paraphrases for spoken reflection.
  */
 
 import { NativeModules } from 'react-native';
 
-// ─── Type mirror (single source of truth: native/shared/SakhaVoiceInterface.ts)
+import type {
+  SakhaLanguage,
+  SakhaVerseRecitation,
+  SakhaVerseSegment,
+  SakhaVoiceNativeModule,
+} from '../types/sakhaVoice';
 
-/** Subset of SakhaLanguage actually used by the verse library today.
- *  Keep aligned with native/shared/SakhaVoiceInterface.ts SakhaLanguage. */
-export type SakhaLanguage =
-  | 'en'
-  | 'hi'
-  | 'hinglish'
-  | 'ta'
-  | 'te'
-  | 'bn'
-  | 'mr'
-  | 'sa';
-
-export interface SakhaVerseSegment {
-  language: SakhaLanguage;
-  text: string;
-}
-
-export interface SakhaVerseRecitation {
-  chapter: number;
-  verse: number;
-  segments: SakhaVerseSegment[];
-  betweenSegmentsPauseMs?: number;
-}
-
-interface SakhaVoiceNative {
-  readVerse(recitation: SakhaVerseRecitation): Promise<void>;
-}
-
-const Native = NativeModules.SakhaVoice as SakhaVoiceNative | undefined;
+const Native = NativeModules.SakhaVoice as SakhaVoiceNativeModule | undefined;
 
 // ─── Library entries ─────────────────────────────────────────────────────
 
@@ -74,12 +40,6 @@ export interface VerseLibraryEntry {
   theme: string;
 }
 
-/**
- * 10 anchor verses Sakha's GUIDANCE engine leans on. Sanskrit pulled
- * from the canonical Mahabharata text (public domain). English / Hindi
- * are plain-prose paraphrases — meant for spoken reflection, not for
- * academic citation. Add more verses as the persona's repertoire grows.
- */
 export const VERSE_LIBRARY: readonly VerseLibraryEntry[] = [
   {
     chapter: 2, verse: 47,
@@ -193,14 +153,13 @@ export function getVerse(chapter: number, verse: number): VerseLibraryEntry | nu
 
 // ─── Recitation builder + driver ─────────────────────────────────────────
 
-/** Common recitation orders. Pass an array of [SakhaLanguage] for custom. */
 export type ReciteOrder =
   | 'sa-hi-en'  // canonical Gita study order; the persona prefers this
-  | 'sa-en'     // Sanskrit + English (most international users)
-  | 'hi-en'     // Hindi + English (Indian diaspora bilingual)
+  | 'sa-en'
+  | 'hi-en'
   | 'sa-only'   // chanting / japa
-  | 'en-only'   // first-time listeners who want meaning first
-  | 'hi-only'   // Hindi-only audience
+  | 'en-only'
+  | 'hi-only'
   | SakhaLanguage[];
 
 const ORDER_PRESETS: Record<Exclude<ReciteOrder, SakhaLanguage[]>, SakhaLanguage[]> = {
@@ -215,22 +174,15 @@ const ORDER_PRESETS: Record<Exclude<ReciteOrder, SakhaLanguage[]>, SakhaLanguage
 export interface ReciteOptions {
   chapter: number;
   verse: number;
-  /** Default 'sa-hi-en'. */
   order?: ReciteOrder;
-  /** Default 700ms (matches the Kotlin default). */
   betweenSegmentsPauseMs?: number;
 }
 
-/**
- * Pure: build a recitation payload from the library. Useful for tests
- * and for callers that want to pass the recitation through their own
- * bridge invocation pipeline.
- */
 export function buildRecitation(opts: ReciteOptions): SakhaVerseRecitation {
   const entry = getVerse(opts.chapter, opts.verse);
   if (!entry) {
     throw new Error(
-      `sakha-verse-library: BG ${opts.chapter}.${opts.verse} is not in the catalog. ` +
+      `sakhaVerseLibrary: BG ${opts.chapter}.${opts.verse} is not in the catalog. ` +
       `Add it to VERSE_LIBRARY or fetch from the backend GITA_LIBRARY route.`,
     );
   }
@@ -244,8 +196,6 @@ export function buildRecitation(opts: ReciteOptions): SakhaVerseRecitation {
         case 'sa': return { language: 'sa', text: entry.texts.sa };
         case 'en': return { language: 'en', text: entry.texts.en };
         case 'hi': return { language: 'hi', text: entry.texts.hi };
-        // Languages we don't yet have curated text for — silently skip
-        // rather than emit empty segments.
         default: return null;
       }
     })
@@ -253,7 +203,7 @@ export function buildRecitation(opts: ReciteOptions): SakhaVerseRecitation {
 
   if (segments.length === 0) {
     throw new Error(
-      `sakha-verse-library: order ${JSON.stringify(order)} produced no segments for BG ${opts.chapter}.${opts.verse}`,
+      `sakhaVerseLibrary: order ${JSON.stringify(order)} produced no segments for BG ${opts.chapter}.${opts.verse}`,
     );
   }
   return {
@@ -266,20 +216,9 @@ export function buildRecitation(opts: ReciteOptions): SakhaVerseRecitation {
   };
 }
 
-/**
- * Build the recitation from the library and dispatch it to the native
- * Sakha bridge. Resolves on dispatch — per-segment progress arrives via
- * the SakhaVoiceVerseSegmentRead / SakhaVoiceVerseReadComplete events
- * (subscribe via NativeEventEmitter on NativeModules.SakhaVoice).
- *
- * Throws synchronously if:
- *   - the verse is not in the catalog
- *   - the order produces no segments
- *   - the native module is not loaded (dev / unsupported platform)
- */
 export async function recite(opts: ReciteOptions): Promise<void> {
   if (!Native) {
-    throw new Error('sakha-verse-library: NativeModules.SakhaVoice is not loaded');
+    throw new Error('sakhaVerseLibrary: NativeModules.SakhaVoice is not loaded');
   }
   const recitation = buildRecitation(opts);
   await Native.readVerse(recitation);
