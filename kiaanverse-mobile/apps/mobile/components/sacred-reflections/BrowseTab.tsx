@@ -329,14 +329,14 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       </View>
 
       {/* Search */}
-      <TextInput
+      <ShankhaVoiceInput
         value={searchQuery}
         onChangeText={setSearchQuery}
         placeholder={COPY.browseSearch}
-        placeholderTextColor={colors.text.muted}
         style={styles.searchInput}
         returnKeyType="search"
-      />
+        dictationMode="append"
+        />
 
       {/* Filter chips */}
       <ScrollView

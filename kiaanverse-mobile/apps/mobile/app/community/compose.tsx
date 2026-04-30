@@ -114,18 +114,17 @@ export default function ComposeScreen(): React.JSX.Element {
             <Text variant="label" color={colors.text.secondary}>
               What wisdom would you like to share?
             </Text>
-            <TextInput
+            <ShankhaVoiceInput
               style={styles.contentInput}
               placeholder="Share your thoughts, insights, or a question..."
-              placeholderTextColor={colors.text.muted}
               value={content}
               onChangeText={handleContentChange}
               multiline
-              textAlignVertical="top"
               scrollEnabled={false}
               selectionColor={colors.primary[500]}
               maxLength={MAX_CHARS + 20}
-            />
+              dictationMode="append"
+              />
             <Text
               variant="caption"
               color={charCountColor}

@@ -95,15 +95,14 @@ export function IntegrationPhase({
         {/* Private journal */}
         <View style={styles.journalBlock}>
           <Text style={styles.journalLabel}>What arose for you?</Text>
-          <TextInput
+          <ShankhaVoiceInput
             value={journal}
             onChangeText={setJournal}
             style={styles.journalInput}
             placeholder="Your sacred journal awaits…"
-            placeholderTextColor="rgba(237,232,220,0.3)"
             multiline
-            textAlignVertical="top"
-          />
+            dictationMode="append"
+            />
           <Text style={styles.journalHint}>This stays private and sacred</Text>
         </View>
 

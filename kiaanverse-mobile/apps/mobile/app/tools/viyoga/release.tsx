@@ -75,15 +75,14 @@ export default function ViyogaRelease(): React.JSX.Element {
         <Text style={s.question}>What do you wish to release?</Text>
         <Text style={s.subtitle}>{subtitle}</Text>
 
-        <TextInput
+        <ShankhaVoiceInput
           style={s.input}
           value={release}
           onChangeText={setRelease}
           placeholder="I release..."
-          placeholderTextColor="rgba(240,235,225,0.25)"
           multiline
-          textAlignVertical="top"
-        />
+          dictationMode="append"
+          />
 
         <TouchableOpacity
           style={[s.fireBtn, !canOffer && s.fireBtnOff]}

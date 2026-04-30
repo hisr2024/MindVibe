@@ -212,18 +212,17 @@ export function SankalpaPhase({
         >
           <Text style={styles.sankalpaTag}>My Sankalpa</Text>
           {isEditing ? (
-            <TextInput
+            <ShankhaVoiceInput
               value={intentionText}
               onChangeText={setIntentionText}
               onBlur={() => setIsEditing(false)}
               multiline
               maxLength={500}
-              textAlignVertical="top"
               autoFocus
               style={styles.intentionEditor}
               placeholder="Write your sankalpa..."
-              placeholderTextColor="#6B6355"
-            />
+              dictationMode="append"
+              />
           ) : (
             <Pressable onPress={() => setIsEditing(true)}>
               <Text style={styles.intentionText}>{intentionText}</Text>

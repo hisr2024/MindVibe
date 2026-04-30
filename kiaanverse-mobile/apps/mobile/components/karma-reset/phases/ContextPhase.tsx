@@ -172,17 +172,16 @@ export function ContextPhase({
         {/* Description */}
         <View style={styles.section}>
           <Text style={styles.label}>What happened? Speak freely.</Text>
-          <TextInput
+          <ShankhaVoiceInput
             value={description}
             onChangeText={setDescription}
             placeholder="In your own words... what action, thought, or situation are you examining?"
-            placeholderTextColor="#6B6355"
             multiline
             maxLength={1000}
-            textAlignVertical="top"
             style={styles.textarea}
             accessibilityLabel="Describe what happened"
-          />
+            dictationMode="append"
+            />
           <Text style={styles.wordCount}>✦ {wordCount} words</Text>
         </View>
 

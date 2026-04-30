@@ -341,18 +341,18 @@ function SearchOverlay({
         <View style={[styles.overlayHeader, { paddingTop: insets.top + 10 }]}>
           <View style={styles.overlayInputWrap}>
             <Search size={18} color={TEXT_SECONDARY} />
-            <TextInput
+            <ShankhaVoiceInput
               value={input}
               onChangeText={handleChange}
               placeholder="Search verses, themes, words…"
-              placeholderTextColor={TEXT_MUTED}
               autoFocus
               autoCorrect={false}
               autoCapitalize="none"
               returnKeyType="search"
               style={styles.overlayInput}
               accessibilityLabel="Search the Bhagavad Gita"
-            />
+              dictationMode="append"
+              />
           </View>
           <Pressable
             onPress={onClose}

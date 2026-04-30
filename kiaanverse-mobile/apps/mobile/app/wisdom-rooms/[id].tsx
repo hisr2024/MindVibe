@@ -150,17 +150,17 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
         />
 
         <View style={styles.inputRow}>
-          <TextInput
+          <ShankhaVoiceInput
             style={styles.textInput}
             placeholder="Share your wisdom..."
-            placeholderTextColor={colors.text.muted}
             value={input}
             onChangeText={setInput}
             multiline
             maxLength={500}
             returnKeyType="send"
             onSubmitEditing={handleSend}
-          />
+            dictationMode="append"
+            />
           <Pressable
             style={[styles.sendButton, { opacity: input.trim() ? 1 : 0.4 }]}
             onPress={handleSend}

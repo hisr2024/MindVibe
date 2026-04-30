@@ -427,7 +427,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
 
             {/* Note input */}
             <Animated.View entering={FadeIn.duration(300)}>
-              <TextInput
+              <ShankhaVoiceInput
                 style={[
                   styles.noteInput,
                   {
@@ -437,13 +437,13 @@ export default function MoodTrackingScreen(): React.JSX.Element {
                   },
                 ]}
                 placeholder="Add a reflection (optional)..."
-                placeholderTextColor={c.textTertiary}
                 value={note}
                 onChangeText={setNote}
                 multiline
                 maxLength={500}
                 accessibilityLabel="Mood reflection note"
-              />
+                dictationMode="append"
+                />
             </Animated.View>
 
             {/* Submit button */}

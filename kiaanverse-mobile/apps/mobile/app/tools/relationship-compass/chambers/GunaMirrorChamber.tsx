@@ -93,19 +93,19 @@ export function GunaMirrorChamber({
         <Text style={styles.queryLabel}>
           Your situation <Text style={styles.queryLabelMuted}>(optional)</Text>
         </Text>
-        <TextInput
+        <ShankhaVoiceInput
           value={customQuery}
           onChangeText={(text) =>
             onCustomQueryChange(text.slice(0, MAX_QUERY_LEN))
           }
           placeholder="Describe your situation in your own words..."
-          placeholderTextColor={TEXT_MUTED}
           multiline
           numberOfLines={3}
           style={styles.queryInput}
           maxLength={MAX_QUERY_LEN}
           accessibilityLabel="Describe your situation"
-        />
+          dictationMode="append"
+          />
         {customQuery.length > 0 ? (
           <Text style={styles.queryCount}>
             {customQuery.length}/{MAX_QUERY_LEN}
