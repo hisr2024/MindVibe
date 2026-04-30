@@ -1,4 +1,17 @@
-// KIAAN Voice Native — Expo-autolinked Android library.
+// KIAAN Voice Native — manually-registered Android library.
+//
+// REGISTRATION MODEL: this module is NOT autolinked. There is
+// deliberately no expo-module.config.json at the workspace root.
+// Instead, the `withKiaanSakhaVoicePackages` config plugin
+// (apps/mobile/plugins/withKiaanSakhaVoicePackages.js) injects the
+// `include ':kiaanverse-kiaan-voice-native'` line + projectDir mapping
+// into apps/mobile/android/settings.gradle, plus the matching
+// `implementation project(...)` dep into app/build.gradle and the
+// runtime `packages.add(KiaanVoicePackage())` line into
+// MainApplication.kt. See that plugin's header for why autolinker is
+// bypassed (pnpm symlink causing dual-discovery → AGP namespace
+// collision → the long-running `Unresolved reference: sakha` build
+// failure).
 //
 // The KIAAN tier-1 voice Kotlin lives in this module's standard
 // `src/main/java/com/mindvibe/kiaan/voice/` tree:
@@ -9,33 +22,14 @@
 //   • KiaanEngineOrchestrator     — Friend/Guidance/Navigation engines
 //   • KiaanVoicePackage           — ReactPackage registration target
 //
-// The sources are intentionally co-located with the gradle module that
-// builds them. An earlier layout pulled them in via a relative
-// `java.srcDirs += '../../../../native/android/voice/kiaan'` reaching
-// out of the kiaanverse-mobile workspace tree — that worked locally
-// (whole repo on disk) but on EAS Build the relative path resolved to
-// a non-existent directory, kotlinc happily produced an empty AAR, and
-// :app:compileReleaseKotlin then failed resolving
-// `com.mindvibe.kiaan.voice.*` because the AAR shipped with zero
-// classes. Co-locating the sources eliminates that whole class of
-// "silent empty AAR" failures.
-//
 // The Sakha persona-specific Kotlin lives in the sibling
-// `kiaanverse-mobile/native/sakha-voice/android/` module and is owned
-// by @kiaanverse/sakha-voice-native. The two source trees are
-// physically disjoint so kotlinc cannot accidentally compile Sakha
-// sources into this .aar — Step 54 fix for the R8 duplicate-class
-// error where `java.exclude '**/sakha/**'` was honored by javac but
-// ignored by kotlinc, producing PauseEvent$Filter / VerseSegment /
-// etc. in BOTH .aar files and triggering R8 dex-merge collisions.
-//
-// Built as part of `eas build --profile production --platform android`
-// (signed .aab) when apps/mobile depends on @kiaanverse/kiaan-voice-native.
-// The Expo autolinker discovers this via the sibling
-// expo-module.config.json and registers it in settings.gradle. The
-// `withKiaanSakhaVoicePackages` config plugin then injects the matching
-// `implementation project(...)` dep into apps/mobile/android/app/build.gradle
-// and patches MainApplication.kt to register KiaanVoicePackage at runtime.
+// `kiaanverse-mobile/native/sakha-voice/android/` module. The two
+// source trees are physically disjoint so kotlinc cannot accidentally
+// compile Sakha sources into this .aar — Step 54 fix for the R8
+// duplicate-class error where `java.exclude '**/sakha/**'` was honored
+// by javac but ignored by kotlinc, producing PauseEvent$Filter /
+// VerseSegment / etc. in BOTH .aar files and triggering R8 dex-merge
+// collisions.
 //
 // Pattern mirrors kiaanverse-mobile/native/sakha-voice/android/build.gradle
 // so AGP / Kotlin / JVM versions stay consistent.
