@@ -51,7 +51,7 @@
  * package additions.
  */
 
-const { withMainApplication } = require('@expo/config-plugins');
+const { withMainApplication, withAppBuildGradle } = require('@expo/config-plugins');
 
 const KIAAN_IMPORT = 'import com.mindvibe.kiaan.voice.KiaanVoicePackage';
 const SAKHA_IMPORT = 'import com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage';
@@ -60,6 +60,27 @@ const FG_IMPORT =
 const KIAAN_ADD = 'packages.add(KiaanVoicePackage())';
 const SAKHA_ADD = 'packages.add(SakhaVoicePackage())';
 const FG_ADD = 'packages.add(SakhaForegroundServicePackage())';
+
+/**
+ * Gradle module names for the workspace packages — derived from the
+ * settings.gradle convention `@kiaanverse/foo-bar` -> `:kiaanverse-foo-bar`.
+ *
+ * The Expo autolinker adds these to settings.gradle automatically because
+ * each package ships an expo-module.config.json with platforms:["android"].
+ * It does NOT, however, write `implementation project(...)` into
+ * apps/mobile/android/app/build.gradle, because both packages declare
+ * `android.modules: []` (they expose old-style ReactPackage classes, not
+ * new-style Expo Module classes — see the file header for why). Without
+ * the implementation declaration, the workspace AARs are built but never
+ * land on :app's compile classpath, and `import com.mindvibe.kiaan.voice.*`
+ * inside MainApplication.kt fails with "Unresolved reference: sakha".
+ *
+ * We patch them in here so :app sees the AARs at compile time.
+ */
+const APP_GRADLE_DEPS = [
+  "implementation project(':kiaanverse-kiaan-voice-native')",
+  "implementation project(':kiaanverse-sakha-voice-native')",
+];
 
 function addImport(contents, importLine) {
   if (contents.includes(importLine)) return contents;
@@ -89,25 +110,69 @@ function addPackageRegistration(contents, addLine) {
   );
 }
 
+/**
+ * Inject `implementation project(':...')` lines into the host app's
+ * `dependencies { ... }` block. Idempotent — re-running prebuild does
+ * not duplicate the lines.
+ */
+function addGradleDependency(contents, dependencyLine) {
+  if (contents.includes(dependencyLine)) return contents;
+  // The Expo SDK 51 app/build.gradle template has a `dependencies {` block
+  // near the top of which lives `implementation("com.facebook.react:react-android")`.
+  // We insert our project-dependency right before the closing brace of
+  // the FIRST dependencies block to land alongside the autolinked deps.
+  const match = contents.match(/dependencies\s*\{[\s\S]*?\n\}/);
+  if (!match) {
+    // Defensive fallback: append a fresh dependencies block at end of file.
+    return `${contents}\n\ndependencies {\n    ${dependencyLine}\n}\n`;
+  }
+  const insertAt = match.index + match[0].lastIndexOf('}');
+  return (
+    contents.slice(0, insertAt) +
+    `    ${dependencyLine}\n` +
+    contents.slice(insertAt)
+  );
+}
+
 const withKiaanSakhaVoicePackages = (config) => {
-  return withMainApplication(config, (config) => {
-    if (config.modResults.language !== 'kt') {
+  // 1. Patch MainApplication.kt — adds imports and packages.add() calls
+  //    so the registration plumbing is present at runtime.
+  config = withMainApplication(config, (cfg) => {
+    if (cfg.modResults.language !== 'kt') {
       // Java MainApplication is not what Expo SDK 51 generates by default,
       // so we don't bother handling it. If a future template change reverts
       // to Java, this plugin would no-op and the build would compile but
       // the packages wouldn't be registered.
-      return config;
+      return cfg;
     }
-    let contents = config.modResults.contents;
+    let contents = cfg.modResults.contents;
     contents = addImport(contents, KIAAN_IMPORT);
     contents = addImport(contents, SAKHA_IMPORT);
     contents = addImport(contents, FG_IMPORT);
     contents = addPackageRegistration(contents, KIAAN_ADD);
     contents = addPackageRegistration(contents, SAKHA_ADD);
     contents = addPackageRegistration(contents, FG_ADD);
-    config.modResults.contents = contents;
-    return config;
+    cfg.modResults.contents = contents;
+    return cfg;
   });
+
+  // 2. Patch app/build.gradle — adds `implementation project(...)` so
+  //    :app sees the workspace AARs on its compile classpath. Without
+  //    this the imports above resolve to "Unresolved reference: sakha"
+  //    even though the workspace modules build their own AARs cleanly.
+  config = withAppBuildGradle(config, (cfg) => {
+    if (cfg.modResults.language !== 'groovy') {
+      return cfg;
+    }
+    let contents = cfg.modResults.contents;
+    for (const dep of APP_GRADLE_DEPS) {
+      contents = addGradleDependency(contents, dep);
+    }
+    cfg.modResults.contents = contents;
+    return cfg;
+  });
+
+  return config;
 };
 
 module.exports = withKiaanSakhaVoicePackages;
