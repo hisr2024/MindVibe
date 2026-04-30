@@ -28,6 +28,7 @@ import {
   loadAssessmentStore,
   saveAssessmentAnswers,
 } from '../../utils/sacredReflectionEncryption';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 const CHALLENGE_OPTIONS = [
   'Anger',

@@ -66,6 +66,49 @@ class UserProfile(SoftDeleteMixin, Base):
     )
 
 
+class UserSettings(SoftDeleteMixin, Base):
+    """
+    Per-user settings blob backing /api/profile/settings.
+
+    One row per user (FK + UNIQUE on user_id) so the GET handler can do
+    a single equality lookup. New columns are added with sensible
+    defaults so existing rows continue to deserialize cleanly. Anything
+    that doesn't fit the columned shape — feature-flag overrides,
+    per-user A/B treatments — should go on a separate `user_features`
+    table rather than be smuggled in here.
+    """
+
+    __tablename__ = "user_settings"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+    )
+
+    # Notifications
+    notifications_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    daily_verse_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    weekly_reflection_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Voice / Sakha
+    voice_persona: Mapped[str] = mapped_column(String(32), default="guidance")
+    voice_language: Mapped[str] = mapped_column(String(16), default="en-IN")
+    sakha_tone: Mapped[str] = mapped_column(String(32), default="warm")
+
+    # Appearance / haptics
+    theme: Mapped[str] = mapped_column(String(16), default="system")
+    haptics_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
 class Work(SoftDeleteMixin, Base):
     __tablename__ = "works"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

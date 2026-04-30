@@ -216,9 +216,34 @@ export function buildRecitation(opts: ReciteOptions): SakhaVerseRecitation {
   };
 }
 
+/**
+ * True when the native SakhaVoice bridge is registered AND exposes
+ * `readVerse`. Returns false in three real-world cases:
+ *
+ *   1. iOS / web — the module is Android-only.
+ *   2. Expo Go — managed runtime cannot link prebuild-only native code.
+ *   3. Android dev/staging APKs that haven't shipped the
+ *      sakha-voice-native ReactPackage yet (current Play Store state).
+ *
+ * Callers should feature-detect first and fall back to the backend
+ * /api/voice/synthesize TTS when this returns false instead of throwing
+ * — sacred verses must never blow up the screen they're rendered on.
+ */
+export function isSakhaVoiceAvailable(): boolean {
+  return !!Native && typeof Native.readVerse === 'function';
+}
+
 export async function recite(opts: ReciteOptions): Promise<void> {
-  if (!Native) {
-    throw new Error('sakhaVerseLibrary: NativeModules.SakhaVoice is not loaded');
+  if (!isSakhaVoiceAvailable() || !Native) {
+    // Fail soft so the caller can swap to the backend TTS fallback. We
+    // still surface a typed error code so analytics can count how often
+    // we hit this path before the native module ships.
+    const err = new Error(
+      'sakhaVerseLibrary: SakhaVoice native bridge not available — ' +
+        'use backend /api/voice/synthesize fallback',
+    ) as Error & { code?: string };
+    err.code = 'SAKHA_VOICE_UNAVAILABLE';
+    throw err;
   }
   const recitation = buildRecitation(opts);
   await Native.readVerse(recitation);

@@ -113,6 +113,42 @@ async def start_session(
         ) from None
 
 
+@router.get("/step/{step_number}")
+async def get_step_state(
+    step_number: int,
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    user_id: str | None = Depends(get_current_user_optional),
+) -> dict[str, Any]:
+    """
+    Read-only fetch of the current state of one step in a session.
+
+    Mobile calls this when the user navigates back into a step that
+    was already submitted (e.g. tapping the breadcrumb or restoring
+    from a deep link). Stubbed to return a "not yet recorded" envelope
+    so the UI falls through to its initial-state render rather than
+    showing a 404 inside the wizard. Wire the real read (re-hydrating
+    from the emotional_reset_steps table) when persistence ships.
+    """
+    _check_feature_enabled()
+    if step_number < 1 or step_number > 7:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Step number must be between 1 and 7.",
+        )
+    return {
+        "status": "ok",
+        "session_id": session_id,
+        "step_number": step_number,
+        "recorded": False,
+        "data": None,
+        "message": (
+            "No saved input for this step yet — submit via "
+            "POST /api/emotional-reset/step to record progress."
+        ),
+    }
+
+
 @router.post("/step")
 @limiter.limit(EMOTIONAL_RESET_RATE_LIMIT)
 async def process_step(

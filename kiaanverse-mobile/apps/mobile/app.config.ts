@@ -102,6 +102,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       // audio session is killed the moment the user leaves the app.
       'android.permission.FOREGROUND_SERVICE',
       'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+      // Required by SakhaForegroundService when the voice companion is
+      // active and the mic is being captured in the background. Android
+      // 14+ (targetSdk 34/35) requires a typed FGS permission per
+      // foregroundServiceType — without this, declaring
+      // android:foregroundServiceType="microphone" raises
+      // MissingForegroundServiceTypeException at startForeground().
+      'android.permission.FOREGROUND_SERVICE_MICROPHONE',
       // Required by SakhaForegroundService.acquireWakeLock() to keep
       // the CPU awake for the duration of a voice session (capped at
       // 30 min). Released on session end or when foreground service stops.
@@ -110,7 +117,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     intentFilters: [
       {
         action: 'VIEW',
-        autoVerify: true,
+        // autoVerify only works when the corresponding assetlinks.json is
+        // hosted at https://kiaanverse.com/.well-known/assetlinks.json.
+        // Until that file is in place, leaving autoVerify=true makes
+        // Play Console flag the listing as "App Links failed to verify".
+        // The deep-link still works as a browsable intent — we just
+        // don't get the auto-routing badge. Flip back to true the day
+        // the assetlinks payload ships.
+        autoVerify: false,
         data: [
           {
             scheme: 'kiaanverse',
@@ -202,6 +216,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-keep class com.kiaanverse.sakha.** { *; }',
             '-keep interface com.kiaanverse.sakha.** { *; }',
             '-dontwarn com.kiaanverse.sakha.**',
+            '',
+            '# Sakha / Kiaan Voice ReactPackages — registered by fully-qualified',
+            '# class name from MainApplication.kt by the',
+            '# withKiaanSakhaVoicePackages plugin. Without these keeps, R8',
+            '# strips the constructors and the host app crashes at startup',
+            '# trying to instantiate KiaanVoicePackage / SakhaVoicePackage.',
+            '-keep class com.mindvibe.kiaan.voice.** { *; }',
+            '-keep interface com.mindvibe.kiaan.voice.** { *; }',
+            '-dontwarn com.mindvibe.kiaan.voice.**',
             '',
             '# react-native-svg (Relationship Compass radar + compass-rose). R8',
             '# strips the Fabric/JSI ViewManager classes because they are loaded',
@@ -318,7 +341,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     picovoice: {
       accessKey: process.env.PICOVOICE_ACCESS_KEY ?? '',
     },
-    sentryDsn: process.env.SENTRY_DSN ?? '',
+    // EXPO_PUBLIC_-prefixed envs are inlined by metro into the JS bundle;
+    // unprefixed `process.env.*` reads return undefined in production
+    // builds. errorTracking.ts already reads EXPO_PUBLIC_SENTRY_DSN, so
+    // the config plumbing must use the same variable name end-to-end.
+    sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN ?? '',
     eas: {
       projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',
     },

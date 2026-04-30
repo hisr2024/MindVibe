@@ -51,6 +51,7 @@ import {
   useUpdateJournal,
   useDeleteJournal,
 } from '@kiaanverse/api';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 const MOOD_OPTIONS = [
   { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },

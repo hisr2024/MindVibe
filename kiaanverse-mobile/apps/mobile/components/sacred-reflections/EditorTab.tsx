@@ -44,6 +44,7 @@ import {
   getWritingTimeOfDay,
 } from '../../utils/sacredReflectionEncryption';
 import { WeeklyAssessment } from './WeeklyAssessment';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 interface EditorTabProps {
   readonly onSaved: () => void;

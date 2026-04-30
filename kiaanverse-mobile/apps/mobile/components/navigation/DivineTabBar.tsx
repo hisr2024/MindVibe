@@ -1,8 +1,8 @@
 /**
- * DivineTabBar — Kiaanverse bottom tab bar (5 sacred doorways).
+ * DivineTabBar — Kiaanverse bottom tab bar (6 sacred doorways).
  *
  * Tab order:
- *   Home · Sakha · Sacred Tools · Journal · Profile
+ *   Home · Sakha · Sacred Tools · Journeys · Journal · Profile
  *
  * Slot 3 is the Sacred Tools hub — a single doorway that opens to every
  * sacred instrument the user has: the Bhagavad Gita scriptures, the
@@ -54,6 +54,7 @@ import { LotusDialogIcon } from './icons/LotusDialogIcon';
 import { ManuscriptIcon } from './icons/ManuscriptIcon';
 import { ChakraColumnIcon } from './icons/ChakraColumnIcon';
 import { MeditatorIcon } from './icons/MeditatorIcon';
+import { SwordChakraIcon } from './icons/SwordChakraIcon';
 
 // ---------------------------------------------------------------------------
 // Palette
@@ -83,11 +84,16 @@ const TABS: readonly SacredTab[] = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
   { name: 'chat', label: 'Sakha', Icon: LotusDialogIcon },
   // Manuscript glyph = scroll of shlokas; the Sacred Tools hub opens to
-  // every sacred scripture, every wellness/wisdom instrument, the
-  // Journeys (षड्रिपु) experience, and the Vibe Player — the
-  // written-word/utterance metaphor still anchors all of it. Route name
-  // remains 'shlokas' so existing deep links keep resolving.
+  // every sacred scripture, every wellness/wisdom instrument, and the
+  // Vibe Player — the written-word/utterance metaphor still anchors all
+  // of it. Route name remains 'shlokas' so existing deep links keep
+  // resolving.
   { name: 'shlokas', label: 'Sacred Tools', Icon: ManuscriptIcon },
+  // Sword + dharma-chakra glyph for the Journeys (षड्रिपु) tab — the
+  // inner battlefield against the six enemies (kāma, krodha, lobha,
+  // moha, mada, mātsarya). First-class doorway because the journeys are
+  // the long-form transformation arc of the app.
+  { name: 'journeys', label: 'Journeys', Icon: SwordChakraIcon },
   // ChakraColumn's seven stacked chakras read as an inward ascent — a
   // fitting cue for the reflection-and-journal practice of Sacred
   // Reflections (the Journal tab's content).

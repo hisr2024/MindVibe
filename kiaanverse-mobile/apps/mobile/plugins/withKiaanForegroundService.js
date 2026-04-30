@@ -54,11 +54,47 @@ function ensureServiceEntry(manifest) {
   const entry = existing ?? { $: {} };
   entry.$['android:name'] = SERVICE_NAME;
   entry.$['android:exported'] = 'false';
-  entry.$['android:foregroundServiceType'] = 'mediaPlayback';
+  // Sakha holds the mic AND streams TTS audio. Android 14+ (API 34, S_V2)
+  // accepts a pipe-separated list of foregroundServiceType values; the
+  // service will satisfy both the FOREGROUND_SERVICE_MICROPHONE and
+  // FOREGROUND_SERVICE_MEDIA_PLAYBACK permission gates declared in
+  // app.config.ts. Without "microphone" the OS throws
+  // MissingForegroundServiceTypeException the moment the user backgrounds
+  // the app while Sakha is listening.
+  entry.$['android:foregroundServiceType'] = 'microphone|mediaPlayback';
 
   if (!existing) {
     application.service.push(entry);
   }
+  return manifest;
+}
+
+/**
+ * Declare the SpeechRecognitionService package query so
+ * SakhaVoiceModule.dictateOnce() can locate the on-device
+ * SpeechRecognizer on Android 11+ (API 30+) where package visibility
+ * is restricted by default. Without this <queries> entry,
+ * SpeechRecognizer.isRecognitionAvailable() returns false even when a
+ * recognizer is installed, and dictation falls back to the network
+ * transcribe path even on devices that have free on-device STT.
+ */
+function ensureSpeechQueries(manifest) {
+  manifest.manifest.queries = manifest.manifest.queries ?? [];
+  // The queries element is an array of <queries> blocks; we want a
+  // single block that contains an <intent> child matching the speech
+  // recognition action.
+  const block = manifest.manifest.queries[0] ?? {};
+  block.intent = block.intent ?? [];
+  const ACTION = 'android.speech.RecognitionService';
+  const already = block.intent.some(
+    (i) => i.action?.[0]?.$?.['android:name'] === ACTION,
+  );
+  if (!already) {
+    block.intent.push({
+      action: [{ $: { 'android:name': ACTION } }],
+    });
+  }
+  manifest.manifest.queries[0] = block;
   return manifest;
 }
 
@@ -84,6 +120,7 @@ function ensureStrings(stringsResource) {
 const withKiaanForegroundService = (config) => {
   config = withAndroidManifest(config, (cfg) => {
     cfg.modResults = ensureServiceEntry(cfg.modResults);
+    cfg.modResults = ensureSpeechQueries(cfg.modResults);
     return cfg;
   });
 

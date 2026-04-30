@@ -52,6 +52,7 @@ import {
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
 import { StepContent } from '../../../components/journey/StepContent';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 
 // ---------------------------------------------------------------------------
 // Constants

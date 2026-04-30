@@ -43,6 +43,7 @@ import {
   useKarmaLytixWeeklyReport,
 } from '@kiaanverse/api';
 import type { KarmaLytixWeeklyReport } from '@kiaanverse/api';
+import { LotusGlyph } from '../components/sacred-reflections/LotusGlyph';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -144,7 +145,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
               entering={FadeInDown.duration(500)}
               style={styles.insufficientCard}
             >
-              <Text style={styles.lotus}>{'\u{1FAB7}'}</Text>
+              <LotusGlyph size={88} />
               <Text
                 variant="h2"
                 color={colors.text.primary}
@@ -404,7 +405,12 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 onPress={onRegenerate}
                 disabled={generate.isPending}
               />
-              <Pressable onPress={onOpenSacred} style={styles.secondaryLink}>
+              <Pressable
+                onPress={onOpenSacred}
+                style={styles.secondaryLink}
+                accessibilityRole="button"
+                accessibilityLabel="Back to Sacred Reflection"
+              >
                 <Text
                   variant="caption"
                   color={colors.text.muted}

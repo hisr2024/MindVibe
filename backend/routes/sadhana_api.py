@@ -288,6 +288,73 @@ async def complete_sadhana(
         ) from None
 
 
+@router.get("/daily")
+async def get_daily_sadhana(
+    user=Depends(get_current_user_optional),
+) -> dict[str, Any]:
+    """
+    Today's composed sadhana for the user, if one has been generated.
+
+    Mobile calls this on the Sadhana screen mount; we return a clean
+    empty envelope (`session: null`) when no composition exists yet so
+    the screen can prompt the user to tap "Compose Today's Practice"
+    rather than show a generic error. The frontend then hits
+    POST /api/sadhana/compose to generate one.
+
+    A future iteration should look up today's row in the sadhana
+    sessions table by (user_id, date) and return the persisted
+    composition so the user can resume mid-practice.
+    """
+    return {
+        "status": "ok",
+        "session": None,
+        "message": (
+            "No sadhana composed for today yet — "
+            "POST /api/sadhana/compose to generate one."
+        ),
+    }
+
+
+@router.get("/history")
+async def get_sadhana_history(
+    limit: int = 30,
+    user=Depends(get_current_user_optional),
+) -> dict[str, Any]:
+    """
+    Past completed sadhana sessions, newest first.
+
+    Stubbed to return an empty list so the History tab on mobile
+    renders the empty state ("Your sacred practice begins today")
+    instead of erroring out. Hook the real query into the sadhana
+    sessions table here once it ships.
+    """
+    safe_limit = max(1, min(limit, 100))
+    return {
+        "status": "ok",
+        "sessions": [],
+        "limit": safe_limit,
+        "total": 0,
+    }
+
+
+@router.get("/streak")
+async def get_sadhana_streak(
+    user=Depends(get_current_user_optional),
+) -> dict[str, Any]:
+    """
+    Current and longest practice streaks for the user.
+
+    Stubbed to return zero so the streak ribbon shows "Begin your
+    streak today" rather than the loading shimmer indefinitely.
+    """
+    return {
+        "status": "ok",
+        "current_streak_days": 0,
+        "longest_streak_days": 0,
+        "last_practice_date": None,
+    }
+
+
 @router.get("/health")
 async def health() -> dict[str, Any]:
     """Health check for the Nityam Sadhana service."""

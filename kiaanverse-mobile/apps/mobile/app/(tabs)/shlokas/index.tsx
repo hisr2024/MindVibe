@@ -3,6 +3,7 @@
  *
  * One doorway, every sacred instrument the user has at their disposal:
  *
+ *   SACRED VOICE       — Sakha · KIAAN Voice Companion (शङ्ख)
  *   SACRED SCRIPTURES  — Bhagavad Gita (18-chapter browser)
  *   WISDOM TOOLS       — Ardha, Viyoga, Relationship Compass
  *   HEALING TOOLS      — Emotional Reset, Karma Reset
@@ -61,6 +62,21 @@ interface ToolDescriptor {
   readonly icon: string;
   readonly route: string;
 }
+
+// SACRED VOICE — Sakha, the KIAAN Voice Companion. Pinned to the top
+// because the conch (शङ्ख) is the centerpiece of the KIAANverse
+// experience and tap-to-speak is the fastest way into every other tool.
+const VOICE_TOOLS: readonly ToolDescriptor[] = [
+  {
+    id: 'voice-companion',
+    name: 'Sakha — Voice Companion',
+    sanskrit: 'सखा · शङ्ख',
+    description: 'Speak with the divine friend',
+    color: DIVINE_GOLD,
+    icon: '🐚',
+    route: '/voice-companion',
+  },
+];
 
 const SCRIPTURE_TOOLS: readonly ToolDescriptor[] = [
   {
@@ -180,6 +196,7 @@ export default function SacredToolsHubScreen(): React.JSX.Element {
   const sections = useMemo(
     () =>
       [
+        { title: 'Sacred Voice', tools: VOICE_TOOLS },
         { title: 'Sacred Scriptures', tools: SCRIPTURE_TOOLS },
         { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
         { title: 'Healing Tools', tools: HEALING_TOOLS },

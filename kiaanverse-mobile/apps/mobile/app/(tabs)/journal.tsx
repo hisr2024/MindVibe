@@ -55,6 +55,7 @@ import { useJournalEntries, useDeleteJournal } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
+import { LotusGlyph } from '../../components/sacred-reflections/LotusGlyph';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
@@ -384,9 +385,9 @@ function JournalView(): React.JSX.Element {
           entering={FadeIn.duration(600)}
           style={styles.emptyContainer}
         >
-          <Text variant="h2" align="center" style={styles.lotusIcon}>
-            {'\u{1FAB7}'}
-          </Text>
+          <View style={styles.lotusIcon}>
+            <LotusGlyph size={88} />
+          </View>
           <Text variant="body" color={colors.text.muted} align="center">
             {t('emptyTitle', 'Your sacred reflections await.')}
           </Text>
@@ -628,7 +629,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   lotusIcon: {
-    fontSize: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   karmaNote: {
     marginTop: spacing.md,

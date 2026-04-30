@@ -27,6 +27,7 @@ import {
 import type { KarmaLytixWeeklyReport } from '@kiaanverse/api';
 
 import { COPY } from './constants';
+import { LotusGlyph } from './LotusGlyph';
 
 interface KiaanTabProps {
   readonly onOpenEditor: () => void;
@@ -95,7 +96,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
           entering={FadeIn.duration(600)}
           style={styles.emptyInner}
         >
-          <Text style={styles.lotus}>{'\u{1FAB7}'}</Text>
+          <LotusGlyph size={92} />
           <Text
             variant="h2"
             color={colors.text.primary}

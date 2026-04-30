@@ -35,6 +35,7 @@ import {
   useWisdomRooms,
   type WisdomRoomMessage,
 } from '@kiaanverse/api';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 export default function WisdomRoomChatScreen(): React.JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();

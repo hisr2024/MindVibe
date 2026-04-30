@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 import {
   KeyboardAvoidingView,
   Platform,

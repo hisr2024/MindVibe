@@ -730,3 +730,76 @@ async def get_advanced_trend_analysis(
             "end_date": datetime.now().isoformat()
         }
     }
+
+
+# ---------------------------------------------------------------------------
+# Mobile-app companion endpoints
+#
+# These three were called by the mobile app's deep-insights / guna /
+# emotional-patterns screens but did not exist server-side, surfacing as
+# stuck spinners. Each returns a sane empty-default envelope so the
+# screens render their "still gathering" state instead of erroring out.
+# Replace with real implementations when the analytics pipelines for
+# each metric mature.
+# ---------------------------------------------------------------------------
+
+
+@router.get("/deep-insights")
+async def get_deep_insights() -> dict:
+    """
+    Deep cross-feature insights summary (KarmaLytix + journal moods +
+    journey progress). Stubbed empty envelope until the joining query
+    is implemented in the analytics service.
+    """
+    return {
+        "status": "ok",
+        "insights": [],
+        "summary": None,
+        "generated_at": datetime.now().isoformat(),
+        "message": (
+            "Deep insights aggregator is still warming up — "
+            "log a few reflections and revisit."
+        ),
+    }
+
+
+@router.get("/guna-balance")
+async def get_guna_balance() -> dict:
+    """
+    Sattva / Rajas / Tamas balance derived from the user's recent tags
+    and mood metadata. Returns equal thirds as a neutral default until
+    the guna classifier ships.
+    """
+    return {
+        "status": "ok",
+        "sattva": 33,
+        "rajas": 33,
+        "tamas": 34,
+        "dominant": "balanced",
+        "window_days": 7,
+        "message": (
+            "Guna analyser is still calibrating — values shown are "
+            "the neutral baseline, not your reading."
+        ),
+    }
+
+
+@router.get("/emotional-patterns")
+async def get_emotional_patterns(days: int = 30) -> dict:
+    """
+    Mobile-friendly proxy for the emotional-pattern extractor.
+
+    The full extractor lives at /api/kiaan/emotional-patterns/extract,
+    but the mobile app expects a GET on /api/analytics/emotional-patterns
+    so it can be called without a body. Stubbed to return an empty
+    pattern list with the requested window — wire this through to the
+    real extractor service once we settle the request shape.
+    """
+    safe_days = max(1, min(days, 90))
+    return {
+        "status": "ok",
+        "window_days": safe_days,
+        "patterns": [],
+        "dominant_pattern": None,
+        "generated_at": datetime.now().isoformat(),
+    }

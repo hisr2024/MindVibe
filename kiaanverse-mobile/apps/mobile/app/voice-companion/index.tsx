@@ -108,22 +108,27 @@ export default function VoiceCompanionScreen() {
     },
   });
 
-  // Quota gate — if quota check ran and can't start, jump to the sheet
+  // Quota gate — if quota check ran and can't start, jump to the sheet.
+  // The quota / crisis / onboarding sheets live under
+  // app/voice-companion/{quota,crisis,onboarding}.tsx — there is no
+  // separate /voice subtree, so the path must be /voice-companion/...
+  // (the older /voice/... paths produced "Unmatched Route" because
+  // app/voice.tsx is a one-line redirect, not a directory).
   useEffect(() => {
     if (quota && !quota.canStartSession) {
-      router.push('/voice/quota');
+      router.push('/voice-companion/quota');
     }
   }, [quota, router]);
 
   // Crisis gate — push the overlay
   useEffect(() => {
-    if (crisis) router.push('/voice/crisis');
+    if (crisis) router.push('/voice-companion/crisis');
   }, [crisis, router]);
 
   // Persona mismatch gate
   useEffect(() => {
     if (personaMismatch) {
-      router.push('/voice/onboarding');
+      router.push('/voice-companion/onboarding');
     }
   }, [personaMismatch, router]);
 

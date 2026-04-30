@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.models import Session, User, UserProfile
+from backend.models import Session, User, UserProfile, UserSettings
 from backend.security.jwt import decode_access_token
 from backend.services.session_service import get_session, session_is_active, touch_session
 
@@ -135,3 +135,127 @@ async def get_profile(request: Request, db: AsyncSession = Depends(get_db)):
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )
+
+
+# ---------------------------------------------------------------------------
+# /api/profile/settings — account settings KV blob
+#
+# The mobile Settings screen reads/writes a flat settings object:
+# notifications, voice persona, language, theme, haptics. Until we
+# have a dedicated settings table we serve a sensible default envelope
+# so the screen stops 404-ing. Replace the in-memory default with a
+# real DB-backed shape when the settings model lands.
+# ---------------------------------------------------------------------------
+
+
+class SettingsOut(BaseModel):
+    notifications_enabled: bool = True
+    daily_verse_enabled: bool = True
+    weekly_reflection_enabled: bool = True
+    voice_persona: str = "guidance"
+    voice_language: str = "en-IN"
+    sakha_tone: str = "warm"
+    theme: str = "system"
+    haptics_enabled: bool = True
+
+
+class SettingsUpdateIn(BaseModel):
+    notifications_enabled: bool | None = None
+    daily_verse_enabled: bool | None = None
+    weekly_reflection_enabled: bool | None = None
+    voice_persona: str | None = Field(default=None, max_length=32)
+    voice_language: str | None = Field(default=None, max_length=16)
+    sakha_tone: str | None = Field(default=None, max_length=32)
+    theme: str | None = Field(default=None, max_length=16)
+    haptics_enabled: bool | None = None
+
+
+async def _load_or_create_settings(
+    db: AsyncSession, user_id: str
+) -> UserSettings:
+    """
+    Fetch the user's settings row, creating one with the canonical
+    defaults on first read. Idempotent — concurrent first-reads from
+    multiple devices end up with the same single row because the
+    INSERT is gated by the (user_id) UNIQUE constraint.
+    """
+    stmt = select(UserSettings).where(UserSettings.user_id == user_id)
+    row = (await db.execute(stmt)).scalars().first()
+    if row is not None:
+        return row
+
+    row = UserSettings(user_id=user_id)
+    db.add(row)
+    try:
+        await db.commit()
+    except Exception:
+        # Another request raced us to the insert; refresh and read.
+        await db.rollback()
+        row = (await db.execute(stmt)).scalars().first()
+        if row is None:
+            raise
+    else:
+        await db.refresh(row)
+    return row
+
+
+def _settings_out(row: UserSettings) -> SettingsOut:
+    return SettingsOut(
+        notifications_enabled=row.notifications_enabled,
+        daily_verse_enabled=row.daily_verse_enabled,
+        weekly_reflection_enabled=row.weekly_reflection_enabled,
+        voice_persona=row.voice_persona,
+        voice_language=row.voice_language,
+        sakha_tone=row.sakha_tone,
+        theme=row.theme,
+        haptics_enabled=row.haptics_enabled,
+    )
+
+
+@router.get("/settings", response_model=SettingsOut)
+async def get_settings(
+    request: Request, db: AsyncSession = Depends(get_db)
+) -> SettingsOut:
+    """
+    Read the user's settings blob, lazily creating the row with the
+    canonical defaults on the first call.
+    """
+    user, session_row, _ = await _get_authenticated_user_and_session(
+        request, db
+    )
+    row = await _load_or_create_settings(db, user.id)
+    await touch_session(db, session_row)
+    return _settings_out(row)
+
+
+@router.put("/settings", response_model=SettingsOut)
+async def update_settings(
+    request: Request,
+    payload: SettingsUpdateIn,
+    db: AsyncSession = Depends(get_db),
+) -> SettingsOut:
+    """
+    Patch the user's settings.
+
+    Only fields explicitly provided are updated — None means "leave
+    untouched", not "reset to default", so the mobile UI can issue a
+    partial PUT (e.g. just `theme`) without echoing the rest of the
+    shape it didn't touch.
+    """
+    user, session_row, _ = await _get_authenticated_user_and_session(
+        request, db
+    )
+    row = await _load_or_create_settings(db, user.id)
+
+    updates = {
+        k: v for k, v in payload.model_dump().items() if v is not None
+    }
+    for key, value in updates.items():
+        setattr(row, key, value)
+
+    if updates:
+        await db.commit()
+        await db.refresh(row)
+    await touch_session(db, session_row)
+
+    return _settings_out(row)

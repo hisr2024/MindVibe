@@ -29,6 +29,7 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useCreatePost, useCommunityCircles } from '@kiaanverse/api';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 const MAX_CHARS = 500;
 
