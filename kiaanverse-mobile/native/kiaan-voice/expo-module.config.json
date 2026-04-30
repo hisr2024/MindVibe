@@ -1,6 +1,6 @@
 {
   "platforms": ["android"],
   "android": {
-    "modules": ["com.mindvibe.kiaan.voice.KiaanVoicePackage"]
+    "modules": []
   }
 }
