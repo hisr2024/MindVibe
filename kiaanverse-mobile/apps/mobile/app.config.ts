@@ -334,7 +334,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     picovoice: {
       accessKey: process.env.PICOVOICE_ACCESS_KEY ?? '',
     },
-    sentryDsn: process.env.SENTRY_DSN ?? '',
+    // EXPO_PUBLIC_-prefixed envs are inlined by metro into the JS bundle;
+    // unprefixed `process.env.*` reads return undefined in production
+    // builds. errorTracking.ts already reads EXPO_PUBLIC_SENTRY_DSN, so
+    // the config plumbing must use the same variable name end-to-end.
+    sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN ?? '',
     eas: {
       projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',
     },

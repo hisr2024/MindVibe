@@ -55,6 +55,7 @@ import {
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
 import { useArrivalStatus } from '../hooks/useArrivalStatus';
+import { useSacredFonts } from '../hooks/useSacredFonts';
 import { OfflineBanner } from '../components/common/OfflineBanner';
 import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
@@ -260,18 +261,27 @@ function AppContent(): React.JSX.Element {
     setCeremonyActive(false);
   }, []);
 
-  // Hide splash the moment any React tree lays out. Waiting for status to
-  // settle kept the native lantern on screen for up to 8s on a slow auth
-  // bootstrap; users read that as a frozen app. Swapping to LoadingMandala
-  // immediately makes loading legible.
+  // Sacred typography. Holds the splash an extra few hundred ms so the
+  // first paint already has Outfit / Cormorant Garamond / Noto Sans
+  // Devanagari instead of the platform sans-serif that ships when the
+  // .ttf files aren't registered. `ready` is true on success OR error
+  // — we never trap the user behind a missing font.
+  const fonts = useSacredFonts();
+
+  // Hide splash the moment any React tree lays out (and fonts have
+  // resolved). Waiting for status to settle kept the native lantern on
+  // screen for up to 8s on a slow auth bootstrap; users read that as a
+  // frozen app. Swapping to LoadingMandala immediately makes loading
+  // legible.
   const onLayoutReady = useCallback(async () => {
+    if (!fonts.ready) return;
     try {
       await SplashScreen.hideAsync();
     } catch {
       // hideAsync throws if the native module is missing or the splash is
       // already hidden — swallow so it never blocks rendering below.
     }
-  }, []);
+  }, [fonts.ready]);
 
   // Fail-open splash hide: if the auth bootstrap takes too long or silently
   // hangs, force the splash to hide after 8 seconds so the user sees the
