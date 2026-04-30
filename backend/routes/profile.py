@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
-from backend.models import Session, User, UserProfile
+from backend.models import Session, User, UserProfile, UserSettings
 from backend.security.jwt import decode_access_token
 from backend.services.session_service import get_session, session_is_active, touch_session
 
@@ -170,16 +170,62 @@ class SettingsUpdateIn(BaseModel):
     haptics_enabled: bool | None = None
 
 
+async def _load_or_create_settings(
+    db: AsyncSession, user_id: str
+) -> UserSettings:
+    """
+    Fetch the user's settings row, creating one with the canonical
+    defaults on first read. Idempotent — concurrent first-reads from
+    multiple devices end up with the same single row because the
+    INSERT is gated by the (user_id) UNIQUE constraint.
+    """
+    stmt = select(UserSettings).where(UserSettings.user_id == user_id)
+    row = (await db.execute(stmt)).scalars().first()
+    if row is not None:
+        return row
+
+    row = UserSettings(user_id=user_id)
+    db.add(row)
+    try:
+        await db.commit()
+    except Exception:
+        # Another request raced us to the insert; refresh and read.
+        await db.rollback()
+        row = (await db.execute(stmt)).scalars().first()
+        if row is None:
+            raise
+    else:
+        await db.refresh(row)
+    return row
+
+
+def _settings_out(row: UserSettings) -> SettingsOut:
+    return SettingsOut(
+        notifications_enabled=row.notifications_enabled,
+        daily_verse_enabled=row.daily_verse_enabled,
+        weekly_reflection_enabled=row.weekly_reflection_enabled,
+        voice_persona=row.voice_persona,
+        voice_language=row.voice_language,
+        sakha_tone=row.sakha_tone,
+        theme=row.theme,
+        haptics_enabled=row.haptics_enabled,
+    )
+
+
 @router.get("/settings", response_model=SettingsOut)
 async def get_settings(
     request: Request, db: AsyncSession = Depends(get_db)
 ) -> SettingsOut:
     """
-    Read the user's settings blob. Returns canonical defaults until
-    the per-user settings table ships.
+    Read the user's settings blob, lazily creating the row with the
+    canonical defaults on the first call.
     """
-    await _get_authenticated_user_and_session(request, db)
-    return SettingsOut()
+    user, session_row, _ = await _get_authenticated_user_and_session(
+        request, db
+    )
+    row = await _load_or_create_settings(db, user.id)
+    await touch_session(db, session_row)
+    return _settings_out(row)
 
 
 @router.put("/settings", response_model=SettingsOut)
@@ -189,14 +235,27 @@ async def update_settings(
     db: AsyncSession = Depends(get_db),
 ) -> SettingsOut:
     """
-    Patch the user's settings. Currently a no-op writer that echoes
-    the merged shape back so the mobile UI can update its local state
-    optimistically. Replace with a DB write when the settings model
-    lands.
+    Patch the user's settings.
+
+    Only fields explicitly provided are updated — None means "leave
+    untouched", not "reset to default", so the mobile UI can issue a
+    partial PUT (e.g. just `theme`) without echoing the rest of the
+    shape it didn't touch.
     """
-    await _get_authenticated_user_and_session(request, db)
-    defaults = SettingsOut()
-    merged = defaults.model_copy(
-        update={k: v for k, v in payload.model_dump().items() if v is not None}
+    user, session_row, _ = await _get_authenticated_user_and_session(
+        request, db
     )
-    return merged
+    row = await _load_or_create_settings(db, user.id)
+
+    updates = {
+        k: v for k, v in payload.model_dump().items() if v is not None
+    }
+    for key, value in updates.items():
+        setattr(row, key, value)
+
+    if updates:
+        await db.commit()
+        await db.refresh(row)
+    await touch_session(db, session_row)
+
+    return _settings_out(row)

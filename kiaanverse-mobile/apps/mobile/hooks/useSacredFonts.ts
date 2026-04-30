@@ -5,34 +5,31 @@
  * CormorantGaramond, NotoSansDevanagari, CrimsonText). On Android,
  * referencing a fontFamily string that has not been registered with
  * expo-font silently falls back to the system sans-serif — the user
- * sees Roboto, not the typeset the design system was built on. That is
- * the failure mode of the production Play Store build before this hook
- * ran.
+ * sees Roboto, not the typeset the design system was built on.
  *
- * Bundling strategy:
- *   • The `.ttf` files live in apps/mobile/assets/fonts/.
- *   • Only files that exist at bundle time are passed to useFonts.
- *     Missing files are tolerated — RN simply uses the system fallback
- *     for that family rather than throwing — so we can ship the loader
- *     incrementally as designers add fonts.
- *   • The app boot waits for `loaded || error` before hiding the splash
- *     screen so the first paint already has the right typeset.
+ * Bundled today (≈ 2 MB total, embedded into the AAB):
+ *   • Outfit-Regular / Medium / SemiBold        (UI, numerals, captions)
+ *   • CormorantGaramond-Light / LightItalic /
+ *     SemiBold                                  (headings, quotes)
+ *   • NotoSansDevanagari-Regular / Medium /
+ *     Bold                                      (Sanskrit / Hindi)
+ *   • CrimsonText-Regular / Italic              (body text, sacred quotes)
  *
- * To add a new font:
- *   1. Drop the .ttf into apps/mobile/assets/fonts/
- *   2. Add the entry below
- *   3. Use `fontFamily: 'Outfit-SemiBold'` (the key, not the file path)
- *      anywhere in the app. The styles already reference these keys;
- *      adding the file makes them light up.
+ * All TTFs live in apps/mobile/assets/fonts/ and are sourced from the
+ * SIL Open Font License files distributed by Google Fonts. The app
+ * boot waits for `loaded || error` before hiding the splash so the
+ * first paint already has the right typeset. Missing files are tolerated
+ * — RN falls back to the system font for that family rather than
+ * throwing — so future additions can ship without changing this hook.
  */
 
 import { useFonts } from 'expo-font';
 
 /**
- * Lazy require so missing files become a clean "module not found" at
- * bundling time (not a silent runtime fallback). When you drop a new
- * .ttf into assets/fonts/, uncomment the matching line and the family
- * lights up on every screen automatically.
+ * Lazy require so a missing file becomes a clean "module not found" at
+ * bundling time rather than a silent runtime fallback. Wrapping each
+ * require in a try/catch lets us register every family that ships
+ * today and quietly skip any whose .ttf hasn't been added yet.
  */
 function safeRequire(loader: () => unknown): unknown | null {
   try {
@@ -44,26 +41,60 @@ function safeRequire(loader: () => unknown): unknown | null {
 
 const FONT_MAP: Record<string, unknown> = (() => {
   const map: Record<string, unknown> = {};
-  // Currently bundled — Crimson Text Regular is shipping today.
-  const crimsonRegular = safeRequire(() =>
+
+  const register = (key: string, loader: () => unknown): void => {
+    const asset = safeRequire(loader);
+    if (asset) map[key] = asset;
+  };
+
+  // Outfit — the workhorse UI family (numerals, captions, eyebrow text).
+  register('Outfit-Regular', () =>
+    require('../assets/fonts/Outfit-Regular.ttf'),
+  );
+  register('Outfit-Medium', () =>
+    require('../assets/fonts/Outfit-Medium.ttf'),
+  );
+  register('Outfit-SemiBold', () =>
+    require('../assets/fonts/Outfit-SemiBold.ttf'),
+  );
+
+  // Cormorant Garamond — display headings, ceremonial quotes, the
+  // golden italic title style used across Sacred Reflections, the
+  // Gita browser header, and ShlokaCard references.
+  register('CormorantGaramond-Light', () =>
+    require('../assets/fonts/CormorantGaramond-Light.ttf'),
+  );
+  register('CormorantGaramond-LightItalic', () =>
+    require('../assets/fonts/CormorantGaramond-LightItalic.ttf'),
+  );
+  register('CormorantGaramond-SemiBold', () =>
+    require('../assets/fonts/CormorantGaramond-SemiBold.ttf'),
+  );
+
+  // Noto Sans Devanagari — every Sanskrit and Hindi shloka, every
+  // Devanagari section title, every chapter sanskrit name. Without
+  // this the Devanagari renders via the platform font, which on most
+  // Android devices is acceptable but lacks the proper conjunct
+  // ligature shaping the design system was tested against.
+  register('NotoSansDevanagari-Regular', () =>
+    require('../assets/fonts/NotoSansDevanagari-Regular.ttf'),
+  );
+  register('NotoSansDevanagari-Medium', () =>
+    require('../assets/fonts/NotoSansDevanagari-Medium.ttf'),
+  );
+  register('NotoSansDevanagari-Bold', () =>
+    require('../assets/fonts/NotoSansDevanagari-Bold.ttf'),
+  );
+
+  // Crimson Text — body type for long-form sacred copy (privacy
+  // policy, terms, journal entries). Regular was already shipping;
+  // italic is added for emphasis.
+  register('CrimsonText-Regular', () =>
     require('../assets/fonts/CrimsonText-Regular.ttf'),
   );
-  if (crimsonRegular) map['CrimsonText-Regular'] = crimsonRegular;
-
-  // The remaining keys are intentionally not yet wired. When the TTFs
-  // land in assets/fonts/ (Outfit-Regular, Outfit-Medium, Outfit-SemiBold,
-  // CormorantGaramond-Light, CormorantGaramond-LightItalic,
-  // CormorantGaramond-SemiBold, CrimsonText-Italic,
-  // NotoSansDevanagari-Regular, NotoSansDevanagari-Medium,
-  // NotoSansDevanagari-Bold), uncomment the corresponding require lines:
-  //
-  //   const outfitRegular = safeRequire(() =>
-  //     require('../assets/fonts/Outfit-Regular.ttf'),
-  //   );
-  //   if (outfitRegular) map['Outfit-Regular'] = outfitRegular;
-  //
-  // Until then every fontFamily: 'Outfit-*' falls back to the platform
-  // sans-serif, which is recoverable but visually off-brand.
+  register('CrimsonText-Italic', () =>
+    require('../assets/fonts/CrimsonText-Italic.ttf'),
+  );
 
   return map;
 })();

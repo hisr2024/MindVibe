@@ -217,6 +217,7 @@ from backend.models.user import (
     User,
     UserProfile,
     UserProgress,
+    UserSettings,
     Work,
 )
 
@@ -294,6 +295,7 @@ __all__ = [
     # User & Auth models
     "User",
     "UserProfile",
+    "UserSettings",
     "Session",
     "RefreshToken",
     "PasswordResetToken",

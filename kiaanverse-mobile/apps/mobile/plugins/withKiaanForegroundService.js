@@ -69,6 +69,35 @@ function ensureServiceEntry(manifest) {
   return manifest;
 }
 
+/**
+ * Declare the SpeechRecognitionService package query so
+ * SakhaVoiceModule.dictateOnce() can locate the on-device
+ * SpeechRecognizer on Android 11+ (API 30+) where package visibility
+ * is restricted by default. Without this <queries> entry,
+ * SpeechRecognizer.isRecognitionAvailable() returns false even when a
+ * recognizer is installed, and dictation falls back to the network
+ * transcribe path even on devices that have free on-device STT.
+ */
+function ensureSpeechQueries(manifest) {
+  manifest.manifest.queries = manifest.manifest.queries ?? [];
+  // The queries element is an array of <queries> blocks; we want a
+  // single block that contains an <intent> child matching the speech
+  // recognition action.
+  const block = manifest.manifest.queries[0] ?? {};
+  block.intent = block.intent ?? [];
+  const ACTION = 'android.speech.RecognitionService';
+  const already = block.intent.some(
+    (i) => i.action?.[0]?.$?.['android:name'] === ACTION,
+  );
+  if (!already) {
+    block.intent.push({
+      action: [{ $: { 'android:name': ACTION } }],
+    });
+  }
+  manifest.manifest.queries[0] = block;
+  return manifest;
+}
+
 /** Inject Sakha-specific notification strings into strings.xml. */
 function ensureStrings(stringsResource) {
   stringsResource.resources = stringsResource.resources ?? {};
@@ -91,6 +120,7 @@ function ensureStrings(stringsResource) {
 const withKiaanForegroundService = (config) => {
   config = withAndroidManifest(config, (cfg) => {
     cfg.modResults = ensureServiceEntry(cfg.modResults);
+    cfg.modResults = ensureSpeechQueries(cfg.modResults);
     return cfg;
   });
 
