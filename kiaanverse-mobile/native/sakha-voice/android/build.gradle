@@ -1,4 +1,17 @@
-// Sakha Voice Native — Expo-autolinked Android library.
+// Sakha Voice Native — manually-registered Android library.
+//
+// REGISTRATION MODEL: this module is NOT autolinked. There is
+// deliberately no expo-module.config.json at the workspace root.
+// Instead, the `withKiaanSakhaVoicePackages` config plugin
+// (apps/mobile/plugins/withKiaanSakhaVoicePackages.js) injects the
+// `include ':kiaanverse-sakha-voice-native'` line + projectDir mapping
+// into apps/mobile/android/settings.gradle, plus the matching
+// `implementation project(...)` dep into app/build.gradle and the
+// runtime `packages.add(SakhaVoicePackage())` line into
+// MainApplication.kt. See that plugin's header for why autolinker is
+// bypassed (pnpm symlink causing dual-discovery → AGP namespace
+// collision → the long-running `Unresolved reference: sakha` build
+// failure).
 //
 // The Sakha persona Kotlin lives in this module's standard
 // `src/main/java/com/mindvibe/kiaan/voice/sakha/` tree:
@@ -12,25 +25,6 @@
 //   • SakhaPersonaGuard           — guardrail filter
 //   • SakhaTypes / SakhaDictation / SakhaVerseReader / SakhaWakeWordDetector
 //   • WakeWordMatcher
-//
-// The sources are intentionally co-located with the gradle module that
-// builds them. An earlier layout pulled them in via a relative
-// `java.srcDirs += '../../../../native/android/voice/sakha'` reaching
-// out of the kiaanverse-mobile workspace tree — that worked locally but
-// on EAS Build the relative path resolved to a non-existent directory,
-// kotlinc happily produced an empty AAR, and :app:compileReleaseKotlin
-// then failed with "Unresolved reference: sakha" because the AAR
-// shipped with zero classes. Co-locating the sources eliminates that
-// whole class of "silent empty AAR" failures.
-//
-// Built as part of `eas build --profile production --platform android`
-// (signed .aab). The Expo autolinker discovers this via the sibling
-// expo-module.config.json and includes it in the generated
-// settings.gradle automatically once the host app declares
-// @kiaanverse/sakha-voice-native as a workspace dep. The
-// `withKiaanSakhaVoicePackages` config plugin then injects the matching
-// `implementation project(...)` dep into apps/mobile/android/app/build.gradle
-// and patches MainApplication.kt to register SakhaVoicePackage at runtime.
 //
 // Pattern mirrors kiaanverse-mobile/native/kiaan-voice/android/build.gradle
 // so AGP / Kotlin / JVM versions stay consistent across the workspace's
