@@ -2,8 +2,9 @@
  * Sakha Verse Library — client-side catalog of anchor Bhagavad Gita verses
  * for the KIAAN Voice Companion app (apps/mobile).
  *
- * Companion to native/android/voice/sakha/SakhaVerseReader.kt (the pure
- * recitation planner) and SakhaVoiceModule.readVerse (the RN bridge).
+ * Companion to kiaanverse-mobile/native/sakha-voice/android/src/main/java/
+ * com/mindvibe/kiaan/voice/sakha/SakhaVerseReader.kt (the pure recitation
+ * planner) and SakhaVoiceModule.readVerse (the RN bridge).
  *
  *   import { recite } from '../lib/sakhaVerseLibrary';
  *   await recite({ chapter: 2, verse: 47 });           // SA → HI → EN
