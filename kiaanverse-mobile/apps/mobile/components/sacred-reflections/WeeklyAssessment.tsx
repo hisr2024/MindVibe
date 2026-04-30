@@ -140,14 +140,14 @@ export function WeeklyAssessment(): React.JSX.Element | null {
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
         Which Gita teaching felt most alive this week?
       </Text>
-      <TextInput
+      <ShankhaVoiceInput
         value={gitaTeaching}
         onChangeText={setGitaTeaching}
         placeholder="e.g. Nishkama Karma, surrender, impermanence…"
-        placeholderTextColor={colors.text.muted}
         style={styles.input}
         maxLength={200}
-      />
+        dictationMode="append"
+        />
 
       {/* Q3 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
@@ -183,28 +183,28 @@ export function WeeklyAssessment(): React.JSX.Element | null {
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
         What pattern are you noticing in yourself?
       </Text>
-      <TextInput
+      <ShankhaVoiceInput
         value={pattern}
         onChangeText={setPattern}
         placeholder="e.g. I react to criticism with anger…"
-        placeholderTextColor={colors.text.muted}
         style={styles.input}
         maxLength={280}
         multiline
-      />
+        dictationMode="append"
+        />
 
       {/* Q5 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
         What sankalpa do you carry into next week?
       </Text>
-      <TextInput
+      <ShankhaVoiceInput
         value={sankalpa}
         onChangeText={setSankalpa}
         placeholder="e.g. I will respond instead of react…"
-        placeholderTextColor={colors.text.muted}
         style={styles.input}
         maxLength={200}
-      />
+        dictationMode="append"
+        />
 
       <GoldenButton
         title={isSaving ? 'Saving…' : 'Save this week’s assessment'}

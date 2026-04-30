@@ -311,7 +311,7 @@ function CompletionArea({
 
       {showReflection ? (
         <>
-          <TextInput
+          <ShankhaVoiceInput
             style={[
               styles.reflectionInput,
               {
@@ -324,12 +324,11 @@ function CompletionArea({
             value={reflectionText}
             onChangeText={onReflectionChange}
             placeholder="What stirs in you after this practice?"
-            placeholderTextColor={colors.text.muted}
             multiline
             maxLength={MAX_REFLECTION_LENGTH}
-            textAlignVertical="top"
             accessibilityLabel="Reflection textarea"
-          />
+            dictationMode="append"
+            />
           <Text
             variant="caption"
             color={colors.text.muted}

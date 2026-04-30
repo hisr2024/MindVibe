@@ -515,7 +515,7 @@ export default function NewJournalScreen(): React.JSX.Element {
               >
                 {t('encryptedLabel', '🔒 Encrypted on this device')}
               </Text>
-              <TextInput
+              <ShankhaVoiceInput
                 style={styles.bodyInput}
                 value={body}
                 onChangeText={setBody}
@@ -523,12 +523,11 @@ export default function NewJournalScreen(): React.JSX.Element {
                   'bodyPlaceholder',
                   'Begin your sacred reflection… Write freely. This space is yours alone.'
                 )}
-                placeholderTextColor={colors.text.muted}
                 multiline
-                textAlignVertical="top"
                 selectionColor={colors.primary[500]}
                 accessibilityLabel="Journal reflection"
-              />
+                dictationMode="append"
+                />
             </Animated.View>
 
             {/* Weekly Sacred Assessment */}

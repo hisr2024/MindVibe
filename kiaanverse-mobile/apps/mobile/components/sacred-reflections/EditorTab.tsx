@@ -267,29 +267,28 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         </ScrollView>
 
         {/* ---- Title ---- */}
-        <TextInput
+        <ShankhaVoiceInput
           value={title}
           onChangeText={setTitle}
           placeholder={COPY.titlePlaceholder}
-          placeholderTextColor={colors.text.muted}
           style={styles.titleInput}
           maxLength={120}
           returnKeyType="next"
-        />
+          dictationMode="append"
+          />
         <View style={styles.titleUnderline} />
 
         {/* ---- Body ---- */}
         <View style={styles.bodyWrap}>
-          <TextInput
+          <ShankhaVoiceInput
             value={body}
             onChangeText={setBody}
             placeholder={COPY.bodyPlaceholder}
-            placeholderTextColor={colors.text.muted}
             style={styles.bodyInput}
             multiline
-            textAlignVertical="top"
             maxLength={10_000}
-          />
+            dictationMode="append"
+            />
           {/* Voice mic affordance — tap once to start, again to stop &
               transcribe. The transcript is appended to the body so anything
               already typed survives. Visually mirrors the Kiaanverse.com

@@ -396,17 +396,16 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
             {/* Content TextInput — fills available space */}
             <View style={styles.editContentContainer}>
-              <TextInput
+              <ShankhaVoiceInput
                 style={styles.editContentInput}
                 placeholder="Pour your heart onto this sacred page..."
-                placeholderTextColor={colors.text.muted}
                 value={editContent}
                 onChangeText={setEditContent}
                 multiline
-                textAlignVertical="top"
                 selectionColor={colors.primary[500]}
                 accessibilityLabel="Edit journal content"
-              />
+                dictationMode="append"
+                />
             </View>
 
             {/* Tags */}

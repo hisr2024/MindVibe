@@ -196,16 +196,15 @@ export function SadhanaPhaseFlow({
           <Text variant="body" color={colors.text.secondary} align="center">
             What does this verse mean for you today?
           </Text>
-          <TextInput
+          <ShankhaVoiceInput
             style={styles.reflectionInput}
             placeholder="Share your reflection..."
-            placeholderTextColor={colors.text.muted}
             value={reflection}
             onChangeText={onReflectionChange}
             multiline
-            textAlignVertical="top"
             selectionColor={colors.primary[500]}
-          />
+            dictationMode="append"
+            />
           <View style={styles.actionArea}>
             <GoldenButton
               title="Continue"
@@ -224,16 +223,15 @@ export function SadhanaPhaseFlow({
           <Text variant="body" color={colors.text.secondary} align="center">
             What will you carry forward from this practice today?
           </Text>
-          <TextInput
+          <ShankhaVoiceInput
             style={styles.reflectionInput}
             placeholder="My intention for today is..."
-            placeholderTextColor={colors.text.muted}
             value={intention}
             onChangeText={onIntentionChange}
             multiline
-            textAlignVertical="top"
             selectionColor={colors.primary[500]}
-          />
+            dictationMode="append"
+            />
           <View style={styles.actionArea}>
             <GoldenButton
               title="Complete Sadhana"

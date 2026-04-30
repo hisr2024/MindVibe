@@ -80,16 +80,15 @@ export function MandalaPhase({
             <Text style={styles.contextLabel}>
               Pour your heart here (optional)
             </Text>
-            <TextInput
+            <ShankhaVoiceInput
               value={context}
               onChangeText={(v) => setContext(v.slice(0, CONTEXT_MAX))}
               style={styles.contextInput}
               placeholder="Speak freely — this is sacred space"
-              placeholderTextColor="rgba(237,232,220,0.35)"
               multiline
               maxLength={CONTEXT_MAX}
-              textAlignVertical="top"
-            />
+              dictationMode="append"
+              />
             <Text style={styles.contextCount}>
               {context.length}/{CONTEXT_MAX}
             </Text>

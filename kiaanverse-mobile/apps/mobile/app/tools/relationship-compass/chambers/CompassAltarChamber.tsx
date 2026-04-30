@@ -150,15 +150,15 @@ export function CompassAltarChamber({
           entering={FadeInDown.duration(360)}
           style={styles.nameBlock}
         >
-          <TextInput
+          <ShankhaVoiceInput
             value={partnerName}
             onChangeText={onNameChange}
             placeholder={`Their name (optional)`}
-            placeholderTextColor={TEXT_MUTED}
             style={styles.nameInput}
             maxLength={64}
             accessibilityLabel="Partner name"
-          />
+            dictationMode="append"
+            />
         </Animated.View>
       ) : null}
 
