@@ -11,6 +11,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text, Badge, Avatar, colors, spacing } from '@kiaanverse/ui';
 import { useReactToPost } from '@kiaanverse/api';
+import { TapToListenButton } from '../../voice/components/TapToListenButton';
 import type { CommunityPost } from '@kiaanverse/api';
 
 const REACTIONS = [
@@ -85,9 +86,22 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
       </View>
 
       {/* Content */}
-      <Text variant="body" color={colors.text.primary} style={styles.content}>
-        {post.content}
-      </Text>
+      <View style={styles.contentRow}>
+        <Text
+          variant="body"
+          color={colors.text.primary}
+          style={[styles.content, styles.contentText]}
+        >
+          {post.content}
+        </Text>
+        <TapToListenButton
+          text={post.content}
+          language="en-IN"
+          provider="system"
+          accessibilityLabel="Listen to this post"
+          size={36}
+        />
+      </View>
 
       {/* Tags */}
       {visibleTags.length > 0 ? (
@@ -165,6 +179,14 @@ const styles = StyleSheet.create({
   },
   content: {
     lineHeight: 22,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  contentText: {
+    flex: 1,
   },
   tagsRow: {
     flexDirection: 'row',

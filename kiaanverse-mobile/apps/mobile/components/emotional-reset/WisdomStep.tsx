@@ -19,6 +19,7 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
+import { TapToListenButton } from '../../voice/components/TapToListenButton';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,6 +107,14 @@ export function WisdomStep({
             >
               {translation}
             </Text>
+            <View style={styles.listenRow}>
+              <TapToListenButton
+                text={`${sanskrit}. ${translation}`}
+                language="en-IN"
+                provider="system"
+                accessibilityLabel="Listen to the verse"
+              />
+            </View>
           </GlowCard>
         </View>
       </Animated.View>
@@ -187,6 +196,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: spacing.xs,
+  },
+  listenRow: {
+    alignItems: 'center',
+    marginTop: spacing.md,
   },
   applicationText: {
     lineHeight: 24,

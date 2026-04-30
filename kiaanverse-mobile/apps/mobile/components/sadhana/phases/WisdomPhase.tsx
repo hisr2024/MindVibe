@@ -15,6 +15,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { DivineButton, ShlokaCard } from '@kiaanverse/ui';
+import { TapToListenButton } from '../../../voice/components/TapToListenButton';
 
 const SACRED_WHITE = '#F5F0E8';
 const GOLD = '#D4A017';
@@ -77,6 +78,14 @@ function WisdomPhaseInner({
           meaning={active.meaning}
           reference={active.reference}
         />
+        <View style={styles.listenRow}>
+          <TapToListenButton
+            text={`${active.sanskrit}. ${active.meaning}`}
+            language="en-IN"
+            provider="system"
+            accessibilityLabel="Listen to today's verse"
+          />
+        </View>
       </View>
 
       <View style={styles.helperBlock}>
@@ -140,6 +149,10 @@ const styles = StyleSheet.create({
   cardWrap: {
     flex: 1,
     justifyContent: 'center',
+  },
+  listenRow: {
+    alignItems: 'center',
+    marginTop: 12,
   },
   helperBlock: {
     paddingHorizontal: 8,
