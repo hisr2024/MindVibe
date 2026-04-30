@@ -1,6 +1,6 @@
 {
   "platforms": ["android"],
   "android": {
-    "modules": []
+    "modules": ["com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage"]
   }
 }
