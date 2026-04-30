@@ -1,13 +1,31 @@
 /**
  * withKiaanSakhaVoicePackages — Expo config plugin.
  *
- * Registers the two ReactPackage classes from
- *   @kiaanverse/kiaan-voice-native  (com.mindvibe.kiaan.voice.KiaanVoicePackage)
- *   @kiaanverse/sakha-voice-native  (com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage)
+ * Registers the three ReactPackage classes that ship with the Sakha /
+ * Kiaan Voice Companion native surface:
+ *
+ *   • com.mindvibe.kiaan.voice.KiaanVoicePackage
+ *       — Kiaan Voice umbrella package (currently empty; kept so the
+ *         plugin's import line resolves at javac time and so we have a
+ *         home for future Kiaan-specific native modules).
+ *
+ *   • com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage
+ *       — registers SakhaVoiceModule (NativeModules.SakhaVoice). Used
+ *         by useDictation, useSakhaVoice, useSakhaWakeWord, and
+ *         lib/sakhaVerseLibrary.ts. Module methods are stubbed today
+ *         so the JS side falls back to backend STT/TTS.
+ *
+ *   • com.kiaanverse.sakha.audio.SakhaForegroundServicePackage
+ *       — registers SakhaForegroundServiceModule
+ *         (NativeModules.SakhaForegroundService). Bridges the existing
+ *         SakhaForegroundService.start/stop static helpers so
+ *         voice/hooks/useForegroundService.ts can keep the voice
+ *         session alive across Android 14+ background lifecycle.
  *
  * by patching MainApplication.kt during prebuild to call:
  *   packages.add(KiaanVoicePackage())
  *   packages.add(SakhaVoicePackage())
+ *   packages.add(SakhaForegroundServicePackage())
  *
  * Why a plugin instead of expo-module.config.json `android.modules`:
  * The `android.modules` field is for the *new* Expo Module API
@@ -37,8 +55,11 @@ const { withMainApplication } = require('@expo/config-plugins');
 
 const KIAAN_IMPORT = 'import com.mindvibe.kiaan.voice.KiaanVoicePackage';
 const SAKHA_IMPORT = 'import com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage';
+const FG_IMPORT =
+  'import com.kiaanverse.sakha.audio.SakhaForegroundServicePackage';
 const KIAAN_ADD = 'packages.add(KiaanVoicePackage())';
 const SAKHA_ADD = 'packages.add(SakhaVoicePackage())';
+const FG_ADD = 'packages.add(SakhaForegroundServicePackage())';
 
 function addImport(contents, importLine) {
   if (contents.includes(importLine)) return contents;
@@ -80,8 +101,10 @@ const withKiaanSakhaVoicePackages = (config) => {
     let contents = config.modResults.contents;
     contents = addImport(contents, KIAAN_IMPORT);
     contents = addImport(contents, SAKHA_IMPORT);
+    contents = addImport(contents, FG_IMPORT);
     contents = addPackageRegistration(contents, KIAAN_ADD);
     contents = addPackageRegistration(contents, SAKHA_ADD);
+    contents = addPackageRegistration(contents, FG_ADD);
     config.modResults.contents = contents;
     return config;
   });

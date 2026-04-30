@@ -54,7 +54,14 @@ function ensureServiceEntry(manifest) {
   const entry = existing ?? { $: {} };
   entry.$['android:name'] = SERVICE_NAME;
   entry.$['android:exported'] = 'false';
-  entry.$['android:foregroundServiceType'] = 'mediaPlayback';
+  // Sakha holds the mic AND streams TTS audio. Android 14+ (API 34, S_V2)
+  // accepts a pipe-separated list of foregroundServiceType values; the
+  // service will satisfy both the FOREGROUND_SERVICE_MICROPHONE and
+  // FOREGROUND_SERVICE_MEDIA_PLAYBACK permission gates declared in
+  // app.config.ts. Without "microphone" the OS throws
+  // MissingForegroundServiceTypeException the moment the user backgrounds
+  // the app while Sakha is listening.
+  entry.$['android:foregroundServiceType'] = 'microphone|mediaPlayback';
 
   if (!existing) {
     application.service.push(entry);
