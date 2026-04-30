@@ -164,6 +164,20 @@ if _os_for_audio_mount.path.isdir(_AUDIO_DIR):
         name="vibe-audio",
     )
 
+# Mount /static/voice/tts-cache for the smart TTS endpoint (Step 70).
+# The cache is populated on demand by /api/voice/tts; clients fetch
+# cached .opus blobs directly from this static path. Created at import
+# time so a cold start hits the existing-dir branch on first request.
+_TTS_CACHE_DIR = _os_for_audio_mount.path.join(
+    _os_for_audio_mount.path.dirname(__file__), "static", "voice", "tts-cache"
+)
+_os_for_audio_mount.makedirs(_TTS_CACHE_DIR, exist_ok=True)
+app.mount(
+    "/static/voice/tts-cache",
+    StaticFiles(directory=_TTS_CACHE_DIR, html=False, check_dir=True),
+    name="voice-tts-cache",
+)
+
 # Add DDoS protection middleware (first line of defense)
 app.add_middleware(
     DDoSProtectionMiddleware,
@@ -2324,6 +2338,45 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(
         f"❌ [ERROR] Failed to load voice pre-flight router: {e}"
+    )
+
+# Load smart TTS router (Step 70). Powers the TapToListenButton across
+# the Android app — picks Google Neural2 (free 1M chars/month) for
+# English / en-IN, Sarvam (already paid) for Indic, ElevenLabs (paid
+# premium) as fallback. 7-day audio cache wipes repeat-play API cost.
+# Also exposes /api/voice-companion/synthesize as a friendly alias the
+# mobile TapToListenButton already POSTs to.
+startup_logger.info(
+    "\n[Voice TTS] Attempting to import voice_tts router..."
+)
+try:
+    from backend.routes.voice_tts import (
+        router as voice_tts_router,
+        alias_router as voice_tts_alias_router,
+    )
+
+    app.include_router(voice_tts_router)
+    app.include_router(voice_tts_alias_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info(
+        "✅ [SUCCESS] Smart TTS router loaded (Google Neural2 → Sarvam → ElevenLabs)"
+    )
+    startup_logger.info(
+        "   • POST /api/voice/tts                    - Synthesize → cached URL"
+    )
+    startup_logger.info(
+        "   • POST /api/voice-companion/synthesize   - Alias (mobile uses this URL)"
+    )
+    startup_logger.info(
+        "   • GET  /api/voice/tts/cache-stats        - Cache hit-rate rollup"
+    )
+    startup_logger.info(
+        "   • GET  /static/voice/tts-cache/<key>     - Cached .opus blobs"
+    )
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load voice TTS router: {e}"
     )
 
 # Load voice safety audio router (crisis routing audio + helpline

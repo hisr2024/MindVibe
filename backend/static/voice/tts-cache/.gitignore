@@ -1,0 +1,2 @@
+backend/static/voice/tts-cache/*.opus
+!.gitignore
