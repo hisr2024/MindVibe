@@ -34,18 +34,28 @@ export function WordReveal({
       onComplete?.();
       return;
     }
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     const start = setTimeout(() => {
       let i = 0;
-      const id = setInterval(() => {
+      intervalId = setInterval(() => {
         i += 1;
         setCount(i);
         if (i >= words.length) {
-          clearInterval(id);
+          if (intervalId) clearInterval(intervalId);
+          intervalId = null;
           onComplete?.();
         }
       }, speed);
     }, startDelay);
-    return () => clearTimeout(start);
+    return () => {
+      // Clear BOTH the start-delay timeout AND the typing interval.
+      // Without clearing the interval, an unmount mid-reveal leaves a
+      // 70ms ticker calling setCount on a dead component, which RN
+      // surfaces as the "can't call setState on an unmounted component"
+      // warning and on Hermes can leak the closure.
+      clearTimeout(start);
+      if (intervalId) clearInterval(intervalId);
+    };
     // onComplete intentionally omitted — effects here must only re-run when text
     // changes, not when the parent re-renders and hands us a fresh callback ref.
     // eslint-disable-next-line react-hooks/exhaustive-deps

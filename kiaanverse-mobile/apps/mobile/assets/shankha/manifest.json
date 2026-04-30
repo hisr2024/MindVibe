@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "description": "Shankha asset bundle manifest. Drives the runtime loader at voice/components/ShankhaLottie.tsx. Each state declares which Lottie file the loader expects; missing files cause a graceful fallback to the inline SVG Shankha (voice/components/Shankha.tsx). See README.md for the full designer specification.",
+  "description": "Shankha asset bundle manifest. Drives the runtime loader at voice/components/ShankhaLottie.tsx. Each state declares which Lottie file the loader expects; missing files cause a graceful fallback to the inline SVG Shankha (voice/components/Shankha.tsx). All states are 'required: false' until the designer hands over the .lottie.json payloads — the runtime is fully covered by the SVG fallback today, and flipping these to true would only mislead future readers about what is actually shipping. See README.md for the full designer specification.",
   "states": {
     "idle": {
       "asset": "idle.lottie.json",
@@ -9,7 +9,7 @@
       "loop": true,
       "max_size_kb": 80,
       "behavior": "Static conch with subtle 4s breath loop on the warm-glow opacity (±5%)",
-      "required": true
+      "required": false
     },
     "listening": {
       "asset": "listening.lottie.json",
@@ -18,7 +18,7 @@
       "loop": true,
       "max_size_kb": 80,
       "behavior": "Slow steady pulse at the mouth, 1.6s cycle, gold rim brightens 70%→70%",
-      "required": true
+      "required": false
     },
     "thinking": {
       "asset": "thinking.lottie.json",
@@ -27,7 +27,7 @@
       "loop": true,
       "max_size_kb": 80,
       "behavior": "Inward shimmer sweep top→bottom, 2.4s cycle, no external pulse",
-      "required": true
+      "required": false
     },
     "interrupted": {
       "asset": "interrupted.lottie.json",
@@ -35,7 +35,7 @@
       "loop": false,
       "max_size_kb": 80,
       "behavior": "Wave-fade-out 300ms, conch dims 15%, then transition target = listening",
-      "required": true
+      "required": false
     },
     "offline": {
       "asset": "offline.lottie.json",
@@ -43,7 +43,7 @@
       "loop": true,
       "max_size_kb": 80,
       "behavior": "Cool moonlit ivory tint, 6s ambient drift, near-stillness",
-      "required": true
+      "required": false
     },
     "error": {
       "asset": "error.lottie.json",
@@ -51,7 +51,7 @@
       "loop": false,
       "max_size_kb": 80,
       "behavior": "Dimmed 80%, slight cool gray cast, no animation",
-      "required": true
+      "required": false
     },
     "speaking": {
       "asset": null,

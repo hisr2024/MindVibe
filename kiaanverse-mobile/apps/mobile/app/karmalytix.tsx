@@ -405,7 +405,12 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 onPress={onRegenerate}
                 disabled={generate.isPending}
               />
-              <Pressable onPress={onOpenSacred} style={styles.secondaryLink}>
+              <Pressable
+                onPress={onOpenSacred}
+                style={styles.secondaryLink}
+                accessibilityRole="button"
+                accessibilityLabel="Back to Sacred Reflection"
+              >
                 <Text
                   variant="caption"
                   color={colors.text.muted}

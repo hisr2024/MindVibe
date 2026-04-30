@@ -135,3 +135,68 @@ async def get_profile(request: Request, db: AsyncSession = Depends(get_db)):
         created_at=profile.created_at,
         updated_at=profile.updated_at,
     )
+
+
+# ---------------------------------------------------------------------------
+# /api/profile/settings — account settings KV blob
+#
+# The mobile Settings screen reads/writes a flat settings object:
+# notifications, voice persona, language, theme, haptics. Until we
+# have a dedicated settings table we serve a sensible default envelope
+# so the screen stops 404-ing. Replace the in-memory default with a
+# real DB-backed shape when the settings model lands.
+# ---------------------------------------------------------------------------
+
+
+class SettingsOut(BaseModel):
+    notifications_enabled: bool = True
+    daily_verse_enabled: bool = True
+    weekly_reflection_enabled: bool = True
+    voice_persona: str = "guidance"
+    voice_language: str = "en-IN"
+    sakha_tone: str = "warm"
+    theme: str = "system"
+    haptics_enabled: bool = True
+
+
+class SettingsUpdateIn(BaseModel):
+    notifications_enabled: bool | None = None
+    daily_verse_enabled: bool | None = None
+    weekly_reflection_enabled: bool | None = None
+    voice_persona: str | None = Field(default=None, max_length=32)
+    voice_language: str | None = Field(default=None, max_length=16)
+    sakha_tone: str | None = Field(default=None, max_length=32)
+    theme: str | None = Field(default=None, max_length=16)
+    haptics_enabled: bool | None = None
+
+
+@router.get("/settings", response_model=SettingsOut)
+async def get_settings(
+    request: Request, db: AsyncSession = Depends(get_db)
+) -> SettingsOut:
+    """
+    Read the user's settings blob. Returns canonical defaults until
+    the per-user settings table ships.
+    """
+    await _get_authenticated_user_and_session(request, db)
+    return SettingsOut()
+
+
+@router.put("/settings", response_model=SettingsOut)
+async def update_settings(
+    request: Request,
+    payload: SettingsUpdateIn,
+    db: AsyncSession = Depends(get_db),
+) -> SettingsOut:
+    """
+    Patch the user's settings. Currently a no-op writer that echoes
+    the merged shape back so the mobile UI can update its local state
+    optimistically. Replace with a DB write when the settings model
+    lands.
+    """
+    await _get_authenticated_user_and_session(request, db)
+    defaults = SettingsOut()
+    merged = defaults.model_copy(
+        update={k: v for k, v in payload.model_dump().items() if v is not None}
+    )
+    return merged

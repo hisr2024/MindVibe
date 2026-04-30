@@ -90,7 +90,10 @@ async function setupNotificationChannels(): Promise<void> {
   if (Platform.OS !== 'android') return;
 
   try {
-    await Promise.all([
+    // allSettled rather than all: one channel failing (e.g. on a fork
+    // of Android that doesn't allow custom vibration patterns) must not
+    // block the other notification channels from registering.
+    await Promise.allSettled([
       Notifications.setNotificationChannelAsync(CHANNELS.DAILY_VERSE, {
         name: 'Daily Verse',
         importance: Notifications.AndroidImportance.HIGH,
@@ -144,7 +147,9 @@ async function setupNotificationCategories(): Promise<void> {
   if (Platform.OS !== 'ios') return;
 
   try {
-    await Promise.all([
+    // allSettled rather than all: a single category failing must not
+    // block the rest from registering, since they're independent.
+    await Promise.allSettled([
       Notifications.setNotificationCategoryAsync(CATEGORIES.DAILY_VERSE, [
         {
           identifier: 'read-now',

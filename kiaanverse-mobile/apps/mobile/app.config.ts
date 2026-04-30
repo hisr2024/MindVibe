@@ -117,7 +117,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     intentFilters: [
       {
         action: 'VIEW',
-        autoVerify: true,
+        // autoVerify only works when the corresponding assetlinks.json is
+        // hosted at https://kiaanverse.com/.well-known/assetlinks.json.
+        // Until that file is in place, leaving autoVerify=true makes
+        // Play Console flag the listing as "App Links failed to verify".
+        // The deep-link still works as a browsable intent — we just
+        // don't get the auto-routing badge. Flip back to true the day
+        // the assetlinks payload ships.
+        autoVerify: false,
         data: [
           {
             scheme: 'kiaanverse',

@@ -272,6 +272,18 @@ export default function ChatScreen(): React.JSX.Element {
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              // Tune virtualization for chat: typical session has 60+
+              // cached messages, each is variable-height markdown +
+              // verse cards. windowSize=10 keeps ~5 screens of
+              // mounted rows; initialNumToRender=20 hides the
+              // "popping in" effect when you tap the tab on a session
+              // with history. removeClippedSubviews keeps offscreen
+              // rows out of the native view hierarchy on Android, where
+              // ScrollView memory pressure is the worst.
+              windowSize={10}
+              initialNumToRender={20}
+              maxToRenderPerBatch={10}
+              removeClippedSubviews={Platform.OS === 'android'}
               onContentSizeChange={() => {
                 listRef.current?.scrollToEnd({ animated: true });
               }}

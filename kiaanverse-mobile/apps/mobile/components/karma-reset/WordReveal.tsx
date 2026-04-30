@@ -30,15 +30,25 @@ export function WordReveal({
   useEffect(() => {
     setCount(0);
     if (words.length === 0) return;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     const start = setTimeout(() => {
       let i = 0;
-      const id = setInterval(() => {
+      intervalId = setInterval(() => {
         i += 1;
         setCount(i);
-        if (i >= words.length) clearInterval(id);
+        if (i >= words.length) {
+          if (intervalId) clearInterval(intervalId);
+          intervalId = null;
+        }
       }, speed);
     }, startDelay);
-    return () => clearTimeout(start);
+    // Clear BOTH timers on unmount — without this the typing interval
+    // outlives the component and continues calling setState until the
+    // word list finishes, leaking the closure on every unmount.
+    return () => {
+      clearTimeout(start);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [words, speed, startDelay]);
 
   return (
