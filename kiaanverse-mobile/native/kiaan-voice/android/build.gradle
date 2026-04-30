@@ -1,28 +1,44 @@
 // KIAAN Voice Native — Expo-autolinked Android library.
 //
-// Wraps the existing Kotlin sources at <repo>/native/android/voice/kiaan/ —
-// the generic on-device tier-1 KIAAN voice stack (KiaanVoiceManager,
-// KiaanComputeTrinity NPU/GPU/CPU router, KiaanWakeWordDetector with
-// TFLite NNAPI/GPU delegates, KiaanEngineOrchestrator for parallel
-// Friend/Guidance/Navigation engines, plus the Phase 1 KiaanVoicePackage
-// scaffold). The Sakha persona-specific Kotlin lives at the sibling
-// path <repo>/native/android/voice/sakha/ and is owned by
-// @kiaanverse/sakha-voice-native. The two source roots are physically
-// disjoint so kotlinc cannot accidentally compile Sakha sources into
-// this .aar — Step 54 fix for the R8 duplicate-class error where
-// `java.exclude '**/sakha/**'` was honored by javac but ignored by
-// kotlinc, producing PauseEvent$Filter / VerseSegment / etc. in BOTH
-// .aar files and triggering R8 dex-merge collisions.
+// The KIAAN tier-1 voice Kotlin lives in this module's standard
+// `src/main/java/com/mindvibe/kiaan/voice/` tree:
+//
+//   • KiaanVoiceManager           — state machine + lifecycle singleton
+//   • KiaanComputeTrinity         — NPU/GPU/CPU task router
+//   • KiaanWakeWordDetector       — TFLite NNAPI wake-word
+//   • KiaanEngineOrchestrator     — Friend/Guidance/Navigation engines
+//   • KiaanVoicePackage           — ReactPackage registration target
+//
+// The sources are intentionally co-located with the gradle module that
+// builds them. An earlier layout pulled them in via a relative
+// `java.srcDirs += '../../../../native/android/voice/kiaan'` reaching
+// out of the kiaanverse-mobile workspace tree — that worked locally
+// (whole repo on disk) but on EAS Build the relative path resolved to
+// a non-existent directory, kotlinc happily produced an empty AAR, and
+// :app:compileReleaseKotlin then failed resolving
+// `com.mindvibe.kiaan.voice.*` because the AAR shipped with zero
+// classes. Co-locating the sources eliminates that whole class of
+// "silent empty AAR" failures.
+//
+// The Sakha persona-specific Kotlin lives in the sibling
+// `kiaanverse-mobile/native/sakha-voice/android/` module and is owned
+// by @kiaanverse/sakha-voice-native. The two source trees are
+// physically disjoint so kotlinc cannot accidentally compile Sakha
+// sources into this .aar — Step 54 fix for the R8 duplicate-class
+// error where `java.exclude '**/sakha/**'` was honored by javac but
+// ignored by kotlinc, producing PauseEvent$Filter / VerseSegment /
+// etc. in BOTH .aar files and triggering R8 dex-merge collisions.
 //
 // Built as part of `eas build --profile production --platform android`
-// (signed .aab) when apps/mobile depends on @kiaanverse/kiaan-voice-native
-// (Step 13). The Expo autolinker discovers this via the sibling
-// expo-module.config.json (Step 9) and registers
-// com.mindvibe.kiaan.voice.KiaanVoicePackage in the generated
-// ExpoModulesProvider.kt automatically.
+// (signed .aab) when apps/mobile depends on @kiaanverse/kiaan-voice-native.
+// The Expo autolinker discovers this via the sibling
+// expo-module.config.json and registers it in settings.gradle. The
+// `withKiaanSakhaVoicePackages` config plugin then injects the matching
+// `implementation project(...)` dep into apps/mobile/android/app/build.gradle
+// and patches MainApplication.kt to register KiaanVoicePackage at runtime.
 //
 // Pattern mirrors kiaanverse-mobile/native/sakha-voice/android/build.gradle
-// (Step 4) so AGP / Kotlin / JVM versions stay consistent.
+// so AGP / Kotlin / JVM versions stay consistent.
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
@@ -68,22 +84,12 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            // Compile the existing KIAAN Kotlin in place — no copy.
-            // Path is relative to this module's projectDir
-            // (kiaanverse-mobile/native/kiaan-voice/android/) and points
-            // ONLY at the kiaan/ subdir. Sakha sources live in the
-            // sibling sakha/ subdir and are owned by
-            // @kiaanverse/sakha-voice-native (Step 4). The two source
-            // roots must stay physically disjoint — see Step 54: a
-            // `java.exclude '**/sakha/**'` directive on a parent srcDir
-            // is honored by javac but silently ignored by kotlinc, which
-            // re-emitted the Sakha classes into this .aar and broke R8
-            // with `Type ... is defined multiple times`.
-            java.srcDirs += '../../../../native/android/voice/kiaan'
-        }
-    }
+    // Sources live at the conventional `src/main/java/com/mindvibe/kiaan/voice/`
+    // path under this gradle module's projectDir. We deliberately do NOT
+    // augment `sourceSets.main.java.srcDirs` to point outside the workspace
+    // tree — see the file-header comment for the empty-AAR failure mode that
+    // happened when an earlier version reached out via
+    // `../../../../native/android/voice/kiaan`.
 }
 
 repositories {

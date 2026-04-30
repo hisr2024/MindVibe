@@ -1,19 +1,40 @@
 // Sakha Voice Native — Expo-autolinked Android library.
 //
-// Wraps the existing Kotlin sources at <repo>/native/android/voice/sakha/
-// (8 files: SakhaVoiceManager, SakhaSseClient, SakhaTtsPlayer,
-// SakhaPauseParser, SakhaPersonaGuard, SakhaTypes, SakhaVoiceModule,
-// SakhaVoicePackage) via a srcDirs entry — no source duplication.
+// The Sakha persona Kotlin lives in this module's standard
+// `src/main/java/com/mindvibe/kiaan/voice/sakha/` tree:
+//
+//   • SakhaVoiceManager           — state machine + lifecycle
+//   • SakhaVoiceModule            — RN bridge module (NativeModules.SakhaVoice)
+//   • SakhaVoicePackage           — ReactPackage registration target
+//   • SakhaSseClient              — POST+SSE stream from /api/voice-companion/message
+//   • SakhaTtsPlayer              — Sarvam REST + system TTS playback queue
+//   • SakhaPauseParser            — pause-tag → PauseEvent stream
+//   • SakhaPersonaGuard           — guardrail filter
+//   • SakhaTypes / SakhaDictation / SakhaVerseReader / SakhaWakeWordDetector
+//   • WakeWordMatcher
+//
+// The sources are intentionally co-located with the gradle module that
+// builds them. An earlier layout pulled them in via a relative
+// `java.srcDirs += '../../../../native/android/voice/sakha'` reaching
+// out of the kiaanverse-mobile workspace tree — that worked locally but
+// on EAS Build the relative path resolved to a non-existent directory,
+// kotlinc happily produced an empty AAR, and :app:compileReleaseKotlin
+// then failed with "Unresolved reference: sakha" because the AAR
+// shipped with zero classes. Co-locating the sources eliminates that
+// whole class of "silent empty AAR" failures.
 //
 // Built as part of `eas build --profile production --platform android`
 // (signed .aab). The Expo autolinker discovers this via the sibling
 // expo-module.config.json and includes it in the generated
 // settings.gradle automatically once the host app declares
-// @kiaanverse/sakha-voice-native as a workspace dep (Step 7).
+// @kiaanverse/sakha-voice-native as a workspace dep. The
+// `withKiaanSakhaVoicePackages` config plugin then injects the matching
+// `implementation project(...)` dep into apps/mobile/android/app/build.gradle
+// and patches MainApplication.kt to register SakhaVoicePackage at runtime.
 //
-// Pattern mirrors apps/sakha-mobile/native/android/build.gradle
-// (KiaanAudioPlayer) so AGP / Kotlin / JVM versions stay consistent
-// across the workspace's two native modules.
+// Pattern mirrors kiaanverse-mobile/native/kiaan-voice/android/build.gradle
+// so AGP / Kotlin / JVM versions stay consistent across the workspace's
+// two native modules.
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
@@ -59,18 +80,13 @@ android {
         }
     }
 
+    // Sources live at the conventional
+    // `src/main/java/com/mindvibe/kiaan/voice/sakha/` path under this
+    // gradle module's projectDir. The `**/test/**` exclude is kept so
+    // future co-located unit tests (SakhaPauseParserTest et al.) are
+    // wired into the `test` source set rather than shipping in the .aab.
     sourceSets {
         main {
-            // Compile yesterday's Sakha Kotlin in place — no copy.
-            // Path is relative to this module's projectDir
-            // (kiaanverse-mobile/native/sakha-voice/android/).
-            //
-            // The exclude keeps the test/ subdir (SakhaPauseParserTest,
-            // SakhaPersonaGuardTest) out of the production .aar — those
-            // get wired into the `test` source set in a later step so
-            // they run via :sakha-voice-native:testDebugUnitTest without
-            // shipping in the .aab.
-            java.srcDirs += '../../../../native/android/voice/sakha'
             java.exclude '**/test/**'
         }
     }

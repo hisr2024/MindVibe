@@ -2,6 +2,6 @@
   "name": "@kiaanverse/kiaan-voice-native",
   "version": "0.0.0",
   "private": true,
-  "description": "Native Android wrapper around native/android/voice/ (KiaanVoiceManager, KiaanComputeTrinity NPU/GPU/CPU router, KiaanWakeWordDetector, KiaanEngineOrchestrator). Phase 1 scaffold — implementation lands in subsequent steps.",
+  "description": "KIAAN tier-1 voice native module (KiaanVoiceManager, KiaanComputeTrinity NPU/GPU/CPU router, KiaanWakeWordDetector, KiaanEngineOrchestrator, KiaanVoicePackage). Sources at android/src/main/java/com/mindvibe/kiaan/voice/.",
   "main": "index.js"
 }
