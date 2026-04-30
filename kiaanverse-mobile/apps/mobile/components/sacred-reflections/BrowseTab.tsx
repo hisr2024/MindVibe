@@ -34,6 +34,8 @@ import { useJournalEntries } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 
 import { BROWSE_FILTER_IDS, COPY, MOOD_BY_ID, type MoodId } from './constants';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
+import { LotusGlyph } from './LotusGlyph';
 
 interface BrowseTabProps {
   readonly onOpenEditor: () => void;
@@ -276,7 +278,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
 
   const renderEmpty = !isLoading ? (
     <Animated.View entering={FadeIn.duration(600)} style={styles.emptyWrap}>
-      <Text style={styles.lotus}>{'\u{1FAB7}'}</Text>
+      <LotusGlyph size={72} />
       <Text variant="h3" color={colors.text.primary} style={styles.emptyTitle}>
         {searchQuery || activeFilter !== 'all'
           ? 'No reflections match that filter'

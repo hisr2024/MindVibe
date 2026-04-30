@@ -11,6 +11,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Text, GoldenButton, colors, spacing } from '@kiaanverse/ui';
 import type { SadhanaDaily } from '@kiaanverse/api';
 import type { SadhanaPhase } from '../../app/sadhana/index';
+import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 interface MoodOption {
   readonly emoji: string;

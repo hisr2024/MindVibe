@@ -9,6 +9,7 @@
  */
 
 import React, { useState } from 'react';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 import {
   KeyboardAvoidingView,
   Platform,

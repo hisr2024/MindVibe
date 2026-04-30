@@ -12,6 +12,7 @@
  */
 
 import React, { useState } from 'react';
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 import {
   View,
   Text,

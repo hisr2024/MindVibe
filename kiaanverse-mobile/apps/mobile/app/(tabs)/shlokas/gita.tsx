@@ -30,7 +30,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
   type ListRenderItem,
 } from 'react-native';
@@ -61,6 +60,8 @@ import {
   type GitaSearchResult,
 } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+
+import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 
 // ---------------------------------------------------------------------------
 // Design tokens (sourced from the web parity tokens used across the UI kit)

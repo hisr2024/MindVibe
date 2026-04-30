@@ -32,6 +32,7 @@ import {
 } from '../data/relationshipTypes';
 import { CompassRose } from '../components/CompassRose';
 import type { GunaName } from '../hooks/useGunaCalculation';
+import { ShankhaVoiceInput } from '../../../../voice/components/ShankhaVoiceInput';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
