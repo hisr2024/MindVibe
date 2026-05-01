@@ -1,17 +1,23 @@
 // KIAAN Voice Native — manually-registered Android library.
 //
-// REGISTRATION MODEL: this module is NOT autolinked. There is
-// deliberately no expo-module.config.json at the workspace root.
+// REGISTRATION MODEL: this module is NOT autolinked by EITHER Expo or
+// React Native autolinkers. Both opt-outs live in this directory:
+//
+//   • Expo autolinker — opt-out via the absence of
+//     `expo-module.config.json` at the workspace root.
+//   • RN autolinker   — opt-out via `react-native.config.js` declaring
+//     `dependency.platforms.{android,ios}: null`.
+//
 // Instead, the `withKiaanSakhaVoicePackages` config plugin
 // (apps/mobile/plugins/withKiaanSakhaVoicePackages.js) injects the
 // `include ':kiaanverse-kiaan-voice-native'` line + projectDir mapping
 // into apps/mobile/android/settings.gradle, plus the matching
 // `implementation project(...)` dep into app/build.gradle and the
 // runtime `packages.add(KiaanVoicePackage())` line into
-// MainApplication.kt. See that plugin's header for why autolinker is
-// bypassed (pnpm symlink causing dual-discovery → AGP namespace
-// collision → the long-running `Unresolved reference: sakha` build
-// failure).
+// MainApplication.kt. See that plugin's header for why both
+// autolinkers had to be bypassed (pnpm symlink causing dual-discovery
+// → AGP namespace collision → the long-running
+// `Unresolved reference: sakha` build failure).
 //
 // The KIAAN tier-1 voice Kotlin lives in this module's standard
 // `src/main/java/com/mindvibe/kiaan/voice/` tree:
