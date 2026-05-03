@@ -28,12 +28,17 @@ const PLUGINS = [
 
 const stub = {
   withAndroidManifest: (config, modifier) => {
+    // Match the real Expo runtime: modResults is the full XML root with a
+    // top-level `manifest` key. Plugins like withKiaanForegroundService
+    // need `modResults.manifest.queries` — passing the inner manifest only
+    // breaks the speech-recognition <queries> patch.
     const fakeManifest = {
       manifest: {
         application: [{ $: {}, service: [], 'meta-data': [] }],
+        queries: [],
       },
     };
-    modifier({ ...config, modResults: fakeManifest.manifest });
+    modifier({ ...config, modResults: fakeManifest });
     return config;
   },
   withStringsXml: (config, modifier) => {

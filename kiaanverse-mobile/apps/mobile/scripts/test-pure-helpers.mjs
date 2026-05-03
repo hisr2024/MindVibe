@@ -14,7 +14,7 @@ import { dirname, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SOURCE = resolve(__dirname, '..', 'hooks', 'voice', 'useToolInvocation.ts');
+const SOURCE = resolve(__dirname, '..', 'voice', 'hooks', 'useToolInvocation.ts');
 
 // Strip TS types and React imports to extract just the two helpers.
 // We're not running a real TS compiler here — just pulling the function

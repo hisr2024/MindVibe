@@ -38,10 +38,18 @@ def _reset_cache():
     reset_cache_for_tests()
 
 
+def _expected_persona_version() -> str:
+    """Read the source-of-truth persona-version file at test time so the
+    suite stays green across persona bumps without hand-editing every
+    assertion (the loader's cross-version-check still guarantees the two
+    prompt files agree with this pin)."""
+    return PERSONA_VERSION_FILE.read_text(encoding="utf-8").strip()
+
+
 class TestPersonaVersion:
     def test_version_is_pinned_semver(self):
         v = get_persona_version()
-        assert v == "1.0.0"
+        assert v == _expected_persona_version()
 
     def test_version_is_cached(self):
         v1 = get_persona_version()
@@ -55,20 +63,22 @@ class TestPersonaVersion:
 
 class TestGetPersona:
     def test_voice_persona_loads(self):
+        expected = _expected_persona_version()
         p = get_persona("voice")
         assert p.render_mode == "voice"
-        assert p.persona_version == "1.0.0"
-        assert "1.0.0" in p.text
+        assert p.persona_version == expected
+        assert expected in p.text
         assert len(p.text) > 1000
         assert len(p.sha256) == 64
         assert str(SAKHA_VOICE_PROMPT) == p.source_path
 
     def test_text_persona_loads(self):
+        expected = _expected_persona_version()
         p = get_persona("text")
         assert p.render_mode == "text"
-        assert p.persona_version == "1.0.0"
+        assert p.persona_version == expected
         assert "**Ancient Wisdom Principle:**" in p.text
-        assert "1.0.0" in p.text
+        assert expected in p.text
 
     def test_persona_is_cached_and_immutable(self):
         a = get_persona("voice")
@@ -120,7 +130,7 @@ class TestResetCacheGuard:
         # After reset, a new load should succeed and yield a new instance
         # (different identity than any object captured before reset).
         p2 = get_persona("voice")
-        assert p2.persona_version == "1.0.0"
+        assert p2.persona_version == _expected_persona_version()
 
 
 class TestThreadSafety:
