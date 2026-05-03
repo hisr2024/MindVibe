@@ -8,7 +8,9 @@
  * ciphertext plus plaintext mood / tag metadata.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { VoicePrefillBanner } from '../../voice/components/VoicePrefillBanner';
+import { useVoicePrefill } from '../../voice/hooks/useVoicePrefill';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -93,6 +95,36 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
   const [body, setBody] = useState('');
   const [selectedTags, setSelectedTags] = useState<SacredTag[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Voice → Sacred Reflections: when Sakha routes the user here from a
+  // dictated reflection, seed the body (and optionally append a verse
+  // reference). Allowed fields per tool-prefill-contracts.ts:
+  // ['prefill_text', 'verse_ref', 'mood_label', 'source'].
+  const voice = useVoicePrefill<{
+    prefill_text?: string;
+    verse_ref?: string;
+    mood_label?: string;
+    source?: string;
+  }>('SACRED_REFLECTIONS');
+
+  useEffect(() => {
+    if (!voice.prefill) return;
+    const text = voice.prefill.prefill_text?.trim();
+    const verse = voice.prefill.verse_ref?.trim();
+    if (text && body.length === 0) {
+      const seeded = verse ? `${text}\n\n— ${verse}` : text;
+      setBody(seeded);
+    }
+    // Single-shot seed on first arrival; subsequent edits stay the
+    // user's. Run only when the carried text changes (i.e. a fresh
+    // voice navigation), not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voice.prefill?.prefill_text, voice.prefill?.verse_ref]);
+
+  const voiceLabel =
+    voice.prefill?.prefill_text?.slice(0, 40) ??
+    voice.prefill?.verse_ref ??
+    'today\'s reflection';
 
   const {
     startRecording,
@@ -212,6 +244,9 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={80}
     >
+      {voice.isVoicePrefilled && (
+        <VoicePrefillBanner label={voiceLabel} onDismiss={voice.acknowledge} />
+      )}
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"

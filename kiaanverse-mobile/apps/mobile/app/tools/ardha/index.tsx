@@ -11,7 +11,7 @@
  * new result screen renders the 5-pillar accordion instead.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -20,6 +20,8 @@ import {
   View,
 } from 'react-native';
 import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
+import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
+import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -74,6 +76,21 @@ export default function ArdhaInputScreen(): React.JSX.Element {
   const [loadingIdx, setLoadingIdx] = useState(0);
   const loadingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Voice → Ardha prefill: surface the split_theme Sakha carried over
+  // and show a dismissible confirmation ribbon. allowedFields for ARDHA
+  // is ['split_theme', 'mood_label'] — see tool-prefill-contracts.ts.
+  const voice = useVoicePrefill<{
+    split_theme?: string;
+    mood_label?: string;
+  }>('ARDHA');
+  useEffect(() => {
+    const seeded = voice.prefill?.split_theme;
+    if (seeded && !thought) setThought(seeded);
+    // We deliberately depend only on the carried theme, not on `thought`
+    // — re-firing on every keystroke would clobber the user's edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voice.prefill?.split_theme]);
+
   const canSubmit = thought.trim().length > 0 && !reframe.isPending;
 
   const handleChip = useCallback((seed: string) => {
@@ -116,6 +133,13 @@ export default function ArdhaInputScreen(): React.JSX.Element {
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
       <GoldenHeader title="Ardha" onBack={() => router.back()} />
+
+      {voice.isVoicePrefilled && voice.prefill?.split_theme && (
+        <VoicePrefillBanner
+          label={voice.prefill.split_theme}
+          onDismiss={voice.acknowledge}
+        />
+      )}
 
       <ScrollView
         contentContainerStyle={styles.scroll}

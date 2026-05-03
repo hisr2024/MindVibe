@@ -14,6 +14,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
+import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -71,6 +73,15 @@ function TearDrop(): React.JSX.Element {
 
 export default function ViyogaIntro(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const voice = useVoicePrefill<{
+    absence_topic?: string;
+    person_role?: string;
+    duration_label?: string;
+  }>('VIYOGA');
+  const voiceLabel =
+    voice.prefill?.absence_topic ??
+    voice.prefill?.person_role ??
+    'the longing you named';
 
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
@@ -95,6 +106,11 @@ export default function ViyogaIntro(): React.JSX.Element {
 
   return (
     <View style={[s.screen, { paddingTop: insets.top + 24 }]}>
+      {voice.isVoicePrefilled && (
+        <View style={s.banner} pointerEvents="box-none">
+          <VoicePrefillBanner label={voiceLabel} onDismiss={voice.acknowledge} />
+        </View>
+      )}
       <Animated.View style={[s.content, animStyle]}>
         <TearDrop />
 
@@ -123,6 +139,13 @@ const s = StyleSheet.create({
     backgroundColor: '#030510',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  banner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
   },
   content: {
     flex: 1,
