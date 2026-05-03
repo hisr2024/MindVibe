@@ -5,27 +5,36 @@
  *
  * The two workspace voice modules
  * (kiaanverse-mobile/native/{kiaan,sakha}-voice/android/) are deliberately
- * NOT discoverable by Expo's autolinker — there is no
- * `expo-module.config.json` at either workspace path. This is the
- * fix for the dual-registration bug:
+ * NOT discoverable by Expo's autolinker NOR React Native's autolinker.
+ * Both opt-out files are co-located with each workspace module:
  *
- *   In a pnpm workspace, the autolinker finds each module twice:
- *     1. via the workspace path (kiaanverse-mobile/native/{X}-voice/)
- *     2. via the pnpm symlink (apps/mobile/node_modules/@kiaanverse/{X}-voice-native/)
- *   Both paths point at the same source tree, but the autolinker mangles
- *   the gradle project name differently for each (slash→`-` vs slash→`_`),
- *   so settings.gradle ends up with TWO entries per module:
- *     :kiaanverse-{X}-voice-native   AND   :kiaanverse_{X}-voice-native
- *   Both AARs build with the same Android `namespace`, AGP detects the
- *   namespace collision, and one set of classes gets pruned from :app's
- *   compile classpath. The result was the persistent
- *   `Unresolved reference: sakha` failure at :app:compileReleaseKotlin
- *   across builds #1 through #7.
+ *   • Expo autolinker — opt-out via the absence of `expo-module.config.json`
+ *   • RN autolinker   — opt-out via `react-native.config.js` declaring
+ *                       `dependency.platforms.{android,ios}: null`
  *
- * Removing the autolinker hook (deleting `expo-module.config.json` from
- * both workspace dirs) eliminates double-discovery at the source. This
- * plugin then takes over the three registration responsibilities the
- * autolinker would otherwise have done:
+ * This is the fix for the dual-registration bug that produced builds
+ * #1 through #8's persistent `Unresolved reference: sakha` failure:
+ *
+ *   In a pnpm workspace, each voice module is reachable via TWO paths:
+ *     1. workspace path: kiaanverse-mobile/native/{X}-voice/
+ *     2. pnpm symlink:   apps/mobile/node_modules/@kiaanverse/{X}-voice-native/
+ *   Both autolinkers (Expo via expo-module.config.json, RN via
+ *   android/build.gradle detection in node_modules) would each register
+ *   the SAME source dir as TWO gradle projects with different name-
+ *   mangling — `:kiaanverse-{X}-voice-native` (slash→`-`) and
+ *   `:kiaanverse_{X}-voice-native` (slash→`_`). Both AARs build with
+ *   the same Android `namespace`, AGP detects the namespace collision,
+ *   prunes one set of classes from :app's compile classpath, and
+ *   :app:compileReleaseKotlin fails because MainApplication.kt's
+ *   imports point at the pruned classes.
+ *
+ *   Build #7 confirmed Expo autolinker as one source.
+ *   Build #8 confirmed RN autolinker as the OTHER source — even after
+ *   the Expo opt-out landed, the duplicate `:kiaanverse_*` projects
+ *   were still being added by RN autolinker through the pnpm symlink.
+ *
+ * With BOTH autolinkers opted out, this plugin takes over the three
+ * registration responsibilities:
  *
  *   1. withSettingsGradle — appends
  *        include ':kiaanverse-kiaan-voice-native', ':kiaanverse-sakha-voice-native'
