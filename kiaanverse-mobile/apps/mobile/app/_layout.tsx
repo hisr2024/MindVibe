@@ -61,6 +61,7 @@ import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
 import { SacredArrival } from '../components/common/SacredArrival';
+import { AmbientVoicePresence } from '../voice/components/AmbientVoicePresence';
 import { initErrorTracking } from '../services/errorTracking';
 import {
   registerPlaybackService,
@@ -467,6 +468,14 @@ function AppContent(): React.JSX.Element {
           {/* Profile sub-screens (notifications, language, billing, legal, etc.) */}
           <Stack.Screen name="(app)" />
         </Stack>
+
+        {/* Ambient voice presence — root-level FAB + opt-in wake-word
+            listener so Sakha can be summoned from any non-suppressed
+            route. Sits inside AuthGate so it's gated behind login,
+            and beside the Stack so it overlays every screen. The
+            component itself returns null on /(auth), /arrival,
+            /onboarding, /voice and /voice-companion. */}
+        <AmbientVoicePresence />
       </AuthGate>
 
       {/* 7-Act Arrival ceremony — rendered LAST so it sits on top of every
