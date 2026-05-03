@@ -16,7 +16,14 @@ from fastapi import FastAPI  # noqa: E402
 from starlette.testclient import TestClient  # noqa: E402
 
 from backend.routes.voice_quota import router  # noqa: E402
-from backend.services.prompt_loader import reset_cache_for_tests  # noqa: E402
+from backend.services.prompt_loader import (  # noqa: E402
+    PERSONA_VERSION_FILE,
+    reset_cache_for_tests,
+)
+
+
+def _live_persona_version() -> str:
+    return PERSONA_VERSION_FILE.read_text(encoding="utf-8").strip()
 from backend.services.voice.quota_service import (  # noqa: E402
     get_voice_quota_service,
 )
@@ -47,7 +54,7 @@ class TestPersonaVersionEndpoint:
         r = client.get("/api/voice/persona-version")
         assert r.status_code == 200
         data = r.json()
-        assert data["persona_version"] == "1.0.0"
+        assert data["persona_version"] == _live_persona_version()
         assert data["schema_version"] == "1.0.0"
         assert data["subprotocol"] == "kiaan-voice-v1"
         assert data["server_loaded_at_iso"].startswith("20")  # ISO 8601 UTC
@@ -127,7 +134,7 @@ class TestQuotaEndpoint:
 
     def test_persona_version_in_response(self, client):
         r = client.get("/api/voice/quota?user_id=u-q-bhakta&tier=bhakta")
-        assert r.json()["persona_version"] == "1.0.0"
+        assert r.json()["persona_version"] == _live_persona_version()
 
     def test_missing_user_id_is_422(self, client):
         r = client.get("/api/voice/quota")

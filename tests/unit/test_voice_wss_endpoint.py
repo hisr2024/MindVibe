@@ -24,11 +24,14 @@ from fastapi import FastAPI  # noqa: E402
 from starlette.testclient import TestClient  # noqa: E402
 
 from backend.routes.voice_companion_wss import router  # noqa: E402
+from backend.services.prompt_loader import PERSONA_VERSION_FILE  # noqa: E402
 from backend.services.voice.stt_router import MockSTTProvider  # noqa: E402
 from backend.services.voice.tts_router import get_tts_router  # noqa: E402
 from backend.services.voice.wss_frames import SCHEMA_VERSION, SUBPROTOCOL  # noqa: E402
 
-PERSONA_VERSION = "1.0.0"
+# Read live from disk so persona bumps don't break the suite. The loader's
+# cross-version-check still guarantees the prompt files agree with this.
+PERSONA_VERSION = PERSONA_VERSION_FILE.read_text(encoding="utf-8").strip()
 
 
 @pytest.fixture

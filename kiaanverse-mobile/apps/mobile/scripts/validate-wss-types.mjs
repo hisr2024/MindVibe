@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TS_PATH = resolve(__dirname, '..', 'lib', 'wss-types.ts');
+const TS_PATH = resolve(__dirname, '..', 'voice', 'lib', 'wss-types.ts');
 // repo root is 4 levels up from apps/sakha-mobile/scripts/
 const PY_PATH = resolve(
   __dirname,
