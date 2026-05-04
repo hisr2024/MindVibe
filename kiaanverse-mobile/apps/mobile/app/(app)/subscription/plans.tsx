@@ -327,7 +327,12 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
           <View style={styles.legalLinks}>
             <Pressable
               onPress={() => {
-                void Linking.openURL('https://kiaanverse.com/terms');
+                // Route into the in-app legal screens (the matching
+                // kiaanverse.com pages no longer exist as a standalone
+                // marketing site; the legal text lives in the bundle so
+                // it is reachable offline and on Play Store policy
+                // review).
+                router.push('/terms');
               }}
             >
               <Text style={styles.legalLink}>Terms of Service</Text>
@@ -335,7 +340,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
             <Text style={styles.legalDot}>·</Text>
             <Pressable
               onPress={() => {
-                void Linking.openURL('https://kiaanverse.com/privacy');
+                router.push('/privacy');
               }}
             >
               <Text style={styles.legalLink}>Privacy Policy</Text>

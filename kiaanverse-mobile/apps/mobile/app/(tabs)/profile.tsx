@@ -140,9 +140,16 @@ const MENU_SECTIONS: readonly MenuSection[] = [
   {
     title: 'Legal',
     items: [
-      { label: 'Privacy Policy', route: '/(app)/privacy', icon: '📄' },
-      { label: 'Terms of Service', route: '/(app)/terms', icon: '📄' },
-      { label: 'Data & Privacy', route: '/(app)/data-privacy', icon: '🛡' },
+      // Expo Router 3.5 strips group segments from URL paths — pushing
+      // `/(app)/privacy` is treated as a literal path containing the
+      // segment "(app)" that doesn't exist, hence the
+      // "kiaanverse:///(app)/privacy → Unmatched Route" 404 in
+      // production AABs. The actual file at app/(app)/privacy.tsx is
+      // reachable as /privacy because the `(app)` group is purely
+      // organisational.
+      { label: 'Privacy Policy', route: '/privacy', icon: '📄' },
+      { label: 'Terms of Service', route: '/terms', icon: '📄' },
+      { label: 'Data & Privacy', route: '/data-privacy', icon: '🛡' },
     ],
   },
 ];

@@ -88,14 +88,14 @@ const SECTIONS: readonly Section[] = [
       '• Delete your account (permanent removal within 30 days).\n' +
       '• Withdraw consent for analytics.\n' +
       'Use Settings → Account → Data Controls, or email ' +
-      'privacy@kiaanverse.com.',
+      'sacredquest2@gmail.com.',
   },
   {
     heading: 'Children',
     body:
       'Kiaanverse is intended for seekers aged 13 and above. We do not ' +
       'knowingly collect data from children under 13. If you believe a ' +
-      'child has registered, please contact privacy@kiaanverse.com and ' +
+      'child has registered, please contact sacredquest2@gmail.com and ' +
       'we will remove the account.',
   },
   {
@@ -103,7 +103,7 @@ const SECTIONS: readonly Section[] = [
     body:
       'We will tell you in-app at least 14 days before any material ' +
       'change to how your data is handled. The full legal Privacy Policy ' +
-      'lives at the previous screen and on kiaanverse.com/privacy.',
+      'is also linked from the Profile tab → Legal section.',
   },
 ];
 
@@ -111,7 +111,7 @@ export default function DataAndPrivacyScreen(): React.JSX.Element {
   const router = useRouter();
 
   const openMail = (): void => {
-    void Linking.openURL('mailto:privacy@kiaanverse.com');
+    void Linking.openURL('mailto:sacredquest2@gmail.com');
   };
 
   return (
@@ -120,7 +120,7 @@ export default function DataAndPrivacyScreen(): React.JSX.Element {
 
       <SacredCard style={styles.card}>
         <Text style={styles.eyebrow}>HOW YOUR DATA IS HANDLED</Text>
-        <Text style={styles.lastUpdated}>Last Updated: April 2026</Text>
+        <Text style={styles.lastUpdated}>Last Updated: May 2026</Text>
 
         <View style={styles.sections}>
           {SECTIONS.map((s) => (
@@ -133,13 +133,13 @@ export default function DataAndPrivacyScreen(): React.JSX.Element {
           <Pressable
             onPress={openMail}
             accessibilityRole="link"
-            accessibilityLabel="Email privacy@kiaanverse.com"
+            accessibilityLabel="Email sacredquest2@gmail.com"
             style={styles.contactRow}
           >
             <Text style={styles.contactLabel}>
               Questions? Write to us at
             </Text>
-            <Text style={styles.contactEmail}>privacy@kiaanverse.com</Text>
+            <Text style={styles.contactEmail}>sacredquest2@gmail.com</Text>
           </Pressable>
         </View>
       </SacredCard>
