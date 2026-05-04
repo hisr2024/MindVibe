@@ -11,27 +11,49 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Kiaanverse',
   slug: 'kiaanverse',
-  // 1.3.1 ships the Relationship Compass Android-release crash fix:
-  //   • R8/Proguard keep rules for react-native-svg, react-native-reanimated,
-  //     gesture-handler, lottie and the Hermes Intl bridge (without these the
-  //     Compass radar + compass-rose chambers crash the JNI bridge with
-  //     NoClassDefFoundError on the first render of the screen);
-  //   • Hermes-safe date formatting in the Seal + Gita Counsel chambers
-  //     (Intl.DateTimeFormat / toLocaleDateString were aborting render);
-  //   • numeric-only animated props for the SVG chamber animations in both
-  //     Relationship Compass (CompassRose, DharmaRadar) and Karma Reset
-  //     (KarmaSealMandala) — animating SVG transform strings via
-  //     useAnimatedProps was NPE-ing react-native-svg's ViewManager off
-  //     the UI thread;
-  //   • Hermes-safe sentence splitter in useCompassWisdom (the previous
-  //     regex used lookbehind + Unicode property escapes, both unsupported
-  //     by Hermes — every API response was being silently swapped for the
-  //     offline fallback because the regex literal threw SyntaxError).
-  // 1.3.0 bundled native additions (expo-document-picker, Sakha chat).
-  // runtimeVersion: { policy: 'appVersion' } scopes OTAs to `version`, so
-  // bumping prevents expo-updates from pushing the new JS to the broken
-  // 1.3.0 APK. The matching versionCode bump is required by Play.
-  version: '1.3.1',
+  // 1.3.2 ships the Voice Companion + Profile completion bundle:
+  //   • Voice navigation: TOOL_ROUTES now match real Expo Router paths
+  //     (PR-G #1679) — 9 of 15 tools used to 404 on voice-driven nav.
+  //     Visible-confirmation banner shows on every prefill destination.
+  //     Sacred Reflections EditorTab seeds from voice dictation.
+  //   • Ambient voice presence (PR-H #1680): root-mounted FAB +
+  //     opt-in "Hey Sakha" wake word, route-suppressed on auth /
+  //     onboarding / voice-companion. Sakha is now ambient, not
+  //     screen-bound.
+  //   • Production hardening (PR-I #1682): native FGS type now
+  //     correctly bitwise-ORs MICROPHONE | MEDIA_PLAYBACK so
+  //     Android 14+ doesn't SecurityException when the service
+  //     records mic in foreground. Voice screen now uses the
+  //     authenticated user.id instead of an anonymous device UUID
+  //     (cross-device + post-signup quotas now correct). Picovoice
+  //     access key no longer baked into the AAB until a Kotlin
+  //     reader exists.
+  //   • Voice nav prefill stringification hotfix (#1681): production
+  //     AAB used to silently strip every voice prefill payload because
+  //     expo-router serialises params via String() — useToolInvocation
+  //     now JSON.stringifies before navigate.
+  //   • Legal screens repaired (PR-J #1683 + PR-K #1684): Privacy
+  //     Policy, Terms of Service, Data & Privacy, Help Center, and
+  //     Contact Us all reachable from Profile (the (app)/* group
+  //     prefix in route strings was 404'ing every Profile menu
+  //     entry on production). Contact email unified to
+  //     sacredquest2@gmail.com everywhere. Help Center has a 9-FAQ
+  //     reference + crisis callout. Contact Us has 7 categorised
+  //     mailto buttons + crisis callout.
+  //
+  // The native FGS type fix is the reason for the version bump (not
+  // an OTA-eligible change) — runtimeVersion: { policy: 'appVersion' }
+  // scopes OTAs to `version`, so bumping forces 1.3.2 to ship as a
+  // fresh APK rather than letting JS-only changes drift into the
+  // 1.3.1 install via expo-updates. The matching versionCode bump
+  // is handled automatically by EAS (autoIncrement: true in
+  // eas.json's production profile).
+  //
+  // 1.3.1 shipped the Relationship Compass Android-release crash fix
+  // (R8 keep rules, Hermes-safe date formatting, numeric SVG props,
+  // Hermes-safe regex). 1.3.0 bundled native additions
+  // (expo-document-picker, Sakha chat).
+  version: '1.3.2',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'kiaanverse',
