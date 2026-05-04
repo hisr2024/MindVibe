@@ -1,23 +1,31 @@
-// KIAAN Voice Native — manually-registered Android library.
+// KIAAN Voice Native — RN-autolinked Android library.
 //
-// REGISTRATION MODEL: this module is NOT autolinked by EITHER Expo or
-// React Native autolinkers. Both opt-outs live in this directory:
+// REGISTRATION MODEL: standard React Native autolinking. This module is
+// a pnpm workspace package (kiaanverse-mobile/native/kiaan-voice/) hoisted
+// by pnpm to apps/mobile/node_modules/@kiaanverse/kiaan-voice-native/.
+// `@react-native-community/cli-platform-android` scans node_modules,
+// finds this android/build.gradle, and:
 //
-//   • Expo autolinker — opt-out via the absence of
-//     `expo-module.config.json` at the workspace root.
-//   • RN autolinker   — opt-out via `react-native.config.js` declaring
-//     `dependency.platforms.{android,ios}: null`.
+//   1. Registers `:kiaanverse_kiaan-voice-native` as a gradle subproject
+//      (slash-to-underscore mangling on the scoped package name).
+//   2. Auto-detects `KiaanVoicePackage` via findPackageClassName() and
+//      adds it to PackageList.java so MainApplication.kt's
+//      `PackageList(this).packages` includes it at runtime.
 //
-// Instead, the `withKiaanSakhaVoicePackages` config plugin
-// (apps/mobile/plugins/withKiaanSakhaVoicePackages.js) injects the
-// `include ':kiaanverse-kiaan-voice-native'` line + projectDir mapping
-// into apps/mobile/android/settings.gradle, plus the matching
-// `implementation project(...)` dep into app/build.gradle and the
-// runtime `packages.add(KiaanVoicePackage())` line into
-// MainApplication.kt. See that plugin's header for why both
-// autolinkers had to be bypassed (pnpm symlink causing dual-discovery
-// → AGP namespace collision → the long-running
-// `Unresolved reference: sakha` build failure).
+// No `react-native.config.js` lives here — adding one with
+// `dependency.platforms.android: null` makes cli-platform-android's
+// `dependencyConfig` return null, which silently skips registration.
+// That was the post-PR-#1689 failure mode: opt-outs in place + plugin
+// no longer injecting → no gradle module → AAR never compiled →
+// MainApplication.kt's `KiaanVoicePackage` import fails to resolve.
+//
+// No `expo-module.config.json` either — this is a plain RN package,
+// not an Expo module. Expo's autolinker ignores it.
+//
+// The `withKiaanSakhaVoicePackages` config plugin
+// (apps/mobile/plugins/withKiaanSakhaVoicePackages.js) only patches
+// MainApplication.kt for `SakhaForegroundServicePackage`, which lives
+// in apps/mobile/native/android/ and is not autolinked.
 //
 // The KIAAN tier-1 voice Kotlin lives in this module's standard
 // `src/main/java/com/mindvibe/kiaan/voice/` tree:

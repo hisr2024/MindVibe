@@ -1,120 +1,76 @@
 /**
  * withKiaanSakhaVoicePackages — Expo config plugin.
  *
- * MODEL: pure manual gradle library registration.
+ * MODEL: minimal MainApplication.kt patch for ONE non-autolinked package.
  *
- * The two workspace voice modules
- * (kiaanverse-mobile/native/{kiaan,sakha}-voice/android/) are deliberately
- * NOT discoverable by Expo's autolinker NOR React Native's autolinker.
- * Both opt-out files are co-located with each workspace module:
+ * Registration topology (post the long native-build saga, builds 1–9):
  *
- *   • Expo autolinker — opt-out via the absence of `expo-module.config.json`
- *   • RN autolinker   — opt-out via `react-native.config.js` declaring
- *                       `dependency.platforms.{android,ios}: null`
+ *   • @kiaanverse/kiaan-voice-native (workspace at native/kiaan-voice/)
+ *     - Hoisted by pnpm to apps/mobile/node_modules/@kiaanverse/kiaan-voice-native
+ *     - RN autolinker scans node_modules, finds android/build.gradle,
+ *       registers `:kiaanverse_kiaan-voice-native` as a gradle subproject,
+ *       auto-detects `KiaanVoicePackage` via cli-platform-android's
+ *       findPackageClassName regex, and adds it to PackageList.java.
+ *     - Runtime registration: handled by `PackageList(this).packages` in
+ *       MainApplication.kt template — NO plugin patch needed.
  *
- * This is the fix for the dual-registration bug that produced builds
- * #1 through #8's persistent `Unresolved reference: sakha` failure:
+ *   • @kiaanverse/sakha-voice-native (workspace at native/sakha-voice/)
+ *     - Same as above. Autolinker registers `:kiaanverse_sakha-voice-native`
+ *       and adds `SakhaVoicePackage` to PackageList.java.
+ *     - Runtime registration: handled by PackageList — NO plugin patch.
  *
- *   In a pnpm workspace, each voice module is reachable via TWO paths:
- *     1. workspace path: kiaanverse-mobile/native/{X}-voice/
- *     2. pnpm symlink:   apps/mobile/node_modules/@kiaanverse/{X}-voice-native/
- *   Both autolinkers (Expo via expo-module.config.json, RN via
- *   android/build.gradle detection in node_modules) would each register
- *   the SAME source dir as TWO gradle projects with different name-
- *   mangling — `:kiaanverse-{X}-voice-native` (slash→`-`) and
- *   `:kiaanverse_{X}-voice-native` (slash→`_`). Both AARs build with
- *   the same Android `namespace`, AGP detects the namespace collision,
- *   prunes one set of classes from :app's compile classpath, and
- *   :app:compileReleaseKotlin fails because MainApplication.kt's
- *   imports point at the pruned classes.
+ *   • SakhaForegroundServicePackage (local module at apps/mobile/native/android/)
+ *     - This module ships an `expo-module.config.json` declaring only
+ *       `KiaanAudioPlayerPackage` as an Expo module. It does NOT live in
+ *       node_modules, so RN autolinker never sees it. Expo's autolinker
+ *       only auto-registers what's listed in expo-module.config.json.
+ *     - SakhaForegroundServicePackage is a regular ReactPackage in the
+ *       same source tree but not declared as an Expo module → no
+ *       autolinker finds it.
+ *     - Runtime registration: this plugin manually adds
+ *       `add(SakhaForegroundServicePackage())` to MainApplication.kt.
  *
- *   Build #7 confirmed Expo autolinker as one source.
- *   Build #8 confirmed RN autolinker as the OTHER source — even after
- *   the Expo opt-out landed, the duplicate `:kiaanverse_*` projects
- *   were still being added by RN autolinker through the pnpm symlink.
+ * Why we DON'T inject KiaanVoicePackage / SakhaVoicePackage here anymore:
  *
- * With BOTH autolinkers opted out, this plugin takes over the three
- * registration responsibilities:
+ *   We tried a long sequence of variants (PRs #1676, #1686, #1687, #1688,
+ *   #1689) chasing the "Unresolved reference: sakha" / namespace-collision
+ *   build failure. The terminal mistake was dual-registration — both the
+ *   plugin and the autolinker registering the SAME source as different
+ *   gradle modules pointing at the SAME directory through pnpm's symlink,
+ *   which produced AGP namespace collision and processReleaseJavaRes races.
  *
- *   1. withSettingsGradle — appends
- *        include ':kiaanverse-kiaan-voice-native', ':kiaanverse-sakha-voice-native'
- *        project(':kiaanverse-kiaan-voice-native').projectDir = file(...)
- *        project(':kiaanverse-sakha-voice-native').projectDir = file(...)
- *      so gradle knows about the two library modules. The relative path
- *      is resolved from the host android/ folder — which on EAS Build is
- *      `apps/mobile/android/`, so we go up three levels to the
- *      kiaanverse-mobile root and then into native/{X}-voice/android/.
+ *   PR #1689 fixed half of it (removed the plugin's gradle module
+ *   injection) but left the per-package react-native.config.js
+ *   `platforms.android: null` opt-outs in place — those make
+ *   cli-platform-android's `dependencyConfig` return `null` for the
+ *   package (verified in node_modules/@react-native-community/
+ *   cli-platform-android/build/config/index.js), which means the
+ *   autolinker ALSO skips registration. Net result post-PR-#1689: NO
+ *   gradle module is registered, the AAR is never compiled, and
+ *   MainApplication.kt's manual `import com.mindvibe.kiaan.voice.
+ *   KiaanVoicePackage` fails to resolve.
  *
- *   2. withAppBuildGradle — appends a fresh `dependencies { ... }` block
- *      with `implementation project(':kiaanverse-{kiaan,sakha}-voice-native')`
- *      so :app sees the two AARs at compile time. Multiple
- *      `dependencies { }` blocks in one build.gradle are additive in
- *      Gradle, so this never collides with the autolinker's block.
- *
- *   3. withMainApplication — injects three imports and matching
- *      `packages.add(...)` calls so the host app instantiates the
- *      ReactPackage classes at runtime:
- *        com.mindvibe.kiaan.voice.KiaanVoicePackage         (workspace)
- *        com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage   (workspace)
- *        com.kiaanverse.sakha.audio.SakhaForegroundServicePackage (local)
- *
- * The third package (SakhaForegroundServicePackage) lives in the local
- * gradle module at `apps/mobile/native/android/`, which IS still
- * autolinked through `apps/mobile/native/android/expo-module.config.json`
- * (that one ships KiaanAudioPlayerPackage as an Expo Module). We only
- * need the `packages.add(...)` line for the foreground-service package
- * because it's a ReactPackage, not a Module — the autolinker's
- * `PackageList(this).packages` doesn't auto-instantiate it.
+ *   The fix (this PR) is to delete the per-package `react-native.config.js`
+ *   files, let RN autolinker do its job (register gradle module + add to
+ *   PackageList.java), and stop having the plugin add manual `add()`
+ *   calls — those would now duplicate what's already in PackageList.
  *
  * Idempotent — re-running prebuild does not duplicate any line.
  */
 
-const {
-  withMainApplication,
-  withAppBuildGradle,
-  withSettingsGradle,
-} = require('@expo/config-plugins');
+const { withMainApplication } = require('@expo/config-plugins');
 
-const KIAAN_IMPORT = 'import com.mindvibe.kiaan.voice.KiaanVoicePackage';
-const SAKHA_IMPORT = 'import com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage';
 const FG_IMPORT =
   'import com.kiaanverse.sakha.audio.SakhaForegroundServicePackage';
-const KIAAN_ADD = 'packages.add(KiaanVoicePackage())';
-const SAKHA_ADD = 'packages.add(SakhaVoicePackage())';
 const FG_ADD = 'packages.add(SakhaForegroundServicePackage())';
-
-/** Gradle module entries we register. Each `name` is the gradle project
- *  name (used in `:<name>` references), `dir` is the relative path from
- *  the host app's android/ folder (where settings.gradle lives) to the
- *  workspace module's android/ folder. */
-const WORKSPACE_MODULES = [
-  {
-    name: 'kiaanverse-kiaan-voice-native',
-    dir: '../../../native/kiaan-voice/android',
-  },
-  {
-    name: 'kiaanverse-sakha-voice-native',
-    dir: '../../../native/sakha-voice/android',
-  },
-];
-
-/** Idempotent markers so re-running prebuild doesn't duplicate lines. */
-const SETTINGS_MARKER = '// kiaanverse-voice-native-modules:start';
-const SETTINGS_MARKER_END = '// kiaanverse-voice-native-modules:end';
-const APP_GRADLE_MARKER = '// kiaanverse-voice-native-deps:start';
-const APP_GRADLE_MARKER_END = '// kiaanverse-voice-native-deps:end';
 
 function addImport(contents, importLine) {
   if (contents.includes(importLine)) return contents;
-  // Insert after the last existing import. The plugin runs three
-  // addImport calls; each new import becomes the "last", so subsequent
-  // imports are appended in order.
   const lastImportMatch = [...contents.matchAll(/^import\s+\S+/gm)].pop();
   if (lastImportMatch) {
     const insertAt = lastImportMatch.index + lastImportMatch[0].length;
     return contents.slice(0, insertAt) + '\n' + importLine + contents.slice(insertAt);
   }
-  // Fallback: insert after the package declaration.
   return contents.replace(/^(package\s+\S+)/m, `$1\n\n${importLine}`);
 }
 
@@ -131,92 +87,11 @@ function addPackageRegistration(contents, addLine) {
   );
 }
 
-/**
- * Append `include ':...'` and `project(':...').projectDir = file('...')`
- * to settings.gradle. Idempotent via SETTINGS_MARKER.
- */
-function appendSettingsGradleIncludes(contents) {
-  if (contents.includes(SETTINGS_MARKER)) return contents;
-  const lines = [
-    '',
-    SETTINGS_MARKER,
-    '// Workspace voice modules (kiaanverse-mobile/native/{kiaan,sakha}-voice/)',
-    '// are NOT autolinked — they have no expo-module.config.json. We',
-    '// register them here as pure gradle library modules so the autolinker',
-    '// cannot double-register them via the pnpm symlink path. See',
-    '// withKiaanSakhaVoicePackages.js header for the full failure mode.',
-    `include ${WORKSPACE_MODULES.map((m) => `':${m.name}'`).join(', ')}`,
-    ...WORKSPACE_MODULES.map(
-      (m) => `project(':${m.name}').projectDir = new File(rootProject.projectDir, '${m.dir}')`,
-    ),
-    SETTINGS_MARKER_END,
-    '',
-  ];
-  return contents.replace(/\s*$/, '\n') + lines.join('\n') + '\n';
-}
-
-/**
- * Append a fresh `dependencies { ... }` block with the workspace
- * project deps. Gradle merges multiple dependencies blocks additively,
- * so this is safe alongside whatever the autolinker / Expo template
- * wrote earlier in the file. Idempotent via APP_GRADLE_MARKER.
- */
-function appendGradleDependencies(contents) {
-  if (contents.includes(APP_GRADLE_MARKER)) return contents;
-  const lines = [
-    '',
-    APP_GRADLE_MARKER,
-    '// Workspace voice ReactPackage modules registered manually (see',
-    '// settings.gradle injection above and withKiaanSakhaVoicePackages.js',
-    '// header for why autolinker is bypassed).',
-    'dependencies {',
-    ...WORKSPACE_MODULES.map((m) => `    implementation project(':${m.name}')`),
-    '}',
-    APP_GRADLE_MARKER_END,
-    '',
-  ];
-  return contents.replace(/\s*$/, '\n') + lines.join('\n') + '\n';
-}
-
 const withKiaanSakhaVoicePackages = (config) => {
-  // settings.gradle + app/build.gradle injections REMOVED. They previously
-  // registered `:kiaanverse-{kiaan,sakha}-voice-native` (hyphen) as gradle
-  // subprojects pointing at `../../../native/{X}-voice/android` — but the
-  // RN/Expo autolinker independently registered the SAME source as
-  // `:kiaanverse_{kiaan,sakha}-voice-native` (underscore) via the pnpm
-  // hoist symlink at `apps/mobile/node_modules/@kiaanverse/{X}-voice-native`,
-  // which resolves to the same directory. Two gradle modules sharing one
-  // build/ output directory caused:
-  //
-  //   1. AGP namespace collision (com.mindvibe.kiaan.voice[.sakha] used by
-  //      both modules) → :app:compileReleaseKotlin "Unresolved reference:
-  //      sakha" in MainApplication.kt.
-  //
-  //   2. Once #1 was worked around, processReleaseJavaRes failed with
-  //      java.nio.file.NoSuchFileException on
-  //      native/{X}-voice/android/build/intermediates/java_res/release/
-  //      out/META-INF — both modules' tasks racing on the same output dir.
-  //
-  // Fix: let the autolinker own the gradle module registration (it does
-  // this automatically when it finds android/build.gradle in
-  // node_modules/@kiaanverse/{X}-voice-native). The plugin's only
-  // remaining job is the MainApplication.kt patches below — those add
-  // explicit `add(KiaanVoicePackage())` etc. calls that the autolinker
-  // itself doesn't inject (because we opt out of PackageList.java
-  // generation via per-package react-native.config.js — the
-  // gradle-module side of the autolinker still runs, which is what we
-  // want, but we own the runtime registration ourselves).
-  //
-  // MainApplication.kt — inject imports + packages.add() calls so the
-  // three ReactPackage classes get registered at runtime.
   config = withMainApplication(config, (cfg) => {
     if (cfg.modResults.language !== 'kt') return cfg;
     let contents = cfg.modResults.contents;
-    contents = addImport(contents, KIAAN_IMPORT);
-    contents = addImport(contents, SAKHA_IMPORT);
     contents = addImport(contents, FG_IMPORT);
-    contents = addPackageRegistration(contents, KIAAN_ADD);
-    contents = addPackageRegistration(contents, SAKHA_ADD);
     contents = addPackageRegistration(contents, FG_ADD);
     cfg.modResults.contents = contents;
     return cfg;
