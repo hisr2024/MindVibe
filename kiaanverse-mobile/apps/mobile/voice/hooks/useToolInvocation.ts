@@ -83,7 +83,13 @@ export const TOOL_ROUTES: Record<string, string> = {
 };
 
 export interface ToolInvocationNavParams {
-  prefill: Record<string, unknown> | null;
+  /** JSON-stringified prefill payload, or null. Must be a string at this
+   *  boundary because expo-router serialises params via String(value)
+   *  when constructing the URL — passing an object yields the literal
+   *  "[object Object]" on the destination, where useVoicePrefill's
+   *  JSON.parse silently throws and prefill becomes null. The
+   *  destination calls JSON.parse to rehydrate. */
+  prefill: string | null;
   source: 'voice_companion';
   carry_id: string | null;
 }
@@ -136,8 +142,17 @@ export function useToolInvocation({
     if (!t) return;
     const adjusted = downgradeIfLowConfidence(t);
     const route = TOOL_ROUTES[adjusted.tool] ?? `/tools/${adjusted.tool.toLowerCase()}`;
+    // Serialise prefill HERE, not at the receiver. expo-router stringifies
+    // every param value via String() when building the URL, so passing
+    // adjusted.inputPayload as an object would arrive at useVoicePrefill
+    // as the literal "[object Object]" — JSON.parse throws, the catch
+    // silently nulls prefill, and the destination shows no banner / no
+    // seeded fields. Stringifying here keeps the wire format opaque to
+    // the caller and the receive-side JSON.parse round-trips cleanly.
+    const prefillJson =
+      adjusted.inputPayload != null ? JSON.stringify(adjusted.inputPayload) : null;
     navigate(route, {
-      prefill: adjusted.inputPayload,
+      prefill: prefillJson,
       source: 'voice_companion',
       carry_id: adjusted.carryId,
     });

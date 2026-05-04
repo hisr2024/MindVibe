@@ -93,6 +93,19 @@ check('navigation timing matches spec (60% of ack, cap 3.5s)',
   code.includes('NAV_AT_FRACTION_OF_ACK = 0.6')
   && code.includes('NAV_DELAY_CAP_MS = 3500'));
 
+// Regression guard for the prefill-serialisation hotfix: useToolInvocation
+// MUST stringify the prefill object before handing it to navigate(),
+// because expo-router serialises params via String() — passing the raw
+// object yields "[object Object]" on the destination, where
+// useVoicePrefill's JSON.parse silently throws and prefill becomes null.
+// If this assertion ever fails again, the production AAB ships a voice
+// nav that strips every prefill payload silently. Don't relax without
+// a corresponding fix at the router layer.
+check('useToolInvocation stringifies prefill before navigate()',
+  code.includes('JSON.stringify(adjusted.inputPayload)'));
+check('ToolInvocationNavParams.prefill typed as string|null (post-stringify)',
+  /prefill:\s*string\s*\|\s*null/.test(code));
+
 console.log('');
 if (failed > 0) {
   console.log(failed + ' failed');
