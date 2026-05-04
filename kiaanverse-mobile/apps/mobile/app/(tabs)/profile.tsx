@@ -97,10 +97,12 @@ const MENU_SECTIONS: readonly MenuSection[] = [
   {
     title: 'Account',
     items: [
-      { label: 'Edit Profile', route: '/(app)/edit-profile', icon: '✦' },
-      { label: 'Change Password', route: '/(app)/change-password', icon: '🔒' },
-      { label: 'Language', route: '/(app)/language-settings', icon: '🌐' },
-      { label: 'Notifications', route: '/(app)/notifications', icon: '🔔' },
+      // Group-segment-stripped — see the matching comment in the
+      // Legal block below for the full rationale.
+      { label: 'Edit Profile', route: '/edit-profile', icon: '✦' },
+      { label: 'Change Password', route: '/change-password', icon: '🔒' },
+      { label: 'Language', route: '/language-settings', icon: '🌐' },
+      { label: 'Notifications', route: '/notifications', icon: '🔔' },
     ],
   },
   {
@@ -108,17 +110,19 @@ const MENU_SECTIONS: readonly MenuSection[] = [
     items: [
       {
         label: 'My Subscription',
-        route: '/(app)/subscription',
+        route: '/subscription',
         icon: '✦',
         gold: true,
       },
       {
         label: 'Upgrade Plan',
-        route: '/(app)/subscription/plans',
+        route: '/subscription/plans',
         icon: '⬆',
         gold: true,
       },
-      { label: 'Billing History', route: '/(app)/billing-history', icon: '📋' },
+      // Billing History entry removed: no app/(app)/billing-history.tsx
+      // exists yet, so tapping previously 404'd. Restore once the
+      // backend transaction-history endpoint + screen are ready.
     ],
   },
   {
@@ -132,8 +136,11 @@ const MENU_SECTIONS: readonly MenuSection[] = [
   {
     title: 'Support',
     items: [
-      { label: 'Help Center', route: '/(app)/help', icon: '❓' },
-      { label: 'Contact Us', route: '/(app)/contact', icon: '✉' },
+      // Group-segment-stripped routes — `app/(app)/help.tsx` is
+      // reachable as /help, not /(app)/help. See the matching comment
+      // in the Legal block below for the full rationale.
+      { label: 'Help Center', route: '/help', icon: '❓' },
+      { label: 'Contact Us', route: '/contact', icon: '✉' },
       { label: 'Rate the App', route: 'external:rate', icon: '⭐' },
     ],
   },
