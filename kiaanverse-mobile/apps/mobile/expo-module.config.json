@@ -1,9 +1,5 @@
 {
   "autolinking": {
-    "exclude": [
-      "expo-in-app-purchases",
-      "@kiaanverse/kiaan-voice-native",
-      "@kiaanverse/sakha-voice-native"
-    ]
+    "exclude": ["expo-in-app-purchases"]
   }
 }

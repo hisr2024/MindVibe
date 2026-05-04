@@ -43,6 +43,12 @@ importers:
       '@kiaanverse/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@kiaanverse/kiaan-voice-native':
+        specifier: workspace:*
+        version: link:../../native/kiaan-voice
+      '@kiaanverse/sakha-voice-native':
+        specifier: workspace:*
+        version: link:../../native/sakha-voice
       '@kiaanverse/store':
         specifier: workspace:*
         version: link:../../packages/store
@@ -233,6 +239,10 @@ importers:
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
+
+  native/kiaan-voice: {}
+
+  native/sakha-voice: {}
 
   packages/api:
     dependencies:

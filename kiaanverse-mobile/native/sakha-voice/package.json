@@ -1,0 +1,7 @@
+{
+  "name": "@kiaanverse/sakha-voice-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sakha persona voice native module (SakhaVoiceManager, SakhaSseClient, SakhaTtsPlayer, SakhaPauseParser, SakhaPersonaGuard, SakhaVoiceModule, SakhaVoicePackage). Sources at android/src/main/java/com/mindvibe/kiaan/voice/sakha/.",
+  "main": "index.js"
+}
