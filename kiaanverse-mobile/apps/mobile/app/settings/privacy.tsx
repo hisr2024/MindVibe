@@ -275,7 +275,7 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
 
       {/* Footer */}
       <Text variant="caption" color={colors.text.muted} style={styles.footer}>
-        Questions? privacy@kiaanverse.com
+        Questions? sacredquest2@gmail.com
       </Text>
     </Screen>
   );

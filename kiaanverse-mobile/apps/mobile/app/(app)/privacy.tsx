@@ -23,6 +23,14 @@ interface Section {
 
 const SECTIONS: readonly Section[] = [
   {
+    heading: 'Effective Date & Scope',
+    body:
+      'This Privacy Policy applies to the Kiaanverse / MindVibe mobile ' +
+      'application and any associated services (collectively, "the ' +
+      'Service") operated by Kiaanverse. By using the Service you agree ' +
+      'to the practices described below.',
+  },
+  {
     heading: '1. Your Journal Is Sacred',
     body:
       'Your journal entries are encrypted using AES-256-GCM directly on your ' +
@@ -63,11 +71,14 @@ const SECTIONS: readonly Section[] = [
     heading: '6. Your Rights (GDPR)',
     body:
       'You have the right to access, correct, export, and delete your data. ' +
-      'Contact: privacy@kiaanverse.com',
+      'Contact: sacredquest2@gmail.com',
   },
   {
     heading: '7. Contact',
-    body: 'Kiaanverse (Germany)\nprivacy@kiaanverse.com\nkiaanverse.com/privacy',
+    body:
+      'For privacy questions, data exports, or to exercise any of your ' +
+      'rights, write to us at:\n\nsacredquest2@gmail.com\n\n' +
+      'We answer every privacy email within 7 business days.',
   },
 ];
 
@@ -80,7 +91,7 @@ export default function PrivacyPolicyScreen(): React.JSX.Element {
 
       <SacredCard style={styles.card}>
         <Text style={styles.eyebrow}>KIAANVERSE PRIVACY POLICY</Text>
-        <Text style={styles.lastUpdated}>Last Updated: April 2026</Text>
+        <Text style={styles.lastUpdated}>Last Updated: May 2026</Text>
 
         <View style={styles.sections}>
           {SECTIONS.map((s) => (

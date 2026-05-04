@@ -109,9 +109,19 @@ const SECTIONS: readonly Section[] = [
       'date constitutes acceptance.',
   },
   {
-    heading: '11. Contact',
+    heading: '11. Governing Law',
     body:
-      'Kiaanverse (Germany)\nlegal@kiaanverse.com\nkiaanverse.com/terms',
+      'These Terms are governed by the laws applicable to your country of ' +
+      'residence to the extent required by mandatory consumer-protection ' +
+      'rules. Any disputes will first be addressed in good faith through ' +
+      'direct correspondence with the contact email below.',
+  },
+  {
+    heading: '12. Contact',
+    body:
+      'For questions about these Terms, account or billing issues, or to ' +
+      'report a violation, write to us at:\n\nsacredquest2@gmail.com\n\n' +
+      'We answer every legal / support email within 7 business days.',
   },
 ];
 
@@ -124,7 +134,7 @@ export default function TermsOfServiceScreen(): React.JSX.Element {
 
       <SacredCard style={styles.card}>
         <Text style={styles.eyebrow}>KIAANVERSE TERMS OF SERVICE</Text>
-        <Text style={styles.lastUpdated}>Last Updated: April 2026</Text>
+        <Text style={styles.lastUpdated}>Last Updated: May 2026</Text>
 
         <View style={styles.sections}>
           {SECTIONS.map((s) => (
