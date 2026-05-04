@@ -234,6 +234,10 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
+  native/kiaan-voice: {}
+
+  native/sakha-voice: {}
+
   packages/api:
     dependencies:
       '@react-native-async-storage/async-storage':
