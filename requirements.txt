@@ -70,4 +70,4 @@ pydub>=0.25.1,<0.26.0
 edge-tts>=6.1.0,<8.0.0
 
 # Tokenizers for local token counting
-transformers>=4.36.0,<6.0.0
+transformers>=5.7.0,<6.0.0
