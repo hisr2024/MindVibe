@@ -45,6 +45,8 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { ChevronLeft, Bell } from 'lucide-react-native';
 import { Screen } from '@kiaanverse/ui';
+import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
+import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
 import {
   useRelationshipStore,
   type SealedCompassReading,
@@ -106,6 +108,16 @@ const INITIAL_DRAFT: CompassDraft = {
 export default function RelationshipCompassScreen(): React.JSX.Element {
   const router = useRouter();
   const addSealedReading = useRelationshipStore((s) => s.addSealedReading);
+
+  const voice = useVoicePrefill<{
+    relationship_role?: string;
+    tension_summary?: string;
+    mood_label?: string;
+  }>('RELATIONSHIP_COMPASS');
+  const voiceLabel =
+    voice.prefill?.tension_summary ??
+    voice.prefill?.relationship_role ??
+    'the bond you named';
 
   const [chamber, setChamber] = useState<ChamberKey>('altar');
   const [draft, setDraft] = useState<CompassDraft>(INITIAL_DRAFT);
@@ -331,6 +343,9 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
 
   return (
     <Screen scroll={false} gradient edges={['top', 'left', 'right']}>
+      {voice.isVoicePrefilled && (
+        <VoicePrefillBanner label={voiceLabel} onDismiss={voice.acknowledge} />
+      )}
       <View style={styles.headerRow}>
         <Pressable
           onPress={onBack}

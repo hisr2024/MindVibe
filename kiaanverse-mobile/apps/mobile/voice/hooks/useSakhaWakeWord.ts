@@ -8,11 +8,11 @@
  * native side does the actual recognizer lifecycle and state-machine
  * pause/resume.
  *
- * Usage in a screen:
+ * Usage in a screen (e.g. /voice-companion):
  *
- *   const sakha = useSakhaVoice({ backendBaseUrl, getAccessToken });
+ *   const session = useVoiceSession({ backendBaseUrl, getAccessToken });
  *   const wake = useSakhaWakeWord({
- *     onWake: () => sakha.activate(),
+ *     onWake: () => session.activate(),
  *     initialEnabled: true,
  *   });
  *   <Switch value={wake.enabled} onValueChange={wake.setEnabled} />

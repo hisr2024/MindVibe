@@ -11,8 +11,42 @@
  */
 
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { KarmaResetScreen } from '../../../components/karma-reset/KarmaResetScreen';
+import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
+import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
 
 export default function KarmaResetRoute(): React.JSX.Element {
-  return <KarmaResetScreen />;
+  const voice = useVoicePrefill<{
+    pattern_summary?: string;
+    duration_label?: string;
+    mood_label?: string;
+  }>('KARMA_RESET');
+
+  const label =
+    voice.prefill?.pattern_summary ??
+    voice.prefill?.mood_label ??
+    'the pattern you named';
+
+  return (
+    <View style={styles.root}>
+      {voice.isVoicePrefilled && (
+        <View style={styles.banner} pointerEvents="box-none">
+          <VoicePrefillBanner label={label} onDismiss={voice.acknowledge} />
+        </View>
+      )}
+      <KarmaResetScreen />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  banner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+});

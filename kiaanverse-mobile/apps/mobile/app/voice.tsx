@@ -5,12 +5,11 @@
  * Kept as a redirect rather than deleted so existing deep links,
  * shortcuts, and Voice tab nav targets keep working without churn.
  *
- * The previous mandala-based implementation (HeroMandala +
- * useSakhaVoice SSE bridge) was the pre-FINAL.2 path. It's
- * superseded by the WSS-based companion at /voice-companion which
- * implements the FINAL.2 spec end-to-end (Shankha iconography,
- * single streaming pipe, Cobra VAD, crisis overlay, INPUT_TO_TOOL
- * carry timing, persona pinning).
+ * The previous mandala-based implementation + the legacy
+ * useSakhaVoice SSE bridge (deleted in PR-G) were the pre-FINAL.2
+ * path. The FINAL.2 spec now lives end-to-end at /voice-companion
+ * (Shankha iconography, single streaming pipe, Cobra VAD, crisis
+ * overlay, INPUT_TO_TOOL carry timing, persona pinning).
  */
 
 import { Redirect } from 'expo-router';

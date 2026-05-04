@@ -41,25 +41,45 @@ const NAV_DELAY_CAP_MS = 3500;
 const NAV_DEFAULT_ACK_MS = 6000;
 const CONFIDENCE_THRESHOLD_FOR_PREFILL = 0.75;
 
-/** Map tool name → in-app route. Matches kiaan_unified_voice_engine.py
- *  TOOL_ROUTES. Centralized here so adding a tool only touches one
- *  table mobile-side. */
+/** Map tool name → in-app route. Authoritative client-side mirror of the
+ *  Python TOOL_ROUTES (the backend just emits the tool name + payload —
+ *  the client owns where each tool actually lives in the app shell).
+ *
+ *  Centralized here so adding a tool only touches one table mobile-side.
+ *  Keep these in sync with the real Expo Router paths under app/. The
+ *  PR-G audit uncovered nine 404s where TOOL_ROUTES claimed `/tools/*`
+ *  paths that never shipped — fixed below by pointing at the actual
+ *  destinations. */
 export const TOOL_ROUTES: Record<string, string> = {
+  // The five canonical /tools/<name> routes that exist on disk.
   EMOTIONAL_RESET: '/tools/emotional-reset',
   KARMA_RESET: '/tools/karma-reset',
-  KARMIC_TREE: '/tools/karmic-tree',
   ARDHA: '/tools/ardha',
   VIYOGA: '/tools/viyoga',
-  SACRED_REFLECTIONS: '/tools/sacred-reflections',
-  KIAAN_VIBE: '/tools/kiaan-vibe',
-  WISDOM_ROOMS: '/tools/wisdom-rooms',
-  SADHANA: '/tools/sadhana',
-  GITA_LIBRARY: '/tools/gita-library',
-  MOOD_INSIGHTS: '/tools/mood-insights',
   RELATIONSHIP_COMPASS: '/tools/relationship-compass',
-  KARMA_FOOTPRINT: '/tools/karma-footprint',
-  COMPANION: '/companion',
-  KIAAN_CHAT: '/kiaan/chat',
+
+  // Top-level routes (the screens predate the /tools/ namespace).
+  SACRED_REFLECTIONS: '/sacred-reflections',
+  WISDOM_ROOMS: '/wisdom-rooms',
+  SADHANA: '/sadhana',
+  KARMA_FOOTPRINT: '/karma-footprint',
+
+  // Tab-group routes — Expo Router strips the (tabs) segment, so the
+  // public URL is just `/chat`, `/shlokas`, `/`.
+  KIAAN_CHAT: '/chat',
+  GITA_LIBRARY: '/shlokas',
+  KIAAN_VIBE: '/', // embedded in the home tab
+
+  // /wellness/mood is the canonical mood-insights surface.
+  MOOD_INSIGHTS: '/wellness/mood',
+
+  // Voice companion is the home for COMPANION tool intent.
+  COMPANION: '/voice-companion',
+
+  // KARMIC_TREE has no production screen yet — stub at /tools/karmic-tree
+  // (added in this PR) tells the user it's coming, so voice nav never
+  // 404s. Replace with the real route once the tree screen ships.
+  KARMIC_TREE: '/tools/karmic-tree',
 };
 
 export interface ToolInvocationNavParams {
