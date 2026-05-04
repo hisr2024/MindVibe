@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
@@ -39,8 +39,6 @@ import {
 } from '../../voice/hooks/useToolInvocation';
 import { useSakhaWakeWord } from '../../voice/hooks/useSakhaWakeWord';
 
-const USER_ID_KEY = 'sakha:user_id';
-
 export default function VoiceCompanionScreen() {
   const router = useRouter();
   const state = useVoiceStore(selectVoiceState);
@@ -55,20 +53,26 @@ export default function VoiceCompanionScreen() {
   const personaMismatch = useVoiceStore((s) => s.personaMismatch);
   const lastError = useVoiceStore((s) => s.lastError);
 
-  // Stable userId per install. Real auth wires this from the existing
-  // Kiaanverse auth context; for the standalone Sakha shell we generate
-  // and pin a UUID per device on first launch.
-  const [userId, setUserId] = React.useState<string | null>(null);
-  useEffect(() => {
-    (async () => {
-      let uid = await SecureStore.getItemAsync(USER_ID_KEY);
-      if (!uid) {
-        uid = 'u-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        await SecureStore.setItemAsync(USER_ID_KEY, uid);
-      }
-      setUserId(uid);
-    })();
-  }, []);
+  // Authenticated user identity for the voice session. AuthGate (in
+  // app/_layout.tsx) guarantees this screen only mounts when status
+  // === 'authenticated' and isOnboarded === true, so user is non-null
+  // by the time we get here in steady state — but during the
+  // hydrate-then-mount transition there's a frame or two where
+  // useAuthStore.user is still null. We hold off starting the voice
+  // session until we have a real id by feeding 'pending' to
+  // useVoiceSession, which short-circuits its quota pre-flight when
+  // userId === 'pending'.
+  //
+  // Until v1.3.1 this screen pinned a per-device UUID in SecureStore
+  // and used that as the user_id. That meant quota / telemetry /
+  // crisis incidents tracked the device, not the account — sign-out
+  // and sign-back-in on the same device kept hitting the same quota
+  // bucket, and the same human across devices got disjoint quotas.
+  // The migration is forward-only: anonymous device UUIDs that were
+  // already written to SecureStore are simply ignored from this
+  // version onward. No data loss because daily quotas reset anyway.
+  const authUserId = useAuthStore((s) => s.user?.id ?? null);
+  const userId = authUserId;
 
   const session = useVoiceSession(userId ?? 'pending');
   const audioFocus = useAudioFocus();
