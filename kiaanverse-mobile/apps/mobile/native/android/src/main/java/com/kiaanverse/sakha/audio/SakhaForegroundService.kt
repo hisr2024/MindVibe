@@ -109,13 +109,20 @@ class SakhaForegroundService : Service() {
     private fun startInForeground() {
         val notification = buildNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14+: must specify the typed foreground service.
-            // Type matches the manifest entry injected by the
-            // withKiaanForegroundService plugin.
+            // Android 14+: must specify the typed foreground service. The
+            // type passed here MUST be a subset of what the manifest
+            // declares — the withKiaanForegroundService plugin declares
+            // android:foregroundServiceType="microphone|mediaPlayback",
+            // and the service actively records mic for VAD + wake-word
+            // while also playing TTS audio. Passing only MEDIA_PLAYBACK
+            // would let TTS continue but Android 14+ throws
+            // SecurityException the moment we hold the mic in foreground.
+            // Combine both with bitwise OR.
             startForeground(
                 NOTIFICATION_ID,
                 notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
             )
         } else {
             startForeground(NOTIFICATION_ID, notification)

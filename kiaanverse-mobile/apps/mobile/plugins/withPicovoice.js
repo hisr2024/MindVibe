@@ -75,10 +75,23 @@ function ensureGradleAbiSplits(buildGradle) {
   return buildGradle.trimEnd() + '\n\n' + PICOVOICE_ABI_SPLIT_BLOCK + '\n';
 }
 
-function ensureBuildConfigField(buildGradle, accessKey) {
-  if (!accessKey) {
-    // No-op when no key is provided — production builds inject via
-    // EAS Secrets. Dev builds without a key fall back to mock VAD.
+function ensureBuildConfigField(buildGradle, accessKey, consumeAccessKey) {
+  // No-op when:
+  //   • no key is provided (dev / CI / EAS Secret unset), or
+  //   • Phase 2B Porcupine integration hasn't shipped yet, in which
+  //     case no Kotlin code reads BuildConfig.KIAAN_PICOVOICE_ACCESS_KEY
+  //     and baking the secret into the AAB just exposes it without
+  //     value. The current production wake-word path uses Google
+  //     SpeechRecognizer (Android 11+ on-device STT) — see
+  //     SakhaWakeWordDetector.kt — and Cobra VAD when present uses a
+  //     free non-commercial license that does not require the access
+  //     key to initialise the recognizer.
+  //
+  // Set `consumeAccessKey: true` in app.config.ts to re-enable
+  // injection once the native side actually reads the BuildConfig
+  // field. Doing this without a consumer is a security smell: any
+  // user with a strings dump of the AAB can recover the key.
+  if (!accessKey || !consumeAccessKey) {
     return buildGradle;
   }
   const escaped = String(accessKey).replace(/"/g, '\\"');
@@ -125,6 +138,10 @@ const withPicovoice = (config, options = {}) => {
   const opts = {
     enableWakeWord: options.enableWakeWord === true,
     wakeWordKeyword: options.wakeWordKeyword || 'hey sakha',
+    // Default false — guards the BuildConfig.KIAAN_PICOVOICE_ACCESS_KEY
+    // injection. Flip to true once Phase 2B lands a Kotlin reader for
+    // the field. See ensureBuildConfigField for the rationale.
+    consumeAccessKey: options.consumeAccessKey === true,
   };
 
   // The access key is read from the resolved app config (extra.picovoice.accessKey).
@@ -135,11 +152,23 @@ const withPicovoice = (config, options = {}) => {
     process.env.PICOVOICE_ACCESS_KEY ||
     '';
 
+  // Surface a build-time warning when the key is set but nothing
+  // consumes it — this caught the post-#1679 audit finding ("Picovoice
+  // key wasted: Phase 2B not yet landed; key is injected but unused").
+  if (accessKey && !opts.consumeAccessKey) {
+    console.warn(
+      '[withPicovoice] PICOVOICE_ACCESS_KEY is set but consumeAccessKey=false. ' +
+      'Skipping BuildConfig injection so the secret is not baked into the AAB. ' +
+      'Pass `consumeAccessKey: true` from app.config.ts once a Kotlin reader exists.',
+    );
+  }
+
   config = withAppBuildGradle(config, (cfg) => {
     cfg.modResults.contents = ensureGradleAbiSplits(cfg.modResults.contents);
     cfg.modResults.contents = ensureBuildConfigField(
       cfg.modResults.contents,
       accessKey,
+      opts.consumeAccessKey,
     );
     return cfg;
   });
