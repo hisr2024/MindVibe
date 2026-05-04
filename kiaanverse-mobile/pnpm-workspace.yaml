@@ -1,4 +1,22 @@
 packages:
   - 'apps/*'
   - 'packages/*'
-  - 'native/*'
+  # 'native/*' was removed deliberately. The kiaanverse-mobile/native/{kiaan,sakha}-voice/
+  # directories hold Android-only Kotlin source, registered as gradle modules
+  # by the withKiaanSakhaVoicePackages config plugin (apps/mobile/plugins/)
+  # via direct workspace path: ../../../native/{kiaan,sakha}-voice/android.
+  #
+  # They MUST NOT be pnpm workspace packages because:
+  #   • The repo's .npmrc sets shamefully-hoist=true + node-linker=hoisted,
+  #     which forces pnpm to hoist EVERY workspace package into consumers'
+  #     node_modules — even ones never declared as deps.
+  #   • The RN + Expo autolinkers scan node_modules; if they find these
+  #     packages there, they register duplicate gradle modules
+  #     (:kiaanverse_{X}-voice-native) alongside the plugin's correct
+  #     :kiaanverse-{X}-voice-native, producing AGP namespace collision and
+  #     killing :app:compileReleaseKotlin with "Unresolved reference: sakha".
+  #
+  # Removing the glob (combined with deleting the per-directory package.json)
+  # makes them invisible to pnpm — the autolinker has nothing to find.
+  # The plugin still compiles them because gradle reads source from the
+  # workspace-relative path, not from node_modules.
