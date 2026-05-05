@@ -34,8 +34,6 @@
     "@kiaanverse/i18n": "workspace:*",
     "@kiaanverse/store": "workspace:*",
     "@kiaanverse/ui": "workspace:*",
-    "kiaanverse-kiaan-voice-native": "workspace:*",
-    "kiaanverse-sakha-voice-native": "workspace:*",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/netinfo": "^11.3.1",
     "@sentry/react-native": "~5.33.0",

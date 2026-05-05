@@ -1,28 +1,38 @@
 packages:
   - 'apps/*'
   - 'packages/*'
-  - 'native/*'
-  # native/{kiaan,sakha}-voice/ are pnpm workspace packages so pnpm hoists
-  # them into apps/mobile/node_modules/@kiaanverse/. The RN/Expo autolinker
-  # finds them there and registers `:kiaanverse_{X}-voice-native` gradle
-  # modules automatically — we WANT this; it's how the Kotlin sources get
-  # compiled and linked.
+  # native/{kiaan,sakha}-voice/ are NOT pnpm workspace packages.
   #
-  # Earlier PRs (#1687, #1688) tried to PREVENT pnpm from hoisting these
-  # packages, in an attempt to stop the autolinker from registering them.
-  # That approach failed for two compounding reasons:
+  # WHY: When the voice modules were pnpm workspace packages, pnpm with
+  # shamefully-hoist=true + node-linker=hoisted aggressively hoisted them
+  # into apps/mobile/node_modules/. Both RN and Expo autolinkers then found
+  # them there and registered them as gradle modules — but with DIFFERENT
+  # name-mangling strategies:
   #
-  #   1. The repo's .npmrc has shamefully-hoist=true + node-linker=hoisted,
-  #      which keeps creating the symlinks regardless of structural changes.
-  #   2. Even with our changes merged, the EAS build server reused cached
-  #      node_modules and kept finding stale symlinks.
+  #   • RN autolinker:   slash → underscore  (e.g. :kiaanverse_X-voice-native)
+  #   • Expo autolinker: slash → hyphen      (e.g. :kiaanverse-X-voice-native)
   #
-  # The actual root cause was that `withKiaanSakhaVoicePackages` ALSO
-  # registered the same source as `:kiaanverse-{X}-voice-native` (hyphen)
-  # via settings.gradle, creating a duplicate gradle module pointing at
-  # the SAME directory through the symlink. Two modules → AGP namespace
-  # collision → process JAR resources race → build death.
+  # This produced TWO gradle modules pointing at the SAME source through
+  # the pnpm symlink → AGP namespace collision → :app:compileReleaseKotlin
+  # "Unresolved reference: sakha". Killed builds 1–13.
   #
-  # The real fix (PR #1689) removes the plugin's gradle injections and
-  # lets the autolinker own the gradle module. The plugin keeps only the
-  # MainApplication.kt patches.
+  # PR #1696 renamed the packages to unscoped names hoping both autolinkers
+  # would produce identical names. They DO locally, but EAS Build's cached
+  # node_modules from pre-rename builds preserved the OLD @kiaanverse-scoped
+  # symlinks alongside the new ones — same dual-registration, same death.
+  #
+  # PR #1697 added pre/post-install nukes for the @kiaanverse-scoped stale
+  # symlinks — but build #13 STILL showed both module sets, indicating the
+  # nuke either didn't run or pnpm install on EAS recreated some symlinks
+  # in ways we can't reliably control.
+  #
+  # The DEFINITIVE fix: take the voice modules OUT of pnpm's workspace
+  # entirely. Without `native/*` here, pnpm cannot hoist them, cannot create
+  # symlinks for them, and the autolinkers cannot find them in node_modules.
+  # The `withKiaanSakhaVoicePackages` plugin then becomes the SOLE registrant
+  # via direct settings.gradle injection with `projectDir` pointing at
+  # `../../../native/{X}-voice/android` (the workspace path, no symlinks).
+  #
+  # The Kotlin sources at kiaanverse-mobile/native/{kiaan,sakha}-voice/
+  # remain in place — gradle reads them directly through the projectDir
+  # mapping, no node_modules indirection.
