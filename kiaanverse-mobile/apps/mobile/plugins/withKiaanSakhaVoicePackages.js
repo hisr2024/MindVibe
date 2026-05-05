@@ -76,46 +76,59 @@ function addImport(contents, importLine) {
 
 function addPackageRegistration(contents, addLine) {
   if (contents.includes(addLine)) return contents;
-  // Expo SDK 51's MainApplication.kt template (inherited from React Native
-  // 0.74's template) generates:
+  // Expo SDK 51's MainApplication.kt template (post the ReactNativeHostWrapper
+  // injection that Expo prebuild applies on top of the RN 0.74 template) has
+  // the following getPackages body shape:
   //
-  //   override fun getPackages(): List<ReactPackage> =
-  //       PackageList(this).packages.apply {
-  //         // Packages that cannot be autolinked yet can be added manually here, for example:
-  //         // add(MyReactNativePackage())
-  //       }
+  //   override fun getPackages(): List<ReactPackage> {
+  //     // Packages that cannot be autolinked yet can be added manually here, for example:
+  //     // packages.add(new MyReactNativePackage());
+  //     return PackageList(this).packages
+  //   }
   //
-  // We inject `add(SakhaForegroundServicePackage())` inside that .apply{}
-  // block, right after the opening brace and before the placeholder
-  // comment line. The closure receiver in `.apply { ... }` is the
-  // MutableList<ReactPackage>, so `add(...)` resolves to its `add` method.
+  // We need to convert `return PackageList(this).packages` into a form that
+  // lets us insert `add(...)` calls — wrap it in `.apply { ... }`:
   //
-  // The previous regex looked for `val packages = PackageList(this).packages`
-  // which was a different style — that style does NOT appear in the SDK 51
-  // template, so the previous regex silently matched nothing and the
-  // SakhaForegroundServicePackage was never registered. This regex matches
-  // the actual template form.
+  //   return PackageList(this).packages.apply {
+  //     add(SakhaForegroundServicePackage())
+  //   }
+  //
+  // The .apply{} closure receiver is the MutableList<ReactPackage>, so bare
+  // `add(...)` resolves to the list's add method.
+  //
+  // We support three patterns to be resilient to Expo template changes:
+  //   1. Plain `return PackageList(this).packages` (SDK 51 actual)
+  //   2. Existing `PackageList(this).packages.apply { ... }` (RN 0.74 plain)
+  //   3. Older `val packages = PackageList(this).packages` (pre-0.74)
+  // If none match, throw — better to fail prebuild than ship an APK without
+  // SakhaForegroundService registered.
+
+  // Pattern 1: SDK 51 form — `return PackageList(this).packages` (no .apply, no val)
+  // Wrap the return in .apply{ add(...) }
+  const returnMatch = contents.match(/return\s+PackageList\(this\)\.packages\s*$/m);
+  if (returnMatch) {
+    return contents.replace(
+      /return\s+PackageList\(this\)\.packages\s*$/m,
+      `return PackageList(this).packages.apply {\n            ${addLine}\n          }`,
+    );
+  }
+  // Pattern 2: existing .apply{} block — inject inside it
   const applyMatch = contents.match(/PackageList\(this\)\.packages\.apply\s*\{\s*\n/);
   if (applyMatch) {
     const insertAt = applyMatch.index + applyMatch[0].length;
-    const indent = '          ';
-    return contents.slice(0, insertAt) + `${indent}${addLine}\n` + contents.slice(insertAt);
+    return contents.slice(0, insertAt) + `            ${addLine}\n` + contents.slice(insertAt);
   }
-  // Fallback for the older `val packages = ...` style (e.g. if Expo
-  // changes the template in a future SDK or a developer customized
-  // MainApplication.kt manually):
+  // Pattern 3: older `val packages = ...` form — inject after the val
   const valMatch = contents.match(/val\s+packages\s*=\s*PackageList\(this\)\.packages/);
   if (valMatch) {
     const insertAt = valMatch.index + valMatch[0].length;
     return contents.slice(0, insertAt) + `\n          packages.${addLine}` + contents.slice(insertAt);
   }
-  // If neither pattern matches, we cannot proceed silently — fail loudly
-  // so the build surfaces the problem instead of producing an APK that
-  // boots without SakhaForegroundService registered.
   throw new Error(
     '[withKiaanSakhaVoicePackages] Could not find an injection point in ' +
     'MainApplication.kt for `add(SakhaForegroundServicePackage())`. ' +
-    'Expected either `PackageList(this).packages.apply { ... }` or ' +
+    'Expected `return PackageList(this).packages`, ' +
+    '`PackageList(this).packages.apply { ... }`, or ' +
     '`val packages = PackageList(this).packages`. Inspect the prebuild ' +
     'output and update this plugin if Expo changed the template.',
   );
