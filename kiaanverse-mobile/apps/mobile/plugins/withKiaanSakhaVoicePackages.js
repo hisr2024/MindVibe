@@ -1,51 +1,44 @@
 /**
- * withKiaanSakhaVoicePackages — Expo config plugin.
+ * withKiaanSakhaVoicePackages — Expo config plugin (post-PR-#1699).
  *
- * MODEL: pure manual gradle library registration (post-PR-#1698).
+ * MODEL: minimal MainApplication.kt patch only.
  *
- * The voice native modules at kiaanverse-mobile/native/{kiaan,sakha}-voice/
- * are NO LONGER pnpm workspace packages (PR #1698 removed `native/*` from
- * pnpm-workspace.yaml). This means:
+ * After PR #1699 ALL voice native code lives in the SINGLE local Expo
+ * module at `apps/mobile/native/android/`:
  *
- *   • pnpm does not hoist them anywhere — no symlinks in node_modules
- *   • RN autolinker cannot find them (it scans node_modules)
- *   • Expo autolinker cannot find them either (no expo-module.config.json
- *     in their workspace dirs, and not in node_modules anyway)
+ *   apps/mobile/native/android/src/main/java/
+ *     com/kiaanverse/sakha/audio/      ← KiaanAudioPlayerPackage,
+ *                                         SakhaForegroundServicePackage,
+ *                                         + Modules + Service
+ *     com/mindvibe/kiaan/voice/        ← KiaanVoicePackage + Manager + ML
+ *     com/mindvibe/kiaan/voice/sakha/  ← SakhaVoicePackage + Manager + SSE
  *
- * This plugin is therefore the SOLE registrant of the voice gradle modules
- * AND the SOLE registrant of their ReactPackage classes in MainApplication.
+ * The local module's `expo-module.config.json` registers
+ * `com.kiaanverse.sakha.audio.KiaanAudioPlayerPackage` as an Expo Module,
+ * which causes the Expo autolinker to:
+ *   • Compile the module's gradle subproject (one project, one AAR with
+ *     all voice Kotlin classes inside)
+ *   • Add KiaanAudioPlayerPackage to the generated ExpoModulesPackageList
  *
- * Three injections per build:
+ * The other three voice ReactPackages (KiaanVoicePackage, SakhaVoicePackage,
+ * SakhaForegroundServicePackage) are regular RN-style ReactPackages, NOT
+ * Expo Modules. The autolinker ignores them. This plugin patches
+ * MainApplication.kt to add the three `add(...)` calls inside
+ * `PackageList(this).packages.apply { ... }` so they get registered at
+ * runtime alongside everything else in PackageList.
  *
- *   1. withSettingsGradle — appends:
- *        include ':kiaanverse-kiaan-voice-native', ':kiaanverse-sakha-voice-native'
- *        project(':kiaanverse-kiaan-voice-native').projectDir = file(...)
- *        project(':kiaanverse-sakha-voice-native').projectDir = file(...)
- *      The relative path is resolved from the host android/ folder
- *      (apps/mobile/android/), going up three levels to the kiaanverse-mobile
- *      root and then into native/{X}-voice/android/.
+ * No more workspace-package gradle module registration:
  *
- *   2. withAppBuildGradle — appends a fresh `dependencies { ... }` block
- *      with `implementation project(':kiaanverse-{kiaan,sakha}-voice-native')`
- *      so :app sees the two AARs at compile time. Multiple `dependencies { }`
- *      blocks in one build.gradle are additive in Gradle, so this never
- *      collides with the autolinker's block (which doesn't include voice
- *      anyway since the autolinker can't see them).
- *
- *   3. withMainApplication — injects three imports and matching
- *      `add(...)` calls inside `PackageList(this).packages.apply { ... }`
- *      so the host app instantiates the ReactPackage classes at runtime:
- *        com.mindvibe.kiaan.voice.KiaanVoicePackage
- *        com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage
- *        com.kiaanverse.sakha.audio.SakhaForegroundServicePackage
- *
- *      The third package (SakhaForegroundServicePackage) lives in the
- *      LOCAL gradle module at apps/mobile/native/android/, which IS still
- *      autolinked through that module's expo-module.config.json (which
- *      ships KiaanAudioPlayerPackage as an Expo Module). We need the
- *      add() line for the foreground-service package because it's a
- *      regular ReactPackage, not an Expo Module — the autolinker's
- *      generated PackageList doesn't auto-instantiate it.
+ *   • PR #1699 deleted `kiaanverse-mobile/native/{kiaan,sakha}-voice/`
+ *   • No more `:kiaanverse-{kiaan,sakha}-voice-native` gradle modules
+ *   • No more `:kiaanverse_{kiaan,sakha}-voice-native` (autolinker name
+ *     for cached @kiaanverse-scoped pre-#1696 symlinks) — even if EAS's
+ *     cache resurrects that symlink, RN autolinker would find a broken
+ *     link (no target dir) and skip it
+ *   • The plugin no longer needs `withSettingsGradle` or
+ *     `withAppBuildGradle` — those PRs (#1689, #1698) restored and removed
+ *     them several times chasing the duplicate-registration bug. With the
+ *     workspace dirs physically gone, there's nothing to register.
  *
  * MainApplication.kt template handling: Expo SDK 51's prebuild generates
  *
@@ -54,18 +47,13 @@
  *     return PackageList(this).packages
  *   }
  *
- * (no .apply{} block, no `val packages = ...`). We rewrite the return
- * to wrap in `.apply { add(...) }` so all three add() calls land inside
- * the closure where the receiver is the MutableList<ReactPackage>.
+ * (no .apply{} block). We rewrite the return to wrap in
+ * `.apply { add(...) }` for all three voice ReactPackages.
  *
  * Idempotent — re-running prebuild does not duplicate any line.
  */
 
-const {
-  withMainApplication,
-  withAppBuildGradle,
-  withSettingsGradle,
-} = require('@expo/config-plugins');
+const { withMainApplication } = require('@expo/config-plugins');
 
 const KIAAN_IMPORT = 'import com.mindvibe.kiaan.voice.KiaanVoicePackage';
 const SAKHA_IMPORT = 'import com.mindvibe.kiaan.voice.sakha.SakhaVoicePackage';
@@ -73,27 +61,6 @@ const FG_IMPORT = 'import com.kiaanverse.sakha.audio.SakhaForegroundServicePacka
 const KIAAN_ADD = 'add(KiaanVoicePackage())';
 const SAKHA_ADD = 'add(SakhaVoicePackage())';
 const FG_ADD = 'add(SakhaForegroundServicePackage())';
-
-/** Gradle module entries we register. `name` is the gradle project name
- *  (used in `:<name>` references), `dir` is the relative path from the
- *  host app's android/ folder (where settings.gradle lives) to the
- *  workspace module's android/ folder. */
-const WORKSPACE_MODULES = [
-  {
-    name: 'kiaanverse-kiaan-voice-native',
-    dir: '../../../native/kiaan-voice/android',
-  },
-  {
-    name: 'kiaanverse-sakha-voice-native',
-    dir: '../../../native/sakha-voice/android',
-  },
-];
-
-/** Idempotent markers so re-running prebuild doesn't duplicate lines. */
-const SETTINGS_MARKER = '// kiaanverse-voice-native-modules:start';
-const SETTINGS_MARKER_END = '// kiaanverse-voice-native-modules:end';
-const APP_GRADLE_MARKER = '// kiaanverse-voice-native-deps:start';
-const APP_GRADLE_MARKER_END = '// kiaanverse-voice-native-deps:end';
 
 function addImport(contents, importLine) {
   if (contents.includes(importLine)) return contents;
@@ -106,11 +73,9 @@ function addImport(contents, importLine) {
 }
 
 function addAllPackageRegistrations(contents, addLines) {
-  // Skip if all already present.
   if (addLines.every((line) => contents.includes(line))) return contents;
 
   // Pattern 1: SDK 51 form — `return PackageList(this).packages`
-  // Wrap in .apply{ add(...); add(...); ... }
   const returnMatch = contents.match(/return\s+PackageList\(this\)\.packages\s*$/m);
   if (returnMatch) {
     const adds = addLines
@@ -123,7 +88,7 @@ function addAllPackageRegistrations(contents, addLines) {
     );
   }
 
-  // Pattern 2: existing .apply{} block — inject inside it.
+  // Pattern 2: existing .apply{} block.
   const applyMatch = contents.match(/PackageList\(this\)\.packages\.apply\s*\{\s*\n/);
   if (applyMatch) {
     const insertAt = applyMatch.index + applyMatch[0].length;
@@ -150,71 +115,11 @@ function addAllPackageRegistrations(contents, addLines) {
     'MainApplication.kt for voice ReactPackage add() calls. ' +
     'Expected `return PackageList(this).packages`, ' +
     '`PackageList(this).packages.apply { ... }`, or ' +
-    '`val packages = PackageList(this).packages`. Inspect the prebuild ' +
-    'output and update this plugin if Expo changed the template.',
+    '`val packages = PackageList(this).packages`.',
   );
 }
 
-/**
- * Append `include ':...'` and `project(':...').projectDir = file('...')`
- * to settings.gradle. Idempotent via SETTINGS_MARKER.
- */
-function appendSettingsGradleIncludes(contents) {
-  if (contents.includes(SETTINGS_MARKER)) return contents;
-  const lines = [
-    '',
-    SETTINGS_MARKER,
-    '// Voice native modules (kiaanverse-mobile/native/{kiaan,sakha}-voice/)',
-    '// are NOT pnpm workspace packages and NOT autolinked by anything.',
-    '// We register them here as pure gradle library modules. Sources are',
-    '// at the workspace path; gradle reads them directly via projectDir.',
-    `include ${WORKSPACE_MODULES.map((m) => `':${m.name}'`).join(', ')}`,
-    ...WORKSPACE_MODULES.map(
-      (m) => `project(':${m.name}').projectDir = new File(rootProject.projectDir, '${m.dir}')`,
-    ),
-    SETTINGS_MARKER_END,
-    '',
-  ];
-  return contents.replace(/\s*$/, '\n') + lines.join('\n') + '\n';
-}
-
-/**
- * Append a fresh `dependencies { ... }` block with the workspace
- * project deps. Gradle merges multiple dependencies blocks additively.
- * Idempotent via APP_GRADLE_MARKER.
- */
-function appendGradleDependencies(contents) {
-  if (contents.includes(APP_GRADLE_MARKER)) return contents;
-  const lines = [
-    '',
-    APP_GRADLE_MARKER,
-    '// Voice native modules registered manually by',
-    '// withKiaanSakhaVoicePackages.js — see settings.gradle injection above.',
-    'dependencies {',
-    ...WORKSPACE_MODULES.map((m) => `    implementation project(':${m.name}')`),
-    '}',
-    APP_GRADLE_MARKER_END,
-    '',
-  ];
-  return contents.replace(/\s*$/, '\n') + lines.join('\n') + '\n';
-}
-
 const withKiaanSakhaVoicePackages = (config) => {
-  // 1. settings.gradle — register the two voice gradle modules.
-  config = withSettingsGradle(config, (cfg) => {
-    if (cfg.modResults.language !== 'groovy') return cfg;
-    cfg.modResults.contents = appendSettingsGradleIncludes(cfg.modResults.contents);
-    return cfg;
-  });
-
-  // 2. app/build.gradle — add `implementation project(...)` deps.
-  config = withAppBuildGradle(config, (cfg) => {
-    if (cfg.modResults.language !== 'groovy') return cfg;
-    cfg.modResults.contents = appendGradleDependencies(cfg.modResults.contents);
-    return cfg;
-  });
-
-  // 3. MainApplication.kt — inject imports + add() calls.
   config = withMainApplication(config, (cfg) => {
     if (cfg.modResults.language !== 'kt') return cfg;
     let contents = cfg.modResults.contents;

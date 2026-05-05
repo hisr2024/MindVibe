@@ -1,13 +1,43 @@
-// KiaanAudioPlayer — local Android module.
+// Local Android module for ALL Kiaan/Sakha native code (PR #1699).
 //
-// Built as part of `eas build --profile production --platform android`
-// (the .aab build path the user confirmed). The Expo autolinker
-// discovers this via expo-module.config.json and includes it in the
-// generated settings.gradle automatically.
+// Hosts:
+//   • KiaanAudioPlayer + SakhaForegroundService (Media3 audio backbone)
+//   • Kiaan Voice tier-1 (KiaanVoiceManager, KiaanComputeTrinity NPU/GPU/CPU
+//     router, KiaanWakeWordDetector, KiaanEngineOrchestrator, KiaanVoicePackage).
+//     Sources at src/main/java/com/mindvibe/kiaan/voice/.
+//   • Sakha persona voice (SakhaVoiceManager, SakhaSseClient, SakhaTtsPlayer,
+//     SakhaPauseParser, SakhaPersonaGuard, SakhaVoiceModule, SakhaVoicePackage,
+//     SakhaWakeWordDetector, SakhaDictation, SakhaVerseReader, WakeWordMatcher).
+//     Sources at src/main/java/com/mindvibe/kiaan/voice/sakha/.
+//
+// Why one gradle module instead of three?
+//
+// PRs #1685–#1698 chased the "Unresolved reference: sakha" / namespace
+// collision through every layer (workspace deps, autolinker name mangling,
+// pre/post-install symlink nukes). Build #14 STILL failed because EAS
+// Build's caches preserved real `node_modules/@kiaanverse/{kiaan,sakha}-
+// voice-native/` directories from pre-PR-#1696 builds, with stale package
+// .json files that RN autolinker kept registering as the underscore form
+// `:kiaanverse_{X}-voice-native` alongside the plugin's hyphen-form
+// `:kiaanverse-{X}-voice-native` — same source through symlink, AGP
+// namespace collision, build dies the same way every time.
+//
+// PR #1699 cuts the Gordian knot: physically delete `kiaanverse-mobile/
+// native/{kiaan,sakha}-voice/` and merge ALL voice Kotlin into THIS
+// module. Now there is exactly ONE gradle module compiling ALL voice
+// classes. No workspace voice modules exist for any cache to resurrect.
+// The plugin only patches MainApplication.kt to register the runtime
+// ReactPackages — it no longer needs withSettingsGradle.
 //
 // AndroidX Media3 ExoPlayer is the audio backbone (replaces the old
-// com.google.android.exoplayer2 namespace). Visualizer is in the
-// platform — no extra dep needed.
+// com.google.android.exoplayer2 namespace). TFLite + kotlinx-coroutines
+// + okhttp added for the merged voice modules.
+//
+// Multiple Kotlin packages in one Android library: the AAR's `namespace`
+// (com.kiaanverse.sakha.audio) is only for R/BuildConfig generation.
+// Kotlin source files declare any `package` (com.mindvibe.kiaan.voice.*,
+// com.kiaanverse.sakha.audio) and all compile into the same AAR. R8 keep
+// rules in app.config.ts reference all three top-level packages.
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
@@ -16,6 +46,9 @@ group = 'com.kiaanverse.sakha'
 version = '1.0.0'
 
 def MEDIA3_VERSION = '1.4.1'
+def TFLITE_VERSION = '2.14.0'
+def COROUTINES_VERSION = '1.7.3'
+def OKHTTP_VERSION = '4.12.0'
 
 android {
     namespace 'com.kiaanverse.sakha.audio'
@@ -63,6 +96,22 @@ dependencies {
     implementation "androidx.media3:media3-datasource:${MEDIA3_VERSION}"
     implementation "androidx.media3:media3-common:${MEDIA3_VERSION}"
     implementation "androidx.media3:media3-session:${MEDIA3_VERSION}"
+
+    // Kotlin coroutines — used by KiaanVoiceManager state machine,
+    // KiaanComputeTrinity dispatcher routing, KiaanWakeWordDetector
+    // recording loop, KiaanEngineOrchestrator parallel inference,
+    // SakhaVoiceManager state machine, SakhaSseClient streaming.
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${COROUTINES_VERSION}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${COROUTINES_VERSION}"
+
+    // TensorFlow Lite — KiaanWakeWordDetector loads kiaan_wakeword.tflite
+    // and runs inference. NnApiDelegate (NPU) lives in the main artifact
+    // since TFLite 2.0+; GpuDelegate is a separate artifact.
+    implementation "org.tensorflow:tensorflow-lite:${TFLITE_VERSION}"
+    implementation "org.tensorflow:tensorflow-lite-gpu:${TFLITE_VERSION}"
+
+    // OkHttp — SakhaSseClient streams from /api/voice-companion/message.
+    implementation "com.squareup.okhttp3:okhttp:${OKHTTP_VERSION}"
 
     // Foreground service notification compat
     implementation 'androidx.core:core-ktx:1.13.1'
