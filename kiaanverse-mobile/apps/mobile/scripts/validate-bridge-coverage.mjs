@@ -40,10 +40,9 @@
  *   1 — at least one drift, with a diagnostic
  */
 
-import { readFileSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -51,6 +50,43 @@ const APP_ROOT = resolve(__dirname, '..');
 const NATIVE_ROOT = resolve(APP_ROOT, 'native/android/src/main/java');
 const TS_ROOT = resolve(APP_ROOT, 'voice');
 const PLUGIN_PATH = resolve(APP_ROOT, 'plugins/withKiaanSakhaVoicePackages.js');
+
+/**
+ * Pure-Node recursive file walker. Returns absolute paths of every file
+ * under `root` for which `predicate(absolutePath)` is true.
+ *
+ * Replaces a previous `execSync('find ...')` shell-out that CodeQL
+ * flagged (correctly) as shell-injection-fragile. The values being
+ * interpolated were derived from `__dirname` and constants, so not
+ * actually exploitable, but the pattern is still unsafe to leave around
+ * (a future edit could pass a user-supplied path through it). Avoiding
+ * shell-out entirely also makes the script Windows-compatible without
+ * relying on a `find` binary on PATH.
+ */
+function walkDir(root, predicate) {
+  const results = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      // Directory may have disappeared mid-walk (e.g., gradle build/
+      // output churning) — skip silently and keep going.
+      continue;
+    }
+    for (const entry of entries) {
+      const full = resolve(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(full);
+      } else if (entry.isFile() && predicate(full)) {
+        results.push(full);
+      }
+    }
+  }
+  return results;
+}
 
 // ─── 1. Discover Kotlin @ReactMethod declarations ───────────────────────
 //
@@ -60,24 +96,12 @@ const PLUGIN_PATH = resolve(APP_ROOT, 'plugins/withKiaanSakhaVoicePackages.js');
 function findKotlinModuleMethods() {
   // Find module files that contain `override fun getName()`. Each is a
   // module class — look for NAME = "X" + every @ReactMethod-tagged fun.
-  const kotlinFiles = execFileSync(
-    'find',
-    [
-      NATIVE_ROOT,
-      '-name',
-      '*.kt',
-      '-exec',
-      'grep',
-      '-l',
-      'override fun getName',
-      '{}',
-      '+',
-    ],
-    { encoding: 'utf-8' },
-  )
-    .trim()
-    .split('\n')
-    .filter(Boolean);
+  const kotlinFiles = walkDir(
+    NATIVE_ROOT,
+    (p) =>
+      p.endsWith('.kt') &&
+      readFileSync(p, 'utf-8').includes('override fun getName'),
+  );
 
   const modules = {}; // { "SakhaVoice": Set("initialize", "activate", ...) }
 
@@ -120,13 +144,10 @@ function findJsCallsites() {
   // local variable to `NativeModules.<X>`, then within the same file
   // find every `<localname>.<m>(` call. Also catch direct
   // `NativeModules.<X>.<m>(` calls.
-  const tsFiles = execSync(
-    `find ${TS_ROOT} -name "*.ts" -o -name "*.tsx"`,
-    { encoding: 'utf-8' },
-  )
-    .trim()
-    .split('\n')
-    .filter(Boolean);
+  const tsFiles = walkDir(
+    TS_ROOT,
+    (p) => p.endsWith('.ts') || p.endsWith('.tsx'),
+  );
 
   const callsites = []; // [{ moduleName, methodName, file }]
 
@@ -198,13 +219,7 @@ function findPackageToModuleMap() {
   // For each *Package.kt file, find its `createNativeModules` body and
   // extract the Module class it instantiates. That gives us the
   // Package → Module mapping the plugin's add() calls implicitly rely on.
-  const packageFiles = execSync(
-    `find ${NATIVE_ROOT} -name "*Package.kt"`,
-    { encoding: 'utf-8' },
-  )
-    .trim()
-    .split('\n')
-    .filter(Boolean);
+  const packageFiles = walkDir(NATIVE_ROOT, (p) => p.endsWith('Package.kt'));
 
   const map = {}; // PackageClassName → ModuleClassName | null
   for (const file of packageFiles) {
@@ -310,13 +325,10 @@ function main() {
       })
     ];
     // Find the NAME for this Module class
-    const moduleFiles = execSync(
-      `find ${NATIVE_ROOT} -name "${moduleName}.kt"`,
-      { encoding: 'utf-8' },
-    )
-      .trim()
-      .split('\n')
-      .filter(Boolean);
+    const moduleFiles = walkDir(
+      NATIVE_ROOT,
+      (p) => basename(p) === `${moduleName}.kt`,
+    );
     if (moduleFiles.length === 0) {
       report(
         false,
@@ -347,13 +359,10 @@ function main() {
   for (const pkgName of pluginPackages) {
     const moduleName = packageToModule[pkgName];
     if (!moduleName) continue;
-    const moduleFiles = execSync(
-      `find ${NATIVE_ROOT} -name "${moduleName}.kt"`,
-      { encoding: 'utf-8' },
-    )
-      .trim()
-      .split('\n')
-      .filter(Boolean);
+    const moduleFiles = walkDir(
+      NATIVE_ROOT,
+      (p) => basename(p) === `${moduleName}.kt`,
+    );
     if (moduleFiles.length === 0) continue;
     const moduleSrc = readFileSync(moduleFiles[0], 'utf-8');
     const nameMatch = moduleSrc.match(/const\s+val\s+NAME\s*=\s*"([^"]+)"/);
