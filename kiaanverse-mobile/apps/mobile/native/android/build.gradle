@@ -108,8 +108,19 @@ dependencies {
     // React Native core — provided by the host app at link time
     implementation 'com.facebook.react:react-native:+'
 
-    // Expo modules core for autolinking
-    implementation 'expo.modules:expomodulescore:+'
+    // (No expo-modules-core dep — verified by grep that no Kotlin source
+    // in this module imports expo.modules.*. The four packages here
+    // (KiaanAudioPlayerPackage, KiaanVoicePackage, SakhaVoicePackage,
+    // SakhaForegroundServicePackage) are plain RN ReactPackage subclasses,
+    // not Expo Modules. Build #17 failed because the previous
+    // `implementation 'expo.modules:expomodulescore:+'` line tried to
+    // resolve expo-modules-core as a published Maven artifact — but it
+    // isn't published; it's an autolinked gradle subproject
+    // `:expo-modules-core`. The dep was leftover from when this module
+    // was briefly meant to register itself via `expo-module.config.json`
+    // (deleted in PR #1700). If a future change introduces an Expo Module
+    // here, re-add as `implementation project(':expo-modules-core')`,
+    // NOT as a Maven coordinate.)
 
     // AndroidX Media3 — the audio pipeline. ExoPlayer + DataSource +
     // ProgressiveMediaSource. Locked to 1.4.x (Sakha tested against
