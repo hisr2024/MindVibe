@@ -55,6 +55,21 @@ jobs:
         working-directory: kiaanverse-mobile
         run: pnpm install --frozen-lockfile
 
+      - name: Validate Expo config plugins + frame contracts (pre-flight)
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Run all five offline validators BEFORE handing off to EAS.
+        # Production builds are tag-triggered and submit to the Play
+        # Store on success — a plugin regression that ships costs an
+        # entire release-candidate cycle. Each validator runs in <1s
+        # with zero network calls; failure exits non-zero and aborts
+        # the workflow before `eas build` is ever invoked.
+        run: |
+          node scripts/validate-plugins.mjs
+          node scripts/validate-voice-plugin.mjs
+          node scripts/validate-wss-types.mjs
+          node scripts/validate-tool-contracts.mjs
+          node scripts/test-pure-helpers.mjs
+
       - name: Setup EAS CLI
         run: npm install -g eas-cli
 

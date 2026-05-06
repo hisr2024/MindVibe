@@ -22,6 +22,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint app/ components/ hooks/ services/ utils/",
     "test": "jest --passWithNoTests",
+    "validate:plugins": "node scripts/validate-plugins.mjs && node scripts/validate-voice-plugin.mjs && node scripts/validate-wss-types.mjs && node scripts/validate-tool-contracts.mjs && node scripts/test-pure-helpers.mjs",
     "format:check": "prettier --check \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"utils/**/*.{ts,tsx}\"",
     "clean": "rm -rf .expo dist node_modules/.cache",
     "postinstall": "node ./scripts/patch-expo-modules-core.js",
