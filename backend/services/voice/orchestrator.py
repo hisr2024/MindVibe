@@ -204,17 +204,25 @@ class VoiceCompanionOrchestrator:
 
             # Cache lookup before LLM call. Hit ⇒ stream cached audio,
             # skip LLM + filter + TTS synth entirely.
-            cached_chunks, cache_hit, tts_decision = await self._tts.synthesize_with_cache(
-                text="",  # placeholder; only used on miss path below
-                lang_hint=ctx.lang_hint,
-                verse_refs=verse_refs,
-                mood_label=mood_label,
-                render_mode=ctx.render_mode,
-                persona_version=ctx.persona_version,
-            ) if False else (None, False, self._tts.decide(ctx.lang_hint))
-            # We can't use synthesize_with_cache without a text yet — manually
-            # check the cache, then either stream cached chunks OR run the
-            # LLM and synthesize fresh.
+            #
+            # We can't use `tts.synthesize_with_cache(text=...)` here
+            # because we don't have the text yet — that's the LLM's job.
+            # The cache key is keyed off (verse_refs, mood, render_mode,
+            # voice_id, persona_version) — none of which depend on the
+            # specific text — so we can do a manual cache lookup BEFORE
+            # the LLM call. On a hit we skip LLM + filter + TTS entirely
+            # (the canonical voice for "same retrieved verse + same
+            # mood + same lang" is already cached). On a miss we run
+            # the LLM, filter the streamed deltas, synthesize each
+            # passing sentence, and cache the resulting audio for next
+            # time.
+            #
+            # Until 2025-11 this expression had a `if False else (...)`
+            # ternary that ALWAYS fell through to the else branch but
+            # made it look like the awaited synthesize_with_cache was
+            # active. Cleaned up below — same runtime behavior, no
+            # confusing dead code path.
+            tts_decision = self._tts.decide(ctx.lang_hint)
             from backend.services.voice.tts_router import AudioCache
             cache_key = AudioCache.build_key(
                 verse_refs=verse_refs,
@@ -225,6 +233,11 @@ class VoiceCompanionOrchestrator:
                 persona_version=ctx.persona_version,
             )
             cached_chunks = self._tts.cache.get(cache_key)
+            # Default cache_hit to False; the hit-branch below flips it
+            # to True. Previously this was initialized as part of the
+            # `if False else (...)` tuple unpack that was removed in
+            # the dead-code cleanup.
+            cache_hit = False
 
             first_byte_ms: int | None = None
             sentences_emitted = 0

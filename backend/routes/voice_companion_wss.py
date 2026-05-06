@@ -283,11 +283,40 @@ async def _audio_intake_loop(
 
         if isinstance(frame, ClientAudioChunkFrame):
             stt = await session.ensure_stt()
-            with contextlib.suppress(Exception):
+            try:
                 async for ev in stt.feed_audio_chunk(seq=frame.seq, opus_b64=frame.data):
                     await _emit_partial_and_scan(
                         ws, session, ev, crisis_event=crisis_event,
                     )
+            except Exception as stt_err:
+                # The previous shape `with contextlib.suppress(Exception):`
+                # swallowed every STT exception silently. That made
+                # production failures invisible: when Sarvam returned an
+                # auth error / rate limit / network timeout / malformed
+                # audio response, the client saw NO transcript and NO
+                # error. The user perceived "voice not working" with
+                # nothing in the UI to diagnose, and the only signal was
+                # buried in server logs that mobile users can't see.
+                #
+                # Now: log the exception with the seq number for
+                # correlation with the client's audio.chunk frames, AND
+                # emit a recoverable ServerErrorFrame so the mobile
+                # client can render the cause in the bottomBar errorText
+                # (which already displays lastError + startError). The
+                # session continues — the next audio.chunk re-tries STT,
+                # so a transient blip doesn't kill the whole turn.
+                logger.error(
+                    "voice.wss.stt.feed_audio_chunk seq=%d err=%s",
+                    frame.seq,
+                    stt_err,
+                    exc_info=True,
+                )
+                await _send_error(
+                    ws,
+                    "STT_FAILURE",
+                    f"Speech recognition failed: {stt_err}",
+                    recoverable=True,
+                )
             continue
 
         # ClientStartFrame mid-session → protocol violation

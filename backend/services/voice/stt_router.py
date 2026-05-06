@@ -219,6 +219,16 @@ _SARVAM_STT_LANG_CODE: dict[str, str] = {
     "kn": "kn-IN",
     "ml": "ml-IN",
     "hi-en": "hi-IN",
+    # English support — Sarvam Saarika accepts en-IN as a recognized
+    # locale. Adding these here lets the router fall back to Sarvam
+    # for English when KIAAN_DEEPGRAM_API_KEY is not configured,
+    # rather than dropping to mock STT (which produces canned text
+    # and makes the user perceive "voice not working" because Sakha
+    # is responding to fabricated transcripts).
+    "en": "en-IN",
+    "en-in": "en-IN",
+    "en-us": "en-IN",
+    "en-gb": "en-IN",
 }
 
 
@@ -446,6 +456,24 @@ class STTRouter:
             return STTRouterDecision(
                 provider_name=deepgram.name,
                 reason=f"non-indic lang {lang_hint!r} → Deepgram Nova-3",
+                fell_back_to_mock=False,
+            )
+        # Deepgram not configured — try Sarvam as a secondary English
+        # path. Sarvam Saarika accepts en-IN and produces usable English
+        # transcripts (lower quality than Deepgram Nova-3 for accented
+        # English but vastly better than the silent mock fallback). This
+        # collapses the deployment requirement: a project with a single
+        # KIAAN_SARVAM_API_KEY now covers English STT in addition to the
+        # 9 Indic languages, instead of forcing the operator to also
+        # provision a Deepgram subscription.
+        sarvam_for_english = SarvamSTTProvider()
+        if sarvam_for_english.is_configured():
+            return STTRouterDecision(
+                provider_name=sarvam_for_english.name,
+                reason=(
+                    f"non-indic lang {lang_hint!r} → Sarvam Saarika "
+                    "(Deepgram not configured)"
+                ),
                 fell_back_to_mock=False,
             )
         return STTRouterDecision(
