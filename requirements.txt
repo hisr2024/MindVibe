@@ -1,5 +1,5 @@
 # FastAPI & Web
-fastapi>=0.100.0,<1.0.0
+fastapi>=0.136.1,<1.0.0
 uvicorn>=0.22.0,<0.45.0
 python-multipart>=0.0.5,<0.0.27
 httpx>=0.28.1,<0.29.0
