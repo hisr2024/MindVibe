@@ -1,4 +1,22 @@
-// Local Android module for ALL Kiaan/Sakha native code (PR #1699).
+// Local Android library for ALL Kiaan/Sakha native code (PR #1699 / #1700).
+//
+// IMPORTANT — REGISTRATION MODEL: this module is MANUALLY registered by
+// `apps/mobile/plugins/withKiaanSakhaVoicePackages.js`, NOT by any
+// autolinker. The plugin patches:
+//   • android/settings.gradle      — `include ':kiaan-voice-native'`
+//                                     + projectDir → `../native/android`
+//   • android/app/build.gradle     — `implementation project(':kiaan-voice-native')`
+//   • MainApplication.kt           — imports + add() calls for the four
+//                                     ReactPackages exported below.
+// There is NO `expo-module.config.json` and NO `package.json` — those
+// were removed in PR #1700 because they implied autolinker discovery
+// that never happened (build #16 confirmed: this directory was missed
+// by every autolinker because it lives in-tree, not under node_modules,
+// and the previous structure didn't match Expo's expected
+// <root>/expo-module.config.json + <root>/android/build.gradle layout).
+// If you ever want to convert this back to an autolinked Expo module,
+// you must restructure the directory AND add `searchPaths` to
+// `expo.autolinking` — restoring just the config alone will not work.
 //
 // Hosts:
 //   • KiaanAudioPlayer + SakhaForegroundService (Media3 audio backbone)
@@ -22,12 +40,16 @@
 // `:kiaanverse-{X}-voice-native` — same source through symlink, AGP
 // namespace collision, build dies the same way every time.
 //
-// PR #1699 cuts the Gordian knot: physically delete `kiaanverse-mobile/
+// PR #1699 cut the Gordian knot: physically delete `kiaanverse-mobile/
 // native/{kiaan,sakha}-voice/` and merge ALL voice Kotlin into THIS
-// module. Now there is exactly ONE gradle module compiling ALL voice
-// classes. No workspace voice modules exist for any cache to resurrect.
-// The plugin only patches MainApplication.kt to register the runtime
-// ReactPackages — it no longer needs withSettingsGradle.
+// module. PR #1700 then made the plugin do the autolinker's work
+// manually (settings + app/build + MainApplication patches in one pass)
+// after build #16 proved the prior "let Expo autolinker pick it up"
+// model didn't fire because this directory isn't in node_modules. Now
+// there is exactly ONE gradle module compiling ALL voice classes AND a
+// deterministic, single-source registration path. The new in-tree
+// directory is invisible to both autolinkers, so the plugin's manual
+// injection cannot collide with anything.
 //
 // AndroidX Media3 ExoPlayer is the audio backbone (replaces the old
 // com.google.android.exoplayer2 namespace). TFLite + kotlinx-coroutines
