@@ -290,6 +290,155 @@ function countOccurrences(haystack, needle) {
   }
 }
 
+// ─── 5. Realistic plugin-chain fixtures ─────────────────────────────────
+//
+// The fixtures above are pristine SDK 51 defaults. On real EAS Build the
+// plugin chain runs in this order:
+//   with-expo-modules-core-patch → with-track-player-android →
+//   withKiaanForegroundService → withKiaanAudioFocus → withPicovoice →
+//   withKiaanSakhaVoicePackages → expo-router → expo-build-properties → ...
+//
+// withPicovoice patches `app/build.gradle` BEFORE our plugin runs (ABI
+// splits appended at EOF + KIAAN_PICOVOICE_ACCESS_KEY into defaultConfig).
+// withTrackPlayerAndroid and the Foreground/AudioFocus plugins don't touch
+// the three files our plugin patches, so they're inert from our POV.
+//
+// These fixtures exercise the plugin against MORE-realistic input,
+// catching regressions that pristine fixtures miss — e.g., a regex that
+// accidentally matches a Picovoice line, or a comment-aware injection
+// point that breaks when other plugins' comments are present.
+
+const APP_BUILD_GRADLE_AFTER_PICOVOICE = `apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+
+react {
+}
+
+android {
+    namespace 'com.kiaanverse.app'
+    defaultConfig {
+        applicationId 'com.kiaanverse.app'
+        versionCode 1
+        // Picovoice access key — injected by withPicovoice
+        buildConfigField "String", "KIAAN_PICOVOICE_ACCESS_KEY", "\\"\\""
+    }
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+}
+
+apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
+applyNativeModulesAppBuildGradle(project)
+
+// Picovoice ABI splits — sakha
+android {
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            universalApk false
+        }
+    }
+}
+`;
+
+const MAIN_APP_WITH_EXISTING_APPLY = `package com.kiaanverse.app
+
+import android.app.Application
+import com.facebook.react.PackageList
+import com.facebook.react.ReactApplication
+import com.facebook.react.ReactNativeHost
+import com.facebook.react.ReactPackage
+import com.example.SomeOtherPackage
+
+class MainApplication : Application(), ReactApplication {
+  override val reactNativeHost: ReactNativeHost = object : DefaultReactNativeHost(this) {
+    override fun getPackages(): List<ReactPackage> {
+      return PackageList(this).packages.apply {
+            add(SomeOtherPackage())
+          }
+    }
+  }
+}
+`;
+
+// Test 5a: Plugin runs cleanly on app/build.gradle after Picovoice
+{
+  const once = patchAppBuildGradle(APP_BUILD_GRADLE_AFTER_PICOVOICE);
+  check(
+    'realistic: app/build.gradle injection survives Picovoice ABI splits',
+    once.includes(APP_DEP_LINE) &&
+      once.includes('KIAAN_PICOVOICE_ACCESS_KEY') &&
+      once.includes('include \'armeabi-v7a\''),
+    'lost the Picovoice content or failed to inject our dep',
+  );
+  check(
+    'realistic: dep line injected exactly ONCE (no double-match against Picovoice)',
+    countOccurrences(once, APP_DEP_LINE) === 1,
+    `found ${countOccurrences(once, APP_DEP_LINE)} copies — regex matched a Picovoice line?`,
+  );
+}
+
+// Test 5b: Plugin merges into pre-existing apply{} block from another plugin
+{
+  let once = addAllImports(MAIN_APP_WITH_EXISTING_APPLY);
+  once = addAllPackageRegistrations(once);
+
+  for (const addLine of ADD_LINES) {
+    check(
+      `realistic: "${addLine}" merged into existing apply{} block`,
+      once.includes(addLine),
+      'add() call not injected into pre-existing block',
+    );
+  }
+  check(
+    'realistic: pre-existing add(SomeOtherPackage()) preserved',
+    once.includes('add(SomeOtherPackage())'),
+    'wiped out the other plugin\'s registration',
+  );
+  check(
+    'realistic: still exactly ONE apply{} block (not nested or doubled)',
+    countOccurrences(once, '.packages.apply') === 1,
+    `found ${countOccurrences(once, '.packages.apply')} apply blocks`,
+  );
+  // Idempotency on the merged-block case: critical because real prebuild
+  // can run multiple times within a single EAS build (clean → install →
+  // patch → re-patch on retry).
+  let twice = addAllImports(once);
+  twice = addAllPackageRegistrations(twice);
+  for (const addLine of ADD_LINES) {
+    check(
+      `realistic: "${addLine}" idempotent on merged-block re-run`,
+      countOccurrences(twice, addLine) === 1,
+      `found ${countOccurrences(twice, addLine)} copies — non-idempotent`,
+    );
+  }
+}
+
+// Test 5c: Settings.gradle that already has another local include (not
+//   ours — testing that our injection doesn't disrupt sibling modules).
+{
+  const SETTINGS_WITH_OTHER_LOCAL_MODULE = FAKE_SETTINGS_GRADLE.replace(
+    "include ':app'",
+    "include ':app'\n\ninclude ':some-other-local-module'\nproject(':some-other-local-module').projectDir = new File(rootProject.projectDir, '../some-other')",
+  );
+  const once = patchSettingsGradle(SETTINGS_WITH_OTHER_LOCAL_MODULE);
+  check(
+    'realistic: our include preserves a sibling local-module include',
+    once.includes(SETTINGS_INCLUDE) &&
+      once.includes("include ':some-other-local-module'"),
+    'wiped or shadowed the sibling include',
+  );
+  check(
+    'realistic: sibling projectDir line preserved',
+    once.includes("project(':some-other-local-module').projectDir"),
+    'lost sibling projectDir',
+  );
+}
+
 if (failures > 0) {
   console.error(`\n${failures} check(s) failed`);
   process.exit(1);
