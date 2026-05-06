@@ -61,7 +61,10 @@ import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
 import { SacredArrival } from '../components/common/SacredArrival';
-import { AmbientVoicePresence } from '../voice/components/AmbientVoicePresence';
+// import { AmbientVoicePresence } from '../voice/components/AmbientVoicePresence';
+// ^ Disabled — see the corresponding mount point near the end of this
+//   file for context. The component file itself is still alive at
+//   voice/components/AmbientVoicePresence.tsx.
 import { initErrorTracking } from '../services/errorTracking';
 import {
   registerPlaybackService,
@@ -469,13 +472,26 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(app)" />
         </Stack>
 
-        {/* Ambient voice presence — root-level FAB + opt-in wake-word
-            listener so Sakha can be summoned from any non-suppressed
-            route. Sits inside AuthGate so it's gated behind login,
-            and beside the Stack so it overlays every screen. The
-            component itself returns null on /(auth), /arrival,
-            /onboarding, /voice and /voice-companion. */}
-        <AmbientVoicePresence />
+        {/*
+          AmbientVoicePresence (root-mounted FAB + opt-in wake-word) is
+          intentionally NOT rendered on Android.
+
+          Originally added in PR-H #1680 so Sakha could be summoned from
+          any screen via a floating "ॐ" button + a long-press wake-word
+          toggle. After the build #20 ship review, the user opted to
+          remove the duplicate entry point: voice already has a Sacred
+          Tools tile, plus the dedicated /voice-companion route, plus
+          deep links from emotional-reset / journals — a global FAB on
+          top of every screen was redundant and visually busy.
+
+          The wake-word path (Hey Sakha) is unaffected — it's a
+          NativeModule-level recognizer, not coupled to this component.
+          If we want to bring the FAB back later, the mount point is
+          here; the component itself is still in voice/components/
+          AmbientVoicePresence.tsx, the route-suppression hook is still
+          live, and the VoiceFab + useSakhaWakeWord wiring is intact.
+        */}
+        {/* <AmbientVoicePresence /> */}
       </AuthGate>
 
       {/* 7-Act Arrival ceremony — rendered LAST so it sits on top of every
