@@ -123,6 +123,77 @@ jobs:
           name: javascript-coverage
           fail_ci_if_error: false
 
+  mobile-validate:
+    name: Validate kiaanverse-mobile plugins + contracts
+    runs-on: ubuntu-latest
+    # Always run on PRs (cheap — no install needed for the validators);
+    # on pushes to main, only run when something under kiaanverse-mobile/
+    # actually changed. The validators are the early-warning system that
+    # keeps a regressed Expo config plugin / WSS frame / tool contract
+    # from reaching EAS Build (which would burn ~30min + $$ before
+    # surfacing the regression). They run in seconds with zero external
+    # network calls — the validate-voice-plugin script stubs out
+    # @expo/config-plugins so it works without `pnpm install`.
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(toJSON(github.event.commits.*.modified), 'kiaanverse-mobile/') ||
+      contains(toJSON(github.event.commits.*.added), 'kiaanverse-mobile/') ||
+      contains(toJSON(github.event.commits.*.removed), 'kiaanverse-mobile/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Expo config plugins (smoke + load)
+        working-directory: kiaanverse-mobile/apps/mobile
+        run: node scripts/validate-plugins.mjs
+
+      - name: Validate withKiaanSakhaVoicePackages — 30 patch checks
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Exercises the plugin's settings.gradle / app/build.gradle /
+        # MainApplication.kt patch functions against synthetic Expo SDK 51
+        # prebuild output. This is the regression gate that would have
+        # caught build #16's "Unresolved reference" failure offline.
+        run: node scripts/validate-voice-plugin.mjs
+
+      - name: Validate WSS frame types match between TS + Python
+        working-directory: kiaanverse-mobile/apps/mobile
+        # 17 frame types must agree across the WSS subprotocol on both
+        # sides; drift would cause subprotocol-mismatch on every voice
+        # session (server returns close code 4001 PERSONA_MISMATCH).
+        run: node scripts/validate-wss-types.mjs
+
+      - name: Validate 15 tool prefill contracts
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Tool contracts (allowed_fields, min_confidence, scrub rules)
+        # must match exactly between TS (apps/mobile/voice/lib/) and
+        # Python (backend/services/voice/). Drift = wrong prefill data
+        # to user-visible tools.
+        run: node scripts/validate-tool-contracts.mjs
+
+      - name: Validate pure helper invariants
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Spec-pinned constants (confidence threshold 0.75, nav delay
+        # = 60% of ack capped at 3.5s, prefill stringification before
+        # navigate). Regressions here are silent feature breakage.
+        run: node scripts/test-pure-helpers.mjs
+
+      - name: Validate JS↔Kotlin bridge coverage
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Cross-check every JS NativeModules.<X>.method() callsite
+        # against the Kotlin @ReactMethod declarations on module class
+        # X. Catches: renaming a Kotlin method without updating JS,
+        # adding a JS call to a never-implemented Kotlin method,
+        # forgetting to register a new module's Package in the plugin.
+        # Without this, drift surfaces as "TypeError: Native.method is
+        # not a function" at first call from the user-driven path.
+        run: node scripts/validate-bridge-coverage.mjs
+
   security-audit:
     runs-on: ubuntu-latest
     if: always()

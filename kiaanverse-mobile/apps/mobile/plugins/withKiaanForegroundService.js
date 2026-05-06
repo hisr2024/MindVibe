@@ -43,6 +43,49 @@ const NOTIFICATION_TITLE_DEFAULT = 'सखा सुन रहे हैं'; //
 const NOTIFICATION_BODY_KEY = 'sakha_notification_body';
 const NOTIFICATION_BODY_DEFAULT = 'Voice companion active';
 
+/**
+ * The four permissions THIS plugin's contract depends on. They are
+ * also present in app.config.ts's `android.permissions` array, but
+ * relying solely on app-level config is fragile: a refactor or a
+ * config typo could silently drop one. Without these declared, the
+ * service either fails to start (FGS_*), crashes with
+ * MissingForegroundServiceTypeException (Android 14+), or shows no
+ * notification and gets killed within seconds (POST_NOTIFICATIONS on
+ * Android 13+). Inject them defensively here — `upsertPermission`
+ * is a no-op if the permission is already present, so this never
+ * duplicates entries.
+ *
+ * NOT injected here (host-level concerns):
+ *   • RECORD_AUDIO, INTERNET, WAKE_LOCK — used by many app surfaces
+ *     (voice, dictation, camera) beyond just this FGS, so they live
+ *     in app.config.ts where they're visible to everyone.
+ */
+const REQUIRED_FGS_PERMISSIONS = [
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_MICROPHONE',
+  'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+  'android.permission.POST_NOTIFICATIONS',
+];
+
+function upsertPermission(manifest, permName) {
+  const root = manifest.manifest;
+  root['uses-permission'] = root['uses-permission'] ?? [];
+  const exists = root['uses-permission'].some(
+    (p) => p?.$?.['android:name'] === permName,
+  );
+  if (!exists) {
+    root['uses-permission'].push({ $: { 'android:name': permName } });
+  }
+  return manifest;
+}
+
+function ensureRequiredPermissions(manifest) {
+  for (const permName of REQUIRED_FGS_PERMISSIONS) {
+    manifest = upsertPermission(manifest, permName);
+  }
+  return manifest;
+}
+
 /** Add or update a <service> child of the AndroidManifest <application>. */
 function ensureServiceEntry(manifest) {
   const application = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
@@ -119,6 +162,7 @@ function ensureStrings(stringsResource) {
 
 const withKiaanForegroundService = (config) => {
   config = withAndroidManifest(config, (cfg) => {
+    cfg.modResults = ensureRequiredPermissions(cfg.modResults);
     cfg.modResults = ensureServiceEntry(cfg.modResults);
     cfg.modResults = ensureSpeechQueries(cfg.modResults);
     return cfg;

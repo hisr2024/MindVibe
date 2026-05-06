@@ -24,6 +24,36 @@
 -keep interface androidx.media3.** { *; }
 -dontwarn androidx.media3.**
 
+# OkHttp 4 + Okio — SakhaSseClient streams the voice-companion
+# conversation. OkHttp/Okio ship their own consumer-rules.pro, but
+# the host app's R8 step doesn't always pick them up reliably — keep
+# defensively here so this AAR is self-sufficient when consumed.
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-keep class okio.** { *; }
+-keep interface okio.** { *; }
+-keepnames class okhttp3.internal.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+# TensorFlow Lite — Interpreter, NnApiDelegate, GpuDelegate. JNI
+# delegates depend on @Keep-annotated entry points; without these
+# rules R8 can strip the symbols the .so libraries dlsym() at runtime,
+# producing UnsatisfiedLinkError on first inference.
+-keep class org.tensorflow.lite.** { *; }
+-keep interface org.tensorflow.lite.** { *; }
+-dontwarn org.tensorflow.lite.**
+
+# kotlinx.coroutines — heavy use in SakhaVoiceManager / KiaanVoiceManager
+# state machines. Keeping volatile fields preserves the
+# DebugProbesImpl agent and the Continuation/Job machinery R8 sometimes
+# trims overzealously.
+-keep class kotlinx.coroutines.** { volatile <fields>; }
+-dontwarn kotlinx.coroutines.**
+
 # React Native module annotations
 -keep @com.facebook.react.module.annotations.ReactModule class * { *; }
 -keep class * implements com.facebook.react.bridge.ReactPackage { *; }

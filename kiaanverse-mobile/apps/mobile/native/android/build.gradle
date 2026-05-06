@@ -78,7 +78,14 @@ android {
     buildToolsVersion safeExtGet('buildToolsVersion', '35.0.0')
 
     defaultConfig {
-        minSdk safeExtGet('minSdkVersion', 24)   // Android 7.0 — RN baseline
+        // Fallback 23 (Android 6.0) matches the Expo SDK 51 + RN 0.74.5
+        // host baseline. In practice safeExtGet returns the host's
+        // rootProject.ext.minSdkVersion (set by Expo prebuild), so the
+        // fallback only fires if the host ever drops the ext. AGP's
+        // manifest-merger fails HARD if a library declares a higher
+        // minSdk than the app, so the fallback must never exceed the
+        // host baseline. No code in this module requires API > 23.
+        minSdk safeExtGet('minSdkVersion', 23)
         targetSdk safeExtGet('targetSdkVersion', 35)
         versionCode 1
         versionName '1.0.0'
@@ -108,8 +115,19 @@ dependencies {
     // React Native core — provided by the host app at link time
     implementation 'com.facebook.react:react-native:+'
 
-    // Expo modules core for autolinking
-    implementation 'expo.modules:expomodulescore:+'
+    // (No expo-modules-core dep — verified by grep that no Kotlin source
+    // in this module imports expo.modules.*. The four packages here
+    // (KiaanAudioPlayerPackage, KiaanVoicePackage, SakhaVoicePackage,
+    // SakhaForegroundServicePackage) are plain RN ReactPackage subclasses,
+    // not Expo Modules. Build #17 failed because the previous
+    // `implementation 'expo.modules:expomodulescore:+'` line tried to
+    // resolve expo-modules-core as a published Maven artifact — but it
+    // isn't published; it's an autolinked gradle subproject
+    // `:expo-modules-core`. The dep was leftover from when this module
+    // was briefly meant to register itself via `expo-module.config.json`
+    // (deleted in PR #1700). If a future change introduces an Expo Module
+    // here, re-add as `implementation project(':expo-modules-core')`,
+    // NOT as a Maven coordinate.)
 
     // AndroidX Media3 — the audio pipeline. ExoPlayer + DataSource +
     // ProgressiveMediaSource. Locked to 1.4.x (Sakha tested against

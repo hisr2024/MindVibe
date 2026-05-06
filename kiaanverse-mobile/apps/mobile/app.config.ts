@@ -67,6 +67,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     policy: 'appVersion' as const,
   },
 
+  // Pin Hermes explicitly. Expo SDK 51 + RN 0.74.5 both default to
+  // Hermes for Android release builds, but defaults can drift across
+  // SDK upgrades and EAS image changes. A silent fall-through to JSC
+  // would (a) break Sentry's source-map upload (Sentry's RN integration
+  // assumes Hermes on Android since 5.x), (b) regress startup time and
+  // bundle size, and (c) reintroduce the Hermes-specific Intl/regex
+  // bugs the 1.3.1 R8 keep-rule block was added to defend against.
+  // Pinning here makes the engine explicit at every consumer (EAS,
+  // local dev, expo prebuild) and any future change is a deliberate
+  // edit to this file rather than a silent default-flip.
+  jsEngine: 'hermes',
+
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
@@ -253,6 +265,47 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-keep class com.mindvibe.kiaan.voice.** { *; }',
             '-keep interface com.mindvibe.kiaan.voice.** { *; }',
             '-dontwarn com.mindvibe.kiaan.voice.**',
+            '',
+            '# OkHttp 4 + Okio — used by SakhaSseClient for the streaming',
+            '# voice-companion conversation. OkHttp 4.x ships its own',
+            '# consumer-rules.pro inside the AAR, but we double up here as',
+            '# defense-in-depth: if R8 ever skips consumer rules (rare AGP',
+            '# bug), the SSE client crashes at first connection. The',
+            '# Platform reflection lookups (Android vs JVM SecurityProvider)',
+            '# and the protocol-negotiation ServiceLoader path are the',
+            '# specific surfaces that lose service implementations under',
+            '# aggressive shrinking.',
+            '-keep class okhttp3.** { *; }',
+            '-keep interface okhttp3.** { *; }',
+            '-keep class okio.** { *; }',
+            '-keep interface okio.** { *; }',
+            '-keepnames class okhttp3.internal.** { *; }',
+            '-dontwarn okhttp3.**',
+            '-dontwarn okio.**',
+            '-dontwarn org.conscrypt.**',
+            '-dontwarn org.bouncycastle.**',
+            '-dontwarn org.openjsse.**',
+            '',
+            '# TensorFlow Lite — used by KiaanWakeWordDetector (NPU/GPU/CPU',
+            '# delegate routing) once that path is wired in. NnApiDelegate +',
+            '# GpuDelegate use JNI to load native delegates; R8 must not',
+            '# strip the @Keep-annotated entry points the JNI looks up.',
+            '# TFLite ships consumer rules but they only cover the JNI',
+            '# entries — coroutine wrappers around the Interpreter need',
+            '# our broader keep rule to survive.',
+            '-keep class org.tensorflow.lite.** { *; }',
+            '-keep interface org.tensorflow.lite.** { *; }',
+            '-dontwarn org.tensorflow.lite.**',
+            '',
+            '# kotlinx.coroutines — heavy use across both voice managers',
+            '# (SakhaVoiceManager / KiaanVoiceManager). The Continuation',
+            '# class metadata feeds debug stacktraces; without keeping the',
+            '# debug agent classes, release builds crash with a',
+            '# ClassNotFoundException on the first suspending call inside',
+            '# a try/catch. -dontwarn covers the MainDispatcherFactory',
+            '# ServiceLoader entry that the Android dispatcher provides.',
+            '-keep class kotlinx.coroutines.** { volatile <fields>; }',
+            '-dontwarn kotlinx.coroutines.**',
             '',
             '# react-native-svg (Relationship Compass radar + compass-rose). R8',
             '# strips the Fabric/JSI ViewManager classes because they are loaded',

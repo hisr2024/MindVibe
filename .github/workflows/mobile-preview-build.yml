@@ -36,6 +36,21 @@ jobs:
         working-directory: kiaanverse-mobile
         run: pnpm install --frozen-lockfile
 
+      - name: Validate Expo config plugins + frame contracts (pre-flight)
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Run all five offline validators BEFORE handing off to EAS.
+        # A plugin regression caught here saves ~30 minutes of EAS
+        # time and prevents the "Unresolved reference" / "Could not
+        # find injection point" class of failures that consumed builds
+        # #1-17. Each validator runs in <1s with zero network calls.
+        run: |
+          node scripts/validate-plugins.mjs
+          node scripts/validate-voice-plugin.mjs
+          node scripts/validate-wss-types.mjs
+          node scripts/validate-tool-contracts.mjs
+          node scripts/test-pure-helpers.mjs
+          node scripts/validate-bridge-coverage.mjs
+
       - name: Setup EAS CLI
         run: npm install -g eas-cli
 
