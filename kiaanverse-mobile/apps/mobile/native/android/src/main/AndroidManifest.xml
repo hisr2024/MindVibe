@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Empty manifest for the :kiaan-voice-native Android library.
+
+  AGP 8.2 with `namespace` declared in build.gradle technically allows
+  this file to be absent — AGP auto-generates an empty manifest from
+  the namespace. BUT some manifest-merger codepaths (resource merging,
+  R8 keep-rule attribution, AGP variants) get cranky when the merger
+  has no source manifest to attribute the library's contributions to.
+  An explicit empty manifest sidesteps every such edge case at zero
+  cost.
+
+  Intentionally empty (no <application>, no <uses-sdk>, no
+  <uses-permission>):
+    • The host app's AndroidManifest.xml (apps/mobile/android/app/
+      src/main/AndroidManifest.xml) carries every <permission> and
+      <uses-feature> that voice needs (RECORD_AUDIO,
+      FOREGROUND_SERVICE_MICROPHONE, FOREGROUND_SERVICE_MEDIA_PLAYBACK,
+      WAKE_LOCK, etc.) — injected by withKiaanForegroundService.js +
+      app.config.ts.
+    • SakhaForegroundService is registered as <service> in the host
+      manifest by withKiaanForegroundService.js, NOT in this library
+      manifest, so it inherits the host's process + permissions.
+    • <uses-sdk> is intentionally absent: the host's build.gradle
+      defaultConfig provides minSdk/targetSdk for the merged APK.
+      Declaring it here would cause manifest-merger conflicts if the
+      library's value ever differs from the host's.
+
+  Do NOT add `package=` here — AGP 8 reads the package from
+  `namespace` in build.gradle. Setting both is a build error.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

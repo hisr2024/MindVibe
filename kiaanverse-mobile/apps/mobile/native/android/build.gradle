@@ -78,7 +78,14 @@ android {
     buildToolsVersion safeExtGet('buildToolsVersion', '35.0.0')
 
     defaultConfig {
-        minSdk safeExtGet('minSdkVersion', 24)   // Android 7.0 — RN baseline
+        // Fallback 23 (Android 6.0) matches the Expo SDK 51 + RN 0.74.5
+        // host baseline. In practice safeExtGet returns the host's
+        // rootProject.ext.minSdkVersion (set by Expo prebuild), so the
+        // fallback only fires if the host ever drops the ext. AGP's
+        // manifest-merger fails HARD if a library declares a higher
+        // minSdk than the app, so the fallback must never exceed the
+        // host baseline. No code in this module requires API > 23.
+        minSdk safeExtGet('minSdkVersion', 23)
         targetSdk safeExtGet('targetSdkVersion', 35)
         versionCode 1
         versionName '1.0.0'
