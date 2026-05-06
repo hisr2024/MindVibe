@@ -130,8 +130,14 @@ dependencies {
     // NOT as a Maven coordinate.)
 
     // AndroidX Media3 — the audio pipeline. ExoPlayer + DataSource +
-    // ProgressiveMediaSource. Locked to 1.4.x (Sakha tested against
-    // ConcatenatingMediaSource2 which lands in 1.4 stable).
+    // ProgressiveMediaSource + (legacy) ConcatenatingMediaSource.
+    // Locked to 1.4.x for the Sakha streaming TTS architecture, which
+    // appends Opus chunks to a live ConcatenatingMediaSource as they
+    // arrive over the WSS. ConcatenatingMediaSource2 (the 1.0+ Builder-
+    // only replacement) is immutable post-build, so it doesn't fit our
+    // runtime-append model — see KiaanAudioPlayerModule's class-level
+    // comment on `concatSource`. Build #19 caught this mismatch when
+    // the code tried to call addMediaSource() on a CMS2 instance.
     implementation "androidx.media3:media3-exoplayer:${MEDIA3_VERSION}"
     implementation "androidx.media3:media3-datasource:${MEDIA3_VERSION}"
     implementation "androidx.media3:media3-common:${MEDIA3_VERSION}"

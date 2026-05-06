@@ -63,7 +63,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ConcatenatingMediaSource2
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
@@ -116,7 +116,21 @@ class KiaanAudioPlayerModule(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var player: ExoPlayer? = null
-    private var concatSource: ConcatenatingMediaSource2? = null
+    // Why ConcatenatingMediaSource and NOT ConcatenatingMediaSource2:
+    // CMS2 (Media3 1.0+) is BUILDER-ONLY and IMMUTABLE post-build — it has
+    // no runtime `addMediaSource(int, MediaSource)`, only `Builder.add(...)`.
+    // Our streaming TTS architecture depends on appending each Opus chunk
+    // as it arrives over the WSS, so we need the legacy CMS which exposes
+    // `addMediaSource()` on the live instance. Build #19 failed with
+    // `Unresolved reference: addMediaSource` precisely because of this
+    // mismatch. CMS is `@UnstableApi` (covered by the class-level @OptIn)
+    // and `@Deprecated` since Media3 1.4 with no removal-version pinned —
+    // safe for the 1.x line we're using. If/when we migrate to Media3 2.0
+    // (which removes CMS), the right move is `player.addMediaSource()`
+    // directly, since the player has its own internal queue with the same
+    // API the code expects here.
+    @Suppress("DEPRECATION")
+    private var concatSource: ConcatenatingMediaSource? = null
     private var visualizer: Visualizer? = null
     private val rmsBuffer = ArrayDeque<Float>()
     @Volatile
@@ -145,7 +159,8 @@ class KiaanAudioPlayerModule(
                 .build()
                 .also { p ->
                     p.addListener(playbackListener)
-                    concatSource = ConcatenatingMediaSource2.Builder().build()
+                    @Suppress("DEPRECATION")
+                    concatSource = ConcatenatingMediaSource()
                     p.setMediaSource(concatSource!!)
                     p.prepare()
                     p.playWhenReady = false
@@ -402,7 +417,8 @@ class KiaanAudioPlayerModule(
             mainHandlerSync {
                 player?.stop()
                 player?.clearMediaItems()
-                concatSource = ConcatenatingMediaSource2.Builder().build()
+                @Suppress("DEPRECATION")
+                concatSource = ConcatenatingMediaSource()
                 player?.setMediaSource(concatSource!!)
                 player?.prepare()
                 nextSourceIndex = 0
