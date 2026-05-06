@@ -45,10 +45,12 @@ if (Native == null && !__DEV__) {
   // re-attach in the simulator may briefly miss the module).
   // eslint-disable-next-line no-console
   console.error(
-    'KiaanAudioPlayer: native module is undefined. Ensure ' +
-      'apps/sakha-mobile/native/android/expo-module.config.json registers ' +
-      'com.kiaanverse.sakha.audio.KiaanAudioPlayerPackage and re-run ' +
-      'expo prebuild.',
+    'KiaanAudioPlayer: native module is undefined. Ensure the ' +
+      'withKiaanSakhaVoicePackages plugin (apps/mobile/plugins/) is ' +
+      'listed in app.config.ts and ran during prebuild — it injects ' +
+      'KiaanAudioPlayerPackage into MainApplication.kt and links the ' +
+      "in-tree gradle subproject ':kiaan-voice-native' " +
+      '(apps/mobile/native/android/) into :app.',
   );
 }
 

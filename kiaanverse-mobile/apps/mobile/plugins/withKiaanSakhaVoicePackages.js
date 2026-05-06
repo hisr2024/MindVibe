@@ -234,7 +234,20 @@ function addAllPackageRegistrations(contents) {
 
 const withKiaanSakhaVoicePackages = (config) => {
   // 1. settings.gradle — register the gradle subproject.
+  //    Guard on Groovy: Expo SDK 51 prebuild always emits a Groovy
+  //    `settings.gradle`. If a future migration ever opts into Kotlin
+  //    DSL (`settings.gradle.kts`) the include + projectDir syntax
+  //    below would be invalid Kotlin — bail loudly rather than emit
+  //    silently broken Groovy into a KTS file.
   config = withSettingsGradle(config, (cfg) => {
+    if (cfg.modResults.language !== 'groovy') {
+      throw new Error(
+        '[withKiaanSakhaVoicePackages] Expected Groovy settings.gradle, ' +
+          `got language=${cfg.modResults.language}. The KTS variant ` +
+          'requires different syntax (`include(":x")` + `project(":x")` ' +
+          'with parens). Update this plugin before migrating.',
+      );
+    }
     cfg.modResults.contents = patchSettingsGradle(cfg.modResults.contents);
     return cfg;
   });
