@@ -14,9 +14,19 @@
  * wires hook outputs to props.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View, ScrollView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  PermissionsAndroid,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@kiaanverse/store';
 
@@ -136,12 +146,110 @@ export default function VoiceCompanionScreen() {
     }
   }, [personaMismatch, router]);
 
+  // Surface session-start errors in the bottomBar instead of crashing the
+  // app. The previous shape called the three async operations one after
+  // the other with NO try/catch, which meant any rejection (mic perm
+  // SecurityException, FGS RemoteServiceException, WSS handshake
+  // failure) became an unhandled Promise rejection. On older RN that
+  // could escape the JS engine and terminate the app process — exactly
+  // the symptom the user reported on first ship.
+  const [startError, setStartError] = useState<string | null>(null);
+
+  /**
+   * Ensure the runtime permissions the voice session NEEDS are granted
+   * before we touch any of the native machinery. The voice-companion
+   * onboarding screen normally runs first and prompts for these, but
+   * users who reach /voice-companion directly (via Sacred Tools tile,
+   * deep link, or wake word) bypass onboarding entirely. Without this
+   * gate, the native foreground service tries to construct an
+   * AudioRecord on launch — and on Android 6+ that throws
+   * SecurityException, which propagates outside the JNI bridge and
+   * crashes the app process.
+   *
+   * RECORD_AUDIO is the must-have. POST_NOTIFICATIONS is required on
+   * Android 13+ for the FGS notification to actually appear; without
+   * it the OS kills the FGS within ~5 seconds anyway, so prompt
+   * proactively.
+   *
+   * Returns true on success, false on user denial — the caller should
+   * surface a clear message rather than barreling on into FGS.start().
+   */
+  const ensureVoicePermissions = useCallback(async (): Promise<boolean> => {
+    // expo-av's Audio.requestPermissionsAsync handles RECORD_AUDIO
+    // cross-platform and integrates with the manifest declaration.
+    // It's idempotent — returns 'granted' instantly if already granted.
+    const audio = await Audio.requestPermissionsAsync();
+    if (audio.status !== 'granted') {
+      return false;
+    }
+
+    // POST_NOTIFICATIONS is Android 13+ (API 33). Older Android grants
+    // it implicitly. Skip on iOS entirely (different model).
+    if (
+      Platform.OS === 'android' &&
+      typeof Platform.Version === 'number' &&
+      Platform.Version >= 33
+    ) {
+      try {
+        const result = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+          // We treat POST_NOTIFICATIONS as a soft requirement: the FGS
+          // can technically launch without it, but the OS will kill it
+          // within seconds because the persistent notification can't
+          // render. Better to tell the user up-front.
+          return false;
+        }
+      } catch (e) {
+        // PermissionsAndroid throws on platforms that don't recognize
+        // the permission constant. On Android 12 and below
+        // POST_NOTIFICATIONS isn't a permission you can request —
+        // treat that as success.
+      }
+    }
+
+    return true;
+  }, []);
+
   const handleStart = useCallback(async () => {
     if (!userId) return;
-    await audioFocus.acquire();
-    await foregroundService.start();
-    await session.start({ langHint: 'en', userRegion: 'GLOBAL' });
-  }, [userId, audioFocus, foregroundService, session]);
+    setStartError(null);
+
+    // 1. Permissions FIRST — never call into native FGS without them.
+    const granted = await ensureVoicePermissions();
+    if (!granted) {
+      Alert.alert(
+        'Microphone access needed',
+        'Sakha needs microphone and notification access to listen and ' +
+          'stay alive while you converse. Open Settings → Apps → ' +
+          'Kiaanverse → Permissions to grant access, then tap "Tap to ' +
+          'begin" again.',
+      );
+      setStartError('Microphone or notification permission denied');
+      return;
+    }
+
+    // 2. Wrap the native start sequence in try/catch so any failure —
+    //    audio-focus refusal, FGS launch denial, WSS handshake error —
+    //    surfaces as a UI message rather than an unhandled rejection
+    //    that the OS could escalate to a process crash.
+    try {
+      await audioFocus.acquire();
+      await foregroundService.start();
+      await session.start({ langHint: 'en', userRegion: 'GLOBAL' });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      // eslint-disable-next-line no-console
+      console.warn('[VoiceCompanion] start failed', e);
+      setStartError(message);
+      // Best-effort cleanup so we don't leave the FGS or audio focus
+      // dangling after a partial start. Each cleanup call swallows its
+      // own errors.
+      try { await foregroundService.stop(); } catch {}
+      try { await audioFocus.release(); } catch {}
+    }
+  }, [userId, audioFocus, foregroundService, session, ensureVoicePermissions]);
 
   const handleStop = useCallback(async () => {
     session.stop();
@@ -182,6 +290,7 @@ export default function VoiceCompanionScreen() {
           </ScrollView>
         ) : null}
         {lastError ? <Text style={styles.errorText}>{lastError.message}</Text> : null}
+        {startError ? <Text style={styles.errorText}>{startError}</Text> : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={isActive ? 'Stop voice session' : 'Start voice session'}
