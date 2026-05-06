@@ -2,7 +2,9 @@
 
 Modules:
   • wss_frames        — Pydantic frame protocol (kiaan-voice-v1)
-  • stt_router        — Server-side STT routing (Sarvam / Deepgram / Mock)
+  • stt_router        — Server-side STT routing (Sarvam / Mock).
+                        Sarvam Saarika handles both Indic and English (en-IN);
+                        Deepgram support was removed in 2025-11.
   • tts_router        — Server-side TTS routing + audio cache
   • orchestrator      — Per-turn voice orchestrator
   • mock_providers    — Deterministic mock STT/TTS for tests + dev

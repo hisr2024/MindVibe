@@ -1,8 +1,15 @@
 """STT router — server-side speech-to-text routing for Sakha voice mode.
 
-Spec routing rule:
+Spec routing rule (post-Deepgram-removal):
   • Indian languages (hi, mr, bn, ta, te, pa, gu, kn, ml, hi-en) → Sarvam Saarika
-  • English + everything else (en, en-US, en-GB, …)               → Deepgram Nova-3
+  • English + everything else (en, en-US, en-IN, en-GB, …)        → Sarvam Saarika
+                                                                    (en-IN locale)
+
+Sarvam Saarika handles BOTH paths. Deepgram Nova-3 was removed in
+2025-11 — the DeepgramSTTProvider class was a never-wired stub that
+raised NotImplementedError on every method, and the operator only ever
+needed Sarvam in practice. Removing it collapses the deployment
+requirement to a single STT provider key.
 
 This module exposes a single STTRouter. Per-session, it picks the right
 provider, streams base64 Opus chunks in, and yields STTResult events
@@ -11,15 +18,13 @@ chunk to drive the CrisisPartialScanner.
 
 Providers:
   • SarvamSTTProvider     — wraps Sarvam Saarika websocket / REST streaming
-  • DeepgramSTTProvider   — wraps Deepgram Nova-3 streaming
   • MockSTTProvider       — deterministic, used in tests + dev
 
 Key design choice: no real network calls happen at import time. The clients
-are lazy-initialised on first use, and only when the corresponding env var
-(KIAAN_SARVAM_API_KEY / KIAAN_DEEPGRAM_API_KEY) is set. If the env var is
-missing OR if KIAAN_VOICE_MOCK_PROVIDERS=1 is set, the MockSTTProvider is
-used. This makes the WSS endpoint runnable end-to-end in CI without ever
-hitting a paid API.
+are lazy-initialised on first use, and only when KIAAN_SARVAM_API_KEY is
+set. If the env var is missing OR if KIAAN_VOICE_MOCK_PROVIDERS=1 is set,
+the MockSTTProvider is used. This makes the WSS endpoint runnable
+end-to-end in CI without ever hitting a paid API.
 """
 
 from __future__ import annotations
@@ -190,9 +195,9 @@ class MockSTTProvider:
 
 
 # ─── Real provider stubs ──────────────────────────────────────────────────
-# These wrap the real Sarvam / Deepgram SDKs but lazy-import them so the
-# module loads without those packages installed. The actual streaming logic
-# is filled in when KIAAN_SARVAM_API_KEY / KIAAN_DEEPGRAM_API_KEY are set;
+# This wraps the real Sarvam SDK but lazy-imports it so the
+# module loads without that package installed. The actual streaming logic
+# is filled in when KIAAN_SARVAM_API_KEY is set;
 # until then the router falls through to MockSTTProvider so dev + CI keep
 # working.
 #
@@ -220,11 +225,9 @@ _SARVAM_STT_LANG_CODE: dict[str, str] = {
     "ml": "ml-IN",
     "hi-en": "hi-IN",
     # English support — Sarvam Saarika accepts en-IN as a recognized
-    # locale. Adding these here lets the router fall back to Sarvam
-    # for English when KIAAN_DEEPGRAM_API_KEY is not configured,
-    # rather than dropping to mock STT (which produces canned text
-    # and makes the user perceive "voice not working" because Sakha
-    # is responding to fabricated transcripts).
+    # locale. Sarvam handles BOTH the Indic path AND the English path
+    # since the Deepgram removal (2025-11). Single KIAAN_SARVAM_API_KEY
+    # covers every supported language.
     "en": "en-IN",
     "en-in": "en-IN",
     "en-us": "en-IN",
@@ -346,56 +349,6 @@ class SarvamSTTProvider:
         self._buffer = bytearray()
 
 
-class DeepgramSTTProvider:
-    """Deepgram Nova-3 streaming STT for English + international.
-
-    Activates when KIAAN_DEEPGRAM_API_KEY is set.
-    """
-
-    name = "deepgram-nova-3"
-    supported_languages = frozenset({"en", "en-US", "en-GB", "en-IN", "en-AU"})
-
-    def __init__(self) -> None:
-        self._api_key = os.environ.get("KIAAN_DEEPGRAM_API_KEY")
-
-    def is_configured(self) -> bool:
-        return bool(self._api_key)
-
-    async def start_session(self, *, session_id: str, lang_hint: str) -> None:
-        if not self._api_key:
-            raise RuntimeError(
-                "DeepgramSTTProvider: KIAAN_DEEPGRAM_API_KEY not set."
-            )
-        try:
-            import deepgram  # noqa: F401  # type: ignore[import-not-found]
-        except ImportError as e:
-            raise RuntimeError(
-                "DeepgramSTTProvider: deepgram-sdk not installed."
-            ) from e
-        raise NotImplementedError(
-            f"DeepgramSTTProvider streaming impl not wired "
-            f"(session_id={session_id!r}, lang_hint={lang_hint!r})."
-        )
-
-    async def feed_audio_chunk(
-        self, *, seq: int, opus_b64: str
-    ) -> AsyncIterator[STTResult]:
-        if False:  # pragma: no cover
-            yield STTResult(text="", is_final=False, seq=seq)
-        raise NotImplementedError(
-            f"DeepgramSTTProvider.feed_audio_chunk not wired "
-            f"(seq={seq}, chunk_len={len(opus_b64)})"
-        )
-
-    async def end_of_speech(self) -> AsyncIterator[STTResult]:
-        if False:  # pragma: no cover
-            yield STTResult(text="", is_final=True, seq=0)
-        raise NotImplementedError
-
-    async def close(self) -> None:
-        return None
-
-
 # ─── Router ───────────────────────────────────────────────────────────────
 
 
@@ -437,48 +390,26 @@ class STTRouter:
                 reason="KIAAN_VOICE_MOCK_PROVIDERS=1 (forced)",
                 fell_back_to_mock=False,
             )
-        # Indic → Sarvam, else Deepgram
-        if normalized in _INDIC_LANGS or lang_hint == "hi-en":
-            sarvam = SarvamSTTProvider()
-            if sarvam.is_configured():
-                return STTRouterDecision(
-                    provider_name=sarvam.name,
-                    reason=f"indic lang {lang_hint!r} → Sarvam Saarika",
-                    fell_back_to_mock=False,
-                )
-            return STTRouterDecision(
-                provider_name="mock",
-                reason="Sarvam not configured (KIAAN_SARVAM_API_KEY unset) → mock fallback",
-                fell_back_to_mock=True,
+        # Sarvam Saarika handles every supported language: the 9 Indic
+        # codes via their native locales (hi-IN, ta-IN, …) plus English
+        # via en-IN. Deepgram was removed in 2025-11 — the operator
+        # only ever needs KIAAN_SARVAM_API_KEY for STT.
+        is_indic = normalized in _INDIC_LANGS or lang_hint == "hi-en"
+        sarvam = SarvamSTTProvider()
+        if sarvam.is_configured():
+            reason = (
+                f"indic lang {lang_hint!r} → Sarvam Saarika"
+                if is_indic
+                else f"non-indic lang {lang_hint!r} → Sarvam Saarika (en-IN)"
             )
-        deepgram = DeepgramSTTProvider()
-        if deepgram.is_configured():
             return STTRouterDecision(
-                provider_name=deepgram.name,
-                reason=f"non-indic lang {lang_hint!r} → Deepgram Nova-3",
-                fell_back_to_mock=False,
-            )
-        # Deepgram not configured — try Sarvam as a secondary English
-        # path. Sarvam Saarika accepts en-IN and produces usable English
-        # transcripts (lower quality than Deepgram Nova-3 for accented
-        # English but vastly better than the silent mock fallback). This
-        # collapses the deployment requirement: a project with a single
-        # KIAAN_SARVAM_API_KEY now covers English STT in addition to the
-        # 9 Indic languages, instead of forcing the operator to also
-        # provision a Deepgram subscription.
-        sarvam_for_english = SarvamSTTProvider()
-        if sarvam_for_english.is_configured():
-            return STTRouterDecision(
-                provider_name=sarvam_for_english.name,
-                reason=(
-                    f"non-indic lang {lang_hint!r} → Sarvam Saarika "
-                    "(Deepgram not configured)"
-                ),
+                provider_name=sarvam.name,
+                reason=reason,
                 fell_back_to_mock=False,
             )
         return STTRouterDecision(
             provider_name="mock",
-            reason="Deepgram not configured (KIAAN_DEEPGRAM_API_KEY unset) → mock fallback",
+            reason="Sarvam not configured (KIAAN_SARVAM_API_KEY unset) → mock fallback",
             fell_back_to_mock=True,
         )
 
@@ -492,9 +423,9 @@ class STTRouter:
             return MockSTTProvider(), decision
         if decision.provider_name == "sarvam-saarika":
             return SarvamSTTProvider(), decision
-        if decision.provider_name == "deepgram-nova-3":
-            return DeepgramSTTProvider(), decision
-        # Defensive — shouldn't reach here
+        # Defensive — shouldn't reach here. Deepgram was removed in
+        # 2025-11; if some upstream caller forces an unknown
+        # provider_name, fall back to mock with a logged warning.
         logger.error(
             "STTRouter: unknown provider %r — falling back to mock",
             decision.provider_name,
@@ -526,6 +457,5 @@ __all__ = [
     "STTRouterDecision",
     "MockSTTProvider",
     "SarvamSTTProvider",
-    "DeepgramSTTProvider",
     "get_stt_router",
 ]

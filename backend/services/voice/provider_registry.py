@@ -1,6 +1,6 @@
 """Voice provider registry — extensibility seam for STT/TTS/LLM providers.
 
-The built-in providers (Mock, Sarvam, ElevenLabs, Deepgram, OpenAI) are
+The built-in providers (Mock, Sarvam, ElevenLabs, OpenAI) are
 hardwired into their respective routers. This registry lets ops or
 plugins add new providers without touching router code.
 
