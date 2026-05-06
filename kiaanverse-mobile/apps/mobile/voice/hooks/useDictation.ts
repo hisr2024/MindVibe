@@ -47,8 +47,10 @@ const SakhaVoiceCandidate = NativeModules.SakhaVoice as
   | undefined;
 
 /**
- * The native SakhaVoice module is Android-only and ships in the
- * @kiaanverse/sakha-voice-native expo-module. It is considered
+ * The native SakhaVoice module is Android-only and ships inside the
+ * in-tree gradle subproject ':kiaan-voice-native'
+ * (apps/mobile/native/android/), registered at app startup by the
+ * withKiaanSakhaVoicePackages config plugin. It is considered
  * available only when the bridge actually exposes dictateOnce —
  * NativeModules surfaces empty proxies on Expo Go / iOS / web, so we
  * have to function-check.

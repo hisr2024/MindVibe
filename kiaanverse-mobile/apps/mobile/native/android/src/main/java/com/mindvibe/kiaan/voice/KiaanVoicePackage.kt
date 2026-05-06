@@ -1,28 +1,28 @@
 /**
  * KIAAN Voice — React Native Package (Phase 1 scaffold).
  *
- * Registration target for Expo's autolinker. The
- * @kiaanverse/kiaan-voice-native module's expo-module.config.json points
- * at this class so prebuild generates an entry in ExpoModulesProvider.kt.
+ * Registered at runtime by `withKiaanSakhaVoicePackages` (PR #1700),
+ * which patches MainApplication.kt to call `add(KiaanVoicePackage())`
+ * inside `PackageList(this).packages.apply { ... }`. This file lives
+ * in the in-tree gradle subproject `:kiaan-voice-native`
+ * (apps/mobile/native/android/), which the same plugin links into :app.
  *
- * Phase 1 deliberately registers an empty module list. The Kotlin sources
- * already in this package
+ * Phase 1 deliberately registers an empty NativeModule list. The Kotlin
+ * sources already in this package
  *
  *   - KiaanVoiceManager.kt           (state machine + lifecycle singleton)
  *   - KiaanComputeTrinity.kt         (NPU/GPU/CPU task router)
  *   - KiaanWakeWordDetector.kt       (TFLite NNAPI wake-word)
  *   - KiaanEngineOrchestrator.kt     (Friend/Guidance/Navigation engines)
  *
- * are managers/services, not RN bridge modules. The bridge module
- * (KiaanVoiceModule extending ReactContextBaseJavaModule) lands in a
- * later feature step alongside the KIAAN voice screen — when there's a
- * concrete JS-facing surface to expose.
- *
- * Until then, this package's only job is to be a real Kotlin class so
- * the Expo autolinker has a registration target. Adding it now (rather
- * than leaving expo-module.config.json pointing at a phantom class)
- * means prebuild succeeds and the .aab build pipeline is green for
- * apps/mobile while feature work proceeds independently.
+ * are managers/services consumed by SakhaVoiceManager, not RN bridge
+ * modules. The bridge module (KiaanVoiceModule extending
+ * ReactContextBaseJavaModule) lands in a later feature step alongside
+ * the KIAAN voice screen — when there's a concrete JS-facing surface
+ * to expose. Until then, this package's only job is to give R8 + the
+ * RN bridge a real ReactPackage class to instantiate so the AAR
+ * containing the manager/service singletons stays on the compile
+ * classpath of :app.
  */
 
 package com.mindvibe.kiaan.voice
