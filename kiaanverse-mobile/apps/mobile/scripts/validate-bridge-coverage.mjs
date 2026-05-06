@@ -41,7 +41,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
@@ -60,8 +60,19 @@ const PLUGIN_PATH = resolve(APP_ROOT, 'plugins/withKiaanSakhaVoicePackages.js');
 function findKotlinModuleMethods() {
   // Find module files that contain `override fun getName()`. Each is a
   // module class — look for NAME = "X" + every @ReactMethod-tagged fun.
-  const kotlinFiles = execSync(
-    `find ${NATIVE_ROOT} -name "*.kt" -exec grep -l "override fun getName" {} +`,
+  const kotlinFiles = execFileSync(
+    'find',
+    [
+      NATIVE_ROOT,
+      '-name',
+      '*.kt',
+      '-exec',
+      'grep',
+      '-l',
+      'override fun getName',
+      '{}',
+      '+',
+    ],
     { encoding: 'utf-8' },
   )
     .trim()
