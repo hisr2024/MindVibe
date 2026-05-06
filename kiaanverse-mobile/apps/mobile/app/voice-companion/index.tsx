@@ -1,263 +1,232 @@
 /**
- * VoiceCompanionScreen — Sakha's main canvas.
+ * VoiceCompanionScreen — Sakha's main canvas (Option-2 native-stack rewrite).
  *
- * Layout (per spec):
- *   • Sacred geometry backdrop (slow rotation, RMS-glowing)
- *   • Shankha at center (RMS-driven sound waves during speaking)
- *   • Live transcript ticker above the conch (current partial)
- *   • Engine + mood + verse citation chip below
- *   • Suggested-next chips at bottom
- *   • Tap-to-start / tap-to-interrupt CTA
+ * History: this screen used to drive a custom WSS pipeline that
+ * streamed Opus chunks to backend Sarvam STT, OpenAI gpt-4o-mini, and
+ * ElevenLabs TTS — with a foreground service, Media3 audio chunking,
+ * and 22 Kotlin files of supporting infrastructure. That stack worked
+ * (commit 410220f5 finally landed it on Play Store after 20 EAS
+ * builds), but it had two problems that mattered for scale:
  *
- * This screen is the composition root for all 11 hooks from Part 9.
- * Logic stays in the hooks; this file just lays out the visuals and
- * wires hook outputs to props.
+ *   1. Cost — Sarvam + ElevenLabs minimum $1.80/user/month at 5min
+ *      daily voice usage. At 1M users that's $3M/month before LLM.
+ *   2. Architectural fork — kiaanverse.com mobile (Chrome on Android)
+ *      uses webkitSpeechRecognition + SpeechSynthesis, which are thin
+ *      wrappers over the SAME android.speech.SpeechRecognizer +
+ *      android.speech.tts.TextToSpeech engines this codebase already
+ *      wraps as SakhaDictation + expo-speech. Two architectures for
+ *      the same engine = 2× maintenance.
+ *
+ * This rewrite collapses the screen onto the same stack used by the
+ * Sakha Chat tab + every Sacred Tool's Shankha voice input:
+ *
+ *   ─ Tap mic       → useDictation (= SakhaDictation = SpeechRecognizer)
+ *   ─ Transcript    → useSakhaStream.send (POST /api/chat/message/stream)
+ *   ─ Stream done   → expo-speech.speak (= TextToSpeech)
+ *
+ * Cost per voice user drops to LLM-only (~$0.30/mo). Server load
+ * drops dramatically (no persistent WSS, no Sarvam round-trips).
+ * Engineering surface drops to one path across the whole app.
+ *
+ * What got DELETED in this rewrite (compared to the prior shape):
+ *   - useVoiceSession (WSS lifecycle)
+ *   - useStreamingPlayer (Media3 chunk player)
+ *   - useAudioFocus + useForegroundService (expo-speech handles its
+ *     own audio routing; no FGS needed because turns are <30s)
+ *   - useToolInvocation, useCrisisHandler (were wired to WSS frame
+ *     types; need a chat-pattern equivalent if reintroduced —
+ *     separate decision)
+ *   - useSakhaWakeWord (will return when wake-word is rebuilt on top
+ *     of the same dictation+chat pattern)
+ *   - useVoiceStore (the entire Zustand voice state machine — local
+ *     useState now)
+ *
+ * The 22 Kotlin files that powered the WSS path are still in the
+ * native module. They're marked deprecated in this PR but NOT deleted
+ * yet — kept as dormant infrastructure so a future "Premium Voice"
+ * tier can re-enable them with Sarvam/ElevenLabs for paying users.
+ *
+ * Backend `/voice-companion/converse` WSS endpoint is similarly
+ * preserved on the server side (Bhashini provider still registered
+ * for when those credentials arrive). Both sides go dormant; neither
+ * is removed.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  PermissionsAndroid,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
-import { useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
-import {
-  selectIsActive,
-  selectVoiceState,
-  useVoiceStore,
-} from '../../voice/stores/voiceStore';
-import { useVoiceSession } from '../../voice/hooks/useVoiceSession';
-import { useStreamingPlayer } from '../../voice/hooks/useStreamingPlayer';
-import { useAudioFocus } from '../../voice/hooks/useAudioFocus';
-import { useForegroundService } from '../../voice/hooks/useForegroundService';
-import { useCrisisHandler } from '../../voice/hooks/useCrisisHandler';
-import {
-  useToolInvocation,
-  type ToolInvocationNavParams,
-} from '../../voice/hooks/useToolInvocation';
-import { useSakhaWakeWord } from '../../voice/hooks/useSakhaWakeWord';
+import { useDictation } from '../../voice/hooks/useDictation';
+import { useSakhaStream } from '../../components/chat/useSakhaStream';
+
+/**
+ * UI state machine for the voice-companion screen.
+ *
+ *   idle      — nothing active; "Tap to begin" button shown
+ *   listening — mic open, SpeechRecognizer capturing utterance
+ *   thinking  — LLM streaming response (no audio yet)
+ *   speaking  — Speech.speak playing the response aloud
+ *   error     — last action failed; error text shown beneath the CTA
+ *
+ * State transitions are driven by callbacks from useDictation +
+ * useSakhaStream + Speech.speak's onDone/onError. There's no
+ * background task; the user can interrupt at any point with the
+ * "End session" button which calls Speech.stop + abort + back to idle.
+ */
+type ScreenState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
 export default function VoiceCompanionScreen() {
-  const router = useRouter();
-  const state = useVoiceStore(selectVoiceState);
-  const isActive = useVoiceStore(selectIsActive);
-  const partial = useVoiceStore((s) => s.partialTranscript);
-  const engine = useVoiceStore((s) => s.currentEngine);
-  const mood = useVoiceStore((s) => s.currentMood);
-  const verse = useVoiceStore((s) => s.currentVerse);
-  const suggested = useVoiceStore((s) => s.suggestedNext);
-  const crisis = useVoiceStore((s) => s.crisis);
-  const quota = useVoiceStore((s) => s.quota);
-  const personaMismatch = useVoiceStore((s) => s.personaMismatch);
-  const lastError = useVoiceStore((s) => s.lastError);
-
-  // Authenticated user identity for the voice session. AuthGate (in
-  // app/_layout.tsx) guarantees this screen only mounts when status
-  // === 'authenticated' and isOnboarded === true, so user is non-null
-  // by the time we get here in steady state — but during the
-  // hydrate-then-mount transition there's a frame or two where
-  // useAuthStore.user is still null. We hold off starting the voice
-  // session until we have a real id by feeding 'pending' to
-  // useVoiceSession, which short-circuits its quota pre-flight when
-  // userId === 'pending'.
-  //
-  // Until v1.3.1 this screen pinned a per-device UUID in SecureStore
-  // and used that as the user_id. That meant quota / telemetry /
-  // crisis incidents tracked the device, not the account — sign-out
-  // and sign-back-in on the same device kept hitting the same quota
-  // bucket, and the same human across devices got disjoint quotas.
-  // The migration is forward-only: anonymous device UUIDs that were
-  // already written to SecureStore are simply ignored from this
-  // version onward. No data loss because daily quotas reset anyway.
   const authUserId = useAuthStore((s) => s.user?.id ?? null);
   const userId = authUserId;
 
-  const session = useVoiceSession(userId ?? 'pending');
-  const audioFocus = useAudioFocus();
-  const foregroundService = useForegroundService();
-  // Crisis flow runs autonomously — just instantiating it wires up the
-  // store subscription + heavy haptic + safety audio.
-  useCrisisHandler();
+  const {
+    send,
+    messages,
+    streaming,
+    error: chatError,
+    abort,
+    onStreamCompleted,
+  } = useSakhaStream();
 
-  // Streaming player needs the raw socket — the session API doesn't
-  // expose it directly, so for this scaffold we leave the prop null
-  // (audio.chunk frames still flow once the underlying useWebSocket
-  // listener attaches once a real WebSocket is exposed in Part 12).
-  // The store's audioLevel still pumps via KiaanAudioPlayer.onAudioLevel.
-  useStreamingPlayer({ socket: null, autoplay: true });
+  const [state, setState] = useState<ScreenState>('idle');
+  const [startError, setStartError] = useState<string | null>(null);
 
-  const navigateForTool = useCallback(
-    (href: string, params: ToolInvocationNavParams) => {
-      router.push({ pathname: href, params: params as unknown as Record<string, string> });
+  // Track the latest assistant text in a ref so the onStreamCompleted
+  // callback (registered once) can speak the freshest value without
+  // closing over stale `messages`.
+  const latestAssistantRef = useRef<string>('');
+  useEffect(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role === 'assistant') {
+        latestAssistantRef.current = m.text;
+        break;
+      }
+    }
+  }, [messages]);
+
+  // ── STT: useDictation wraps android.speech.SpeechRecognizer ──
+  const dictation = useDictation({
+    language: 'en-IN',
+    onTranscript: (transcript) => {
+      // Recognizer returned final text → kick off the LLM stream.
+      // No need to show the transcript on this screen — the user
+      // just heard themselves say it. Going straight to "thinking"
+      // keeps the UI calm.
+      setState('thinking');
+      void send(transcript);
     },
-    [router],
-  );
-  useToolInvocation({ navigate: navigateForTool });
-
-  // Wake-word hook. Subscribes to the SakhaVoiceWakeWord native event;
-  // when the user says "Hey Sakha" the native side has already started
-  // a turn (state → LISTENING) — we only need to start the WSS session
-  // to feed the audio chunks. This is symmetric with the tap-to-begin
-  // path: handleStart() vs. wake-word both end up at session.start().
-  const wake = useSakhaWakeWord({
-    onWake: () => {
-      if (!userId) return;
-      void (async () => {
-        await audioFocus.acquire();
-        await foregroundService.start();
-        await session.start({ langHint: 'en', userRegion: 'GLOBAL' });
-      })();
+    onError: (code, message) => {
+      // eslint-disable-next-line no-console
+      console.warn('[VoiceCompanion] dictation error', code, message);
+      setStartError(`Could not hear you (${code}): ${message}`);
+      setState('error');
     },
   });
 
-  // Quota gate — if quota check ran and can't start, jump to the sheet.
-  // The quota / crisis / onboarding sheets live under
-  // app/voice-companion/{quota,crisis,onboarding}.tsx — there is no
-  // separate /voice subtree, so the path must be /voice-companion/...
-  // (the older /voice/... paths produced "Unmatched Route" because
-  // app/voice.tsx is a one-line redirect, not a directory).
+  // Mirror dictation lifecycle into the screen state machine. We only
+  // listen for 'listening'/'resolving' here; 'idle'/'error' are
+  // handled by the onTranscript / onError callbacks above.
   useEffect(() => {
-    if (quota && !quota.canStartSession) {
-      router.push('/voice-companion/quota');
-    }
-  }, [quota, router]);
+    if (dictation.state.tag === 'listening') setState('listening');
+    else if (dictation.state.tag === 'resolving') setState('thinking');
+  }, [dictation.state.tag]);
 
-  // Crisis gate — push the overlay
+  // ── TTS: expo-speech wraps android.speech.tts.TextToSpeech ──
+  // Register a single onStreamCompleted handler at mount that speaks
+  // whatever the latest assistant message is. Speech.stop() is called
+  // before each new utterance to prevent overlap if the user fires
+  // multiple turns rapidly (the chat tab uses the same pattern).
   useEffect(() => {
-    if (crisis) router.push('/voice-companion/crisis');
-  }, [crisis, router]);
-
-  // Persona mismatch gate
-  useEffect(() => {
-    if (personaMismatch) {
-      router.push('/voice-companion/onboarding');
-    }
-  }, [personaMismatch, router]);
-
-  // Surface session-start errors in the bottomBar instead of crashing the
-  // app. The previous shape called the three async operations one after
-  // the other with NO try/catch, which meant any rejection (mic perm
-  // SecurityException, FGS RemoteServiceException, WSS handshake
-  // failure) became an unhandled Promise rejection. On older RN that
-  // could escape the JS engine and terminate the app process — exactly
-  // the symptom the user reported on first ship.
-  const [startError, setStartError] = useState<string | null>(null);
-
-  /**
-   * Ensure the runtime permissions the voice session NEEDS are granted
-   * before we touch any of the native machinery. The voice-companion
-   * onboarding screen normally runs first and prompts for these, but
-   * users who reach /voice-companion directly (via Sacred Tools tile,
-   * deep link, or wake word) bypass onboarding entirely. Without this
-   * gate, the native foreground service tries to construct an
-   * AudioRecord on launch — and on Android 6+ that throws
-   * SecurityException, which propagates outside the JNI bridge and
-   * crashes the app process.
-   *
-   * RECORD_AUDIO is the must-have. POST_NOTIFICATIONS is required on
-   * Android 13+ for the FGS notification to actually appear; without
-   * it the OS kills the FGS within ~5 seconds anyway, so prompt
-   * proactively.
-   *
-   * Returns true on success, false on user denial — the caller should
-   * surface a clear message rather than barreling on into FGS.start().
-   */
-  const ensureVoicePermissions = useCallback(async (): Promise<boolean> => {
-    // expo-av's Audio.requestPermissionsAsync handles RECORD_AUDIO
-    // cross-platform and integrates with the manifest declaration.
-    // It's idempotent — returns 'granted' instantly if already granted.
-    const audio = await Audio.requestPermissionsAsync();
-    if (audio.status !== 'granted') {
-      return false;
-    }
-
-    // POST_NOTIFICATIONS is Android 13+ (API 33). Older Android grants
-    // it implicitly. Skip on iOS entirely (different model).
-    if (
-      Platform.OS === 'android' &&
-      typeof Platform.Version === 'number' &&
-      Platform.Version >= 33
-    ) {
-      try {
-        const result = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        );
-        if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-          // We treat POST_NOTIFICATIONS as a soft requirement: the FGS
-          // can technically launch without it, but the OS will kill it
-          // within seconds because the persistent notification can't
-          // render. Better to tell the user up-front.
-          return false;
-        }
-      } catch (e) {
-        // PermissionsAndroid throws on platforms that don't recognize
-        // the permission constant. On Android 12 and below
-        // POST_NOTIFICATIONS isn't a permission you can request —
-        // treat that as success.
+    onStreamCompleted(() => {
+      const text = latestAssistantRef.current;
+      if (!text || !text.trim()) {
+        setState('idle');
+        return;
       }
-    }
+      setState('speaking');
+      Speech.stop();
+      Speech.speak(text, {
+        language: 'en-IN',
+        // 0.95 matches the contemplative cadence the web's
+        // useVoiceOutput uses for spiritual content. 1.0 is too fast
+        // for the kind of dialogue Sakha produces.
+        rate: 0.95,
+        pitch: 1.0,
+        onDone: () => setState('idle'),
+        onStopped: () => setState('idle'),
+        onError: () => setState('idle'),
+      });
+    });
+    return () => {
+      onStreamCompleted(null);
+      Speech.stop();
+    };
+  }, [onStreamCompleted]);
 
-    return true;
+  // ── Permission gate (mic only — no FGS, no notifications) ──
+  // The prior shape needed RECORD_AUDIO + POST_NOTIFICATIONS because
+  // the FGS notification was load-bearing. Now we just need the mic.
+  // expo-av's request is idempotent (returns 'granted' instantly if
+  // already granted) so calling on every Tap-to-begin is fine.
+  const ensureMicPermission = useCallback(async (): Promise<boolean> => {
+    const audio = await Audio.requestPermissionsAsync();
+    return audio.status === 'granted';
   }, []);
 
   const handleStart = useCallback(async () => {
     if (!userId) return;
     setStartError(null);
 
-    // 1. Permissions FIRST — never call into native FGS without them.
-    const granted = await ensureVoicePermissions();
+    const granted = await ensureMicPermission();
     if (!granted) {
       Alert.alert(
         'Microphone access needed',
-        'Sakha needs microphone and notification access to listen and ' +
-          'stay alive while you converse. Open Settings → Apps → ' +
-          'Kiaanverse → Permissions to grant access, then tap "Tap to ' +
-          'begin" again.',
+        'Sakha needs microphone access to listen. Open Settings → ' +
+          'Apps → Kiaanverse → Permissions to grant access, then ' +
+          'tap "Tap to begin" again.',
       );
-      setStartError('Microphone or notification permission denied');
+      setStartError('Microphone permission denied');
+      setState('error');
       return;
     }
 
-    // 2. Wrap the native start sequence in try/catch so any failure —
-    //    audio-focus refusal, FGS launch denial, WSS handshake error —
-    //    surfaces as a UI message rather than an unhandled rejection
-    //    that the OS could escalate to a process crash.
+    void dictation.start();
+  }, [userId, dictation, ensureMicPermission]);
+
+  const handleStop = useCallback(() => {
+    // Universal "end session" button: stops whatever's currently
+    // happening (mic capture / LLM stream / TTS playback) and
+    // returns to idle. Each abort path swallows its own errors so
+    // a partial-state cleanup doesn't crash.
+    Speech.stop();
     try {
-      await audioFocus.acquire();
-      await foregroundService.start();
-      await session.start({ langHint: 'en', userRegion: 'GLOBAL' });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      // eslint-disable-next-line no-console
-      console.warn('[VoiceCompanion] start failed', e);
-      setStartError(message);
-      // Best-effort cleanup so we don't leave the FGS or audio focus
-      // dangling after a partial start. Each cleanup call swallows its
-      // own errors.
-      try { await foregroundService.stop(); } catch {}
-      try { await audioFocus.release(); } catch {}
+      abort();
+    } catch {
+      /* useSakhaStream.abort is no-op when not streaming */
     }
-  }, [userId, audioFocus, foregroundService, session, ensureVoicePermissions]);
+    setState('idle');
+    setStartError(null);
+  }, [abort]);
 
-  const handleStop = useCallback(async () => {
-    session.stop();
-    await foregroundService.stop();
-    await audioFocus.release();
-  }, [session, foregroundService, audioFocus]);
-
+  const isActive = state !== 'idle' && state !== 'error';
   const stateLabel = useMemo(() => stateToLabel(state), [state]);
+
+  // Reflect chat hook's own error state in the UI (e.g., network drop
+  // while streaming). startError covers the dictation/permission side.
+  const displayedError = startError ?? chatError;
 
   return (
     <SafeAreaView style={styles.root}>
@@ -266,34 +235,16 @@ export default function VoiceCompanionScreen() {
         <Shankha size={170} />
       </View>
 
-      <View style={styles.transcriptTicker} pointerEvents="none">
-        {partial ? (
-          <Text style={styles.partial} numberOfLines={2}>
-            {partial}
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.metaRow}>
-        {engine ? <Chip label={engine} /> : null}
-        {mood ? <Chip label={`${mood.label} · ${Math.round(mood.intensity * 100)}%`} /> : null}
-        {verse ? <Chip label={verse.citation} accent /> : null}
-      </View>
-
       <View style={styles.bottomBar}>
         <Text style={styles.stateLabel}>{stateLabel}</Text>
-        {suggested.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestedRow}>
-            {suggested.map((s) => (
-              <Chip key={s.action} label={s.label} accent />
-            ))}
-          </ScrollView>
+        {displayedError ? (
+          <Text style={styles.errorText}>{displayedError}</Text>
         ) : null}
-        {lastError ? <Text style={styles.errorText}>{lastError.message}</Text> : null}
-        {startError ? <Text style={styles.errorText}>{startError}</Text> : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={isActive ? 'Stop voice session' : 'Start voice session'}
+          accessibilityLabel={
+            isActive ? 'Stop voice session' : 'Start voice session'
+          }
           onPress={isActive ? handleStop : handleStart}
           style={[styles.primaryBtn, isActive ? styles.primaryBtnActive : null]}
         >
@@ -306,27 +257,25 @@ export default function VoiceCompanionScreen() {
   );
 }
 
-function Chip({ label, accent }: { label: string; accent?: boolean }) {
-  return (
-    <View style={[styles.chip, accent ? styles.chipAccent : null]}>
-      <Text style={[styles.chipText, accent ? styles.chipTextAccent : null]}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function stateToLabel(s: ReturnType<typeof selectVoiceState>): string {
+function stateToLabel(s: ScreenState): string {
+  // Streaming-flag was used by the prior implementation to distinguish
+  // partial-LLM-arrived-but-still-streaming from done. The new state
+  // machine collapses that into 'thinking' (LLM still streaming) →
+  // 'speaking' (LLM done, TTS playing) → 'idle' (TTS done). One label
+  // per state is enough.
   switch (s) {
-    case 'idle': return 'Tap to begin';
-    case 'listening': return 'I am here, listening';
-    case 'thinking': return '…';
-    case 'speaking': return 'Sakha speaks';
-    case 'interrupted': return 'I hear you';
-    case 'offline': return 'Reconnecting…';
-    case 'crisis': return 'You are not alone';
-    case 'error': return 'Something went wrong';
-    default: return '';
+    case 'idle':
+      return 'Tap to begin';
+    case 'listening':
+      return 'I am here, listening';
+    case 'thinking':
+      return '…';
+    case 'speaking':
+      return 'Sakha speaks';
+    case 'error':
+      return 'Something went wrong';
+    default:
+      return '';
   }
 }
 
@@ -341,24 +290,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  transcriptTicker: {
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
-  partial: {
-    ...Type.body,
-    color: Color.textSecondary,
-    textAlign: 'center',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    marginVertical: Spacing.md,
-  },
   bottomBar: {
     paddingBottom: Spacing.lg,
     alignItems: 'center',
@@ -366,11 +297,6 @@ const styles = StyleSheet.create({
   stateLabel: {
     ...Type.caption,
     color: Color.textTertiary,
-    marginBottom: Spacing.md,
-  },
-  suggestedRow: {
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
   },
   primaryBtn: {
@@ -394,24 +320,5 @@ const styles = StyleSheet.create({
     color: Color.errorRed,
     marginBottom: Spacing.sm,
     textAlign: 'center',
-  },
-  chip: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: 999,
-    backgroundColor: Color.cosmicVoidSoft,
-    borderWidth: 1,
-    borderColor: Color.divider,
-  },
-  chipAccent: {
-    borderColor: Color.divineGoldDim,
-    backgroundColor: 'rgba(212, 160, 23, 0.06)',
-  },
-  chipText: {
-    ...Type.caption,
-    color: Color.textSecondary,
-  },
-  chipTextAccent: {
-    color: Color.divineGoldBright,
   },
 });

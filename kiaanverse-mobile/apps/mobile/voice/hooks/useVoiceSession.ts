@@ -1,4 +1,45 @@
 /**
+ * 🟡 DEPRECATED (2025-11) — see voice-companion/index.tsx header for context.
+ *
+ * This hook (and the other WSS-coupled hooks in this directory:
+ * useStreamingPlayer, useRecorder, useAudioFocus, useForegroundService,
+ * useToolInvocation, useCrisisHandler, useBargeIn, useWebSocket,
+ * useShankhaAnimation, useVAD, useVoicePrefill) is no longer wired
+ * into the main voice-companion flow. It powered the WSS+Sarvam+
+ * ElevenLabs pipeline that ran from PR #1635 through commit
+ * 410220f5. The Option-2 convergence (commit on this branch) replaced
+ * the pipeline with the simpler chat-style stack:
+ *
+ *   useDictation (= SpeechRecognizer) +
+ *   useSakhaStream (= /api/chat) +
+ *   expo-speech (= TextToSpeech)
+ *
+ * which is identical to what kiaanverse.com mobile uses on Chrome/Android.
+ *
+ * The hook is preserved (not deleted) as DORMANT INFRASTRUCTURE for a
+ * future "Premium Voice" tier that re-enables Sarvam Indic + ElevenLabs
+ * English for paying users. The 22 Kotlin files at
+ * apps/mobile/native/android/src/main/java/com/mindvibe/kiaan/voice/*
+ * + the backend's /voice-companion/converse WSS endpoint are
+ * preserved in parallel for the same reason.
+ *
+ * Sibling routes that still import this (quota.tsx, crisis.tsx,
+ * transcript.tsx, onboarding.tsx) are no longer reachable from
+ * /voice-companion/index.tsx after the rewrite — they're dormant
+ * routes that the router can still resolve if anyone deep-links them.
+ *
+ * DO NOT extend or refactor this file. If you need to add voice
+ * functionality, add it via the chat-pattern stack instead. If you
+ * need to bring this hook back to life for a premium tier:
+ *   1. Wire VoiceCompanionScreen to opt into this hook based on a
+ *      user-tier check.
+ *   2. Re-enable the FGS plugin in app.config.ts plugins[].
+ *   3. Re-enable the backend WSS route registration.
+ *   4. Re-add the permissions back to manifest (POST_NOTIFICATIONS
+ *      is still there from the earlier permission-gate PR).
+ *
+ * ─────────────────────────────────────────────────────────────────
+ *
  * useVoiceSession — top-level orchestration hook.
  *
  * Owns the full session lifecycle:
