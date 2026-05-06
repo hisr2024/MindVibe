@@ -44,6 +44,9 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
+import * as Speech from 'expo-speech';
+
+import { useDictation } from '../../voice/hooks/useDictation';
 
 import {
   ChatHeader,
@@ -152,9 +155,55 @@ export default function ChatScreen(): React.JSX.Element {
     onStreamCompleted(() => {
       headerRef.current?.pulse();
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Read Sakha's final response aloud via Android's native
+      // TextToSpeech (the same engine kiaanverse.com Chrome uses
+      // through the SpeechSynthesis API). expo-speech wraps
+      // android.speech.tts.TextToSpeech directly, so this is the
+      // exact cross-platform parity the user asked for.
+      //
+      // Read latestAssistantMessageRef.current — captured at the
+      // moment the stream finishes — rather than reading
+      // `messages` (which is stale inside this callback closure
+      // because onStreamCompleted is registered with an empty
+      // dependency tail in the hook).
+      const latestText = latestAssistantMessageRef.current;
+      if (latestText && latestText.trim().length > 0) {
+        Speech.stop();
+        Speech.speak(latestText, {
+          language: 'en-IN',
+          // Slightly slower than default — reads spiritual content
+          // more contemplatively, mirrors the cadence of the web's
+          // useVoiceOutput defaults.
+          rate: 0.95,
+          pitch: 1.0,
+          // No callbacks needed — fire-and-forget. If the user
+          // navigates away or sends another message, the next
+          // Speech.stop() above ensures we don't have overlapping
+          // utterances.
+        });
+      }
     });
-    return () => onStreamCompleted(null);
+    return () => {
+      onStreamCompleted(null);
+      // Clean up any in-flight speech when the chat tab unmounts.
+      Speech.stop();
+    };
   }, [onStreamCompleted]);
+
+  // Track the latest assistant message text so the onStreamCompleted
+  // callback (registered once on mount) can speak the freshest value.
+  // Using a ref instead of relying on the closure over `messages`
+  // avoids the stale-closure trap.
+  const latestAssistantMessageRef = useRef<string>('');
+  useEffect(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role === 'assistant') {
+        latestAssistantMessageRef.current = m.text;
+        break;
+      }
+    }
+  }, [messages]);
 
   // ── Auto-scroll on new content. ───────────────────────────────────────────
   useEffect(() => {
@@ -211,12 +260,54 @@ export default function ChatScreen(): React.JSX.Element {
     });
   }, [abort, reset]);
 
+  // ── Voice dictation (STT) ─────────────────────────────────────────────
+  // Wires the chat composer's mic button to Android's native
+  // SpeechRecognizer via SakhaDictation (the same engine Chrome's Web
+  // Speech API uses on Android — kiaanverse.com mobile parity). On
+  // success the captured transcript appends to the current `input`
+  // state so the user can edit before sending OR submit immediately.
+  // On error we surface the message inline + clear the listening state.
+  const dictation = useDictation({
+    // 'en-IN' picks up Indian English by default — same locale Sarvam
+    // uses on the WSS path. Users speaking other Indian languages can
+    // still get reasonable results because SpeechRecognizer falls back
+    // to whatever the system language is set to.
+    language: 'en-IN',
+    onTranscript: (transcript) => {
+      // Append (don't replace) so a partially-typed message isn't
+      // wiped if the user tapped the mic mid-thought. Trim leading
+      // whitespace if input was empty.
+      setInput((current) =>
+        current.trim() ? `${current.trim()} ${transcript}` : transcript,
+      );
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: (code, message) => {
+      // eslint-disable-next-line no-console
+      console.warn('[chat] dictation error', code, message);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
+  });
+
   const handleToggleVoice = useCallback(() => {
-    // Voice STT wiring lives in a future story; for now we expose the
-    // visual state so the user sees the tap acknowledged.
+    // If a dictation is already in flight, the user tapping again
+    // is best treated as a no-op — useDictation guards internally
+    // against double-start. We still flip the visual indicator so
+    // the user gets immediate feedback.
     void Haptics.selectionAsync();
-    setVoiceEnabled((v) => !v);
-  }, []);
+    setVoiceEnabled(true);
+    void dictation.start();
+  }, [dictation]);
+
+  // Reflect actual dictation state in the visual `voiceEnabled` flag so
+  // the mic button's UI tracks reality (idle vs listening vs resolving).
+  useEffect(() => {
+    if (dictation.state.tag === 'idle' || dictation.state.tag === 'error') {
+      setVoiceEnabled(false);
+    } else {
+      setVoiceEnabled(true);
+    }
+  }, [dictation.state.tag]);
 
   // ── Rendering helpers ────────────────────────────────────────────────────
   const renderItem = useCallback(
