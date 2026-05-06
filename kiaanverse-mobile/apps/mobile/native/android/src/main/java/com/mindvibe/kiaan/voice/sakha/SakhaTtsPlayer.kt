@@ -298,34 +298,51 @@ class SakhaTtsPlayer(
     private suspend fun playFile(file: File): Long {
         val done = CompletableDeferred<Long>()
         val started = System.currentTimeMillis()
+
+        // Construct FIRST, then configure under a try/catch that holds a
+        // direct reference to the player. Important: NEVER use
+        // `MediaPlayer().apply { prepare() }` for this — if prepare()
+        // throws inside the apply lambda, the MediaPlayer instance is
+        // already on the heap but no reference escaped the throw, so
+        // there is no handle to release(). Each leaked MediaPlayer holds
+        // an audio decoder session for ~30s until the system reaper
+        // claims it; under repeated TTS errors this drains the codec
+        // pool and subsequent prepare() calls return MEDIA_ERROR_SERVER_DIED.
+        val player = MediaPlayer()
         try {
-            val player = MediaPlayer().apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .setUsage(AudioAttributes.USAGE_ASSISTANT)
-                        .build()
-                )
-                setDataSource(context, Uri.fromFile(file))
-                setOnCompletionListener {
-                    done.complete(System.currentTimeMillis() - started)
-                }
-                setOnErrorListener { _, what, extra ->
-                    done.complete(0L)
-                    if (config.debugMode) Log.w(TAG, "MediaPlayer error: $what/$extra")
-                    true
-                }
-                prepare()
-                start()
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                    .build()
+            )
+            player.setDataSource(context, Uri.fromFile(file))
+            player.setOnCompletionListener {
+                done.complete(System.currentTimeMillis() - started)
             }
-            currentPlayer = player
-            val ms = done.await()
+            player.setOnErrorListener { _, what, extra ->
+                done.complete(0L)
+                if (config.debugMode) Log.w(TAG, "MediaPlayer error: $what/$extra")
+                true
+            }
+            // prepare() can raise IOException synchronously when the
+            // codec doesn't support the file or the source is unreadable.
+            player.prepare()
+            player.start()
+        } catch (e: Exception) {
+            // Release the player WE STILL HAVE A REFERENCE TO before
+            // bailing out. release() on a never-prepared player is safe.
+            try { player.release() } catch (_: Exception) {}
+            if (config.debugMode) Log.w(TAG, "Playback setup failed: ${e.message}")
+            return 0L
+        }
+
+        currentPlayer = player
+        try {
+            return done.await()
+        } finally {
             try { player.release() } catch (_: Exception) {}
             currentPlayer = null
-            return ms
-        } catch (e: Exception) {
-            if (config.debugMode) Log.w(TAG, "Playback failed: ${e.message}")
-            return 0L
         }
     }
 
