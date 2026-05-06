@@ -67,6 +67,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     policy: 'appVersion' as const,
   },
 
+  // Pin Hermes explicitly. Expo SDK 51 + RN 0.74.5 both default to
+  // Hermes for Android release builds, but defaults can drift across
+  // SDK upgrades and EAS image changes. A silent fall-through to JSC
+  // would (a) break Sentry's source-map upload (Sentry's RN integration
+  // assumes Hermes on Android since 5.x), (b) regress startup time and
+  // bundle size, and (c) reintroduce the Hermes-specific Intl/regex
+  // bugs the 1.3.1 R8 keep-rule block was added to defend against.
+  // Pinning here makes the engine explicit at every consumer (EAS,
+  // local dev, expo prebuild) and any future change is a deliberate
+  // edit to this file rather than a silent default-flip.
+  jsEngine: 'hermes',
+
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
