@@ -183,6 +183,17 @@ jobs:
         # navigate). Regressions here are silent feature breakage.
         run: node scripts/test-pure-helpers.mjs
 
+      - name: Validate JS↔Kotlin bridge coverage
+        working-directory: kiaanverse-mobile/apps/mobile
+        # Cross-check every JS NativeModules.<X>.method() callsite
+        # against the Kotlin @ReactMethod declarations on module class
+        # X. Catches: renaming a Kotlin method without updating JS,
+        # adding a JS call to a never-implemented Kotlin method,
+        # forgetting to register a new module's Package in the plugin.
+        # Without this, drift surfaces as "TypeError: Native.method is
+        # not a function" at first call from the user-driven path.
+        run: node scripts/validate-bridge-coverage.mjs
+
   security-audit:
     runs-on: ubuntu-latest
     if: always()

@@ -49,6 +49,7 @@ jobs:
           node scripts/validate-wss-types.mjs
           node scripts/validate-tool-contracts.mjs
           node scripts/test-pure-helpers.mjs
+          node scripts/validate-bridge-coverage.mjs
 
       - name: Setup EAS CLI
         run: npm install -g eas-cli
