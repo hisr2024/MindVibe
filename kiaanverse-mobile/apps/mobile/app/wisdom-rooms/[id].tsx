@@ -35,6 +35,7 @@ import {
   useWisdomRooms,
   type WisdomRoomMessage,
 } from '@kiaanverse/api';
+import { MessageActionBar } from '../../voice/components/MessageActionBar';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 export default function WisdomRoomChatScreen(): React.JSX.Element {
@@ -100,6 +101,13 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
               minute: '2-digit',
             })}
           </Text>
+          {/* Per-message action bar — Listen / Copy / Share / Journal.
+              Same component used in Sakha Chat. Surfaces on every
+              wisdom-room message (both host + participant) since the
+              user may want to save a participant's reflection to their
+              own journal too. Hide Journal on the user's own messages
+              would require sender-id comparison; keeping it simple. */}
+          <MessageActionBar text={item.content} journalSource="wisdom-room" />
         </View>
       );
     },

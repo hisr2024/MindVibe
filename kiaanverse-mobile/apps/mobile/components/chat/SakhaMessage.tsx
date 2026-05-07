@@ -16,19 +16,9 @@
  * prose (if provided).
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Pressable,
-  Share,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Speech from 'expo-speech';
-import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -38,13 +28,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  BookHeart,
-  Copy,
-  Share2,
-  Square,
-  Volume2,
-} from 'lucide-react-native';
+
+import { MessageActionBar } from '../../voice/components/MessageActionBar';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let MandalaSpin: React.ComponentType<any> | null = null;
@@ -303,143 +288,9 @@ function SakhaMessageInner({
             swallowed) — these are nice-to-have actions; a Share-sheet
             cancel or a TTS engine hiccup must not crash the bubble. */}
         {!isStreaming && text.trim().length > 0 ? (
-          <MessageActionBar text={text} />
+          <MessageActionBar text={text} journalSource="sakha-chat" />
         ) : null}
       </View>
-    </View>
-  );
-}
-
-/** Per-message action bar (replay TTS, copy, share, save to journal). */
-function MessageActionBar({ text }: { text: string }): React.JSX.Element {
-  const router = useRouter();
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  // Replay-TTS button. Same engine used for the auto-speak when the
-  // stream first completes (see app/(tabs)/chat.tsx). Tapping again
-  // while playing stops playback (toggle behavior).
-  const handleSpeak = useCallback(() => {
-    if (isSpeaking) {
-      Speech.stop();
-      setIsSpeaking(false);
-      return;
-    }
-    void Haptics.selectionAsync().catch(() => {});
-    setIsSpeaking(true);
-    Speech.stop();
-    Speech.speak(text, {
-      language: 'en-IN',
-      rate: 0.95,
-      pitch: 1.0,
-      onDone: () => setIsSpeaking(false),
-      onStopped: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
-    });
-  }, [text, isSpeaking]);
-
-  // Copy + Share both go through Android's native share sheet, which
-  // surfaces "Copy to clipboard" as one of the system options. This
-  // avoids adding expo-clipboard (~30KB) for a single-purpose feature
-  // and keeps Android-native UX intact.
-  const handleShare = useCallback(async () => {
-    void Haptics.selectionAsync().catch(() => {});
-    try {
-      await Share.share({
-        message: `${text}\n\n— Sakha · Kiaanverse`,
-      });
-    } catch {
-      // User cancelled or share sheet unavailable — no state to
-      // unwind. The original message stays in the chat.
-    }
-  }, [text]);
-
-  // Save to Sacred Reflections journal. Pushes /sacred-reflections
-  // with a `prefill` query param so the editor seeds with this
-  // message text. The reflections editor already accepts `prefill`
-  // via the same shape that voice tool-invocation uses (see
-  // useToolInvocation.ts:62 — TOOL_ROUTES.SACRED_REFLECTIONS).
-  const handleJournal = useCallback(() => {
-    void Haptics.selectionAsync().catch(() => {});
-    router.push({
-      pathname: '/sacred-reflections',
-      params: {
-        prefill: JSON.stringify({
-          prefill_text: text,
-          source: 'sakha-chat',
-        }),
-      },
-    });
-  }, [text, router]);
-
-  // Stop playback if the bubble unmounts (e.g., chat history scrolls
-  // off-screen and the FlatList recycles the view).
-  useEffect(() => {
-    return () => {
-      Speech.stop();
-    };
-  }, []);
-
-  return (
-    <View style={styles.actionBar}>
-      <Pressable
-        onPress={handleSpeak}
-        accessibilityRole="button"
-        accessibilityLabel={isSpeaking ? 'Stop reading aloud' : 'Read aloud'}
-        style={({ pressed }) => [
-          styles.actionBtn,
-          pressed && styles.actionBtnPressed,
-        ]}
-        hitSlop={8}
-      >
-        {isSpeaking ? (
-          <Square size={14} color={GOLD} fill={GOLD} />
-        ) : (
-          <Volume2 size={14} color={GOLD} />
-        )}
-        <Text style={styles.actionLabel}>{isSpeaking ? 'Stop' : 'Listen'}</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={handleShare}
-        accessibilityRole="button"
-        accessibilityLabel="Copy or share Sakha's response"
-        style={({ pressed }) => [
-          styles.actionBtn,
-          pressed && styles.actionBtnPressed,
-        ]}
-        hitSlop={8}
-      >
-        <Copy size={14} color={GOLD} />
-        <Text style={styles.actionLabel}>Copy</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={handleShare}
-        accessibilityRole="button"
-        accessibilityLabel="Share to social media or messaging app"
-        style={({ pressed }) => [
-          styles.actionBtn,
-          pressed && styles.actionBtnPressed,
-        ]}
-        hitSlop={8}
-      >
-        <Share2 size={14} color={GOLD} />
-        <Text style={styles.actionLabel}>Share</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={handleJournal}
-        accessibilityRole="button"
-        accessibilityLabel="Save to Sacred Reflections journal"
-        style={({ pressed }) => [
-          styles.actionBtn,
-          pressed && styles.actionBtnPressed,
-        ]}
-        hitSlop={8}
-      >
-        <BookHeart size={14} color={GOLD} />
-        <Text style={styles.actionLabel}>Journal</Text>
-      </Pressable>
     </View>
   );
 }
@@ -546,35 +397,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(212,160,23,0.18)',
     gap: 6,
-  },
-  actionBar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(212,160,23,0.12)',
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
-    backgroundColor: 'rgba(212,160,23,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(212,160,23,0.18)',
-  },
-  actionBtnPressed: {
-    backgroundColor: 'rgba(212,160,23,0.18)',
-    borderColor: 'rgba(212,160,23,0.36)',
-  },
-  actionLabel: {
-    color: GOLD,
-    fontSize: 12,
-    fontWeight: '500',
   },
   shlokaSanskrit: {
     fontFamily: 'NotoSansDevanagari-Regular',

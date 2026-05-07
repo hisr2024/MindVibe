@@ -16,7 +16,7 @@
  * Background: DivineScreenWrapper on mount.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -27,16 +27,15 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import * as Speech from 'expo-speech';
 import {
   Bookmark,
   BookmarkCheck,
   ChevronLeft,
   Share2,
   Sparkles,
-  Square,
-  Volume2,
 } from 'lucide-react-native';
+
+import { ListenButton } from '../../../../voice/components/ListenButton';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -129,93 +128,30 @@ export default function VerseDetailScreen(): React.JSX.Element {
     }
   }, [data, translations]);
 
-  // ── TTS playback (Sanskrit → English → Hindi sequential) ─────────────
-  // Reads the verse aloud through Android's native TextToSpeech engine
-  // (via expo-speech, which wraps android.speech.tts.TextToSpeech). Same
-  // engine kiaanverse.com uses on Chrome/Android via SpeechSynthesis.
-  //
-  // Strategy: queue Sanskrit first (sa-IN locale → uses the system's
-  // best available Indic voice; Google's neural TTS handles Devanagari
-  // word-by-word), then English (en-IN), then Hindi if available.
-  // Speech.stop() between segments prevents overlap; the chain is
-  // expressed as nested onDone callbacks for sequential playback.
-  //
-  // Rate is 0.9 — slightly slower than default — so the user can
-  // follow Sanskrit pronunciation. The contemplative cadence matches
-  // the rest of Sakha's voice surfaces (chat: 0.95, voice-companion: 0.95).
-  //
-  // No backend call. No Sarvam. No ElevenLabs. Free, on-device, instant.
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const handleListen = useCallback(() => {
-    if (!data?.verse) return;
-    if (isSpeaking) {
-      // Tap-to-stop while playing.
-      Speech.stop();
-      setIsSpeaking(false);
-      return;
-    }
+  // ── TTS playback handled by <ListenButton segments={...}> below.
+  // The segment list (Sanskrit → English → Hindi) is computed during
+  // render so the button can play / stop / re-play at any time without
+  // recomputation. The button itself owns the "is speaking" state and
+  // the cleanup-on-unmount semantics — keeping that out of this screen
+  // means no stale-closure bugs around verse navigation.
+  const listenSegments = React.useMemo(() => {
+    if (!data?.verse) return undefined;
     const v = data.verse;
-    const hindiText = (translations?.translations as
-      | { hindi?: string }
-      | undefined)?.hindi?.trim();
-
-    void Haptics.selectionAsync().catch(() => {});
-    setIsSpeaking(true);
-    Speech.stop();
-
-    // Speech.speak callback signature: onDone fires when the utterance
-    // completes naturally; onStopped fires when Speech.stop() interrupts.
-    // We chain segments via onDone so they play back-to-back.
-    const speakEnglish = () => {
-      Speech.speak(v.english, {
-        language: 'en-IN',
-        rate: 0.9,
-        pitch: 1.0,
-        onDone: hindiText ? speakHindi : finish,
-        onStopped: () => setIsSpeaking(false),
-        onError: () => setIsSpeaking(false),
-      });
-    };
-    const speakHindi = () => {
-      if (!hindiText) {
-        finish();
-        return;
-      }
-      Speech.speak(hindiText, {
-        language: 'hi-IN',
-        rate: 0.9,
-        pitch: 1.0,
-        onDone: finish,
-        onStopped: () => setIsSpeaking(false),
-        onError: () => setIsSpeaking(false),
-      });
-    };
-    const finish = () => setIsSpeaking(false);
-
-    Speech.speak(v.sanskrit, {
+    const hindiText = (
+      translations?.translations as { hindi?: string } | undefined
+    )?.hindi?.trim();
+    return [
       // 'sa-IN' is the BCP-47 tag for Sanskrit (India). Most Android
-      // builds don't ship a Sanskrit voice; the engine then falls back
-      // to the closest match (typically hi-IN), which still pronounces
-      // Devanagari script correctly. If the user's device DOES have a
-      // Sanskrit voice (some custom ROMs / Pixel Tensor TPU), it
-      // auto-picks it.
-      language: 'sa-IN',
-      rate: 0.85,
-      pitch: 1.0,
-      onDone: speakEnglish,
-      onStopped: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
-    });
-  }, [data, translations, isSpeaking]);
-
-  // Stop in-flight TTS if the user navigates away or the verse changes.
-  useEffect(() => {
-    return () => {
-      Speech.stop();
-      setIsSpeaking(false);
-    };
-  }, [verseId]);
+      // builds don't ship a Sanskrit voice; the engine falls back to
+      // the closest Indic match (typically hi-IN), which still
+      // pronounces Devanagari script correctly. Devices with a
+      // Sanskrit voice (some Pixel Tensor TPU / custom ROMs) auto-pick.
+      // Slower rate (0.85) so the user can follow each Sanskrit word.
+      { text: v.sanskrit, language: 'sa-IN', rate: 0.85 },
+      { text: v.english, language: 'en-IN', rate: 0.9 },
+      ...(hindiText ? [{ text: hindiText, language: 'hi-IN', rate: 0.9 }] : []),
+    ];
+  }, [data, translations]);
 
   const handleAskSakha = useCallback(() => {
     if (!data?.verse) return;
@@ -368,22 +304,12 @@ export default function VerseDetailScreen(): React.JSX.Element {
           entering={FadeIn.delay(340).duration(400)}
           style={styles.ctaRow}
         >
-          <DivineButton
-            title={isSpeaking ? 'Stop' : 'Listen to verse'}
-            onPress={handleListen}
+          <ListenButton
+            segments={listenSegments}
             variant="secondary"
-            leftAccessory={
-              isSpeaking ? (
-                <Square size={14} color={GOLD} fill={GOLD} />
-              ) : (
-                <Volume2 size={16} color={GOLD} />
-              )
-            }
-            accessibilityLabel={
-              isSpeaking
-                ? 'Stop verse playback'
-                : 'Listen to verse aloud (Sanskrit, English, Hindi)'
-            }
+            idleLabel="Listen to verse"
+            accessibilityLabelIdle="Listen to verse aloud (Sanskrit, English, Hindi)"
+            accessibilityLabelPlaying="Stop verse playback"
           />
         </Animated.View>
 
