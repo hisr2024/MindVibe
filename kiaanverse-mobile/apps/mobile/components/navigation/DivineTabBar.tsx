@@ -114,8 +114,12 @@ const TOP_BORDER_COLORS: readonly [string, string, string, string, string] = [
   'transparent',
 ];
 
-/** Base height of the tab bar content (safe-area inset is added on top). */
-const TAB_BAR_HEIGHT = 64;
+/** Base height of the tab bar content (safe-area inset is added on top).
+ *
+ *  Exported so screens with floating elements (FABs, snackbars,
+ *  composers) can lift themselves above the tab bar instead of being
+ *  covered by it. The journal tab's "+" FAB relies on this value. */
+export const TAB_BAR_HEIGHT = 64;
 /** Active indicator dot diameter. */
 const DOT_SIZE = 4;
 /** Distance between the dot's bottom edge and the icon's top edge. */

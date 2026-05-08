@@ -6,8 +6,7 @@
  *   2. SubMandalaTexture – faint sacred-geometry backdrop behind the scroll area
  *   3a. Empty state      – HeroMandala + hero prompt + ConversationStarters
  *   3b. Messages list    – alternating UserMessage / SakhaMessage + TypingIndicator
- *   4. InsightFab       – floating lightbulb that injects a curated Gita prompt
- *   5. ChatInput        – voice/text composer with send pulse
+ *   4. ChatInput        – voice/text composer with send pulse
  *
  * Data flow:
  *   - `useSakhaStream` owns the SSE lifecycle (POST → token stream → done).
@@ -47,7 +46,6 @@ import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 
 import { useDictation } from '../../voice/hooks/useDictation';
-import { divineProsody } from '../../voice/lib/divineVoice';
 
 import {
   ChatHeader,
@@ -55,7 +53,6 @@ import {
   ChatInput,
   ConversationStarters,
   HeroMandala,
-  InsightFab,
   SakhaMessage,
   TypingIndicator,
   UserMessage,
@@ -73,8 +70,8 @@ const MAX_CACHED_MESSAGES = 60;
  * Height of the custom DivineTabBar's content (safe-area bottom is added on
  * top inside the tab bar itself). The tab bar is `position: absolute, bottom:
  * 0` so it overlays tab screens; we reserve this space on the chat root so
- * the ChatInput and the InsightFab both sit above it instead of being
- * covered by the Home / Sakha / Shlokas row.
+ * the ChatInput sits above it instead of being covered by the Home /
+ * Sakha / Shlokas row.
  *
  * Must stay in sync with `TAB_BAR_HEIGHT` in components/navigation/DivineTabBar.tsx.
  */
@@ -178,46 +175,22 @@ export default function ChatScreen(): React.JSX.Element {
       // android.speech.tts.TextToSpeech directly, so this is the
       // exact cross-platform parity the user asked for.
       //
-      // Read latestAssistantMessageRef.current — captured at the
-      // moment the stream finishes — rather than reading
-      // `messages` (which is stale inside this callback closure
-      // because onStreamCompleted is registered with an empty
-      // dependency tail in the hook).
-      const latestText = latestAssistantMessageRef.current;
-      if (latestText && latestText.trim().length > 0) {
-        Speech.stop();
-        // Use divineProsody so this auto-speak picks the same neural
-        // voice + contemplative cadence as the per-message Listen
-        // button (which uses ListenButton + warmDivineVoiceCache).
-        // The cache is warmed lazily — first auto-speak after app
-        // launch may use the engine default for ~50ms while the cache
-        // populates; subsequent ones get the divine voice.
-        Speech.speak(latestText, {
-          ...divineProsody('en-IN'),
-        });
-      }
+      // Auto-speak removed (per user request 2025-11): chat responses
+      // should NOT play automatically. The user reads at their own
+      // pace; they tap the Listen button on a specific message bubble
+      // (see SakhaMessage's MessageActionBar) when they want to hear
+      // it. This matches kiaanverse.com mobile behavior — chat is for
+      // considered messages + reading, voice-companion is for fluid
+      // conversation. Auto-listen still fires on /voice-companion.
     });
     return () => {
       onStreamCompleted(null);
-      // Clean up any in-flight speech when the chat tab unmounts.
+      // Clean up any in-flight speech when the chat tab unmounts —
+      // catches the case where the user tapped Listen on a message,
+      // started playback, then navigated away mid-utterance.
       Speech.stop();
     };
   }, [onStreamCompleted]);
-
-  // Track the latest assistant message text so the onStreamCompleted
-  // callback (registered once on mount) can speak the freshest value.
-  // Using a ref instead of relying on the closure over `messages`
-  // avoids the stale-closure trap.
-  const latestAssistantMessageRef = useRef<string>('');
-  useEffect(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i];
-      if (m.role === 'assistant') {
-        latestAssistantMessageRef.current = m.text;
-        break;
-      }
-    }
-  }, [messages]);
 
   // ── Auto-scroll on new content. ───────────────────────────────────────────
   useEffect(() => {
@@ -258,12 +231,6 @@ export default function ChatScreen(): React.JSX.Element {
     },
     [handleSend]
   );
-
-  const handleInsightPress = useCallback((prompt: string) => {
-    // Fill the composer so the user can edit before sending, rather than
-    // auto-sending — gives them control over their spiritual dialogue.
-    setInput(prompt);
-  }, []);
 
   const handleClearConversation = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -323,6 +290,22 @@ export default function ChatScreen(): React.JSX.Element {
     }
   }, [dictation.state.tag]);
 
+  // "Go deeper" follow-up handler — fires when the user taps the
+  // conversation-mode pill on a Sakha message bubble. Sends the
+  // follow-up prompt as a NEW user turn so the LLM has the prior
+  // context server-side and can take the topic further.
+  //
+  // We pass the prompt through handleSend (not direct send) so the
+  // online + streaming guards still apply — taps fired during a
+  // network drop or while a previous response is still streaming
+  // are swallowed by the same safeguards.
+  const handleAskFollowUp = useCallback(
+    (followUpPrompt: string) => {
+      void handleSend(followUpPrompt);
+    },
+    [handleSend],
+  );
+
   // ── Rendering helpers ────────────────────────────────────────────────────
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<SakhaStreamMessage>) => {
@@ -334,10 +317,11 @@ export default function ChatScreen(): React.JSX.Element {
           id={item.id}
           text={item.text}
           isStreaming={item.isStreaming === true}
+          onAskFollowUp={handleAskFollowUp}
         />
       );
     },
-    []
+    [handleAskFollowUp]
   );
 
   const keyExtractor = useCallback((item: SakhaStreamMessage) => item.id, []);
@@ -433,15 +417,6 @@ export default function ChatScreen(): React.JSX.Element {
             </View>
           )}
 
-          {/* Floating insight FAB — seeds a Gita-rooted reflection prompt.
-              Positioned relative to the body's bottom edge, which — thanks
-              to the flex layout and the root's reserved tab-bar space —
-              already sits just above the ChatInput composer. */}
-          <InsightFab
-            onPress={handleInsightPress}
-            hidden={streaming}
-            bottomOffset={12}
-          />
         </View>
 
         <ChatInput

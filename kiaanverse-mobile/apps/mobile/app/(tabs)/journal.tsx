@@ -56,6 +56,7 @@ import type { JournalEntry } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
 import { LotusGlyph } from '../../components/sacred-reflections/LotusGlyph';
+import { TAB_BAR_HEIGHT } from '../../components/navigation/DivineTabBar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
@@ -485,10 +486,18 @@ function JournalView(): React.JSX.Element {
         />
       </SacredTransition>
 
-      {/* FAB */}
+      {/* FAB — lifted above the tab bar.
+          Earlier shape used `bottom: insets.bottom + spacing.lg` which
+          ignored the tab bar height. The DivineTabBar overlays every
+          tab screen at the bottom (height = TAB_BAR_HEIGHT + safe-area),
+          so the FAB was hiding behind the navigation row.
+          Now: tab bar height + safe-area + a comfortable gap. */}
       <Pressable
         onPress={handleFabPress}
-        style={[styles.fab, { bottom: insets.bottom + spacing.lg }]}
+        style={[
+          styles.fab,
+          { bottom: insets.bottom + TAB_BAR_HEIGHT + spacing.lg },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={t('newEntry', 'Create new journal entry')}
       >

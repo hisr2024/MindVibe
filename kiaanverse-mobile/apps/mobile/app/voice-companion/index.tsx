@@ -52,7 +52,7 @@
  * is removed.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -69,7 +69,7 @@ import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
-import { divineProsody, warmDivineVoiceCache } from '../../voice/lib/divineVoice';
+import { divineProsody } from '../../voice/lib/divineVoice';
 import { useSakhaStream } from '../../components/chat/useSakhaStream';
 
 /**
