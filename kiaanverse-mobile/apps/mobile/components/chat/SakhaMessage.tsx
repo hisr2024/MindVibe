@@ -16,9 +16,10 @@
  * prose (if provided).
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -28,8 +29,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { ArrowDownToLine, MessageCircleMore } from 'lucide-react-native';
 
 import { MessageActionBar } from '../../voice/components/MessageActionBar';
+import { isWorthSummarizing, summarize } from '../../voice/lib/summarize';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let MandalaSpin: React.ComponentType<any> | null = null;
@@ -71,6 +74,13 @@ export interface SakhaMessageProps {
   readonly shloka?: SakhaMessageShloka;
   /** Stable message id for keying. */
   readonly id?: string;
+  /**
+   * Called when the user taps "Go deeper" — starts a follow-up turn
+   * to take the conversation further on this topic. Chat tab wires
+   * this to send() with a "please explain further" prompt seeded
+   * with the current message context.
+   */
+  readonly onAskFollowUp?: (followUpPrompt: string) => void;
 }
 
 /** Regex that splits text into whitespace vs. non-whitespace runs. */
@@ -207,11 +217,28 @@ function SakhaMessageInner({
   isStreaming,
   shloka,
   id,
+  onAskFollowUp,
 }: SakhaMessageProps): React.JSX.Element {
   const { width } = useWindowDimensions();
   const maxWidth = Math.round(width * MAX_WIDTH_PERCENT);
 
-  const tokens = useMemo(() => tokenize(text), [text]);
+  // ── Saransh (सारांश, "summary") view mode ──
+  // 'full'    — render the full streamed response (default).
+  // 'saransh' — render the heuristic-extracted short summary.
+  // Toggleable via a pill button below the bubble. Only shown when
+  // the message is long enough for a summary to be meaningfully
+  // different from the full text (isWorthSummarizing >= 280 chars).
+  const [viewMode, setViewMode] = useState<'full' | 'saransh'>('full');
+  const summaryText = useMemo(() => summarize(text), [text]);
+  const showSaranshToggle =
+    !isStreaming &&
+    isWorthSummarizing(text) &&
+    summaryText.length > 0 &&
+    summaryText !== text;
+  // Pick which text to actually animate + display.
+  const displayedText = viewMode === 'saransh' ? summaryText : text;
+
+  const tokens = useMemo(() => tokenize(displayedText), [displayedText]);
   const lastNonWhitespace = useMemo(() => {
     for (let i = tokens.length - 1; i >= 0; i--) {
       const tok = tokens[i];
@@ -219,6 +246,24 @@ function SakhaMessageInner({
     }
     return -1;
   }, [tokens]);
+
+  const handleToggleSaransh = useCallback(() => {
+    void Haptics.selectionAsync().catch(() => {});
+    setViewMode((m) => (m === 'full' ? 'saransh' : 'full'));
+  }, []);
+
+  const handleGoDeeper = useCallback(() => {
+    if (!onAskFollowUp) return;
+    void Haptics.selectionAsync().catch(() => {});
+    // Simple "explain further" prompt — the LLM has the prior
+    // conversation context server-side so it knows what "this
+    // topic" refers to. Sending a richer prompt with the current
+    // message text inline would double-count it in the model's
+    // context window for no added benefit.
+    onAskFollowUp(
+      'Please go deeper into this — share more nuance, examples, or a Gita reference.',
+    );
+  }, [onAskFollowUp]);
 
   // Reveal index grows as the text grows, so every new token fades in.
   const revealIndex = tokens.length - 1;
@@ -280,15 +325,72 @@ function SakhaMessageInner({
 
         {shimmerKey ? <CompletionShimmer key={shimmerKey} /> : null}
 
+        {/* View-mode + conversation-mode controls. Saransh toggle
+            (Hindi: सारांश, "summary") flips between the full streamed
+            response and a heuristic short summary. "Go deeper" sends
+            a follow-up prompt to continue the conversation on this
+            topic — the user can chain Saransh for the gist + Go
+            deeper for nuance, mimicking how kiaanverse.com lets users
+            switch between detailed/summary modes mid-conversation.
+
+            Both controls only render AFTER streaming completes so a
+            partially-streamed message doesn't get a "Saransh" pill
+            it doesn't deserve yet. */}
+        {!isStreaming && text.trim().length > 0 ? (
+          <View style={styles.viewModeRow}>
+            {showSaranshToggle ? (
+              <Pressable
+                onPress={handleToggleSaransh}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  viewMode === 'saransh'
+                    ? 'Show full explanation'
+                    : 'Show short summary (Saransh)'
+                }
+                style={({ pressed }) => [
+                  styles.actionBtn,
+                  viewMode === 'saransh' && styles.actionBtnActive,
+                  pressed && styles.actionBtnPressed,
+                ]}
+                hitSlop={8}
+              >
+                <ArrowDownToLine size={14} color={GOLD} />
+                <Text style={styles.actionLabel}>
+                  {viewMode === 'saransh' ? 'Full' : 'Saransh'}
+                </Text>
+              </Pressable>
+            ) : null}
+            {onAskFollowUp ? (
+              <Pressable
+                onPress={handleGoDeeper}
+                accessibilityRole="button"
+                accessibilityLabel="Continue the conversation — go deeper into this topic"
+                style={({ pressed }) => [
+                  styles.actionBtn,
+                  pressed && styles.actionBtnPressed,
+                ]}
+                hitSlop={8}
+              >
+                <MessageCircleMore size={14} color={GOLD} />
+                <Text style={styles.actionLabel}>Go deeper</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+
         {/* Per-message action bar — Speak / Copy / Share / Save to
             Journal. Only renders AFTER streaming completes so the user
             doesn't see a half-formed bubble with action affordances.
-            Mirror of the desktop SakhaMessageBubble's action set on
-            kiaanverse.com. Each handler is fire-and-forget (errors
-            swallowed) — these are nice-to-have actions; a Share-sheet
-            cancel or a TTS engine hiccup must not crash the bubble. */}
+            Listen reads `displayedText` so it speaks the SAME view
+            the user is currently looking at (Saransh or Full).
+            Each handler is fire-and-forget (errors swallowed) —
+            these are nice-to-have actions; a Share-sheet cancel or
+            a TTS engine hiccup must not crash the bubble. */}
         {!isStreaming && text.trim().length > 0 ? (
-          <MessageActionBar text={text} journalSource="sakha-chat" />
+          <MessageActionBar
+            text={displayedText}
+            journalSource="sakha-chat"
+          />
         ) : null}
       </View>
     </View>
@@ -397,6 +499,46 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(212,160,23,0.18)',
     gap: 6,
+  },
+  // View-mode + conversation-mode pill row (Saransh / Go deeper).
+  // Sits ABOVE MessageActionBar so the user sees "what kind of view"
+  // controls first, then the per-message actions (Listen / Copy /
+  // Share / Journal) below. Same gold pill aesthetic as the action
+  // bar; visually one continuous control surface.
+  viewModeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(212,160,23,0.12)',
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.18)',
+  },
+  actionBtnActive: {
+    // Fill state — applied when Saransh view is currently selected
+    // so the user can tell at a glance which view they're seeing.
+    backgroundColor: 'rgba(212,160,23,0.22)',
+    borderColor: 'rgba(212,160,23,0.45)',
+  },
+  actionBtnPressed: {
+    backgroundColor: 'rgba(212,160,23,0.18)',
+    borderColor: 'rgba(212,160,23,0.36)',
+  },
+  actionLabel: {
+    color: GOLD,
+    fontSize: 12,
+    fontWeight: '500',
   },
   shlokaSanskrit: {
     fontFamily: 'NotoSansDevanagari-Regular',

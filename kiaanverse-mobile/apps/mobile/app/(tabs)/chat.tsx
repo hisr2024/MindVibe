@@ -290,6 +290,22 @@ export default function ChatScreen(): React.JSX.Element {
     }
   }, [dictation.state.tag]);
 
+  // "Go deeper" follow-up handler — fires when the user taps the
+  // conversation-mode pill on a Sakha message bubble. Sends the
+  // follow-up prompt as a NEW user turn so the LLM has the prior
+  // context server-side and can take the topic further.
+  //
+  // We pass the prompt through handleSend (not direct send) so the
+  // online + streaming guards still apply — taps fired during a
+  // network drop or while a previous response is still streaming
+  // are swallowed by the same safeguards.
+  const handleAskFollowUp = useCallback(
+    (followUpPrompt: string) => {
+      void handleSend(followUpPrompt);
+    },
+    [handleSend],
+  );
+
   // ── Rendering helpers ────────────────────────────────────────────────────
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<SakhaStreamMessage>) => {
@@ -301,10 +317,11 @@ export default function ChatScreen(): React.JSX.Element {
           id={item.id}
           text={item.text}
           isStreaming={item.isStreaming === true}
+          onAskFollowUp={handleAskFollowUp}
         />
       );
     },
-    []
+    [handleAskFollowUp]
   );
 
   const keyExtractor = useCallback((item: SakhaStreamMessage) => item.id, []);
