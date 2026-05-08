@@ -57,6 +57,25 @@ let warmupPromise: Promise<VoiceCache> | null = null;
 /**
  * Score a candidate voice. Higher score = better fit for Sakha's
  * spiritual dialogue.
+ *
+ * KEY INSIGHT (revised 2025-11): Google's Android TTS exposes the
+ * SAME high-quality female-Indian-English voice in two variants:
+ *
+ *   • en-in-x-ahp-LOCAL    — voice model bundled in TTS engine,
+ *                            INSTANT playback, no network call ever
+ *   • en-in-x-ahp-NETWORK  — same voice model fetched on-demand
+ *                            from Google's servers, 200-1000ms wait
+ *                            on FIRST use (cached after that)
+ *
+ * Both variants render the EXACT SAME audio. The "network" suffix is
+ * a download-on-demand strategy, not a quality tier. Preferring local
+ * over network is therefore strictly better: same quality, zero
+ * latency, no internet required.
+ *
+ * Earlier versions of this file scored network higher than local —
+ * that was a misread of the Android TTS API. The result was a
+ * noticeable lag on the first Listen tap of every fresh app launch.
+ * The fix is one-line: invert the local/network scoring.
  */
 function scoreVoice(voice: Speech.Voice, targetLang: string): number {
   let score = 0;
@@ -79,11 +98,12 @@ function scoreVoice(voice: Speech.Voice, targetLang: string): number {
   // Apple's quality flag (iOS): 'Enhanced' voices are neural.
   if (voice.quality === 'Enhanced') score += 50;
 
-  // Google neural voices on Android use 'network' suffix in their
-  // identifier (e.g., 'en-in-x-ahp-network' = Indian English female
-  // neural). These sound dramatically better than 'local' variants.
+  // Google neural voice variants. LOCAL beats network because they
+  // render identical audio and local has no first-use download wait.
+  // The user explicitly asked for instant playback — local wins.
   const id = voice.identifier?.toLowerCase() ?? '';
-  if (id.includes('network')) score += 80;
+  if (id.includes('local')) score += 90;
+  else if (id.includes('network')) score += 20;
   else if (id.includes('neural')) score += 70;
 
   // Prefer female voices for Sakha's persona. Indian English female
@@ -129,9 +149,13 @@ function pickBestVoice(
 
 /**
  * Warm the cache by enumerating device voices and picking the best
- * for each target language. Call this from app boot or lazily from
- * the first ListenButton tap. Idempotent — second call returns the
- * cached promise.
+ * for each target language. ALSO pre-warms the TTS audio pipeline
+ * by triggering a no-op engine call — the first real Speech.speak()
+ * after this completes is genuinely instant (otherwise it pays a
+ * 50-200ms one-time engine init cost on first use).
+ *
+ * Call this from app boot or lazily from the first ListenButton tap.
+ * Idempotent — second call returns the cached promise.
  */
 export function warmDivineVoiceCache(): Promise<VoiceCache> {
   if (warmupPromise) return warmupPromise;
@@ -150,6 +174,24 @@ export function warmDivineVoiceCache(): Promise<VoiceCache> {
       cache[lang] = pickBestVoice(voices, lang);
     }
     voiceCache = cache;
+
+    // Pre-warm the TTS audio pipeline. The first speak after app
+    // launch normally pays a one-time ~50-200ms engine init cost
+    // (allocating an AudioTrack, opening an AudioFlinger session,
+    // initializing the synthesis engine). Calling
+    // Speech.isSpeakingAsync() forces those allocations now, before
+    // the user ever taps a Listen button — so the first real
+    // utterance is instant.
+    //
+    // Failure-silent: if the call throws (very rare), we just lose
+    // the pre-warm benefit. Speech.speak still works fine, just
+    // pays the init cost on first real call.
+    try {
+      await Speech.isSpeakingAsync();
+    } catch {
+      // ignore — pre-warm is a nice-to-have, not load-bearing.
+    }
+
     return cache;
   })();
   return warmupPromise;
