@@ -67,6 +67,15 @@ export interface SakhaStreamMessage {
   readonly timestamp: number;
   /** True while the assistant response is actively streaming. */
   isStreaming?: boolean;
+  /**
+   * Verse references (e.g. ['BG2.47', 'BG6.5']) surfaced by the backend
+   * from the Wisdom Core retrieval pass and emitted in the streaming
+   * `done` frame. Rendered as a subtle citation chip below the message
+   * by `<SakhaMessage />`. Empty array (not undefined) when the backend
+   * returned no verses, so consumers can `.length`-check without a
+   * null-guard.
+   */
+  verseRefs?: readonly string[];
 }
 
 export interface UseSakhaStreamOptions {
@@ -399,6 +408,24 @@ export function useSakhaStream(
                 fullText += event.message;
               }
               if (event.done) {
+                // Capture verse refs surfaced by the backend's Wisdom
+                // Core retrieval (chat.py extracts BG-style refs from
+                // the streamed text *and* the orchestrator hands the
+                // retrieved-verse list to the prompt). We attach them
+                // to the assistant message so SakhaMessage can render
+                // a subtle citation chip.
+                if (Array.isArray(event.verseRefs)) {
+                  const refs = event.verseRefs.filter(
+                    (r): r is string => typeof r === 'string' && r.length > 0,
+                  );
+                  if (refs.length > 0) {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === assistantId ? { ...m, verseRefs: refs } : m,
+                      ),
+                    );
+                  }
+                }
                 sawDone = true;
                 break;
               }

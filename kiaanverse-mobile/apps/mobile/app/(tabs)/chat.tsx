@@ -317,6 +317,7 @@ export default function ChatScreen(): React.JSX.Element {
           id={item.id}
           text={item.text}
           isStreaming={item.isStreaming === true}
+          verseRefs={item.verseRefs}
           onAskFollowUp={handleAskFollowUp}
         />
       );
