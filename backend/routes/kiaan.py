@@ -119,6 +119,7 @@ async def _run_ai(
     *,
     message: str,
     db: AsyncSession | None = None,
+    user_id: str | None = None,
     history: list[dict[str, str]] | None = None,
     tool_name: str | None = None,
     gita_verse: dict[str, Any] | None = None,
@@ -150,6 +151,7 @@ async def _run_ai(
             db=db,
             query=message,
             tool_name=tool_name,
+            user_id=user_id,
         )
         if composed:
             system_override = composed
@@ -197,6 +199,7 @@ async def _handle_sakha_chat(
     response_text, verses = await _run_ai(
         message=payload.message,
         db=db,
+        user_id=current_user_id,
         history=history,
         tool_name=payload.tool_name,
         gita_verse=payload.gita_verse,
@@ -254,6 +257,7 @@ async def emotional_reset(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="Emotional Reset",
         gita_verse=payload.gita_verse,
     )
@@ -287,6 +291,7 @@ async def ardha(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="Ardha",
         gita_verse=payload.gita_verse,
     )
@@ -319,6 +324,7 @@ async def viyoga(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="Viyoga",
         gita_verse=payload.gita_verse,
     )
@@ -351,6 +357,7 @@ async def karma_reset(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="Karma Reset",
         gita_verse=payload.gita_verse,
     )
@@ -383,6 +390,7 @@ async def relationship_compass(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="Relationship Compass",
         gita_verse=payload.gita_verse,
     )
@@ -435,6 +443,7 @@ async def karmalytix(
     response_text, verses = await _run_ai(
         message=message,
         db=db,
+        user_id=current_user_id,
         tool_name="KarmaLytix",
         gita_verse=payload.gita_verse,
     )
