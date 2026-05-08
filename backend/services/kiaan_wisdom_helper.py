@@ -3,8 +3,9 @@
 Purpose
 -------
 Compose a system prompt that grounds every Kiaan response (chat + 6
-tools) in **strictly Bhagavad-Gita-based wisdom** — both the static
-700+ verse corpus and the per-mood effectiveness-learning layer:
+tools) in **strictly Bhagavad-Gita-based wisdom** — the complete 700+
+verse corpus, the per-verse principle, and the modern-world
+implementation layer (``gita_practical_wisdom``):
 
   1. Load the modern-secular text persona (``sakha.text.openai.md``,
      persona-version 1.2.0) once at module import.
@@ -14,7 +15,8 @@ tools) in **strictly Bhagavad-Gita-based wisdom** — both the static
      * **Static Gita corpus (700+ verses):** via
        :meth:`WisdomCore.search` with ``include_learned=False`` — only
        rows from the ``gita_verses`` table reach the prompt; the
-       generic ``learned_wisdom`` table is excluded.
+       generic ``learned_wisdom`` table is excluded. The full
+       18-chapter / 701-verse corpus is the searchable space.
      * **Gita-based dynamic corpus:** via
        :meth:`DynamicWisdomCorpus.get_effectiveness_weighted_verse` —
        selects a Gita verse from ``gita_verses`` weighted by which
@@ -23,14 +25,22 @@ tools) in **strictly Bhagavad-Gita-based wisdom** — both the static
        returned is still a Bhagavad Gita verse; the "dynamic" piece
        is the *ordering* signal, not the source.
 
-  3. Format the result as a ``RETRIEVED_VERSES`` block the persona
+  3. **Enrich each retrieved verse with its modern-world
+     implementation** from the ``gita_practical_wisdom`` table —
+     ``principle_in_action``, ``micro_practice``, ``action_steps``,
+     ``modern_scenario``, ``reflection_prompt``, ``counter_pattern``.
+     This is the implementation-in-the-modern-world layer the
+     persona's 4-Part Structure (Ancient Wisdom Principle → Modern
+     Application → Practical Steps → Deeper Understanding) consumes.
+  4. Format the result as a ``RETRIEVED_VERSES`` block the persona
      expects (the persona prompt explicitly states it consumes a
      ``retrieved_verses`` block from the orchestrator).
 
 Callers do
 ``compose_kiaan_system_prompt(db, query, tool_name, user_id=...)``,
 hand the result to ``call_kiaan_ai(..., system_override=<that>)``,
-and the LLM receives **persona 1.2.0 + 100% Bhagavad-Gita context**.
+and the LLM receives **persona 1.2.0 + 100% Bhagavad-Gita context +
+modern-world implementation grounding**.
 
 Design notes
 ------------
@@ -275,11 +285,97 @@ async def compose_kiaan_system_prompt(
             exc,
         )
 
+    # ─── Tier 3: Modern-implementation enrichment ────────────────────
+    # For every retrieved Gita verse, pull its rows from
+    # ``gita_practical_wisdom`` (principle_in_action, micro_practice,
+    # action_steps, modern_scenario, reflection_prompt, counter_pattern).
+    # This is what gives the persona's "Modern Application" + "Practical
+    # Steps" sections grounding in the real Gita-implementation corpus
+    # rather than the model's training data. Failures are silent — the
+    # verse still renders with sanskrit + english + principle.
+    if verses:
+        try:
+            await _enrich_with_practical_wisdom(db, verses)
+        except Exception as exc:
+            logger.debug(
+                "kiaan_wisdom_helper: practical-wisdom enrichment skipped "
+                "(tool=%s): %s",
+                tool_name,
+                exc,
+            )
+
     block = _format_retrieved_verses_block(verses)
     system_prompt = (
         f"{_TEXT_PERSONA}\n\n{block}" if block else _TEXT_PERSONA
     )
     return system_prompt, verses
+
+
+async def _enrich_with_practical_wisdom(
+    db: AsyncSession,
+    verses: list[dict[str, Any]],
+) -> None:
+    """Attach ``GitaPracticalWisdom`` rows to each verse, in place.
+
+    Each verse dict gains a ``practical_wisdom`` key — a list of
+    rows (one per ``life_domain``) containing the modern-world
+    implementation fields. The persona consumes these to ground the
+    "Modern Application" + "Practical Steps" sections.
+
+    No-op when no ``verse_ref`` keys are present or the
+    ``gita_practical_wisdom`` table is empty / unmigrated.
+    """
+    refs = [v.get("verse_ref") for v in verses if v.get("verse_ref")]
+    if not refs:
+        return
+
+    from sqlalchemy import select
+
+    from backend.models.wisdom import GitaPracticalWisdom
+
+    result = await db.execute(
+        select(GitaPracticalWisdom).where(
+            GitaPracticalWisdom.verse_ref.in_(refs),
+            GitaPracticalWisdom.is_validated.is_(True),
+        )
+    )
+    rows = result.scalars().all()
+    if not rows:
+        return
+
+    # Group by verse_ref and pick the top 1-2 most-effective entries
+    # per verse so the prompt doesn't balloon. Sorted by
+    # effectiveness_score desc → highest-scoring entry leads.
+    by_ref: dict[str, list[GitaPracticalWisdom]] = {}
+    for row in rows:
+        by_ref.setdefault(row.verse_ref, []).append(row)
+    for ref, entries in by_ref.items():
+        entries.sort(
+            key=lambda r: getattr(r, "effectiveness_score", 0.0) or 0.0,
+            reverse=True,
+        )
+
+    for v in verses:
+        ref = v.get("verse_ref")
+        if not ref:
+            continue
+        ref_entries = by_ref.get(ref) or []
+        if not ref_entries:
+            continue
+        # Cap at 2 per verse — leading domain + one alternate keeps
+        # the prompt focused without losing variety.
+        v["practical_wisdom"] = [
+            {
+                "life_domain": e.life_domain,
+                "principle_in_action": e.principle_in_action or "",
+                "micro_practice": e.micro_practice or "",
+                "action_steps": list(e.action_steps or []),
+                "reflection_prompt": e.reflection_prompt or "",
+                "modern_scenario": e.modern_scenario or "",
+                "counter_pattern": e.counter_pattern or "",
+            }
+            for e in ref_entries[:2]
+        ]
 
 
 def _normalise_dynamic_verse(verse: dict[str, Any]) -> dict[str, Any]:
@@ -319,17 +415,47 @@ def _normalise_dynamic_verse(verse: dict[str, Any]) -> dict[str, Any]:
 
 
 def _format_retrieved_verses_block(verses: list[dict[str, Any]]) -> str:
-    """Render the persona's expected ``retrieved_verses`` context block."""
+    """Render the persona's expected ``retrieved_verses`` context block.
+
+    Layout per verse:
+
+        ### N. BG <chapter.verse>
+        Sanskrit:     <devanagari>
+        English:      <translation>
+        Principle:    <single-line principle>
+        Theme:        <theme tag>
+        Source:       gita_corpus | dynamic_corpus
+
+        Modern Implementation (life_domain: <domain>):
+          Principle in Action: ...
+          Modern Scenario:     ...
+          Practical Steps:
+            1. ...
+            2. ...
+            3. ...
+          Micro-practice:      ...
+          Reflection Prompt:   ...
+          Counter-pattern:     ...
+
+    The persona prompt's 4-Part Structure consumes:
+      * "Ancient Wisdom Principle"  → Sanskrit + English (verbatim)
+      * "Modern Application"        → Modern Scenario + Principle in Action
+      * "Practical Steps"           → Action Steps + Micro-practice
+      * "Deeper Understanding"      → Counter-pattern + Reflection Prompt
+    """
     if not verses:
         return ""
 
-    lines: list[str] = ["## RETRIEVED VERSES (from Wisdom Core)"]
+    lines: list[str] = [
+        "## RETRIEVED VERSES (from Wisdom Core — 100% Bhagavad Gita)"
+    ]
     for i, v in enumerate(verses, start=1):
         ref = v.get("verse_ref") or "?"
         sanskrit = v.get("sanskrit") or ""
         english = v.get("english") or ""
         principle = v.get("principle") or ""
         theme = v.get("theme") or ""
+        source = v.get("source") or "gita_corpus"
         lines.append(f"\n### {i}. BG {ref}")
         if sanskrit:
             lines.append(f"Sanskrit: {sanskrit}")
@@ -339,9 +465,50 @@ def _format_retrieved_verses_block(verses: list[dict[str, Any]]) -> str:
             lines.append(f"Principle: {principle}")
         if theme:
             lines.append(f"Theme: {theme}")
+        lines.append(f"Source: {source}")
+
+        # ── Modern-world implementation block (gita_practical_wisdom) ──
+        practical = v.get("practical_wisdom") or []
+        for entry in practical:
+            domain = entry.get("life_domain") or "general"
+            lines.append(
+                f"\nModern Implementation (life_domain: {domain}):"
+            )
+            principle_in_action = entry.get("principle_in_action") or ""
+            modern_scenario = entry.get("modern_scenario") or ""
+            action_steps = entry.get("action_steps") or []
+            micro_practice = entry.get("micro_practice") or ""
+            reflection_prompt = entry.get("reflection_prompt") or ""
+            counter_pattern = entry.get("counter_pattern") or ""
+
+            if principle_in_action:
+                lines.append(f"  Principle in Action: {principle_in_action}")
+            if modern_scenario:
+                lines.append(f"  Modern Scenario: {modern_scenario}")
+            if action_steps:
+                lines.append("  Practical Steps:")
+                for n, step in enumerate(action_steps, start=1):
+                    lines.append(f"    {n}. {step}")
+            if micro_practice:
+                lines.append(f"  Micro-practice: {micro_practice}")
+            if reflection_prompt:
+                lines.append(f"  Reflection Prompt: {reflection_prompt}")
+            if counter_pattern:
+                lines.append(f"  Counter-pattern: {counter_pattern}")
+
     lines.append(
-        "\nUse these verses verbatim where the 4-Part Structure calls for "
-        "an Ancient Wisdom Principle. Do not invent verses outside this "
-        "list."
+        "\n---\n"
+        "INSTRUCTIONS FOR USING THIS CONTEXT:\n"
+        "  • Use the Sanskrit + English text verbatim where the 4-Part "
+        "Structure calls for an Ancient Wisdom Principle.\n"
+        "  • Use the Modern Scenario + Principle in Action to ground the "
+        "Modern Application section in real 2026 life.\n"
+        "  • Use the Practical Steps as the basis for the Practical Steps "
+        "section — adapt them to the seeker's exact situation.\n"
+        "  • Counter-pattern + Reflection Prompt feed the Deeper "
+        "Understanding section.\n"
+        "  • DO NOT invent verses, principles, or implementation details "
+        "outside this retrieved set. Every claim must trace back to the "
+        "Bhagavad Gita corpus shown above."
     )
     return "\n".join(lines)
