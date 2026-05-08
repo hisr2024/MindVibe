@@ -62,6 +62,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Speech from 'expo-speech';
 
+import {
+  CLOUD_VOICE_PREFIX,
+  findCloudVoice,
+  isCloudVoiceId,
+  parseCloudVoiceId,
+} from './cloudVoices';
+import {
+  cloudIsSpeaking,
+  cloudSpeak,
+  cloudStop,
+} from './cloudTTS';
+
 // ── TARGET LANGUAGES ─────────────────────────────────────────────────
 /** Languages we explicitly select voices for. Keep in sync with the
  *  set of locales used by ListenButton callers. */
@@ -469,18 +481,159 @@ export function divineProsody(
   return { language, rate, pitch, voice };
 }
 
+// ── UNIFIED SPEAK API ────────────────────────────────────────────────
+/**
+ * Options for ``speakDivinely`` — mirror the relevant subset of
+ * ``Speech.SpeechOptions`` so call sites can swap with one line.
+ */
+export interface SpeakDivinelyOptions {
+  /** Persona override — surface-specific (e.g. verse readings always
+   *  use 'storyteller' regardless of user pick). */
+  readonly personaOverride?: DivinePersona;
+  /** Fired when playback completes. Cloud and on-device paths both
+   *  honour this. */
+  readonly onDone?: () => void;
+  /** Fired on any error. For on-device, this is Speech.SpeechOptions
+   *  onError (passes a SpeechError); for cloud, an Error wrapper from
+   *  the fetch / decode path. We coerce both into a plain ``Error``. */
+  readonly onError?: (err: Error) => void;
+  /** Cloud only — getter for the JWT, re-resolved per call. Required
+   *  when the user has picked a cloud voice; ignored on-device. */
+  readonly getAccessToken?: () => Promise<string | null> | string | null;
+  /** Cloud only — backend baseURL override for tests. */
+  readonly baseUrl?: string;
+}
+
+/**
+ * Speak ``text`` in ``language`` using whichever path the user has
+ * selected (cloud TTS or on-device Speech.speak).
+ *
+ * Routing logic:
+ *
+ *   • Resolved voice id starts with ``cloud:`` → ``cloudSpeak()``
+ *     POST to ``/api/voice/synthesize`` + play via expo-av.
+ *   • Otherwise → ``Speech.speak()`` with the divine prosody.
+ *
+ * Both paths converge on the same ``onDone`` / ``onError`` contract so
+ * call sites (ListenButton, voice-companion, verse readings) can use
+ * the same auto-listen loop / error handling regardless of provider.
+ *
+ * The active TTS path can be cancelled at any time with ``stopSpeaking()``.
+ */
+export async function speakDivinely(
+  text: string,
+  language: string,
+  options: SpeakDivinelyOptions = {},
+): Promise<void> {
+  // Cancel anything already playing on either path.
+  Speech.stop();
+  await cloudStop();
+
+  if (!text || !text.trim()) {
+    options.onDone?.();
+    return;
+  }
+
+  const resolvedVoice = getDivineVoiceSync(language);
+  const persona = options.personaOverride ?? personaCache;
+  const preset = PERSONA_PRESETS[persona];
+
+  // ── Cloud path ──
+  if (isCloudVoiceId(resolvedVoice)) {
+    const backendId = parseCloudVoiceId(resolvedVoice as string);
+    const meta = findCloudVoice(resolvedVoice as string);
+    if (!backendId || !meta) {
+      // Stale persisted id — fall through to on-device.
+    } else {
+      // Map persona → backend voice_type. The backend's voice_type
+      // tunes its own speed/pitch presets, so we don't override on
+      // top of that.
+      const voiceType =
+        persona === 'friend'
+          ? 'friendly'
+          : persona === 'storyteller'
+            ? 'storytelling'
+            : 'calm';
+      await cloudSpeak(text, {
+        voiceId: backendId,
+        language,
+        voiceType,
+        baseUrl: options.baseUrl,
+        getAccessToken: options.getAccessToken,
+        onDone: options.onDone,
+        onError: options.onError,
+      });
+      return;
+    }
+  }
+
+  // ── On-device path ──
+  const isSanskrit = language === 'sa-IN';
+  const rate = isSanskrit
+    ? preset.rate + preset.rateBoostSanskrit
+    : preset.rate;
+  const pitch = isSanskrit ? preset.pitch - 0.01 : preset.pitch;
+  Speech.speak(text, {
+    language,
+    voice: resolvedVoice && !isCloudVoiceId(resolvedVoice) ? resolvedVoice : undefined,
+    rate,
+    pitch,
+    onDone: options.onDone,
+    onError: (err) => {
+      const e =
+        err instanceof Error
+          ? err
+          : new Error(
+              typeof err === 'string'
+                ? err
+                : err
+                  ? JSON.stringify(err)
+                  : 'Speech.speak error',
+            );
+      options.onError?.(e);
+    },
+  });
+}
+
+/** Stop whichever path is currently speaking. Idempotent. */
+export async function stopSpeaking(): Promise<void> {
+  Speech.stop();
+  await cloudStop();
+}
+
+/** True when either path has audio in flight. */
+export async function isSpeaking(): Promise<boolean> {
+  if (cloudIsSpeaking()) return true;
+  try {
+    return await Speech.isSpeakingAsync();
+  } catch {
+    return false;
+  }
+}
+
+// Re-export so call sites only need one import.
+export {
+  CLOUD_VOICE_PREFIX,
+  isCloudVoiceId,
+  parseCloudVoiceId,
+} from './cloudVoices';
+
 // ── PREVIEW ──────────────────────────────────────────────────────────
 /**
  * Speak a short sample for the picker UI so users can hear a voice
- * before locking it in. Keep the sample short (one sentence) to
- * minimise wait time on Studio voices that download on first use.
+ * before locking it in. Routes through the cloud path when the
+ * supplied ``identifier`` is a cloud voice id, otherwise through
+ * Speech.speak with the divine prosody.
  */
 export function previewVoice(
   identifier: string,
   language: string,
   sampleText?: string,
+  preview?: {
+    readonly getAccessToken?: () => Promise<string | null> | string | null;
+    readonly baseUrl?: string;
+  },
 ): void {
-  Speech.stop();
   const text =
     sampleText ??
     (language.startsWith('hi') || language === 'sa-IN'
@@ -492,6 +645,31 @@ export function previewVoice(
           : language.startsWith('bn')
             ? 'নমস্কার। আমি সখা।'
             : 'Hello. I am Sakha — your friend in stillness.');
+
+  // Stop both paths before previewing.
+  Speech.stop();
+  void cloudStop();
+
+  if (isCloudVoiceId(identifier)) {
+    const backendId = parseCloudVoiceId(identifier);
+    if (!backendId) return;
+    const persona = personaCache;
+    const voiceType =
+      persona === 'friend'
+        ? 'friendly'
+        : persona === 'storyteller'
+          ? 'storytelling'
+          : 'calm';
+    void cloudSpeak(text, {
+      voiceId: backendId,
+      language,
+      voiceType,
+      baseUrl: preview?.baseUrl,
+      getAccessToken: preview?.getAccessToken,
+    });
+    return;
+  }
+
   const persona = personaCache;
   const preset = PERSONA_PRESETS[persona];
   Speech.speak(text, {

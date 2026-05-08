@@ -1,0 +1,334 @@
+/**
+ * cloudTTS — fetch a cloud-synthesised audio clip from the backend
+ * (``POST /api/voice/synthesize``) and play it through expo-av.
+ *
+ * Why a cloud TTS path at all?
+ * ----------------------------
+ * On-device Android TTS — even Google's Studio voices — does not
+ * match ElevenLabs Lily, Sarvam Bulbul, or Bhashini's Indic neural
+ * voices for naturalness. The user wants Sakha to sound divine,
+ * soothing, calm — never robotic. Cloud providers cross that bar.
+ *
+ * The backend already wraps all three providers behind a single
+ * ``/api/voice/synthesize`` endpoint (see ``backend/routes/voice.py``
+ * + ``backend/services/tts_service.py``). We POST text + voice_id +
+ * language, receive MP3 bytes, write them to a temp file, and play
+ * with ``Audio.Sound``.
+ *
+ * Cache strategy
+ * --------------
+ * Per-(text, voice_id) cache in the document directory. Same text +
+ * voice replayed = no network call. Cache is purgeable from
+ * ``/settings/voice``'s clear-cache button (TODO).
+ *
+ * Lifecycle
+ * ---------
+ * Each ``cloudSpeak()`` call cancels and unloads any in-flight clip
+ * before starting a new one. ``cloudStop()`` is the universal stop.
+ * Callers should treat this exactly like ``Speech.speak`` — same
+ * onDone / onError shape.
+ */
+
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+
+// ── CONFIG ───────────────────────────────────────────────────────────
+/** Match SynthesizeRequest.text limit on the backend. */
+const MAX_TEXT_LENGTH = 5000;
+
+// ── MODULE STATE ─────────────────────────────────────────────────────
+/** Currently-loaded sound, if any. Single-stream playback model. */
+let currentSound: Audio.Sound | null = null;
+/** Cache: hash key → file uri. Persists in module memory; survives
+ *  the document-directory cache between cold starts. */
+const fileCache = new Map<string, string>();
+/** In-flight fetch deduplication so two simultaneous taps on the same
+ *  Listen button don't double-fetch. Maps cache key → promise. */
+const inflight = new Map<string, Promise<string>>();
+
+// ── PUBLIC TYPES ─────────────────────────────────────────────────────
+export interface CloudSpeakOptions {
+  /** Backend voice_id (e.g. ``elevenlabs-nova``, ``sarvam-meera``). */
+  readonly voiceId: string;
+  /** BCP-47 language tag — ``en-IN`` becomes ``en`` on the wire since
+   *  the backend uses ISO-639 codes. */
+  readonly language: string;
+  /** Voice persona — passed through as ``voice_type``. Defaults to
+   *  ``calm`` which the backend tunes for soothing wisdom delivery. */
+  readonly voiceType?:
+    | 'calm'
+    | 'wisdom'
+    | 'friendly'
+    | 'energetic'
+    | 'soothing'
+    | 'storytelling'
+    | 'chanting';
+  /** Backend baseURL override. Defaults to ``API_CONFIG.baseURL``. */
+  readonly baseUrl?: string;
+  /** Async getter for the JWT — re-resolved per call so token rotation
+   *  doesn't strand a stale value. */
+  readonly getAccessToken?: () => Promise<string | null> | string | null;
+  /** Fired when playback finishes (matches ``Speech.SpeechOptions``). */
+  readonly onDone?: () => void;
+  /** Fired on fetch / decode / playback failure. */
+  readonly onError?: (err: Error) => void;
+  /** Fired when playback first starts (audio pipeline ready). */
+  readonly onStart?: () => void;
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────
+/** Stable cache key for a (text, voice_id, language) triple. */
+function cacheKey(text: string, voiceId: string, language: string): string {
+  // Lightweight hash: not cryptographic, just collision-resistant
+  // for the size of cache we keep (a few hundred entries max).
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
+  }
+  return `tts-${voiceId}-${language}-${h.toString(36)}-${text.length}`;
+}
+
+/** Map BCP-47 (``en-IN``) to ISO-639 (``en``) for the backend payload. */
+function backendLanguageCode(bcp47: string): string {
+  return bcp47.split('-')[0] || 'en';
+}
+
+/** Resolve API_CONFIG.baseURL lazily so this module doesn't pull in
+ *  the @kiaanverse/api package at import time (kept light for tests). */
+async function resolveBaseUrl(override?: string): Promise<string> {
+  if (override) return override;
+  // Lazy import — only triggered when cloudSpeak() actually fires.
+  const { API_CONFIG } = await import('@kiaanverse/api');
+  return API_CONFIG.baseURL;
+}
+
+// ── CACHE I/O ────────────────────────────────────────────────────────
+/** Path on disk for a cached clip. */
+function cacheFilePath(key: string): string {
+  // ``cacheDirectory`` is wiped by Android occasionally; that's fine —
+  // we just refetch on the next play.
+  const base = FileSystem.cacheDirectory ?? FileSystem.documentDirectory ?? '';
+  return `${base}${key}.mp3`;
+}
+
+async function readFromCache(key: string): Promise<string | null> {
+  // Memory cache hit — fastest path.
+  const memHit = fileCache.get(key);
+  if (memHit) {
+    try {
+      const info = await FileSystem.getInfoAsync(memHit);
+      if (info.exists) return memHit;
+    } catch {
+      // fall through
+    }
+    fileCache.delete(key);
+  }
+  // Disk cache hit — verify the file still exists.
+  const path = cacheFilePath(key);
+  try {
+    const info = await FileSystem.getInfoAsync(path);
+    if (info.exists) {
+      fileCache.set(key, path);
+      return path;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function writeToCache(key: string, mp3Bytes: ArrayBuffer): Promise<string> {
+  const path = cacheFilePath(key);
+  // Convert ArrayBuffer → base64 for FileSystem.writeAsStringAsync.
+  // Reasonable for clips < 1 MB (typical Sakha responses are ~50–300 KB).
+  const base64 = arrayBufferToBase64(mp3Bytes);
+  await FileSystem.writeAsStringAsync(path, base64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  fileCache.set(key, path);
+  return path;
+}
+
+function arrayBufferToBase64(buf: ArrayBuffer): string {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  // Process in 8 KB chunks to avoid stack-size issues on long clips.
+  const chunk = 8192;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    const slice = bytes.subarray(i, Math.min(i + chunk, bytes.length));
+    binary += String.fromCharCode.apply(null, Array.from(slice));
+  }
+  // global.btoa is available on Hermes / RN.
+  return globalThis.btoa(binary);
+}
+
+// ── FETCH ────────────────────────────────────────────────────────────
+/**
+ * Fetch + cache a single audio clip. Returns the local file uri.
+ * Dedupes concurrent fetches for the same key.
+ */
+async function fetchClip(
+  text: string,
+  opts: CloudSpeakOptions,
+): Promise<string> {
+  if (text.length > MAX_TEXT_LENGTH) {
+    throw new Error(
+      `cloudTTS: text exceeds backend cap of ${MAX_TEXT_LENGTH} chars`,
+    );
+  }
+  const key = cacheKey(text, opts.voiceId, opts.language);
+
+  // Memory / disk cache — instant replay.
+  const cached = await readFromCache(key);
+  if (cached) return cached;
+
+  // Dedupe in-flight fetches for this exact key.
+  const existing = inflight.get(key);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    const baseUrl = await resolveBaseUrl(opts.baseUrl);
+    const url = `${baseUrl}/api/voice/synthesize`;
+    let token: string | null = null;
+    if (opts.getAccessToken) {
+      const resolved = await opts.getAccessToken();
+      token = typeof resolved === 'string' ? resolved : null;
+    }
+    const body = JSON.stringify({
+      text,
+      language: backendLanguageCode(opts.language),
+      voice_type: opts.voiceType ?? 'calm',
+      voice_id: opts.voiceId,
+    });
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'audio/mpeg, audio/*',
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    });
+    if (!response.ok) {
+      // Drain body so the error message is informative without
+      // leaking sensitive payload contents.
+      let detail = '';
+      try {
+        detail = (await response.text()).slice(0, 200);
+      } catch {
+        // ignore
+      }
+      throw new Error(
+        `cloudTTS: backend ${response.status} ${response.statusText} — ${detail}`,
+      );
+    }
+    const buf = await response.arrayBuffer();
+    if (!buf || buf.byteLength === 0) {
+      throw new Error('cloudTTS: backend returned empty audio body');
+    }
+    return writeToCache(key, buf);
+  })();
+
+  inflight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    inflight.delete(key);
+  }
+}
+
+// ── PLAYBACK ─────────────────────────────────────────────────────────
+async function unloadCurrent(): Promise<void> {
+  const s = currentSound;
+  currentSound = null;
+  if (s) {
+    try {
+      await s.stopAsync();
+    } catch {
+      // ignore
+    }
+    try {
+      await s.unloadAsync();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
+ * Synthesize + play a single clip. Cancels any in-flight playback
+ * before starting. Cache hits play immediately; cache misses fetch
+ * first (typical 200–600ms for a 200-character response).
+ *
+ * Mirror of Speech.speak shape so the call sites can swap between
+ * on-device and cloud paths with a single conditional.
+ */
+export async function cloudSpeak(
+  text: string,
+  options: CloudSpeakOptions,
+): Promise<void> {
+  await unloadCurrent();
+
+  if (!text || !text.trim()) {
+    options.onDone?.();
+    return;
+  }
+
+  let uri: string;
+  try {
+    uri = await fetchClip(text, options);
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    options.onError?.(err);
+    return;
+  }
+
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      { uri },
+      { shouldPlay: true },
+    );
+    currentSound = sound;
+    options.onStart?.();
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (!status.isLoaded) return;
+      if (status.didJustFinish) {
+        // Clear current sound *before* firing onDone so a synchronous
+        // re-call inside the callback (auto-listen flows do this) sees
+        // a clean slate.
+        if (currentSound === sound) currentSound = null;
+        sound.unloadAsync().catch(() => undefined);
+        options.onDone?.();
+      }
+    });
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    options.onError?.(err);
+  }
+}
+
+/** Stop any in-flight playback. Idempotent. */
+export async function cloudStop(): Promise<void> {
+  await unloadCurrent();
+}
+
+/** Whether a clip is currently playing — useful for ListenButton's
+ *  Stop / Listen toggle state. */
+export function cloudIsSpeaking(): boolean {
+  return currentSound !== null;
+}
+
+/** Pre-fetch a clip without playing — useful for verse-of-the-day
+ *  cards that want instant playback on first tap. Best-effort. */
+export async function cloudPrefetch(
+  text: string,
+  options: CloudSpeakOptions,
+): Promise<void> {
+  try {
+    await fetchClip(text, options);
+  } catch {
+    // Pre-fetch is opportunistic; failures are silently dropped.
+  }
+}

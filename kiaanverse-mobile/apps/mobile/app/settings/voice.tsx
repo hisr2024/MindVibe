@@ -59,6 +59,25 @@ import {
   setPreferredVoice,
   warmDivineVoiceCache,
 } from '../../voice/lib/divineVoice';
+import {
+  type CloudVoiceOption,
+  PROVIDER_COLORS,
+  PROVIDER_LABELS,
+  listCloudVoicesForLanguage,
+} from '../../voice/lib/cloudVoices';
+import * as SecureStore from 'expo-secure-store';
+
+/** Match the key authStore writes to. Lifted as a module-level const so
+ *  any cloud-TTS preview / playback in this screen sees the same token
+ *  the rest of the app uses. */
+const ACCESS_TOKEN_KEY = 'kiaanverse_access_token';
+async function readAccessToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 // ── LANGUAGE TABS ────────────────────────────────────────────────────
 /** Languages exposed in the picker. Mirror of ``TARGET_LANGUAGES``
@@ -123,6 +142,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
 
   const [language, setLanguage] = useState<string>('en-IN');
   const [voices, setVoices] = useState<VoiceOption[]>([]);
+  const [cloudVoices, setCloudVoices] = useState<CloudVoiceOption[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selected, setSelected] = useState<string | undefined>(undefined);
   const [persona, setPersona] = useState<DivinePersona>('divine');
@@ -135,9 +155,13 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
       await warmDivineVoiceCache();
       if (!mounted) return;
       setPersona(getPreferredPersonaSync());
-      const list = await listVoicesForLanguage(language);
+      const [list, cloudList] = await Promise.all([
+        listVoicesForLanguage(language),
+        Promise.resolve(listCloudVoicesForLanguage(language)),
+      ]);
       if (!mounted) return;
       setVoices(list);
+      setCloudVoices(cloudList);
       setSelected(getPreferredVoiceSync(language));
       setLoading(false);
     })();
@@ -155,8 +179,12 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
     void Haptics.selectionAsync().catch(() => {});
     setLanguage(code);
     setLoading(true);
-    const list = await listVoicesForLanguage(code);
+    const [list, cloudList] = await Promise.all([
+      listVoicesForLanguage(code),
+      Promise.resolve(listCloudVoicesForLanguage(code)),
+    ]);
     setVoices(list);
+    setCloudVoices(cloudList);
     setSelected(getPreferredVoiceSync(code));
     setLoading(false);
   }, []);
@@ -179,7 +207,12 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
   const handlePreview = useCallback(
     (id: string) => {
       void Haptics.selectionAsync().catch(() => {});
-      previewVoice(id, language);
+      // Cloud voices need the JWT to hit /api/voice/synthesize. The
+      // on-device path ignores the token cleanly. Preview helper
+      // handles the routing internally based on the id prefix.
+      previewVoice(id, language, undefined, {
+        getAccessToken: readAccessToken,
+      });
     },
     [language],
   );
@@ -238,8 +271,102 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
         </View>
       </Card>
 
+      {/* Cloud voices — most natural, taking inspiration from Bhashini,
+          Sarvam, and ElevenLabs. Renders only when at least one cloud
+          voice covers the current language; otherwise we hide the
+          section entirely so the picker stays focused. */}
+      {cloudVoices.length > 0 ? (
+        <>
+          <SectionHeader title="Most Natural · Cloud Voices" />
+          <Card style={styles.card}>
+            <Text variant="caption" color={colors.text.muted} style={styles.mb8}>
+              Cloud voices use the device's network to fetch studio-grade
+              audio from ElevenLabs, Sarvam Bulbul, or Bhashini. First
+              play of a phrase takes a moment; replays are instant from
+              cache.
+            </Text>
+            {cloudVoices.map((v, idx) => (
+              <React.Fragment key={v.id}>
+                {idx > 0 ? <Divider /> : null}
+                <View
+                  style={[
+                    styles.voiceRow,
+                    selected === v.id && styles.voiceRowSelected,
+                  ]}
+                >
+                  <Pressable
+                    onPress={() => void handlePickVoice(v.id)}
+                    style={styles.voiceRowMain}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: selected === v.id }}
+                  >
+                    <View style={styles.voiceTitleRow}>
+                      <Text variant="label" color={colors.text.primary}>
+                        {v.name}
+                      </Text>
+                      <View
+                        style={[
+                          styles.qualityBadge,
+                          { borderColor: PROVIDER_COLORS[v.provider] },
+                        ]}
+                      >
+                        <Text
+                          variant="caption"
+                          color={PROVIDER_COLORS[v.provider]}
+                          style={styles.qualityBadgeText}
+                        >
+                          {PROVIDER_LABELS[v.provider]}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text
+                      variant="caption"
+                      color={colors.text.muted}
+                      style={styles.mt2}
+                    >
+                      {v.description}
+                    </Text>
+                    <Text
+                      variant="caption"
+                      color={colors.text.muted}
+                      style={styles.mt2}
+                    >
+                      {v.gender} · {v.supportedLanguages.length} languages
+                    </Text>
+                  </Pressable>
+                  <View style={styles.voiceRowActions}>
+                    <Pressable
+                      onPress={() => handlePreview(v.id)}
+                      style={styles.previewBtn}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Preview ${v.name} from ${PROVIDER_LABELS[v.provider]}`}
+                      hitSlop={8}
+                    >
+                      <Text
+                        variant="caption"
+                        color={colors.primary[300]}
+                        style={styles.previewBtnText}
+                      >
+                        ▶ Play
+                      </Text>
+                    </Pressable>
+                    {selected === v.id ? (
+                      <View style={styles.checkmark}>
+                        <Text variant="caption" color={colors.primary[300]}>
+                          ✓
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+              </React.Fragment>
+            ))}
+          </Card>
+        </>
+      ) : null}
+
       {/* Voice list */}
-      <SectionHeader title="Voice" />
+      <SectionHeader title="On-device Voice" />
       <Card style={styles.card}>
         {/* Auto row */}
         <Pressable
@@ -429,6 +556,7 @@ const styles = StyleSheet.create({
   },
   mt2: { marginTop: 2 },
   mt4: { marginTop: 4 },
+  mb8: { marginBottom: 8 },
   langRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
