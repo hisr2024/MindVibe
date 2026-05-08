@@ -47,6 +47,7 @@ import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 
 import { useDictation } from '../../voice/hooks/useDictation';
+import { divineProsody } from '../../voice/lib/divineVoice';
 
 import {
   ChatHeader,
@@ -105,10 +106,18 @@ export default function ChatScreen(): React.JSX.Element {
     send,
     abort,
     reset,
+    restore,
     onStreamCompleted,
   } = useSakhaStream();
 
   // ── Persistence: restore the last session on mount. ───────────────────────
+  // Earlier versions of this code wrote the cache but NEVER restored it.
+  // The hook exposed no setter, so the comment in the previous block read
+  // "we just mark restored and leave the in-memory list empty" — meaning
+  // user force-quit + relaunch always saw an empty chat tab even though
+  // their last 30 messages were sitting in AsyncStorage.
+  // Now useSakhaStream exposes `restore()` (added 2025-11) and we wire it
+  // here on initial mount.
   const [restored, setRestored] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -118,10 +127,13 @@ export default function ChatScreen(): React.JSX.Element {
         if (!cancelled && raw) {
           const parsed = JSON.parse(raw) as CachedConversation;
           if (Array.isArray(parsed?.messages) && parsed.messages.length > 0) {
-            // We inject through the hook by sending synthetic messages —
-            // but the hook exposes no setter, so we just mark restored and
-            // leave the in-memory list empty. The cache is used for analytics
-            // only; a real-restore API can be added later if needed.
+            // Re-inject the cached messages into the hook's in-memory
+            // state. The hook's `restore` method no-ops if a stream is
+            // currently in flight or if messages are already present,
+            // so this is safe even if the user navigates away + back
+            // in quick succession. The cache also still feeds analytics
+            // through the existing persistence write below.
+            restore(parsed.messages);
           }
         }
       } catch {
@@ -133,6 +145,11 @@ export default function ChatScreen(): React.JSX.Element {
     return () => {
       cancelled = true;
     };
+    // restore is intentionally omitted from deps — useCallback keeps it
+    // referentially stable across renders, but adding it would cause
+    // this hydration effect to re-run on every render (defeating the
+    // mount-only intent of `[]`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Persistence: save the last N messages whenever they change. ───────────
@@ -169,17 +186,14 @@ export default function ChatScreen(): React.JSX.Element {
       const latestText = latestAssistantMessageRef.current;
       if (latestText && latestText.trim().length > 0) {
         Speech.stop();
+        // Use divineProsody so this auto-speak picks the same neural
+        // voice + contemplative cadence as the per-message Listen
+        // button (which uses ListenButton + warmDivineVoiceCache).
+        // The cache is warmed lazily — first auto-speak after app
+        // launch may use the engine default for ~50ms while the cache
+        // populates; subsequent ones get the divine voice.
         Speech.speak(latestText, {
-          language: 'en-IN',
-          // Slightly slower than default — reads spiritual content
-          // more contemplatively, mirrors the cadence of the web's
-          // useVoiceOutput defaults.
-          rate: 0.95,
-          pitch: 1.0,
-          // No callbacks needed — fire-and-forget. If the user
-          // navigates away or sends another message, the next
-          // Speech.stop() above ensures we don't have overlapping
-          // utterances.
+          ...divineProsody('en-IN'),
         });
       }
     });

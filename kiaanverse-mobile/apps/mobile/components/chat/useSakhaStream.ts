@@ -84,6 +84,9 @@ export interface UseSakhaStreamResult {
   readonly send: (prompt: string) => Promise<void>;
   readonly abort: () => void;
   readonly reset: () => void;
+  /** Re-inject a cached conversation. Used to restore from AsyncStorage
+   *  on cold start so the chat doesn't appear empty after force-quit. */
+  readonly restore: (cached: SakhaStreamMessage[]) => void;
   /** Signal that the caller has acknowledged an end-of-stream transition. */
   readonly onStreamCompleted: (handler: (() => void) | null) => void;
 }
@@ -166,6 +169,31 @@ export function useSakhaStream(
     setSessionId(null);
     setError(null);
   }, [abort]);
+
+  /**
+   * Re-inject a previously-cached conversation into the in-memory
+   * messages list. Called by the chat tab on cold start to restore
+   * a conversation persisted to AsyncStorage so the user doesn't
+   * see an empty chat after force-quitting and relaunching.
+   *
+   * No-ops if a stream is currently in flight (we don't want to
+   * clobber a live conversation), if the input is empty, or if
+   * messages are already present (we never overwrite a live
+   * session — restoration only happens once on initial mount).
+   *
+   * Does NOT trigger any network request — the messages are
+   * displayed as-is. The next user message starts a fresh stream
+   * (the LLM doesn't see the restored history; this is purely a
+   * UI continuity affordance).
+   */
+  const restore = useCallback(
+    (cached: SakhaStreamMessage[]) => {
+      if (streaming) return;
+      if (!Array.isArray(cached) || cached.length === 0) return;
+      setMessages((prev) => (prev.length > 0 ? prev : cached));
+    },
+    [streaming],
+  );
 
   const appendAssistantText = useCallback((delta: string) => {
     const id = assistantIdRef.current;
@@ -437,6 +465,7 @@ export function useSakhaStream(
     send,
     abort,
     reset,
+    restore,
     onStreamCompleted,
   };
 }

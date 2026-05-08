@@ -29,6 +29,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { MessageActionBar } from '../../voice/components/MessageActionBar';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let MandalaSpin: React.ComponentType<any> | null = null;
 try {
@@ -277,6 +279,17 @@ function SakhaMessageInner({
         </View>
 
         {shimmerKey ? <CompletionShimmer key={shimmerKey} /> : null}
+
+        {/* Per-message action bar — Speak / Copy / Share / Save to
+            Journal. Only renders AFTER streaming completes so the user
+            doesn't see a half-formed bubble with action affordances.
+            Mirror of the desktop SakhaMessageBubble's action set on
+            kiaanverse.com. Each handler is fire-and-forget (errors
+            swallowed) — these are nice-to-have actions; a Share-sheet
+            cancel or a TTS engine hiccup must not crash the bubble. */}
+        {!isStreaming && text.trim().length > 0 ? (
+          <MessageActionBar text={text} journalSource="sakha-chat" />
+        ) : null}
       </View>
     </View>
   );

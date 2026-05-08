@@ -62,6 +62,8 @@ import {
 // verse-of-the-day is resolved by useGitaStore + useGitaVerse(chapter, verse).
 import { useGitaVerse, useSadhanaStreak } from '@kiaanverse/api';
 
+import { ListenButton } from '../../voice/components/ListenButton';
+
 // ── Design tokens ──────────────────────────────────────────────────────────
 const GOLD = '#D4A017';
 const GOLD_SHIMMER = 'rgba(245, 226, 122, 0.35)';
@@ -492,6 +494,21 @@ function DailyVerseCard(): React.JSX.Element {
               >
                 <Text style={s.verseAskBtnText}>Ask Sakha →</Text>
               </TouchableOpacity>
+              {/* TTS: speaks Sanskrit → English sequentially via the
+                  same on-device Android TextToSpeech engine the verse
+                  detail screen uses. The card-level bookmark button
+                  stays adjacent for fast bookmark + listen workflow. */}
+              <ListenButton
+                segments={[
+                  { text: verse.sanskrit, language: 'sa-IN', rate: 0.85 },
+                  { text: verse.translation, language: 'en-IN', rate: 0.9 },
+                ]}
+                variant="inline"
+                idleLabel=""
+                playingLabel=""
+                accessibilityLabelIdle="Listen to verse of the day"
+                accessibilityLabelPlaying="Stop verse playback"
+              />
               <TouchableOpacity
                 style={s.verseBookmarkBtn}
                 onPress={bookmark}

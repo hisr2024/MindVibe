@@ -34,6 +34,8 @@ import {
   Share2,
   Sparkles,
 } from 'lucide-react-native';
+
+import { ListenButton } from '../../../../voice/components/ListenButton';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -124,6 +126,31 @@ export default function VerseDetailScreen(): React.JSX.Element {
     } catch {
       // User cancelled or share sheet failed — no state to roll back.
     }
+  }, [data, translations]);
+
+  // ── TTS playback handled by <ListenButton segments={...}> below.
+  // The segment list (Sanskrit → English → Hindi) is computed during
+  // render so the button can play / stop / re-play at any time without
+  // recomputation. The button itself owns the "is speaking" state and
+  // the cleanup-on-unmount semantics — keeping that out of this screen
+  // means no stale-closure bugs around verse navigation.
+  const listenSegments = React.useMemo(() => {
+    if (!data?.verse) return undefined;
+    const v = data.verse;
+    const hindiText = (
+      translations?.translations as { hindi?: string } | undefined
+    )?.hindi?.trim();
+    return [
+      // 'sa-IN' is the BCP-47 tag for Sanskrit (India). Most Android
+      // builds don't ship a Sanskrit voice; the engine falls back to
+      // the closest Indic match (typically hi-IN), which still
+      // pronounces Devanagari script correctly. Devices with a
+      // Sanskrit voice (some Pixel Tensor TPU / custom ROMs) auto-pick.
+      // Slower rate (0.85) so the user can follow each Sanskrit word.
+      { text: v.sanskrit, language: 'sa-IN', rate: 0.85 },
+      { text: v.english, language: 'en-IN', rate: 0.9 },
+      ...(hindiText ? [{ text: hindiText, language: 'hi-IN', rate: 0.9 }] : []),
+    ];
   }, [data, translations]);
 
   const handleAskSakha = useCallback(() => {
@@ -270,6 +297,19 @@ export default function VerseDetailScreen(): React.JSX.Element {
             variant="primary"
             leftAccessory={<Sparkles size={18} color="#FFFFFF" />}
             accessibilityLabel={`Ask Sakha about ${reference}`}
+          />
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeIn.delay(340).duration(400)}
+          style={styles.ctaRow}
+        >
+          <ListenButton
+            segments={listenSegments}
+            variant="secondary"
+            idleLabel="Listen to verse"
+            accessibilityLabelIdle="Listen to verse aloud (Sanskrit, English, Hindi)"
+            accessibilityLabelPlaying="Stop verse playback"
           />
         </Animated.View>
 

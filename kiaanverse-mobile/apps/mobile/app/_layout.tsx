@@ -62,6 +62,7 @@ import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
 import { SacredArrival } from '../components/common/SacredArrival';
 import { initErrorTracking } from '../services/errorTracking';
+import { warmDivineVoiceCache } from '../voice/lib/divineVoice';
 import {
   registerPlaybackService,
   setupTrackPlayer,
@@ -78,6 +79,22 @@ registerPlaybackService();
 
 // Initialize error tracking before any providers mount
 initErrorTracking();
+
+// Warm the divine-voice cache early — enumerates the device's
+// available TTS voices (typically 4-8 per language on Android) and
+// picks the highest-quality neural network voice per supported
+// language (en-IN, hi-IN, sa-IN, mr-IN, ta-IN, bn-IN). Caching this
+// at app boot means the FIRST Listen tap a user makes already has
+// the divine voice resolved — no latency hit on first-use.
+//
+// Failure is silent and non-blocking: if Speech.getAvailableVoicesAsync
+// throws (rare, e.g. on a stripped-down RN dev build), the cache stays
+// empty and the engine falls back to its default voice. NOT a crash.
+//
+// We don't await this — fire-and-forget at module-load time. By the
+// time the user navigates to /chat or /voice-companion or taps any
+// ListenButton, the cache is populated.
+void warmDivineVoiceCache();
 
 // Prevent splash screen from hiding until we're ready
 void SplashScreen.preventAutoHideAsync();

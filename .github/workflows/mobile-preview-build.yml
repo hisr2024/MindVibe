@@ -6,6 +6,27 @@ on:
       - develop
     paths:
       - 'kiaanverse-mobile/**'
+  # Manual dispatch lets maintainers preview-build any branch (e.g. a
+  # feature branch with an open PR) without first merging to develop.
+  # Useful for verifying an EAS build before review-merge — this branch
+  # itself burned 20 builds chasing an Android voice issue, exactly the
+  # case workflow_dispatch is for.
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'EAS build platform'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      clear_cache:
+        description: 'Pass --clear-cache to eas build (slower, fresh native build)'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: mobile-preview-${{ github.ref }}
@@ -54,11 +75,22 @@ jobs:
       - name: Setup EAS CLI
         run: npm install -g eas-cli
 
-      - name: Build preview (all platforms)
+      - name: Build preview
         working-directory: kiaanverse-mobile/apps/mobile
-        run: eas build --platform all --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # On push-to-develop, defaults to all-platforms. On manual
+          # dispatch, the maintainer picks platform + cache strategy.
+          PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+          CLEAR_CACHE: ${{ github.event.inputs.clear_cache || 'false' }}
+        run: |
+          EXTRA=""
+          if [ "$CLEAR_CACHE" = "true" ]; then
+            EXTRA="--clear-cache"
+            echo "::notice::Building with --clear-cache (fresh native build)"
+          fi
+          echo "Running: eas build --platform $PLATFORM --profile preview --non-interactive $EXTRA"
+          eas build --platform "$PLATFORM" --profile preview --non-interactive $EXTRA
 
       - name: Notify Slack
         if: always() && env.SLACK_WEBHOOK_URL != ''
