@@ -40,6 +40,11 @@ import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import { Square, Volume2 } from 'lucide-react-native';
 
+import {
+  divineProsody,
+  warmDivineVoiceCache,
+} from '../lib/divineVoice';
+
 const GOLD = '#D4A017';
 
 export interface ListenSegment {
@@ -103,7 +108,7 @@ export function ListenButton({
     return [];
   }, [segments, text, language, rate]);
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = useCallback(async () => {
     if (isSpeaking) {
       Speech.stop();
       setIsSpeaking(false);
@@ -112,22 +117,46 @@ export function ListenButton({
     if (playList.length === 0) return;
 
     void Haptics.selectionAsync().catch(() => {});
+
+    // Warm the divine voice cache once on first tap (idempotent —
+    // subsequent taps hit the in-memory cache instantly). This picks
+    // Google's neural network voices over the default local voice
+    // for each language, giving the most natural + divine output the
+    // device can produce without paid providers (Sarvam / ElevenLabs).
+    await warmDivineVoiceCache();
+
     setIsSpeaking(true);
     Speech.stop();
 
     // Walk the segment list via nested onDone callbacks. Each callback
     // is captured by index — once segment N finishes, fire segment N+1.
     // On final segment's onDone, flip back to idle.
+    //
+    // For each segment we overlay divineProsody(language) on top of any
+    // segment-specific rate/pitch overrides. The prosody helper picks
+    // the highest-quality device voice + applies contemplative cadence
+    // (rate 0.88 default, 0.85 for Sanskrit; pitch 0.98 default, 0.97
+    // for Sanskrit to match Vedic ritual register).
     const speakAt = (index: number) => {
       if (index >= playList.length) {
         setIsSpeaking(false);
         return;
       }
       const seg = playList[index];
+      const lang = seg.language ?? 'en-IN';
+      const prosody = divineProsody(lang);
       Speech.speak(seg.text, {
-        language: seg.language ?? 'en-IN',
-        rate: seg.rate ?? 0.9,
-        pitch: seg.pitch ?? 1.0,
+        language: lang,
+        // Caller-provided rate/pitch override prosody defaults so a
+        // surface that needs unusual cadence (e.g. fast announcement)
+        // can still get it. Most callers leave these undefined and
+        // inherit divine prosody.
+        rate: seg.rate ?? prosody.rate,
+        pitch: seg.pitch ?? prosody.pitch,
+        // Voice ID = highest-quality match the device offers. If
+        // undefined, expo-speech falls back to the engine default —
+        // not a crash, just a quality regression.
+        voice: prosody.voice,
         onDone: () => speakAt(index + 1),
         onStopped: () => setIsSpeaking(false),
         onError: () => setIsSpeaking(false),

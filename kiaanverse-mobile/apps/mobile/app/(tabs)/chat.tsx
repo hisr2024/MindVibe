@@ -47,6 +47,7 @@ import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 
 import { useDictation } from '../../voice/hooks/useDictation';
+import { divineProsody } from '../../voice/lib/divineVoice';
 
 import {
   ChatHeader,
@@ -169,17 +170,14 @@ export default function ChatScreen(): React.JSX.Element {
       const latestText = latestAssistantMessageRef.current;
       if (latestText && latestText.trim().length > 0) {
         Speech.stop();
+        // Use divineProsody so this auto-speak picks the same neural
+        // voice + contemplative cadence as the per-message Listen
+        // button (which uses ListenButton + warmDivineVoiceCache).
+        // The cache is warmed lazily — first auto-speak after app
+        // launch may use the engine default for ~50ms while the cache
+        // populates; subsequent ones get the divine voice.
         Speech.speak(latestText, {
-          language: 'en-IN',
-          // Slightly slower than default — reads spiritual content
-          // more contemplatively, mirrors the cadence of the web's
-          // useVoiceOutput defaults.
-          rate: 0.95,
-          pitch: 1.0,
-          // No callbacks needed — fire-and-forget. If the user
-          // navigates away or sends another message, the next
-          // Speech.stop() above ensures we don't have overlapping
-          // utterances.
+          ...divineProsody('en-IN'),
         });
       }
     });

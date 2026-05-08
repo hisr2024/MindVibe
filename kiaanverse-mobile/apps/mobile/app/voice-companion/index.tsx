@@ -69,6 +69,7 @@ import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
+import { divineProsody, warmDivineVoiceCache } from '../../voice/lib/divineVoice';
 import { useSakhaStream } from '../../components/chat/useSakhaStream';
 
 /**
@@ -158,13 +159,13 @@ export default function VoiceCompanionScreen() {
       }
       setState('speaking');
       Speech.stop();
+      // divineProsody picks the highest-quality neural voice the
+      // device offers + applies contemplative cadence (rate 0.88,
+      // pitch 0.98 — see voice/lib/divineVoice.ts). Same prosody
+      // used by the chat tab + every per-message Listen button →
+      // unified Sakha voice across the entire ecosystem.
       Speech.speak(text, {
-        language: 'en-IN',
-        // 0.95 matches the contemplative cadence the web's
-        // useVoiceOutput uses for spiritual content. 1.0 is too fast
-        // for the kind of dialogue Sakha produces.
-        rate: 0.95,
-        pitch: 1.0,
+        ...divineProsody('en-IN'),
         onDone: () => setState('idle'),
         onStopped: () => setState('idle'),
         onError: () => setState('idle'),
