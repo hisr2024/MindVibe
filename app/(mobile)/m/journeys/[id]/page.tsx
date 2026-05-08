@@ -433,8 +433,13 @@ export default function MobileJourneyDetailPage() {
         )}
       </AnimatePresence>
 
-      {/* Step content */}
-      <div className="px-page-x py-4 pb-8 space-y-5">
+      {/* Step content
+          relative + z-10 + opaque cosmic-void bg seals this scroll region
+          against any ambient/fixed backdrop (sacred particle canvas, gold
+          aura blurs, browser autofill tint) that previously bled through the
+          translucent cards below and turned the lower half of the screen
+          into a muddy khaki wash. */}
+      <div className="relative z-10 px-page-x py-4 pb-8 space-y-5 bg-[#050714]">
         {step ? (
           <>
             {/* Step title */}
@@ -459,7 +464,7 @@ export default function MobileJourneyDetailPage() {
                 className="relative overflow-hidden rounded-2xl"
                 style={{
                   background:
-                    'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), rgba(17,20,53,0.98))',
+                    'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), #111435 80%)',
                   border: '1px solid rgba(212,160,23,0.22)',
                   borderTop: '3px solid rgba(212,160,23,0.7)',
                 }}
@@ -552,7 +557,7 @@ export default function MobileJourneyDetailPage() {
             )}
 
             {/* Teaching */}
-            <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
+            <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0B0E2A]">
               <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#d4a44c] to-orange-500" />
               <div className="p-5 pl-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -645,7 +650,7 @@ export default function MobileJourneyDetailPage() {
                 className="relative overflow-hidden rounded-2xl"
                 style={{
                   background:
-                    'linear-gradient(145deg, rgba(22,26,66,0.85), rgba(17,20,53,0.98))',
+                    'linear-gradient(145deg, #161A42, #111435)',
                   border: enemyInfo
                     ? `1px solid rgba(${enemyInfo.colorRGB},0.22)`
                     : '1px solid rgba(212,160,23,0.22)',
@@ -695,7 +700,7 @@ export default function MobileJourneyDetailPage() {
 
             {/* Guided Reflection */}
             {step.guided_reflection?.length > 0 && (
-              <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-purple-950/10">
+              <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-[#0B0E2A]">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-500" />
                 <div className="p-5 pl-6">
                   <div className="flex items-center gap-2 mb-3">
@@ -718,7 +723,7 @@ export default function MobileJourneyDetailPage() {
 
             {/* Practice */}
             {step.practice && Object.keys(step.practice).length > 0 && (
-              <section className="relative overflow-hidden rounded-2xl border border-green-500/20 bg-green-950/10">
+              <section className="relative overflow-hidden rounded-2xl border border-green-500/20 bg-[#0B0E2A]">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-500" />
                 <div className="p-5 pl-6">
                   <div className="flex items-center justify-between mb-3">
@@ -753,7 +758,7 @@ export default function MobileJourneyDetailPage() {
 
             {/* Micro commitment */}
             {step.micro_commitment && (
-              <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/10 p-4">
+              <div className="rounded-2xl border border-cyan-500/20 bg-[#0B0E2A] p-4">
                 <p className="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2">Micro Commitment</p>
                 <p className="text-white/90 text-sm italic">&ldquo;{step.micro_commitment}&rdquo;</p>
               </div>
@@ -761,7 +766,7 @@ export default function MobileJourneyDetailPage() {
 
             {/* Safety note */}
             {step.safety_note && (
-              <div className="rounded-xl border border-rose-500/20 bg-rose-950/10 p-3">
+              <div className="rounded-xl border border-rose-500/20 bg-[#0B0E2A] p-3">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-rose-300/90 leading-relaxed">{step.safety_note}</p>
@@ -791,13 +796,17 @@ export default function MobileJourneyDetailPage() {
                   style={{
                     borderColor: showReflection
                       ? `${enemyInfo?.color ?? '#D4A017'}40`
-                      : 'rgba(255,255,255,0.08)',
+                      : 'rgba(255,255,255,0.12)',
+                    // Opaque dark surface so the placeholder label remains
+                    // legible regardless of any ambient backdrop behind the
+                    // page (previously the 3% white made the text wash out
+                    // to a near-invisible khaki on top of gold particle blurs).
                     backgroundColor: showReflection
-                      ? `${enemyInfo?.color ?? '#D4A017'}08`
-                      : 'rgba(255,255,255,0.03)',
+                      ? '#161A42'
+                      : '#0B0E2A',
                     color: showReflection
                       ? (enemyInfo?.color ?? '#D4A017')
-                      : 'rgba(255,255,255,0.6)',
+                      : 'rgba(237,232,220,0.85)',
                   }}
                 >
                   {showReflection ? 'Hide Reflection' : 'Add Reflection (Optional)'}
@@ -815,7 +824,7 @@ export default function MobileJourneyDetailPage() {
                           value={reflection}
                           onChange={(e) => setReflection(e.target.value)}
                           placeholder="What stirs in you after this practice?"
-                          className="w-full rounded-xl bg-[rgba(22,26,66,0.5)] p-4 text-[#EDE8DC] font-sacred text-base leading-relaxed placeholder:text-white/25 outline-none resize-none transition-all"
+                          className="w-full rounded-xl bg-[#161A42] p-4 text-[#EDE8DC] font-sacred text-base leading-relaxed placeholder:text-white/40 outline-none resize-none transition-all"
                           style={{
                             border: `1px solid ${reflection.length > 0 ? (enemyInfo?.color ?? '#D4A017') + '40' : 'rgba(212,160,23,0.15)'}`,
                             minHeight: 140,
@@ -872,7 +881,7 @@ export default function MobileJourneyDetailPage() {
 
             {/* Time-gated - Come back tomorrow */}
             {!step.is_completed && !step.available_to_complete && (
-              <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-amber-900/10 p-6 text-center">
+              <div className="rounded-2xl border border-amber-500/30 bg-[#0B0E2A] p-6 text-center">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto mb-3">
                   <span className="text-2xl">🌅</span>
                 </div>
@@ -906,7 +915,7 @@ export default function MobileJourneyDetailPage() {
                   className="relative overflow-hidden rounded-2xl"
                   style={{
                     background:
-                      'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), rgba(17,20,53,0.98))',
+                      'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), #111435 80%)',
                     border: '1px solid rgba(212,160,23,0.22)',
                     borderTop: '3px solid rgba(212,160,23,0.7)',
                   }}
@@ -992,7 +1001,7 @@ export default function MobileJourneyDetailPage() {
             {/* Already completed (legacy box) — suppressed while the Sakha
                 card is showing so we don't duplicate the "completed" state. */}
             {step.is_completed && !aiResponse && (
-              <div className="rounded-2xl border border-green-500/30 bg-green-950/20 p-6 text-center">
+              <div className="rounded-2xl border border-green-500/30 bg-[#0B0E2A] p-6 text-center">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
                 <p className="text-green-400 font-semibold">Step Completed</p>
                 {step.completed_at && (
