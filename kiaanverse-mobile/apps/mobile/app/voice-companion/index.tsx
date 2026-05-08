@@ -104,6 +104,22 @@ export default function VoiceCompanionScreen() {
   const [state, setState] = useState<ScreenState>('idle');
   const [startError, setStartError] = useState<string | null>(null);
 
+  // Session-active flag — tracks whether the user has tapped "Tap to
+  // begin" without yet tapping "End session". Determines whether we
+  // auto-restart dictation after Sakha finishes speaking (the
+  // "two friends talking" continuous flow).
+  //
+  // Stored as a ref because it's read inside callbacks registered ONCE
+  // at mount (onStreamCompleted, dictation onError) — using state would
+  // close over a stale value. Refs read live, always current.
+  const sessionActiveRef = useRef<boolean>(false);
+
+  // Track dictation.start as a stable ref so the onStreamCompleted
+  // callback can call it without needing dictation in its dep array
+  // (which would re-register the callback on every render and risk
+  // missing stream completions).
+  const dictationStartRef = useRef<(() => Promise<void>) | null>(null);
+
   // Track the latest assistant text in a ref so the onStreamCompleted
   // callback (registered once) can speak the freshest value without
   // closing over stale `messages`.
@@ -130,12 +146,43 @@ export default function VoiceCompanionScreen() {
       void send(transcript);
     },
     onError: (code, message) => {
+      // SOFT errors during a friends-talking session: NO_MATCH (mic
+      // heard sound but couldn't transcribe) and SPEECH_TIMEOUT
+      // (user paused longer than the recognizer's silence threshold)
+      // are NORMAL parts of conversation. Don't kick the user out of
+      // the session — silently auto-restart listening so the flow
+      // stays continuous. This matches how kiaanverse.com mobile +
+      // Sarvam-style real-time voice work.
+      const isSoftError = code === 'NO_MATCH' || code === 'SPEECH_TIMEOUT';
+      if (isSoftError && sessionActiveRef.current) {
+        // eslint-disable-next-line no-console
+        console.log('[VoiceCompanion] soft dictation timeout — re-listening', code);
+        // Defer to next tick so the recognizer can fully tear down
+        // before the next start() — Android SpeechRecognizer can
+        // throw if you start a new session too quickly after error.
+        setTimeout(() => {
+          if (sessionActiveRef.current && dictationStartRef.current) {
+            void dictationStartRef.current();
+          }
+        }, 100);
+        return;
+      }
+      // HARD errors (network down, mic blocked, audio HW failure, etc.)
+      // → break out of the session and surface the error to the user.
       // eslint-disable-next-line no-console
-      console.warn('[VoiceCompanion] dictation error', code, message);
+      console.warn('[VoiceCompanion] dictation hard error', code, message);
+      sessionActiveRef.current = false;
       setStartError(`Could not hear you (${code}): ${message}`);
       setState('error');
     },
   });
+
+  // Update the stable start ref whenever the dictation hook returns a
+  // new start function (it's useCallback so this is rare, but ref
+  // tracking is the safe pattern).
+  useEffect(() => {
+    dictationStartRef.current = dictation.start;
+  }, [dictation.start]);
 
   // Mirror dictation lifecycle into the screen state machine. We only
   // listen for 'listening'/'resolving' here; 'idle'/'error' are
@@ -150,11 +197,25 @@ export default function VoiceCompanionScreen() {
   // whatever the latest assistant message is. Speech.stop() is called
   // before each new utterance to prevent overlap if the user fires
   // multiple turns rapidly (the chat tab uses the same pattern).
+  //
+  // FRIEND-TALKING FLOW: after Sakha finishes speaking, if the
+  // session is still active (user hasn't tapped "End session"),
+  // auto-restart dictation so the user can respond IMMEDIATELY
+  // without tapping anything. This is the natural rhythm of a real
+  // conversation — speak, listen, speak, listen — without any
+  // manual handoff. End-session button breaks the loop.
   useEffect(() => {
     onStreamCompleted(() => {
       const text = latestAssistantRef.current;
       if (!text || !text.trim()) {
-        setState('idle');
+        // Empty stream (e.g., model returned nothing) — if session
+        // is still active, jump straight back to listening rather
+        // than dropping to idle and forcing a tap.
+        if (sessionActiveRef.current && dictationStartRef.current) {
+          void dictationStartRef.current();
+        } else {
+          setState('idle');
+        }
         return;
       }
       setState('speaking');
@@ -164,11 +225,23 @@ export default function VoiceCompanionScreen() {
       // pitch 0.98 — see voice/lib/divineVoice.ts). Same prosody
       // used by the chat tab + every per-message Listen button →
       // unified Sakha voice across the entire ecosystem.
+      const onSpeechFinished = () => {
+        // If session is still active, immediately resume listening
+        // so the user can respond without tapping. The dictation
+        // state machine then walks through 'listening' →
+        // 'resolving' → onTranscript → send → onStreamCompleted →
+        // back here. That's the friend-talking loop.
+        if (sessionActiveRef.current && dictationStartRef.current) {
+          void dictationStartRef.current();
+        } else {
+          setState('idle');
+        }
+      };
       Speech.speak(text, {
         ...divineProsody('en-IN'),
-        onDone: () => setState('idle'),
-        onStopped: () => setState('idle'),
-        onError: () => setState('idle'),
+        onDone: onSpeechFinished,
+        onStopped: () => setState('idle'),  // explicit stop = end session
+        onError: onSpeechFinished, // transient TTS hiccup → keep going
       });
     });
     return () => {
@@ -204,6 +277,10 @@ export default function VoiceCompanionScreen() {
       return;
     }
 
+    // Mark the session as active — enables the auto-restart loop
+    // that runs after Sakha finishes speaking. The loop only stops
+    // when handleStop sets this back to false.
+    sessionActiveRef.current = true;
     void dictation.start();
   }, [userId, dictation, ensureMicPermission]);
 
@@ -212,6 +289,11 @@ export default function VoiceCompanionScreen() {
     // happening (mic capture / LLM stream / TTS playback) and
     // returns to idle. Each abort path swallows its own errors so
     // a partial-state cleanup doesn't crash.
+    //
+    // CRITICAL: clear the session-active flag BEFORE Speech.stop
+    // so the onStopped callback doesn't kick off a fresh dictation
+    // (the auto-restart guard reads sessionActiveRef.current).
+    sessionActiveRef.current = false;
     Speech.stop();
     try {
       abort();
@@ -221,6 +303,19 @@ export default function VoiceCompanionScreen() {
     setState('idle');
     setStartError(null);
   }, [abort]);
+
+  // Defense-in-depth: if the screen unmounts (user navigates away),
+  // tear down the session so an in-flight dictation/TTS cycle stops
+  // cleanly. Without this, navigating away mid-conversation could
+  // leave a Speech.speak running in the background that auto-restarts
+  // a dictation on done — which would then either crash (no native
+  // module attached on Expo Go) or just play in the background.
+  useEffect(() => {
+    return () => {
+      sessionActiveRef.current = false;
+      Speech.stop();
+    };
+  }, []);
 
   const isActive = state !== 'idle' && state !== 'error';
   const stateLabel = useMemo(() => stateToLabel(state), [state]);
