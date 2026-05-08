@@ -1,136 +1,178 @@
 /**
- * divineVoice — picks the highest-quality voice the device offers per
- * language and applies contemplative prosody for Sakha's spiritual
- * dialogue.
+ * divineVoice — pick the most natural-sounding voice the device offers,
+ * apply contemplative prosody, and let the user override the default.
  *
- * Background: android.speech.tts.TextToSpeech (which expo-speech wraps,
- * which kiaanverse.com mobile uses through the browser's
- * SpeechSynthesis API) ships 4-8 voices per supported locale on most
- * Android devices. ONE of those is typically a Google neural-network
- * voice ("network" suffix) — vastly more expressive than the default
- * "local" voice the engine picks if you don't specify. By explicitly
- * selecting the network voice + a female persona for Sakha + slightly
- * slower rate, we get something that genuinely sounds divine + natural
- * without any paid provider (Sarvam / ElevenLabs / Bhashini).
+ * The Android system TTS engine (which expo-speech wraps) ships
+ * multiple quality tiers per locale. From most-natural to least:
  *
- * Selection priority (highest to lowest):
- *   1. quality === 'Enhanced' (Apple's neural voices on iOS; equivalent
- *      to Google's network voices on Android)
- *   2. identifier contains 'network' (Google's cloud-trained neural
- *      voices — these are noticeably better than 'local' variants)
- *   3. identifier or name suggests female (Sakha persona is feminine —
- *      Devi / Mother / Friend; female voice fits the spiritual register)
- *   4. exact language match preferred over language-fallback
- *      (e.g., 'sa-IN' falls back to 'hi-IN' since most devices don't
- *      ship Sanskrit voices, and Hindi pronounces Devanagari correctly)
+ *   1. **Studio**  (Google Cloud Studio voices, near-human prosody)
+ *      ids look like ``en-US-Studio-O``, ``en-IN-Studio-A``
+ *   2. **Neural2** (Google's current best on-device neural)
+ *      ids look like ``en-IN-Neural2-A``
+ *   3. **WaveNet** (older neural, still much better than Standard)
+ *      ids look like ``en-IN-Wavenet-A``, ``en-in-x-ahp-NETWORK``
+ *   4. **Local**   (bundled voice model — same quality as Network for
+ *      most modern voices, just downloaded vs streamed)
+ *      ids look like ``en-in-x-ahp-LOCAL``
+ *   5. **Standard** (legacy text-to-speech engine; robotic)
  *
- * Prosody tuning (overlaid on the selected voice):
- *   • rate 0.88  — contemplative cadence, neither rushed nor sluggish
- *   • pitch 0.98 — barely below natural; deepens slightly for gravitas
+ * For Sakha — divine, soothing, calm — we want Studio first, then
+ * Neural2, then WaveNet/Local (which on most modern Android devices
+ * are the same quality), and Standard only as a last resort.
  *
- * The selected voice IDs are cached in module memory (per app session)
- * so we don't re-enumerate the device voice list on every Listen tap.
- * Cache TTL is the app session — voices don't change at runtime.
+ * Female voices fit the Sakha persona (Devi / Mother / Friend).
  *
- * If the device has NO voices for a language (extremely rare; even
- * stripped-down ROMs ship 'eng-USA' fallbacks), the selector returns
- * undefined and Speech.speak falls back to the engine's default voice
- * — degraded experience, but no crash.
+ * USER OVERRIDE
+ * -------------
+ * The picker in ``app/settings/voice.tsx`` lets users browse all
+ * available voices for a language and lock in a specific one. That
+ * choice is persisted in AsyncStorage and takes priority over
+ * automatic scoring. Selecting "Auto" clears the override and
+ * returns to the scored default.
+ *
+ * PROSODY PRESETS
+ * ---------------
+ * Three personas are available; the persisted choice is loaded once
+ * and applied across every Speech.speak() call in the app:
+ *
+ *   • **divine**       (default) — rate 0.88, pitch 0.98 — contemplative
+ *                      cadence, slightly lower for gravitas. Best for
+ *                      verse readings and Voice Companion.
+ *   • **friend**       — rate 0.95, pitch 1.00 — warm, conversational.
+ *                      Best for chat Listen.
+ *   • **storyteller**  — rate 0.85, pitch 0.96 — slow, grave. Best for
+ *                      verse-by-verse readings of the Gita.
+ *
+ * Sanskrit (sa-IN) gets a touch slower across all presets so
+ * Devanagari syllables land cleanly.
+ *
+ * CACHE BEHAVIOUR
+ * ---------------
+ * Voice list + user override are read once at app boot via
+ * ``warmDivineVoiceCache()`` and held in module memory for the rest
+ * of the session. Voice list never changes at runtime; user override
+ * changes go through ``setPreferredVoice()`` which both persists to
+ * AsyncStorage and updates the in-memory cache so the next
+ * Speech.speak picks up the change instantly.
+ *
+ * If the device has NO voices for a language the selector returns
+ * undefined and Speech.speak falls back to the engine default.
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Speech from 'expo-speech';
 
+// ── TARGET LANGUAGES ─────────────────────────────────────────────────
 /** Languages we explicitly select voices for. Keep in sync with the
  *  set of locales used by ListenButton callers. */
-const TARGET_LANGUAGES = ['en-IN', 'hi-IN', 'sa-IN', 'mr-IN', 'ta-IN', 'bn-IN'] as const;
-type TargetLanguage = (typeof TARGET_LANGUAGES)[number];
+const TARGET_LANGUAGES = [
+  'en-IN',
+  'hi-IN',
+  'sa-IN',
+  'mr-IN',
+  'ta-IN',
+  'bn-IN',
+] as const;
 
-/** Resolved voice IDs — one per language. undefined = no voice
- *  matched, fall back to engine default. */
+// ── PROSODY PRESETS ──────────────────────────────────────────────────
+export type DivinePersona = 'divine' | 'friend' | 'storyteller';
+
+const PERSONA_PRESETS: Record<
+  DivinePersona,
+  { rate: number; pitch: number; rateBoostSanskrit: number }
+> = {
+  divine: { rate: 0.88, pitch: 0.98, rateBoostSanskrit: -0.03 },
+  friend: { rate: 0.95, pitch: 1.0, rateBoostSanskrit: -0.05 },
+  storyteller: { rate: 0.85, pitch: 0.96, rateBoostSanskrit: -0.03 },
+};
+
+// ── PERSISTENCE KEYS ─────────────────────────────────────────────────
+/** AsyncStorage key prefix for per-language voice overrides. */
+const VOICE_OVERRIDE_KEY = (lang: string) =>
+  `divineVoice:override:${lang}`;
+/** AsyncStorage key for selected persona. */
+const PERSONA_KEY = 'divineVoice:persona';
+
+// ── MODULE STATE ─────────────────────────────────────────────────────
 type VoiceCache = Record<string, string | undefined>;
+type VoiceListCache = Record<string, Speech.Voice[]>;
 
-/** Module-scoped cache. First call to selectDivineVoice() warms it;
- *  subsequent calls hit memory. */
 let voiceCache: VoiceCache | null = null;
+let voiceListCache: VoiceListCache | null = null;
+let userOverrideCache: VoiceCache = {};
+let personaCache: DivinePersona = 'divine';
 let warmupPromise: Promise<VoiceCache> | null = null;
 
+// ── SCORING ──────────────────────────────────────────────────────────
 /**
- * Score a candidate voice. Higher score = better fit for Sakha's
- * spiritual dialogue.
+ * Score a candidate voice. Higher = more natural for Sakha.
  *
- * KEY INSIGHT (revised 2025-11): Google's Android TTS exposes the
- * SAME high-quality female-Indian-English voice in two variants:
- *
- *   • en-in-x-ahp-LOCAL    — voice model bundled in TTS engine,
- *                            INSTANT playback, no network call ever
- *   • en-in-x-ahp-NETWORK  — same voice model fetched on-demand
- *                            from Google's servers, 200-1000ms wait
- *                            on FIRST use (cached after that)
- *
- * Both variants render the EXACT SAME audio. The "network" suffix is
- * a download-on-demand strategy, not a quality tier. Preferring local
- * over network is therefore strictly better: same quality, zero
- * latency, no internet required.
- *
- * Earlier versions of this file scored network higher than local —
- * that was a misread of the Android TTS API. The result was a
- * noticeable lag on the first Listen tap of every fresh app launch.
- * The fix is one-line: invert the local/network scoring.
+ * Tier weights are gapped so a Studio voice always beats a Neural2 +
+ * exact-language match, but a Neural2 in the wrong language still
+ * loses to a Studio in the right one (we add the language match
+ * weight on top).
  */
 function scoreVoice(voice: Speech.Voice, targetLang: string): number {
   let score = 0;
+  const id = voice.identifier?.toLowerCase() ?? '';
+  const name = voice.name?.toLowerCase() ?? '';
 
-  // Exact language match (e.g., 'en-IN' matches 'en-IN' but also
-  // matches 'en-in' since BCP-47 is case-insensitive).
+  // ── Language match (gate) ──
   const voiceLang = voice.language.toLowerCase();
   const wanted = targetLang.toLowerCase();
   if (voiceLang === wanted) {
     score += 100;
   } else if (voiceLang.startsWith(wanted.split('-')[0])) {
     // Same base language but different region (e.g., en-US vs en-IN).
-    // Better than nothing but worse than exact match.
+    // Worse than exact match, better than nothing.
     score += 40;
   } else {
     // Wrong language entirely — disqualify.
     return -1;
   }
 
-  // Apple's quality flag (iOS): 'Enhanced' voices are neural.
+  // ── Quality tier (the natural-sounding axis) ──
+  // Studio > Neural2 > WaveNet > Local/Network > Standard
+  // Gap > language-match weight so tier dominates.
+  if (id.includes('studio') || name.includes('studio')) {
+    score += 200;
+  } else if (id.includes('neural2') || name.includes('neural2')) {
+    score += 160;
+  } else if (id.includes('neural') || name.includes('neural')) {
+    score += 130;
+  } else if (id.includes('wavenet') || name.includes('wavenet')) {
+    score += 110;
+  } else if (id.includes('local')) {
+    // Same quality as network on modern Android — instant playback.
+    score += 90;
+  } else if (id.includes('network')) {
+    // Equivalent quality to local but downloaded on demand.
+    score += 70;
+  }
+
+  // iOS quality flag — Apple's neural voices are 'Enhanced'.
   if (voice.quality === 'Enhanced') score += 50;
 
-  // Google neural voice variants. LOCAL beats network because they
-  // render identical audio and local has no first-use download wait.
-  // The user explicitly asked for instant playback — local wins.
-  const id = voice.identifier?.toLowerCase() ?? '';
-  if (id.includes('local')) score += 90;
-  else if (id.includes('network')) score += 20;
-  else if (id.includes('neural')) score += 70;
-
-  // Prefer female voices for Sakha's persona. Indian English female
-  // voice IDs typically contain 'ahp' / 'cxx' / 'female'; Hindi
-  // female contains 'hia' / 'female'. Sanskrit voices are rare;
-  // when present they're typically female by convention.
-  const name = voice.name?.toLowerCase() ?? '';
+  // ── Female bias for Sakha persona ──
+  // Indian English female ids: 'ahp', 'cxx', 'female'.
+  // Hindi female: 'hia', 'female'.
+  // Sanskrit voices are rare; female by convention when present.
   if (
     id.includes('female') ||
     name.includes('female') ||
-    /\bahp\b|\bcxx\b|\bhia\b/.test(id)
+    /\bahp\b|\bcxx\b|\bhia\b/.test(id) ||
+    /-[acef]-?$/i.test(id) // Google convention: -A, -C, -E, -F = female
   ) {
     score += 30;
   }
 
-  // Slight bonus for non-default voices — the engine's default is
-  // usually the lowest-quality option, kept for backward compat.
+  // Slight bonus for non-default voices — engine default is usually
+  // the lowest-quality option kept for backward compat.
   if (id.length > 0) score += 5;
 
   return score;
 }
 
-/**
- * Pick the best voice for one target language out of the available
- * voice list. Returns the identifier (string) or undefined if no
- * acceptable match exists.
- */
 function pickBestVoice(
   voices: readonly Speech.Voice[],
   targetLang: string,
@@ -147,14 +189,160 @@ function pickBestVoice(
   return best?.identifier;
 }
 
+// ── PUBLIC API: VOICE LIST FOR PICKER ────────────────────────────────
 /**
- * Warm the cache by enumerating device voices and picking the best
- * for each target language. ALSO pre-warms the TTS audio pipeline
- * by triggering a no-op engine call — the first real Speech.speak()
- * after this completes is genuinely instant (otherwise it pays a
- * 50-200ms one-time engine init cost on first use).
+ * One row in the voice picker. Exposes everything the picker UI needs
+ * to render a friendly label + a quality badge.
+ */
+export interface VoiceOption {
+  /** Stable identifier — pass to Speech.speak via `voice` option. */
+  readonly identifier: string;
+  /** Human-readable name from the engine. */
+  readonly name: string;
+  /** BCP-47 language tag, e.g. ``en-IN``. */
+  readonly language: string;
+  /** Quality badge for the picker — derived from id/name patterns. */
+  readonly quality: 'studio' | 'neural2' | 'neural' | 'wavenet' | 'local' | 'standard';
+  /** Best guess at gender. ``female`` is preferred for Sakha. */
+  readonly gender: 'female' | 'male' | 'unknown';
+  /** Score from the auto-pick algorithm — descending = more natural. */
+  readonly score: number;
+}
+
+function inferGender(voice: Speech.Voice): VoiceOption['gender'] {
+  const id = voice.identifier?.toLowerCase() ?? '';
+  const name = voice.name?.toLowerCase() ?? '';
+  if (id.includes('female') || name.includes('female')) return 'female';
+  if (id.includes('male') || name.includes('male')) return 'male';
+  if (/\bahp\b|\bcxx\b|\bhia\b/.test(id)) return 'female';
+  // Google convention: -A/-C/-E/-F female; -B/-D male.
+  if (/-[acef]-?$/i.test(id)) return 'female';
+  if (/-[bd]-?$/i.test(id)) return 'male';
+  return 'unknown';
+}
+
+function inferQuality(voice: Speech.Voice): VoiceOption['quality'] {
+  const id = voice.identifier?.toLowerCase() ?? '';
+  const name = voice.name?.toLowerCase() ?? '';
+  if (id.includes('studio') || name.includes('studio')) return 'studio';
+  if (id.includes('neural2') || name.includes('neural2')) return 'neural2';
+  if (id.includes('neural') || name.includes('neural')) return 'neural';
+  if (id.includes('wavenet') || name.includes('wavenet')) return 'wavenet';
+  if (id.includes('local') || id.includes('network')) return 'local';
+  return 'standard';
+}
+
+/**
+ * List all voices available on the device for ``language``, sorted by
+ * scored quality (most natural first). Caller wires this into the
+ * voice picker UI.
+ */
+export async function listVoicesForLanguage(
+  language: string,
+): Promise<VoiceOption[]> {
+  // Ensure the cache is warm so we know the engine has been
+  // enumerated at least once.
+  if (!voiceListCache) {
+    await warmDivineVoiceCache();
+  }
+  const all = voiceListCache?.['__all__'] ?? [];
+  const lang = language.toLowerCase();
+  const matched = all.filter((v) => {
+    const vl = v.language.toLowerCase();
+    return vl === lang || vl.startsWith(lang.split('-')[0]);
+  });
+  return matched
+    .map((v) => ({
+      identifier: v.identifier,
+      name: v.name,
+      language: v.language,
+      quality: inferQuality(v),
+      gender: inferGender(v),
+      score: scoreVoice(v, language),
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+
+// ── USER OVERRIDE PERSISTENCE ────────────────────────────────────────
+/**
+ * Read the persisted user override for one language. Returns undefined
+ * when the user is on Auto (no override), or AsyncStorage is empty,
+ * or storage threw.
+ */
+async function loadOverride(language: string): Promise<string | undefined> {
+  try {
+    const v = await AsyncStorage.getItem(VOICE_OVERRIDE_KEY(language));
+    return v ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function loadPersona(): Promise<DivinePersona> {
+  try {
+    const v = await AsyncStorage.getItem(PERSONA_KEY);
+    if (v === 'friend' || v === 'storyteller' || v === 'divine') return v;
+    return 'divine';
+  } catch {
+    return 'divine';
+  }
+}
+
+/**
+ * Persist the user's pick for one language. Pass undefined to clear
+ * the override and return to Auto.
+ */
+export async function setPreferredVoice(
+  language: string,
+  identifier: string | undefined,
+): Promise<void> {
+  if (identifier) {
+    userOverrideCache[language] = identifier;
+    try {
+      await AsyncStorage.setItem(VOICE_OVERRIDE_KEY(language), identifier);
+    } catch {
+      // Best-effort persistence; cache update is what matters
+      // immediately for the running session.
+    }
+  } else {
+    delete userOverrideCache[language];
+    try {
+      await AsyncStorage.removeItem(VOICE_OVERRIDE_KEY(language));
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
+ * Read the current user override (memory cache only — no IO). Returns
+ * undefined when on Auto.
+ */
+export function getPreferredVoiceSync(language: string): string | undefined {
+  return userOverrideCache[language];
+}
+
+/** Persist the persona pick + update in-memory cache. */
+export async function setPreferredPersona(persona: DivinePersona): Promise<void> {
+  personaCache = persona;
+  try {
+    await AsyncStorage.setItem(PERSONA_KEY, persona);
+  } catch {
+    // ignore
+  }
+}
+
+/** Read the in-memory persona (no IO). */
+export function getPreferredPersonaSync(): DivinePersona {
+  return personaCache;
+}
+
+// ── WARMUP ───────────────────────────────────────────────────────────
+/**
+ * Enumerate device voices, score them, load the user's persisted
+ * overrides + persona pick, and pre-warm the TTS audio pipeline so
+ * the first real Speech.speak() is genuinely instant.
  *
- * Call this from app boot or lazily from the first ListenButton tap.
  * Idempotent — second call returns the cached promise.
  */
 export function warmDivineVoiceCache(): Promise<VoiceCache> {
@@ -164,9 +352,6 @@ export function warmDivineVoiceCache(): Promise<VoiceCache> {
     try {
       voices = await Speech.getAvailableVoicesAsync();
     } catch {
-      // expo-speech is unavailable on web preview / certain RN dev
-      // builds; treat as no-voices and let speech fall back to
-      // default. NOT a crash — the cache just stays empty.
       voices = [];
     }
     const cache: VoiceCache = {};
@@ -174,22 +359,39 @@ export function warmDivineVoiceCache(): Promise<VoiceCache> {
       cache[lang] = pickBestVoice(voices, lang);
     }
     voiceCache = cache;
+    voiceListCache = { __all__: voices };
 
-    // Pre-warm the TTS audio pipeline. The first speak after app
-    // launch normally pays a one-time ~50-200ms engine init cost
-    // (allocating an AudioTrack, opening an AudioFlinger session,
-    // initializing the synthesis engine). Calling
-    // Speech.isSpeakingAsync() forces those allocations now, before
-    // the user ever taps a Listen button — so the first real
-    // utterance is instant.
-    //
-    // Failure-silent: if the call throws (very rare), we just lose
-    // the pre-warm benefit. Speech.speak still works fine, just
-    // pays the init cost on first real call.
+    // Load every persisted override + persona in parallel. AsyncStorage
+    // is fast (~5-10ms each) but issuing 6 reads in parallel keeps the
+    // app-boot pre-warm under one frame.
+    try {
+      const [overrideEntries, persona] = await Promise.all([
+        Promise.all(
+          TARGET_LANGUAGES.map(async (lang) => {
+            const id = await loadOverride(lang);
+            return [lang, id] as const;
+          }),
+        ),
+        loadPersona(),
+      ]);
+      const overrides: VoiceCache = {};
+      for (const [lang, id] of overrideEntries) {
+        if (id) overrides[lang] = id;
+      }
+      userOverrideCache = overrides;
+      personaCache = persona;
+    } catch {
+      // Persistence failure → defaults. Auto-pick still works.
+    }
+
+    // Pre-warm the audio pipeline. First Speech.speak() after launch
+    // pays a one-time ~50–200ms engine init (AudioTrack alloc, engine
+    // init). Calling Speech.isSpeakingAsync() forces those allocations
+    // now, before the user ever taps Listen.
     try {
       await Speech.isSpeakingAsync();
     } catch {
-      // ignore — pre-warm is a nice-to-have, not load-bearing.
+      // ignore
     }
 
     return cache;
@@ -197,45 +399,39 @@ export function warmDivineVoiceCache(): Promise<VoiceCache> {
   return warmupPromise;
 }
 
+// ── ACCESSORS ────────────────────────────────────────────────────────
 /**
- * Synchronous accessor — returns the cached voice ID for a language,
- * or undefined if the cache is cold or no voice matched. Callers
- * should await `warmDivineVoiceCache()` once at app start to populate
- * before relying on this.
+ * Return the best voice ID for ``language``. Resolution order:
+ *
+ *   1. Persisted user override (if any).
+ *   2. Auto-scored best from the device voice list.
+ *   3. Sanskrit-specific fallback to Hindi (most devices don't ship
+ *      Sanskrit voices but Hindi pronounces Devanagari correctly).
+ *   4. ``undefined`` — let Speech.speak use the engine default.
+ *
+ * Synchronous — caller must have already awaited
+ * ``warmDivineVoiceCache()`` once at app start.
  */
 export function getDivineVoiceSync(language: string): string | undefined {
+  if (userOverrideCache[language]) return userOverrideCache[language];
   if (!voiceCache) return undefined;
-  // Try exact match first, then language base (e.g., 'sa-IN' →
-  // 'hi-IN' since most devices don't ship Sanskrit but Hindi
-  // pronounces Devanagari correctly).
   if (voiceCache[language]) return voiceCache[language];
   if (language === 'sa-IN') return voiceCache['hi-IN'];
   return undefined;
 }
 
 /**
- * One-shot helper — warms cache if needed, then returns the voice ID.
- * Use this from async contexts (e.g., right before a Speech.speak call
- * if you're not sure whether warmup has run).
+ * Async one-shot helper — warms the cache if needed, then returns
+ * the resolved voice ID.
  */
-export async function getDivineVoice(language: string): Promise<string | undefined> {
+export async function getDivineVoice(
+  language: string,
+): Promise<string | undefined> {
   if (!voiceCache) await warmDivineVoiceCache();
   return getDivineVoiceSync(language);
 }
 
-/**
- * Divine prosody — apply to every Speech.speak call across the app for
- * a unified contemplative cadence. Spread into the speak options:
- *
- *   Speech.speak(text, {
- *     ...divineProsody('en-IN'),
- *     onDone: ...,
- *   });
- *
- * Per-language overrides are possible (e.g., Sanskrit slightly slower
- * for clarity on Devanagari pronunciation), but the defaults are
- * sensible across all 6 target languages.
- */
+// ── PROSODY ──────────────────────────────────────────────────────────
 export interface DivineProsody {
   language: string;
   rate: number;
@@ -243,15 +439,65 @@ export interface DivineProsody {
   voice?: string;
 }
 
-export function divineProsody(language: string): DivineProsody {
+/**
+ * Compose the full speak-options spread for a Speech.speak call.
+ * Reads the user's persisted persona pick + voice override.
+ *
+ *   Speech.speak(text, {
+ *     ...divineProsody('en-IN'),
+ *     onDone: ...,
+ *   });
+ *
+ * ``personaOverride`` (optional) lets a specific surface ignore the
+ * user's saved persona — e.g. a verse-reading screen always uses
+ * 'storyteller' regardless of preference.
+ */
+export function divineProsody(
+  language: string,
+  personaOverride?: DivinePersona,
+): DivineProsody {
   const voice = getDivineVoiceSync(language);
-  // Sanskrit needs a slightly slower rate so Devanagari syllables
-  // land cleanly. Other languages share the contemplative 0.88 rate.
-  const rate = language === 'sa-IN' ? 0.85 : 0.88;
-  // Slight pitch lowering — 0.98 is barely below natural and gives
-  // the voice a sense of weight without sounding artificially deep.
-  // Sanskrit goes a touch lower (0.97) to match the ritualistic
+  const persona = personaOverride ?? personaCache;
+  const preset = PERSONA_PRESETS[persona];
+  const isSanskrit = language === 'sa-IN';
+  const rate = isSanskrit
+    ? preset.rate + preset.rateBoostSanskrit
+    : preset.rate;
+  // Sanskrit drops a touch in pitch (0.97 vs 0.98) for the ritualistic
   // register Vedic chant traditionally uses.
-  const pitch = language === 'sa-IN' ? 0.97 : 0.98;
+  const pitch = isSanskrit ? preset.pitch - 0.01 : preset.pitch;
   return { language, rate, pitch, voice };
+}
+
+// ── PREVIEW ──────────────────────────────────────────────────────────
+/**
+ * Speak a short sample for the picker UI so users can hear a voice
+ * before locking it in. Keep the sample short (one sentence) to
+ * minimise wait time on Studio voices that download on first use.
+ */
+export function previewVoice(
+  identifier: string,
+  language: string,
+  sampleText?: string,
+): void {
+  Speech.stop();
+  const text =
+    sampleText ??
+    (language.startsWith('hi') || language === 'sa-IN'
+      ? 'नमस्ते। मैं सखा हूँ।'
+      : language.startsWith('mr')
+        ? 'नमस्कार. मी सखा आहे.'
+        : language.startsWith('ta')
+          ? 'வணக்கம். நான் சக்கா.'
+          : language.startsWith('bn')
+            ? 'নমস্কার। আমি সখা।'
+            : 'Hello. I am Sakha — your friend in stillness.');
+  const persona = personaCache;
+  const preset = PERSONA_PRESETS[persona];
+  Speech.speak(text, {
+    language,
+    voice: identifier,
+    rate: preset.rate,
+    pitch: preset.pitch,
+  });
 }

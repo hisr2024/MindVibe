@@ -147,6 +147,29 @@ export default function SettingsScreen(): React.JSX.Element {
         </SettingRow>
       </Card>
 
+      {/* Voice — choose the most natural voice + persona for Sakha
+          across Listen buttons, Voice Companion, and verse readings. */}
+      <SectionHeader title="Voice" />
+      <Card style={styles.card}>
+        <Pressable
+          onPress={() => {
+            void Haptics.selectionAsync();
+            router.push('/settings/voice');
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Voice settings — pick voice and persona"
+        >
+          <SettingRow
+            label="Voice & Persona"
+            description="Pick the most natural voice on your device · preview before selecting"
+          >
+            <Text variant="caption" color={colors.primary[300]}>
+              ›
+            </Text>
+          </SettingRow>
+        </Pressable>
+      </Card>
+
       {/* Appearance */}
       <SectionHeader title="Appearance" />
       <Card style={styles.card}>
