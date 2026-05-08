@@ -75,6 +75,14 @@ export interface SakhaMessageProps {
   /** Stable message id for keying. */
   readonly id?: string;
   /**
+   * Verse refs surfaced by the backend's Wisdom Core retrieval pass
+   * (e.g. ['BG2.47', 'BG6.5']). Rendered as small subtle chips below
+   * the message body so the user can see what the response was
+   * grounded in. Hidden when empty/undefined — no UI clutter on
+   * conversational replies that don't need a citation.
+   */
+  readonly verseRefs?: readonly string[];
+  /**
    * Called when the user taps "Go deeper" — starts a follow-up turn
    * to take the conversation further on this topic. Chat tab wires
    * this to send() with a "please explain further" prompt seeded
@@ -217,6 +225,7 @@ function SakhaMessageInner({
   isStreaming,
   shloka,
   id,
+  verseRefs,
   onAskFollowUp,
 }: SakhaMessageProps): React.JSX.Element {
   const { width } = useWindowDimensions();
@@ -321,6 +330,22 @@ function SakhaMessageInner({
 
           {/* Optional inline shloka card. */}
           {shloka ? <InlineShloka shloka={shloka} /> : null}
+
+          {/* Wisdom Core citations — small gold chips listing the
+              Bhagavad Gita verses the backend's Wisdom Core retrieval
+              pass surfaced for this response. Renders only when the
+              streaming completed AND the backend returned at least one
+              ref. Quiet, dismissible, non-interactive — just lets the
+              user see the source the answer was grounded in. */}
+          {!isStreaming && verseRefs && verseRefs.length > 0 ? (
+            <View style={styles.verseRefRow}>
+              {verseRefs.map((ref) => (
+                <View key={ref} style={styles.verseRefChip}>
+                  <Text style={styles.verseRefText}>{formatVerseRef(ref)}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </View>
 
         {shimmerKey ? <CompletionShimmer key={shimmerKey} /> : null}
@@ -395,6 +420,25 @@ function SakhaMessageInner({
       </View>
     </View>
   );
+}
+
+/**
+ * Normalise a verse ref into the user-facing chip label.
+ *
+ * Backend emits refs in two shapes (legacy + structured):
+ *   - "BG 2.47" (extracted via regex from streamed prose)
+ *   - "BG2.47"  (compact form from the structured retrieval list)
+ *   - "2.47"    (Wisdom Core's `verse_ref` field — no prefix)
+ *
+ * We render all three as "BG 2.47" so the chip looks consistent
+ * regardless of which path put the ref on the message.
+ */
+function formatVerseRef(ref: string): string {
+  const trimmed = ref.trim();
+  // "BG2.47" or "BG 2.47" → match "X.Y"
+  const match = trimmed.match(/(\d+)\.(\d+)/);
+  if (!match) return trimmed;
+  return `BG ${match[1]}.${match[2]}`;
 }
 
 /** Lightweight inline shloka renderer — used inside SakhaMessage bubbles. */
@@ -499,6 +543,31 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(212,160,23,0.18)',
     gap: 6,
+  },
+  // Wisdom Core verse-citation row. Sits at the bottom of the bubble
+  // body, below the streamed prose (and any inline shloka). Quiet
+  // gold chips so they read as supporting metadata, not as a card
+  // demanding attention. flexWrap so 3+ refs flow gracefully on
+  // narrow screens.
+  verseRefRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 10,
+  },
+  verseRefChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: 'rgba(212,160,23,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.28)',
+  },
+  verseRefText: {
+    color: GOLD,
+    fontSize: 11,
+    fontWeight: '500',
+    letterSpacing: 0.3,
   },
   // View-mode + conversation-mode pill row (Saransh / Go deeper).
   // Sits ABOVE MessageActionBar so the user sees "what kind of view"

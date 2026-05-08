@@ -1253,34 +1253,51 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
         context: str,
         limit: int = 15  # Expanded from 5 to 15
     ) -> list[dict[str, Any]]:
-        """Get relevant Gita verses based on query and context."""
+        """Retrieve verses via Wisdom Core (static Gita corpus + dynamic learned wisdom).
+
+        Routes through :func:`backend.services.wisdom_core.get_wisdom_core` so
+        the response is grounded in the unified corpus the rest of the platform
+        already uses (voice orchestrator, guidance route). The merge picks up:
+          - 700+ static Gita verses, scored by keyword + theme + domain match.
+          - Dynamic learned wisdom (validated rows from `learned_wisdom`).
+          - Effectiveness-weighted ordering when the dynamic corpus has data
+            for the surfaced moods.
+
+        Modern-secular framing is enforced by the persona prompt
+        (`prompts/sakha.text.openai.md` v1.2.0) — Wisdom Core supplies the
+        source material; the persona renders it in 2026 language.
+
+        On error (DB hiccup, missing tables, etc.) returns an empty list so
+        :meth:`_get_fallback_verses` can take over.
+        """
         try:
-            # Use wisdom KB to search verses
-            verse_results = await self.wisdom_kb.search_relevant_verses(
+            from backend.services.wisdom_core import get_wisdom_core
+
+            wisdom_core = get_wisdom_core()
+            results = await wisdom_core.search(
                 db=db,
                 query=query,
-                limit=limit
+                limit=limit,
             )
-            
-            # Format results
-            formatted_verses = []
-            for result in verse_results:
-                verse = result.get("verse")
-                if verse:
-                    chapter = getattr(verse, 'chapter', '')
-                    verse_num = getattr(verse, 'verse', '')
-                    formatted_verses.append({
-                        "verse_id": f"{chapter}.{verse_num}" if chapter and verse_num else "",
-                        "english": getattr(verse, 'english', ''),
-                        "principle": getattr(verse, 'principle', ''),
-                        "theme": getattr(verse, 'theme', ''),
-                        "score": result.get("score", 0.0)
-                    })
-            
+
+            formatted_verses: list[dict[str, Any]] = []
+            for r in results:
+                chapter = r.chapter or ""
+                verse_num = r.verse or ""
+                verse_id = r.verse_ref or (
+                    f"{chapter}.{verse_num}" if chapter and verse_num else ""
+                )
+                formatted_verses.append({
+                    "verse_id": verse_id,
+                    "english": r.content or "",
+                    "principle": r.principle or "",
+                    "theme": r.theme or "",
+                    "score": r.score,
+                })
             return formatted_verses
-            
+
         except Exception as e:
-            logger.error(f"KIAAN Core: Error getting verses: {e}")
+            logger.error(f"KIAAN Core: Wisdom Core search failed: {e}")
             return []
 
     async def _get_fallback_verses(self, db: AsyncSession, limit: int = 3) -> list[dict[str, Any]]:

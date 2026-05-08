@@ -22,14 +22,16 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user
+from backend.deps import get_current_user, get_db
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.services.ai_provider import (
     AIProviderError,
     AIProviderNotConfigured,
     call_kiaan_ai,
 )
+from backend.services.kiaan_wisdom_helper import compose_kiaan_system_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,11 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     conversation_id: str | None = None
+    # Verses surfaced from Wisdom Core (static + dynamic) that grounded
+    # the response. Empty list when retrieval was skipped or returned
+    # nothing — never None, so the Android client can render a flat
+    # `verses?.length` check without a null-guard.
+    verses: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ToolRequest(BaseModel):
@@ -111,26 +118,51 @@ def _tool_input(inputs: dict[str, Any], key: str, default: str = "") -> str:
 async def _run_ai(
     *,
     message: str,
+    db: AsyncSession | None = None,
     history: list[dict[str, str]] | None = None,
     tool_name: str | None = None,
     gita_verse: dict[str, Any] | None = None,
     system_override: str | None = None,
-) -> str:
-    """Call the AI provider and translate errors into HTTP responses.
+) -> tuple[str, list[dict[str, Any]]]:
+    """Call the AI provider grounded in Wisdom Core, modern-secular framing.
+
+    When ``db`` is provided and the caller has *not* shipped its own
+    ``system_override``, this composes a system prompt = persona-version
+    1.2.0 (modern-secular text persona) + retrieved verses block from
+    :class:`backend.services.wisdom_core.WisdomCore` (static + dynamic
+    corpus, effectiveness-weighted). That replaces the legacy Krishna-
+    flavoured constant in :mod:`backend.services.ai_provider` for every
+    chat + tool request routed here.
+
+    Returns ``(response_text, verses)`` so the caller can echo verse
+    refs back to the client (Android already parses them from the
+    streaming endpoint's done frame; this gives the unary endpoints
+    parity).
 
     Provider configuration problems surface as 503 (service unavailable) —
     the app should keep working; only AI features are degraded. Transient
     upstream failures surface as 502 (bad gateway). Validation errors from
     the provider layer become 400.
     """
+    verses: list[dict[str, Any]] = []
+    if db is not None and not (system_override and system_override.strip()):
+        composed, verses = await compose_kiaan_system_prompt(
+            db=db,
+            query=message,
+            tool_name=tool_name,
+        )
+        if composed:
+            system_override = composed
+
     try:
-        return await call_kiaan_ai(
+        text = await call_kiaan_ai(
             message=message,
             conversation_history=history or [],
             gita_verse=gita_verse,
             tool_name=tool_name,
             system_override=system_override,
         )
+        return text, verses
     except AIProviderNotConfigured as exc:
         logger.error("KIAAN AI not configured: %s", exc)
         raise HTTPException(
@@ -155,20 +187,26 @@ async def _run_ai(
 async def _handle_sakha_chat(
     payload: ChatRequest,
     current_user_id: str,
+    db: AsyncSession,
 ) -> ChatResponse:
     """Shared implementation for the Sakha chat endpoint and its alias."""
     history = [
         {"role": m.role, "content": m.content} for m in payload.conversation_history
     ]
 
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=payload.message,
+        db=db,
         history=history,
         tool_name=payload.tool_name,
         gita_verse=payload.gita_verse,
         system_override=payload.system_context,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -177,9 +215,10 @@ async def sakha_chat(
     request: Request,
     payload: ChatRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     """Main Sakha chat endpoint consumed by the Android chat screen."""
-    return await _handle_sakha_chat(payload, current_user_id)
+    return await _handle_sakha_chat(payload, current_user_id, db)
 
 
 @sakha_router.post("/chat", response_model=ChatResponse)
@@ -188,9 +227,10 @@ async def sakha_chat_alias(
     request: Request,
     payload: ChatRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     """Compat alias at ``/api/sakha/chat`` — identical to ``/api/kiaan/chat``."""
-    return await _handle_sakha_chat(payload, current_user_id)
+    return await _handle_sakha_chat(payload, current_user_id, db)
 
 
 # ── ENDPOINT 2: Emotional Reset ──────────────────────────────────────────
@@ -200,6 +240,7 @@ async def emotional_reset(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     emotion = _tool_input(payload.inputs, "emotion", "overwhelmed")
     intensity = _tool_input(payload.inputs, "intensity", "5")
@@ -208,14 +249,19 @@ async def emotional_reset(
     message = (
         f"I am experiencing {emotion} with an intensity of {intensity}/10. "
         f"Here is what happened: {situation}. "
-        "Please guide me through an emotional reset using Gita wisdom."
+        "Please guide me through an emotional reset."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="Emotional Reset",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 # ── ENDPOINT 3: Ardha (Cognitive Reframing) ──────────────────────────────
@@ -225,24 +271,30 @@ async def ardha(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     situation = _tool_input(payload.inputs, "situation")
     belief = _tool_input(payload.inputs, "limiting_belief")
     fear = _tool_input(payload.inputs, "fear")
 
     message = (
-        "I need cognitive reframing through Gita wisdom. "
+        "I need cognitive reframing. "
         f"My situation: {situation}. "
         f"The limiting belief holding me: {belief}. "
         f"What I fear most: {fear}. "
-        "Please help me reframe this through Gita philosophy."
+        "Please help me reframe this."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="Ardha",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 # ── ENDPOINT 4: Viyoga (Sacred Detachment) ───────────────────────────────
@@ -252,6 +304,7 @@ async def viyoga(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     attachment = _tool_input(payload.inputs, "attachment")
     attachment_type = _tool_input(payload.inputs, "attachment_type")
@@ -261,14 +314,19 @@ async def viyoga(
         f"I am struggling to let go of: {attachment}. "
         f"This is an attachment to: {attachment_type}. "
         f"What freedom would feel like: {freedom_vision}. "
-        "Please guide me through Viyoga — the sacred art of non-attachment."
+        "Please guide me through Viyoga — the practice of non-attachment."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="Viyoga",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 # ── ENDPOINT 5: Karma Reset ──────────────────────────────────────────────
@@ -278,23 +336,29 @@ async def karma_reset(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     pattern = _tool_input(payload.inputs, "pattern")
     dimension = _tool_input(payload.inputs, "dimension")
     dharmic_action = _tool_input(payload.inputs, "dharmic_action")
 
     message = (
-        f"I want to examine this karmic pattern: {pattern}. "
-        f"This pattern involves: {dimension}. "
-        f"The dharmic action I feel called to: {dharmic_action}. "
-        "Please guide me through a Karma Reset using Gita wisdom."
+        f"I want to examine this recurring pattern: {pattern}. "
+        f"This pattern shows up as: {dimension}. "
+        f"The action I feel called to: {dharmic_action}. "
+        "Please guide me through a Karma Reset."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="Karma Reset",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 # ── ENDPOINT 6: Relationship Compass ─────────────────────────────────────
@@ -304,6 +368,7 @@ async def relationship_compass(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     challenge = _tool_input(payload.inputs, "challenge")
     relationship_type = _tool_input(payload.inputs, "relationship_type")
@@ -313,14 +378,19 @@ async def relationship_compass(
         f"I have a relationship challenge: {challenge}. "
         f"This is with: {relationship_type}. "
         f"The core difficulty is: {difficulty}. "
-        "Please guide me through the Relationship Compass using Gita wisdom."
+        "Please guide me through the Relationship Compass."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="Relationship Compass",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
 
 
 # ── ENDPOINT 7: KarmaLytix Sacred Mirror ─────────────────────────────────
@@ -330,6 +400,7 @@ async def karmalytix(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
     """Generate the weekly Sacred Mirror from journal METADATA only.
 
@@ -361,9 +432,14 @@ async def karmalytix(
         "Gita Echo (most relevant verse), Growth Edge (invitation to deepen), "
         "Blessing (acknowledgment of where they are)."
     )
-    response_text = await _run_ai(
+    response_text, verses = await _run_ai(
         message=message,
+        db=db,
         tool_name="KarmaLytix",
         gita_verse=payload.gita_verse,
     )
-    return ChatResponse(response=response_text, conversation_id=current_user_id)
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
