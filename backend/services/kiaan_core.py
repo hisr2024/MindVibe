@@ -1253,22 +1253,29 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
         context: str,
         limit: int = 15  # Expanded from 5 to 15
     ) -> list[dict[str, Any]]:
-        """Retrieve verses via Wisdom Core (static Gita corpus + dynamic learned wisdom).
+        """Retrieve verses STRICTLY from the Bhagavad Gita corpus.
 
-        Routes through :func:`backend.services.wisdom_core.get_wisdom_core` so
-        the response is grounded in the unified corpus the rest of the platform
-        already uses (voice orchestrator, guidance route). The merge picks up:
-          - 700+ static Gita verses, scored by keyword + theme + domain match.
-          - Dynamic learned wisdom (validated rows from `learned_wisdom`).
-          - Effectiveness-weighted ordering when the dynamic corpus has data
-            for the surfaced moods.
+        Routes through :func:`backend.services.wisdom_core.get_wisdom_core`
+        with ``include_learned=False`` so the result is **100% Bhagavad
+        Gita** — only rows from the ``gita_verses`` table (700+ verses;
+        Sanskrit + Hindi + English + transliteration). Generic
+        ``learned_wisdom`` rows that may contain non-Gita content are
+        deliberately excluded, satisfying the "strictly Gita-based"
+        product constraint.
+
+        The "dynamic" dimension here is the per-verse scoring done inside
+        :meth:`WisdomCore._search_gita_verses` itself: keyword match,
+        theme overlap, primary/secondary domain match, and ``usage_count``
+        signals — all derived from how a Gita verse has performed for
+        prior queries. So static + dynamic ranking, but every row
+        retrieved is Gita.
 
         Modern-secular framing is enforced by the persona prompt
-        (`prompts/sakha.text.openai.md` v1.2.0) — Wisdom Core supplies the
-        source material; the persona renders it in 2026 language.
+        (``prompts/sakha.text.openai.md`` v1.2.0) — Wisdom Core supplies
+        the source material; the persona renders it in 2026 language.
 
-        On error (DB hiccup, missing tables, etc.) returns an empty list so
-        :meth:`_get_fallback_verses` can take over.
+        On error (DB hiccup, missing tables, etc.) returns an empty list
+        so :meth:`_get_fallback_verses` can take over.
         """
         try:
             from backend.services.wisdom_core import get_wisdom_core
@@ -1278,6 +1285,7 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
                 db=db,
                 query=query,
                 limit=limit,
+                include_learned=False,  # ← STRICTLY Gita: skip learned_wisdom rows
             )
 
             formatted_verses: list[dict[str, Any]] = []
