@@ -36,14 +36,27 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
 import { Square, Volume2 } from 'lucide-react-native';
 
 import {
-  divineProsody,
+  speakDivinely,
+  stopSpeaking,
   warmDivineVoiceCache,
 } from '../lib/divineVoice';
+import * as SecureStore from 'expo-secure-store';
+
+/** SecureStore key written by authStore. Same key used by the API
+ *  client + voice picker — keeps cloud TTS auth in step with the rest
+ *  of the app without an extra wiring layer. */
+const ACCESS_TOKEN_KEY = 'kiaanverse_access_token';
+async function readAccessToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 const GOLD = '#D4A017';
 
@@ -110,7 +123,7 @@ export function ListenButton({
 
   const handleToggle = useCallback(async () => {
     if (isSpeaking) {
-      Speech.stop();
+      void stopSpeaking();
       setIsSpeaking(false);
       return;
     }
@@ -126,17 +139,21 @@ export function ListenButton({
     await warmDivineVoiceCache();
 
     setIsSpeaking(true);
-    Speech.stop();
+    void stopSpeaking();
 
     // Walk the segment list via nested onDone callbacks. Each callback
     // is captured by index — once segment N finishes, fire segment N+1.
     // On final segment's onDone, flip back to idle.
     //
-    // For each segment we overlay divineProsody(language) on top of any
-    // segment-specific rate/pitch overrides. The prosody helper picks
-    // the highest-quality device voice + applies contemplative cadence
-    // (rate 0.88 default, 0.85 for Sanskrit; pitch 0.98 default, 0.97
-    // for Sanskrit to match Vedic ritual register).
+    // ``speakDivinely`` routes between cloud TTS (ElevenLabs / Sarvam /
+    // Bhashini, when the user has picked one in /settings/voice) and
+    // on-device Google TTS (Studio / Neural2 / WaveNet) automatically.
+    // Both paths honour the same onDone / onError contract so the
+    // segment-walk works identically.
+    //
+    // Cloud-path latency is concentrated on the first play of a
+    // phrase (~200–600ms for ElevenLabs); replays hit the local cache
+    // and are instant. On-device path is always instant.
     const speakAt = (index: number) => {
       if (index >= playList.length) {
         setIsSpeaking(false);
@@ -144,21 +161,9 @@ export function ListenButton({
       }
       const seg = playList[index];
       const lang = seg.language ?? 'en-IN';
-      const prosody = divineProsody(lang);
-      Speech.speak(seg.text, {
-        language: lang,
-        // Caller-provided rate/pitch override prosody defaults so a
-        // surface that needs unusual cadence (e.g. fast announcement)
-        // can still get it. Most callers leave these undefined and
-        // inherit divine prosody.
-        rate: seg.rate ?? prosody.rate,
-        pitch: seg.pitch ?? prosody.pitch,
-        // Voice ID = highest-quality match the device offers. If
-        // undefined, expo-speech falls back to the engine default —
-        // not a crash, just a quality regression.
-        voice: prosody.voice,
+      void speakDivinely(seg.text, lang, {
+        getAccessToken: readAccessToken,
         onDone: () => speakAt(index + 1),
-        onStopped: () => setIsSpeaking(false),
         onError: () => setIsSpeaking(false),
       });
     };
@@ -172,7 +177,7 @@ export function ListenButton({
       // Only stop if WE were the one playing; otherwise we'd cancel
       // a sibling button's playback. setIsSpeaking is React state so
       // its closure here reflects the value at unmount time.
-      if (isSpeaking) Speech.stop();
+      if (isSpeaking) void stopSpeaking();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

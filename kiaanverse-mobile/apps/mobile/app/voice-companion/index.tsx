@@ -62,14 +62,26 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
-import * as Speech from 'expo-speech';
+import * as SecureStore from 'expo-secure-store';
 import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
-import { divineProsody } from '../../voice/lib/divineVoice';
+import { speakDivinely, stopSpeaking } from '../../voice/lib/divineVoice';
+
+/** Match authStore's SecureStore key — used by Voice Companion's cloud
+ *  TTS path (when the user has picked an ElevenLabs / Sarvam / Bhashini
+ *  voice in /settings/voice). On-device path ignores the token. */
+const ACCESS_TOKEN_KEY = 'kiaanverse_access_token';
+async function readAccessToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 import { useSakhaStream } from '../../components/chat/useSakhaStream';
 
 /**
@@ -219,12 +231,12 @@ export default function VoiceCompanionScreen() {
         return;
       }
       setState('speaking');
-      Speech.stop();
-      // divineProsody picks the highest-quality neural voice the
-      // device offers + applies contemplative cadence (rate 0.88,
-      // pitch 0.98 — see voice/lib/divineVoice.ts). Same prosody
-      // used by the chat tab + every per-message Listen button →
-      // unified Sakha voice across the entire ecosystem.
+      void stopSpeaking();
+      // ``speakDivinely`` routes between cloud TTS (ElevenLabs / Sarvam
+      // / Bhashini, when the user has picked one in /settings/voice)
+      // and on-device Google TTS (Studio / Neural2 / WaveNet). Same
+      // prosody + same onDone contract used by the chat tab's Listen
+      // button → unified Sakha voice across the entire ecosystem.
       const onSpeechFinished = () => {
         // If session is still active, immediately resume listening
         // so the user can respond without tapping. The dictation
@@ -237,16 +249,18 @@ export default function VoiceCompanionScreen() {
           setState('idle');
         }
       };
-      Speech.speak(text, {
-        ...divineProsody('en-IN'),
+      void speakDivinely(text, 'en-IN', {
+        getAccessToken: readAccessToken,
         onDone: onSpeechFinished,
-        onStopped: () => setState('idle'),  // explicit stop = end session
-        onError: onSpeechFinished, // transient TTS hiccup → keep going
+        // A transient TTS hiccup (cloud fetch failure, decode error,
+        // etc.) shouldn't break the session — fall through to the
+        // listening loop the same way a normal completion does.
+        onError: onSpeechFinished,
       });
     });
     return () => {
       onStreamCompleted(null);
-      Speech.stop();
+      void stopSpeaking();
     };
   }, [onStreamCompleted]);
 
@@ -294,7 +308,7 @@ export default function VoiceCompanionScreen() {
     // so the onStopped callback doesn't kick off a fresh dictation
     // (the auto-restart guard reads sessionActiveRef.current).
     sessionActiveRef.current = false;
-    Speech.stop();
+    void stopSpeaking();
     try {
       abort();
     } catch {
@@ -313,7 +327,7 @@ export default function VoiceCompanionScreen() {
   useEffect(() => {
     return () => {
       sessionActiveRef.current = false;
-      Speech.stop();
+      void stopSpeaking();
     };
   }, []);
 
