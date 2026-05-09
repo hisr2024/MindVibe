@@ -25,6 +25,7 @@ import { AuroraLayer } from './AuroraLayer';
 import { DivineCelestialBackground } from './DivineCelestialBackground';
 import { useTimeOfDay } from './useTimeOfDay';
 import { TIME_OF_DAY_ATMOSPHERE } from './tokens/background';
+import { useTheme } from '../theme/useTheme';
 
 export interface DivineScreenWrapperProps {
   readonly children: React.ReactNode;
@@ -57,6 +58,12 @@ function DivineScreenWrapperComponent({
   const detected = useTimeOfDay();
   const timeOfDay = forceTimeOfDay ?? detected;
   const atmosphere = TIME_OF_DAY_ATMOSPHERE[timeOfDay];
+  // The active sacred palette overrides the muhurta background so a user-picked
+  // scheme (Maroon / Forest / Black & Gold) shows on every screen wrapped here.
+  // The aurora and particle field stay tuned to time-of-day to keep the living
+  // background's "breath" intact.
+  const { theme } = useTheme();
+  const paletteBg = theme.colorScheme.bg.void;
 
   const content = safeArea ? (
     <SafeAreaView edges={edges} style={[styles.safeArea, contentStyle]}>
@@ -67,7 +74,7 @@ function DivineScreenWrapperComponent({
   );
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, { backgroundColor: paletteBg }, style]}>
       <StatusBar
         translucent
         barStyle="light-content"
@@ -76,7 +83,7 @@ function DivineScreenWrapperComponent({
 
       {!disableParticles && (
         <DivineCelestialBackground
-          backgroundColor={atmosphere.background}
+          backgroundColor={paletteBg}
           opacityMultiplier={atmosphere.opacityMultiplier}
           particleCount={atmosphere.particleCount}
         />

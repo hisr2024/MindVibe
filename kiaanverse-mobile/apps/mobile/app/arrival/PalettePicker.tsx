@@ -18,7 +18,6 @@
 import React, { useCallback } from 'react';
 import {
   Dimensions,
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -100,18 +99,31 @@ export interface PaletteSheetProps {
   readonly onClose: () => void;
 }
 
+/**
+ * Inline overlay sheet (not a Modal). Mounting as a sibling of the arrival
+ * screen content avoids the cross-platform quirks `<Modal statusBarTranslucent>`
+ * has on Android emulators (where it can mount under the status bar or fail
+ * to receive touches), which is what made the picker appear "non-functional"
+ * in the first build. The animation behaviour is identical.
+ */
 export function PaletteSheet({
   visible,
   onClose,
-}: PaletteSheetProps): React.JSX.Element {
+}: PaletteSheetProps): React.JSX.Element | null {
   const activeId = useThemeStore((s) => s.palette);
   const setPalette = useThemeStore((s) => s.setPalette);
+
+  // Mount-gate so the overlay leaves the tree after the close animation runs;
+  // otherwise an absolute-positioned full-screen view would block taps on the
+  // arrival page even when invisible.
+  const [mounted, setMounted] = React.useState(visible);
 
   const sheetTranslate = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
 
   React.useEffect(() => {
     if (visible) {
+      setMounted(true);
       sheetTranslate.value = withTiming(0, {
         duration: 360,
         easing: SHEET_EASING,
@@ -123,7 +135,11 @@ export function PaletteSheet({
         easing: SHEET_EASING,
       });
       backdropOpacity.value = withTiming(0, { duration: 220 });
+      // Unmount after the slide-down completes.
+      const t = setTimeout(() => setMounted(false), 320);
+      return () => clearTimeout(t);
     }
+    return undefined;
   }, [visible, sheetTranslate, backdropOpacity]);
 
   const handleSelect = useCallback(
@@ -149,44 +165,43 @@ export function PaletteSheet({
     opacity: backdropOpacity.value,
   }));
 
+  if (!mounted) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      onRequestClose={onClose}
-      animationType="none"
-      statusBarTranslucent
-    >
-      <View style={styles.sheetRoot} testID="arrival-palette-sheet">
-        <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        </Animated.View>
+    <View style={styles.sheetRoot} testID="arrival-palette-sheet">
+      <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close palette picker"
+        />
+      </Animated.View>
 
-        <Animated.View style={[styles.sheet, sheetStyle]}>
-          <View style={styles.handleBar} />
-          <Text allowFontScaling={false} style={styles.sheetEyebrow}>
-            SACRED COLOR SCHEME
-          </Text>
-          <Text allowFontScaling={false} style={styles.sheetTitle}>
-            Choose your palette
-          </Text>
-          <Text allowFontScaling={false} style={styles.sheetSubtitle}>
-            Each scheme dresses the entire app — from this introduction onward.
-          </Text>
+      <Animated.View style={[styles.sheet, sheetStyle]}>
+        <View style={styles.handleBar} />
+        <Text allowFontScaling={false} style={styles.sheetEyebrow}>
+          SACRED COLOR SCHEME
+        </Text>
+        <Text allowFontScaling={false} style={styles.sheetTitle}>
+          Choose your palette
+        </Text>
+        <Text allowFontScaling={false} style={styles.sheetSubtitle}>
+          Each scheme dresses the whole app.
+        </Text>
 
-          <View style={styles.cardGrid}>
-            {PALETTE_ORDER.map((id) => (
-              <PaletteCard
-                key={id}
-                palette={PALETTES[id]}
-                isActive={id === activeId}
-                onSelect={handleSelect}
-              />
-            ))}
-          </View>
-        </Animated.View>
-      </View>
-    </Modal>
+        <View style={styles.cardGrid}>
+          {PALETTE_ORDER.map((id) => (
+            <PaletteCard
+              key={id}
+              palette={PALETTES[id]}
+              isActive={id === activeId}
+              onSelect={handleSelect}
+            />
+          ))}
+        </View>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -342,13 +357,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 
-  // Sheet root + backdrop
+  // Sheet root + backdrop — absolute overlay over the arrival screen.
   sheetRoot: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'flex-end',
+    zIndex: 100,
+    elevation: 100,
   },
   backdrop: {
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
 
   // Sheet container
