@@ -33,7 +33,7 @@ import * as Haptics from 'expo-haptics';
 import {
   Text,
   GoldenButton,
-  DivineGradient,
+  DivineBackground,
   GlowCard,
   SacredStepIndicator,
   SacredDivider,
@@ -92,18 +92,14 @@ const DAY_META: Record<number, { theme: string; focus: string }> = {
   14: { theme: 'Completion', focus: 'New Beginning' },
 };
 
-/**
- * DivineGradient variant mapped from enemy keywords.
- * Falls back to 'divine' if no mapping exists.
- */
-const ENEMY_GRADIENT_VARIANT: Record<string, string> = {
-  kama: 'renewal',
-  krodha: 'release',
-  lobha: 'healing',
-  moha: 'healing',
-  mada: 'divine',
-  matsarya: 'peace',
-};
+// ENEMY_GRADIENT_VARIANT was previously used to map each shadripu to one of
+// the `sacredGradients` presets ('peace', 'healing', etc.). Those presets
+// have #FFD700 / #F0C040 as their third color, which DivineGradient renders
+// as a flex:1 layer at 0.3 opacity — producing the cream/khaki bands the
+// user reported as overlapping the journey content. The screen now uses
+// `<DivineBackground variant="cosmic">` (palette-driven dark cosmic), and
+// per-enemy theming is preserved via the inner `accentColor` instead of
+// the page background.
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -405,9 +401,6 @@ export default function StepPlayerScreen(): React.JSX.Element {
   const accentColor = enemyKey
     ? (ENEMY_COLORS[enemyKey] ?? colors.primary[500])
     : colors.primary[500];
-  const gradientVariant = (
-    enemyKey ? ENEMY_GRADIENT_VARIANT[enemyKey] : 'divine'
-  ) as 'divine' | 'peace' | 'healing' | 'release' | 'renewal';
 
   const currentStep = useMemo(() => {
     if (!data?.steps) return null;
@@ -474,27 +467,21 @@ export default function StepPlayerScreen(): React.JSX.Element {
   // Loading state
   if (isLoading || !data) {
     return (
-      <DivineGradient
-        variant="divine"
-        style={{ flex: 1, paddingTop: insets.top }}
-      >
+      <DivineBackground variant="cosmic" style={{ paddingTop: insets.top }}>
         <View style={styles.centerState}>
           <LoadingMandala size={80} />
           <Text variant="bodySmall" color={colors.text.muted}>
             Preparing your practice...
           </Text>
         </View>
-      </DivineGradient>
+      </DivineBackground>
     );
   }
 
   // Error state
   if (error || !currentStep) {
     return (
-      <DivineGradient
-        variant="divine"
-        style={{ flex: 1, paddingTop: insets.top }}
-      >
+      <DivineBackground variant="cosmic" style={{ paddingTop: insets.top }}>
         <View style={styles.centerState}>
           <Text variant="body" color={colors.semantic.error}>
             {currentStep === null
@@ -510,12 +497,22 @@ export default function StepPlayerScreen(): React.JSX.Element {
             onPress={() => router.back()}
           />
         </View>
-      </DivineGradient>
+      </DivineBackground>
     );
   }
 
+  // The previous wrapper here was `<DivineGradient variant={gradientVariant}>`.
+  // sacredGradients[variant][2] resolves to bright #FFD700 — DivineGradient
+  // stacks that gold as a flex:1 layer at 0.3 opacity (and again in the
+  // cross-fade overlay at 0.4 in the middle band), which is what produced
+  // the cream/khaki bands the user reported as overlapping the journey
+  // step content. DivineBackground is palette-driven (theme.colorScheme.bg
+  // .gradient → dark cosmic), keeps the dark theme intact, and STILL
+  // honours the user's chosen palette. The per-enemy `accentColor` is
+  // still applied to inner UI accents below (titles, borders, the verse
+  // BG-pill), so the screen continues to feel themed per shadripu.
   return (
-    <DivineGradient variant={gradientVariant} style={{ flex: 1 }}>
+    <DivineBackground variant="cosmic" style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -672,7 +669,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
           }}
         />
       ) : null}
-    </DivineGradient>
+    </DivineBackground>
   );
 }
 
