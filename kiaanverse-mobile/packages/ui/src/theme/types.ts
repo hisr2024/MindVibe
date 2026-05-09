@@ -10,6 +10,7 @@ import type { fontFamily, fontSize, lineHeight, letterSpacing, textPresets } fro
 import type { spacing } from '../tokens/spacing';
 import type { radii } from '../tokens/radii';
 import type { duration, spring } from '../tokens/motion';
+import type { Palette, PaletteId } from '../tokens/palettes';
 
 // ---------------------------------------------------------------------------
 // Theme mode
@@ -89,6 +90,11 @@ export interface Theme {
   /** Animation timing */
   readonly duration: typeof duration;
   readonly spring: typeof spring;
+
+  /** Active sacred color scheme — drives DivineBackground gradient + aura,
+   *  arrival page accents, and primary CTA gradient. Switched at runtime by
+   *  the user via the palette picker. */
+  readonly colorScheme: Palette;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,4 +106,8 @@ export interface ThemeContextValue {
   readonly isDark: boolean;
   readonly mode: ThemeMode;
   readonly setMode: (mode: ThemeMode) => void;
+  /** Active palette id — the picker reads this to highlight the current pick. */
+  readonly paletteId: PaletteId;
+  /** Switch to a different sacred color scheme. Persists via the host store. */
+  readonly setPaletteId: (id: PaletteId) => void;
 }

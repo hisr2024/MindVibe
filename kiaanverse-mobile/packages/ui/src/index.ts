@@ -53,6 +53,15 @@ export {
   type ChakraColor,
 } from './tokens/sacred';
 export { gradients } from './tokens/gradients';
+export {
+  PALETTES,
+  PALETTE_ORDER,
+  DEFAULT_PALETTE_ID,
+  resolvePalette,
+  type Palette,
+  type PaletteAccent,
+  type PaletteId,
+} from './tokens/palettes';
 
 // ---------------------------------------------------------------------------
 // Theme (composed token system with dark/light mode)

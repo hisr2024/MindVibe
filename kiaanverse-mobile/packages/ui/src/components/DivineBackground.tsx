@@ -25,7 +25,6 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/useTheme';
-import { gradients } from '../tokens/gradients';
 import { duration } from '../tokens/motion';
 
 export type DivineBackgroundVariant = 'cosmic' | 'sacred' | 'warm';
@@ -48,8 +47,8 @@ function DivineBackgroundInner({
   style,
   children,
 }: DivineBackgroundProps): React.JSX.Element {
-  const { isDark } = useTheme();
-  const mode = isDark ? 'dark' : 'light';
+  const { theme, isDark } = useTheme();
+  const scheme = theme.colorScheme;
 
   // Breathing aura opacity
   const auraOpacity = useSharedValue(0.4);
@@ -71,11 +70,20 @@ function DivineBackgroundInner({
     opacity: auraOpacity.value,
   }));
 
-  // Select gradient colors based on variant
-  const bgColors = gradients.cosmicBackground[mode];
-  const auraColors = variant === 'warm'
-    ? gradients.peacockSheen[mode]
-    : gradients.divineAura[mode];
+  // Light mode keeps a warm cream backdrop regardless of the picked palette
+  // (palettes are designed for the cosmic/dark side of the app). Dark mode
+  // uses the active sacred color scheme — Indigo, Maroon, Forest, or Black/Gold.
+  const bgColors: readonly string[] = isDark
+    ? scheme.bg.gradient
+    : ['#FAF7F2', '#F5F0E8', '#EDE8DC'];
+
+  // The aura tints the top breathing glow toward the palette's primary mood.
+  // 'sacred' variant biases the aura toward divine gold for a temple feel,
+  // while 'warm' and 'cosmic' use the palette's own aura ramp.
+  const auraColors: readonly string[] =
+    variant === 'sacred'
+      ? [scheme.accent.divine + '55', scheme.accent.divine + '22', 'transparent']
+      : [scheme.aura[0], scheme.aura[1], scheme.aura[2]];
 
   return (
     <View style={[styles.container, style]}>
