@@ -25,6 +25,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -130,7 +132,7 @@ const MENU_SECTIONS: readonly MenuSection[] = [
     items: [
       { label: 'My Journeys', route: '/journey', icon: '🗺' },
       { label: 'Karma Footprint', route: '/karma-footprint', icon: '☸' },
-      { label: 'KarmaLytix', route: '/analytics', icon: '📊' },
+      { label: 'KarmaLytix', route: '/karmalytix', icon: '📊' },
     ],
   },
   {
@@ -186,8 +188,28 @@ export default function ProfileScreen(): React.JSX.Element {
 
   const handleMenuPress = useCallback((route: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (route === 'external:rate') {
+      // Native store-rating URL. Falls back to the web Play Store / App Store
+      // page if the native scheme isn't installed (rare, but handled).
+      const PACKAGE_ID = 'com.kiaanverse.app';
+      const APPLE_ID = '6743000000'; // placeholder until App Store id is final
+      const native =
+        Platform.OS === 'android'
+          ? `market://details?id=${PACKAGE_ID}`
+          : `itms-apps://itunes.apple.com/app/id${APPLE_ID}?action=write-review`;
+      const web =
+        Platform.OS === 'android'
+          ? `https://play.google.com/store/apps/details?id=${PACKAGE_ID}`
+          : `https://apps.apple.com/app/id${APPLE_ID}?action=write-review`;
+      Linking.canOpenURL(native)
+        .then((ok) => Linking.openURL(ok ? native : web))
+        .catch(() => {
+          void Linking.openURL(web).catch(() => undefined);
+        });
+      return;
+    }
     if (route.startsWith('external:')) {
-      // External links (e.g., store rating) — hooked up in a later pass.
+      // Other external links — hooked up in a later pass.
       return;
     }
     router.push(route as never);

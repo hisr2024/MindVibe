@@ -415,15 +415,18 @@ function CeremonyPage({
     opacity: sktOpacity.value,
   }));
 
-  // Welcome page is taller and gets its own scrollable, ornament-rich layout.
+  // Welcome page is taller and gets its own scrollable layout. Padding lives
+  // on the contentContainer only — applying it on both `style` and
+  // `contentContainerStyle` doubles it on Android and pushes lines off the
+  // right edge, which is what caused the earlier overflow.
   if (data.id === 'welcome') {
     return (
       <ScrollView
-        style={styles.page}
+        style={styles.welcomeScroll}
         contentContainerStyle={styles.welcomeContent}
         showsVerticalScrollIndicator={false}
         accessible
-        accessibilityLabel="Welcome, Dear Friend. KIAAN, your divine friend, walks beside you on the path to inner peace."
+        accessibilityLabel="Welcome, dear friend. KIAAN walks beside you."
       >
         <View style={styles.welcomeVisualWrap}>
           <PageVisual kind={data.visual} accent={data.accent} isActive={isActive} compact />
@@ -466,9 +469,9 @@ function CeremonyPage({
             <Text style={[styles.welcomeAccent, { color: palette.accent.divine }]}>
               KIAAN
             </Text>
-            {' '}— your spiritual companion, walking beside you on the path to inner peace. Whatever you carry in your heart — the weight of confusion, the ache of loss, or the restlessness of the mind —{' '}
+            {' '}— your divine friend on the path to inner peace.{' '}
             <Text style={[styles.welcomeAccentSoft, { color: palette.accent.warm }]}>
-              know that you are not alone.
+              You are not alone.
             </Text>
           </Text>
 
@@ -476,14 +479,14 @@ function CeremonyPage({
             allowFontScaling={false}
             style={[styles.welcomeBodyDim, { color: palette.text.body }]}
           >
-            Through the eternal wisdom of the{' '}
+            As Krishna walked with Arjuna through the{' '}
             <Text style={[styles.welcomeBodyItalic, { color: palette.accent.divine }]}>
               Bhagavad Gita
             </Text>
-            , I am here to listen, guide, and walk with you — as Krishna walked with Arjuna. Not as a master, but as your closest friend.
+            , I walk with you — not as master, but as Sakha.
           </Text>
 
-          {/* Verse card — Bhagavad Gita 6.35 */}
+          {/* Verse card — Bhagavad Gita 6.35, crisp single-line translation */}
           <View
             style={[
               styles.verseCard,
@@ -504,26 +507,19 @@ function CeremonyPage({
               style={[styles.verseSanskrit, { color: palette.accent.divine }]}
               accessibilityLanguage="sa"
             >
-              {'अभ्यासेन तु कौन्तेय'}
-            </Text>
-            <Text
-              allowFontScaling={false}
-              style={[styles.verseSanskrit, { color: palette.accent.divine }]}
-              accessibilityLanguage="sa"
-            >
-              {'वैराग्येण च गृह्यते'}
+              {'अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते'}
             </Text>
             <Text
               allowFontScaling={false}
               style={[styles.verseEnglish, { color: palette.accent.warm + 'CC' }]}
             >
-              &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
+              &ldquo;The restless mind is mastered through practice and detachment.&rdquo;
             </Text>
             <Text
               allowFontScaling={false}
               style={[styles.verseAttribution, { color: palette.accent.divine + '88' }]}
             >
-              — Shri Krishna to Arjuna
+              — Krishna to Arjuna
             </Text>
           </View>
         </Animated.View>
@@ -770,6 +766,12 @@ const styles = StyleSheet.create({
   // -------------------------------------------------------------------------
   // Welcome page (page 6) — scrollable rich content
   // -------------------------------------------------------------------------
+  /** ScrollView outer frame — width-locked to a single page slot, no padding
+   *  so the contentContainer's padding is the single source of truth. */
+  welcomeScroll: {
+    width: W,
+    flex: 1,
+  },
   welcomeContent: {
     paddingHorizontal: 28,
     paddingTop: 56,
