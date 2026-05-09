@@ -490,6 +490,14 @@ export interface SpeakDivinelyOptions {
   /** Persona override — surface-specific (e.g. verse readings always
    *  use 'storyteller' regardless of user pick). */
   readonly personaOverride?: DivinePersona;
+  /** Explicit cloud voice ID — pass ``divine-krishna``,
+   *  ``divine-saraswati``, ``sarvam-rishi``, ``elevenlabs-nova``, etc.
+   *  to bypass the user's persisted preference and force a specific
+   *  cloud voice for this one utterance. Used by the verse-detail
+   *  screen's 4-voice pill picker (Krishna / Saraswati / Rishi / Nova)
+   *  so each button truly speaks in its named voice via cloud TTS,
+   *  not in the user's globally-chosen voice. */
+  readonly cloudVoiceId?: string;
   /** Fired when playback completes. Cloud and on-device paths both
    *  honour this. */
   readonly onDone?: () => void;
@@ -505,16 +513,17 @@ export interface SpeakDivinelyOptions {
 }
 
 /**
- * Speak ``text`` in ``language`` using whichever path the user has
- * selected (cloud TTS or on-device Speech.speak).
+ * Speak ``text`` in ``language`` using whichever path the caller or
+ * user has selected.
  *
- * Routing logic:
+ * Routing precedence:
  *
- *   • Resolved voice id starts with ``cloud:`` → ``cloudSpeak()``
- *     POST to ``/api/voice/synthesize`` + play via expo-av.
- *   • Otherwise → ``Speech.speak()`` with the divine prosody.
+ *   1. ``options.cloudVoiceId`` — explicit caller override. Always
+ *      goes through cloud TTS regardless of user pref.
+ *   2. User's persisted voice id starts with ``cloud:`` → ``cloudSpeak``.
+ *   3. Otherwise → ``Speech.speak`` with the divine prosody.
  *
- * Both paths converge on the same ``onDone`` / ``onError`` contract so
+ * All paths converge on the same ``onDone`` / ``onError`` contract so
  * call sites (ListenButton, voice-companion, verse readings) can use
  * the same auto-listen loop / error handling regardless of provider.
  *
@@ -534,26 +543,41 @@ export async function speakDivinely(
     return;
   }
 
-  const resolvedVoice = getDivineVoiceSync(language);
   const persona = options.personaOverride ?? personaCache;
   const preset = PERSONA_PRESETS[persona];
+  const voiceType =
+    persona === 'friend'
+      ? 'friendly'
+      : persona === 'storyteller'
+        ? 'storytelling'
+        : 'calm';
 
-  // ── Cloud path ──
+  // ── Tier 1: explicit cloud override ──
+  // The verse-detail screen's per-pill picker hands us ``divine-krishna``
+  // etc. directly. Skip the persisted-preference lookup entirely so
+  // the chosen voice plays exactly as labelled.
+  if (options.cloudVoiceId) {
+    await cloudSpeak(text, {
+      voiceId: options.cloudVoiceId,
+      language,
+      voiceType,
+      baseUrl: options.baseUrl,
+      getAccessToken: options.getAccessToken,
+      onDone: options.onDone,
+      onError: options.onError,
+    });
+    return;
+  }
+
+  const resolvedVoice = getDivineVoiceSync(language);
+
+  // ── Tier 2: user-persisted cloud voice ──
   if (isCloudVoiceId(resolvedVoice)) {
     const backendId = parseCloudVoiceId(resolvedVoice as string);
     const meta = findCloudVoice(resolvedVoice as string);
     if (!backendId || !meta) {
       // Stale persisted id — fall through to on-device.
     } else {
-      // Map persona → backend voice_type. The backend's voice_type
-      // tunes its own speed/pitch presets, so we don't override on
-      // top of that.
-      const voiceType =
-        persona === 'friend'
-          ? 'friendly'
-          : persona === 'storyteller'
-            ? 'storytelling'
-            : 'calm';
       await cloudSpeak(text, {
         voiceId: backendId,
         language,
@@ -567,7 +591,7 @@ export async function speakDivinely(
     }
   }
 
-  // ── On-device path ──
+  // ── Tier 3: on-device path ──
   const isSanskrit = language === 'sa-IN';
   const rate = isSanskrit
     ? preset.rate + preset.rateBoostSanskrit

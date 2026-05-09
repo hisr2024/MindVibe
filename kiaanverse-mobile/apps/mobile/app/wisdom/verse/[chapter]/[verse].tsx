@@ -51,11 +51,27 @@ import {
 import {
   DivineScreenWrapper,
   OmLoader,
-  useSpeechOutput,
 } from '@kiaanverse/ui';
 import { useGitaVerse } from '@kiaanverse/api';
 import { getLocalChapter, getLocalVerse } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+import * as SecureStore from 'expo-secure-store';
+
+import {
+  speakDivinely,
+  stopSpeaking,
+} from '../../../../voice/lib/divineVoice';
+
+/** Match the SecureStore key authStore writes the JWT into. The
+ *  cloud-TTS path needs it to authenticate POST /api/voice/synthesize. */
+const ACCESS_TOKEN_KEY = 'kiaanverse_access_token';
+async function readAccessToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 // ── Tokens ────────────────────────────────────────────────────────────────
 const GOLD = '#D4A017';
@@ -231,15 +247,50 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
   const selectedVoice =
     VOICES.find((v) => v.id === selectedVoiceId) ?? VOICES[0];
 
-  const { speak, stop, isSpeaking } = useSpeechOutput({
-    rate: selectedVoice.speed,
-    pitch: selectedVoice.pitch,
-    language: selectedVoice.language,
-  });
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  /**
+   * Stop whichever TTS path is in flight. Uses the unified
+   * ``stopSpeaking`` from divineVoice so both cloud-TTS (expo-av Sound)
+   * and on-device fallback (expo-speech) are cancelled.
+   */
+  const stop = useCallback(() => {
+    void stopSpeaking();
+    setIsSpeaking(false);
+  }, []);
+
+  /**
+   * Speak the verse via the chosen pill voice. Each VOICES entry's
+   * ``id`` is a backend voice_id (``divine-krishna``,
+   * ``divine-saraswati``, ``sarvam-rishi``, ``elevenlabs-nova``) that
+   * ``backend/services/{elevenlabs,sarvam}_tts_service.py`` already
+   * maps to a real provider voice (Krishna → ElevenLabs Clyde,
+   * Saraswati → ElevenLabs Dorothy, etc.). speakDivinely's
+   * ``cloudVoiceId`` override forces routing through cloud TTS so
+   * the four pills sound truly distinct and divine instead of all
+   * playing through the same robotic Android engine.
+   */
+  const speak = useCallback(
+    (text: string) => {
+      if (!text || !text.trim()) return;
+      setIsSpeaking(true);
+      // ``personaOverride: 'storyteller'`` gives the slow, grave
+      // cadence appropriate for verse readings — used as the prosody
+      // hint when cloud TTS hands the audio back.
+      void speakDivinely(text, selectedVoice.language, {
+        cloudVoiceId: selectedVoice.id,
+        personaOverride: 'storyteller',
+        getAccessToken: readAccessToken,
+        onDone: () => setIsSpeaking(false),
+        onError: () => setIsSpeaking(false),
+      });
+    },
+    [selectedVoice.id, selectedVoice.language],
+  );
 
   // Stop any ongoing playback if the user switches voices mid-utterance —
-  // expo-speech will otherwise queue and the caller can't tell which voice
-  // is "active" any more.
+  // expo-speech / expo-av would otherwise queue and the caller can't
+  // tell which voice is "active" any more.
   const handleSelectVoice = useCallback(
     (voiceId: string) => {
       void Haptics.selectionAsync().catch(() => undefined);
@@ -438,7 +489,11 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
           </View>
         </View>
 
-        {/* Sanskrit body */}
+        {/* Sanskrit body — the verse text itself ends with the
+            Devanagari closing notation ``।। chapter.verse ।।`` (e.g.
+            ``।। 2.14 ।।``), so the ad-hoc verseStamp text below was
+            duplicating the verse number visually. Removed: the
+            Sanskrit's own closing already says it. */}
         {sanskrit ? (
           <Animated.View
             entering={FadeInDown.duration(420)}
@@ -451,7 +506,6 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
             >
               {sanskrit}
             </Text>
-            <Text style={styles.verseStamp}>{`${chapterNum}.${verseNum}`}</Text>
           </Animated.View>
         ) : null}
 
@@ -721,13 +775,20 @@ const styles = StyleSheet.create({
   // Sub-header
   scroll: {
     paddingHorizontal: 20,
-    gap: 18,
+    // Generous gap so each section (sub-header → Sanskrit →
+    // transliteration → translation → voice picker → action row)
+    // breathes. Tightening below 22 makes the Sanskrit + transliteration
+    // feel crammed against each other on small phones.
+    gap: 22,
   },
   subHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginTop: 4,
+    // Pull the sub-header off the parent header so "BG 2.14 · SANKHYA
+    // YOGA" isn't clipped by the safe-area top inset on tall-aspect
+    // devices.
+    marginTop: 8,
   },
   subRef: {
     fontFamily: 'Outfit-Medium',
@@ -753,19 +814,19 @@ const styles = StyleSheet.create({
   // Sanskrit
   sanskritBlock: {
     gap: 6,
+    // Bottom margin gives the divider that follows visual breathing
+    // room — without it, the divider sits flush against the verse
+    // closing ``।।`` and looks like part of the punctuation.
+    marginBottom: 4,
   },
   sanskrit: {
     fontFamily: 'NotoSansDevanagari-Regular',
     fontStyle: 'italic',
     fontSize: 22,
-    lineHeight: 40,
+    // Roomy line height so the two padas (split by ``।``) read as
+    // distinct lines instead of running together visually.
+    lineHeight: 44,
     color: GOLD_BRIGHT,
-  },
-  verseStamp: {
-    fontFamily: 'CormorantGaramond-SemiBoldItalic',
-    fontSize: 22,
-    color: GOLD,
-    marginTop: 6,
   },
 
   // Divider
@@ -778,8 +839,11 @@ const styles = StyleSheet.create({
   translit: {
     fontFamily: 'CrimsonText-Italic',
     fontSize: 14,
-    lineHeight: 24,
+    lineHeight: 26,
     color: TEXT_SECONDARY,
+    // Match Sanskrit block's bottom margin so the divider below sits
+    // symmetrically between transliteration and translation.
+    marginBottom: 2,
   },
 
   // Translation
@@ -788,6 +852,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 26,
     color: TEXT_PRIMARY,
+    marginBottom: 2,
   },
 
   // Voice section
