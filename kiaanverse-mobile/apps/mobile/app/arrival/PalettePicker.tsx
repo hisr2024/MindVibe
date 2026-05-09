@@ -307,6 +307,79 @@ function SwatchQuadrant({
 }
 
 // ---------------------------------------------------------------------------
+// InlinePaletteSwatches — visible row of palette options on the welcome page
+// ---------------------------------------------------------------------------
+
+export interface InlinePaletteSwatchesProps {
+  /** Which palette is currently active (for the check tick). */
+  readonly activeId: PaletteId;
+}
+
+/**
+ * A horizontal row of four palette pills shown directly on the welcome page,
+ * so the color options are visible without tapping the floating chip. Tapping
+ * a pill applies the palette immediately. This complements the chip + sheet
+ * (the chip remains for users on pages 1–5).
+ */
+export function InlinePaletteSwatches({
+  activeId,
+}: InlinePaletteSwatchesProps): React.JSX.Element {
+  const setPalette = useThemeStore((s) => s.setPalette);
+
+  const handle = useCallback(
+    (id: PaletteId) => {
+      if (id === activeId) return;
+      if (Platform.OS !== 'web') {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+          () => undefined
+        );
+      }
+      setPalette(id);
+    },
+    [activeId, setPalette]
+  );
+
+  return (
+    <>
+      {PALETTE_ORDER.map((id) => {
+        const p = PALETTES[id];
+        const isActive = id === activeId;
+        return (
+          <TouchableOpacity
+            key={id}
+            onPress={() => handle(id)}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={`Select ${p.label} palette`}
+            testID={`arrival-palette-inline-${id}`}
+            style={[
+              styles.inlinePill,
+              {
+                backgroundColor: p.bg.void,
+                borderColor: isActive
+                  ? p.accent.divine
+                  : 'rgba(212, 164, 76, 0.25)',
+                borderWidth: isActive ? 2 : 1,
+              },
+            ]}
+          >
+            <SwatchQuadrant palette={p} size={28} />
+            <Text
+              allowFontScaling={false}
+              style={[styles.inlinePillLabel, { color: p.text.title }]}
+              numberOfLines={1}
+            >
+              {p.shortLabel}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Hook — small helper so the chip + sheet can co-live in one parent screen
 // ---------------------------------------------------------------------------
 
@@ -452,5 +525,22 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+
+  // Inline palette swatches (visible on the welcome page)
+  inlinePill: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+    minWidth: 64,
+    gap: 4,
+  },
+  inlinePillLabel: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 11,
+    letterSpacing: 0.4,
   },
 });
