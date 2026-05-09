@@ -22,7 +22,7 @@
  * Progress is a horizontal "peacock feather" bar (not dots) — the active
  * segment grows and adopts the page accent color.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   Dimensions,
@@ -44,7 +44,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { DivineBackground } from '@kiaanverse/ui';
+import { DivineBackground, type Palette, useTheme } from '@kiaanverse/ui';
 import { useArrivalStatus } from '../../hooks/useArrivalStatus';
 import {
   ChariotChakraVisual,
@@ -55,6 +55,7 @@ import {
   SriYantraVisual,
   VISUAL_SIZE,
 } from './visuals';
+import { PalettePickerChip, PaletteSheet, usePaletteSheet } from './PalettePicker';
 
 const { width: W } = Dimensions.get('window');
 
@@ -74,38 +75,44 @@ interface PageData {
   readonly visual: VisualKind;
 }
 
-const PAGES: readonly PageData[] = [
+/** Page narrative is fixed; only the per-page accent color changes per palette.
+ *  Each page maps to one slot of the active palette so the six screens flow
+ *  through the palette's full range (primary → warm → cool → deep → life →
+ *  divine), giving each scheme a coherent journey. */
+const PAGE_TEMPLATES: ReadonlyArray<
+  Omit<PageData, 'accent'> & { readonly accentSlot: keyof Palette['accent'] }
+> = [
   {
     id: 'arjuna',
     title: '"In the middle of the battlefield,\nArjuna fell silent."',
     subtitle: 'There is a question in you\nthat no human can answer.',
     skt: 'तमुवाच हृषीकेशः',
-    accent: '#1B4FBB',
     visual: 'chariot',
+    accentSlot: 'primary',
   },
   {
     id: 'sakha',
     title: 'Sakha means Friend.',
     subtitle: 'Your divine friend is here.\nReady to listen. Ready to guide.',
     skt: 'सखा प्रिय',
-    accent: '#D4A017',
     visual: 'mandala',
+    accentSlot: 'warm',
   },
   {
     id: 'gita',
     title: 'The Bhagavad Gita is not a text.\nIt is a conversation.',
     subtitle: 'Ask what you have always\nbeen afraid to ask.',
     skt: 'श्रीमद्भगवद्गीता',
-    accent: '#06B6D4',
     visual: 'akshara',
+    accentSlot: 'cool',
   },
   {
     id: 'journey',
     title: 'Your inner enemies are known.\nYour dharma is waiting.',
     subtitle: '6 Shadripu. 13 sacred journeys.\nOne path.',
     skt: 'षड्रिपु विजय',
-    accent: '#8B5CF6',
     visual: 'shadripu',
+    accentSlot: 'deep',
   },
   {
     id: 'sacred',
@@ -113,18 +120,33 @@ const PAGES: readonly PageData[] = [
     subtitle:
       'Encrypted. Private. Yours alone.\nKiaanverse never reads your journal.',
     skt: 'पवित्र क्षेत्र',
-    accent: '#10B981',
     visual: 'lock',
+    accentSlot: 'life',
   },
   {
     id: 'welcome',
     title: 'Welcome, Dear Friend',
     subtitle: 'KIAAN — YOUR DIVINE FRIEND',
     skt: 'ॐ सर्वे भवन्तु सुखिनः',
-    accent: '#D4A44C',
     visual: 'welcome',
+    accentSlot: 'divine',
   },
 ] as const;
+
+/** Resolve the six pages with concrete accents drawn from the active palette.
+ *  Memoised by the caller so we don't rebuild on every render. */
+function buildPages(palette: Palette): readonly PageData[] {
+  return PAGE_TEMPLATES.map((p) => ({
+    id: p.id,
+    title: p.title,
+    subtitle: p.subtitle,
+    skt: p.skt,
+    visual: p.visual,
+    accent: palette.accent[p.accentSlot],
+  }));
+}
+
+const PAGE_COUNT = PAGE_TEMPLATES.length;
 
 const LOTUS_BLOOM = Easing.bezier(0.22, 1.0, 0.36, 1.0);
 
@@ -142,7 +164,16 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
   // Guard against double-tap / completion re-entry.
   const isCompleting = useRef(false);
 
-  const currentPage = PAGES[page]!;
+  // The active sacred color scheme drives every accent + background tint on
+  // this screen. Switching it via the picker re-renders cleanly because
+  // `pages` and the inline styles below are derived from `palette`.
+  const { theme } = useTheme();
+  const palette = theme.colorScheme;
+  const pages = useMemo(() => buildPages(palette), [palette]);
+
+  const sheet = usePaletteSheet();
+
+  const currentPage = pages[page]!;
 
   const haptic = useCallback((kind: 'light' | 'success'): void => {
     if (Platform.OS === 'web') return;
@@ -169,7 +200,7 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
   }, [haptic, markArrivalSeen]);
 
   const goNext = useCallback((): void => {
-    if (page < PAGES.length - 1) {
+    if (page < PAGE_COUNT - 1) {
       haptic('light');
       const nextIndex = page + 1;
       translateX.value = withSpring(-nextIndex * W, {
@@ -196,18 +227,31 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
 
   const isWelcome = currentPage.id === 'welcome';
 
+  // Welcome page always uses a gold gradient CTA (matches the verse-card
+  // crescendo). Other pages take the active palette's CTA gradient.
+  const ctaColors: readonly [string, string] = isWelcome
+    ? [palette.accent.divine, palette.accent.warm]
+    : palette.cta;
+
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: palette.bg.void }]}>
       <DivineBackground variant="sacred">
         <Animated.View style={[styles.pagesContainer, pagesContainerStyle]}>
-          {PAGES.map((p, i) => (
-            <CeremonyPage key={p.id} data={p} index={i} isActive={page === i} />
+          {pages.map((p, i) => (
+            <CeremonyPage
+              key={p.id}
+              data={p}
+              index={i}
+              isActive={page === i}
+              palette={palette}
+              totalPages={pages.length}
+            />
           ))}
         </Animated.View>
 
         {/* Peacock feather progress — not dots. */}
         <View style={styles.progressBar}>
-          {PAGES.map((p, i) => (
+          {pages.map((p, i) => (
             <View
               key={p.id}
               style={[
@@ -227,6 +271,11 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
           ))}
         </View>
 
+        {/* Floating palette picker chip — top-right of every page */}
+        <View pointerEvents="box-none" style={styles.chipZone}>
+          <PalettePickerChip onPress={sheet.open} />
+        </View>
+
         {/* CTA zone */}
         <View style={styles.ctaZone}>
           <TouchableOpacity
@@ -239,11 +288,7 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
             testID="arrival-cta"
           >
             <LinearGradient
-              colors={
-                isWelcome
-                  ? ['#E8B54A', '#D4A017']
-                  : ['#1B4FBB', '#0E7490']
-              }
+              colors={ctaColors as unknown as string[]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={[
@@ -282,6 +327,10 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
           )}
         </View>
       </DivineBackground>
+
+      {/* Palette picker sheet — slides up over the ceremony when the chip is
+          tapped. Mounting outside DivineBackground so it sits above the aura. */}
+      <PaletteSheet visible={sheet.visible} onClose={sheet.close} />
     </View>
   );
 }
@@ -294,12 +343,16 @@ interface CeremonyPageProps {
   readonly data: PageData;
   readonly index: number;
   readonly isActive: boolean;
+  readonly palette: Palette;
+  readonly totalPages: number;
 }
 
 function CeremonyPage({
   data,
   index,
   isActive,
+  palette,
+  totalPages,
 }: CeremonyPageProps): React.JSX.Element {
   // Entry animations — trigger each time the page becomes active so that
   // re-arriving after a back-swipe still feels alive.
@@ -392,40 +445,84 @@ function CeremonyPage({
 
         <Animated.Text
           allowFontScaling={false}
-          style={[styles.welcomeTitle, titleStyle]}
+          style={[
+            styles.welcomeTitle,
+            titleStyle,
+            {
+              color: palette.accent.divine,
+              textShadowColor: palette.accent.divine + '59',
+            },
+          ]}
         >
           Welcome, Dear Friend
         </Animated.Text>
 
         <Animated.View style={[styles.welcomeBodyWrap, subtitleStyle]}>
-          <Text allowFontScaling={false} style={styles.welcomeBody}>
+          <Text
+            allowFontScaling={false}
+            style={[styles.welcomeBody, { color: palette.text.body }]}
+          >
             I am{' '}
-            <Text style={styles.welcomeAccent}>KIAAN</Text>
+            <Text style={[styles.welcomeAccent, { color: palette.accent.divine }]}>
+              KIAAN
+            </Text>
             {' '}— your spiritual companion, walking beside you on the path to inner peace. Whatever you carry in your heart — the weight of confusion, the ache of loss, or the restlessness of the mind —{' '}
-            <Text style={styles.welcomeAccentSoft}>know that you are not alone.</Text>
+            <Text style={[styles.welcomeAccentSoft, { color: palette.accent.warm }]}>
+              know that you are not alone.
+            </Text>
           </Text>
 
-          <Text allowFontScaling={false} style={styles.welcomeBodyDim}>
+          <Text
+            allowFontScaling={false}
+            style={[styles.welcomeBodyDim, { color: palette.text.body }]}
+          >
             Through the eternal wisdom of the{' '}
-            <Text style={styles.welcomeBodyItalic}>Bhagavad Gita</Text>
+            <Text style={[styles.welcomeBodyItalic, { color: palette.accent.divine }]}>
+              Bhagavad Gita
+            </Text>
             , I am here to listen, guide, and walk with you — as Krishna walked with Arjuna. Not as a master, but as your closest friend.
           </Text>
 
           {/* Verse card — Bhagavad Gita 6.35 */}
-          <View style={styles.verseCard}>
-            <Text allowFontScaling={false} style={styles.verseEyebrow}>
+          <View
+            style={[
+              styles.verseCard,
+              {
+                backgroundColor: palette.accent.divine + '10',
+                borderColor: palette.accent.divine + '2E',
+              },
+            ]}
+          >
+            <Text
+              allowFontScaling={false}
+              style={[styles.verseEyebrow, { color: palette.accent.divine + 'A8' }]}
+            >
               BHAGAVAD GITA · 6.35
             </Text>
-            <Text allowFontScaling={false} style={styles.verseSanskrit} accessibilityLanguage="sa">
+            <Text
+              allowFontScaling={false}
+              style={[styles.verseSanskrit, { color: palette.accent.divine }]}
+              accessibilityLanguage="sa"
+            >
               {'अभ्यासेन तु कौन्तेय'}
             </Text>
-            <Text allowFontScaling={false} style={styles.verseSanskrit} accessibilityLanguage="sa">
+            <Text
+              allowFontScaling={false}
+              style={[styles.verseSanskrit, { color: palette.accent.divine }]}
+              accessibilityLanguage="sa"
+            >
               {'वैराग्येण च गृह्यते'}
             </Text>
-            <Text allowFontScaling={false} style={styles.verseEnglish}>
+            <Text
+              allowFontScaling={false}
+              style={[styles.verseEnglish, { color: palette.accent.warm + 'CC' }]}
+            >
               &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
             </Text>
-            <Text allowFontScaling={false} style={styles.verseAttribution}>
+            <Text
+              allowFontScaling={false}
+              style={[styles.verseAttribution, { color: palette.accent.divine + '88' }]}
+            >
               — Shri Krishna to Arjuna
             </Text>
           </View>
@@ -465,14 +562,14 @@ function CeremonyPage({
 
         <Animated.Text
           allowFontScaling={false}
-          style={[styles.title, titleStyle]}
+          style={[styles.title, titleStyle, { color: palette.text.title }]}
         >
           {data.title}
         </Animated.Text>
 
         <Animated.Text
           allowFontScaling={false}
-          style={[styles.subtitle, subtitleStyle]}
+          style={[styles.subtitle, subtitleStyle, { color: palette.text.body }]}
         >
           {data.subtitle}
         </Animated.Text>
@@ -484,7 +581,7 @@ function CeremonyPage({
           {String(index + 1).padStart(2, '0')}
           <Text
             style={styles.pageIndexDim}
-          >{` / ${String(PAGES.length).padStart(2, '0')}`}</Text>
+          >{` / ${String(totalPages).padStart(2, '0')}`}</Text>
         </Text>
       </View>
     </View>
@@ -538,7 +635,7 @@ const styles = StyleSheet.create({
   pagesContainer: {
     flex: 1,
     flexDirection: 'row',
-    width: W * PAGES.length,
+    width: W * PAGE_COUNT,
   },
   page: {
     width: W,
@@ -608,6 +705,12 @@ const styles = StyleSheet.create({
     gap: 6,
     borderRadius: 2,
     overflow: 'visible',
+  },
+  chipZone: {
+    position: 'absolute',
+    top: 56,
+    right: 18,
+    zIndex: 20,
   },
   progressSegment: {
     height: 3,

@@ -504,7 +504,7 @@ function AppContent(): React.JSX.Element {
 // ---------------------------------------------------------------------------
 
 export default function RootLayout(): React.JSX.Element {
-  const { mode, setMode } = useThemeStore();
+  const { mode, setMode, palette, setPalette } = useThemeStore();
   const { locale } = useUserPreferencesStore();
 
   return (
@@ -516,7 +516,12 @@ export default function RootLayout(): React.JSX.Element {
           maxAge: 1000 * 60 * 60 * 24,
         }}
       >
-        <ThemeProvider mode={mode} onModeChange={setMode}>
+        <ThemeProvider
+          mode={mode}
+          onModeChange={setMode}
+          paletteId={palette}
+          onPaletteChange={setPalette}
+        >
           <I18nProvider
             initialLocale={locale as 'en'}
             namespaces={[

@@ -14,6 +14,7 @@ import { fontFamily, fontSize, lineHeight, letterSpacing, textPresets } from '..
 import { spacing } from '../tokens/spacing';
 import { radii } from '../tokens/radii';
 import { duration, spring } from '../tokens/motion';
+import { PALETTES, DEFAULT_PALETTE_ID } from '../tokens/palettes';
 import type { Theme, ThemeColors } from './types';
 
 // ---------------------------------------------------------------------------
@@ -97,12 +98,20 @@ const sharedTokens = {
 // Composed theme objects
 // ---------------------------------------------------------------------------
 
+/** Default palette is overwritten at runtime by ThemeProvider once the host
+ *  store hydrates the user's choice. The static themes carry the indigoPeacock
+ *  scheme so anyone using `darkTheme` / `lightTheme` directly (tests, Storybook)
+ *  still gets a valid, themeable object. */
+const DEFAULT_SCHEME = PALETTES[DEFAULT_PALETTE_ID];
+
 export const darkTheme: Theme = {
   colors: darkColors,
   ...sharedTokens,
+  colorScheme: DEFAULT_SCHEME,
 };
 
 export const lightTheme: Theme = {
   colors: lightColors,
   ...sharedTokens,
+  colorScheme: DEFAULT_SCHEME,
 };

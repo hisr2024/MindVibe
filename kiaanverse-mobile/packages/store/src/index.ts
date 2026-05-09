@@ -9,7 +9,7 @@
 export { useAuthStore, type AuthStatus } from './authStore';
 
 // Theme
-export { useThemeStore, type ThemeMode } from './themeStore';
+export { useThemeStore, type ThemeMode, type PaletteId } from './themeStore';
 
 // Journey
 export { useJourneyStore, type JourneyProgress } from './journeyStore';
