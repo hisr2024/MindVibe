@@ -38,7 +38,15 @@ const CARD_BG = 'rgba(22, 26, 66, 0.6)';
 
 const MAX_QUERY_LEN = 500;
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+// `Dimensions.get('window').width` returns a fractional value on many
+// Android devices (e.g. 411.42857). When that fractional width is set on
+// each panel, React Native's `pagingEnabled` ScrollView snaps to
+// integer-pixel boundaries that don't match the fractional panel layout
+// — over 3 panels the drift compounds and pages 2 (Rajas) + 3 (Sattva)
+// visibly shift to the right (header text gets clipped, the previous
+// panel peeks in from the left). Rounding to an integer eliminates the
+// mismatch so every panel snaps to its own left edge.
+const SCREEN_WIDTH = Math.round(Dimensions.get('window').width);
 
 export interface GunaMirrorChamberProps {
   readonly selectedPatterns: GunaSelections;
