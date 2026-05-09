@@ -1,5 +1,5 @@
 /**
- * Arrival Ceremony — 5 sacred pages that introduce Kiaanverse to a new soul.
+ * Arrival Ceremony — 6 sacred pages that introduce Kiaanverse to a new soul.
  *
  * This is the pre-authentication darshan. It plays once per device (tracked
  * via useArrivalStatus) and replaces a conventional welcome carousel with an
@@ -8,11 +8,16 @@
  *   returning     → routed straight past this screen by the AuthGate
  *
  * Pages:
- *   1. arjuna   — the silent battlefield question
- *   2. sakha    — the divine friend is here
- *   3. gita     — the Gita is a conversation
- *   4. journey  — your dharma is waiting (6 shadripu)
- *   5. sacred   — privacy covenant
+ *   1. arjuna   — the silent battlefield question        (Dharma Chakra + peacock eye)
+ *   2. sakha    — the divine friend is here              (Sri Yantra mandala)
+ *   3. gita     — the Gita is a conversation             (Krishna's flute + shabda rings)
+ *   4. journey  — your dharma is waiting (6 shadripu)    (Shatkona hexagram + 6 ripu orbs)
+ *   5. sacred   — privacy covenant                       (16+8 petal lotus + yantra seal)
+ *   6. welcome  — Krishna's word from the Gita 6.35      (Grand Sri Yantra + peacock crown)
+ *
+ * Page 6 is the rich finale — it carries the full Welcome message, Krishna's
+ * verse to Arjuna, and the "Enter the Sacred Space" CTA. Because it has more
+ * vertical content than the other pages it is internally scrollable.
  *
  * Progress is a horizontal "peacock feather" bar (not dots) — the active
  * segment grows and adopts the page accent color.
@@ -22,6 +27,7 @@ import {
   AccessibilityInfo,
   Dimensions,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,8 +39,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
-  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -42,6 +46,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { DivineBackground } from '@kiaanverse/ui';
 import { useArrivalStatus } from '../../hooks/useArrivalStatus';
+import {
+  ChariotChakraVisual,
+  KiaanWelcomeVisual,
+  ManuscriptVisual,
+  PadmaSealVisual,
+  ShatkonaVisual,
+  SriYantraVisual,
+  VISUAL_SIZE,
+} from './visuals';
 
 const { width: W } = Dimensions.get('window');
 
@@ -49,7 +62,8 @@ const { width: W } = Dimensions.get('window');
 // Page definitions
 // ---------------------------------------------------------------------------
 
-type PageId = 'arjuna' | 'sakha' | 'gita' | 'journey' | 'sacred';
+type PageId = 'arjuna' | 'sakha' | 'gita' | 'journey' | 'sacred' | 'welcome';
+type VisualKind = 'chariot' | 'mandala' | 'akshara' | 'shadripu' | 'lock' | 'welcome';
 
 interface PageData {
   readonly id: PageId;
@@ -57,7 +71,7 @@ interface PageData {
   readonly subtitle: string;
   readonly skt: string;
   readonly accent: string;
-  readonly visual: 'chariot' | 'mandala' | 'akshara' | 'shadripu' | 'lock';
+  readonly visual: VisualKind;
 }
 
 const PAGES: readonly PageData[] = [
@@ -102,9 +116,20 @@ const PAGES: readonly PageData[] = [
     accent: '#10B981',
     visual: 'lock',
   },
+  {
+    id: 'welcome',
+    title: 'Welcome, Dear Friend',
+    subtitle: 'KIAAN — YOUR DIVINE FRIEND',
+    skt: 'ॐ सर्वे भवन्तु सुखिनः',
+    accent: '#D4A44C',
+    visual: 'welcome',
+  },
 ] as const;
 
 const LOTUS_BLOOM = Easing.bezier(0.22, 1.0, 0.36, 1.0);
+
+const GOLD = '#D4A44C';
+const GOLD_SOFT = 'rgba(212, 164, 76, 0.7)';
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -169,6 +194,8 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
     transform: [{ translateX: translateX.value }],
   }));
 
+  const isWelcome = currentPage.id === 'welcome';
+
   return (
     <View style={styles.root}>
       <DivineBackground variant="sacred">
@@ -207,23 +234,36 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel={
-              page < PAGES.length - 1 ? 'Continue' : 'Begin your journey'
+              isWelcome ? 'Enter the sacred space' : 'Continue'
             }
             testID="arrival-cta"
           >
             <LinearGradient
-              colors={['#1B4FBB', '#0E7490']}
+              colors={
+                isWelcome
+                  ? ['#E8B54A', '#D4A017']
+                  : ['#1B4FBB', '#0E7490']
+              }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.ctaButton}
+              style={[
+                styles.ctaButton,
+                isWelcome && styles.ctaButtonGold,
+              ]}
             >
-              <Text allowFontScaling={false} style={styles.ctaText}>
-                {page < PAGES.length - 1 ? 'Continue' : 'Begin Your Journey'}
+              <Text
+                allowFontScaling={false}
+                style={[
+                  styles.ctaText,
+                  isWelcome && styles.ctaTextDark,
+                ]}
+              >
+                {isWelcome ? 'Enter the Sacred Space' : 'Continue'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
 
-          {page < PAGES.length - 1 ? (
+          {!isWelcome ? (
             <TouchableOpacity
               onPress={handleSkip}
               style={styles.skipBtn}
@@ -322,6 +362,89 @@ function CeremonyPage({
     opacity: sktOpacity.value,
   }));
 
+  // Welcome page is taller and gets its own scrollable, ornament-rich layout.
+  if (data.id === 'welcome') {
+    return (
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.welcomeContent}
+        showsVerticalScrollIndicator={false}
+        accessible
+        accessibilityLabel="Welcome, Dear Friend. KIAAN, your divine friend, walks beside you on the path to inner peace."
+      >
+        <View style={styles.welcomeVisualWrap}>
+          <PageVisual kind={data.visual} accent={data.accent} isActive={isActive} compact />
+        </View>
+
+        {/* Top ornament — soft gold dividers framing a bindu */}
+        <View style={styles.ornament}>
+          <View style={[styles.ornamentLine, styles.ornamentLineLeft]} />
+          <View style={styles.ornamentDot} />
+          <View style={[styles.ornamentLine, styles.ornamentLineRight]} />
+        </View>
+
+        <Animated.Text
+          allowFontScaling={false}
+          style={[styles.eyebrow, sktStyle]}
+        >
+          KIAAN — YOUR DIVINE FRIEND
+        </Animated.Text>
+
+        <Animated.Text
+          allowFontScaling={false}
+          style={[styles.welcomeTitle, titleStyle]}
+        >
+          Welcome, Dear Friend
+        </Animated.Text>
+
+        <Animated.View style={[styles.welcomeBodyWrap, subtitleStyle]}>
+          <Text allowFontScaling={false} style={styles.welcomeBody}>
+            I am{' '}
+            <Text style={styles.welcomeAccent}>KIAAN</Text>
+            {' '}— your spiritual companion, walking beside you on the path to inner peace. Whatever you carry in your heart — the weight of confusion, the ache of loss, or the restlessness of the mind —{' '}
+            <Text style={styles.welcomeAccentSoft}>know that you are not alone.</Text>
+          </Text>
+
+          <Text allowFontScaling={false} style={styles.welcomeBodyDim}>
+            Through the eternal wisdom of the{' '}
+            <Text style={styles.welcomeBodyItalic}>Bhagavad Gita</Text>
+            , I am here to listen, guide, and walk with you — as Krishna walked with Arjuna. Not as a master, but as your closest friend.
+          </Text>
+
+          {/* Verse card — Bhagavad Gita 6.35 */}
+          <View style={styles.verseCard}>
+            <Text allowFontScaling={false} style={styles.verseEyebrow}>
+              BHAGAVAD GITA · 6.35
+            </Text>
+            <Text allowFontScaling={false} style={styles.verseSanskrit} accessibilityLanguage="sa">
+              {'अभ्यासेन तु कौन्तेय'}
+            </Text>
+            <Text allowFontScaling={false} style={styles.verseSanskrit} accessibilityLanguage="sa">
+              {'वैराग्येण च गृह्यते'}
+            </Text>
+            <Text allowFontScaling={false} style={styles.verseEnglish}>
+              &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
+            </Text>
+            <Text allowFontScaling={false} style={styles.verseAttribution}>
+              — Shri Krishna to Arjuna
+            </Text>
+          </View>
+        </Animated.View>
+
+        {/* Bottom ornament — closes the scroll before the CTA */}
+        <View style={styles.ornament}>
+          <View style={[styles.ornamentLine, styles.ornamentLineLeft]} />
+          <View style={styles.ornamentDotSmall} />
+          <View style={[styles.ornamentLine, styles.ornamentLineRight]} />
+        </View>
+
+        {/* Spacer so the bottom ornament clears the absolute-positioned CTA */}
+        <View style={styles.welcomeBottomSpacer} />
+      </ScrollView>
+    );
+  }
+
+  // Default narrative page — visual + sanskrit + title + subtitle + counter.
   return (
     <View
       style={styles.page}
@@ -329,11 +452,7 @@ function CeremonyPage({
       accessibilityLabel={`${data.title.replace(/\n/g, ' ')}. ${data.subtitle.replace(/\n/g, ' ')}`}
     >
       <View style={styles.visualWrap}>
-        <PageVisual
-          kind={data.visual}
-          accent={data.accent}
-          isActive={isActive}
-        />
+        <PageVisual kind={data.visual} accent={data.accent} isActive={isActive} />
       </View>
 
       <View style={styles.textBlock}>
@@ -373,145 +492,39 @@ function CeremonyPage({
 }
 
 // ---------------------------------------------------------------------------
-// PageVisual — a simple, token-only visual per page kind. These replace the
-// Skia Canvas illustrations: they're accent-colored concentric rings, arranged
-// differently per page, with independent breathing animations that stay on
-// the UI thread. Visually consistent with SakhaMandala + OmLoader language.
+// PageVisual — switches over the page kind to render its bespoke Vedic SVG.
 // ---------------------------------------------------------------------------
 
 interface PageVisualProps {
-  readonly kind: PageData['visual'];
+  readonly kind: VisualKind;
   readonly accent: string;
   readonly isActive: boolean;
+  /** Use a smaller footprint (welcome page leaves more room for text). */
+  readonly compact?: boolean;
 }
 
 function PageVisual({
   kind,
   accent,
   isActive,
+  compact = false,
 }: PageVisualProps): React.JSX.Element {
-  const pulse = useSharedValue(0.9);
-  const rotate = useSharedValue(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then((reduce) => {
-        if (cancelled || reduce || !isActive) return;
-        pulse.value = withRepeat(
-          withSequence(
-            withTiming(1.08, { duration: 1800, easing: LOTUS_BLOOM }),
-            withTiming(0.92, { duration: 1800, easing: LOTUS_BLOOM })
-          ),
-          -1,
-          false
-        );
-        rotate.value = withRepeat(
-          withTiming(360, { duration: 36000, easing: Easing.linear }),
-          -1,
-          false
-        );
-      })
-      .catch(() => {
-        // Accessibility probe unavailable — stay static.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isActive, pulse, rotate]);
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
-  const rotateStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotate.value}deg` }],
-  }));
-
-  const rings = VISUAL_LAYOUT[kind];
-  return (
-    <Animated.View style={[styles.visual, pulseStyle]}>
-      <Animated.View style={[StyleSheet.absoluteFill, rotateStyle]}>
-        {rings.map((r, i) => (
-          <View
-            key={`ring-${i}`}
-            style={[
-              styles.ring,
-              {
-                width: r.size,
-                height: r.size,
-                borderRadius: r.size / 2,
-                borderColor: accent,
-                borderWidth: r.stroke,
-                opacity: r.opacity,
-                top: (VISUAL_SIZE - r.size) / 2 + (r.offsetY ?? 0),
-                left: (VISUAL_SIZE - r.size) / 2 + (r.offsetX ?? 0),
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Central gold core — anchors the eye. */}
-      <View
-        style={[
-          styles.core,
-          {
-            backgroundColor: accent,
-            shadowColor: accent,
-          },
-        ]}
-      />
-    </Animated.View>
-  );
+  const size = compact ? VISUAL_SIZE * 0.78 : VISUAL_SIZE;
+  switch (kind) {
+    case 'chariot':
+      return <ChariotChakraVisual accent={accent} isActive={isActive} size={size} />;
+    case 'mandala':
+      return <SriYantraVisual accent={accent} isActive={isActive} size={size} />;
+    case 'akshara':
+      return <ManuscriptVisual accent={accent} isActive={isActive} size={size} />;
+    case 'shadripu':
+      return <ShatkonaVisual accent={accent} isActive={isActive} size={size} />;
+    case 'lock':
+      return <PadmaSealVisual accent={accent} isActive={isActive} size={size} />;
+    case 'welcome':
+      return <KiaanWelcomeVisual accent={accent} isActive={isActive} size={size} />;
+  }
 }
-
-// ---------------------------------------------------------------------------
-// Visual layouts — each page gets a distinct ring composition so the five
-// screens feel different while sharing a design language.
-// ---------------------------------------------------------------------------
-
-const VISUAL_SIZE = 220;
-
-interface RingSpec {
-  size: number;
-  stroke: number;
-  opacity: number;
-  offsetX?: number;
-  offsetY?: number;
-}
-
-const VISUAL_LAYOUT: Record<PageData['visual'], readonly RingSpec[]> = {
-  // Chariot — a single grounded wheel with a rising horizon line above.
-  chariot: [
-    { size: 140, stroke: 2, opacity: 0.65 },
-    { size: 80, stroke: 1, opacity: 0.4 },
-    { size: 200, stroke: 0.8, opacity: 0.18 },
-  ],
-  // Mandala — three concentric golden auras.
-  mandala: [
-    { size: 200, stroke: 1, opacity: 0.35 },
-    { size: 150, stroke: 1.5, opacity: 0.55 },
-    { size: 100, stroke: 2, opacity: 0.8 },
-  ],
-  // Akshara — asymmetric scatter suggesting Sanskrit syllables in space.
-  akshara: [
-    { size: 120, stroke: 1.2, opacity: 0.55, offsetX: -36 },
-    { size: 80, stroke: 1, opacity: 0.45, offsetX: 52, offsetY: -30 },
-    { size: 140, stroke: 0.8, opacity: 0.3, offsetY: 28 },
-  ],
-  // Shadripu — a hexagonal suggestion with 6 orbs via stacked rings at angles.
-  shadripu: [
-    { size: 180, stroke: 1, opacity: 0.35 },
-    { size: 120, stroke: 1.5, opacity: 0.55 },
-    { size: 60, stroke: 2, opacity: 0.85 },
-  ],
-  // Lock — tight concentric rings evoking a sealed vault.
-  lock: [
-    { size: 130, stroke: 2, opacity: 0.7 },
-    { size: 100, stroke: 1.5, opacity: 0.55 },
-    { size: 70, stroke: 1, opacity: 0.4 },
-  ],
-} as const;
 
 // ---------------------------------------------------------------------------
 // Styles
@@ -543,25 +556,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  visual: {
-    width: VISUAL_SIZE,
-    height: VISUAL_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ring: {
-    position: 'absolute',
-    backgroundColor: 'transparent',
-  },
-  core: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 14,
-    elevation: 10,
-  },
   textBlock: {
     alignItems: 'center',
     width: '100%',
@@ -576,7 +570,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   title: {
-    fontFamily: 'CormorantGaramond-Italic',
+    fontFamily: 'CormorantGaramond-LightItalic',
     fontStyle: 'italic',
     fontSize: 26,
     lineHeight: 34,
@@ -639,11 +633,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(212, 160, 23, 0.3)',
   },
+  ctaButtonGold: {
+    borderColor: 'rgba(255, 220, 140, 0.55)',
+    shadowColor: GOLD,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 18,
+    elevation: 8,
+  },
   ctaText: {
     fontSize: 17,
     fontFamily: 'Outfit-SemiBold',
     color: '#F5F0E8',
     letterSpacing: 0.3,
+  },
+  ctaTextDark: {
+    color: '#1A0F02',
+    letterSpacing: 0.6,
   },
   skipBtn: {
     alignItems: 'center',
@@ -656,5 +662,155 @@ const styles = StyleSheet.create({
   },
   skipPlaceholder: {
     height: 32,
+  },
+
+  // -------------------------------------------------------------------------
+  // Welcome page (page 6) — scrollable rich content
+  // -------------------------------------------------------------------------
+  welcomeContent: {
+    paddingHorizontal: 28,
+    paddingTop: 56,
+    alignItems: 'center',
+  },
+  welcomeVisualWrap: {
+    marginTop: 4,
+    marginBottom: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ornament: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 14,
+    width: '100%',
+  },
+  ornamentLine: {
+    height: 1,
+    width: 56,
+  },
+  ornamentLineLeft: {
+    backgroundColor: 'rgba(212, 164, 76, 0.4)',
+  },
+  ornamentLineRight: {
+    backgroundColor: 'rgba(212, 164, 76, 0.4)',
+  },
+  ornamentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: GOLD_SOFT,
+    marginHorizontal: 10,
+    shadowColor: GOLD,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  ornamentDotSmall: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(212, 164, 76, 0.55)',
+    marginHorizontal: 10,
+  },
+  eyebrow: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 11,
+    letterSpacing: 3,
+    color: 'rgba(212, 164, 76, 0.7)',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  welcomeTitle: {
+    fontFamily: 'CormorantGaramond-LightItalic',
+    fontStyle: 'italic',
+    fontSize: 34,
+    lineHeight: 42,
+    color: GOLD,
+    textAlign: 'center',
+    marginBottom: 22,
+    textShadowColor: 'rgba(212, 164, 76, 0.35)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 14,
+  },
+  welcomeBodyWrap: {
+    width: '100%',
+    maxWidth: 420,
+    gap: 16,
+  },
+  welcomeBody: {
+    fontFamily: 'CrimsonText-Regular',
+    fontSize: 15.5,
+    lineHeight: 24,
+    color: 'rgba(245, 240, 232, 0.78)',
+    textAlign: 'center',
+  },
+  welcomeBodyDim: {
+    fontFamily: 'CrimsonText-Regular',
+    fontSize: 15.5,
+    lineHeight: 24,
+    color: 'rgba(245, 240, 232, 0.66)',
+    textAlign: 'center',
+  },
+  welcomeBodyItalic: {
+    fontFamily: 'CrimsonText-Italic',
+    fontStyle: 'italic',
+    color: GOLD_SOFT,
+  },
+  welcomeAccent: {
+    fontFamily: 'Outfit-SemiBold',
+    color: GOLD,
+    letterSpacing: 1,
+  },
+  welcomeAccentSoft: {
+    color: '#E8B54A',
+    fontFamily: 'CrimsonText-Italic',
+    fontStyle: 'italic',
+  },
+  verseCard: {
+    marginTop: 14,
+    paddingVertical: 22,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    backgroundColor: 'rgba(212, 164, 76, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 164, 76, 0.18)',
+    alignItems: 'center',
+    gap: 8,
+  },
+  verseEyebrow: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 10.5,
+    letterSpacing: 3,
+    color: 'rgba(212, 164, 76, 0.55)',
+    marginBottom: 8,
+  },
+  verseSanskrit: {
+    fontFamily: 'NotoSansDevanagari-Medium',
+    fontSize: 17,
+    lineHeight: 26,
+    color: '#F0C96D',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  verseEnglish: {
+    fontFamily: 'CrimsonText-Italic',
+    fontStyle: 'italic',
+    fontSize: 13.5,
+    lineHeight: 21,
+    color: 'rgba(212, 164, 76, 0.7)',
+    textAlign: 'center',
+    marginTop: 10,
+    paddingHorizontal: 4,
+  },
+  verseAttribution: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 12,
+    color: 'rgba(212, 164, 76, 0.5)',
+    marginTop: 6,
+  },
+  welcomeBottomSpacer: {
+    height: 200,
   },
 });
