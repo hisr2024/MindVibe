@@ -56,6 +56,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -63,13 +64,25 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
 import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
-import { speakDivinely, stopSpeaking } from '../../voice/lib/divineVoice';
+import {
+  previewVoice,
+  speakDivinely,
+  stopSpeaking,
+} from '../../voice/lib/divineVoice';
+import {
+  CLOUD_VOICE_PREFIX,
+  PROVIDER_COLORS,
+  PROVIDER_LABELS,
+  type CloudProvider,
+} from '../../voice/lib/cloudVoices';
+import { useSakhaStream } from '../../components/chat/useSakhaStream';
 
 /** Match authStore's SecureStore key — used by Voice Companion's cloud
  *  TTS path (when the user has picked an ElevenLabs / Sarvam / Bhashini
@@ -82,7 +95,100 @@ async function readAccessToken(): Promise<string | null> {
     return null;
   }
 }
-import { useSakhaStream } from '../../components/chat/useSakhaStream';
+
+/**
+ * Voice Companion's own voice picker — independent of the global
+ * /settings/voice preference so users can have a different on-screen
+ * voice for the verse pages, the chat tab, and the live conversation.
+ *
+ * Six curated cloud voices, balanced across providers and gender so
+ * every user finds at least one that sounds right to them. Each
+ * ``backendVoiceId`` is a real entry in
+ * ``backend/services/elevenlabs_tts_service.py`` /
+ * ``sarvam_tts_service.py`` voice catalogs (verified Krishna →
+ * Clyde, Saraswati → Dorothy, Rishi → Abhilash, etc.).
+ *
+ * Persisted under ``voiceCompanion:cloudVoiceId`` (separate key from
+ * the per-language ``divineVoice:override:*`` keys).
+ */
+interface CompanionVoiceOption {
+  readonly backendVoiceId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly provider: CloudProvider;
+  readonly gender: 'female' | 'male';
+}
+
+const COMPANION_VOICES: readonly [
+  CompanionVoiceOption,
+  ...CompanionVoiceOption[],
+] = [
+  {
+    backendVoiceId: 'divine-saraswati',
+    name: 'Saraswati',
+    description: 'Ethereal divine female — goddess of sacred speech',
+    provider: 'kiaan',
+    gender: 'female',
+  },
+  {
+    backendVoiceId: 'divine-krishna',
+    name: 'Krishna',
+    description: 'Storyteller gravitas — the divine friend',
+    provider: 'kiaan',
+    gender: 'male',
+  },
+  {
+    backendVoiceId: 'sarvam-rishi',
+    name: 'Rishi',
+    description: 'Scholarly Indic — Sanskrit chant register',
+    provider: 'sarvam',
+    gender: 'male',
+  },
+  {
+    backendVoiceId: 'sarvam-meera',
+    name: 'Meera',
+    description: 'Warm multilingual Indic — 11 Indian languages',
+    provider: 'sarvam',
+    gender: 'female',
+  },
+  {
+    backendVoiceId: 'elevenlabs-nova',
+    name: 'Nova',
+    description: 'Clear conversational English — for newcomers',
+    provider: 'elevenlabs',
+    gender: 'female',
+  },
+  {
+    backendVoiceId: 'elevenlabs-lily',
+    name: 'Lily',
+    description: 'Warm calm English — soothing daily companion',
+    provider: 'elevenlabs',
+    gender: 'female',
+  },
+];
+
+const DEFAULT_COMPANION_VOICE = 'divine-saraswati';
+const COMPANION_VOICE_KEY = 'voiceCompanion:cloudVoiceId';
+
+async function loadCompanionVoice(): Promise<string> {
+  try {
+    const v = await AsyncStorage.getItem(COMPANION_VOICE_KEY);
+    if (v && COMPANION_VOICES.some((opt) => opt.backendVoiceId === v)) {
+      return v;
+    }
+  } catch {
+    // ignore — fall through to default
+  }
+  return DEFAULT_COMPANION_VOICE;
+}
+
+async function saveCompanionVoice(backendVoiceId: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(COMPANION_VOICE_KEY, backendVoiceId);
+  } catch {
+    // best-effort; in-memory state still updates
+  }
+}
 
 /**
  * UI state machine for the voice-companion screen.
@@ -115,6 +221,48 @@ export default function VoiceCompanionScreen() {
 
   const [state, setState] = useState<ScreenState>('idle');
   const [startError, setStartError] = useState<string | null>(null);
+
+  // ── Voice picker ───────────────────────────────────────────────────
+  // The user's chosen Sakha voice for this Voice Companion session.
+  // Default is Saraswati; persisted in AsyncStorage so the choice
+  // survives app launches. Read live by sessionVoiceRef (callbacks
+  // registered once at mount close over stale state otherwise).
+  const [selectedVoiceId, setSelectedVoiceId] =
+    useState<string>(DEFAULT_COMPANION_VOICE);
+  const selectedVoiceRef = useRef<string>(DEFAULT_COMPANION_VOICE);
+
+  // Hydrate the persisted pick on mount. Idempotent.
+  useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      const id = await loadCompanionVoice();
+      if (!mounted) return;
+      setSelectedVoiceId(id);
+      selectedVoiceRef.current = id;
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleSelectVoice = useCallback(
+    (backendVoiceId: string) => {
+      // Stop any in-flight playback before switching so the user
+      // doesn't hear the new voice cut into the old one mid-syllable.
+      void stopSpeaking();
+      setSelectedVoiceId(backendVoiceId);
+      selectedVoiceRef.current = backendVoiceId;
+      void saveCompanionVoice(backendVoiceId);
+      // Speak a short greeting in the new voice so the user hears
+      // what they picked. Routes through the same cloud TTS path
+      // ``speakDivinely`` uses for live conversation, so this is a
+      // genuine preview — what they'll actually hear during a turn.
+      previewVoice(`${CLOUD_VOICE_PREFIX}${backendVoiceId}`, 'en-IN', undefined, {
+        getAccessToken: readAccessToken,
+      });
+    },
+    [],
+  );
 
   // Session-active flag — tracks whether the user has tapped "Tap to
   // begin" without yet tapping "End session". Determines whether we
@@ -250,6 +398,13 @@ export default function VoiceCompanionScreen() {
         }
       };
       void speakDivinely(text, 'en-IN', {
+        // Force the user's picked Sakha voice for this Voice Companion
+        // session. Read live from the ref so a switch mid-conversation
+        // takes effect on the very next utterance. The voice picker
+        // calls stopSpeaking() before changing the ref, so an
+        // in-flight clip is cancelled before this cloudVoiceId would
+        // route the next one.
+        cloudVoiceId: selectedVoiceRef.current,
         getAccessToken: readAccessToken,
         onDone: onSpeechFinished,
         // A transient TTS hiccup (cloud fetch failure, decode error,
@@ -346,6 +501,62 @@ export default function VoiceCompanionScreen() {
       </View>
 
       <View style={styles.bottomBar}>
+        {/* Voice picker — six divine cloud voices.
+            Visible when idle / errored so the user can choose before
+            starting; hidden during an active session so the screen
+            stays focused on the conversation. Tap to switch + preview;
+            picked voice persists across launches. */}
+        {!isActive ? (
+          <View style={styles.voicePickerWrap}>
+            <Text style={styles.voicePickerLabel}>SAKHA VOICE</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.voicePickerRow}
+            >
+              {COMPANION_VOICES.map((opt) => {
+                const selected = opt.backendVoiceId === selectedVoiceId;
+                const accent = PROVIDER_COLORS[opt.provider];
+                return (
+                  <Pressable
+                    key={opt.backendVoiceId}
+                    onPress={() => handleSelectVoice(opt.backendVoiceId)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Sakha voice: ${opt.name}, ${PROVIDER_LABELS[opt.provider]}`}
+                    accessibilityState={{ selected }}
+                    style={[
+                      styles.voicePill,
+                      selected
+                        ? {
+                            backgroundColor: `${accent}22`,
+                            borderColor: `${accent}AA`,
+                          }
+                        : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.voicePillName,
+                        selected ? { color: accent, fontWeight: '700' } : null,
+                      ]}
+                    >
+                      {opt.name}
+                    </Text>
+                    <Text style={[styles.voicePillProvider, { color: accent }]}>
+                      {PROVIDER_LABELS[opt.provider]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <Text style={styles.voicePickerDescription}>
+              {COMPANION_VOICES.find(
+                (v) => v.backendVoiceId === selectedVoiceId,
+              )?.description ?? ''}
+            </Text>
+          </View>
+        ) : null}
+
         <Text style={styles.stateLabel}>{stateLabel}</Text>
         {displayedError ? (
           <Text style={styles.errorText}>{displayedError}</Text>
@@ -430,5 +641,55 @@ const styles = StyleSheet.create({
     color: Color.errorRed,
     marginBottom: Spacing.sm,
     textAlign: 'center',
+  },
+
+  // Voice picker (idle-state only)
+  voicePickerWrap: {
+    width: '100%',
+    marginBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  voicePickerLabel: {
+    ...Type.caption,
+    color: Color.textTertiary,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    marginBottom: Spacing.sm,
+  },
+  voicePickerRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: Spacing.md,
+  },
+  voicePill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.22)',
+    alignItems: 'center',
+    gap: 2,
+    minWidth: 84,
+  },
+  voicePillName: {
+    ...Type.caption,
+    color: Color.textPrimary,
+    fontWeight: '600',
+  },
+  voicePillProvider: {
+    fontSize: 9,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    opacity: 0.85,
+  },
+  voicePickerDescription: {
+    ...Type.caption,
+    color: Color.textTertiary,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.md,
+    fontSize: 12,
   },
 });

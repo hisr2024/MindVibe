@@ -658,7 +658,13 @@ class MultilingualVoiceEngine:
         Returns:
             Tuple of (provider_name, voice_id)
         """
-        elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+        # Accept either env-var name (ELEVENLABS_API_KEY for the REST
+        # path, KIAAN_ELEVENLABS_API_KEY for the WSS path) so a single
+        # Render configuration unlocks both.
+        elevenlabs_key = (
+            os.getenv("ELEVENLABS_API_KEY")
+            or os.getenv("KIAAN_ELEVENLABS_API_KEY")
+        )
 
         # Priority chain with preferred provider override
         if preferred_provider == "elevenlabs" and speaker.elevenlabs_voice_id and elevenlabs_key:

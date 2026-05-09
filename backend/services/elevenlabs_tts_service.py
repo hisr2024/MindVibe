@@ -620,10 +620,33 @@ ELEVENLABS_PRIORITY_LANGUAGES = {
 }
 
 
+def _resolve_elevenlabs_api_key() -> str:
+    """Read the ElevenLabs API key, accepting either env-var name.
+
+    Two paths in this codebase configure ElevenLabs:
+
+      • ``ELEVENLABS_API_KEY``       — read by this module + the
+        ``/api/voice/synthesize`` REST endpoint (chat Listen, verse
+        readings, the 4-pill voice picker).
+      • ``KIAAN_ELEVENLABS_API_KEY`` — read by
+        ``backend/services/voice/tts_router.py`` for the WSS Voice
+        Companion path.
+
+    Render deployments commonly configure only one of these, leading to
+    "the voices sound robotic" reports because chat Listen falls
+    through to the mock provider while Voice Companion works. We accept
+    either name (legacy-first for backwards compat with existing Render
+    setups) so the fix is "set ANY ONE key, both paths work".
+    """
+    return (
+        os.getenv("ELEVENLABS_API_KEY", "").strip()
+        or os.getenv("KIAAN_ELEVENLABS_API_KEY", "").strip()
+    )
+
+
 def is_elevenlabs_available() -> bool:
     """Check if ElevenLabs TTS is configured and available."""
-    api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
-    return bool(api_key)
+    return bool(_resolve_elevenlabs_api_key())
 
 
 def is_elevenlabs_priority_language(language: str) -> bool:
@@ -678,7 +701,7 @@ async def synthesize_elevenlabs_tts(
         ...     mood="peaceful",
         ... )
     """
-    api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+    api_key = _resolve_elevenlabs_api_key()
     if not api_key:
         logger.debug("ElevenLabs TTS: API key not configured, skipping")
         return None
@@ -690,33 +713,93 @@ async def synthesize_elevenlabs_tts(
     # Resolve emotion settings
     emotion_settings = get_elevenlabs_emotion_settings(mood)
 
-    # Combine voice defaults with emotion adjustments
-    stability = (
-        voice_config["default_stability"] * 0.6
-        + emotion_settings["stability"] * 0.4
-    )
-    similarity = (
-        voice_config["default_similarity"] * 0.6
-        + emotion_settings["similarity_boost"] * 0.4
-    )
-    style_value = (
-        voice_config["default_style"] * 0.4
-        + emotion_settings["style"] * 0.6
-    )
+    # ── Voice settings tuning for naturalness ──
+    # Divine voices (Krishna / Saraswati / Ganga / Shiva / Hanuman /
+    # Radha — anything starting with ``divine-``) get a more
+    # expressive, less monotone profile so they sound human and
+    # spiritually present rather than studio-flat:
+    #   • stability   → 0.40-0.50 (lower = more emotional dynamism;
+    #                   too low becomes erratic, this is the sweet
+    #                   spot ElevenLabs recommends for narration)
+    #   • similarity  → 0.85+    (strong voice character — keeps
+    #                   "Saraswati" sounding like Saraswati instead
+    #                   of drifting toward generic neural-female)
+    #   • style       → 0.55+    (emotional warmth without being
+    #                   theatrical)
+    # Non-divine voices keep the existing 60/40 default+mood blend.
+    is_divine_voice = voice_id.startswith("divine-")
+    if is_divine_voice:
+        # For divine voices, weight emotion-mood adjustments more
+        # heavily so the listener actually hears mood differences;
+        # then floor each parameter at the divine-voice minimum so
+        # we never accidentally produce a flat reading.
+        stability = max(
+            0.40,
+            voice_config["default_stability"] * 0.5
+            + emotion_settings["stability"] * 0.5,
+        )
+        similarity = max(
+            0.85,
+            voice_config["default_similarity"] * 0.5
+            + emotion_settings["similarity_boost"] * 0.5,
+        )
+        style_value = max(
+            0.55,
+            voice_config["default_style"] * 0.4
+            + emotion_settings["style"] * 0.6,
+        )
+    else:
+        # Standard blend — voice defaults dominate, mood nudges.
+        stability = (
+            voice_config["default_stability"] * 0.6
+            + emotion_settings["stability"] * 0.4
+        )
+        similarity = (
+            voice_config["default_similarity"] * 0.6
+            + emotion_settings["similarity_boost"] * 0.4
+        )
+        style_value = (
+            voice_config["default_style"] * 0.4
+            + emotion_settings["style"] * 0.6
+        )
 
     # Clamp to ElevenLabs API limits
     stability = max(0.0, min(1.0, stability))
     similarity = max(0.0, min(1.0, similarity))
     style_value = max(0.0, min(1.0, style_value))
 
-    # Use pronunciation-corrected text if available
-    synthesis_text = pronunciation_text or text
+    # ── Text normalization for cleaner prosody ──
+    # The orchestrator can hand us markdown-flavoured text (asterisks
+    # for emphasis, multi-space gaps from streamed concatenation,
+    # etc.). ElevenLabs reads literal asterisks — they show up as
+    # awkward stutters in the audio. Strip them along with other
+    # non-spoken markdown noise. Keep newlines so the engine still
+    # honours sentence-level pauses.
+    raw_text = pronunciation_text or text
+    synthesis_text = (
+        raw_text.replace("**", "")
+        .replace("*", "")
+        .replace("__", "")
+        .replace("`", "")
+    )
+    # Collapse runs of whitespace inside lines but preserve newlines
+    # so paragraph breaks still produce natural pauses.
+    synthesis_text = "\n".join(
+        " ".join(line.split()) for line in synthesis_text.split("\n")
+    ).strip()
 
-    # Select model based on latency requirements and content type
-    if use_turbo:
+    # ── Model selection ──
+    # Divine voices ALWAYS use multilingual_v2 (the flagship quality
+    # model). The Flash model is faster but distinctly more digital
+    # on short text — and Gita verses are typically <100 chars in
+    # English translation, which would otherwise route to Flash and
+    # sound robotic. The 1-2s extra latency on first play is worth
+    # the studio-grade quality; cache hits on second play are instant.
+    if is_divine_voice:
+        model_id = ELEVENLABS_MODEL_QUALITY
+    elif use_turbo:
         model_id = ELEVENLABS_MODEL_TURBO
     elif len(synthesis_text) < 100:
-        # Short text benefits from flash for snappy responses
         model_id = ELEVENLABS_MODEL_FLASH
     else:
         model_id = ELEVENLABS_MODEL_QUALITY
@@ -807,7 +890,7 @@ async def synthesize_elevenlabs_streaming(
     Yields:
         Audio bytes chunks (MP3 format)
     """
-    api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+    api_key = _resolve_elevenlabs_api_key()
     if not api_key:
         return
 

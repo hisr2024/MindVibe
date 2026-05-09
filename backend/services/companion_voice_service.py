@@ -853,7 +853,14 @@ async def _try_elevenlabs_tts(text: str, ssml_data: dict) -> bytes | None:
     ElevenLabs produces the most realistic, human-like speech available.
     Supports emotion, pacing, and natural inflection natively.
     """
-    api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+    # Accept either env-var name. Render deployments commonly use
+    # KIAAN_ELEVENLABS_API_KEY (the WSS-flow canonical name) while the
+    # rest of the codebase historically read ELEVENLABS_API_KEY. Both
+    # work — fixes the silent-disable case where only one is set.
+    api_key = (
+        os.getenv("ELEVENLABS_API_KEY", "").strip()
+        or os.getenv("KIAAN_ELEVENLABS_API_KEY", "").strip()
+    )
     if not api_key:
         return None
 

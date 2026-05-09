@@ -59,7 +59,14 @@ class SarvamProvider(AIProvider):
             model: Model to use (falls back to AI_MODEL_SARVAM env var or sarvam-m)
             base_url: Optional base URL override
         """
-        self._api_key = api_key or os.getenv("SARVAM_API_KEY")
+        # Accept either env-var name (SARVAM_API_KEY for the REST path,
+        # KIAAN_SARVAM_API_KEY for the WSS path) so a single Render
+        # configuration unlocks both code paths.
+        self._api_key = (
+            api_key
+            or os.getenv("SARVAM_API_KEY")
+            or os.getenv("KIAAN_SARVAM_API_KEY")
+        )
         self._model = model or os.getenv("AI_MODEL_SARVAM", DEFAULT_SARVAM_MODEL)
         self._base_url = base_url or os.getenv("SARVAM_BASE_URL", DEFAULT_SARVAM_BASE_URL)
 

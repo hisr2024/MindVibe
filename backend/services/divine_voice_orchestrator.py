@@ -270,9 +270,17 @@ class DivineVoiceOrchestrator:
         self._cache_ttl = timedelta(hours=24)
         self._max_cache_size = 100
 
-        # Check which providers are available
-        self._sarvam_available = bool(os.getenv("SARVAM_API_KEY", "").strip())
-        self._elevenlabs_available = bool(os.getenv("ELEVENLABS_API_KEY", "").strip())
+        # Check which providers are available. Accept either env-var
+        # name per provider — REST path uses the unprefixed names,
+        # WSS path uses the KIAAN_-prefixed names. Either unlocks both.
+        self._sarvam_available = bool(
+            os.getenv("SARVAM_API_KEY", "").strip()
+            or os.getenv("KIAAN_SARVAM_API_KEY", "").strip()
+        )
+        self._elevenlabs_available = bool(
+            os.getenv("ELEVENLABS_API_KEY", "").strip()
+            or os.getenv("KIAAN_ELEVENLABS_API_KEY", "").strip()
+        )
 
         # Edge TTS is always available if the package is installed (no API key needed)
         try:

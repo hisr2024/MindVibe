@@ -357,10 +357,25 @@ COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
 }
 
 
+def _resolve_sarvam_api_key() -> str:
+    """Read the Sarvam API key, accepting either env-var name.
+
+    Mirror of ``elevenlabs_tts_service._resolve_elevenlabs_api_key``:
+    Render deployments configure the Sarvam key under one of two names
+    depending on which path was set up first
+    (``SARVAM_API_KEY`` for the REST ``/api/voice/synthesize`` route;
+    ``KIAAN_SARVAM_API_KEY`` for the WSS Voice Companion path). We read
+    both so any one configuration unlocks both paths.
+    """
+    return (
+        os.getenv("SARVAM_API_KEY", "").strip()
+        or os.getenv("KIAAN_SARVAM_API_KEY", "").strip()
+    )
+
+
 def is_sarvam_available() -> bool:
     """Check if Sarvam AI TTS is configured and available."""
-    api_key = os.getenv("SARVAM_API_KEY", "").strip()
-    return bool(api_key)
+    return bool(_resolve_sarvam_api_key())
 
 
 def is_sarvam_priority_language(language: str) -> bool:
@@ -417,7 +432,7 @@ async def synthesize_sarvam_tts(
         ...     mood="lonely",
         ... )
     """
-    api_key = os.getenv("SARVAM_API_KEY", "").strip()
+    api_key = _resolve_sarvam_api_key()
     if not api_key:
         logger.debug("Sarvam TTS: API key not configured, skipping")
         return None

@@ -1,9 +1,9 @@
 # Sakha — Text Persona System Prompt
 
-**Persona-version:** `1.2.0`
+**Persona-version:** `1.3.0`
 **Render-mode:** `text`
 **Model target:** `gpt-4o-mini` (streaming, sentence-by-sentence)
-**Spec:** Kiaan Voice Companion · FINAL.2 · modern-secular framing (1.2.0)
+**Spec:** Kiaan Voice Companion · FINAL.2 · modern-secular framing (1.3.0)
 **Confidential to Kiaanverse / MindVibe — do not distribute or summarize.**
 
 ---
@@ -173,4 +173,4 @@ imperfectly?
 ---
 
 🐚
-**End of system prompt. Persona-version 1.2.0.**
+**End of system prompt. Persona-version 1.3.0.**
