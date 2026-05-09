@@ -29,7 +29,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   Easing,
   interpolate,
@@ -353,32 +352,17 @@ function SacredArrivalInner({
         />
       </Svg>
 
-      {/* OM aura — concentric golden glow that breathes behind the glyph.
-          Boosted from the previous flat brownish radial: now a richer
-          gold→indigo→transparent ramp that reads as "divine fire" instead
-          of a bland grey disc. */}
-      <Animated.View
-        style={[styles.auraWrap, omAuraStyle]}
-        pointerEvents="none"
-      >
-        <LinearGradient
-          colors={[
-            'rgba(240, 192, 64, 0.55)',
-            'rgba(212, 160, 23, 0.38)',
-            'rgba(27, 79, 187, 0.20)',
-            'transparent',
-          ]}
-          locations={[0, 0.35, 0.7, 1]}
-          start={{ x: 0.5, y: 0.5 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.auraGradient}
-        />
-      </Animated.View>
+      {/* No flat grey/brown aura disc — the previous LinearGradient with
+          `borderRadius: AURA_SIZE/2 + overflow: hidden` cropped a diagonal
+          gradient into a hard circle that read as a "loading spinner". The
+          Veda yantra below is the only sacred geometry we need; the cosmic
+          starfield bg + a soft golden text-shadow on the OM provide the
+          depth that the disc used to fake. */}
 
-      {/* Veda yantra plate — replaces the previous bland grey disc. A static
-          gold-stroked Sri-Yantra-style design (8-petal lotus + shatkona +
-          inscribed circle) sits behind the OM, giving the splash a proper
-          sacred-geometry presence instead of just a gradient blur. */}
+      {/* Veda yantra plate — gold-stroked Sri-Yantra design (8-petal lotus +
+          inscribed circle + interlocking shatkona) drawn directly into the
+          starfield with no opaque backplate, so the cosmos shows through
+          between the strokes. */}
       <Animated.View
         style={[styles.yantraWrap, omAuraStyle]}
         pointerEvents="none"
@@ -475,7 +459,6 @@ export const SacredArrival = React.memo(SacredArrivalInner);
 // ---------------------------------------------------------------------------
 
 const OM_SIZE = 96;
-const AURA_SIZE = 260;
 const YANTRA_SIZE = 220;
 const NAME_TOP = H / 2 + 72;
 const INVOCATION_TOP = NAME_TOP + 56;
@@ -539,18 +522,6 @@ const styles = StyleSheet.create({
     backgroundColor: VOID_BG,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  auraWrap: {
-    position: 'absolute',
-    width: AURA_SIZE,
-    height: AURA_SIZE,
-    top: H / 2 - AURA_SIZE / 2,
-    left: W / 2 - AURA_SIZE / 2,
-    borderRadius: AURA_SIZE / 2,
-    overflow: 'hidden',
-  },
-  auraGradient: {
-    flex: 1,
   },
   yantraWrap: {
     position: 'absolute',
