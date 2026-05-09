@@ -30,12 +30,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-
-/** Sacred body gradient — parity with web indigo glass surface. */
-const SACRED_CARD_BODY = [
-  'rgba(22, 26, 66, 0.95)',
-  'rgba(17, 20, 53, 0.98)',
-] as const;
+import { useTheme } from '../theme/useTheme';
 
 /** Top shimmer strip — horizontal gold edge, never clipped. */
 const SACRED_TOP_SHIMMER = [
@@ -84,6 +79,17 @@ function SacredCardInner({
   testID,
   accessibilityLabel,
 }: SacredCardProps): React.JSX.Element {
+  // Read the active sacred palette so cards follow the user's chosen scheme
+  // (Indigo / Maroon / Forest / Black-&-Gold). Previously this gradient was
+  // hardcoded to indigo, which is why the profile menu stayed navy even when
+  // the user selected Black-&-Gold from the arrival picker.
+  const { theme } = useTheme();
+  const cardBody: readonly string[] = [
+    theme.colorScheme.bg.surface,
+    theme.colorScheme.bg.card,
+  ];
+  const containerBg = theme.colorScheme.bg.card;
+
   const scale = useSharedValue(1);
 
   const handlePressIn = useCallback(() => {
@@ -124,9 +130,9 @@ function SacredCardInner({
         style={styles.topShimmer}
         pointerEvents="none"
       />
-      {/* Indigo body gradient. */}
+      {/* Palette-tinted body gradient (was hardcoded indigo). */}
       <LinearGradient
-        colors={SACRED_CARD_BODY as unknown as string[]}
+        colors={cardBody as unknown as string[]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[styles.body, contentStyle]}
@@ -147,7 +153,13 @@ function SacredCardInner({
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled }}
         testID={testID}
-        style={[styles.container, glowStyle, animatedStyle, style]}
+        style={[
+          styles.container,
+          { backgroundColor: containerBg },
+          glowStyle,
+          animatedStyle,
+          style,
+        ]}
       >
         {surface}
       </AnimatedPressable>
@@ -156,7 +168,12 @@ function SacredCardInner({
 
   return (
     <View
-      style={[styles.container, glowStyle, style]}
+      style={[
+        styles.container,
+        { backgroundColor: containerBg },
+        glowStyle,
+        style,
+      ]}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
     >
@@ -170,10 +187,12 @@ export const SacredCard = React.memo(SacredCardInner);
 
 const styles = StyleSheet.create({
   container: {
+    // Background is applied inline from theme.colorScheme.bg.card so the
+    // card automatically follows the active palette. The static value was
+    // removed so it can't override the palette-driven inline color.
     borderRadius: SACRED_RADIUS,
     borderWidth: 1,
     borderColor: SACRED_BORDER_COLOR,
-    backgroundColor: 'rgba(17, 20, 53, 0.98)',
     position: 'relative',
   },
   body: {
