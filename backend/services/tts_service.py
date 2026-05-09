@@ -442,10 +442,33 @@ class TTSService:
         voice_id: Optional[str] = None,
     ) -> Optional[bytes]:
         """
-        Synthesize using the provider fallback chain.
+        Synthesize using the canonical provider fallback chain.
 
-        Indian Languages: Sarvam AI -> ElevenLabs -> Edge TTS
-        International Languages: ElevenLabs -> Sarvam AI (if applicable)
+        Uniform priority across ALL languages (no Indian/International
+        branching) per product directive:
+
+           1. Sarvam AI (paid plan — primary)
+           2. ElevenLabs (premium fallback)
+           3. Microsoft Neural via Edge TTS (free fallback)
+           4. Bhashini AI (planned — see TODO below)
+
+        Why uniform: the user runs paid Sarvam which handles 11 Indic
+        languages + Indian-accented English natively, so it should be
+        tried first regardless of language. ElevenLabs is the next-best
+        for naturalness on any language. Microsoft Neural via the
+        ``edge-tts`` library is a free, key-less last-resort that
+        supports 50+ languages with Neural-quality voices — better
+        than no audio.
+
+        Bhashini AI integration is planned: when wired, insert a step
+        between ElevenLabs and Edge TTS for Indic languages so users
+        get sovereign Indic voices when the paid providers are
+        unavailable. Until then, Edge TTS covers Indic via Microsoft
+        Neural's hi-IN / ta-IN / bn-IN / mr-IN / gu-IN voices.
+
+        Each provider's adapter is a no-op (returns None) when its
+        env-var key is unset, so the chain naturally skips disabled
+        tiers without explicit checks.
         """
         # Map voice_type to voice_id if not provided
         if not voice_id:
@@ -476,32 +499,69 @@ class TTSService:
                 "chanting": "peaceful",
             }.get(voice_type, "neutral")
 
-        if self._is_indian_language(language):
-            # Indian language chain: Sarvam -> ElevenLabs -> Edge TTS
-            audio = await self._synthesize_with_sarvam(text, language, voice_type, mood, voice_id)
-            if audio:
-                logger.info(f"Sarvam AI synthesis success for {language}")
-                return audio
+        # ── Tier 1: Sarvam AI (paid, primary for ALL languages) ──
+        audio = await self._synthesize_with_sarvam(
+            text, language, voice_type, mood, voice_id
+        )
+        if audio:
+            logger.info(
+                f"Sarvam AI (Tier 1) synthesis success for {language} "
+                f"voice={voice_id}"
+            )
+            return audio
 
-            audio = await self._synthesize_with_elevenlabs(text, language, voice_id, mood)
-            if audio:
-                logger.info(f"ElevenLabs synthesis success for {language}")
-                return audio
-        else:
-            # International language chain: ElevenLabs -> Sarvam (if en-IN)
-            audio = await self._synthesize_with_elevenlabs(text, language, voice_id, mood)
-            if audio:
-                logger.info(f"ElevenLabs synthesis success for {language}")
-                return audio
+        # ── Tier 2: ElevenLabs (premium fallback) ──
+        audio = await self._synthesize_with_elevenlabs(
+            text, language, voice_id, mood
+        )
+        if audio:
+            logger.info(
+                f"ElevenLabs (Tier 2) synthesis success for {language} "
+                f"voice={voice_id}"
+            )
+            return audio
 
-            # Try Sarvam as fallback for English
-            if language in ("en", "en-IN"):
-                audio = await self._synthesize_with_sarvam(text, language, voice_type, mood, voice_id)
+        # ── Tier 3: Microsoft Neural via Edge TTS (free fallback) ──
+        # Same naturalness tier as Sarvam/ElevenLabs (Microsoft Neural
+        # voices are studio-grade), no API key required, supports
+        # 50+ languages including all Indic languages we serve. Last-
+        # resort but still divine-sounding.
+        try:
+            from backend.services.edge_tts_service import (
+                synthesize_edge_tts,
+                is_edge_tts_available,
+            )
+            if is_edge_tts_available():
+                audio = await synthesize_edge_tts(
+                    text=text,
+                    language=language,
+                    voice_id=voice_id,
+                    mood=mood,
+                )
                 if audio:
-                    logger.info(f"Sarvam AI fallback synthesis success for {language}")
+                    logger.info(
+                        f"Microsoft Neural / Edge TTS (Tier 3) synthesis "
+                        f"success for {language} voice={voice_id}"
+                    )
                     return audio
+        except ImportError:
+            logger.debug("Edge TTS unavailable (edge-tts package not installed)")
+        except Exception as e:
+            logger.warning(f"Edge TTS Tier 3 failed: {e}")
 
-        logger.error(f"All TTS providers failed for language: {language}")
+        # ── Tier 4: Bhashini AI (planned) ────────────────────────────
+        # When integrated, insert here for Indic languages. Government
+        # of India sovereign Indic neural — free, fast, optimized for
+        # Marathi / Tamil / Bengali / Sanskrit. The provider class
+        # already exists at backend/services/voice/bhashini_provider.py
+        # for the WSS path; needs a sync wrapper for this REST path.
+        # See `tts_router.py` for the WSS-side wiring as reference.
+
+        logger.error(
+            f"All TTS tiers failed for language={language} voice_id={voice_id}. "
+            f"Configured: sarvam={self._sarvam_available} "
+            f"elevenlabs={self._elevenlabs_available}"
+        )
         return None
 
     def synthesize(

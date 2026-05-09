@@ -553,10 +553,20 @@ export async function speakDivinely(
         : 'calm';
 
   // ── Tier 1: explicit cloud override ──
-  // The verse-detail screen's per-pill picker hands us ``divine-krishna``
-  // etc. directly. Skip the persisted-preference lookup entirely so
-  // the chosen voice plays exactly as labelled.
+  // The verse-detail screen's per-pill picker and Voice Companion hand
+  // us ``divine-krishna`` etc. directly. Skip the persisted-preference
+  // lookup entirely so the chosen voice plays exactly as labelled.
+  //
+  // If cloud fails (network, 401/403 from missing API key, mock provider
+  // returning empty audio, etc.) we MUST fall through to on-device
+  // Speech.speak so the user always hears something. Without this
+  // fallback, every "no audio output" failure mode is silent — the
+  // caller's onError fires (which voice-companion treats as onDone for
+  // the auto-listen loop), state cycles past 'speaking' instantly, and
+  // the user sees the screen flicker but never hears Sakha.
   if (options.cloudVoiceId) {
+    let cloudFailed = false;
+    let cloudError: Error | null = null;
     await cloudSpeak(text, {
       voiceId: options.cloudVoiceId,
       language,
@@ -564,20 +574,38 @@ export async function speakDivinely(
       baseUrl: options.baseUrl,
       getAccessToken: options.getAccessToken,
       onDone: options.onDone,
-      onError: options.onError,
+      onError: (err) => {
+        cloudFailed = true;
+        cloudError = err;
+      },
     });
-    return;
+    if (!cloudFailed) {
+      return;
+    }
+    // Cloud path failed → fall through to on-device. Log so the
+    // failure is diagnosable, but don't surface to the user as an
+    // error — they're about to hear the on-device voice instead.
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn(
+        'speakDivinely: cloud TTS failed, falling through to on-device —',
+        cloudError?.message,
+      );
+    }
+    // Drop through to Tier 3 below.
   }
 
-  const resolvedVoice = getDivineVoiceSync(language);
+  const resolvedVoice = options.cloudVoiceId
+    ? undefined // explicit-cloud-failed branch: ignore persisted voice
+    : getDivineVoiceSync(language);
 
   // ── Tier 2: user-persisted cloud voice ──
-  if (isCloudVoiceId(resolvedVoice)) {
+  // Same fallthrough-on-failure as Tier 1 — never leave the user silent.
+  if (resolvedVoice && isCloudVoiceId(resolvedVoice)) {
     const backendId = parseCloudVoiceId(resolvedVoice as string);
     const meta = findCloudVoice(resolvedVoice as string);
-    if (!backendId || !meta) {
-      // Stale persisted id — fall through to on-device.
-    } else {
+    if (backendId && meta) {
+      let cloudFailed = false;
+      let cloudError: Error | null = null;
       await cloudSpeak(text, {
         voiceId: backendId,
         language,
@@ -585,10 +613,22 @@ export async function speakDivinely(
         baseUrl: options.baseUrl,
         getAccessToken: options.getAccessToken,
         onDone: options.onDone,
-        onError: options.onError,
+        onError: (err) => {
+          cloudFailed = true;
+          cloudError = err;
+        },
       });
-      return;
+      if (!cloudFailed) {
+        return;
+      }
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn(
+          'speakDivinely: persisted cloud voice failed, falling through to on-device —',
+          cloudError?.message,
+        );
+      }
     }
+    // Stale persisted id or cloud failure — drop through.
   }
 
   // ── Tier 3: on-device path ──
@@ -684,12 +724,27 @@ export function previewVoice(
         : persona === 'storyteller'
           ? 'storytelling'
           : 'calm';
+    // Cloud preview with on-device fallback. Without the fallback, a
+    // missing/invalid API key produces a silent picker — users tap
+    // Play and hear nothing. We surface SOMETHING in every case.
+    const fallbackToDevice = (reason: string) => {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('previewVoice: cloud failed, falling through —', reason);
+      }
+      const preset = PERSONA_PRESETS[persona];
+      Speech.speak(text, {
+        language,
+        rate: preset.rate,
+        pitch: preset.pitch,
+      });
+    };
     void cloudSpeak(text, {
       voiceId: backendId,
       language,
       voiceType,
       baseUrl: preview?.baseUrl,
       getAccessToken: preview?.getAccessToken,
+      onError: (err) => fallbackToDevice(err.message),
     });
     return;
   }
