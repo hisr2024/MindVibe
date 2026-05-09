@@ -349,8 +349,18 @@ export default function ChatScreen(): React.JSX.Element {
 
       <KeyboardAvoidingView
         style={styles.keyboardAvoider}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        // The previous Android behavior of `undefined` made KAV a no-op, so
+        // when the soft keyboard opened it sat ON TOP of the ChatInput and
+        // the user could not see what they were typing. Switching to
+        // `behavior="height"` on Android makes KAV shrink itself by the
+        // keyboard height, pulling the ChatInput above the keyboard. The
+        // vertical offset compensates for the 64pt tab-bar slot reserved by
+        // `root.paddingBottom`, so the input lands snugly above the keyboard
+        // (not floating 64pt higher with empty space between them).
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={
+          Platform.OS === 'android' ? TAB_BAR_CONTENT_HEIGHT : 0
+        }
       >
         <View style={styles.body}>
           {hasMessages ? (
