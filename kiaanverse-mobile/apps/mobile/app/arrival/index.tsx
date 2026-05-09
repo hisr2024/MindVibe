@@ -39,7 +39,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -161,6 +160,10 @@ function buildPages(palette: Palette): readonly PageData[] {
 const PAGE_COUNT = PAGE_TEMPLATES.length;
 
 const LOTUS_BLOOM = Easing.bezier(0.22, 1.0, 0.36, 1.0);
+/** Spring-like easing for the page slide that always settles exactly at the
+ *  target (vs. a real spring whose epsilon-tolerance was leaving sub-pixel
+ *  residue that compounded into a visible right-shift on later pages). */
+const SLIDE_EASE = Easing.bezier(0.32, 0.72, 0, 1);
 
 const GOLD = '#D4A44C';
 const GOLD_SOFT = 'rgba(212, 164, 76, 0.7)';
@@ -215,21 +218,17 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
     if (page < PAGE_COUNT - 1) {
       haptic('light');
       const nextIndex = page + 1;
-      const target = -nextIndex * W;
-      // Snap to the exact integer offset on completion. Reanimated springs
-      // settle within an epsilon of the target; over many transitions the
-      // residue compounds and shifts later pages right of center. Forcing
-      // the final value here keeps every page perfectly aligned.
-      translateX.value = withSpring(
-        target,
-        { damping: 22, stiffness: 90 },
-        (finished) => {
-          'worklet';
-          if (finished) {
-            translateX.value = target;
-          }
-        }
-      );
+      // Use withTiming instead of withSpring. Springs have a settle threshold
+      // (~0.001) that's normally fine, but if the user taps Continue before
+      // the previous spring finishes the completion callback gets
+      // `finished=false` and the snap-to-integer never fires — leaving
+      // sub-pixel residue that compounds across pages and visibly shifts
+      // later pages to the right (pages 4 & 5 were the worst). withTiming
+      // always lands exactly on the target value, regardless of interruption.
+      translateX.value = withTiming(-nextIndex * W, {
+        duration: 360,
+        easing: SLIDE_EASE,
+      });
       setPage(nextIndex);
     } else {
       void handleComplete();

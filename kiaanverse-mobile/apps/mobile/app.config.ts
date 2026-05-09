@@ -116,6 +116,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: 'com.kiaanverse.app',
     versionCode: 22,
+    // Use 'pan' so the system pans the activity up just enough to keep the
+    // focused TextInput visible above the soft keyboard, rather than
+    // resizing the entire window. With 'resize', Android's automatic shrink
+    // double-stacks with our `KeyboardAvoidingView behavior="height"` on the
+    // chat screen and leaves the ChatInput hidden behind the keyboard. 'pan'
+    // gives KAV sole responsibility for keyboard avoidance, which is the
+    // pattern the chat layout expects.
+    softwareKeyboardLayoutMode: 'pan',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop
