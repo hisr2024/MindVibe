@@ -42,7 +42,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, Polygon, RadialGradient, Stop } from 'react-native-svg';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -353,21 +353,79 @@ function SacredArrivalInner({
         />
       </Svg>
 
-      {/* OM aura — concentric golden glow that breathes behind the glyph. */}
+      {/* OM aura — concentric golden glow that breathes behind the glyph.
+          Boosted from the previous flat brownish radial: now a richer
+          gold→indigo→transparent ramp that reads as "divine fire" instead
+          of a bland grey disc. */}
       <Animated.View
         style={[styles.auraWrap, omAuraStyle]}
         pointerEvents="none"
       >
         <LinearGradient
           colors={[
-            'rgba(212, 160, 23, 0.35)',
-            'rgba(27, 79, 187, 0.12)',
+            'rgba(240, 192, 64, 0.55)',
+            'rgba(212, 160, 23, 0.38)',
+            'rgba(27, 79, 187, 0.20)',
             'transparent',
           ]}
+          locations={[0, 0.35, 0.7, 1]}
           start={{ x: 0.5, y: 0.5 }}
           end={{ x: 1, y: 1 }}
           style={styles.auraGradient}
         />
+      </Animated.View>
+
+      {/* Veda yantra plate — replaces the previous bland grey disc. A static
+          gold-stroked Sri-Yantra-style design (8-petal lotus + shatkona +
+          inscribed circle) sits behind the OM, giving the splash a proper
+          sacred-geometry presence instead of just a gradient blur. */}
+      <Animated.View
+        style={[styles.yantraWrap, omAuraStyle]}
+        pointerEvents="none"
+      >
+        <Svg width={YANTRA_SIZE} height={YANTRA_SIZE} viewBox={`0 0 ${YANTRA_SIZE} ${YANTRA_SIZE}`}>
+          {/* Outer ring */}
+          <Circle
+            cx={YANTRA_SIZE / 2}
+            cy={YANTRA_SIZE / 2}
+            r={YANTRA_SIZE / 2 - 2}
+            stroke="rgba(212, 160, 23, 0.55)"
+            strokeWidth={1.2}
+            fill="none"
+          />
+          {/* 8-petal lotus */}
+          <Path
+            d={SPLASH_LOTUS_PATH}
+            stroke="rgba(212, 160, 23, 0.7)"
+            strokeWidth={1.4}
+            fill="none"
+            strokeLinejoin="round"
+          />
+          {/* Inner circle */}
+          <Circle
+            cx={YANTRA_SIZE / 2}
+            cy={YANTRA_SIZE / 2}
+            r={YANTRA_SIZE * 0.32}
+            stroke="rgba(212, 160, 23, 0.45)"
+            strokeWidth={1}
+            fill="none"
+          />
+          {/* Shatkona — two interlocking triangles */}
+          <Polygon
+            points={SPLASH_TRI_UP}
+            stroke="rgba(212, 160, 23, 0.85)"
+            strokeWidth={1.4}
+            fill="none"
+            strokeLinejoin="round"
+          />
+          <Polygon
+            points={SPLASH_TRI_DOWN}
+            stroke="rgba(212, 160, 23, 0.85)"
+            strokeWidth={1.4}
+            fill="none"
+            strokeLinejoin="round"
+          />
+        </Svg>
       </Animated.View>
 
       {/* ACT 1 — point of light. */}
@@ -418,8 +476,62 @@ export const SacredArrival = React.memo(SacredArrivalInner);
 
 const OM_SIZE = 96;
 const AURA_SIZE = 260;
+const YANTRA_SIZE = 220;
 const NAME_TOP = H / 2 + 72;
 const INVOCATION_TOP = NAME_TOP + 56;
+
+// ---------------------------------------------------------------------------
+// Splash yantra geometry — pre-computed at module load so the splash never
+// re-builds these paths on each frame. The 8-petal lotus is rendered as a
+// chain of cubic teardrops; the shatkona is two interlocking triangles
+// inscribed in a circle of radius r = YANTRA_SIZE * 0.30.
+// ---------------------------------------------------------------------------
+
+function splashLotusPath(): string {
+  const cx = YANTRA_SIZE / 2;
+  const cy = YANTRA_SIZE / 2;
+  const r = YANTRA_SIZE * 0.4;
+  const petals = 8;
+  let d = '';
+  for (let i = 0; i < petals; i += 1) {
+    const a = (i * 2 * Math.PI) / petals;
+    const tipX = cx + r * Math.cos(a);
+    const tipY = cy + r * Math.sin(a);
+    const baseAngle = Math.PI / petals;
+    const baseR = r * 0.34;
+    const lX = cx + baseR * Math.cos(a + baseAngle);
+    const lY = cy + baseR * Math.sin(a + baseAngle);
+    const rX = cx + baseR * Math.cos(a - baseAngle);
+    const rY = cy + baseR * Math.sin(a - baseAngle);
+    const c1X = cx + r * 0.78 * Math.cos(a + baseAngle * 0.55);
+    const c1Y = cy + r * 0.78 * Math.sin(a + baseAngle * 0.55);
+    const c2X = cx + r * 0.78 * Math.cos(a - baseAngle * 0.55);
+    const c2Y = cy + r * 0.78 * Math.sin(a - baseAngle * 0.55);
+    d += `M ${lX.toFixed(2)} ${lY.toFixed(2)} `;
+    d += `C ${c1X.toFixed(2)} ${c1Y.toFixed(2)}, ${tipX.toFixed(2)} ${tipY.toFixed(2)}, ${tipX.toFixed(2)} ${tipY.toFixed(2)} `;
+    d += `C ${tipX.toFixed(2)} ${tipY.toFixed(2)}, ${c2X.toFixed(2)} ${c2Y.toFixed(2)}, ${rX.toFixed(2)} ${rY.toFixed(2)} `;
+    d += `Z `;
+  }
+  return d;
+}
+
+function splashTrianglePoints(rotationDeg: number): string {
+  const cx = YANTRA_SIZE / 2;
+  const cy = YANTRA_SIZE / 2;
+  const r = YANTRA_SIZE * 0.3;
+  const pts: string[] = [];
+  for (let i = 0; i < 3; i += 1) {
+    const a = ((rotationDeg + (i * 360) / 3) * Math.PI) / 180;
+    pts.push(
+      `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`
+    );
+  }
+  return pts.join(' ');
+}
+
+const SPLASH_LOTUS_PATH = splashLotusPath();
+const SPLASH_TRI_UP = splashTrianglePoints(-90);
+const SPLASH_TRI_DOWN = splashTrianglePoints(90);
 
 const styles = StyleSheet.create({
   root: {
@@ -439,6 +551,15 @@ const styles = StyleSheet.create({
   },
   auraGradient: {
     flex: 1,
+  },
+  yantraWrap: {
+    position: 'absolute',
+    width: YANTRA_SIZE,
+    height: YANTRA_SIZE,
+    top: H / 2 - YANTRA_SIZE / 2 - 32,
+    left: W / 2 - YANTRA_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pointWrap: {
     position: 'absolute',
@@ -486,21 +607,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nameLetter: {
+    // CormorantGaramond-Italic isn't registered (only LightItalic is). The
+    // previous spelling silently fell back to the system font on Android,
+    // making the title look wrong. Use the registered face.
     fontSize: 28,
     lineHeight: 34,
     color: SACRED_WHITE,
-    fontFamily: 'CormorantGaramond-Italic',
+    fontFamily: 'CormorantGaramond-LightItalic',
     fontStyle: 'italic',
     letterSpacing: 0.3 * 28,
   },
   invocation: {
+    // Was rendered at TEXT_MUTED (#6B6355) which is the same value as the
+    // splash's near-black backdrop in poor lighting — the Sanskrit looked
+    // missing. Lift to a soft warm gold and give it real Devanagari
+    // descender room (lineHeight 26 for fontSize 14) so ु and ्र don't clip.
     position: 'absolute',
     top: INVOCATION_TOP,
-    fontSize: 13,
-    lineHeight: 19,
-    color: TEXT_MUTED,
+    fontSize: 14,
+    lineHeight: 26,
+    color: 'rgba(245, 222, 179, 0.78)',
     fontFamily: 'NotoSansDevanagari-Regular',
     textAlign: 'center',
     letterSpacing: 0.4,
+    paddingVertical: 4,
   },
 });

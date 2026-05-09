@@ -54,8 +54,23 @@ export function ThemeProvider({
     const baseTheme = resolvedDark ? darkTheme : lightTheme;
     const colorScheme = PALETTES[paletteId] ?? PALETTES[DEFAULT_PALETTE_ID];
 
+    // Light mode keeps its warm-cream surfaces regardless of palette — the
+    // palettes are designed for dark/cosmic surfaces. In dark mode we
+    // override the four background slots so every screen reading
+    // `theme.colors.{background,card,surface,surfaceElevated}` follows the
+    // active palette automatically.
+    const themeColors = resolvedDark
+      ? {
+          ...baseTheme.colors,
+          background: colorScheme.bg.void,
+          card: colorScheme.bg.card,
+          surface: colorScheme.bg.surface,
+          surfaceElevated: colorScheme.bg.elevated,
+        }
+      : baseTheme.colors;
+
     return {
-      theme: { ...baseTheme, colorScheme },
+      theme: { ...baseTheme, colors: themeColors, colorScheme },
       isDark: resolvedDark,
       mode,
       setMode: onModeChange,

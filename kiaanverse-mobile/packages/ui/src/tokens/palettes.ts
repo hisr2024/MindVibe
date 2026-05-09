@@ -47,8 +47,16 @@ export interface Palette {
   /** Short label for chips / one-line previews. */
   readonly shortLabel: string;
   readonly bg: {
+    /** Flat fallback bg (root view, status-bar safe-area). */
     readonly void: string;
+    /** Three-stop vertical gradient for `<DivineBackground>`. */
     readonly gradient: readonly [string, string, string];
+    /** Card / panel surface — what `theme.colors.card` resolves to. */
+    readonly card: string;
+    /** Slightly raised surface — `theme.colors.surface`. */
+    readonly surface: string;
+    /** Highest-elevation surface — `theme.colors.surfaceElevated`. */
+    readonly elevated: string;
   };
   /** Three-stop rgba ramp for the breathing aura at the top of the screen. */
   readonly aura: readonly [string, string, string];
@@ -72,6 +80,9 @@ const indigoPeacock: Palette = {
   bg: {
     void: '#050714',
     gradient: ['#050714', '#0A1228', '#050714'],
+    card: '#0B0E2A',
+    surface: '#161A42',
+    elevated: '#1E2448',
   },
   aura: ['rgba(27, 79, 187, 0.28)', 'rgba(14, 116, 144, 0.10)', 'transparent'],
   accent: {
@@ -96,6 +107,9 @@ const maroon: Palette = {
   bg: {
     void: '#1A0606',
     gradient: ['#1A0606', '#2B0A0A', '#3B0E0E'],
+    card: '#2B0A0A',
+    surface: '#3B0E0E',
+    elevated: '#4A1414',
   },
   aura: ['rgba(139, 0, 0, 0.32)', 'rgba(180, 83, 9, 0.10)', 'transparent'],
   accent: {
@@ -120,6 +134,9 @@ const darkGreen: Palette = {
   bg: {
     void: '#0A1F0F',
     gradient: ['#0A1F0F', '#102818', '#163A22'],
+    card: '#102818',
+    surface: '#163A22',
+    elevated: '#1F4A2C',
   },
   aura: ['rgba(45, 134, 89, 0.30)', 'rgba(143, 188, 143, 0.10)', 'transparent'],
   accent: {
@@ -144,6 +161,9 @@ const blackGold: Palette = {
   bg: {
     void: '#000000',
     gradient: ['#000000', '#0A0A0A', '#141414'],
+    card: '#0A0A0A',
+    surface: '#141414',
+    elevated: '#1F1F1F',
   },
   aura: ['rgba(212, 160, 23, 0.32)', 'rgba(212, 160, 23, 0.08)', 'transparent'],
   accent: {

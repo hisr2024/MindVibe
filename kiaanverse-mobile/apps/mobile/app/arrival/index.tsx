@@ -55,9 +55,21 @@ import {
   SriYantraVisual,
   VISUAL_SIZE,
 } from './visuals';
-import { PalettePickerChip, PaletteSheet, usePaletteSheet } from './PalettePicker';
+import {
+  InlinePaletteSwatches,
+  PalettePickerChip,
+  PaletteSheet,
+  usePaletteSheet,
+} from './PalettePicker';
 
-const { width: W } = Dimensions.get('window');
+// Use integer pixel widths everywhere on this slider. `Dimensions.get` returns
+// a fractional value on many Android devices (e.g. 411.42857) — when that
+// fractional W feeds both the page width AND the per-page translateX, Yoga
+// rounds the actual rendered widths but the translateX uses the unrounded
+// number, so each page lands a fraction of a pixel off. Over 5 transitions
+// the drift compounds into a visible right-shift on later pages. Rounding W
+// to an integer eliminates the mismatch.
+const W = Math.round(Dimensions.get('window').width);
 
 // ---------------------------------------------------------------------------
 // Page definitions
@@ -203,10 +215,21 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
     if (page < PAGE_COUNT - 1) {
       haptic('light');
       const nextIndex = page + 1;
-      translateX.value = withSpring(-nextIndex * W, {
-        damping: 22,
-        stiffness: 90,
-      });
+      const target = -nextIndex * W;
+      // Snap to the exact integer offset on completion. Reanimated springs
+      // settle within an epsilon of the target; over many transitions the
+      // residue compounds and shifts later pages right of center. Forcing
+      // the final value here keeps every page perfectly aligned.
+      translateX.value = withSpring(
+        target,
+        { damping: 22, stiffness: 90 },
+        (finished) => {
+          'worklet';
+          if (finished) {
+            translateX.value = target;
+          }
+        }
+      );
       setPage(nextIndex);
     } else {
       void handleComplete();
@@ -531,6 +554,20 @@ function CeremonyPage({
           <View style={[styles.ornamentLine, styles.ornamentLineRight]} />
         </View>
 
+        {/* Inline palette swatch row — makes the color options visible right
+            on the welcome page (so the user sees the choices before tapping
+            the chip). Each swatch is itself tappable and applies the palette
+            immediately, so this row IS the picker for users who never spot
+            the floating chip in the corner. */}
+        <View style={styles.paletteRow}>
+          <Text allowFontScaling={false} style={styles.paletteRowLabel}>
+            CHOOSE YOUR SACRED PALETTE
+          </Text>
+          <View style={styles.paletteRowSwatches}>
+            <InlinePaletteSwatches activeId={palette.id} />
+          </View>
+        </View>
+
         {/* Spacer so the bottom ornament clears the absolute-positioned CTA */}
         <View style={styles.welcomeBottomSpacer} />
       </ScrollView>
@@ -656,11 +693,15 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sanskrit: {
+    // Devanagari needs ~1.7x line-height to clear matras above (शिरोरेखा)
+    // and below (्, ु, ृ) the consonant. The previous 22pt line-height
+    // clipped the lower matras on most Android devices.
     fontFamily: 'NotoSansDevanagari-Regular',
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 17,
+    lineHeight: 32,
     letterSpacing: 0.3,
     textAlign: 'center',
+    paddingVertical: 4,
   },
   title: {
     fontFamily: 'CormorantGaramond-LightItalic',
@@ -892,12 +933,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   verseSanskrit: {
+    // Same Devanagari descender allowance as `sanskrit` — both vowel signs
+    // and the upper bar must clear in a single line so a long shloka like
+    // "अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते" (which has ृ, ौ, ्य) renders cleanly.
     fontFamily: 'NotoSansDevanagari-Medium',
-    fontSize: 17,
-    lineHeight: 26,
+    fontSize: 18,
+    lineHeight: 34,
     color: '#F0C96D',
     letterSpacing: 0.5,
     textAlign: 'center',
+    paddingVertical: 4,
   },
   verseEnglish: {
     fontFamily: 'CrimsonText-Italic',
@@ -917,5 +962,25 @@ const styles = StyleSheet.create({
   },
   welcomeBottomSpacer: {
     height: 200,
+  },
+  paletteRow: {
+    width: '100%',
+    maxWidth: 420,
+    alignItems: 'center',
+    marginTop: 18,
+    marginBottom: 6,
+    gap: 12,
+  },
+  paletteRowLabel: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 10.5,
+    letterSpacing: 3,
+    color: 'rgba(212, 164, 76, 0.7)',
+    textAlign: 'center',
+  },
+  paletteRowSwatches: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 14,
   },
 });
