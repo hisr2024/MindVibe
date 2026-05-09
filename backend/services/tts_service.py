@@ -459,6 +459,23 @@ class TTSService:
                 "chanting": "sarvam-rishi",
             }.get(voice_type, "sarvam-aura")
 
+        # Map voice_type → mood when caller didn't specify one. The
+        # ElevenLabs/Sarvam adapters drive their stability/style/pace
+        # tuning from ``mood``; passing ``neutral`` flattens divine
+        # voices into a studio-flat reading. Resolve a richer mood
+        # so divine voice settings actually produce divine audio.
+        # Caller-supplied ``mood != "neutral"`` is preserved.
+        if mood == "neutral":
+            mood = {
+                "calm": "peaceful",
+                "wisdom": "peaceful",
+                "friendly": "joyful",
+                "energetic": "joyful",
+                "soothing": "peaceful",
+                "storytelling": "peaceful",
+                "chanting": "peaceful",
+            }.get(voice_type, "neutral")
+
         if self._is_indian_language(language):
             # Indian language chain: Sarvam -> ElevenLabs -> Edge TTS
             audio = await self._synthesize_with_sarvam(text, language, voice_type, mood, voice_id)
