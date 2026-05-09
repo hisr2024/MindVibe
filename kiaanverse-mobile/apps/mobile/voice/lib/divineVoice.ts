@@ -724,12 +724,27 @@ export function previewVoice(
         : persona === 'storyteller'
           ? 'storytelling'
           : 'calm';
+    // Cloud preview with on-device fallback. Without the fallback, a
+    // missing/invalid API key produces a silent picker — users tap
+    // Play and hear nothing. We surface SOMETHING in every case.
+    const fallbackToDevice = (reason: string) => {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('previewVoice: cloud failed, falling through —', reason);
+      }
+      const preset = PERSONA_PRESETS[persona];
+      Speech.speak(text, {
+        language,
+        rate: preset.rate,
+        pitch: preset.pitch,
+      });
+    };
     void cloudSpeak(text, {
       voiceId: backendId,
       language,
       voiceType,
       baseUrl: preview?.baseUrl,
       getAccessToken: preview?.getAccessToken,
+      onError: (err) => fallbackToDevice(err.message),
     });
     return;
   }

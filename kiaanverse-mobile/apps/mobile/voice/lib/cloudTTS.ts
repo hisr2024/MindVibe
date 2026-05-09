@@ -330,23 +330,31 @@ export async function cloudSpeak(
   }
 
   try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri },
-      { shouldPlay: true },
-    );
-    currentSound = sound;
-    options.onStart?.();
-    sound.setOnPlaybackStatusUpdate((status) => {
+    // Holder for the sound — referenced inside the status callback
+    // BEFORE createAsync resolves. Passing the callback as the third
+    // arg of createAsync (rather than via setOnPlaybackStatusUpdate
+    // afterwards) eliminates a tiny race where very short clips can
+    // fire didJustFinish before the late-bound listener attaches —
+    // which would mean onDone never fires and the voice-companion
+    // auto-listen loop hangs in the 'speaking' state forever.
+    const holder: { sound: Audio.Sound | null } = { sound: null };
+    const onStatus = (status: import('expo-av').AVPlaybackStatus) => {
       if (!status.isLoaded) return;
       if (status.didJustFinish) {
-        // Clear current sound *before* firing onDone so a synchronous
-        // re-call inside the callback (auto-listen flows do this) sees
-        // a clean slate.
-        if (currentSound === sound) currentSound = null;
-        sound.unloadAsync().catch(() => undefined);
+        const s = holder.sound;
+        if (s && currentSound === s) currentSound = null;
+        if (s) s.unloadAsync().catch(() => undefined);
         options.onDone?.();
       }
-    });
+    };
+    const { sound } = await Audio.Sound.createAsync(
+      { uri },
+      { shouldPlay: true, volume: 1.0 },
+      onStatus,
+    );
+    holder.sound = sound;
+    currentSound = sound;
+    options.onStart?.();
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     if (typeof console !== 'undefined' && console.warn) {
