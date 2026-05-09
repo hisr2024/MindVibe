@@ -27,6 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '@kiaanverse/ui';
 
 const GOLD = '#D4A017';
 const SACRED_WHITE = '#F5F0E8';
@@ -53,6 +54,11 @@ function DailyVerseBannerInner({
   onPress,
   style,
 }: DailyVerseBannerProps): React.JSX.Element {
+  // Read the active palette so the "Today's Sacred Sound" card stops
+  // rendering hardcoded indigo `rgba(17,20,53,0.85)` over a forest /
+  // maroon / black-&-gold page bg.
+  const { theme } = useTheme();
+  const cardBg = theme.colors.card;
   const scale = useSharedValue(1);
 
   const handlePressIn = useCallback(() => {
@@ -84,7 +90,7 @@ function DailyVerseBannerInner({
         }`}
         style={styles.press}
       >
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: cardBg }]}>
           {/* Top gold shimmer strip (matches SacredCard). */}
           <LinearGradient
             colors={[

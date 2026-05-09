@@ -32,7 +32,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path, Polygon } from 'react-native-svg';
-import { WaveformVisualizer } from '@kiaanverse/ui';
+import { WaveformVisualizer, useTheme } from '@kiaanverse/ui';
 
 import { KRISHNA_BLUE, PEACOCK_TEAL } from './toolColors';
 
@@ -91,6 +91,13 @@ function VibePlayerCardInner({
   style,
   testID,
 }: VibePlayerCardProps): React.JSX.Element {
+  // Read the active palette so the KIAAN Vibe Player tile on the Sacred
+  // Tools tab stops rendering as a hardcoded blue card over a forest /
+  // maroon / black-&-gold page bg. The stripe + accent halo follow
+  // `accent.primary`, the card surface follows `colors.card`.
+  const { theme } = useTheme();
+  const cardBg = theme.colors.card;
+  const accentPrimary = theme.colorScheme.accent.primary;
   const scale = useSharedValue(1);
   const playScale = useSharedValue(1);
 
@@ -153,18 +160,22 @@ function VibePlayerCardInner({
         accessibilityHint="Opens the full Vibe Player"
         style={styles.press}
       >
-        <View style={styles.surface}>
-          {/* Base Krishna→peacock gradient body. */}
+        <View style={[styles.surface, { backgroundColor: cardBg }]}>
+          {/* Base palette-tinted gradient body. Was hardcoded Krishna →
+              peacock; now uses the active palette's primary accent at ~15%
+              and ~8% alpha so the tile reads as themed (forest, maroon,
+              gold, indigo). */}
           <LinearGradient
-            colors={GRADIENT_COLORS as unknown as string[]}
+            colors={[accentPrimary + '26', accentPrimary + '14']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
 
-          {/* Left semantic-color stripe. */}
+          {/* Left semantic-color stripe — follows the active palette's
+              primary accent (was hardcoded KRISHNA_BLUE). */}
           <View
-            style={[styles.stripe, { backgroundColor: KRISHNA_BLUE }]}
+            style={[styles.stripe, { backgroundColor: accentPrimary }]}
             pointerEvents="none"
           />
 

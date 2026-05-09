@@ -37,7 +37,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { DivineBackground, LoadingMandala } from '@kiaanverse/ui';
+import { DivineBackground, LoadingMandala, useTheme } from '@kiaanverse/ui';
 import { useMeditationTracks } from '@kiaanverse/api';
 import type { MeditationTrack } from '@kiaanverse/api';
 import { useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
@@ -225,6 +225,10 @@ function SegmentedTabs({
   value: VibeTab;
   onChange: (tab: VibeTab) => void;
 }): React.JSX.Element {
+  // Read the active palette so tab pills + chips stop rendering hardcoded
+  // navy-indigo even when the user picks Forest / Maroon / Black-&-Gold.
+  const { theme } = useTheme();
+  const pillBg = theme.colors.card;
   const handlePress = useCallback(
     (tab: VibeTab) => {
       if (tab === value) return;
@@ -245,7 +249,11 @@ function SegmentedTabs({
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             accessibilityLabel={`${tab.label} tab`}
-            style={[styles.tabPill, active && styles.tabPillActive]}
+            style={[
+              styles.tabPill,
+              { backgroundColor: pillBg },
+              active && styles.tabPillActive,
+            ]}
           >
             <Text
               style={[styles.tabLabel, active && styles.tabLabelActive]}
