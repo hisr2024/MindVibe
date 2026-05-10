@@ -869,18 +869,20 @@ const s = StyleSheet.create({
   },
   wordmarkSub: {
     // Sakha byline — divine calligraphic subtitle under the Kiaanverse
-    // wordmark. Uses CormorantGaramond-LightItalic (one weight lighter
-    // than the wordmark) at 11pt with 1.0pt letter-spacing — matches the
-    // wordmark's 0.08em letter-spacing ratio so the two lines share the
-    // same typographic rhythm. Warm gold at 85% so the byline glows
-    // beneath the white wordmark without competing with it.
-    marginTop: 2,
+    // wordmark. Uses CormorantGaramond-LightItalic (same italic family
+    // as the wordmark, one weight lighter) at 14pt with 1.4pt letter-
+    // spacing — visible at glance distance on real devices, where the
+    // earlier 11pt rendered as a thin gold thread that vanished into
+    // the starfield. Full-opacity warm gold so the byline reads as
+    // clearly as the wordmark above it. marginTop 4pt for breathing
+    // room from the "Kiaanverse" baseline.
+    marginTop: 4,
     fontFamily: 'CormorantGaramond-LightItalic',
     fontStyle: 'italic',
-    fontSize: 11,
-    lineHeight: 14,
-    color: 'rgba(212, 160, 23, 0.85)',
-    letterSpacing: 1.0,
+    fontSize: 14,
+    lineHeight: 18,
+    color: GOLD,
+    letterSpacing: 1.4,
     textAlign: 'center',
   },
 
