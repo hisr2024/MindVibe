@@ -1,14 +1,11 @@
 /**
- * Shankha (शङ्ख) — Krishna's conch.
+ * Shankha (शङ्ख) — clean silhouette per founder reference.
  *
- * Cinematic SVG: ornate golden body with Indian decorative bands,
- * spiral top, dark copper interior at the mouth, and a peacock feather
- * emerging from the spiral (Krishna's iconic motif).
- *
- * Per founder reference: should look divine and ornate — never flat
- * cartoon. Multiple decorative bands across the body, gradient golden
- * surface, dark copper interior visible at the opening, peacock
- * feather as the divine accent.
+ * Simple, divine, unambiguous: a solid golden conch silhouette with
+ * a peacock feather rising from the spiral apex. No gradients, no
+ * decorative bands — minimal black-silhouette-style design matching
+ * the reference image, rendered in divine gold so it reads on the
+ * dark cosmic-void canvas.
  *
  * Mounts the three sound-wave layers from useShankhaAnimation
  * (Reanimated worklets) so the visual hooks up to actual ExoPlayer
@@ -18,15 +15,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import Svg, {
-  Circle,
-  Defs,
-  Ellipse,
-  LinearGradient,
-  Path,
-  RadialGradient,
-  Stop,
-} from 'react-native-svg';
+import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
 import {
   useShankhaAnimation,
   type ShankhaWaveLayer,
@@ -71,236 +60,114 @@ function SoundWaveLayer({ layer, size }: { layer: ShankhaWaveLayer; size: number
 }
 
 /**
- * Ornate divine Shankha with peacock feather. Layered SVG paths build
- * up the ornament:
- *   1. Body silhouette  — gradient gold→copper conch shape
- *   2. Decorative bands — 3 horizontal bands across the body
- *   3. Inner mouth      — dark copper-brown opening at the bottom
- *   4. Spiral top       — concentric rings forming the apex
- *   5. Rim highlight    — bright gold edge accent
- *   6. Peacock feather  — divine motif emerging from the spiral
+ * Simple silhouette Shankha — single solid fill, no gradients, no
+ * decorative bands. Three SVG paths only:
  *
- * viewBox is 200×260 (taller than wide) so the peacock feather
- * has vertical room above the conch.
+ *   1. Peacock feather rising from the spiral apex
+ *   2. Conch body — the main silhouette (solid fill)
+ *   3. Spiral stripes — a few horizontal ridges at the apex
+ *
+ * viewBox 200×280 (taller than wide) so the peacock feather has
+ * vertical room above the conch.
  */
 function ShankhaSvg({ size }: { size: number }) {
+  const fill = Color.divineGoldBright;
   return (
-    // viewBox shifted so the conch BODY centers vertically (the peacock
-    // feather extends above the natural center). Height ratio 1.25 :1
-    // keeps the feather room without squashing the body.
-    <Svg width={size} height={size * 1.25} viewBox="0 0 200 250">
-      <Defs>
-        {/* Body gradient — golden ivory in the center, deeper copper
-            toward the edges. Mimics the reference's metallic sheen. */}
-        <RadialGradient id="body" cx="42%" cy="55%" r="60%">
-          <Stop offset="0%" stopColor={Color.divineGoldBright} stopOpacity="1" />
-          <Stop offset="35%" stopColor={Color.shankhaCream} stopOpacity="1" />
-          <Stop offset="75%" stopColor={Color.divineGold} stopOpacity="1" />
-          <Stop offset="100%" stopColor={Color.shankhaCopper} stopOpacity="1" />
-        </RadialGradient>
-
-        {/* Rim gradient — bright gold-to-amber for the edges and
-            spiral coils so they read as raised metalwork. */}
-        <LinearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0%" stopColor={Color.divineGoldBright} stopOpacity="1" />
-          <Stop offset="50%" stopColor={Color.divineGold} stopOpacity="1" />
-          <Stop offset="100%" stopColor={Color.shankhaCopper} stopOpacity="1" />
-        </LinearGradient>
-
-        {/* Mouth gradient — deep copper-brown at the conch opening,
-            so the dark interior shows through as in the reference. */}
-        <RadialGradient id="mouth" cx="50%" cy="40%" r="60%">
-          <Stop offset="0%" stopColor="#3D2010" stopOpacity="1" />
-          <Stop offset="60%" stopColor={Color.shankhaCopper} stopOpacity="1" />
-          <Stop offset="100%" stopColor={Color.divineGold} stopOpacity="0.85" />
-        </RadialGradient>
-
-        {/* Peacock-feather eye gradient — emerald to indigo to gold,
-            traditional peacock-feather palette. */}
-        <RadialGradient id="featherEye" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#7A4A1A" stopOpacity="1" />
-          <Stop offset="35%" stopColor="#1B5C2F" stopOpacity="1" />
-          <Stop offset="70%" stopColor="#1E3A8A" stopOpacity="1" />
-          <Stop offset="100%" stopColor={Color.divineGoldBright} stopOpacity="0.95" />
-        </RadialGradient>
-      </Defs>
-
-      {/* ── Peacock feather — emerges from the spiral apex ──
-          A subtle divine accent inspired by Krishna's iconography.
-          The plume curves up and to the right; the eye sits at the tip. */}
+    <Svg width={size} height={size * 1.4} viewBox="0 0 200 280">
+      {/* ── Peacock feather — rises from the spiral apex ──
+          Single stem with a teardrop eye at the tip. Minimal,
+          recognizable, matching the reference. */}
       <Path
-        d="M 110 90
-           Q 118 70, 128 50
-           Q 138 28, 145 12
-           Q 142 30, 138 50
-           Q 135 70, 128 92
-           Z"
-        fill={Color.divineGold}
-        opacity="0.85"
-      />
-      <Path
-        d="M 110 90
-           Q 118 70, 128 50
-           Q 138 28, 145 12"
+        d="M 92 110
+           Q 88 90, 82 70
+           Q 76 50, 72 30"
         fill="none"
-        stroke={Color.shankhaCopper}
-        strokeWidth="0.8"
-        strokeOpacity="0.9"
+        stroke={fill}
+        strokeWidth="2.5"
+        strokeLinecap="round"
       />
-      {/* Feather barbules — short strokes radiating from the central rachis */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const t = i / 12;
-        const x1 = 110 + (145 - 110) * t + 6 * Math.sin(t * 3);
-        const y1 = 90 + (12 - 90) * t;
-        const angle = -55 + t * 30;
-        const len = 6 + t * 4;
-        const x2 = x1 + Math.cos((angle * Math.PI) / 180) * len;
-        const y2 = y1 + Math.sin((angle * Math.PI) / 180) * len;
-        return (
-          <Path
-            key={`barb-${i}`}
-            d={`M ${x1} ${y1} L ${x2} ${y2}`}
-            stroke={Color.divineGoldBright}
-            strokeWidth="0.6"
-            strokeOpacity="0.7"
-          />
-        );
-      })}
-      {/* Peacock feather eye */}
-      <Ellipse cx="143" cy="14" rx="7" ry="9" fill="url(#featherEye)" />
-      <Ellipse cx="143" cy="14" rx="3" ry="4" fill="#0B1A4D" opacity="0.9" />
-      <Circle cx="143" cy="13" r="1.2" fill={Color.divineGoldBright} />
-
-      {/* ── Conch body — main silhouette ──
-          Wider at the bottom, tapering to the spiral apex at the top.
-          The path traces the outline visible in the reference image:
-          spiral peak top-right, body curving down-left, opening at
-          the bottom with the lip visible. */}
-      <Path
-        d="M 110 95
-           C 75 100, 55 130, 50 160
-           C 46 185, 55 215, 80 235
-           C 105 250, 145 248, 168 230
-           C 188 215, 195 195, 188 175
-           C 182 158, 165 150, 148 156
-           C 132 162, 124 175, 130 188
-           C 134 198, 148 200, 156 192
-           C 160 188, 162 184, 162 180"
-        fill="url(#body)"
-        stroke="url(#rim)"
-        strokeWidth="2"
-      />
-
-      {/* ── Inner spiral coil — visible inside the upper body ──
-          Three concentric arcs suggesting the conch's internal
-          chambers spiraling toward the apex. */}
-      <Path
-        d="M 130 130
-           C 116 134, 108 148, 114 162
-           C 120 174, 134 178, 144 172"
-        fill="none"
-        stroke={Color.shankhaCopper}
-        strokeWidth="1.2"
-        strokeOpacity="0.75"
-      />
-      <Path
-        d="M 138 138
-           C 128 142, 124 152, 128 162
-           C 132 170, 142 172, 148 168"
-        fill="none"
-        stroke={Color.shankhaCopper}
-        strokeWidth="1"
-        strokeOpacity="0.6"
-      />
-
-      {/* ── Spiral apex — concentric rings forming the conch's top ──
-          Tightly stacked elliptical rings that read as a coiled
-          spiral viewed from the side. */}
+      {/* Feather barbs — short strokes along the stem */}
       {[
-        { cy: 102, rx: 10, ry: 6 },
-        { cy: 96,  rx: 9,  ry: 5 },
-        { cy: 91,  rx: 8,  ry: 4.5 },
-        { cy: 86,  rx: 7,  ry: 4 },
-        { cy: 81,  rx: 6,  ry: 3.5 },
-        { cy: 77,  rx: 5,  ry: 3 },
-      ].map((r, i) => (
-        <Ellipse
-          key={`spiral-${i}`}
-          cx={114 - i * 0.5}
-          cy={r.cy}
-          rx={r.rx}
-          ry={r.ry}
-          fill="url(#rim)"
-          stroke={Color.shankhaCopper}
-          strokeWidth="0.7"
-          strokeOpacity="0.85"
+        { x1: 90, y1: 100, x2: 84, y2: 96 },
+        { x1: 88, y1: 90, x2: 94, y2: 86 },
+        { x1: 86, y1: 80, x2: 80, y2: 76 },
+        { x1: 84, y1: 70, x2: 90, y2: 66 },
+        { x1: 80, y1: 60, x2: 74, y2: 56 },
+        { x1: 78, y1: 50, x2: 84, y2: 46 },
+        { x1: 76, y1: 40, x2: 70, y2: 36 },
+      ].map((b, i) => (
+        <Path
+          key={`barb-${i}`}
+          d={`M ${b.x1} ${b.y1} L ${b.x2} ${b.y2}`}
+          stroke={fill}
+          strokeWidth="1.5"
+          strokeLinecap="round"
         />
       ))}
+      {/* Peacock feather eye — solid teardrop shape at the tip */}
+      <Ellipse cx="72" cy="28" rx="10" ry="14" fill={fill} />
+      {/* Eye dark center */}
+      <Ellipse cx="72" cy="28" rx="4" ry="6" fill="#1A1010" opacity="0.85" />
+      <Circle cx="72" cy="25" r="1.5" fill={fill} />
 
-      {/* ── Decorative bands — three horizontal bands of Indian
-          ornament across the body. The reference image shows
-          intricate engraved motifs; we approximate with short
-          repeating strokes that read as patterning at any size. */}
-      {[160, 188, 215].map((cy, bandIdx) => (
-        <React.Fragment key={`band-${bandIdx}`}>
-          {/* Band top + bottom rails */}
-          <Path
-            d={`M 70 ${cy - 5} Q 120 ${cy - 9}, 175 ${cy - 3}`}
-            fill="none"
-            stroke={Color.shankhaCopper}
-            strokeWidth="1"
-            strokeOpacity="0.85"
-          />
-          <Path
-            d={`M 70 ${cy + 5} Q 120 ${cy + 9}, 175 ${cy + 3}`}
-            fill="none"
-            stroke={Color.shankhaCopper}
-            strokeWidth="1"
-            strokeOpacity="0.85"
-          />
-          {/* Floral / geometric repeats inside the band */}
-          {Array.from({ length: 9 }).map((_, i) => {
-            const x = 78 + i * 11;
-            const yTop = cy - 5 + (i / 8) * 2;
-            const yBot = cy + 5 - (i / 8) * 2;
-            return (
-              <Path
-                key={`band-${bandIdx}-mark-${i}`}
-                d={`M ${x} ${yTop + 1} Q ${x + 2} ${cy}, ${x} ${yBot - 1}`}
-                fill="none"
-                stroke={Color.shankhaCopper}
-                strokeWidth="0.8"
-                strokeOpacity="0.7"
-              />
-            );
-          })}
-        </React.Fragment>
-      ))}
-
-      {/* ── Mouth opening — dark copper interior at the bottom-right
-          where the conch flares open. Captures the deep interior
-          tone visible in both reference images. */}
+      {/* ── Spiral apex — short stack of horizontal ridges ──
+          Three small bumps at the top of the conch where the spiral
+          coils. Matches the reference's stepped spiral. */}
       <Path
-        d="M 130 188
-           Q 152 198, 168 220
-           Q 178 238, 158 245
-           Q 130 248, 115 235
-           Q 108 222, 122 200 Z"
-        fill="url(#mouth)"
-        stroke="url(#rim)"
-        strokeWidth="1.5"
+        d="M 95 130
+           L 110 130
+           Q 115 124, 110 118
+           L 96 118
+           Q 91 124, 95 130 Z"
+        fill={fill}
+      />
+      <Path
+        d="M 96 118
+           L 108 118
+           Q 113 113, 108 108
+           L 97 108
+           Q 92 113, 96 118 Z"
+        fill={fill}
+      />
+      <Path
+        d="M 98 108
+           L 106 108
+           Q 110 104, 106 100
+           L 99 100
+           Q 95 104, 98 108 Z"
+        fill={fill}
       />
 
-      {/* ── Highlight crescent — soft glint on the body's upper-left
-          curve so the conch reads as 3D and divinely lit. */}
+      {/* ── Conch body — single solid silhouette ──
+          The main conch shape: spiral apex at top-center, body
+          curving down and to the right, mouth opening flared at
+          the bottom. Matches the silhouette of the reference image
+          (image 2). */}
       <Path
-        d="M 78 130
-           Q 66 160, 70 195"
-        fill="none"
-        stroke={Color.shankhaCream}
-        strokeWidth="3"
-        strokeOpacity="0.55"
-        strokeLinecap="round"
+        d="M 92 130
+           C 70 140, 55 165, 55 200
+           C 55 235, 78 265, 115 270
+           C 150 273, 178 258, 178 230
+           C 178 220, 172 215, 165 218
+           L 175 240
+           Q 178 250, 170 252
+           Q 158 254, 150 246
+           L 138 232
+           C 130 220, 130 205, 138 198
+           C 145 192, 158 190, 162 184
+           C 165 178, 162 170, 155 168
+           C 145 165, 130 168, 120 175
+           C 110 182, 105 192, 108 200
+           Q 110 208, 118 210
+           Q 128 212, 132 206
+           L 126 200
+           Q 122 198, 118 200
+           L 110 195
+           C 105 190, 105 180, 110 175
+           C 116 170, 120 162, 118 155
+           C 116 148, 110 142, 105 138
+           C 100 134, 95 132, 92 130 Z"
+        fill={fill}
       />
     </Svg>
   );

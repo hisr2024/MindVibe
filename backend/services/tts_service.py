@@ -47,7 +47,7 @@ VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "stor
 #   v1 — initial implementation
 #   v2 — speaker mapping fixes (sarvam-meera, elevenlabs-lily added);
 #        is_picker_voice extended premium tuning to non-divine voices.
-TTS_CACHE_VERSION = 2
+TTS_CACHE_VERSION = 3
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
@@ -524,14 +524,80 @@ class TTSService:
             }.get(voice_type, "neutral")
 
         # Track per-tier outcome for the consolidated final-failure log.
-        # Each tier appends its result so ops can see the whole chain
-        # in one Render log line: "T1=skipped(no_key), T2=429, T3=ok"
-        # etc. Reduces "audio is silent and I can't tell why" to a
-        # single grep.
         tier_outcomes: list[str] = []
 
         def _record(tier: str, outcome: str) -> None:
             tier_outcomes.append(f"{tier}={outcome}")
+
+        # ── Direct-routing fast path: <provider>-<speaker> ──
+        # New v3 voice IDs are bound to a specific (provider, speaker)
+        # tuple — e.g. ``sarvam-karun`` routes to Sarvam's API with
+        # speaker_id=karun, ``elevenlabs-clyde`` routes to ElevenLabs
+        # with voice_id=clyde. Bypasses the legacy persona double-lookup
+        # that was producing collisions (two persona ids defaulting to
+        # the same speaker → identical audio).
+        #
+        # Recognized prefixes: ``sarvam-`` and ``elevenlabs-``. Anything
+        # else (legacy ``divine-*``, bare ``meera``, etc.) falls through
+        # to the canonical chain below.
+        if voice_id:
+            primary_provider: Optional[str] = None
+            if voice_id.startswith("sarvam-"):
+                primary_provider = "sarvam"
+            elif voice_id.startswith("elevenlabs-"):
+                primary_provider = "elevenlabs"
+
+            if primary_provider == "sarvam":
+                try:
+                    audio = await self._synthesize_with_sarvam(
+                        text, language, voice_type, mood, voice_id
+                    )
+                    if audio:
+                        _record("T1_sarvam_direct", "ok")
+                        logger.info(
+                            f"Sarvam direct-route success for {language} "
+                            f"voice={voice_id} "
+                            f"chain=[{', '.join(tier_outcomes)}]"
+                        )
+                        return audio
+                    _record(
+                        "T1_sarvam_direct",
+                        "skipped_no_key"
+                        if not self._sarvam_available
+                        else "no_audio",
+                    )
+                except Exception as e:
+                    _record("T1_sarvam_direct", f"err:{type(e).__name__}")
+                    logger.warning(f"Sarvam direct-route raised: {e}")
+
+            elif primary_provider == "elevenlabs":
+                try:
+                    audio = await self._synthesize_with_elevenlabs(
+                        text, language, voice_id, mood
+                    )
+                    if audio:
+                        _record("T1_elevenlabs_direct", "ok")
+                        logger.info(
+                            f"ElevenLabs direct-route success for {language} "
+                            f"voice={voice_id} "
+                            f"chain=[{', '.join(tier_outcomes)}]"
+                        )
+                        return audio
+                    _record(
+                        "T1_elevenlabs_direct",
+                        "skipped_no_key"
+                        if not self._elevenlabs_available
+                        else "no_audio",
+                    )
+                except Exception as e:
+                    _record(
+                        "T1_elevenlabs_direct", f"err:{type(e).__name__}"
+                    )
+                    logger.warning(f"ElevenLabs direct-route raised: {e}")
+
+            # Direct route failed — fall through to canonical chain
+            # below as a backstop (the OTHER paid provider, then
+            # Microsoft Neural).
 
         # ── Tier 1: Sarvam AI (paid primary) ──
         try:

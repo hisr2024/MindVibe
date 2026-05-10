@@ -88,6 +88,22 @@ export interface CloudSpeakOptions {
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────────
+
+/**
+ * Mobile-side cache version. Bumped whenever the backend's
+ * ``TTS_CACHE_VERSION`` changes — keeps the on-device file cache in
+ * step with the server's Redis cache so users don't replay stale
+ * audio rendered with an old speaker mapping. Without this,
+ * ``cacheDirectory`` would hold the OLD audio for the file's
+ * lifetime (potentially forever) even after the backend has
+ * re-synthesized correctly.
+ *
+ * Increment in lockstep with ``backend/services/tts_service.py``
+ * ``TTS_CACHE_VERSION``. v3 = direct-routing voice IDs
+ * (``sarvam-<speaker>`` / ``elevenlabs-<voice>``) shipped.
+ */
+const CLOUD_TTS_CACHE_VERSION = 3;
+
 /** Stable cache key for a (text, voice_id, language) triple. */
 function cacheKey(text: string, voiceId: string, language: string): string {
   // Lightweight hash: not cryptographic, just collision-resistant
@@ -96,7 +112,7 @@ function cacheKey(text: string, voiceId: string, language: string): string {
   for (let i = 0; i < text.length; i++) {
     h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
   }
-  return `tts-${voiceId}-${language}-${h.toString(36)}-${text.length}`;
+  return `tts-v${CLOUD_TTS_CACHE_VERSION}-${voiceId}-${language}-${h.toString(36)}-${text.length}`;
 }
 
 /** Map BCP-47 (``en-IN``) to ISO-639 (``en``) for the backend payload. */

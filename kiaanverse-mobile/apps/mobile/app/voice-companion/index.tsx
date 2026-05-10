@@ -113,19 +113,19 @@ async function readAccessToken(): Promise<string | null> {
  * the per-language ``divineVoice:override:*`` keys).
  */
 const COMPANION_VOICE_IDS = [
-  'divine-saraswati',
-  'divine-krishna',
-  'sarvam-rishi',
-  'sarvam-meera',
-  'elevenlabs-nova',
-  'elevenlabs-lily',
+  'elevenlabs-dorothy',   // Saraswati
+  'elevenlabs-clyde',     // Krishna
+  'sarvam-karun',         // Rishi
+  'sarvam-manisha',       // Meera
+  'elevenlabs-rachel',    // Nova
+  'elevenlabs-bella',     // Lily
 ] as const;
 
 const COMPANION_VOICES: readonly CloudVoiceOption[] = pickCloudVoices(
   COMPANION_VOICE_IDS,
 );
 
-const DEFAULT_COMPANION_VOICE = 'divine-saraswati';
+const DEFAULT_COMPANION_VOICE = 'elevenlabs-dorothy';
 const COMPANION_VOICE_KEY = 'voiceCompanion:cloudVoiceId';
 
 async function loadCompanionVoice(): Promise<string> {
