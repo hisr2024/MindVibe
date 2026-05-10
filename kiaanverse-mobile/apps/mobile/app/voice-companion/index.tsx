@@ -69,7 +69,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
-import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
 import {
@@ -577,19 +576,11 @@ export default function VoiceCompanionScreen() {
       ) : null}
 
       <View style={styles.canvas}>
-        {/* SacredGeometry + Shankha must overlay — the geometry is the
-            backdrop ring around the conch. Default flex layout stacks
-            them vertically (Shankha appearing BELOW the geometry rings),
-            which is the "wrongly placed Shankha" bug. Wrap both in an
-            absolute-positioned stack and explicitly center each one. */}
-        <View style={styles.sacredStack} pointerEvents="none">
-          <View style={styles.sacredLayer}>
-            <SacredGeometry size={360} />
-          </View>
-          <View style={styles.sacredLayer}>
-            <Shankha size={170} />
-          </View>
-        </View>
+        {/* The Shankha PNG asset includes its own mandala backdrop
+            (see ``assets/shankha/shankha-mandala.png``), so we no
+            longer need a separate SacredGeometry layer. One Image
+            component renders the complete divine composition. */}
+        <Shankha size={200} />
       </View>
 
       <View style={styles.bottomBar}>
@@ -777,25 +768,6 @@ const styles = StyleSheet.create({
   },
   canvas: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // The Shankha sits exactly inside the SacredGeometry rings. Both
-  // children of ``sacredStack`` use ``position: 'absolute'`` so they
-  // overlay (centered in the stack) rather than stacking vertically
-  // — fixes the "Shankha is offset from the geometry" placement bug.
-  sacredStack: {
-    width: 360,
-    height: 360,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sacredLayer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
