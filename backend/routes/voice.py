@@ -750,6 +750,118 @@ async def get_voice_quality_info() -> dict:
     return get_tts_provider_quality_info()
 
 
+@router.get("/providers/status")
+async def get_provider_status() -> dict:
+    """
+    Diagnostic endpoint: which TTS providers are actually configured.
+
+    Mobile pings this on Voice Companion mount to surface a warning
+    when the user has paid Sarvam / ElevenLabs but the env-var didn't
+    make it to Render — the most common silent-failure mode.
+
+    Returns the OBSERVED runtime config (env vars set OR not), not
+    just what's expected. So if the user added the key but mistyped the
+    name, this catches it.
+
+    Response:
+        {
+          "providers": {
+            "sarvam":     {"configured": bool, "tier": 1, "label": "Sarvam AI (paid)"},
+            "elevenlabs": {"configured": bool, "tier": 2, "label": "ElevenLabs (paid)"},
+            "microsoft":  {"configured": True,  "tier": 3, "label": "Microsoft Neural (free fallback)"},
+            "bhashini":   {"configured": bool, "tier": 4, "label": "Bhashini AI (deferred — pending approval)"}
+          },
+          "active_chain": ["sarvam", "elevenlabs", "microsoft"],
+          "warnings": [
+            "Sarvam key not configured — paid Tier 1 unreachable",
+            ...
+          ]
+        }
+
+    No auth required — this is config metadata, not user data.
+    """
+    # Lazy imports so this endpoint stays fast even on cold start
+    from backend.services.elevenlabs_tts_service import (
+        is_elevenlabs_available,
+    )
+    from backend.services.sarvam_tts_service import is_sarvam_available
+    from backend.services.bhashini_tts_service import is_bhashini_available
+    try:
+        from backend.services.edge_tts_service import is_edge_tts_available
+        edge_ok = is_edge_tts_available()
+    except ImportError:
+        edge_ok = False
+
+    sarvam_ok = is_sarvam_available()
+    elevenlabs_ok = is_elevenlabs_available()
+    bhashini_ok = is_bhashini_available()
+
+    providers = {
+        "sarvam": {
+            "configured": sarvam_ok,
+            "tier": 1,
+            "label": "Sarvam AI (paid)",
+        },
+        "elevenlabs": {
+            "configured": elevenlabs_ok,
+            "tier": 2,
+            "label": "ElevenLabs (paid)",
+        },
+        "microsoft": {
+            "configured": edge_ok,
+            "tier": 3,
+            "label": "Microsoft Neural (free fallback)",
+        },
+        "bhashini": {
+            # Bhashini is wired but DEFERRED at the chain level pending
+            # approval — even if env-vars are set, the chain skips it.
+            # We report the env-var status so user knows whether to set
+            # the key NOW (and just have it ready) or wait.
+            "configured": bhashini_ok,
+            "tier": 4,
+            "label": "Bhashini AI (deferred — pending approval)",
+        },
+    }
+
+    # Active chain reflects what the chain ACTUALLY tries — Bhashini
+    # is deliberately excluded until approval lands.
+    active_chain = []
+    if sarvam_ok:
+        active_chain.append("sarvam")
+    if elevenlabs_ok:
+        active_chain.append("elevenlabs")
+    if edge_ok:
+        active_chain.append("microsoft")
+
+    warnings: list[str] = []
+    if not sarvam_ok:
+        warnings.append(
+            "Sarvam key not configured — paid Tier 1 unreachable. "
+            "Set SARVAM_API_KEY or KIAAN_SARVAM_API_KEY on Render."
+        )
+    if not elevenlabs_ok:
+        warnings.append(
+            "ElevenLabs key not configured — paid Tier 2 unreachable. "
+            "Set ELEVENLABS_API_KEY or KIAAN_ELEVENLABS_API_KEY on Render."
+        )
+    if not edge_ok:
+        warnings.append(
+            "Edge TTS module unavailable — Tier 3 last-resort fallback "
+            "broken. Check edge-tts package install in production."
+        )
+    if not active_chain:
+        warnings.append(
+            "CRITICAL: No TTS providers configured. Every Sakha "
+            "utterance will fail until at least one tier is enabled."
+        )
+
+    return {
+        "providers": providers,
+        "active_chain": active_chain,
+        "warnings": warnings,
+    }
+
+
 # ===== Elite Voice Query Endpoint =====
 
 class VoiceQueryRequest(BaseModel):
