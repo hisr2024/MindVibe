@@ -32,7 +32,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
 import {
   SAKHA_VOICE_EVENTS,
@@ -74,7 +74,11 @@ export function useSakhaWakeWord(
   const onWakeRef = useRef<typeof onWake>(onWake);
   onWakeRef.current = onWake;
 
-  const isAvailable = Native != null && Platform.OS === 'android';
+  // Cross-platform: Android registers SakhaVoice via SakhaVoicePackage; iOS
+  // registers it via SakhaVoiceBridge (apps/mobile/native/ios/Sources/Bridge/).
+  // Both implement enableWakeWord/disableWakeWord/SakhaVoiceWakeWord — no
+  // Platform.OS gate needed.
+  const isAvailable = Native != null;
 
   useEffect(() => {
     if (!Native) return undefined;

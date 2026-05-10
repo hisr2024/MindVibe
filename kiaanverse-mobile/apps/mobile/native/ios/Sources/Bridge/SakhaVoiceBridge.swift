@@ -178,10 +178,18 @@ final class SakhaVoiceBridge: RCTEventEmitter {
         resolver resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
-        // M4 — Speech.framework dictation port pending. Reject so the
-        // JS hook (useDictation) sees a typed error and falls back to
-        // cloud transcription instead of silently waiting forever.
-        reject("not_implemented", "iOS dictateOnce ships in M4", nil)
+        let tag = (languageTag as String).isEmpty ? "en-US" : (languageTag as String)
+        SakhaVoiceManager.shared.dictateOnce(languageTag: tag) { result in
+            switch result {
+            case .success(let transcript):
+                resolve([
+                    "transcript": transcript,
+                    "language": tag,
+                ])
+            case .failure(let code, let message):
+                reject(code, message, nil)
+            }
+        }
     }
 
     // MARK: - Helpers

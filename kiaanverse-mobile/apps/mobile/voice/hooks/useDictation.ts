@@ -22,7 +22,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 import { Audio } from 'expo-av';
 
 import { api } from '@kiaanverse/api';
@@ -47,16 +47,17 @@ const SakhaVoiceCandidate = NativeModules.SakhaVoice as
   | undefined;
 
 /**
- * The native SakhaVoice module is Android-only and ships inside the
- * in-tree gradle subproject ':kiaan-voice-native'
- * (apps/mobile/native/android/), registered at app startup by the
- * withKiaanSakhaVoicePackages config plugin. It is considered
- * available only when the bridge actually exposes dictateOnce —
- * NativeModules surfaces empty proxies on Expo Go / iOS / web, so we
- * have to function-check.
+ * The native SakhaVoice module is registered on both platforms:
+ *   • Android — apps/mobile/native/android/.../SakhaVoiceModule.kt via
+ *     the withKiaanSakhaVoicePackages config plugin.
+ *   • iOS — apps/mobile/native/ios/Sources/Bridge/SakhaVoiceBridge.swift
+ *     via the same plugin's ios Podfile injection.
+ *
+ * Both expose dictateOnce(languageTag) → { transcript, language }.
+ * NativeModules surfaces empty proxies on Expo Go / web, so we still
+ * function-check before treating the module as present.
  */
 const SakhaVoice: SakhaVoiceModuleShape | undefined =
-  Platform.OS === 'android' &&
   SakhaVoiceCandidate &&
   typeof SakhaVoiceCandidate.dictateOnce === 'function'
     ? SakhaVoiceCandidate

@@ -186,6 +186,13 @@ export interface SakhaWakeWordEvent {
 // Bridge module surface
 // ============================================================================
 
+/** Result of a single SakhaVoice.dictateOnce(...) call. */
+export interface SakhaDictationResult {
+  transcript: string;
+  /** Echoes the BCP-47 tag passed in, e.g. "en-IN" / "hi-IN". */
+  language: string;
+}
+
 export interface SakhaVoiceNativeModule {
   initialize(config: SakhaVoiceConfig): Promise<void>;
   setAuthToken(token: string | null): void;
@@ -204,6 +211,13 @@ export interface SakhaVoiceNativeModule {
 
   /** Stop wake-word detection. Idempotent. */
   disableWakeWord(): Promise<void>;
+
+  /** One-shot dictation — captures one utterance and returns the
+   *  best transcript. Used by the Shankha voice-input button on tool
+   *  screens. Rejects with typed error codes (PERMISSION_DENIED /
+   *  NOT_AVAILABLE / NO_MATCH / SPEECH_TIMEOUT / AUDIO_ERROR /
+   *  UNKNOWN_ERROR_*) on failure. */
+  dictateOnce(languageTag: string): Promise<SakhaDictationResult>;
 
   // NativeEventEmitter contract
   addListener(eventName: string): void;

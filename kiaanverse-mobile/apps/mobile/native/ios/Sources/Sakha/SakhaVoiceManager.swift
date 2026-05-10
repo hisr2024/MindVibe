@@ -90,6 +90,12 @@ public final class SakhaVoiceManager: NSObject {
     private var currentVerseRecitation: VerseRecitation?
     private var verseSegmentIndex: Int = 0
 
+    // Always-on wake-word detector. Non-nil when enableWakeWord() has been
+    // called; auto-paused while the manager is in any non-IDLE state (so the
+    // conversational STT and the wake STT never contend for the mic),
+    // auto-resumed on return to IDLE — see setState(_:).
+    private var wakeDetector: SakhaWakeWordDetector?
+
     // Auth provider supplied by the bridge.
     private var authTokenProvider: (() async -> String?) = { nil }
 
@@ -169,6 +175,8 @@ public final class SakhaVoiceManager: NSObject {
         ttsPlayer = nil
         sseClient?.cancel()
         sseClient = nil
+        wakeDetector?.stop()
+        wakeDetector = nil
         setState(.shutdown)
     }
 
@@ -177,14 +185,66 @@ public final class SakhaVoiceManager: NSObject {
         turnCount = 0
     }
 
-    /// M4 — wake-word detector port pending. Logs and returns.
+    /// Enable always-on wake-word detection. Lazy-creates a
+    /// SakhaWakeWordDetector keyed off the current config and starts it
+    /// if the manager is currently IDLE. If state is non-IDLE
+    /// (mid-turn / mid-recitation), the detector is created but not
+    /// started — `setState` will start it on the next return to IDLE so
+    /// we never contend with the conversational STT for the mic.
+    /// Idempotent — safe to call again.
     public func enableWakeWord() {
         guard ensureInitialized() else { return }
-        NSLog("[SakhaVoiceManager] enableWakeWord: M4 detector port pending; no-op for now.")
+        guard hasRecordPermission() else {
+            listener?.sakhaVoice(error: .permissionDenied)
+            return
+        }
+        if wakeDetector == nil, let cfg = config {
+            wakeDetector = SakhaWakeWordDetector(
+                phrases: cfg.wakeWordPhrases,
+                cooldownMs: cfg.wakeWordCooldownMs,
+                localeId: cfg.language.sttLocaleId,
+                onDetected: { [weak self] phrase in
+                    self?.handleWakeWordDetected(phrase)
+                },
+                onError: { [weak self] error in
+                    Task { @MainActor in
+                        self?.listener?.sakhaVoice(error: .unknown("wake: \(error.localizedDescription)"))
+                    }
+                },
+                debugMode: cfg.debugMode
+            )
+        }
+        if currentState == .idle {
+            wakeDetector?.start()
+        }
     }
 
+    /// Stop + release the wake-word detector. Idempotent.
     public func disableWakeWord() {
-        NSLog("[SakhaVoiceManager] disableWakeWord: M4 detector port pending; no-op for now.")
+        wakeDetector?.stop()
+        wakeDetector = nil
+    }
+
+    private func handleWakeWordDetected(_ phrase: String) {
+        Task { @MainActor [weak self] in
+            self?.listener?.sakhaVoice(wakeWord: phrase)
+        }
+        // Auto-activate so the user's next utterance lands in the same
+        // turn — no extra tap needed. activate() is internally guarded
+        // by the state machine so a simultaneous tap-to-begin doesn't
+        // create a duplicate turn.
+        activate()
+    }
+
+    /// One-shot dictation — captures a single utterance via SFSpeechRecognizer
+    /// and returns its best transcript. Used by the Shankha voice-input
+    /// button on tool screens. Each call uses a fresh SakhaDictation so
+    /// back-to-back invocations can't share state. languageTag is BCP-47
+    /// (e.g. "en-IN", "hi-IN").
+    public func dictateOnce(languageTag: String,
+                            completion: @escaping (SakhaDictation.DictationResult) -> Void) {
+        let dict = SakhaDictation()
+        dict.dictateOnce(languageTag: languageTag, onResult: completion)
     }
 
     public func readVerse(_ recitation: VerseRecitation) {
@@ -514,6 +574,21 @@ public final class SakhaVoiceManager: NSObject {
         if config?.debugMode == true {
             NSLog("[SakhaVoiceManager] state \(prev.wire) → \(next.wire)")
         }
+
+        // Wake-detector contention management — mirrors Android exactly:
+        //   • Leaving IDLE → pause the always-on recognizer so the turn
+        //     STT (or verse TTS) has the mic to itself.
+        //   • Returning to IDLE → resume so the user can wake Sakha
+        //     again with "Hey Sakha".
+        //   • SHUTDOWN: leave it stopped; shutdown() handles full release.
+        if let detector = wakeDetector, next != .shutdown {
+            if next == .idle && prev != .idle {
+                detector.start()
+            } else if next != .idle && detector.isRunning() {
+                detector.stop()
+            }
+        }
+
         Task { @MainActor [weak self] in
             self?.listener?.sakhaVoice(stateChanged: next, previousState: prev)
         }
