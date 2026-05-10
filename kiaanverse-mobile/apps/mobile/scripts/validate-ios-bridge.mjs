@@ -201,6 +201,21 @@ const AUDITS = [
     // either. Skip the supportedEvents parsing for this module.
     skipSwiftEventsCheck: true,
   },
+  {
+    moduleName: 'SakhaVoice',
+    bridgeM: 'SakhaVoiceBridge.m',
+    bridgeSwift: 'SakhaVoiceBridge.swift',
+    typesFile: 'sakhaVoice.ts',
+    interfaceName: 'SakhaVoiceNativeModule',
+    eventsConstName: 'SAKHA_VOICE_EVENTS',
+    rnEventEmitterBuiltins: ['addListener', 'removeListeners'],
+    // dictateOnce is intentionally exposed by the iOS bridge (returns a
+    // typed not-implemented reject for M4) but absent from the TS
+    // SakhaVoiceNativeModule interface — the JS hook (useDictation.ts)
+    // duck-types it via `typeof SakhaVoiceCandidate.dictateOnce ===
+    // 'function'`. The validator's reverse-coverage warning is the
+    // right level of noise here; do nothing to silence it.
+  },
 ];
 
 for (const audit of AUDITS) {
