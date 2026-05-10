@@ -62,6 +62,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { Audio } from 'expo-av';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -479,6 +480,30 @@ export default function VoiceCompanionScreen() {
   // leave a Speech.speak running in the background that auto-restarts
   // a dictation on done — which would then either crash (no native
   // module attached on Expo Go) or just play in the background.
+  // Defense-in-depth: kill the session whenever the screen loses focus —
+  // i.e. when the user switches tabs, navigates away, or the device goes
+  // to background. The previous `useEffect` cleanup only fired on actual
+  // unmount, which expo-router does NOT do for tab screens (they stay
+  // mounted in memory), so navigating to another tab while Sakha was
+  // mid-sentence left TTS playing in the background until the cloud
+  // audio finished naturally. `useFocusEffect` runs the returned cleanup
+  // every time the screen blurs, regardless of mount state.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        sessionActiveRef.current = false;
+        // Fire-and-forget — Speech.stop is sync, cloudStop is async but
+        // we don't need to await before the screen blurs.
+        void stopSpeaking();
+        try {
+          abort();
+        } catch {
+          /* abort throws when no stream is in flight — harmless */
+        }
+      };
+    }, [abort])
+  );
+
   useEffect(() => {
     return () => {
       sessionActiveRef.current = false;
@@ -495,6 +520,25 @@ export default function VoiceCompanionScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      {/* Floating Stop button — top-right of the canvas. Only visible when
+          a voice session is in flight. Gives the user a clear, always-
+          reachable kill switch even mid-sentence. (The bottom-bar "End
+          session" pill does the same thing but lives below the wave
+          visualizer; on long Sakha replies users were missing it.) */}
+      {isActive ? (
+        <Pressable
+          onPress={handleStop}
+          style={styles.floatingStopBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Stop Sakha (silence the voice and end the session)"
+          testID="voice-companion-stop-floating"
+          hitSlop={12}
+        >
+          <View style={styles.floatingStopGlyph} />
+          <Text style={styles.floatingStopLabel}>Stop</Text>
+        </Pressable>
+      ) : null}
+
       <View style={styles.canvas}>
         <SacredGeometry size={360} />
         <Shankha size={170} />
@@ -605,6 +649,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.cosmicVoid,
     paddingHorizontal: Spacing.md,
+  },
+  // Floating Stop button — top-right kill switch shown only during an
+  // active session so the user can silence Sakha mid-sentence without
+  // hunting for the "End session" pill below the visualizer.
+  floatingStopBtn: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 30,
+    elevation: 30,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(220, 38, 38, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.45)',
+  },
+  floatingStopGlyph: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    backgroundColor: '#FCA5A5',
+  },
+  floatingStopLabel: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 12,
+    letterSpacing: 0.5,
+    color: '#FCA5A5',
   },
   canvas: {
     flex: 1,
