@@ -613,6 +613,60 @@ EDGE_SUPPORTED_LANGUAGES = set(EDGE_LANGUAGE_VOICES.keys())
 # Maps KIAAN companion voice personas to the best Edge voice for that persona.
 
 COMPANION_TO_EDGE_VOICE: dict[str, dict[str, str]] = {
+    # ── v3 direct-route voices (paid-exhaustion fallback) ───────────
+    # Per founder directive 2026-05: when the user-chosen paid provider
+    # is exhausted (Sarvam 429 or ElevenLabs quota), routing jumps
+    # DIRECTLY here — NOT to the other paid provider (which would
+    # substitute a different voice character). These mappings preserve
+    # gender + regional register so the user hears a coherent voice
+    # even at last-resort tier.
+    "sarvam-anushka": {
+        "hi": "hi-IN-SwaraNeural",
+        "en": "en-IN-NeerjaNeural",
+        "ta": "ta-IN-PallaviNeural",
+        "te": "te-IN-ShrutiNeural",
+        "bn": "bn-IN-TanishaaNeural",
+        "mr": "mr-IN-AarohiNeural",
+        "gu": "gu-IN-DhwaniNeural",
+        "kn": "kn-IN-SapnaNeural",
+        "ml": "ml-IN-SobhanaNeural",
+        "default": "en-IN-NeerjaNeural",
+    },
+    "sarvam-abhilash": {
+        "hi": "hi-IN-MadhurNeural",
+        "en": "en-IN-PrabhatNeural",
+        "ta": "ta-IN-ValluvarNeural",
+        "te": "te-IN-MohanNeural",
+        "bn": "bn-IN-BashkarNeural",
+        "mr": "mr-IN-ManoharNeural",
+        "gu": "gu-IN-NiranjanNeural",
+        "kn": "kn-IN-GaganNeural",
+        "ml": "ml-IN-MidhunNeural",
+        "default": "en-IN-PrabhatNeural",
+    },
+    "elevenlabs-adam": {
+        "en": "en-US-GuyNeural",
+        "hi": "hi-IN-MadhurNeural",
+        "default": "en-US-GuyNeural",
+    },
+    "elevenlabs-sarah": {
+        "en": "en-US-JennyNeural",
+        "hi": "hi-IN-SwaraNeural",
+        "default": "en-US-JennyNeural",
+    },
+    "elevenlabs-aria": {
+        "en": "en-US-AriaNeural",
+        "es": "es-ES-ElviraNeural",
+        "fr": "fr-FR-DeniseNeural",
+        "de": "de-DE-KatjaNeural",
+        "it": "it-IT-ElsaNeural",
+        "default": "en-US-AriaNeural",
+    },
+    "elevenlabs-charlotte": {
+        "en": "en-US-AriaNeural",
+        "default": "en-US-AriaNeural",
+    },
+    # ── Legacy persona mappings (pre-v3, kept for backwards compat) ─
     # Warm female personas → warm female voices per language
     "sarvam-aura": {"hi": "hi-IN-SwaraNeural", "en": "en-IN-NeerjaNeural", "ta": "ta-IN-PallaviNeural", "te": "te-IN-ShrutiNeural", "bn": "bn-IN-TanishaaNeural", "default": "en-IN-NeerjaNeural"},
     "priya": {"hi": "hi-IN-SwaraNeural", "en": "en-IN-NeerjaNeural", "default": "en-IN-NeerjaNeural"},

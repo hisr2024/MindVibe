@@ -494,9 +494,17 @@ export async function cloudPrefetch(
   text: string,
   options: CloudSpeakOptions,
 ): Promise<void> {
+  // Pre-fetch is fire-and-forget — give it a 30s ceiling via a local
+  // AbortController so a hung backend doesn't leak a request forever.
+  // The caller can't cancel a prefetch; that's by design (it's
+  // opportunistic warming, not a user-facing request).
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
-    await fetchClip(text, options);
+    await fetchClip(text, options, controller.signal);
   } catch {
     // Pre-fetch is opportunistic; failures are silently dropped.
+  } finally {
+    clearTimeout(timeout);
   }
 }
