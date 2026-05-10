@@ -1,0 +1,11 @@
+{
+  "catalog": "Catalogue des parcours",
+  "active": "Parcours actifs",
+  "completed": "Terminés",
+  "start": "Commencer le parcours",
+  "resume": "Reprendre",
+  "pause": "Pause",
+  "day": "Jour",
+  "progress": "Progression",
+  "completeStep": "Marquer comme terminé"
+}

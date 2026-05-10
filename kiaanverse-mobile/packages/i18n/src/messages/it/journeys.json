@@ -1,0 +1,11 @@
+{
+  "catalog": "Catalogo viaggi",
+  "active": "Viaggi attivi",
+  "completed": "Completati",
+  "start": "Inizia il viaggio",
+  "resume": "Riprendi",
+  "pause": "Pausa",
+  "day": "Giorno",
+  "progress": "Progresso",
+  "completeStep": "Segna come completato"
+}

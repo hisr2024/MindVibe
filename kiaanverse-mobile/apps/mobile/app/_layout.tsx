@@ -36,7 +36,7 @@ import {
   colors,
   LoadingMandala,
 } from '@kiaanverse/ui';
-import { I18nProvider } from '@kiaanverse/i18n';
+import { I18nProvider, locales as supportedLocales } from '@kiaanverse/i18n';
 import {
   api,
   type SyncQueueItem,
@@ -534,7 +534,16 @@ function AppContent(): React.JSX.Element {
 
 export default function RootLayout(): React.JSX.Element {
   const { mode, setMode, palette, setPalette } = useThemeStore();
-  const { locale } = useUserPreferencesStore();
+  const locale = useUserPreferencesStore((s) => s.locale);
+  const initLocaleFromSystem = useUserPreferencesStore((s) => s.initLocaleFromSystem);
+
+  // First-launch only: align locale to the OS so non-English users land on
+  // their language without ever having to open Language Settings. The store
+  // gates this internally — once a locale is resolved (here or via the
+  // picker) the call is a no-op on subsequent boots.
+  useEffect(() => {
+    initLocaleFromSystem(supportedLocales.map((l) => l.code));
+  }, [initLocaleFromSystem]);
 
   return (
     <GestureHandlerRootView style={styles.container}>

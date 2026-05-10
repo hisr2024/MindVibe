@@ -1,0 +1,11 @@
+{
+  "catalog": "Journey Catalog",
+  "active": "Active Journeys",
+  "completed": "Completed",
+  "start": "Start Journey",
+  "resume": "Resume",
+  "pause": "Pause",
+  "day": "Day",
+  "progress": "Progress",
+  "completeStep": "Mark Complete"
+}

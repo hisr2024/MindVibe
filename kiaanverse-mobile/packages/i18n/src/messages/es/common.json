@@ -1,0 +1,17 @@
+{
+  "loading": "Cargando…",
+  "error": "Algo salió mal",
+  "retry": "Reintentar",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "done": "Hecho",
+  "next": "Siguiente",
+  "back": "Atrás",
+  "skip": "Omitir",
+  "ok": "OK",
+  "yes": "Sí",
+  "no": "No",
+  "search": "Buscar",
+  "noResults": "No se encontraron resultados",
+  "offline": "Estás sin conexión"
+}
