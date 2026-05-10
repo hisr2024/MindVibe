@@ -32,6 +32,22 @@ from backend.services.language_registry import normalize_language_code
 logger = logging.getLogger(__name__)
 
 VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"]
+
+
+# ─── Cache versioning ──────────────────────────────────────────────────────
+#
+# Bumped manually whenever a code change alters how a given
+# (text, voice_id) pair is rendered. Salted into ``_generate_cache_key``
+# so the next request after deploy re-synthesizes instead of replaying
+# stale audio. The cache TTL on ``/api/voice/synthesize`` responses is
+# ``max-age=604800`` (7 days), so without versioning the user could hear
+# the old (pre-fix) audio for a week after a mapping change.
+#
+# Increment history:
+#   v1 — initial implementation
+#   v2 — speaker mapping fixes (sarvam-meera, elevenlabs-lily added);
+#        is_picker_voice extended premium tuning to non-divine voices.
+TTS_CACHE_VERSION = 2
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
@@ -338,7 +354,14 @@ class TTSService:
         otherwise all voices for the same verse would collapse to the same
         cached audio and the player would only ever produce one voice.
         """
-        content = f"{text}:{language}:{voice_type}:{speed}:{voice_id or ''}"
+        # ``TTS_CACHE_VERSION`` is salted into the key so backend changes
+        # that alter how a (text, voice_id) pair renders — speaker mapping
+        # changes, tuning bumps, chain reorders — automatically invalidate
+        # stale audio without manual Redis flush.
+        content = (
+            f"v{TTS_CACHE_VERSION}:{text}:{language}:{voice_type}:"
+            f"{speed}:{voice_id or ''}"
+        )
         return f"tts:{hashlib.sha256(content.encode()).hexdigest()}"
 
     def _get_cached_audio(self, cache_key: str) -> Optional[bytes]:

@@ -379,11 +379,20 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
 # Maps each KIAAN companion persona to the optimal ElevenLabs voice.
 
 PERSONA_TO_ELEVENLABS: dict[str, str] = {
-    # Canonical companion IDs
-    "sarvam-aura": "sarah",       # Warm nurturing
-    "sarvam-rishi": "adam",       # Grounded, sacred narration
-    "elevenlabs-nova": "rachel",  # Conversational clarity
-    "elevenlabs-orion": "adam",   # Mentor / narration
+    # Canonical companion IDs (Voice Companion picker — must all map to
+    # DISTINCT ElevenLabs voices so the 6 voices sound truly different;
+    # missing entries fall to "sarah" via get_elevenlabs_voice_for_persona's
+    # default and produce the "Meera and Lily sound the same" bug.)
+    "sarvam-aura": "sarah",          # Warm nurturing female
+    "sarvam-rishi": "adam",          # Deep male — sacred narration
+    "sarvam-meera": "sarah",         # Warm Indic mother → ElevenLabs warm
+    "sarvam-anushka": "elli",        # Expressive young female
+    "elevenlabs-nova": "rachel",     # Conversational clarity female
+    "elevenlabs-lily": "bella",      # Bright expressive female
+                                      #   (distinct from sarah and rachel)
+    "elevenlabs-bella": "bella",     # Direct-name pass-through
+    "elevenlabs-adam": "adam",       # Direct-name pass-through
+    "elevenlabs-orion": "adam",      # Mentor / narration
 
     # Legacy persona IDs (backward compatibility)
     "priya": "sarah",       # Warm nurturing → Sarah (warm female)
@@ -714,25 +723,34 @@ async def synthesize_elevenlabs_tts(
     emotion_settings = get_elevenlabs_emotion_settings(mood)
 
     # ── Voice settings tuning for naturalness ──
-    # Divine voices (Krishna / Saraswati / Ganga / Shiva / Hanuman /
-    # Radha — anything starting with ``divine-``) get a more
-    # expressive, less monotone profile so they sound human and
-    # spiritually present rather than studio-flat:
+    # The "premium picker" tier — any voice the mobile picker exposes
+    # to the user (``divine-*``, ``sarvam-*``, ``elevenlabs-*``) — gets
+    # an expressive-floor profile so it sounds rich and present rather
+    # than studio-flat:
     #   • stability   → 0.40-0.50 (lower = more emotional dynamism;
     #                   too low becomes erratic, this is the sweet
     #                   spot ElevenLabs recommends for narration)
     #   • similarity  → 0.85+    (strong voice character — keeps
-    #                   "Saraswati" sounding like Saraswati instead
-    #                   of drifting toward generic neural-female)
+    #                   each voice sounding like itself instead of
+    #                   drifting toward generic neural-female)
     #   • style       → 0.55+    (emotional warmth without being
     #                   theatrical)
-    # Non-divine voices keep the existing 60/40 default+mood blend.
-    is_divine_voice = voice_id.startswith("divine-")
-    if is_divine_voice:
-        # For divine voices, weight emotion-mood adjustments more
-        # heavily so the listener actually hears mood differences;
-        # then floor each parameter at the divine-voice minimum so
-        # we never accidentally produce a flat reading.
+    #
+    # Was previously gated only on ``divine-*`` prefix, so picker
+    # voices like ``elevenlabs-nova`` and ``elevenlabs-lily`` got the
+    # standard 60/40 blend with no floors — the user's reported "Nova
+    # and Lily sound weird" was the difference between expressive
+    # divine voices and flat non-divine ones.
+    is_picker_voice = voice_id and (
+        voice_id.startswith("divine-")
+        or voice_id.startswith("sarvam-")
+        or voice_id.startswith("elevenlabs-")
+    )
+    if is_picker_voice:
+        # Weight emotion-mood adjustments more heavily so the listener
+        # actually hears mood differences; then floor each parameter
+        # at the picker-voice minimum so we never accidentally produce
+        # a flat reading.
         stability = max(
             0.40,
             voice_config["default_stability"] * 0.5
@@ -749,7 +767,9 @@ async def synthesize_elevenlabs_tts(
             + emotion_settings["style"] * 0.6,
         )
     else:
-        # Standard blend — voice defaults dominate, mood nudges.
+        # Standard blend — for legacy voice ids passed by older code
+        # paths (chat-Listen on default ``sarvam-aura``, etc.). Voice
+        # defaults dominate, mood nudges.
         stability = (
             voice_config["default_stability"] * 0.6
             + emotion_settings["stability"] * 0.4
@@ -789,13 +809,17 @@ async def synthesize_elevenlabs_tts(
     ).strip()
 
     # ── Model selection ──
-    # Divine voices ALWAYS use multilingual_v2 (the flagship quality
-    # model). The Flash model is faster but distinctly more digital
-    # on short text — and Gita verses are typically <100 chars in
-    # English translation, which would otherwise route to Flash and
-    # sound robotic. The 1-2s extra latency on first play is worth
-    # the studio-grade quality; cache hits on second play are instant.
-    if is_divine_voice:
+    # ALL picker voices (divine-/sarvam-/elevenlabs-) ALWAYS use
+    # multilingual_v2 — the flagship quality model. Flash is faster
+    # but distinctly more digital on short text; the picker preview
+    # greeting ("Hello. I am Sakha — your friend in stillness.") is
+    # ~50 chars and would route to Flash under the old logic, making
+    # Nova/Lily/Meera sound noticeably more synthetic than Saraswati/
+    # Krishna. Now uniform: picker voices = quality model, every time.
+    #
+    # The 1-2s extra latency on first play is worth the studio-grade
+    # quality; cache hits on second play are instant.
+    if is_picker_voice:
         model_id = ELEVENLABS_MODEL_QUALITY
     elif use_turbo:
         model_id = ELEVENLABS_MODEL_TURBO

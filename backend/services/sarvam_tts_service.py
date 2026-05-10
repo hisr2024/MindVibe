@@ -327,10 +327,21 @@ SARVAM_EMOTION_PROFILES: dict[str, dict[str, Any]] = {
 # Maps KIAAN companion voice personas to the best Sarvam speaker for that persona.
 
 COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
-    # Canonical companion IDs
+    # Canonical companion IDs (Voice Companion picker — must all map
+    # to DISTINCT Sarvam speakers so the 6 voices sound truly different;
+    # missing entries here fall to the "meera" default and produce the
+    # "Meera and Lily sound the same" bug.)
     "sarvam-aura": "meera",
-    "sarvam-rishi": "arvind",
-    "elevenlabs-nova": "pavithra",
+    "sarvam-rishi": "arvind",         # Deep male Indic — Karun
+    "sarvam-meera": "meera",          # Warm Indic mother — Manisha
+    "sarvam-anushka": "anushka",      # Expressive Indic female
+    "elevenlabs-nova": "pavithra",    # Clear multilingual female — Vidya
+    "elevenlabs-lily": "anushka",     # Lily falls back to expressive
+                                       #   female (distinct from Meera +
+                                       #   Pavithra) when Sarvam is the
+                                       #   tier serving English content.
+    "elevenlabs-bella": "anushka",
+    "elevenlabs-adam": "arvind",      # Deep male English fallback
     "elevenlabs-orion": "arvind",
 
     # Legacy persona IDs (backward compatibility)
