@@ -379,11 +379,20 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
 # Maps each KIAAN companion persona to the optimal ElevenLabs voice.
 
 PERSONA_TO_ELEVENLABS: dict[str, str] = {
-    # Canonical companion IDs
-    "sarvam-aura": "sarah",       # Warm nurturing
-    "sarvam-rishi": "adam",       # Grounded, sacred narration
-    "elevenlabs-nova": "rachel",  # Conversational clarity
-    "elevenlabs-orion": "adam",   # Mentor / narration
+    # Canonical companion IDs (Voice Companion picker — must all map to
+    # DISTINCT ElevenLabs voices so the 6 voices sound truly different;
+    # missing entries fall to "sarah" via get_elevenlabs_voice_for_persona's
+    # default and produce the "Meera and Lily sound the same" bug.)
+    "sarvam-aura": "sarah",          # Warm nurturing female
+    "sarvam-rishi": "adam",          # Deep male — sacred narration
+    "sarvam-meera": "sarah",         # Warm Indic mother → ElevenLabs warm
+    "sarvam-anushka": "elli",        # Expressive young female
+    "elevenlabs-nova": "rachel",     # Conversational clarity female
+    "elevenlabs-lily": "bella",      # Bright expressive female
+                                      #   (distinct from sarah and rachel)
+    "elevenlabs-bella": "bella",     # Direct-name pass-through
+    "elevenlabs-adam": "adam",       # Direct-name pass-through
+    "elevenlabs-orion": "adam",      # Mentor / narration
 
     # Legacy persona IDs (backward compatibility)
     "priya": "sarah",       # Warm nurturing → Sarah (warm female)
