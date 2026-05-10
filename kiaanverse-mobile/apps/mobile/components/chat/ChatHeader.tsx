@@ -26,6 +26,7 @@ import React, {
 import { Pressable, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@kiaanverse/ui';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -121,6 +122,10 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
     ref
   ) {
     const insets = useSafeAreaInsets();
+    // Header bg follows the active palette so the chat title bar doesn't
+    // sit as an indigo strip over a forest / maroon / black-&-gold page.
+    const { theme } = useTheme();
+    const bgColor = theme.colors.background;
 
     /** Always-on breathing: scale 1.0 → 1.08 → 1.0 (idle) or 1.16 (streaming). */
     const breath = useSharedValue(0);
@@ -191,9 +196,13 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
     const containerStyle = useMemo(
       () => [
         styles.container,
-        { paddingTop: insets.top, height: HEADER_CONTENT_HEIGHT + insets.top },
+        {
+          paddingTop: insets.top,
+          height: HEADER_CONTENT_HEIGHT + insets.top,
+          backgroundColor: bgColor,
+        },
       ],
-      [insets.top]
+      [insets.top, bgColor]
     );
 
     return (
