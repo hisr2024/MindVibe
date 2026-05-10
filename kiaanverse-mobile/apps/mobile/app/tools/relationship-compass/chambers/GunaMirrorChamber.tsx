@@ -14,10 +14,10 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Dimensions,
+  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -65,14 +65,29 @@ export function GunaMirrorChamber({
   onCustomQueryChange,
   onProceed,
 }: GunaMirrorChamberProps): React.JSX.Element {
-  const scrollRef = useRef<ScrollView>(null);
+  // Native FlatList paging — replaces the previous `ScrollView pagingEnabled`
+  // approach. ScrollView+pagingEnabled on Android has a known issue where
+  // pages 2+ drift right because the snap intervals don't always match the
+  // panel widths exactly (especially when there's any container padding
+  // or SafeAreaView in the ancestor tree). FlatList with `getItemLayout`
+  // returning fixed integer offsets snaps deterministically.
+  const listRef = useRef<FlatList<(typeof GUNA_PANELS)[number]>>(null);
   const [activePanel, setActivePanel] = useState(0);
 
-  const onScroll = useCallback(
+  const onMomentumScrollEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const idx = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
       setActivePanel((prev) => (prev === idx ? prev : idx));
     },
+    []
+  );
+
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<(typeof GUNA_PANELS)[number]> | null | undefined, index: number) => ({
+      length: SCREEN_WIDTH,
+      offset: SCREEN_WIDTH * index,
+      index,
+    }),
     []
   );
 
@@ -124,17 +139,22 @@ export function GunaMirrorChamber({
 
       <Text style={styles.divider}>Or select patterns you recognise</Text>
 
-      <ScrollView
-        ref={scrollRef}
+      <FlatList
+        ref={listRef}
+        data={GUNA_PANELS}
+        keyExtractor={(panel) => panel.key}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={32}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        getItemLayout={getItemLayout}
+        decelerationRate="fast"
+        initialNumToRender={GUNA_PANELS.length}
+        windowSize={GUNA_PANELS.length}
+        removeClippedSubviews={false}
         style={styles.panelScroller}
-      >
-        {GUNA_PANELS.map((panel) => (
-          <View key={panel.key} style={[styles.panel, { width: SCREEN_WIDTH }]}>
+        renderItem={({ item: panel }) => (
+          <View style={[styles.panel, { width: SCREEN_WIDTH }]}>
             <View style={[styles.panelHeader, { backgroundColor: panel.tint }]}>
               <Text style={[styles.panelTitle, { color: panel.color }]}>
                 {panel.sanskrit} — {panel.label}
@@ -184,8 +204,8 @@ export function GunaMirrorChamber({
               })}
             </View>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
 
       <View style={styles.dotsRow}>
         {GUNA_PANELS.map((_, i) => (

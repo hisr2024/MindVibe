@@ -680,7 +680,11 @@ function PageVisual({
   isActive,
   compact = false,
 }: PageVisualProps): React.JSX.Element {
-  const size = compact ? VISUAL_SIZE * 0.78 : VISUAL_SIZE;
+  // Round so the compact welcome-page visual gets an integer width too —
+  // 220 * 0.78 = 171.6, which Yoga would round to 172 for the View while
+  // the SVG drew at 171.6, leaving a 0.4px asymmetry between the visual's
+  // bounding box and its rendered geometry.
+  const size = compact ? Math.round(VISUAL_SIZE * 0.78) : VISUAL_SIZE;
   switch (kind) {
     case 'chariot':
       return <ChariotChakraVisual accent={accent} isActive={isActive} size={size} />;
@@ -849,11 +853,13 @@ const styles = StyleSheet.create({
   // -------------------------------------------------------------------------
   // Welcome page (page 6) — scrollable rich content
   // -------------------------------------------------------------------------
-  /** ScrollView outer frame — width-locked to a single page slot, no padding
-   *  so the contentContainer's padding is the single source of truth. */
+  /** ScrollView outer frame — width-locked to a single page slot. Same
+   *  `height:'100%'` (instead of `flex:1`) treatment as `styles.page` so
+   *  the welcome page's ScrollView never races with FlatList's horizontal
+   *  flexGrow inside the row container. */
   welcomeScroll: {
     width: W,
-    flex: 1,
+    height: '100%',
   },
   welcomeContent: {
     paddingHorizontal: 28,
