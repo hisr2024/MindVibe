@@ -510,45 +510,74 @@ class TTSService:
         def _record(tier: str, outcome: str) -> None:
             tier_outcomes.append(f"{tier}={outcome}")
 
-        # ── Tier 1: Sarvam AI (paid primary) ──
-        try:
-            audio = await self._synthesize_with_sarvam(
-                text, language, voice_type, mood, voice_id
-            )
-            if audio:
-                _record("T1_sarvam", "ok")
-                logger.info(
-                    f"Sarvam AI (Tier 1) synthesis success for {language} "
-                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
-                )
-                return audio
-            _record(
-                "T1_sarvam",
-                "skipped_no_key" if not self._sarvam_available else "no_audio",
-            )
-        except Exception as e:
-            _record("T1_sarvam", f"err:{type(e).__name__}")
-            logger.warning(f"Sarvam Tier 1 raised: {e}")
+        # ── Provider-preference routing ────────────────────────────────
+        # Mobile catalogs voices by source provider (``sarvam-*``,
+        # ``elevenlabs-*``, ``divine-*``, ``bhashini-*``) and the user
+        # picks them via badged chips ("ELEVENLABS Nova", "SARVAM Meera").
+        # Without this routing, EVERY voice tried Sarvam first, so
+        # ``elevenlabs-nova`` ended up sounding like Sarvam ``pavithra``
+        # instead of ElevenLabs ``rachel`` — the user's "Nova doesn't
+        # sound like Nova" complaint.
+        #
+        # Now the chain reorders dynamically: the voice's intended
+        # provider goes FIRST, others fall through behind. Each voice
+        # gets the provider it was curated for; if quota / network
+        # fails, the chain still has a backstop.
+        def _preferred_provider(vid: Optional[str]) -> str:
+            if not vid:
+                return "sarvam"
+            if vid.startswith("elevenlabs-"):
+                return "elevenlabs"
+            if vid.startswith("sarvam-"):
+                return "sarvam"
+            if vid.startswith("divine-"):
+                # KIAAN curated divine personas (Saraswati / Krishna /
+                # etc.) are tuned for ElevenLabs's expressive register —
+                # storyteller gravitas, ethereal celestial — which
+                # ElevenLabs renders better than Sarvam's Indic-accented
+                # English. Try ElevenLabs first for divine voices.
+                return "elevenlabs"
+            return "sarvam"  # default for unknown / legacy ids
 
-        # ── Tier 2: ElevenLabs (paid fallback) ──
-        try:
-            audio = await self._synthesize_with_elevenlabs(
-                text, language, voice_id, mood
-            )
-            if audio:
-                _record("T2_elevenlabs", "ok")
-                logger.info(
-                    f"ElevenLabs (Tier 2) synthesis success for {language} "
-                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+        preferred = _preferred_provider(voice_id)
+        # ALL_TIERS in canonical priority order; we'll reorder so
+        # ``preferred`` comes first and the other paid tier comes
+        # second. Microsoft Neural stays at Tier-3 last-resort.
+        ALL_PAID = ["sarvam", "elevenlabs"]
+        ordered_paid = [preferred] + [p for p in ALL_PAID if p != preferred]
+
+        # ── Tiers 1 & 2: paid providers in voice-preferred order ──
+        for tier_idx, provider_name in enumerate(ordered_paid, start=1):
+            tier_label = f"T{tier_idx}_{provider_name}"
+            try:
+                if provider_name == "sarvam":
+                    audio = await self._synthesize_with_sarvam(
+                        text, language, voice_type, mood, voice_id
+                    )
+                    available = self._sarvam_available
+                else:  # elevenlabs
+                    audio = await self._synthesize_with_elevenlabs(
+                        text, language, voice_id, mood
+                    )
+                    available = self._elevenlabs_available
+
+                if audio:
+                    _record(tier_label, "ok")
+                    logger.info(
+                        f"{provider_name} (Tier {tier_idx}, preferred="
+                        f"{preferred}) synthesis success for {language} "
+                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                    )
+                    return audio
+                _record(
+                    tier_label,
+                    "skipped_no_key" if not available else "no_audio",
                 )
-                return audio
-            _record(
-                "T2_elevenlabs",
-                "skipped_no_key" if not self._elevenlabs_available else "no_audio",
-            )
-        except Exception as e:
-            _record("T2_elevenlabs", f"err:{type(e).__name__}")
-            logger.warning(f"ElevenLabs Tier 2 raised: {e}")
+            except Exception as e:
+                _record(tier_label, f"err:{type(e).__name__}")
+                logger.warning(
+                    f"{provider_name} (Tier {tier_idx}) raised: {e}"
+                )
 
         # ── Tier 3: Microsoft Neural via Edge TTS (LAST resort) ──
         # Only reached when Sarvam + ElevenLabs are BOTH
