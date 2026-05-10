@@ -664,7 +664,19 @@ def is_elevenlabs_priority_language(language: str) -> bool:
 
 
 def get_elevenlabs_voice_for_persona(persona_id: str) -> dict[str, Any]:
-    """Get the optimal ElevenLabs voice configuration for a KIAAN persona."""
+    """Get the optimal ElevenLabs voice configuration for a KIAAN persona.
+
+    Direct-route format: ``elevenlabs-<voice_key>`` (e.g.
+    ``elevenlabs-clyde``) bypasses the persona lookup table and goes
+    straight to that ElevenLabs voice in ``ELEVENLABS_VOICES``.
+    Eliminates the "two persona ids default to the same voice"
+    collision class.
+    """
+    if persona_id.startswith("elevenlabs-"):
+        direct_key = persona_id[len("elevenlabs-"):]
+        if direct_key in ELEVENLABS_VOICES:
+            return ELEVENLABS_VOICES[direct_key]
+        # Fall through to legacy mapping for unknown direct ids
     el_voice_key = PERSONA_TO_ELEVENLABS.get(persona_id, "sarah")
     voice = ELEVENLABS_VOICES.get(el_voice_key, ELEVENLABS_VOICES["sarah"])
     return voice

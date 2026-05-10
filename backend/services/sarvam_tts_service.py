@@ -403,6 +403,26 @@ def get_sarvam_language_code(language: str) -> Optional[str]:
 
 
 def get_sarvam_speaker_for_companion(voice_id: str) -> str:
+    # Direct-route format: ``sarvam-<speaker_id>`` bypasses the
+    # legacy persona lookup table and goes straight to that API
+    # speaker. e.g. ``sarvam-karun`` → API speaker ``karun``.
+    # Validates against the SARVAM_SPEAKERS catalog so a typo doesn't
+    # silently fall through to default ``meera``.
+    if voice_id.startswith("sarvam-"):
+        candidate = voice_id[len("sarvam-"):]
+        for persona, info in SARVAM_SPEAKERS.items():
+            if info.get("speaker_id") == candidate:
+                # The catalog's persona is keyed on the persona name;
+                # return the persona key so downstream
+                # ``SARVAM_SPEAKERS.get(speaker_id, …)`` resolves
+                # correctly.
+                return persona
+        # Direct API speaker — caller will use this raw value
+        return candidate
+    return _legacy_get_sarvam_speaker_for_companion(voice_id)
+
+
+def _legacy_get_sarvam_speaker_for_companion(voice_id: str) -> str:
     """Get the best Sarvam speaker for a given companion voice persona."""
     return COMPANION_TO_SARVAM_SPEAKER.get(voice_id, "meera")
 
