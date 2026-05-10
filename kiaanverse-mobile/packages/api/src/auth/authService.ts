@@ -170,6 +170,11 @@ function mapMeResponseToUser(me: MeResponse): User {
     locale: 'en', // Default — not available from /api/auth/me
     subscriptionTier: (me.subscription_tier?.toUpperCase() ?? 'FREE') as User['subscriptionTier'],
     createdAt: '', // Not available from /api/auth/me
+    // Propagate email_verified so AuthGate's redirect-to-/verify-email-pending
+    // gate has the truth from the source. Without this, a session that
+    // refreshes via /api/auth/me silently lost the field and the gate would
+    // treat the user as verified (undefined ≠ false).
+    email_verified: me.email_verified,
   };
 }
 
