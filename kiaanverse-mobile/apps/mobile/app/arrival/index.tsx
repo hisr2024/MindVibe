@@ -26,6 +26,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AccessibilityInfo,
   Dimensions,
+  FlatList,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -160,10 +163,6 @@ function buildPages(palette: Palette): readonly PageData[] {
 const PAGE_COUNT = PAGE_TEMPLATES.length;
 
 const LOTUS_BLOOM = Easing.bezier(0.22, 1.0, 0.36, 1.0);
-/** Spring-like easing for the page slide that always settles exactly at the
- *  target (vs. a real spring whose epsilon-tolerance was leaving sub-pixel
- *  residue that compounded into a visible right-shift on later pages). */
-const SLIDE_EASE = Easing.bezier(0.32, 0.72, 0, 1);
 
 const GOLD = '#D4A44C';
 const GOLD_SOFT = 'rgba(212, 164, 76, 0.7)';
@@ -174,7 +173,14 @@ const GOLD_SOFT = 'rgba(212, 164, 76, 0.7)';
 
 export default function ArrivalCeremonyScreen(): React.JSX.Element {
   const [page, setPage] = useState(0);
-  const translateX = useSharedValue(0);
+  // Native FlatList paging — replaces the previous `Animated.View` +
+  // `withTiming(-page * W)` approach. Math.round + withTiming were both
+  // mathematically correct, yet the rendered slider on the user's device
+  // still drifted right on later pages. Switching to the platform's
+  // pagingEnabled FlatList offloads alignment to native code which snaps
+  // to integer pixel boundaries deterministically — there is no layer of
+  // RN/Yoga/Reanimated math that can introduce sub-pixel residue here.
+  const listRef = useRef<FlatList<PageData>>(null);
   const { markArrivalSeen } = useArrivalStatus();
   // Guard against double-tap / completion re-entry.
   const isCompleting = useRef(false);
@@ -218,34 +224,62 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
     if (page < PAGE_COUNT - 1) {
       haptic('light');
       const nextIndex = page + 1;
-      // Use withTiming instead of withSpring. Springs have a settle threshold
-      // (~0.001) that's normally fine, but if the user taps Continue before
-      // the previous spring finishes the completion callback gets
-      // `finished=false` and the snap-to-integer never fires — leaving
-      // sub-pixel residue that compounds across pages and visibly shifts
-      // later pages to the right (pages 4 & 5 were the worst). withTiming
-      // always lands exactly on the target value, regardless of interruption.
-      translateX.value = withTiming(-nextIndex * W, {
-        duration: 360,
-        easing: SLIDE_EASE,
-      });
+      // Native FlatList scroll — animated paging that always lands exactly
+      // on integer-pixel page boundaries. No translateX residue.
+      listRef.current?.scrollToOffset({ offset: nextIndex * W, animated: true });
       setPage(nextIndex);
     } else {
       void handleComplete();
     }
-  }, [page, translateX, haptic, handleComplete]);
+  }, [page, haptic, handleComplete]);
 
   const handleSkip = useCallback((): void => {
     void handleComplete();
   }, [handleComplete]);
 
   // -------------------------------------------------------------------------
-  // Slide animation
+  // Page state sync — keeps `page` in sync with manual swipes (if/when the
+  // FlatList ever permits horizontal gesture; currently it does via default
+  // Android paging, on iOS too). Uses `Math.round(offsetX / W)` so a
+  // half-swipe lands on the nearest page.
   // -------------------------------------------------------------------------
 
-  const pagesContainerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  const handleMomentumScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>): void => {
+      const newIndex = Math.round(e.nativeEvent.contentOffset.x / W);
+      if (newIndex !== page && newIndex >= 0 && newIndex < PAGE_COUNT) {
+        setPage(newIndex);
+      }
+    },
+    [page]
+  );
+
+  // FlatList per-item layout: tells the list every item is exactly W wide
+  // so initial render + scrollToOffset are both pixel-perfect (no measure
+  // pass that could produce fractional widths).
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<PageData> | null | undefined, index: number) => ({
+      length: W,
+      offset: W * index,
+      index,
+    }),
+    []
+  );
+
+  const renderPage = useCallback(
+    ({ item, index }: { item: PageData; index: number }) => (
+      <CeremonyPage
+        data={item}
+        index={index}
+        isActive={page === index}
+        palette={palette}
+        totalPages={pages.length}
+      />
+    ),
+    [page, palette, pages.length]
+  );
+
+  const keyExtractor = useCallback((item: PageData) => item.id, []);
 
   const isWelcome = currentPage.id === 'welcome';
 
@@ -258,18 +292,26 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
   return (
     <View style={[styles.root, { backgroundColor: palette.bg.void }]}>
       <DivineBackground variant="sacred">
-        <Animated.View style={[styles.pagesContainer, pagesContainerStyle]}>
-          {pages.map((p, i) => (
-            <CeremonyPage
-              key={p.id}
-              data={p}
-              index={i}
-              isActive={page === i}
-              palette={palette}
-              totalPages={pages.length}
-            />
-          ))}
-        </Animated.View>
+        <FlatList
+          ref={listRef}
+          data={pages}
+          renderItem={renderPage}
+          keyExtractor={keyExtractor}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={getItemLayout}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          // The Continue button drives navigation; manual swiping is allowed
+          // as a bonus but isn't the primary path. `decelerationRate=fast`
+          // makes a stray swipe snap immediately to the next page.
+          decelerationRate="fast"
+          // Render every page up front (only 6) so the visuals' breathing
+          // animations are warm when the user advances to them.
+          initialNumToRender={PAGE_COUNT}
+          windowSize={PAGE_COUNT}
+          removeClippedSubviews={false}
+        />
 
         {/* Peacock feather progress — not dots. */}
         <View style={styles.progressBar}>
@@ -664,14 +706,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#050714',
   },
-  pagesContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    width: W * PAGE_COUNT,
-  },
   page: {
+    // Each page is exactly W wide (= integer device pixels via Math.round).
+    // Vertical fill comes from FlatList's default alignSelf:'stretch' on
+    // horizontal items — `flex:1` was removed because in a row context it
+    // is `flexGrow:1` in main axis, which can race with `width:W` on Yoga
+    // and produce sub-pixel render widths. Explicit width + no flexGrow
+    // gives the most predictable native paging.
     width: W,
-    flex: 1,
+    height: '100%',
     paddingHorizontal: 28,
     paddingTop: 72,
     paddingBottom: 24,
