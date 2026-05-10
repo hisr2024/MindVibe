@@ -56,6 +56,7 @@ const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.6)';
 
 const TITLE = 'Kiaanverse';
+const BYLINE = 'Sakha · your spiritual companion';
 const INVOCATION = 'ॐ सर्वे भवन्तु सुखिनः';
 
 // Fixed-length tuple of shared value slots — keeps hook order stable.
@@ -93,6 +94,7 @@ function SacredArrivalInner({
   const omScale = useSharedValue(0.8);
   const omAuraOpacity = useSharedValue(0);
   const invocationOpacity = useSharedValue(0);
+  const bylineOpacity = useSharedValue(0);
   const sceneScale = useSharedValue(1);
   const sceneOpacity = useSharedValue(1);
 
@@ -155,6 +157,7 @@ function SacredArrivalInner({
           omProgress.value = withTiming(1, { duration: 200 });
           omAuraOpacity.value = withTiming(0.5, { duration: 200 });
           invocationOpacity.value = withTiming(0.6, { duration: 200 });
+          bylineOpacity.value = withTiming(0.85, { duration: 200 });
           letterOpacities.forEach((sv) => {
             sv.value = withTiming(1, { duration: 200 });
           });
@@ -209,6 +212,18 @@ function SacredArrivalInner({
             withTiming(0, { duration: 320, easing: LOTUS_BLOOM })
           );
         });
+
+        // ACT 3.5 — SAKHA BYLINE. Eye-trail: name → byline → invocation.
+        // Fades in 200ms before the Sanskrit so the user reads top-down
+        // in order. Same DIVINE_IN curve as the invocation for visual
+        // family. Lands at 0.85 (vs invocation's 0.6) — Latin glyphs at
+        // 14pt need a bit more contrast than Devanagari at the same size
+        // to feel equally present, and the byline is the new identity
+        // beat we want the user to actually see.
+        bylineOpacity.value = withDelay(
+          ACT4_INVOCATION - 200,
+          withTiming(0.85, { duration: 600, easing: DIVINE_IN })
+        );
 
         // ACT 4 — INVOCATION
         invocationOpacity.value = withDelay(
@@ -271,6 +286,9 @@ function SacredArrivalInner({
   }));
   const invocationStyle = useAnimatedStyle(() => ({
     opacity: invocationOpacity.value,
+  }));
+  const bylineStyle = useAnimatedStyle(() => ({
+    opacity: bylineOpacity.value,
   }));
 
   // Per-letter styles — top-level hooks (not in a loop) to keep hook order stable.
@@ -440,6 +458,19 @@ function SacredArrivalInner({
         ))}
       </View>
 
+      {/* ACT 3.5 — Sakha byline. Names the companion at the threshold of
+          entry, before the Sanskrit benediction. Established as Sakha
+          everywhere downstream (chat tab, Ask Sakha CTA, arrival page 2),
+          so the splash is the right moment to introduce the name. */}
+      <Animated.Text
+        allowFontScaling={false}
+        accessibilityRole="text"
+        accessibilityLabel="Sakha, your spiritual companion"
+        style={[styles.byline, bylineStyle]}
+      >
+        {BYLINE}
+      </Animated.Text>
+
       {/* ACT 4 — Sanskrit invocation. */}
       <Animated.Text
         allowFontScaling={false}
@@ -461,7 +492,13 @@ export const SacredArrival = React.memo(SacredArrivalInner);
 const OM_SIZE = 96;
 const YANTRA_SIZE = 220;
 const NAME_TOP = H / 2 + 72;
-const INVOCATION_TOP = NAME_TOP + 56;
+// Sakha byline sits 38pt below the name (7pt clear from the bottom of
+// the 28pt italic glyphs which extend ~31pt below NAME_TOP).
+const BYLINE_TOP = NAME_TOP + 38;
+// Pushed from +56 to +68 (+12pt) to leave room for the new byline. The
+// invocation is still inside the visible safe area on every device the
+// app supports (smallest target ~640pt screen height).
+const INVOCATION_TOP = NAME_TOP + 68;
 
 // ---------------------------------------------------------------------------
 // Splash yantra geometry — pre-computed at module load so the splash never
@@ -587,6 +624,18 @@ const styles = StyleSheet.create({
     fontFamily: 'CormorantGaramond-LightItalic',
     fontStyle: 'italic',
     letterSpacing: 0.3 * 28,
+  },
+  byline: {
+    position: 'absolute',
+    top: BYLINE_TOP,
+    left: 0,
+    right: 0,
+    fontSize: 13,
+    lineHeight: 20,
+    color: 'rgba(245, 222, 179, 0.92)',
+    fontFamily: 'Outfit-Regular',
+    textAlign: 'center',
+    letterSpacing: 1.4,
   },
   invocation: {
     // Was rendered at TEXT_MUTED (#6B6355) which is the same value as the
