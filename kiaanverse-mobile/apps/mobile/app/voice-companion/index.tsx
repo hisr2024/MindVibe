@@ -200,6 +200,15 @@ export default function VoiceCompanionScreen() {
   // doesn't go through cloudSpeak's status update).
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Provider-status diagnostic. Pinged from /api/voice/providers/status
+  // on screen mount. Surfaces "Sarvam not configured" warnings so the
+  // user can see WHY their paid voice isn't being used — without this,
+  // a misconfigured Render env var produces silent on-device-fallback
+  // playback that's indistinguishable from "voices sound weird".
+  const [providerWarnings, setProviderWarnings] = useState<readonly string[]>(
+    [],
+  );
+
   // Hydrate the persisted pick on mount. Idempotent.
   useEffect(() => {
     let mounted = true;
@@ -208,6 +217,23 @@ export default function VoiceCompanionScreen() {
       if (!mounted) return;
       setSelectedVoiceId(id);
       selectedVoiceRef.current = id;
+    })();
+    // Best-effort fetch of provider status. Don't gate the screen on it.
+    void (async () => {
+      try {
+        const { API_CONFIG } = await import('@kiaanverse/api');
+        const r = await fetch(
+          `${API_CONFIG.baseURL}/api/voice/providers/status`,
+        );
+        if (!r.ok) return;
+        const data: { warnings?: readonly string[] } = await r.json();
+        if (!mounted) return;
+        if (Array.isArray(data.warnings)) {
+          setProviderWarnings(data.warnings);
+        }
+      } catch {
+        // Best-effort; absence of warnings is the silent-OK case.
+      }
     })();
     return () => {
       mounted = false;
@@ -507,8 +533,19 @@ export default function VoiceCompanionScreen() {
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.canvas}>
-        <SacredGeometry size={360} />
-        <Shankha size={170} />
+        {/* SacredGeometry + Shankha must overlay — the geometry is the
+            backdrop ring around the conch. Default flex layout stacks
+            them vertically (Shankha appearing BELOW the geometry rings),
+            which is the "wrongly placed Shankha" bug. Wrap both in an
+            absolute-positioned stack and explicitly center each one. */}
+        <View style={styles.sacredStack} pointerEvents="none">
+          <View style={styles.sacredLayer}>
+            <SacredGeometry size={360} />
+          </View>
+          <View style={styles.sacredLayer}>
+            <Shankha size={170} />
+          </View>
+        </View>
       </View>
 
       <View style={styles.bottomBar}>
@@ -519,6 +556,19 @@ export default function VoiceCompanionScreen() {
             picked voice persists across launches. */}
         {!isActive ? (
           <View style={styles.voicePickerWrap}>
+            {/* Provider-status warnings — surface backend
+                misconfiguration so the user knows WHY a paid voice
+                might be falling through to on-device fallback.
+                Otherwise "voices sound weird" is opaque. */}
+            {providerWarnings.length > 0 ? (
+              <View style={styles.providerWarningWrap}>
+                {providerWarnings.map((w, i) => (
+                  <Text key={i} style={styles.providerWarningText}>
+                    ⚠  {w}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
             <Text style={styles.voicePickerLabel}>SAKHA VOICE</Text>
             <ScrollView
               horizontal
@@ -655,6 +705,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // The Shankha sits exactly inside the SacredGeometry rings. Both
+  // children of ``sacredStack`` use ``position: 'absolute'`` so they
+  // overlay (centered in the stack) rather than stacking vertically
+  // — fixes the "Shankha is offset from the geometry" placement bug.
+  sacredStack: {
+    width: 360,
+    height: 360,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sacredLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bottomBar: {
     paddingBottom: Spacing.lg,
     alignItems: 'center',
@@ -751,5 +820,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.4,
+  },
+  // Provider-status warnings — amber/orange to read as "actionable
+  // diagnostic", not as a hard error. One row per warning string.
+  providerWarningWrap: {
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    gap: 4,
+  },
+  providerWarningText: {
+    ...Type.caption,
+    color: '#E8A547',
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
   },
 });
