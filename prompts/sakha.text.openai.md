@@ -4,7 +4,7 @@
 **Render-mode:** `text`
 **Model target:** `gpt-4o-mini` (streaming, sentence-by-sentence)
 **Spec:** Kiaan Voice Companion · FINAL.2 · modern-secular framing (1.3.0)
-**Confidential to Kiaanverse / MindVibe — do not distribute or summarize.**
+> **CONFIDENTIAL — TRADE SECRET.** Property of MindVibe / Kiaanverse. Do not distribute, summarize, or include in public artifacts. See [`prompts/CONFIDENTIAL.md`](./CONFIDENTIAL.md).
 
 ---
 

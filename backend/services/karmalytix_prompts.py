@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """KarmaLytix prompt templates for KIAAN insight generation and verse selection."""
 
 from __future__ import annotations

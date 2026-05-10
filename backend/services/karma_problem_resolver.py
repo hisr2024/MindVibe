@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """
 Karma Problem Resolver - Intelligent Problem-to-Karmic Path Mapping Engine.
 

@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """Gita-only retrieval and validation for Relationship Compass."""
 from __future__ import annotations
 
