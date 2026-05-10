@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTheme } from '@kiaanverse/ui';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -230,6 +231,11 @@ function SakhaMessageInner({
 }: SakhaMessageProps): React.JSX.Element {
   const { width } = useWindowDimensions();
   const maxWidth = Math.round(width * MAX_WIDTH_PERCENT);
+  // Sakha message bubble follows the active palette — was a fixed
+  // indigo `rgba(19,26,61,0.92)` that read as a navy island when the
+  // user was on Forest / Maroon / Black-&-Gold.
+  const { theme } = useTheme();
+  const bubbleBg = theme.colors.card;
 
   // ── Saransh (सारांश, "summary") view mode ──
   // 'full'    — render the full streamed response (default).
@@ -306,7 +312,7 @@ function SakhaMessageInner({
       </View>
 
       {/* Bubble column */}
-      <View style={[styles.bubble, { maxWidth }]}>
+      <View style={[styles.bubble, { maxWidth, backgroundColor: bubbleBg }]}>
         {/* Left border accent — vertical Krishna-aura ribbon. */}
         <LinearGradient
           colors={KRISHNA_AURA as unknown as string[]}

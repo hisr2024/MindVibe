@@ -28,6 +28,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { useTheme } from '@kiaanverse/ui';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -120,6 +121,12 @@ function ChatInputInner({
 }: ChatInputProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const [focused, setFocused] = useState(false);
+  // Bottom input bar follows the active palette — was a fixed indigo
+  // strip that floated as an indigo island over forest / maroon /
+  // black-&-gold pages.
+  const { theme } = useTheme();
+  const bgColor = theme.colors.background;
+  const fieldBg = theme.colors.card;
 
   const canSend = value.trim().length > 0 && !disabled;
 
@@ -173,6 +180,7 @@ function ChatInputInner({
         {
           paddingBottom: insets.bottom,
           height: ROW_HEIGHT + insets.bottom,
+          backgroundColor: bgColor,
         },
       ]}
     >
@@ -195,7 +203,13 @@ function ChatInputInner({
           <MicIcon color={GOLD} />
         </Pressable>
 
-        <View style={[styles.inputWrap, focused && styles.inputWrapFocused]}>
+        <View
+          style={[
+            styles.inputWrap,
+            { backgroundColor: fieldBg },
+            focused && styles.inputWrapFocused,
+          ]}
+        >
           <TextInput
             value={value}
             onChangeText={onChangeText}

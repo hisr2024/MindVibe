@@ -60,6 +60,7 @@ import {
   type SakhaStreamMessage,
 } from '../../components/chat/index';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import { useTheme } from '@kiaanverse/ui';
 
 /** AsyncStorage key that keeps the last conversation so it survives cold kills. */
 const CONVERSATION_CACHE_KEY = 'sakha_chat_conversation_v1';
@@ -91,6 +92,11 @@ export default function ChatScreen(): React.JSX.Element {
   const listRef = useRef<FlatList<SakhaStreamMessage>>(null);
   const headerRef = useRef<ChatHeaderHandle | null>(null);
   const { isOnline } = useNetworkStatus();
+  // Read the active palette so the chat page bg + suggestion-card bg follow
+  // the user's chosen scheme (Indigo / Maroon / Forest / Black-&-Gold)
+  // instead of the previously hardcoded `BG = '#050714'` indigo.
+  const { theme } = useTheme();
+  const bgColor = theme.colors.background;
 
   const [input, setInput] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(false);
@@ -338,7 +344,7 @@ export default function ChatScreen(): React.JSX.Element {
   }, [streaming, messages]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: bgColor }]}>
       <ChatHeader
         ref={headerRef}
         streaming={streaming}

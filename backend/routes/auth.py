@@ -1,4 +1,5 @@
 import logging
+import os
 import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -1351,3 +1352,135 @@ async def developer_status(
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
     )
+
+
+# ---------------------------------------------------------------------------
+# Email-verification health endpoints
+# ---------------------------------------------------------------------------
+#
+# Past PRs claimed to fix the "new accounts created without verification email"
+# bug but it kept reappearing because there was no observable signal that the
+# deployed backend actually had EMAIL_PROVIDER=resend + RESEND_API_KEY wired up.
+# These two endpoints let the operator verify the chain in one curl, and isolate
+# the failing link (config / API key / domain / send) when something breaks.
+
+class EmailHealthOut(BaseModel):
+    """Sanitized email-config snapshot — never leaks the API key value."""
+    provider: str
+    can_send: bool
+    require_verification: bool
+    from_address: str
+    from_name: str
+    frontend_url: str
+    resend_api_key_configured: bool
+    smtp_host_configured: bool
+    smtp_user_configured: bool
+    environment: str
+
+
+@router.get(
+    "/health/email",
+    response_model=EmailHealthOut,
+    summary="Sanitized email-provider config (operator diagnostic)",
+)
+async def get_email_health() -> EmailHealthOut:
+    """Public diagnostic. `curl /api/auth/health/email` after each deploy to
+    verify the running container actually has the email env vars the dashboard
+    claims — this is the gap that made prior 'fixes' look successful when they
+    weren't. Response includes only presence flags, never the API key value."""
+    from backend.services import email_service as _es
+    return EmailHealthOut(
+        provider=_es.EMAIL_PROVIDER,
+        can_send=_es.can_send_email(),
+        require_verification=settings.REQUIRE_EMAIL_VERIFICATION,
+        from_address=_es.EMAIL_FROM_ADDRESS,
+        from_name=_es.EMAIL_FROM_NAME,
+        frontend_url=_es.FRONTEND_URL,
+        resend_api_key_configured=bool(_es.RESEND_API_KEY),
+        smtp_host_configured=bool(_es.SMTP_HOST and _es.SMTP_HOST != "localhost"),
+        smtp_user_configured=bool(_es.SMTP_USER),
+        environment=os.getenv("ENVIRONMENT", "development"),
+    )
+
+
+class EmailSendTestIn(BaseModel):
+    to: EmailStr
+
+
+class EmailSendTestOut(BaseModel):
+    """Result of a real provider send. `provider_response` is whatever the
+    provider returned (Resend HTTP status / SMTP error string) — that's the
+    only data that pinpoints WHY a send is failing in production."""
+    sent: bool
+    provider: str
+    to: str
+    provider_response: str
+
+
+@router.post(
+    "/health/email/send-test",
+    response_model=EmailSendTestOut,
+    summary="Send a real verification-style email to confirm provider connectivity",
+)
+async def post_email_send_test(payload: EmailSendTestIn, request: Request) -> EmailSendTestOut:
+    """Operator-only diagnostic. Gated by the `X-Admin-Token` header matching
+    the `ADMIN_HEALTH_TOKEN` env var (must be set on the deployed container —
+    if missing, the endpoint is disabled). Reuses the production
+    `send_email_verification()` path with a throwaway dummy token so any
+    failure mode (invalid Resend key, unverified domain, sandbox restriction,
+    SMTP greylisting) surfaces with the same provider error a real signup
+    would hit. The token in the email is never persisted as a real
+    verification — it's just a string to fill the template URL."""
+    expected_token = os.getenv("ADMIN_HEALTH_TOKEN", "").strip()
+    if not expected_token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "code": "ADMIN_HEALTH_TOKEN_NOT_CONFIGURED",
+                "message": "Set ADMIN_HEALTH_TOKEN on the deployed container to enable this endpoint.",
+            },
+        )
+    supplied = (request.headers.get("x-admin-token") or "").strip()
+    # Constant-time compare so a curious attacker can't time-side-channel the token.
+    if not secrets.compare_digest(supplied, expected_token):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "ADMIN_TOKEN_INVALID", "message": "Invalid X-Admin-Token."},
+        )
+
+    from backend.services import email_service as _es
+    if not _es.can_send_email():
+        return EmailSendTestOut(
+            sent=False,
+            provider=_es.EMAIL_PROVIDER,
+            to=payload.to,
+            provider_response=(
+                f"can_send_email() is False — provider={_es.EMAIL_PROVIDER}. "
+                "Set EMAIL_PROVIDER=resend with RESEND_API_KEY, or EMAIL_PROVIDER=smtp "
+                "with a real SMTP_HOST."
+            ),
+        )
+
+    # Throwaway token — only used to fill the email template URL. Not persisted.
+    dummy_token = secrets.token_urlsafe(32)
+    try:
+        sent = await send_email_verification(payload.to, dummy_token)
+        return EmailSendTestOut(
+            sent=bool(sent),
+            provider=_es.EMAIL_PROVIDER,
+            to=payload.to,
+            provider_response=(
+                "Provider returned success. Check the inbox (and spam folder) — "
+                "if the email never arrives, the provider accepted the request "
+                "but a downstream filter (DMARC, recipient block, spam) ate it."
+                if sent
+                else "Provider returned False — check backend logs for the underlying error."
+            ),
+        )
+    except Exception as exc:  # surface the raw error verbatim
+        return EmailSendTestOut(
+            sent=False,
+            provider=_es.EMAIL_PROVIDER,
+            to=payload.to,
+            provider_response=f"{type(exc).__name__}: {exc}",
+        )

@@ -12,6 +12,7 @@ import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { useTheme } from '@kiaanverse/ui';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -46,6 +47,10 @@ interface ChipProps {
 }
 
 function SacredChip({ text, delay, onPress }: ChipProps): React.JSX.Element {
+  // Suggestion-card gradient follows the active palette so it stops
+  // reading as an indigo island over forest / maroon / black-&-gold pages.
+  const { theme } = useTheme();
+  const palette = theme.colorScheme;
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(12);
   const scale = useSharedValue(0.96);
@@ -85,7 +90,7 @@ function SacredChip({ text, delay, onPress }: ChipProps): React.JSX.Element {
         style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
       >
         <LinearGradient
-          colors={['rgba(19,26,61,0.9)', 'rgba(27,79,187,0.35)']}
+          colors={[palette.bg.card, palette.accent.primary + '59']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}

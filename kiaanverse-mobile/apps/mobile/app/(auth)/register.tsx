@@ -12,7 +12,7 @@
  * email address before they can log in (backend returns 403 on unverified).
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -29,7 +29,10 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
+import { authService } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
+
+const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
 // ---------------------------------------------------------------------------
 // Validation Schema
@@ -72,8 +75,13 @@ export default function RegisterScreen(): React.JSX.Element {
     status: _status,
     isLoading,
     signupPendingVerification,
+    signupEmail,
+    signupVerificationSent,
     clearSignupPending,
   } = useAuthStore();
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   const {
     control,
@@ -112,20 +120,96 @@ export default function RegisterScreen(): React.JSX.Element {
     );
   }
 
-  // After successful signup — show email verification message
+  // ──── Resend (used by the "delivery failed" branch below) ─────────────
+  const handleResend = useCallback(async () => {
+    if (!signupEmail) {
+      setResendError(
+        `We do not have your email on file. Try signing up again or email ${SUPPORT_EMAIL}.`,
+      );
+      return;
+    }
+    setResending(true);
+    setResendError(null);
+    try {
+      await authService.resendVerification(signupEmail);
+      setResendSent(true);
+    } catch (err) {
+      setResendError(
+        (err as { message?: string })?.message ??
+          `Could not send a fresh email right now. Please email ${SUPPORT_EMAIL}.`,
+      );
+    } finally {
+      setResending(false);
+    }
+  }, [signupEmail]);
+
+  // After successful signup — show one of two outcome screens.
   if (signupPendingVerification) {
+    // Branch A: backend confirmed the email actually shipped. Original
+    // happy-path copy.
+    if (signupVerificationSent) {
+      return (
+        <Screen>
+          <View style={styles.verificationContainer}>
+            <Text variant="h2" align="center">
+              Check your email
+            </Text>
+            <Text variant="body" color={colors.text.muted} align="center">
+              We sent a verification link to{' '}
+              <Text color={colors.primary[500]}>{signupEmail ?? 'your email'}</Text>
+              . Please verify your email before signing in.
+            </Text>
+            <GoldenButton
+              title="Go to Sign In"
+              onPress={handleGoToLogin}
+              testID="go-to-login-button"
+            />
+          </View>
+        </Screen>
+      );
+    }
+
+    // Branch B: account exists but the verification email FAILED to send
+    // (provider not configured / domain unverified / sandbox restriction
+    // / rate-limit). Earlier builds silently fell through to the form here,
+    // leaving the user with no signal — that was a primary cause of the
+    // "I created an account and never got an email" bug. Tell them honestly.
     return (
       <Screen>
         <View style={styles.verificationContainer}>
-          <Text variant="h2" align="center">
-            Check your email
+          <Text variant="h2" align="center" color={colors.semantic.error}>
+            Account created, but…
           </Text>
           <Text variant="body" color={colors.text.muted} align="center">
-            We sent a verification link to your email address. Please verify
-            your email before signing in.
+            Your account was created, but we could not send the verification
+            email to{' '}
+            <Text color={colors.primary[500]}>{signupEmail ?? 'your email'}</Text>
+            .{'\n\n'}
+            Tap below to try sending the link again. If it still does not
+            arrive, please contact{' '}
+            <Text color={colors.primary[500]}>{SUPPORT_EMAIL}</Text>.
           </Text>
+
+          {resendSent ? (
+            <Text variant="body" color={colors.primary[500]} align="center">
+              ✓ A fresh verification email is on its way.
+            </Text>
+          ) : null}
+          {resendError ? (
+            <Text variant="caption" color={colors.semantic.error} align="center">
+              {resendError}
+            </Text>
+          ) : null}
+
+          <GoldenButton
+            title={resending ? 'Sending…' : 'Resend verification email'}
+            onPress={handleResend}
+            disabled={resending}
+            testID="resend-verification-button"
+          />
           <GoldenButton
             title="Go to Sign In"
+            variant="secondary"
             onPress={handleGoToLogin}
             testID="go-to-login-button"
           />
