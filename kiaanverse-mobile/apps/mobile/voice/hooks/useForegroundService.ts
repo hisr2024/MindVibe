@@ -8,17 +8,22 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
 interface SakhaForegroundServiceNativeSpec {
   start(): Promise<void>;
   stop(): Promise<void>;
 }
 
+// Cross-platform: Android registers SakhaForegroundService via
+// SakhaForegroundServicePackage; iOS registers it via
+// SakhaForegroundServiceBridge (apps/mobile/native/ios/Sources/Bridge/).
+// Both implement the same start/stop contract (see
+// apps/mobile/types/sakhaForegroundService.ts) — JS no longer needs a
+// Platform.OS gate. Falls back to null if the native module isn't
+// loaded (e.g., a stripped dev build with the plugin disabled).
 const Native: SakhaForegroundServiceNativeSpec | null =
-  Platform.OS === 'android'
-    ? (NativeModules.SakhaForegroundService as SakhaForegroundServiceNativeSpec | null) ?? null
-    : null;
+  (NativeModules.SakhaForegroundService as SakhaForegroundServiceNativeSpec | null) ?? null;
 
 export interface ForegroundServiceAPI {
   start: () => Promise<void>;

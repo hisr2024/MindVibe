@@ -50,21 +50,32 @@ function check(label, cond, detail) {
 // ─── Parsers ────────────────────────────────────────────────────────────
 
 /**
- * Parse RCT_EXTERN_METHOD declarations from a .m file.
- * Returns the set of bridged method names (Swift selector first segment).
+ * Parse RCT_EXTERN_METHOD and RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD
+ * declarations from a .m file. Returns the set of bridged method names
+ * (Swift selector first segment).
  *
- * Example input:
+ * Example inputs:
  *   RCT_EXTERN_METHOD(initialize:(NSDictionary *)config
  *                     resolver:(RCTPromiseResolveBlock)resolve
  *                     rejecter:(RCTPromiseRejectBlock)reject)
- * Returns: 'initialize'
+ *   → 'initialize'
+ *
+ *   RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(getAudioLevel)
+ *   → 'getAudioLevel'
+ *
+ * The blocking-sync form takes only the bare method name (no args) — it's
+ * used for getter-style accessors that the Reanimated worklet can read
+ * every frame without bridge overhead.
  */
 function parseExternMethods(objcSource) {
   const methods = new Set();
-  const re = /RCT_EXTERN_METHOD\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*[:\(]/g;
-  let m;
-  while ((m = re.exec(objcSource)) !== null) {
-    methods.add(m[1]);
+  const reAsync = /RCT_EXTERN_METHOD\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*[:\(]/g;
+  const reSync = /RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)/g;
+  for (const re of [reAsync, reSync]) {
+    let m;
+    while ((m = re.exec(objcSource)) !== null) {
+      methods.add(m[1]);
+    }
   }
   return methods;
 }
@@ -162,6 +173,34 @@ const AUDITS = [
     // need a corresponding RCT_EXTERN_METHOD declaration.
     rnEventEmitterBuiltins: ['addListener', 'removeListeners'],
   },
+  {
+    moduleName: 'KiaanAudioPlayer',
+    bridgeM: 'KiaanAudioPlayerBridge.m',
+    bridgeSwift: 'KiaanAudioPlayerBridge.swift',
+    typesFile: 'kiaanAudioPlayer.ts',
+    interfaceName: 'KiaanAudioPlayerNativeModule',
+    eventsConstName: 'KIAAN_AUDIO_PLAYER_EVENTS',
+    rnEventEmitterBuiltins: ['addListener', 'removeListeners'],
+    // getAudioLevel is a synchronous bridge method declared via
+    // RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD (not RCT_EXTERN_METHOD).
+    // The parser only looks for RCT_EXTERN_METHOD; teach it to also
+    // accept the sync variant for these specific names.
+    syncMethods: ['getAudioLevel'],
+  },
+  {
+    moduleName: 'SakhaForegroundService',
+    bridgeM: 'SakhaForegroundServiceBridge.m',
+    bridgeSwift: 'SakhaForegroundServiceBridge.swift',
+    typesFile: 'sakhaForegroundService.ts',
+    interfaceName: 'SakhaForegroundServiceNativeModule',
+    eventsConstName: 'SAKHA_FOREGROUND_SERVICE_EVENTS',
+    // No event emitter on this module — addListener/removeListeners are
+    // not required.
+    rnEventEmitterBuiltins: [],
+    // No NativeEventEmitter base class → supportedEvents() doesn't exist
+    // either. Skip the supportedEvents parsing for this module.
+    skipSwiftEventsCheck: true,
+  },
 ];
 
 for (const audit of AUDITS) {
@@ -224,20 +263,24 @@ for (const audit of AUDITS) {
   }
 
   // Event coverage: every supportedEvents entry must appear as a value of
-  // the JS EVENTS const, and vice-versa.
-  for (const swiftEvt of swiftEvents) {
-    check(
-      `${audit.moduleName}: Swift event "${swiftEvt}" is in TS ${audit.eventsConstName}`,
-      tsEvents.has(swiftEvt),
-      `JS will not have a name to subscribe with`,
-    );
-  }
-  for (const tsEvt of tsEvents) {
-    check(
-      `${audit.moduleName}: TS event "${tsEvt}" is emitted by Swift supportedEvents()`,
-      swiftEvents.has(tsEvt),
-      `native side will reject NativeEventEmitter subscription with "Sending '<name>' with no listeners registered"`,
-    );
+  // the JS EVENTS const, and vice-versa. Skipped for modules whose Swift
+  // class is plain NSObject (no NativeEventEmitter base, no
+  // supportedEvents() method).
+  if (!audit.skipSwiftEventsCheck) {
+    for (const swiftEvt of swiftEvents) {
+      check(
+        `${audit.moduleName}: Swift event "${swiftEvt}" is in TS ${audit.eventsConstName}`,
+        tsEvents.has(swiftEvt),
+        `JS will not have a name to subscribe with`,
+      );
+    }
+    for (const tsEvt of tsEvents) {
+      check(
+        `${audit.moduleName}: TS event "${tsEvt}" is emitted by Swift supportedEvents()`,
+        swiftEvents.has(tsEvt),
+        `native side will reject NativeEventEmitter subscription with "Sending '<name>' with no listeners registered"`,
+      );
+    }
   }
 }
 

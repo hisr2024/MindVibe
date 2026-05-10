@@ -355,6 +355,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-keepclassmembers,includedescriptorclasses class * { native <methods>; }',
           ].join('\n'),
         },
+        ios: {
+          // Bumped from Expo SDK 51 default (13.4) to 17.0 so that
+          // AVFoundation can decode Opus natively (added in iOS 17).
+          // The Sakha streaming TTS pipeline ships base64-encoded Opus
+          // chunks over the WSS — the iOS KiaanAudioPlayer decodes them
+          // with AVPlayerItem(url: <chunk>.opus), which only works on
+          // iOS 17+. Lower deployment targets would require vendoring
+          // libopus or renegotiating PCM from the backend; both add
+          // significant complexity without serving a meaningful number
+          // of users (iOS 17+ has >80% device penetration as of 2026).
+          deploymentTarget: '17.0',
+        },
       },
     ],
     [

@@ -37,7 +37,12 @@ Pod::Spec.new do |s|
   s.author           = { 'Kiaanverse' => 'engineering@kiaanverse.com' }
   s.source           = { :git => '' }
 
-  s.platform         = :ios, '15.0'
+  # iOS 17.0 minimum: AVFoundation decodes Opus natively starting iOS 17,
+  # which the KiaanAudioPlayer streaming TTS pipeline relies on. See
+  # app.config.ts → expo-build-properties → ios.deploymentTarget for the
+  # canonical value; both must agree or `pod install` will warn about
+  # version mismatch.
+  s.platform         = :ios, '17.0'
   s.swift_versions   = ['5.9']
   s.requires_arc     = true
 
@@ -49,12 +54,14 @@ Pod::Spec.new do |s|
   s.dependency 'React-Core'
 
   s.frameworks = [
-    'AVFoundation', # AVAudioEngine, AVAudioSession, AVSpeechSynthesizer
+    'AVFoundation', # AVAudioEngine, AVAudioSession, AVSpeechSynthesizer, AVQueuePlayer
     'Speech',       # SFSpeechRecognizer (on-device speech recognition)
     'CoreML',       # Hardware-accelerated wake-word detection (ANE)
     'Metal',        # GPU compute (Whisper STT, FAISS, TTS synthesis)
     'Accelerate',   # vDSP for audio buffer pre-processing
     'Combine',      # @Published publishers in KiaanVoiceManager
+    'MediaPlayer',  # MPNowPlayingInfoCenter, MPRemoteCommandCenter (lock-screen art + controls)
+    'UIKit',        # UIApplication.isIdleTimerDisabled in SakhaBackgroundAudioCoordinator
   ]
 
   # Pod hashing: pin pod-internal artefact cache by source hash so EAS's
