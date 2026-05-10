@@ -23,10 +23,10 @@ Edge cases:
 """
 
 import datetime
-import json
 import logging
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -181,77 +181,134 @@ async def _verify_ios_receipt(receipt: str, product_id: str) -> dict[str, Any]:
 
 
 async def _verify_android_receipt(receipt: str, product_id: str) -> dict[str, Any]:
-    """Validate a Google Play purchase token.
+    """Validate a Google Play purchase token against the Play Developer API.
 
-    In production this calls the Google Play Developer API.
-    For development, we accept all tokens.
+    Calls purchases.subscriptions.get via :class:`GooglePlayService` (which
+    handles the OAuth2 service-account JWT exchange and access-token
+    caching) and translates the response into the
+    {valid, expires_at} contract this module uses internally.
+
+    Falls back to the dev stub (accept everything, mock 30-day expiry)
+    when GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not configured. The stub
+    is gated so that production deployments — which DO set the env var
+    — can never silently accept fake receipts.
 
     Returns:
         dict with keys: valid (bool), expires_at (datetime | None)
     """
-    import os
+    from backend.services.google_play_service import (
+        GooglePlayAPIError,
+        GooglePlayConfigError,
+        get_google_play_service,
+        get_package_name,
+        is_configured,
+    )
 
-    google_service_account = os.getenv("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON")
-
-    if not google_service_account:
-        logger.warning("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON not configured — accepting receipt for dev")
+    if not is_configured():
+        logger.warning(
+            "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON not set — accepting receipt "
+            "for dev. DO NOT ship to production without configuring this."
+        )
         return {
             "valid": True,
-            "expires_at": datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
+            "expires_at": datetime.datetime.now(datetime.UTC)
+            + datetime.timedelta(days=30),
         }
 
-    # Production: validate with Google Play Developer API
+    service = get_google_play_service()
+    package_name = get_package_name()
+
     try:
-        import httpx
-
-        # Parse service account credentials
-        service_account = json.loads(google_service_account)
-        package_name = os.getenv("ANDROID_PACKAGE_NAME", "com.kiaanverse.app")
-
-        # Get OAuth2 access token from service account
-        # In production, use google-auth library for proper JWT token exchange
-        access_token = os.getenv("GOOGLE_PLAY_ACCESS_TOKEN", "")
-
-        if not access_token:
-            logger.warning("Google Play access token not available — accepting for dev")
-            return {
-                "valid": True,
-                "expires_at": datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
-            }
-
-        url = (
-            f"https://androidpublisher.googleapis.com/androidpublisher/v3/"
-            f"applications/{package_name}/purchases/subscriptions/"
-            f"{product_id}/tokens/{receipt}"
+        sub = await service.get_subscription(
+            package_name=package_name,
+            product_id=product_id,
+            purchase_token=receipt,
         )
-
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                url,
-                headers={"Authorization": f"Bearer {access_token}"},
-            )
-
-            if response.status_code != 200:
-                return {"valid": False, "expires_at": None}
-
-            data = response.json()
-            expiry_ms = int(data.get("expiryTimeMillis", "0"))
-            expires_at = datetime.datetime.fromtimestamp(
-                expiry_ms / 1000, tz=datetime.UTC
-            )
-            is_valid = expires_at > datetime.datetime.now(datetime.UTC)
-
-            return {"valid": is_valid, "expires_at": expires_at}
-
-    except Exception as e:
-        logger.error(f"Google Play receipt verification failed: {e}")
+    except GooglePlayConfigError as e:
+        # Operator misconfigured the env var — fail loud, this is not a
+        # transient error and the user can't do anything about it.
+        logger.error("Google Play credentials misconfigured: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "google_play_misconfigured",
+                "message": (
+                    "Server is not configured to validate Android purchases. "
+                    "Please contact support."
+                ),
+            },
+        ) from None
+    except GooglePlayAPIError as e:
+        # Non-200 from Play API. Common cases:
+        #   400/404 — purchase token unrecognised → tampered or wrong env
+        #   410     — token Gone (refunded / replaced by upgrade)
+        # Treat all of these as "this receipt is not valid" rather than
+        # a server outage, so the user gets a clear "validation failed"
+        # message instead of a retry prompt.
+        logger.warning("Google Play receipt rejected: %s", e)
+        return {"valid": False, "expires_at": None}
+    except httpx.HTTPError as e:
+        # Network/timeout reaching Google. Surface as 503 so the mobile
+        # client can offer a retry rather than telling the user their
+        # purchase was bad.
+        logger.error("Google Play API call failed (network): %s", e)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={
                 "error": "verification_unavailable",
-                "message": "Unable to verify purchase with Google. Please try again.",
+                "message": (
+                    "Unable to verify purchase with Google. Please try "
+                    "again."
+                ),
             },
         ) from None
+    except Exception as e:  # pragma: no cover — defensive guard
+        logger.error("Google Play API call failed: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "verification_unavailable",
+                "message": (
+                    "Unable to verify purchase with Google. Please try "
+                    "again."
+                ),
+            },
+        ) from None
+
+    # Parse the SubscriptionPurchase resource.
+    # https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptions
+    expiry_ms_raw = sub.get("expiryTimeMillis", "0")
+    try:
+        expiry_ms = int(expiry_ms_raw)
+    except (TypeError, ValueError):
+        logger.warning(
+            "Google Play returned non-integer expiryTimeMillis: %r",
+            expiry_ms_raw,
+        )
+        return {"valid": False, "expires_at": None}
+
+    expires_at = datetime.datetime.fromtimestamp(
+        expiry_ms / 1000, tz=datetime.UTC
+    )
+
+    # paymentState semantics:
+    #   0 = payment pending (e.g. card declined, retry pending)
+    #   1 = payment received
+    #   2 = free trial
+    #   3 = pending deferred upgrade/downgrade
+    # We treat 0 as "not valid yet" — Google may eventually settle the
+    # payment and send a real-time developer notification, but until
+    # then the user is not entitled to the tier. 1/2/3 are valid.
+    payment_state = sub.get("paymentState")
+    if payment_state == 0:
+        logger.info(
+            "Google Play receipt is pending payment: product=%s state=0",
+            product_id,
+        )
+        return {"valid": False, "expires_at": expires_at}
+
+    is_valid = expires_at > datetime.datetime.now(datetime.UTC)
+    return {"valid": is_valid, "expires_at": expires_at}
 
 
 # ---------------------------------------------------------------------------
