@@ -510,6 +510,13 @@ export interface SpeakDivinelyOptions {
   readonly getAccessToken?: () => Promise<string | null> | string | null;
   /** Cloud only — backend baseURL override for tests. */
   readonly baseUrl?: string;
+  /** Playback tempo — multiplier on the natural speech rate. Range
+   *  0.5 (half speed) to 1.5 (1.5× speed). Default 1.0. Passed to
+   *  the backend as the ``speed`` field in SynthesizeRequest, so
+   *  ElevenLabs + Sarvam render the audio at that tempo. On the
+   *  on-device path, mapped to expo-speech's ``rate`` parameter
+   *  (with the same multiplier semantics). */
+  readonly tempo?: number;
 }
 
 /**
@@ -571,6 +578,7 @@ export async function speakDivinely(
       voiceId: options.cloudVoiceId,
       language,
       voiceType,
+      tempo: options.tempo,
       baseUrl: options.baseUrl,
       getAccessToken: options.getAccessToken,
       onDone: options.onDone,
@@ -610,6 +618,7 @@ export async function speakDivinely(
         voiceId: backendId,
         language,
         voiceType,
+        tempo: options.tempo,
         baseUrl: options.baseUrl,
         getAccessToken: options.getAccessToken,
         onDone: options.onDone,
@@ -633,9 +642,12 @@ export async function speakDivinely(
 
   // ── Tier 3: on-device path ──
   const isSanskrit = language === 'sa-IN';
-  const rate = isSanskrit
+  const baseRate = isSanskrit
     ? preset.rate + preset.rateBoostSanskrit
     : preset.rate;
+  // User-controlled tempo multiplies the preset's natural cadence.
+  // Default 1.0 = unchanged; 0.5 = half-speed; 1.5 = 1.5× fast.
+  const rate = baseRate * (options.tempo ?? 1.0);
   const pitch = isSanskrit ? preset.pitch - 0.01 : preset.pitch;
   Speech.speak(text, {
     language,

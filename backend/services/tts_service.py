@@ -47,7 +47,7 @@ VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "stor
 #   v1 — initial implementation
 #   v2 — speaker mapping fixes (sarvam-meera, elevenlabs-lily added);
 #        is_picker_voice extended premium tuning to non-divine voices.
-TTS_CACHE_VERSION = 3
+TTS_CACHE_VERSION = 4
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
