@@ -79,7 +79,10 @@ const {
   withMainApplication,
   withSettingsGradle,
   withAppBuildGradle,
+  withDangerousMod,
 } = require('@expo/config-plugins');
+const fs = require('fs');
+const path = require('path');
 
 // ─── Gradle subproject metadata ─────────────────────────────────────────
 
@@ -230,6 +233,57 @@ function addAllPackageRegistrations(contents) {
   );
 }
 
+// ─── iOS Podfile patch ──────────────────────────────────────────────────
+//
+// Mirrors the Android gradle subproject registration. The Swift sources at
+// apps/mobile/native/ios/ ship as a local CocoaPod called `KiaanSakhaVoice`
+// (see apps/mobile/native/ios/KiaanSakhaVoice.podspec). We inject:
+//
+//   pod 'KiaanSakhaVoice', :path => '../native/ios'
+//
+// inside the main app target block of the generated ios/Podfile. The path
+// is relative to the Podfile (`ios/Podfile`), so `../native/ios` lands on
+// `apps/mobile/native/ios/` exactly as required.
+//
+// Why a local pod (and not autolinking via expo-module.config.json):
+//   • The iOS Swift sources are NOT inside node_modules, NOT a workspace
+//     package, and NOT a published pod — same constraints that apply to
+//     the Android library. Autolinkers cannot find them.
+//   • A local-path pod is the iOS-side equivalent of an in-tree gradle
+//     subproject: deterministic, cache-stable, and picks up source
+//     changes on every `pod install` without symlink shenanigans.
+//
+// The patch is idempotent (guarded by a sentinel marker comment).
+
+const PODFILE_POD_LINE = `  pod 'KiaanSakhaVoice', :path => '../native/ios'`;
+const PODFILE_MARKER =
+  `  # KiaanSakhaVoice (in-tree, manually registered by withKiaanSakhaVoicePackages)`;
+const PODFILE_BLOCK = `\n${PODFILE_MARKER}\n${PODFILE_POD_LINE}\n`;
+
+function patchPodfile(contents) {
+  if (contents.includes(PODFILE_POD_LINE)) {
+    return contents;
+  }
+
+  // Inject as the FIRST line inside the main app target block. Expo SDK 51
+  // prebuild emits a Podfile whose primary target is the app's display
+  // name in the form: `target 'Kiaanverse' do`. Match the first
+  // `target '...' do` that is NOT preceded by `# ` (i.e., not commented).
+  const targetRe = /^target\s+'[^']+'\s+do\s*\n/m;
+  const match = contents.match(targetRe);
+  if (match) {
+    const insertAt = match.index + match[0].length;
+    return contents.slice(0, insertAt) + PODFILE_BLOCK + contents.slice(insertAt);
+  }
+
+  throw new Error(
+    `[withKiaanSakhaVoicePackages] Could not find a \`target '...' do\` ` +
+      `block in ios/Podfile to inject ` +
+      `\`${PODFILE_POD_LINE.trim()}\`. ` +
+      `Expo prebuild output may have changed shape.`,
+  );
+}
+
 // ─── Plugin entry ───────────────────────────────────────────────────────
 
 const withKiaanSakhaVoicePackages = (config) => {
@@ -270,6 +324,32 @@ const withKiaanSakhaVoicePackages = (config) => {
     return cfg;
   });
 
+  // 4. ios/Podfile — register the local KiaanSakhaVoice pod so the Swift
+  //    sources at apps/mobile/native/ios/ compile into the app binary.
+  //    iOS RN bridge classes auto-register at runtime via the Objective-C
+  //    runtime (no MainApplication.kt-equivalent patching needed once the
+  //    pod is in the build) — `RCT_EXTERN_MODULE` does the work.
+  config = withDangerousMod(config, [
+    'ios',
+    async (cfg) => {
+      const podfilePath = path.join(
+        cfg.modRequest.platformProjectRoot,
+        'Podfile',
+      );
+      if (!fs.existsSync(podfilePath)) {
+        // First prebuild may not have generated the Podfile yet; skip
+        // silently — the next prebuild round will pick it up.
+        return cfg;
+      }
+      const original = fs.readFileSync(podfilePath, 'utf8');
+      const patched = patchPodfile(original);
+      if (patched !== original) {
+        fs.writeFileSync(podfilePath, patched, 'utf8');
+      }
+      return cfg;
+    },
+  ]);
+
   // Visible breadcrumb in the EAS prebuild log so it's obvious this
   // plugin actually fired. If you don't see this line in the build log,
   // the plugin was never invoked and a build will fail with the
@@ -279,7 +359,8 @@ const withKiaanSakhaVoicePackages = (config) => {
     '[withKiaanSakhaVoicePackages] Registered in-tree gradle subproject ' +
       `${GRADLE_MODULE_NAME} (projectDir=${GRADLE_MODULE_REL_PATH}) and ` +
       `injected ${IMPORTS.length} imports + ${ADD_LINES.length} ReactPackage ` +
-      'add() calls into MainApplication.kt.',
+      'add() calls into MainApplication.kt. ' +
+      `iOS: registered local pod 'KiaanSakhaVoice' (path=../native/ios).`,
   );
 
   return config;
@@ -296,8 +377,11 @@ module.exports.__internals = {
   SETTINGS_INCLUDE,
   SETTINGS_PROJECT_DIR,
   APP_DEP_LINE,
+  PODFILE_POD_LINE,
+  PODFILE_MARKER,
   patchSettingsGradle,
   patchAppBuildGradle,
   addAllImports,
   addAllPackageRegistrations,
+  patchPodfile,
 };

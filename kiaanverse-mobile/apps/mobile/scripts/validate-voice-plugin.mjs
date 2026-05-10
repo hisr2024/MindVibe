@@ -48,6 +48,7 @@ const stub = {
   withMainApplication: (config) => config,
   withSettingsGradle: (config) => config,
   withAppBuildGradle: (config) => config,
+  withDangerousMod: (config) => config,
 };
 Module._load = function (request, parent, ...rest) {
   if (request === '@expo/config-plugins') return stub;
@@ -69,10 +70,13 @@ const {
   ADD_LINES,
   SETTINGS_INCLUDE,
   APP_DEP_LINE,
+  PODFILE_POD_LINE,
+  PODFILE_MARKER,
   patchSettingsGradle,
   patchAppBuildGradle,
   addAllImports,
   addAllPackageRegistrations,
+  patchPodfile,
 } = internals;
 
 // ─── Synthetic Expo SDK 51 prebuild fixtures ────────────────────────────
@@ -436,6 +440,98 @@ class MainApplication : Application(), ReactApplication {
     'realistic: sibling projectDir line preserved',
     once.includes("project(':some-other-local-module').projectDir"),
     'lost sibling projectDir',
+  );
+}
+
+// ─── 6. iOS Podfile injection ───────────────────────────────────────────
+//
+// Mirrors the gradle subproject registration: the local CocoaPod
+// 'KiaanSakhaVoice' (path = ../native/ios) must be injected as the FIRST
+// pod inside the main app target block of ios/Podfile.
+
+const FAKE_PODFILE = `# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+platform :ios, podfile_properties['ios.deploymentTarget'] || '13.4'
+prepare_react_native_project!
+
+target 'Kiaanverse' do
+  use_expo_modules!
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+  )
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+    )
+  end
+end
+`;
+
+{
+  const once = patchPodfile(FAKE_PODFILE);
+  check(
+    "ios/Podfile: pod 'KiaanSakhaVoice' line injected",
+    once.includes(PODFILE_POD_LINE),
+    `expected to find "${PODFILE_POD_LINE.trim()}"`,
+  );
+  check(
+    'ios/Podfile: marker comment present',
+    once.includes(PODFILE_MARKER.trim()),
+    'sentinel marker not injected — idempotency guard depends on it',
+  );
+  check(
+    'ios/Podfile: original use_expo_modules! preserved',
+    once.includes('use_expo_modules!'),
+    'lost the expo modules setup',
+  );
+  check(
+    'ios/Podfile: original use_react_native! preserved',
+    once.includes('use_react_native!('),
+    'lost the react native setup',
+  );
+  check(
+    "ios/Podfile: pod injected INSIDE the target 'Kiaanverse' do block",
+    /target\s+'Kiaanverse'\s+do[^]*?pod\s+'KiaanSakhaVoice'[^]*?end/.test(once),
+    'pod line ended up outside the app target block',
+  );
+  const twice = patchPodfile(once);
+  check(
+    'ios/Podfile: idempotent (no duplicate pod line after 2nd run)',
+    countOccurrences(twice, PODFILE_POD_LINE) === 1,
+    `found ${countOccurrences(twice, PODFILE_POD_LINE)} copies of pod line`,
+  );
+}
+
+// Test 6b: Podfile with a pre-existing local pod from another plugin —
+// our pod must coexist, not be injected twice, and the order shouldn't
+// disturb the sibling.
+{
+  const PODFILE_WITH_OTHER_POD = FAKE_PODFILE.replace(
+    `target 'Kiaanverse' do\n  use_expo_modules!`,
+    `target 'Kiaanverse' do\n  pod 'SomeOtherLocalPod', :path => '../some-other'\n  use_expo_modules!`,
+  );
+  const once = patchPodfile(PODFILE_WITH_OTHER_POD);
+  check(
+    "realistic: ios/Podfile: sibling local pod preserved",
+    once.includes("pod 'SomeOtherLocalPod', :path => '../some-other'"),
+    'wiped sibling pod',
+  );
+  check(
+    'realistic: ios/Podfile: our pod still injected exactly once',
+    countOccurrences(once, PODFILE_POD_LINE) === 1,
+    `found ${countOccurrences(once, PODFILE_POD_LINE)} copies of our pod line`,
   );
 }
 

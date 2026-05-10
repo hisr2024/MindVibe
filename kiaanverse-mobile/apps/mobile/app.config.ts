@@ -96,6 +96,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'Kiaanverse uses Face ID for secure, quick login.',
       NSCameraUsageDescription:
         'Kiaanverse may use your camera for future features.',
+      NSSpeechRecognitionUsageDescription:
+        'Sakha uses on-device speech recognition to understand your voice when you tap to talk.',
       // 'audio' keeps the AVAudioSession alive when the screen locks or the
       // user backgrounds the app — required for Vibe Player lock-screen
       // controls and for audio to continue during meditation sessions.
