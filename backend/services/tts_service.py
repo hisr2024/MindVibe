@@ -448,16 +448,21 @@ class TTSService:
 
            1. Sarvam AI (paid — primary, 11 Indic + Indian English)
            2. ElevenLabs (paid — premium fallback, 29+ languages)
-           3. Bhashini AI (Government of India sovereign Indic neural)
-           4. Microsoft Neural via Edge TTS (LAST resort — only when all
-              paid providers are exhausted; free, no API key required,
-              50+ languages)
+           3. Microsoft Neural via Edge TTS (LAST resort — only when
+              both paid providers are exhausted; free, no API key
+              required, 50+ languages)
+           4. Bhashini AI (FUTURE — pending Government of India
+              approval; provider class wired for both REST + WSS but
+              kept INACTIVE in the chain until approved by Bhashini
+              programme). When approved, simply move the call out of
+              the placeholder block below into Tier 3 and demote
+              Microsoft Neural to Tier 4.
 
-        The fourth tier exists strictly for emergency redundancy when
-        the user's paid Sarvam + ElevenLabs quotas are spent or both
-        providers are temporarily unavailable. It is NOT a regular
-        production path — when you see Microsoft Neural in Render logs,
-        treat it as a signal to top up paid quotas.
+        The third tier (Microsoft Neural) exists strictly for emergency
+        redundancy when the user's paid Sarvam + ElevenLabs quotas are
+        spent or both providers are temporarily unavailable. It is NOT
+        a regular production path — when you see Microsoft Neural in
+        Render logs, treat it as a signal to top up paid quotas.
 
         Each tier's adapter is a no-op (returns None) when its env-var
         key is unset, so the chain naturally skips disabled tiers
@@ -545,42 +550,8 @@ class TTSService:
             _record("T2_elevenlabs", f"err:{type(e).__name__}")
             logger.warning(f"ElevenLabs Tier 2 raised: {e}")
 
-        # ── Tier 3: Bhashini AI (sovereign Indic, free) ──
-        # Government of India neural voices for 22 Indic languages.
-        # Free; requires BHASHINI_USER_ID + BHASHINI_API_KEY (sign up
-        # at bhashini.gov.in is free). Inserts above Microsoft Neural
-        # so paid-quota-exhausted users still get high-quality Indic
-        # voices before falling to the emergency last-resort tier.
-        try:
-            from backend.services.bhashini_tts_service import (
-                synthesize_bhashini_tts,
-                is_bhashini_available,
-            )
-            if is_bhashini_available():
-                audio = await synthesize_bhashini_tts(
-                    text=text,
-                    language=language,
-                    voice_id=voice_id or "bhashini-devi",
-                    mood=mood,
-                )
-                if audio:
-                    _record("T3_bhashini", "ok")
-                    logger.info(
-                        f"Bhashini AI (Tier 3) synthesis success for {language} "
-                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
-                    )
-                    return audio
-                _record("T3_bhashini", "no_audio")
-            else:
-                _record("T3_bhashini", "skipped_no_key")
-        except ImportError:
-            _record("T3_bhashini", "skipped_module_missing")
-        except Exception as e:
-            _record("T3_bhashini", f"err:{type(e).__name__}")
-            logger.warning(f"Bhashini Tier 3 raised: {e}")
-
-        # ── Tier 4: Microsoft Neural via Edge TTS (LAST resort) ──
-        # Only reached when Sarvam + ElevenLabs + Bhashini are ALL
+        # ── Tier 3: Microsoft Neural via Edge TTS (LAST resort) ──
+        # Only reached when Sarvam + ElevenLabs are BOTH
         # exhausted/unavailable. Free (no API key), studio-grade
         # quality, 50+ languages. NOT a regular production path —
         # seeing this in logs is a signal to top up paid quotas.
@@ -597,22 +568,52 @@ class TTSService:
                     mood=mood,
                 )
                 if audio:
-                    _record("T4_microsoft", "ok")
+                    _record("T3_microsoft", "ok")
                     logger.warning(
-                        f"Microsoft Neural / Edge TTS (Tier 4 LAST RESORT) "
+                        f"Microsoft Neural / Edge TTS (Tier 3 LAST RESORT) "
                         f"used for {language} — paid providers exhausted. "
                         f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]. "
-                        f"Top up Sarvam/ElevenLabs/Bhashini quota."
+                        f"Top up Sarvam/ElevenLabs quota."
                     )
                     return audio
-                _record("T4_microsoft", "no_audio")
+                _record("T3_microsoft", "no_audio")
             else:
-                _record("T4_microsoft", "skipped_module_missing")
+                _record("T3_microsoft", "skipped_module_missing")
         except ImportError:
-            _record("T4_microsoft", "skipped_module_missing")
+            _record("T3_microsoft", "skipped_module_missing")
         except Exception as e:
-            _record("T4_microsoft", f"err:{type(e).__name__}")
-            logger.warning(f"Edge TTS Tier 4 raised: {e}")
+            _record("T3_microsoft", f"err:{type(e).__name__}")
+            logger.warning(f"Edge TTS Tier 3 raised: {e}")
+
+        # ── Tier 4: Bhashini AI (FUTURE — awaiting approval) ─────────
+        # The REST adapter (``bhashini_tts_service.py``) and WSS
+        # provider (``backend/services/voice/bhashini_provider.py``) are
+        # both fully implemented and ready, but Bhashini AI's
+        # production-tier API access requires Government of India /
+        # MeitY programme approval. Until that approval lands, this
+        # tier stays INACTIVE — no call, no telemetry, just a clearly
+        # marked placeholder so the next engineer knows the wiring
+        # exists and only needs to be uncommented.
+        #
+        # When approval lands:
+        #   1. Set BHASHINI_USER_ID + BHASHINI_API_KEY on Render.
+        #   2. Move the active block out of this comment, ABOVE Tier 3
+        #      (so Bhashini becomes the new Tier 3 and Microsoft Neural
+        #      demotes to Tier 4 — the natural priority order: paid →
+        #      sovereign-free → last-resort-free).
+        #   3. Update the docstring above to reflect 4-tier active.
+        #
+        # Sample wiring (kept as a verified-buildable example, not
+        # invoked):
+        #     from backend.services.bhashini_tts_service import (
+        #         synthesize_bhashini_tts, is_bhashini_available,
+        #     )
+        #     if is_bhashini_available():
+        #         audio = await synthesize_bhashini_tts(
+        #             text=text, language=language,
+        #             voice_id=voice_id or "bhashini-devi", mood=mood,
+        #         )
+        _record("T4_bhashini", "deferred_pending_approval")
 
         logger.error(
             f"All TTS tiers failed for language={language} voice_id={voice_id}. "
