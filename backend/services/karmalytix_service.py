@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """KarmaLytix Service: Sacred Reflections Analysis engine.
 
 Analyzes journal metadata only (mood_labels, tag_labels, timestamps, frequency,

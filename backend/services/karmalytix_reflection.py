@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """KarmaLytix Sacred Reflection — structured five-section KIAAN response.
 
 Generates the six-field Sacred Mirror JSON consumed by the mobile

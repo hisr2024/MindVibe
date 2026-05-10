@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """
 KIAAN Response Composition Engine — Module 1 of 4 Self-Sufficiency Modules
 

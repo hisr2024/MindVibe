@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """Crisis Partial Scanner — Sub-800ms crisis routing on streaming transcripts.
 
 PURPOSE:

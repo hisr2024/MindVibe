@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """Shared Gita Wisdom Retrieval Service for Viyoga and Relationship Compass.
 
 This service provides direct access to the 701 Bhagavad Gita verses stored in JSON,

@@ -1,3 +1,4 @@
+# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
 """
 Unified Wisdom Core - The Single Source of Truth for KIAAN's Wisdom.
 
