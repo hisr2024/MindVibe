@@ -12,7 +12,7 @@
  * Security: No credentials logged. Tokens handled by authStore + SecureStore.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -29,7 +29,10 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
+import { authService } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
+
+const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
 // ---------------------------------------------------------------------------
 // Validation Schema
@@ -69,12 +72,46 @@ export default function LoginScreen(): React.JSX.Element {
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
     mode: 'onBlur',
   });
+
+  // Resend-verification side state. The store's `error` already holds the
+  // friendly text when the backend returns 403 EMAIL_NOT_VERIFIED (handled
+  // in authService.ts:104-110); we only need to detect the substring to
+  // know whether to render the inline Resend button.
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+  const isUnverifiedError = Boolean(
+    error &&
+      /verify your email|EMAIL_NOT_VERIFIED|verification link/i.test(error),
+  );
+
+  const handleResendVerification = useCallback(async () => {
+    const email = getValues('email').trim();
+    if (!email) {
+      setResendError('Enter your email above first.');
+      return;
+    }
+    setResending(true);
+    setResendError(null);
+    try {
+      await authService.resendVerification(email);
+      setResendSent(true);
+    } catch (err) {
+      setResendError(
+        (err as { message?: string })?.message ??
+          `Could not send a fresh email. Please email ${SUPPORT_EMAIL}.`,
+      );
+    } finally {
+      setResending(false);
+    }
+  }, [getValues]);
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -161,6 +198,34 @@ export default function LoginScreen(): React.JSX.Element {
             <Text variant="caption" color={colors.semantic.error}>
               {error}
             </Text>
+          ) : null}
+
+          {/* When the backend returns 403 EMAIL_NOT_VERIFIED, give the user a
+              one-tap recovery path right next to the error instead of a dead
+              end. Mirrors the verify-email-pending screen but inline. */}
+          {isUnverifiedError ? (
+            <View style={{ gap: spacing.xs }}>
+              {resendSent ? (
+                <Text variant="caption" color={colors.primary[500]}>
+                  ✓ Fresh verification email sent. Check your inbox (and spam).
+                </Text>
+              ) : null}
+              {resendError ? (
+                <Text variant="caption" color={colors.semantic.error}>
+                  {resendError}
+                </Text>
+              ) : null}
+              <GoldenButton
+                title={resending ? 'Sending…' : 'Resend verification email'}
+                variant="secondary"
+                onPress={handleResendVerification}
+                disabled={resending}
+                testID="resend-verification-from-login"
+              />
+              <Text variant="caption" color={colors.text.muted}>
+                Still nothing? Email {SUPPORT_EMAIL}.
+              </Text>
+            </View>
           ) : null}
 
           <GoldenButton

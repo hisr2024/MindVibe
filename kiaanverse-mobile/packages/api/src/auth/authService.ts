@@ -184,6 +184,13 @@ function mapLoginResponseToUser(res: LoginResponse): User {
     locale: 'en',
     subscriptionTier: (res.subscription_tier?.toUpperCase() ?? 'FREE') as User['subscriptionTier'],
     createdAt: '',
+    // Backend's login endpoint REJECTS unverified users with 403 — so any
+    // user we successfully construct here is, by definition, verified.
+    // Marking explicit `true` (rather than leaving undefined) so the
+    // AuthGate's `email_verified === false` check is unambiguous and so
+    // a future call to /api/auth/me can still flip it back to false if
+    // the user is somehow downgraded.
+    email_verified: true,
   };
 }
 
@@ -297,6 +304,44 @@ async function logout(): Promise<void> {
  * Fetch the currently authenticated user's session info.
  * Maps the backend MeOut response to the frontend User type.
  */
+/**
+ * Confirm an email-verification token from the deep-link.
+ *
+ * Backend `POST /api/auth/verify-email` validates the token, sets the
+ * user's `email_verified=True`, and returns 200 with a small success
+ * payload. On expired/invalid token it returns 410/422 — surface those
+ * with a friendly mapped error so the verify-email screen can show
+ * "expired, please resend".
+ */
+async function verifyEmail(token: string): Promise<{ verified: boolean }> {
+  try {
+    const { data } = await apiClient.post<{ verified: boolean }>(
+      '/api/auth/verify-email',
+      { token },
+    );
+    return data;
+  } catch (err) {
+    throw mapAxiosError(err);
+  }
+}
+
+/**
+ * Ask the backend to send a fresh verification email. Used when the
+ * user lost the original email or its 24-hour token expired. Backend
+ * deduplicates by email + a small server-side rate limit.
+ */
+async function resendVerification(email: string): Promise<{ sent: boolean }> {
+  try {
+    const { data } = await apiClient.post<{ sent: boolean }>(
+      '/api/auth/resend-verification',
+      { email },
+    );
+    return data;
+  } catch (err) {
+    throw mapAxiosError(err);
+  }
+}
+
 async function getCurrentUser(): Promise<User> {
   try {
     const { data } = await apiClient.get<MeResponse>('/api/auth/me');
@@ -317,4 +362,6 @@ export const authService = {
   logout,
   getCurrentUser,
   mapLoginResponseToUser,
+  verifyEmail,
+  resendVerification,
 } as const;

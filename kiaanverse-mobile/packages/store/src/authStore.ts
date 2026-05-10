@@ -52,6 +52,20 @@ interface AuthState {
    */
   signupPendingVerification: boolean;
   /**
+   * Email address used for the most recent signup. Lets the register
+   * screen render "we sent a link to {email}" and powers its
+   * Resend-verification-email button.
+   */
+  signupEmail: string | null;
+  /**
+   * Whether the backend actually shipped the verification email
+   * (`signup` response's `email_verification_sent` field). When false,
+   * the user account exists but no email arrived — the register screen
+   * surfaces a clear error + Resend button instead of the misleading
+   * "Check your email" copy that earlier builds always showed.
+   */
+  signupVerificationSent: boolean;
+  /**
    * True once Zustand persist middleware has rehydrated state from storage.
    * AuthGate must wait for this before redirecting, otherwise isOnboarded
    * may be stale (false) causing a flash redirect to onboarding.
@@ -136,6 +150,8 @@ const initialState: AuthState = {
   biometricEnabled: false,
   biometricAvailable: false,
   signupPendingVerification: false,
+  signupEmail: null,
+  signupVerificationSent: false,
   hasHydrated: false,
 };
 
@@ -273,11 +289,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               confirmPassword: password,
             });
 
-            // Signup succeeded — user must verify email before login
+            // Signup succeeded — user must verify email before login.
+            // ALWAYS show the pending screen on success; whether the email
+            // actually shipped is tracked separately so the screen can show
+            // an honest "couldn't send" path when delivery failed.
             set((state) => {
               state.status = 'unauthenticated';
               state.isLoading = false;
-              state.signupPendingVerification = response.email_verification_sent;
+              state.signupPendingVerification = true;
+              state.signupEmail = email;
+              state.signupVerificationSent = response.email_verification_sent;
             });
             return true;
           } catch (err: unknown) {
@@ -317,6 +338,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         clearSignupPending: () => {
           set((state) => {
             state.signupPendingVerification = false;
+            state.signupEmail = null;
+            state.signupVerificationSent = false;
           });
         },
 

@@ -379,6 +379,29 @@ async def startup():
             _settings.INSTANCE_ID = _uuid.uuid4().hex[:12]
         startup_logger.info(f"\n🆔 Instance ID: {_settings.INSTANCE_ID}")
 
+        # Email-config self-check. Past deploys silently misconfigured this so
+        # signup looked fine but no verification emails ever shipped — surface
+        # it loudly at boot so any future regression is one log-line away.
+        try:
+            from backend.services.email_service import (
+                EMAIL_PROVIDER as _EP,
+                can_send_email as _can_send,
+                validate_email_config as _validate_email,
+            )
+            _email_warnings = _validate_email()
+            startup_logger.info(
+                "\n📧 Email config: provider=%s can_send=%s require_verification=%s",
+                _EP,
+                _can_send(),
+                _settings.REQUIRE_EMAIL_VERIFICATION,
+            )
+            for _w in _email_warnings:
+                startup_logger.warning("📧 EMAIL CONFIG WARNING: %s", _w)
+            if not _email_warnings:
+                startup_logger.info("📧 Email config OK — verification emails will deliver.")
+        except Exception as _ee:
+            startup_logger.error("📧 Email config self-check failed: %s", _ee)
+
         _step_t0 = _time.monotonic()
         startup_logger.info("\n🔗 Initializing Redis...")
         import asyncio as _asyncio

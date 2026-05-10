@@ -16,6 +16,12 @@ export interface User {
   locale: string;
   subscriptionTier: SubscriptionTier;
   createdAt: string;
+  /** True when the user has clicked the link in their verification email.
+   *  Optional for backwards compat with sessions persisted by older builds
+   *  that did not carry this field — AuthGate treats `undefined` as verified
+   *  to avoid forcing re-verification on a healthy existing session. Only
+   *  `false` triggers the verify-email-pending redirect. */
+  email_verified?: boolean;
 }
 
 export type SubscriptionTier = 'FREE' | 'BHAKTA' | 'SADHAK' | 'SIDDHA';

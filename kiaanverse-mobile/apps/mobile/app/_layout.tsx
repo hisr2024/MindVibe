@@ -191,7 +191,7 @@ function AuthGate({
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
-  const { status, isOnboarded, hasHydrated } = useAuthStore();
+  const { status, isOnboarded, hasHydrated, user } = useAuthStore();
   const { isLoaded: arrivalLoaded, hasSeenArrival } = useArrivalStatus();
   const segments = useSegments();
   const router = useRouter();
@@ -209,6 +209,13 @@ function AuthGate({
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
     const inArrival = segments[0] === 'arrival';
+    // The two screens that handle the "verify your email" flow live inside
+    // (auth) so unauthenticated visits land there from the email link, but
+    // we also need to be able to ROUTE TO them when an authenticated-but-
+    // unverified session sneaks in. Track them by their leaf paths.
+    const path = segments.join('/');
+    const onVerifyEmailScreen =
+      path === '(auth)/verify-email' || path === '(auth)/verify-email-pending';
 
     // First-launch darshan: unauthenticated users who have not yet seen the
     // arrival ceremony are routed into /arrival before the auth door.
@@ -224,12 +231,33 @@ function AuthGate({
       !inArrival
     ) {
       router.replace('/(auth)/login');
-    } else if (status === 'authenticated' && !isOnboarded && !inOnboarding) {
+      return;
+    }
+
+    // Email-verification gate. Backend already blocks login for unverified
+    // accounts, but a session can rehydrate from AsyncStorage from a build
+    // that was running before REQUIRE_EMAIL_VERIFICATION was enforced — and
+    // we never want an unverified user to walk into /(tabs) on the strength
+    // of a stale token. `user.email_verified === false` (NOT undefined) is
+    // the only case we redirect: undefined means an older session payload
+    // that didn't carry the field, treat as verified for backwards compat.
+    if (
+      status === 'authenticated' &&
+      user &&
+      user.email_verified === false &&
+      !onVerifyEmailScreen
+    ) {
+      router.replace('/(auth)/verify-email-pending');
+      return;
+    }
+
+    if (status === 'authenticated' && !isOnboarded && !inOnboarding) {
       router.replace('/onboarding');
     } else if (
       status === 'authenticated' &&
       isOnboarded &&
-      (inAuthGroup || inOnboarding || inArrival)
+      (inAuthGroup || inOnboarding || inArrival) &&
+      !onVerifyEmailScreen
     ) {
       router.replace('/(tabs)');
     }
@@ -241,6 +269,7 @@ function AuthGate({
     arrivalLoaded,
     segments,
     router,
+    user,
   ]);
 
   return <>{children}</>;
