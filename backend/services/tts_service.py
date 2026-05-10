@@ -444,31 +444,27 @@ class TTSService:
         """
         Synthesize using the canonical provider fallback chain.
 
-        Uniform priority across ALL languages (no Indian/International
-        branching) per product directive:
+        Priority order (matches user's stated infrastructure plan):
 
-           1. Sarvam AI (paid plan — primary)
-           2. ElevenLabs (premium fallback)
-           3. Microsoft Neural via Edge TTS (free fallback)
-           4. Bhashini AI (planned — see TODO below)
+           1. Sarvam AI (paid — primary, 11 Indic + Indian English)
+           2. ElevenLabs (paid — premium fallback, 29+ languages)
+           3. Bhashini AI (Government of India sovereign Indic neural)
+           4. Microsoft Neural via Edge TTS (LAST resort — only when all
+              paid providers are exhausted; free, no API key required,
+              50+ languages)
 
-        Why uniform: the user runs paid Sarvam which handles 11 Indic
-        languages + Indian-accented English natively, so it should be
-        tried first regardless of language. ElevenLabs is the next-best
-        for naturalness on any language. Microsoft Neural via the
-        ``edge-tts`` library is a free, key-less last-resort that
-        supports 50+ languages with Neural-quality voices — better
-        than no audio.
+        The fourth tier exists strictly for emergency redundancy when
+        the user's paid Sarvam + ElevenLabs quotas are spent or both
+        providers are temporarily unavailable. It is NOT a regular
+        production path — when you see Microsoft Neural in Render logs,
+        treat it as a signal to top up paid quotas.
 
-        Bhashini AI integration is planned: when wired, insert a step
-        between ElevenLabs and Edge TTS for Indic languages so users
-        get sovereign Indic voices when the paid providers are
-        unavailable. Until then, Edge TTS covers Indic via Microsoft
-        Neural's hi-IN / ta-IN / bn-IN / mr-IN / gu-IN voices.
-
-        Each provider's adapter is a no-op (returns None) when its
-        env-var key is unset, so the chain naturally skips disabled
-        tiers without explicit checks.
+        Each tier's adapter is a no-op (returns None) when its env-var
+        key is unset, so the chain naturally skips disabled tiers
+        without explicit checks. Plus the per-adapter HTTP layer
+        already classifies 429 (rate limit / quota) vs 401/403 (auth
+        misconfig) vs 5xx (service outage) — see this method's
+        post-loop summary for the consolidated tier-level failure mode.
         """
         # Map voice_type to voice_id if not provided
         if not voice_id:
@@ -499,33 +495,95 @@ class TTSService:
                 "chanting": "peaceful",
             }.get(voice_type, "neutral")
 
-        # ── Tier 1: Sarvam AI (paid, primary for ALL languages) ──
-        audio = await self._synthesize_with_sarvam(
-            text, language, voice_type, mood, voice_id
-        )
-        if audio:
-            logger.info(
-                f"Sarvam AI (Tier 1) synthesis success for {language} "
-                f"voice={voice_id}"
-            )
-            return audio
+        # Track per-tier outcome for the consolidated final-failure log.
+        # Each tier appends its result so ops can see the whole chain
+        # in one Render log line: "T1=skipped(no_key), T2=429, T3=ok"
+        # etc. Reduces "audio is silent and I can't tell why" to a
+        # single grep.
+        tier_outcomes: list[str] = []
 
-        # ── Tier 2: ElevenLabs (premium fallback) ──
-        audio = await self._synthesize_with_elevenlabs(
-            text, language, voice_id, mood
-        )
-        if audio:
-            logger.info(
-                f"ElevenLabs (Tier 2) synthesis success for {language} "
-                f"voice={voice_id}"
-            )
-            return audio
+        def _record(tier: str, outcome: str) -> None:
+            tier_outcomes.append(f"{tier}={outcome}")
 
-        # ── Tier 3: Microsoft Neural via Edge TTS (free fallback) ──
-        # Same naturalness tier as Sarvam/ElevenLabs (Microsoft Neural
-        # voices are studio-grade), no API key required, supports
-        # 50+ languages including all Indic languages we serve. Last-
-        # resort but still divine-sounding.
+        # ── Tier 1: Sarvam AI (paid primary) ──
+        try:
+            audio = await self._synthesize_with_sarvam(
+                text, language, voice_type, mood, voice_id
+            )
+            if audio:
+                _record("T1_sarvam", "ok")
+                logger.info(
+                    f"Sarvam AI (Tier 1) synthesis success for {language} "
+                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                )
+                return audio
+            _record(
+                "T1_sarvam",
+                "skipped_no_key" if not self._sarvam_available else "no_audio",
+            )
+        except Exception as e:
+            _record("T1_sarvam", f"err:{type(e).__name__}")
+            logger.warning(f"Sarvam Tier 1 raised: {e}")
+
+        # ── Tier 2: ElevenLabs (paid fallback) ──
+        try:
+            audio = await self._synthesize_with_elevenlabs(
+                text, language, voice_id, mood
+            )
+            if audio:
+                _record("T2_elevenlabs", "ok")
+                logger.info(
+                    f"ElevenLabs (Tier 2) synthesis success for {language} "
+                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                )
+                return audio
+            _record(
+                "T2_elevenlabs",
+                "skipped_no_key" if not self._elevenlabs_available else "no_audio",
+            )
+        except Exception as e:
+            _record("T2_elevenlabs", f"err:{type(e).__name__}")
+            logger.warning(f"ElevenLabs Tier 2 raised: {e}")
+
+        # ── Tier 3: Bhashini AI (sovereign Indic, free) ──
+        # Government of India neural voices for 22 Indic languages.
+        # Free; requires BHASHINI_USER_ID + BHASHINI_API_KEY (sign up
+        # at bhashini.gov.in is free). Inserts above Microsoft Neural
+        # so paid-quota-exhausted users still get high-quality Indic
+        # voices before falling to the emergency last-resort tier.
+        try:
+            from backend.services.bhashini_tts_service import (
+                synthesize_bhashini_tts,
+                is_bhashini_available,
+            )
+            if is_bhashini_available():
+                audio = await synthesize_bhashini_tts(
+                    text=text,
+                    language=language,
+                    voice_id=voice_id or "bhashini-devi",
+                    mood=mood,
+                )
+                if audio:
+                    _record("T3_bhashini", "ok")
+                    logger.info(
+                        f"Bhashini AI (Tier 3) synthesis success for {language} "
+                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                    )
+                    return audio
+                _record("T3_bhashini", "no_audio")
+            else:
+                _record("T3_bhashini", "skipped_no_key")
+        except ImportError:
+            _record("T3_bhashini", "skipped_module_missing")
+        except Exception as e:
+            _record("T3_bhashini", f"err:{type(e).__name__}")
+            logger.warning(f"Bhashini Tier 3 raised: {e}")
+
+        # ── Tier 4: Microsoft Neural via Edge TTS (LAST resort) ──
+        # Only reached when Sarvam + ElevenLabs + Bhashini are ALL
+        # exhausted/unavailable. Free (no API key), studio-grade
+        # quality, 50+ languages. NOT a regular production path —
+        # seeing this in logs is a signal to top up paid quotas.
         try:
             from backend.services.edge_tts_service import (
                 synthesize_edge_tts,
@@ -539,26 +597,26 @@ class TTSService:
                     mood=mood,
                 )
                 if audio:
-                    logger.info(
-                        f"Microsoft Neural / Edge TTS (Tier 3) synthesis "
-                        f"success for {language} voice={voice_id}"
+                    _record("T4_microsoft", "ok")
+                    logger.warning(
+                        f"Microsoft Neural / Edge TTS (Tier 4 LAST RESORT) "
+                        f"used for {language} — paid providers exhausted. "
+                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]. "
+                        f"Top up Sarvam/ElevenLabs/Bhashini quota."
                     )
                     return audio
+                _record("T4_microsoft", "no_audio")
+            else:
+                _record("T4_microsoft", "skipped_module_missing")
         except ImportError:
-            logger.debug("Edge TTS unavailable (edge-tts package not installed)")
+            _record("T4_microsoft", "skipped_module_missing")
         except Exception as e:
-            logger.warning(f"Edge TTS Tier 3 failed: {e}")
-
-        # ── Tier 4: Bhashini AI (planned) ────────────────────────────
-        # When integrated, insert here for Indic languages. Government
-        # of India sovereign Indic neural — free, fast, optimized for
-        # Marathi / Tamil / Bengali / Sanskrit. The provider class
-        # already exists at backend/services/voice/bhashini_provider.py
-        # for the WSS path; needs a sync wrapper for this REST path.
-        # See `tts_router.py` for the WSS-side wiring as reference.
+            _record("T4_microsoft", f"err:{type(e).__name__}")
+            logger.warning(f"Edge TTS Tier 4 raised: {e}")
 
         logger.error(
             f"All TTS tiers failed for language={language} voice_id={voice_id}. "
+            f"chain=[{', '.join(tier_outcomes)}]. "
             f"Configured: sarvam={self._sarvam_available} "
             f"elevenlabs={self._elevenlabs_available}"
         )
