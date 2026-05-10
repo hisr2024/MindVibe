@@ -231,6 +231,18 @@ export default function VoiceCompanionScreen() {
     useState<string>(DEFAULT_COMPANION_VOICE);
   const selectedVoiceRef = useRef<string>(DEFAULT_COMPANION_VOICE);
 
+  // Which voice is currently being previewed (audible right now).
+  // Used to drive the chip's "▶ Play" → "◼ Stop" toggle and to make
+  // tap-same-chip stop instead of re-trigger.
+  const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(
+    null,
+  );
+  // Auto-clear the preview-state after the voice finishes. Each
+  // greeting is < 3s; this is a UX guard in case the playback's onDone
+  // doesn't fire (e.g. cloud failure → fallthrough to on-device which
+  // doesn't go through cloudSpeak's status update).
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Hydrate the persisted pick on mount. Idempotent.
   useEffect(() => {
     let mounted = true;
@@ -242,26 +254,68 @@ export default function VoiceCompanionScreen() {
     })();
     return () => {
       mounted = false;
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
     };
+  }, []);
+
+  const handleStopPreview = useCallback(() => {
+    void stopSpeaking();
+    setPreviewingVoiceId(null);
+    if (previewTimerRef.current) {
+      clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = null;
+    }
   }, []);
 
   const handleSelectVoice = useCallback(
     (backendVoiceId: string) => {
-      // Stop any in-flight playback before switching so the user
-      // doesn't hear the new voice cut into the old one mid-syllable.
+      // Tapping the chip that is CURRENTLY previewing → stop. This
+      // gives the user a cancel affordance directly on the chip
+      // without needing a separate stop button.
+      if (previewingVoiceId === backendVoiceId) {
+        handleStopPreview();
+        return;
+      }
+
+      // Switching to a different voice — stop any in-flight playback
+      // (network + audio) so the old voice doesn't bleed into the new
+      // one mid-syllable. cloudStop now actually aborts the fetch +
+      // bumps the request id so stale responses are dropped.
       void stopSpeaking();
+      if (previewTimerRef.current) {
+        clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = null;
+      }
+
       setSelectedVoiceId(backendVoiceId);
       selectedVoiceRef.current = backendVoiceId;
       void saveCompanionVoice(backendVoiceId);
+      setPreviewingVoiceId(backendVoiceId);
+
       // Speak a short greeting in the new voice so the user hears
       // what they picked. Routes through the same cloud TTS path
       // ``speakDivinely`` uses for live conversation, so this is a
       // genuine preview — what they'll actually hear during a turn.
-      previewVoice(`${CLOUD_VOICE_PREFIX}${backendVoiceId}`, 'en-IN', undefined, {
-        getAccessToken: readAccessToken,
-      });
+      previewVoice(
+        `${CLOUD_VOICE_PREFIX}${backendVoiceId}`,
+        'en-IN',
+        undefined,
+        {
+          getAccessToken: readAccessToken,
+        },
+      );
+
+      // Auto-clear the previewing state after a generous ceiling so
+      // the chip stops showing "Stop" even if playback callbacks
+      // never fire. 5s is longer than any greeting we generate.
+      previewTimerRef.current = setTimeout(() => {
+        setPreviewingVoiceId((id) =>
+          id === backendVoiceId ? null : id,
+        );
+        previewTimerRef.current = null;
+      }, 5000);
     },
-    [],
+    [previewingVoiceId, handleStopPreview],
   );
 
   // Session-active flag — tracks whether the user has tapped "Tap to
@@ -516,20 +570,32 @@ export default function VoiceCompanionScreen() {
             >
               {COMPANION_VOICES.map((opt) => {
                 const selected = opt.backendVoiceId === selectedVoiceId;
+                const previewing =
+                  opt.backendVoiceId === previewingVoiceId;
                 const accent = PROVIDER_COLORS[opt.provider];
                 return (
                   <Pressable
                     key={opt.backendVoiceId}
                     onPress={() => handleSelectVoice(opt.backendVoiceId)}
                     accessibilityRole="button"
-                    accessibilityLabel={`Sakha voice: ${opt.name}, ${PROVIDER_LABELS[opt.provider]}`}
-                    accessibilityState={{ selected }}
+                    accessibilityLabel={
+                      previewing
+                        ? `Stop ${opt.name} preview`
+                        : `Sakha voice: ${opt.name}, ${PROVIDER_LABELS[opt.provider]}`
+                    }
+                    accessibilityState={{ selected, busy: previewing }}
                     style={[
                       styles.voicePill,
                       selected
                         ? {
                             backgroundColor: `${accent}22`,
                             borderColor: `${accent}AA`,
+                          }
+                        : null,
+                      previewing
+                        ? {
+                            backgroundColor: `${accent}33`,
+                            borderColor: accent,
                           }
                         : null,
                     ]}
@@ -542,8 +608,15 @@ export default function VoiceCompanionScreen() {
                     >
                       {opt.name}
                     </Text>
-                    <Text style={[styles.voicePillProvider, { color: accent }]}>
-                      {PROVIDER_LABELS[opt.provider]}
+                    <Text
+                      style={[
+                        styles.voicePillProvider,
+                        { color: accent },
+                      ]}
+                    >
+                      {previewing
+                        ? '◼ TAP TO STOP'
+                        : PROVIDER_LABELS[opt.provider]}
                     </Text>
                   </Pressable>
                 );
@@ -554,6 +627,20 @@ export default function VoiceCompanionScreen() {
                 (v) => v.backendVoiceId === selectedVoiceId,
               )?.description ?? ''}
             </Text>
+            {/* Universal stop affordance — visible whenever ANY voice
+                is previewing. Cancels both the in-flight fetch and
+                the playing audio (cloudStop now actually aborts). */}
+            {previewingVoiceId ? (
+              <Pressable
+                onPress={handleStopPreview}
+                accessibilityRole="button"
+                accessibilityLabel="Stop voice preview"
+                style={styles.stopPreviewBtn}
+                hitSlop={8}
+              >
+                <Text style={styles.stopPreviewBtnText}>◼  Stop preview</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
@@ -691,5 +778,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: Spacing.md,
     fontSize: 12,
+  },
+  stopPreviewBtn: {
+    marginTop: Spacing.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: 'rgba(220,80,80,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(220,80,80,0.40)',
+  },
+  stopPreviewBtnText: {
+    ...Type.caption,
+    color: '#E89292',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.4,
   },
 });
