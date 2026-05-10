@@ -1,7 +1,7 @@
 /**
  * Home Tab — The Sacred Court
  *
- * Six-zone cinematic home screen composed on top of the Divine design system.
+ * Five-zone cinematic home screen composed on top of the Divine design system.
  * Every element is alive — the OM breathes, the avatar aura pulses, the verse
  * reveals word by word, the streak flame flickers — but all animation runs on
  * the UI thread via Reanimated worklets so the JS thread stays free for user
@@ -11,8 +11,13 @@
  *   ZONE 2  Time-based Greeting Hero         │  staggered entrance
  *   ZONE 3  Daily Verse Card                 │  120ms between each
  *   ZONE 4  Tools Quick Rail                 │  zone, lotus-bloom
- *   ZONE 5  Sadhana Streak + Progress Ring   │  easing, NATURAL
- *   ZONE 6  KIAAN Vibe Mini Banner           ┘  duration (320ms)
+ *   ZONE 5  Sadhana Streak + Progress Ring   ┘  easing, NATURAL
+ *                                                duration (320ms)
+ *
+ * (The KIAAN Vibe Player previously lived as ZONE 6 here, but it duplicated
+ * the entry-point already exposed under Sacred Tools / Vibe — the duplicate
+ * pulled the eye away from the daily-practice flow above. Removed; the tile
+ * inside Sacred Tools is the single source of truth for that surface.)
  *
  * Particle field + aurora are rendered by DivineScreenWrapper at the
  * navigator level — every zone floats over the cosmic void.
@@ -77,8 +82,6 @@ const WHITE = '#F0EBE1';
 const SECONDARY = '#C8BFA8';
 const MUTED = '#7A7060';
 /** Krishna Aura + Peacock — used by the Vibe banner's blue gradients. */
-const KRISHNA = '#1B4FBB';
-const PEACOCK = '#0E7490';
 
 /** Staggered zone entrance delays (ms) — spec §animation. */
 const ZONE_DELAY = {
@@ -86,7 +89,6 @@ const ZONE_DELAY = {
   verse: 240,
   tools: 360,
   sadhana: 480,
-  vibe: 560,
 } as const;
 
 /** lotus-bloom — organic expansion, soft overshoot (divine.css parity). */
@@ -243,11 +245,28 @@ function DivineHeader(): React.JSX.Element {
         {/* Left: OM breathing */}
         <OmBreath />
 
-        {/* Center: Wordmark — Sanskrit OM glyph + Cormorant italic wordmark */}
-        <View style={s.wordmark} pointerEvents="none">
+        {/* Center: Wordmark — Sanskrit OM glyph + Cormorant italic wordmark,
+            stacked above a Sakha byline. The subtitle uses the same Cormorant
+            italic family as the wordmark (one weight lighter) so the two
+            lines read as a single calligraphic identity rather than a
+            heading + caption. Warm gold at 85% opacity keeps the byline
+            sacred but un-shouty under the white wordmark. */}
+        <View
+          style={s.wordmark}
+          pointerEvents="none"
+          accessibilityRole="header"
+          accessibilityLabel="Kiaanverse — Sakha, your spiritual companion"
+        >
           <Text style={s.wordmarkText} numberOfLines={1}>
             <Text style={s.wordmarkOm}>ॐ </Text>
             Kiaanverse
+          </Text>
+          <Text
+            style={s.wordmarkSub}
+            numberOfLines={1}
+            allowFontScaling={false}
+          >
+            Sakha · your spiritual companion
           </Text>
         </View>
 
@@ -773,78 +792,6 @@ function SadhanaStreakCard(): React.JSX.Element {
   );
 }
 
-// ── ZONE 6: KIAAN Vibe Banner ─────────────────────────────────────────────
-function KiaanVibeBanner(): React.JSX.Element {
-  // Zone 6 entrance — 560ms stagger after Zone 1.
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(12);
-
-  React.useEffect(() => {
-    opacity.value = withDelay(
-      ZONE_DELAY.vibe,
-      withTiming(1, { duration: 400, easing: easeLotusBloom })
-    );
-    translateY.value = withDelay(
-      ZONE_DELAY.vibe,
-      withTiming(0, { duration: 400, easing: easeLotusBloom })
-    );
-  }, [opacity, translateY]);
-
-  const animStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  const openVibePlayer = (): void => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
-      () => undefined
-    );
-    router.push('/vibe-player' as never);
-  };
-
-  return (
-    <Reanimated.View style={animStyle}>
-      <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={openVibePlayer}
-        accessibilityRole="button"
-        accessibilityLabel="Open KIAAN Vibe Player"
-      >
-        <View style={s.vibeBanner}>
-          {/* Left blue glow edge — Krishna Aura → Peacock gradient */}
-          <LinearGradient
-            colors={[KRISHNA, PEACOCK]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={s.vibeLeftGlow}
-          />
-
-          {/* Icon */}
-          <View style={s.vibeIconCircle}>
-            <Text style={s.vibeIcon}>🎵</Text>
-          </View>
-
-          {/* Text */}
-          <View style={s.vibeText}>
-            <Text style={s.vibeName}>KIAAN Vibe Player</Text>
-            <Text style={s.vibeSub}>Mantras · Meditation · Gita Shlokas</Text>
-          </View>
-
-          {/* Play button — Krishna Aura gradient */}
-          <LinearGradient
-            colors={[KRISHNA, PEACOCK]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={s.vibePlayBtn}
-          >
-            <Text style={s.vibePlayIcon}>▶</Text>
-          </LinearGradient>
-        </View>
-      </TouchableOpacity>
-    </Reanimated.View>
-  );
-}
-
 // ── MAIN SCREEN ───────────────────────────────────────────────────────────
 export default function HomeScreen(): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null);
@@ -876,9 +823,6 @@ export default function HomeScreen(): React.JSX.Element {
 
         {/* ZONE 5 — Sadhana Streak */}
         <SadhanaStreakCard />
-
-        {/* ZONE 6 — KIAAN Vibe Banner */}
-        <KiaanVibeBanner />
 
         {/* Bottom padding above the tab bar */}
         <View style={s.bottomSpacer} />
@@ -922,6 +866,22 @@ const s = StyleSheet.create({
     fontFamily: 'NotoSansDevanagari-Regular',
     fontSize: 20,
     color: WHITE,
+  },
+  wordmarkSub: {
+    // Sakha byline — divine calligraphic subtitle under the Kiaanverse
+    // wordmark. Uses CormorantGaramond-LightItalic (one weight lighter
+    // than the wordmark) at 11pt with 1.0pt letter-spacing — matches the
+    // wordmark's 0.08em letter-spacing ratio so the two lines share the
+    // same typographic rhythm. Warm gold at 85% so the byline glows
+    // beneath the white wordmark without competing with it.
+    marginTop: 2,
+    fontFamily: 'CormorantGaramond-LightItalic',
+    fontStyle: 'italic',
+    fontSize: 11,
+    lineHeight: 14,
+    color: 'rgba(212, 160, 23, 0.85)',
+    letterSpacing: 1.0,
+    textAlign: 'center',
   },
 
   // Avatar
@@ -1232,65 +1192,6 @@ const s = StyleSheet.create({
     fontFamily: 'Outfit-Medium',
     fontSize: 12,
     color: GOLD,
-  },
-
-  // Zone 6 — KIAAN Vibe Banner
-  vibeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(22,26,66,0.95)',
-    borderWidth: 1,
-    borderColor: 'rgba(27,79,187,0.3)',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 16,
-    height: 72,
-  },
-  vibeLeftGlow: {
-    width: 3,
-    height: '100%',
-  },
-  vibeIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(27,79,187,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(27,79,187,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 12,
-  },
-  vibeIcon: {
-    fontSize: 20,
-  },
-  vibeText: {
-    flex: 1,
-  },
-  vibeName: {
-    fontFamily: 'CormorantGaramond-Italic',
-    fontSize: 17,
-    color: WHITE,
-  },
-  vibeSub: {
-    fontFamily: 'Outfit-Regular',
-    fontSize: 11,
-    color: MUTED,
-    marginTop: 2,
-  },
-  vibePlayBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  vibePlayIcon: {
-    fontSize: 14,
-    color: WHITE,
-    // Optical centering — the ▶ glyph has a left-heavy mass.
-    marginLeft: 2,
   },
 
   // Scroll
