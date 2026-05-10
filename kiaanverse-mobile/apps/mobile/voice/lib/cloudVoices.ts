@@ -95,7 +95,7 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
     name: 'Nova',
     provider: 'elevenlabs',
     supportedLanguages: ['en-IN', 'en-US', 'hi-IN', 'sa-IN'],
-    description: 'Soft, soothing, divine — the closest to a human friend.',
+    description: 'Clear conversational English — for newcomers',
     gender: 'female',
   },
   {
@@ -104,7 +104,7 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
     name: 'Lily',
     provider: 'elevenlabs',
     supportedLanguages: ['en-IN', 'en-US'],
-    description: 'Warm, calm, grounded English. Best for chat Listen.',
+    description: 'Warm calm English — soothing daily companion',
     gender: 'female',
   },
   {
@@ -144,7 +144,7 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
       'ml-IN',
       'sa-IN',
     ],
-    description: 'Multilingual Indic — Hindi, Marathi, Tamil, Bengali, more.',
+    description: 'Warm multilingual Indic — 11 Indian languages',
     gender: 'female',
   },
   {
@@ -162,7 +162,7 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
     name: 'Rishi',
     provider: 'sarvam',
     supportedLanguages: ['hi-IN', 'sa-IN', 'en-IN'],
-    description: 'Indian male voice — Sanskrit chant register.',
+    description: 'Scholarly Indic — Sanskrit chant register',
     gender: 'male',
   },
 
@@ -193,7 +193,7 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
     name: 'Saraswati',
     provider: 'kiaan',
     supportedLanguages: ['en-IN', 'hi-IN', 'sa-IN'],
-    description: 'KIAAN curated divine female — Sarvam + ElevenLabs blend.',
+    description: 'Ethereal divine female — goddess of sacred speech',
     gender: 'female',
   },
   {
@@ -202,10 +202,26 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
     name: 'Krishna',
     provider: 'kiaan',
     supportedLanguages: ['en-IN', 'hi-IN', 'sa-IN'],
-    description: 'KIAAN curated divine male — friend-of-the-soul register.',
+    description: 'Storyteller gravitas — the divine friend',
     gender: 'male',
   },
 ];
+
+/**
+ * Filter ``CLOUD_VOICES`` to a curated subset by backend voice id.
+ * Used by Voice Companion to pick its 6-voice picker without
+ * redefining metadata. Preserves the order of ``ids``.
+ *
+ * Silently drops ids not present in CLOUD_VOICES — safer than throwing
+ * because a typo in the curation list shouldn't crash the picker.
+ */
+export function pickCloudVoices(
+  ids: readonly string[],
+): readonly CloudVoiceOption[] {
+  return ids
+    .map((id) => CLOUD_VOICES.find((v) => v.backendVoiceId === id))
+    .filter((v): v is CloudVoiceOption => Boolean(v));
+}
 
 /** Return cloud voices that cover ``language`` (exact match or base
  *  language match like ``hi`` matching ``hi-IN``). */

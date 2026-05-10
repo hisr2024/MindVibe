@@ -52,8 +52,11 @@ import {
   DivineScreenWrapper,
   OmLoader,
 } from '@kiaanverse/ui';
-import { useGitaVerse } from '@kiaanverse/api';
-import { getLocalChapter, getLocalVerse } from '@kiaanverse/api';
+import {
+  getLocalChapter,
+  getLocalVerse,
+  useGitaVerse,
+} from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
 import * as SecureStore from 'expo-secure-store';
 

@@ -78,9 +78,10 @@ import {
 } from '../../voice/lib/divineVoice';
 import {
   CLOUD_VOICE_PREFIX,
+  type CloudVoiceOption,
   PROVIDER_COLORS,
   PROVIDER_LABELS,
-  type CloudProvider,
+  pickCloudVoices,
 } from '../../voice/lib/cloudVoices';
 import { useSakhaStream } from '../../components/chat/useSakhaStream';
 
@@ -97,75 +98,31 @@ async function readAccessToken(): Promise<string | null> {
 }
 
 /**
- * Voice Companion's own voice picker — independent of the global
+ * Voice Companion's curated voice list — a six-voice subset of the
+ * shared ``CLOUD_VOICES`` catalog. Independent of the global
  * /settings/voice preference so users can have a different on-screen
  * voice for the verse pages, the chat tab, and the live conversation.
  *
- * Six curated cloud voices, balanced across providers and gender so
- * every user finds at least one that sounds right to them. Each
- * ``backendVoiceId`` is a real entry in
- * ``backend/services/elevenlabs_tts_service.py`` /
- * ``sarvam_tts_service.py`` voice catalogs (verified Krishna →
- * Clyde, Saraswati → Dorothy, Rishi → Abhilash, etc.).
+ * Single source of truth for voice metadata is ``cloudVoices.ts``;
+ * this screen just picks the 6 it wants by backend id and inherits
+ * the description / provider / gender from there. Eliminates the
+ * "same voice id, different description in two catalogs" drift bug.
  *
  * Persisted under ``voiceCompanion:cloudVoiceId`` (separate key from
  * the per-language ``divineVoice:override:*`` keys).
  */
-interface CompanionVoiceOption {
-  readonly backendVoiceId: string;
-  readonly name: string;
-  readonly description: string;
-  readonly provider: CloudProvider;
-  readonly gender: 'female' | 'male';
-}
+const COMPANION_VOICE_IDS = [
+  'divine-saraswati',
+  'divine-krishna',
+  'sarvam-rishi',
+  'sarvam-meera',
+  'elevenlabs-nova',
+  'elevenlabs-lily',
+] as const;
 
-const COMPANION_VOICES: readonly [
-  CompanionVoiceOption,
-  ...CompanionVoiceOption[],
-] = [
-  {
-    backendVoiceId: 'divine-saraswati',
-    name: 'Saraswati',
-    description: 'Ethereal divine female — goddess of sacred speech',
-    provider: 'kiaan',
-    gender: 'female',
-  },
-  {
-    backendVoiceId: 'divine-krishna',
-    name: 'Krishna',
-    description: 'Storyteller gravitas — the divine friend',
-    provider: 'kiaan',
-    gender: 'male',
-  },
-  {
-    backendVoiceId: 'sarvam-rishi',
-    name: 'Rishi',
-    description: 'Scholarly Indic — Sanskrit chant register',
-    provider: 'sarvam',
-    gender: 'male',
-  },
-  {
-    backendVoiceId: 'sarvam-meera',
-    name: 'Meera',
-    description: 'Warm multilingual Indic — 11 Indian languages',
-    provider: 'sarvam',
-    gender: 'female',
-  },
-  {
-    backendVoiceId: 'elevenlabs-nova',
-    name: 'Nova',
-    description: 'Clear conversational English — for newcomers',
-    provider: 'elevenlabs',
-    gender: 'female',
-  },
-  {
-    backendVoiceId: 'elevenlabs-lily',
-    name: 'Lily',
-    description: 'Warm calm English — soothing daily companion',
-    provider: 'elevenlabs',
-    gender: 'female',
-  },
-];
+const COMPANION_VOICES: readonly CloudVoiceOption[] = pickCloudVoices(
+  COMPANION_VOICE_IDS,
+);
 
 const DEFAULT_COMPANION_VOICE = 'divine-saraswati';
 const COMPANION_VOICE_KEY = 'voiceCompanion:cloudVoiceId';
