@@ -39,6 +39,17 @@ const MAX_TEXT_LENGTH = 5000;
 // ── MODULE STATE ─────────────────────────────────────────────────────
 /** Currently-loaded sound, if any. Single-stream playback model. */
 let currentSound: Audio.Sound | null = null;
+/** Monotonic request counter — every cloudSpeak call increments this.
+ *  Used to detect stale responses: if a call's local snapshot of
+ *  ``activeRequestId`` no longer matches the module-level value when
+ *  it tries to play, it knows a newer call has superseded it and
+ *  silently aborts. Eliminates the "tap voice A, tap voice B before A
+ *  finishes fetching, A's audio plays after B's" overlap bug. */
+let activeRequestId = 0;
+/** AbortController for the current in-flight fetch. ``cloudStop``
+ *  aborts it so the network call doesn't continue + waste an audio
+ *  pipeline slot after the user has cancelled. */
+let activeAbortController: AbortController | null = null;
 /** Cache: hash key → file uri. Persists in module memory; survives
  *  the document-directory cache between cold starts. */
 const fileCache = new Map<string, string>();
@@ -165,11 +176,13 @@ function arrayBufferToBase64(buf: ArrayBuffer): string {
 // ── FETCH ────────────────────────────────────────────────────────────
 /**
  * Fetch + cache a single audio clip. Returns the local file uri.
- * Dedupes concurrent fetches for the same key.
+ * Dedupes concurrent fetches for the same key. Honours the abort
+ * signal so cloudStop() actually cancels the network request.
  */
 async function fetchClip(
   text: string,
   opts: CloudSpeakOptions,
+  signal: AbortSignal,
 ): Promise<string> {
   if (text.length > MAX_TEXT_LENGTH) {
     throw new Error(
@@ -182,7 +195,10 @@ async function fetchClip(
   const cached = await readFromCache(key);
   if (cached) return cached;
 
-  // Dedupe in-flight fetches for this exact key.
+  // Dedupe in-flight fetches for this exact key. Note: dedup is keyed
+  // on (text, voiceId, language) so two concurrent calls for the SAME
+  // voice + text share one fetch. Different voices / texts always
+  // run their own fetch.
   const existing = inflight.get(key);
   if (existing) return existing;
 
@@ -210,6 +226,7 @@ async function fetchClip(
       method: 'POST',
       headers,
       body,
+      signal,
     });
     if (!response.ok) {
       // Drain body so the error message is informative without
@@ -291,34 +308,66 @@ async function ensurePlaybackAudioMode(): Promise<void> {
 }
 
 /**
- * Synthesize + play a single clip. Cancels any in-flight playback
- * before starting. Cache hits play immediately; cache misses fetch
- * first (typical 200–600ms for a 200-character response).
+ * Synthesize + play a single clip. Cancels any in-flight playback OR
+ * in-flight fetch before starting. Cache hits play immediately; cache
+ * misses fetch first (typical 200–600ms for a 200-character response).
  *
  * Mirror of Speech.speak shape so the call sites can swap between
  * on-device and cloud paths with a single conditional.
+ *
+ * Race-safety
+ * -----------
+ * Each call increments ``activeRequestId`` and snapshots its own ID.
+ * Before each await checkpoint (after fetch, before createAsync,
+ * after createAsync), the call compares its snapshot against the
+ * module-level ``activeRequestId``. If they differ, a newer call has
+ * superseded this one — we drop the result silently. This eliminates
+ * the "tap voice A, tap voice B before A finishes, both play" overlap.
+ *
+ * The fetch itself is wired to an ``AbortController`` whose ``abort()``
+ * is invoked by ``cloudStop()`` — so cancelling truly cancels the
+ * network call, not just the playback.
  */
 export async function cloudSpeak(
   text: string,
   options: CloudSpeakOptions,
 ): Promise<void> {
-  await unloadCurrent();
+  // Cancel any prior in-flight call (network + playback). This MUST
+  // run before incrementing activeRequestId so the prior call's
+  // staleness check works correctly.
+  await cloudStop();
 
   if (!text || !text.trim()) {
     options.onDone?.();
     return;
   }
 
+  // Snapshot a unique ID for this call so subsequent staleness checks
+  // can compare against the module-level activeRequestId.
+  const myRequestId = ++activeRequestId;
+  const abortController = new AbortController();
+  activeAbortController = abortController;
+
   // Force the audio session into playback mode BEFORE doing anything
   // else. If useDictation just finished, the mode is still recording —
   // playing under recording mode produces no audible output.
   await ensurePlaybackAudioMode();
+  if (myRequestId !== activeRequestId) return; // superseded — drop
 
   let uri: string;
   try {
-    uri = await fetchClip(text, options);
+    uri = await fetchClip(text, options, abortController.signal);
   } catch (e) {
+    if (myRequestId !== activeRequestId) return; // superseded — drop
     const err = e instanceof Error ? e : new Error(String(e));
+    // Treat AbortError as a normal cancellation — not a real error.
+    // The user (or a newer cloudSpeak call) requested the abort.
+    if (
+      err.name === 'AbortError' ||
+      (err.message && err.message.toLowerCase().includes('aborted'))
+    ) {
+      return;
+    }
     // Log so silent failures are diagnosable from adb logcat. Without
     // this, a 401/403/timeout looks identical to "audio is fine, just
     // really quiet" to the user.
@@ -328,6 +377,10 @@ export async function cloudSpeak(
     options.onError?.(err);
     return;
   }
+
+  // Post-fetch staleness re-check — the user may have tapped another
+  // voice while we were waiting on the network.
+  if (myRequestId !== activeRequestId) return;
 
   try {
     // Holder for the sound — referenced inside the status callback
@@ -352,10 +405,17 @@ export async function cloudSpeak(
       { shouldPlay: true, volume: 1.0 },
       onStatus,
     );
+    // Final staleness check after the createAsync await — unload
+    // immediately if we've been superseded.
+    if (myRequestId !== activeRequestId) {
+      sound.unloadAsync().catch(() => undefined);
+      return;
+    }
     holder.sound = sound;
     currentSound = sound;
     options.onStart?.();
   } catch (e) {
+    if (myRequestId !== activeRequestId) return; // superseded — drop
     const err = e instanceof Error ? e : new Error(String(e));
     if (typeof console !== 'undefined' && console.warn) {
       console.warn('cloudTTS: playback failed —', err.message);
@@ -364,8 +424,26 @@ export async function cloudSpeak(
   }
 }
 
-/** Stop any in-flight playback. Idempotent. */
+/**
+ * Stop any in-flight playback OR fetch. Idempotent. Bumps the
+ * ``activeRequestId`` so any pending cloudSpeak call sees its
+ * snapshot is stale and drops silently.
+ */
 export async function cloudStop(): Promise<void> {
+  // Bump the active request id so any pending cloudSpeak detects
+  // staleness and drops silently — including ones still inside the
+  // fetch await that didn't get aborted in time.
+  activeRequestId++;
+  // Abort any in-flight fetch. fetch() honours the abort signal and
+  // throws AbortError, which cloudSpeak treats as a non-error.
+  if (activeAbortController) {
+    try {
+      activeAbortController.abort();
+    } catch {
+      // ignore
+    }
+    activeAbortController = null;
+  }
   await unloadCurrent();
 }
 

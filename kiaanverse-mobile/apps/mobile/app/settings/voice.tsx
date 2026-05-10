@@ -57,6 +57,7 @@ import {
   previewVoice,
   setPreferredPersona,
   setPreferredVoice,
+  stopSpeaking,
   warmDivineVoiceCache,
 } from '../../voice/lib/divineVoice';
 import {
@@ -146,6 +147,11 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [selected, setSelected] = useState<string | undefined>(undefined);
   const [persona, setPersona] = useState<DivinePersona>('divine');
+  // Which voice id is currently audible. Drives Play→Stop chip toggle
+  // and the universal "◼ Stop preview" strip. ``stopSpeaking`` triggers
+  // the cancellation chain (cloudStop bumps activeRequestId + aborts
+  // in-flight fetch).
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
 
   // Initial load: warm the voice cache so the picker has data to
   // render. Cache is module-scoped — second visit is instant.
@@ -204,8 +210,19 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
     [language],
   );
 
+  const handleStopPreview = useCallback(() => {
+    void stopSpeaking();
+    setPreviewingId(null);
+  }, []);
+
   const handlePreview = useCallback(
     (id: string) => {
+      // Tap-the-same-Play-toggle = stop. Avoids the "I tapped Play, now
+      // it's playing, how do I stop?" UX dead-end.
+      if (previewingId === id) {
+        handleStopPreview();
+        return;
+      }
       void Haptics.selectionAsync().catch(() => {});
       // Cloud voices need the JWT to hit /api/voice/synthesize. The
       // on-device path ignores the token cleanly. Preview helper
@@ -213,8 +230,14 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
       previewVoice(id, language, undefined, {
         getAccessToken: readAccessToken,
       });
+      setPreviewingId(id);
+      // Auto-clear after a generous ceiling (5s) so the chip never
+      // gets stuck on "Stop" if a callback fails to fire.
+      setTimeout(() => {
+        setPreviewingId((cur) => (cur === id ? null : cur));
+      }, 5000);
     },
-    [language],
+    [language, previewingId, handleStopPreview],
   );
 
   const handlePersonaChange = useCallback(async (value: DivinePersona) => {
@@ -339,7 +362,12 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       onPress={() => handlePreview(v.id)}
                       style={styles.previewBtn}
                       accessibilityRole="button"
-                      accessibilityLabel={`Preview ${v.name} from ${PROVIDER_LABELS[v.provider]}`}
+                      accessibilityLabel={
+                        previewingId === v.id
+                          ? `Stop ${v.name} preview`
+                          : `Preview ${v.name} from ${PROVIDER_LABELS[v.provider]}`
+                      }
+                      accessibilityState={{ busy: previewingId === v.id }}
                       hitSlop={8}
                     >
                       <Text
@@ -347,7 +375,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                         color={colors.primary[300]}
                         style={styles.previewBtnText}
                       >
-                        ▶ Play
+                        {previewingId === v.id ? '◼ Stop' : '▶ Play'}
                       </Text>
                     </Pressable>
                     {selected === v.id ? (
@@ -464,7 +492,12 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                     onPress={() => handlePreview(v.identifier)}
                     style={styles.previewBtn}
                     accessibilityRole="button"
-                    accessibilityLabel={`Preview ${v.name}`}
+                    accessibilityLabel={
+                      previewingId === v.identifier
+                        ? `Stop ${v.name} preview`
+                        : `Preview ${v.name}`
+                    }
+                    accessibilityState={{ busy: previewingId === v.identifier }}
                     hitSlop={8}
                   >
                     <Text
@@ -472,7 +505,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       color={colors.primary[300]}
                       style={styles.previewBtnText}
                     >
-                      ▶ Play
+                      {previewingId === v.identifier ? '◼ Stop' : '▶ Play'}
                     </Text>
                   </Pressable>
                   {selected === v.identifier ? (

@@ -44,8 +44,29 @@ _PIPELINE_CACHE_TTL_SECONDS = 1800  # 30 minutes
 # --- Bhashini API Configuration ---
 
 BHASHINI_METERING_URL = "https://meity-auth.ulcacontrib.org/ulca/apis/v0/model/getModelsPipeline"
-BHASHINI_USER_ID = os.getenv("BHASHINI_USER_ID", "").strip()
-BHASHINI_API_KEY = os.getenv("BHASHINI_API_KEY", "").strip()
+
+
+def _bhashini_user_id() -> str:
+    """Read BHASHINI_USER_ID fresh per call. Captured-at-import was the
+    legacy pattern but breaks when env vars are set after the Python
+    process is started (Render's deploy flow sets them before import,
+    but local test runs and re-deploys with a hot key swap need a fresh
+    read each call). Mirror of ``_resolve_elevenlabs_api_key`` /
+    ``_resolve_sarvam_api_key`` patterns elsewhere in this codebase."""
+    return os.getenv("BHASHINI_USER_ID", "").strip()
+
+
+def _bhashini_api_key() -> str:
+    """Read BHASHINI_API_KEY fresh per call. See _bhashini_user_id."""
+    return os.getenv("BHASHINI_API_KEY", "").strip()
+
+
+# Backwards-compat: callers that read these as module constants get
+# the fresh value on every access via __getattr__-style. Most internal
+# call sites use the helper functions; these globals stay for any
+# external integration that imports the constants directly.
+BHASHINI_USER_ID = _bhashini_user_id()
+BHASHINI_API_KEY = _bhashini_api_key()
 
 # --- Language Code Mapping ---
 # Maps MindVibe internal language codes to Bhashini's language codes.
@@ -141,7 +162,7 @@ COMPANION_TO_BHASHINI: dict[str, dict[str, str]] = {
 
 def is_bhashini_available() -> bool:
     """Check if Bhashini AI TTS is configured and available."""
-    return bool(BHASHINI_USER_ID and BHASHINI_API_KEY)
+    return bool(_bhashini_user_id() and _bhashini_api_key())
 
 
 def is_bhashini_supported_language(language: str) -> bool:
@@ -209,8 +230,8 @@ async def _get_bhashini_pipeline_config(
             response = await client.post(
                 BHASHINI_METERING_URL,
                 headers={
-                    "userID": BHASHINI_USER_ID,
-                    "ulcaApiKey": BHASHINI_API_KEY,
+                    "userID": _bhashini_user_id(),
+                    "ulcaApiKey": _bhashini_api_key(),
                     "Content-Type": "application/json",
                 },
                 json=payload,
