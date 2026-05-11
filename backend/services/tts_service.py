@@ -47,7 +47,7 @@ VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "stor
 #   v1 — initial implementation
 #   v2 — speaker mapping fixes (sarvam-meera, elevenlabs-lily added);
 #        is_picker_voice extended premium tuning to non-divine voices.
-TTS_CACHE_VERSION = 3
+TTS_CACHE_VERSION = 4
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
@@ -531,15 +531,25 @@ class TTSService:
 
         # ── Direct-routing fast path: <provider>-<speaker> ──
         # New v3 voice IDs are bound to a specific (provider, speaker)
-        # tuple — e.g. ``sarvam-karun`` routes to Sarvam's API with
-        # speaker_id=karun, ``elevenlabs-clyde`` routes to ElevenLabs
-        # with voice_id=clyde. Bypasses the legacy persona double-lookup
+        # tuple — e.g. ``sarvam-anushka`` routes to Sarvam's API with
+        # speaker_id=anushka, ``elevenlabs-aria`` routes to ElevenLabs
+        # with voice_id=aria. Bypasses the legacy persona double-lookup
         # that was producing collisions (two persona ids defaulting to
         # the same speaker → identical audio).
         #
         # Recognized prefixes: ``sarvam-`` and ``elevenlabs-``. Anything
         # else (legacy ``divine-*``, bare ``meera``, etc.) falls through
         # to the canonical chain below.
+        #
+        # IMPORTANT (per founder directive 2026-05): when the user's
+        # chosen paid provider is exhausted (quota / 429 / network), we
+        # MUST NOT silently substitute the OTHER paid provider — that
+        # would deliver a completely different voice character than the
+        # one the user picked (e.g. Aria → some Sarvam Indic female).
+        # Instead, on direct-route failure we jump STRAIGHT to
+        # Microsoft Neural (Tier 3), which can render any text in any
+        # supported language without speaker-identity collisions.
+        direct_route_attempted = False
         if voice_id:
             primary_provider: Optional[str] = None
             if voice_id.startswith("sarvam-"):
@@ -548,6 +558,7 @@ class TTSService:
                 primary_provider = "elevenlabs"
 
             if primary_provider == "sarvam":
+                direct_route_attempted = True
                 try:
                     audio = await self._synthesize_with_sarvam(
                         text, language, voice_type, mood, voice_id
@@ -571,6 +582,7 @@ class TTSService:
                     logger.warning(f"Sarvam direct-route raised: {e}")
 
             elif primary_provider == "elevenlabs":
+                direct_route_attempted = True
                 try:
                     audio = await self._synthesize_with_elevenlabs(
                         text, language, voice_id, mood
@@ -595,49 +607,51 @@ class TTSService:
                     )
                     logger.warning(f"ElevenLabs direct-route raised: {e}")
 
-            # Direct route failed — fall through to canonical chain
-            # below as a backstop (the OTHER paid provider, then
-            # Microsoft Neural).
-
-        # ── Tier 1: Sarvam AI (paid primary) ──
-        try:
-            audio = await self._synthesize_with_sarvam(
-                text, language, voice_type, mood, voice_id
-            )
-            if audio:
-                _record("T1_sarvam", "ok")
-                logger.info(
-                    f"Sarvam AI (Tier 1) synthesis success for {language} "
-                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+        # ── Canonical paid chain (legacy voice IDs only) ─────────────
+        # Skipped entirely when the user picked a v3 direct-route voice
+        # — see ``direct_route_attempted`` block above. Routing the
+        # ``sarvam-anushka`` request through ElevenLabs would deliver a
+        # different person's voice and is treated as an error condition.
+        if not direct_route_attempted:
+            # ── Tier 1: Sarvam AI (paid primary) ──
+            try:
+                audio = await self._synthesize_with_sarvam(
+                    text, language, voice_type, mood, voice_id
                 )
-                return audio
-            _record(
-                "T1_sarvam",
-                "skipped_no_key" if not self._sarvam_available else "no_audio",
-            )
-        except Exception as e:
-            _record("T1_sarvam", f"err:{type(e).__name__}")
-            logger.warning(f"Sarvam Tier 1 raised: {e}")
-
-        # ── Tier 2: ElevenLabs (paid fallback) ──
-        try:
-            audio = await self._synthesize_with_elevenlabs(
-                text, language, voice_id, mood
-            )
-            if audio:
-                _record("T2_elevenlabs", "ok")
-                logger.info(
-                    f"ElevenLabs (Tier 2) synthesis success for {language} "
-                    f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                if audio:
+                    _record("T1_sarvam", "ok")
+                    logger.info(
+                        f"Sarvam AI (Tier 1) synthesis success for {language} "
+                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                    )
+                    return audio
+                _record(
+                    "T1_sarvam",
+                    "skipped_no_key" if not self._sarvam_available else "no_audio",
                 )
-                return audio
-            _record(
-                "T2_elevenlabs",
-                "skipped_no_key" if not self._elevenlabs_available else "no_audio",
-            )
-        except Exception as e:
-            _record("T2_elevenlabs", f"err:{type(e).__name__}")
-            logger.warning(f"ElevenLabs Tier 2 raised: {e}")
+            except Exception as e:
+                _record("T1_sarvam", f"err:{type(e).__name__}")
+                logger.warning(f"Sarvam Tier 1 raised: {e}")
+
+            # ── Tier 2: ElevenLabs (paid fallback) ──
+            try:
+                audio = await self._synthesize_with_elevenlabs(
+                    text, language, voice_id, mood
+                )
+                if audio:
+                    _record("T2_elevenlabs", "ok")
+                    logger.info(
+                        f"ElevenLabs (Tier 2) synthesis success for {language} "
+                        f"voice={voice_id} chain=[{', '.join(tier_outcomes)}]"
+                    )
+                    return audio
+                _record(
+                    "T2_elevenlabs",
+                    "skipped_no_key" if not self._elevenlabs_available else "no_audio",
+                )
+            except Exception as e:
+                _record("T2_elevenlabs", f"err:{type(e).__name__}")
+                logger.warning(f"ElevenLabs Tier 2 raised: {e}")
 
         # ── Tier 3: Microsoft Neural via Edge TTS (LAST resort) ──
         # Only reached when Sarvam + ElevenLabs are BOTH
