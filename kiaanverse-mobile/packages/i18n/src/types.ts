@@ -28,7 +28,8 @@ export type TranslationNamespace =
   | 'community'
   | 'vibe-player'
   | 'analytics'
-  | 'settings';
+  | 'settings'
+  | 'wisdom';
 
 /** Nested translation messages — supports one level of nesting */
 export type TranslationMessages = Record<string, string | Record<string, string>>;

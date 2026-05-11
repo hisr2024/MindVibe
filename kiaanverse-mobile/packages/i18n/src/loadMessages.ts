@@ -27,6 +27,25 @@ import enDivine from './messages/en/divine.json';
 import enJournal from './messages/en/journal.json';
 import enAnalytics from './messages/en/analytics.json';
 import enSettings from './messages/en/settings.json';
+import enWisdom from './messages/en/wisdom.json';
+
+// Wisdom — only English populated for now; other locales fall back at runtime.
+// They'll be authored alongside the wisdom-screen refactor.
+import hiWisdom from './messages/hi/wisdom.json';
+import saWisdom from './messages/sa/wisdom.json';
+import taWisdom from './messages/ta/wisdom.json';
+import teWisdom from './messages/te/wisdom.json';
+import bnWisdom from './messages/bn/wisdom.json';
+import mrWisdom from './messages/mr/wisdom.json';
+import guWisdom from './messages/gu/wisdom.json';
+import knWisdom from './messages/kn/wisdom.json';
+import mlWisdom from './messages/ml/wisdom.json';
+import paWisdom from './messages/pa/wisdom.json';
+import deWisdom from './messages/de/wisdom.json';
+import frWisdom from './messages/fr/wisdom.json';
+import esWisdom from './messages/es/wisdom.json';
+import itWisdom from './messages/it/wisdom.json';
+import ptWisdom from './messages/pt/wisdom.json';
 
 // Hindi
 import hiCommon from './messages/hi/common.json';
@@ -199,6 +218,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   journal: enJournal,
   analytics: enAnalytics,
   settings: enSettings,
+  wisdom: enWisdom,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -225,6 +245,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: hiErrors,
     journeys: hiJourneys,
     settings: hiSettings,
+    wisdom: hiWisdom,
   },
   sa: {
     common: saCommon,
@@ -235,6 +256,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: saErrors,
     journeys: saJourneys,
     settings: saSettings,
+    wisdom: saWisdom,
   },
   ta: {
     common: taCommon,
@@ -245,6 +267,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: taErrors,
     journeys: taJourneys,
     settings: taSettings,
+    wisdom: taWisdom,
   },
   te: {
     common: teCommon,
@@ -255,6 +278,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: teErrors,
     journeys: teJourneys,
     settings: teSettings,
+    wisdom: teWisdom,
   },
   bn: {
     common: bnCommon,
@@ -265,6 +289,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: bnErrors,
     journeys: bnJourneys,
     settings: bnSettings,
+    wisdom: bnWisdom,
   },
   mr: {
     common: mrCommon,
@@ -275,6 +300,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: mrErrors,
     journeys: mrJourneys,
     settings: mrSettings,
+    wisdom: mrWisdom,
   },
   gu: {
     common: guCommon,
@@ -285,6 +311,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: guErrors,
     journeys: guJourneys,
     settings: guSettings,
+    wisdom: guWisdom,
   },
   kn: {
     common: knCommon,
@@ -295,6 +322,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: knErrors,
     journeys: knJourneys,
     settings: knSettings,
+    wisdom: knWisdom,
   },
   ml: {
     common: mlCommon,
@@ -305,6 +333,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: mlErrors,
     journeys: mlJourneys,
     settings: mlSettings,
+    wisdom: mlWisdom,
   },
   pa: {
     common: paCommon,
@@ -315,6 +344,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: paErrors,
     journeys: paJourneys,
     settings: paSettings,
+    wisdom: paWisdom,
   },
   de: {
     common: deCommon,
@@ -325,6 +355,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: deErrors,
     journeys: deJourneys,
     settings: deSettings,
+    wisdom: deWisdom,
   },
   fr: {
     common: frCommon,
@@ -335,6 +366,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: frErrors,
     journeys: frJourneys,
     settings: frSettings,
+    wisdom: frWisdom,
   },
   es: {
     common: esCommon,
@@ -345,6 +377,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: esErrors,
     journeys: esJourneys,
     settings: esSettings,
+    wisdom: esWisdom,
   },
   it: {
     common: itCommon,
@@ -355,6 +388,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: itErrors,
     journeys: itJourneys,
     settings: itSettings,
+    wisdom: itWisdom,
   },
   pt: {
     common: ptCommon,
@@ -365,6 +399,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     errors: ptErrors,
     journeys: ptJourneys,
     settings: ptSettings,
+    wisdom: ptWisdom,
   },
 };
 
