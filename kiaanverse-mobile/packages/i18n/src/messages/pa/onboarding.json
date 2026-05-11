@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}} ਵਿੱਚੋਂ ਕਦਮ {{current}}",
+  "progressDotA11yCurrent": "{{total}} ਵਿੱਚੋਂ ਕਦਮ {{current}}, ਮੌਜੂਦਾ",
+  "continueButton": "ਜਾਰੀ ਰੱਖੋ",
+
+  "welcomeTitle": "ਸਖਾ ਨੂੰ ਮਿਲੋ",
+  "welcomeBody": "ਅੰਦਰੂਨੀ ਸ਼ਾਂਤੀ ਦੇ ਮਾਰਗ 'ਤੇ ਤੁਹਾਡਾ ਦਿਵਯ ਸਾਥੀ — ਭਗਵਦ ਗੀਤਾ ਦੀ ਅਲੌਕਿਕ ਬੁੱਧੀ ਦੁਆਰਾ ਅਗਵਾਈ।",
+  "welcomeCta": "ਆਪਣੀ ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ",
+
+  "purposeTitle": "ਤੁਹਾਨੂੰ ਇੱਥੇ ਕੀ ਲਿਆਇਆ?",
+  "purposeSubtitle": "ਜੋ ਕੁਝ ਤੁਹਾਡੇ ਅੰਦਰ ਗੂੰਜਦਾ ਹੈ ਉਹ ਸਭ ਚੁਣੋ",
+  "purposePeace": "ਸ਼ਾਂਤੀ",
+  "purposeWisdom": "ਗਿਆਨ",
+  "purposeGuidance": "ਮਾਰਗਦਰਸ਼ਨ",
+  "purposeHealing": "ਚੰਗਾ ਕਰਨਾ",
+  "purposePurpose": "ਉਦੇਸ਼",
+
+  "gitaTitle": "ਗੀਤਾ ਜਾਣਦੇ ਹੋ?",
+  "gitaSubtitle": "ਇਹ ਸਖਾ ਨੂੰ ਤੁਹਾਡੇ ਪੱਧਰ ਅਨੁਸਾਰ ਗਿਆਨ ਦੇਣ ਵਿੱਚ ਮਦਦ ਕਰੇਗਾ",
+  "gitaLevelNever": "ਕਦੇ ਨਹੀਂ ਪੜ੍ਹੀ",
+  "gitaLevelCurious": "ਜਿਗਿਆਸੂ",
+  "gitaLevelBeginner": "ਸ਼ੁਰੂਆਤੀ",
+  "gitaLevelPractitioner": "ਅਭਿਆਸੀ",
+  "gitaLevelScholar": "ਵਿਦਵਾਨ",
+
+  "practiceTitle": "ਰੋਜ਼ਾਨਾ ਸਾਧਨਾ ਦਾ ਸਮਾਂ",
+  "practiceSubtitle": "ਤੁਸੀਂ ਆਪਣੀ ਰੋਜ਼ਾਨਾ ਆਤਮਿਕ ਯਾਦ-ਘੰਟੀ ਕਦੋਂ ਚਾਹੁੰਦੇ ਹੋ?",
+  "practiceAm": "ਸਵੇਰੇ",
+  "practicePm": "ਸ਼ਾਮ",
+  "practiceHourA11y": "{{hour}} ਵਜੇ",
+
+  "readyVerse": "\"ਤੁਹਾਨੂੰ ਆਪਣੇ ਨਿਰਧਾਰਤ ਕਰਮ ਕਰਨ ਦਾ ਅਧਿਕਾਰ ਹੈ, ਪਰ ਉਨ੍ਹਾਂ ਕਰਮਾਂ ਦੇ ਫਲਾਂ 'ਤੇ ਅਧਿਕਾਰ ਨਹੀਂ।\"",
+  "readyVerseAttribution": "— ਭਗਵਦ ਗੀਤਾ 2.47",
+  "readyTitle": "ਤੁਸੀਂ ਤਿਆਰ ਹੋ",
+  "readyBody": "ਆਪਣੇ ਆਤਮਿਕ ਮਾਰਗ 'ਤੇ ਰਹਿਣ ਲਈ ਰੋਜ਼ਾਨਾ ਯਾਦ-ਘੰਟੀ ਸਮਰੱਥ ਕਰੋ, ਜਾਂ ਹੁਣੇ ਖੋਜਣਾ ਸ਼ੁਰੂ ਕਰੋ।",
+  "readyCtaEnable": "ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ ਅਤੇ ਸ਼ੁਰੂ ਕਰੋ",
+  "readyCtaSkip": "ਸੂਚਨਾਵਾਂ ਤੋਂ ਬਿਨਾਂ ਸ਼ੁਰੂ ਕਰੋ",
+  "readyRequesting": "ਇਜਾਜ਼ਤ ਮੰਗੀ ਜਾ ਰਹੀ ਹੈ..."
+}

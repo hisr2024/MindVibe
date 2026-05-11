@@ -33,6 +33,7 @@ import {
   useAuthStore,
   useUserPreferencesStore,
 } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { api } from '@kiaanverse/api';
 import {
@@ -65,6 +66,7 @@ function ProgressDots({
   current: number;
   total: number;
 }): React.JSX.Element {
+  const { t } = useTranslation();
   return (
     <View style={styles.dotsRow}>
       {Array.from({ length: total }, (_, i) => (
@@ -75,7 +77,12 @@ function ProgressDots({
             i === current && styles.dotActive,
             i < current && styles.dotCompleted,
           ]}
-          accessibilityLabel={`Step ${i + 1} of ${total}${i === current ? ', current' : ''}`}
+          accessibilityLabel={t(
+            i === current
+              ? 'onboarding.progressDotA11yCurrent'
+              : 'onboarding.progressDotA11y',
+            { current: String(i + 1), total: String(total) },
+          )}
         />
       ))}
     </View>

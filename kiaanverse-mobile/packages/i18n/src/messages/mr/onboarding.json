@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}} पैकी पायरी {{current}}",
+  "progressDotA11yCurrent": "{{total}} पैकी पायरी {{current}}, सध्याची",
+  "continueButton": "सुरू ठेवा",
+
+  "welcomeTitle": "सख्याची भेट",
+  "welcomeBody": "अंतःशांतीच्या मार्गावर तुमचा दिव्य साथीदार — श्रीमद्भगवद्गीतेच्या कालातीत ज्ञानाने मार्गदर्शित.",
+  "welcomeCta": "तुमचा प्रवास सुरू करा",
+
+  "purposeTitle": "तुम्हाला इथे काय आणले?",
+  "purposeSubtitle": "तुमच्या आत प्रतिध्वनी होणारे सर्व निवडा",
+  "purposePeace": "शांती",
+  "purposeWisdom": "ज्ञान",
+  "purposeGuidance": "मार्गदर्शन",
+  "purposeHealing": "उपचार",
+  "purposePurpose": "उद्देश",
+
+  "gitaTitle": "गीतेची ओळख?",
+  "gitaSubtitle": "हे सख्याला तुमच्या स्तरानुसार ज्ञान देण्यास मदत करेल",
+  "gitaLevelNever": "कधीच वाचली नाही",
+  "gitaLevelCurious": "उत्सुक",
+  "gitaLevelBeginner": "नवशिक्या",
+  "gitaLevelPractitioner": "साधक",
+  "gitaLevelScholar": "विद्वान",
+
+  "practiceTitle": "दैनंदिन साधनेची वेळ",
+  "practiceSubtitle": "तुम्हाला तुमची दैनंदिन आध्यात्मिक स्मरण-घंटी कधी हवी?",
+  "practiceAm": "सकाळी",
+  "practicePm": "संध्याकाळी",
+  "practiceHourA11y": "{{hour}} वाजता",
+
+  "readyVerse": "\"तुम्हाला तुमचे विहित कर्म करण्याचा अधिकार आहे, परंतु त्या कर्माच्या फळांवर अधिकार नाही.\"",
+  "readyVerseAttribution": "— श्रीमद्भगवद्गीता २.४७",
+  "readyTitle": "तुम्ही तयार आहात",
+  "readyBody": "तुमच्या आध्यात्मिक मार्गावर राहण्यासाठी दैनंदिन स्मरण-घंटी सक्रिय करा, किंवा आत्ताच अन्वेषण सुरू करा.",
+  "readyCtaEnable": "सूचना सक्रिय करा आणि सुरू करा",
+  "readyCtaSkip": "सूचनांशिवाय सुरू करा",
+  "readyRequesting": "परवानगी मागितली जात आहे..."
+}

@@ -30,6 +30,24 @@ import enSettings from './messages/en/settings.json';
 import enWisdom from './messages/en/wisdom.json';
 import enSadhana from './messages/en/sadhana.json';
 import enSubscription from './messages/en/subscription.json';
+import enOnboarding from './messages/en/onboarding.json';
+
+// Onboarding — per-locale bundles (registered in Batch 6).
+import hiOnboarding from './messages/hi/onboarding.json';
+import saOnboarding from './messages/sa/onboarding.json';
+import taOnboarding from './messages/ta/onboarding.json';
+import teOnboarding from './messages/te/onboarding.json';
+import bnOnboarding from './messages/bn/onboarding.json';
+import mrOnboarding from './messages/mr/onboarding.json';
+import guOnboarding from './messages/gu/onboarding.json';
+import knOnboarding from './messages/kn/onboarding.json';
+import mlOnboarding from './messages/ml/onboarding.json';
+import paOnboarding from './messages/pa/onboarding.json';
+import deOnboarding from './messages/de/onboarding.json';
+import frOnboarding from './messages/fr/onboarding.json';
+import esOnboarding from './messages/es/onboarding.json';
+import itOnboarding from './messages/it/onboarding.json';
+import ptOnboarding from './messages/pt/onboarding.json';
 
 // Subscription — per-locale bundles (registered in Batch 5).
 import hiSubscription from './messages/hi/subscription.json';
@@ -257,6 +275,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   wisdom: enWisdom,
   sadhana: enSadhana,
   subscription: enSubscription,
+  onboarding: enOnboarding,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -285,6 +304,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: hiWisdom,
     sadhana: hiSadhana,
     subscription: hiSubscription,
+    onboarding: hiOnboarding,
   },
   sa: {
     common: saCommon,
@@ -298,6 +318,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: saWisdom,
     sadhana: saSadhana,
     subscription: saSubscription,
+    onboarding: saOnboarding,
   },
   ta: {
     common: taCommon,
@@ -311,6 +332,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: taWisdom,
     sadhana: taSadhana,
     subscription: taSubscription,
+    onboarding: taOnboarding,
   },
   te: {
     common: teCommon,
@@ -324,6 +346,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: teWisdom,
     sadhana: teSadhana,
     subscription: teSubscription,
+    onboarding: teOnboarding,
   },
   bn: {
     common: bnCommon,
@@ -337,6 +360,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: bnWisdom,
     sadhana: bnSadhana,
     subscription: bnSubscription,
+    onboarding: bnOnboarding,
   },
   mr: {
     common: mrCommon,
@@ -350,6 +374,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: mrWisdom,
     sadhana: mrSadhana,
     subscription: mrSubscription,
+    onboarding: mrOnboarding,
   },
   gu: {
     common: guCommon,
@@ -363,6 +388,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: guWisdom,
     sadhana: guSadhana,
     subscription: guSubscription,
+    onboarding: guOnboarding,
   },
   kn: {
     common: knCommon,
@@ -376,6 +402,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: knWisdom,
     sadhana: knSadhana,
     subscription: knSubscription,
+    onboarding: knOnboarding,
   },
   ml: {
     common: mlCommon,
@@ -389,6 +416,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: mlWisdom,
     sadhana: mlSadhana,
     subscription: mlSubscription,
+    onboarding: mlOnboarding,
   },
   pa: {
     common: paCommon,
@@ -402,6 +430,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: paWisdom,
     sadhana: paSadhana,
     subscription: paSubscription,
+    onboarding: paOnboarding,
   },
   de: {
     common: deCommon,
@@ -415,6 +444,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: deWisdom,
     sadhana: deSadhana,
     subscription: deSubscription,
+    onboarding: deOnboarding,
   },
   fr: {
     common: frCommon,
@@ -428,6 +458,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: frWisdom,
     sadhana: frSadhana,
     subscription: frSubscription,
+    onboarding: frOnboarding,
   },
   es: {
     common: esCommon,
@@ -441,6 +472,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: esWisdom,
     sadhana: esSadhana,
     subscription: esSubscription,
+    onboarding: esOnboarding,
   },
   it: {
     common: itCommon,
@@ -454,6 +486,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: itWisdom,
     sadhana: itSadhana,
     subscription: itSubscription,
+    onboarding: itOnboarding,
   },
   pt: {
     common: ptCommon,
@@ -467,6 +500,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     wisdom: ptWisdom,
     sadhana: ptSadhana,
     subscription: ptSubscription,
+    onboarding: ptOnboarding,
   },
 };
 

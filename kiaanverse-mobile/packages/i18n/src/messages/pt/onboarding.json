@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "Passo {{current}} de {{total}}",
+  "progressDotA11yCurrent": "Passo {{current}} de {{total}}, actual",
+  "continueButton": "Continuar",
+
+  "welcomeTitle": "Conhece o Sakha",
+  "welcomeBody": "O teu companheiro divino no caminho para a paz interior, guiado pela sabedoria intemporal do Bhagavad Gita.",
+  "welcomeCta": "Começa a tua jornada",
+
+  "purposeTitle": "O que te traz aqui?",
+  "purposeSubtitle": "Selecciona tudo o que ressoa em ti",
+  "purposePeace": "Paz",
+  "purposeWisdom": "Sabedoria",
+  "purposeGuidance": "Orientação",
+  "purposeHealing": "Cura",
+  "purposePurpose": "Propósito",
+
+  "gitaTitle": "Conheces o Gita?",
+  "gitaSubtitle": "Ajuda o Sakha a adaptar a sabedoria ao teu nível",
+  "gitaLevelNever": "Nunca li",
+  "gitaLevelCurious": "Curioso",
+  "gitaLevelBeginner": "Iniciante",
+  "gitaLevelPractitioner": "Praticante",
+  "gitaLevelScholar": "Erudito",
+
+  "practiceTitle": "Hora da prática diária",
+  "practiceSubtitle": "Quando queres o teu lembrete espiritual diário?",
+  "practiceAm": "AM",
+  "practicePm": "PM",
+  "practiceHourA11y": "{{hour}} horas",
+
+  "readyVerse": "«Tens o direito de cumprir os teus deveres prescritos, mas não tens direito aos frutos das tuas acções.»",
+  "readyVerseAttribution": "— Bhagavad Gita 2.47",
+  "readyTitle": "Estás pronto",
+  "readyBody": "Activa os lembretes diários para te manteres no teu caminho espiritual, ou começa a explorar agora.",
+  "readyCtaEnable": "Activar notificações e começar",
+  "readyCtaSkip": "Começar sem notificações",
+  "readyRequesting": "A pedir permissão..."
+}

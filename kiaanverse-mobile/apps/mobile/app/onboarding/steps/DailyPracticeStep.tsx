@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const HOURS = [6, 7, 8, 9, 10, 11, 12] as const;
 const PERIODS = ['AM', 'PM'] as const;
@@ -26,6 +27,7 @@ export function DailyPracticeStep({
   onNext,
   onSkip,
 }: DailyPracticeStepProps): React.JSX.Element {
+  const { t } = useTranslation();
   // Parse initial value (HH:mm 24h format) into hour/period
   const parsedHour = value ? parseInt(value.split(':')[0] ?? '8', 10) : 8;
   const initialDisplayHour =
@@ -70,16 +72,20 @@ export function DailyPracticeStep({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text variant="h1" align="center">
-          Daily Practice Time
+          {t('onboarding.practiceTitle')}
         </Text>
         <Text variant="bodySmall" color={colors.text.muted} align="center">
-          When would you like your daily spiritual reminder?
+          {t('onboarding.practiceSubtitle')}
         </Text>
       </View>
 
-      {/* Time display */}
+      {/* Time display — "HH:00 AM/PM"; the AM/PM token localizes via i18n. */}
       <Text variant="display" color={colors.primary[300]} align="center">
-        {selectedHour}:00 {selectedPeriod}
+        {`${selectedHour}:00 ${
+          selectedPeriod === 'AM'
+            ? t('onboarding.practiceAm')
+            : t('onboarding.practicePm')
+        }`}
       </Text>
 
       {/* Hour grid */}
@@ -93,7 +99,9 @@ export function DailyPracticeStep({
               style={[styles.hourChip, isSelected && styles.hourChipSelected]}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={`${hour} o'clock`}
+              accessibilityLabel={t('onboarding.practiceHourA11y', {
+                hour: String(hour),
+              })}
             >
               <Text
                 variant="label"
@@ -111,6 +119,10 @@ export function DailyPracticeStep({
       <View style={styles.periodRow}>
         {PERIODS.map((period) => {
           const isSelected = selectedPeriod === period;
+          const label =
+            period === 'AM'
+              ? t('onboarding.practiceAm')
+              : t('onboarding.practicePm');
           return (
             <Pressable
               key={period}
@@ -121,13 +133,14 @@ export function DailyPracticeStep({
               ]}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={label}
             >
               <Text
                 variant="label"
                 color={isSelected ? colors.primary[300] : colors.text.secondary}
                 align="center"
               >
-                {period}
+                {label}
               </Text>
             </Pressable>
           );
@@ -136,12 +149,12 @@ export function DailyPracticeStep({
 
       <View style={styles.actions}>
         <GoldenButton
-          title="Continue"
+          title={t('onboarding.continueButton')}
           onPress={onNext}
           testID="practice-next"
         />
         <GoldenButton
-          title="Skip"
+          title={t('common.skip')}
           variant="ghost"
           onPress={onSkip}
           testID="practice-skip"
