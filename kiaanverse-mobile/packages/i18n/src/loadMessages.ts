@@ -29,6 +29,24 @@ import enAnalytics from './messages/en/analytics.json';
 import enSettings from './messages/en/settings.json';
 import enWisdom from './messages/en/wisdom.json';
 import enSadhana from './messages/en/sadhana.json';
+import enSubscription from './messages/en/subscription.json';
+
+// Subscription — per-locale bundles (registered in Batch 5).
+import hiSubscription from './messages/hi/subscription.json';
+import saSubscription from './messages/sa/subscription.json';
+import taSubscription from './messages/ta/subscription.json';
+import teSubscription from './messages/te/subscription.json';
+import bnSubscription from './messages/bn/subscription.json';
+import mrSubscription from './messages/mr/subscription.json';
+import guSubscription from './messages/gu/subscription.json';
+import knSubscription from './messages/kn/subscription.json';
+import mlSubscription from './messages/ml/subscription.json';
+import paSubscription from './messages/pa/subscription.json';
+import deSubscription from './messages/de/subscription.json';
+import frSubscription from './messages/fr/subscription.json';
+import esSubscription from './messages/es/subscription.json';
+import itSubscription from './messages/it/subscription.json';
+import ptSubscription from './messages/pt/subscription.json';
 
 // Sadhana — per-locale bundles (registered alongside Wisdom in Batch 4).
 import hiSadhana from './messages/hi/sadhana.json';
@@ -238,6 +256,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   settings: enSettings,
   wisdom: enWisdom,
   sadhana: enSadhana,
+  subscription: enSubscription,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -265,6 +284,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: hiSettings,
     wisdom: hiWisdom,
     sadhana: hiSadhana,
+    subscription: hiSubscription,
   },
   sa: {
     common: saCommon,
@@ -277,6 +297,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: saSettings,
     wisdom: saWisdom,
     sadhana: saSadhana,
+    subscription: saSubscription,
   },
   ta: {
     common: taCommon,
@@ -289,6 +310,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: taSettings,
     wisdom: taWisdom,
     sadhana: taSadhana,
+    subscription: taSubscription,
   },
   te: {
     common: teCommon,
@@ -301,6 +323,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: teSettings,
     wisdom: teWisdom,
     sadhana: teSadhana,
+    subscription: teSubscription,
   },
   bn: {
     common: bnCommon,
@@ -313,6 +336,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: bnSettings,
     wisdom: bnWisdom,
     sadhana: bnSadhana,
+    subscription: bnSubscription,
   },
   mr: {
     common: mrCommon,
@@ -325,6 +349,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: mrSettings,
     wisdom: mrWisdom,
     sadhana: mrSadhana,
+    subscription: mrSubscription,
   },
   gu: {
     common: guCommon,
@@ -337,6 +362,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: guSettings,
     wisdom: guWisdom,
     sadhana: guSadhana,
+    subscription: guSubscription,
   },
   kn: {
     common: knCommon,
@@ -349,6 +375,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: knSettings,
     wisdom: knWisdom,
     sadhana: knSadhana,
+    subscription: knSubscription,
   },
   ml: {
     common: mlCommon,
@@ -361,6 +388,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: mlSettings,
     wisdom: mlWisdom,
     sadhana: mlSadhana,
+    subscription: mlSubscription,
   },
   pa: {
     common: paCommon,
@@ -373,6 +401,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: paSettings,
     wisdom: paWisdom,
     sadhana: paSadhana,
+    subscription: paSubscription,
   },
   de: {
     common: deCommon,
@@ -385,6 +414,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: deSettings,
     wisdom: deWisdom,
     sadhana: deSadhana,
+    subscription: deSubscription,
   },
   fr: {
     common: frCommon,
@@ -397,6 +427,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: frSettings,
     wisdom: frWisdom,
     sadhana: frSadhana,
+    subscription: frSubscription,
   },
   es: {
     common: esCommon,
@@ -409,6 +440,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: esSettings,
     wisdom: esWisdom,
     sadhana: esSadhana,
+    subscription: esSubscription,
   },
   it: {
     common: itCommon,
@@ -421,6 +453,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: itSettings,
     wisdom: itWisdom,
     sadhana: itSadhana,
+    subscription: itSubscription,
   },
   pt: {
     common: ptCommon,
@@ -433,6 +466,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     settings: ptSettings,
     wisdom: ptWisdom,
     sadhana: ptSadhana,
+    subscription: ptSubscription,
   },
 };
 

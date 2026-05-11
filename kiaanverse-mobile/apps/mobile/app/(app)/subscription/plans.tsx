@@ -45,6 +45,7 @@ import {
   type IAPProduct,
 } from '@kiaanverse/api';
 import type { SubscriptionTier } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   BillingToggle,
@@ -75,6 +76,7 @@ interface CurrentSubscriptionMini {
 }
 
 export default function SubscriptionPlansScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const [billing, setBilling] = useState<BillingPeriod>('monthly');
   const [selected, setSelected] = useState<SubscriptionTier>('sadhak');
   const [products, setProducts] = useState<IAPProduct[]>([]);
@@ -166,19 +168,19 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
           // still being configured server-side.
           if (isSubscriptionUnavailableError(message)) {
             Alert.alert(
-              'Coming soon 🙏',
-              'This plan will be available very soon. Thank you for your patience.',
-              [{ text: 'OK' }]
+              t('subscription.alertComingSoonTitle'),
+              t('subscription.alertComingSoonBody'),
+              [{ text: t('common.ok') }],
             );
             return;
           }
-          Alert.alert('Purchase unsuccessful', message);
+          Alert.alert(t('subscription.alertPurchaseFailedTitle'), message);
         },
       });
     } finally {
       setPurchasing(false);
     }
-  }, [selected, billing]);
+  }, [selected, billing, t]);
 
   const handleRestore = useCallback(async () => {
     setRestoring(true);
@@ -189,66 +191,72 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
           Haptics.NotificationFeedbackType.Success
         );
         Alert.alert(
-          'Purchases restored',
-          `Your ${TIER_CONFIGS[result.tier].name} subscription is active.`,
-          [{ text: 'Continue', onPress: () => router.back() }]
+          t('subscription.alertRestoredTitle'),
+          t('subscription.alertRestoredBody', {
+            tierName: TIER_CONFIGS[result.tier].name,
+          }),
+          [{ text: t('subscription.continueButton'), onPress: () => router.back() }],
         );
       } else {
         Alert.alert(
-          'Nothing to restore',
-          result.error ?? 'No active subscription found.'
+          t('subscription.alertNothingTitle'),
+          result.error ?? t('subscription.alertNothingFoundBody'),
         );
       }
     } finally {
       setRestoring(false);
     }
-  }, []);
+  }, [t]);
 
   const ctaMeta = useMemo(() => {
     if (selected === 'free') {
       return {
-        label: 'Continue with Free Seeker',
-        sub: 'Sign in anytime to upgrade to a sacred tier',
+        label: t('subscription.ctaFreeLabel'),
+        sub: t('subscription.ctaFreeSub'),
         disabled: true,
       } as const;
     }
     const price = priceFor(selected as PaidTier, billing);
-    const period = billing === 'monthly' ? '/month' : '/year';
+    const period =
+      billing === 'monthly'
+        ? t('subscription.periodPerMonth')
+        : t('subscription.periodPerYear');
     const identity = tierIdentity(selected);
     const action = resolveCtaAction(current, selected as PaidTier, billing);
+    const params = { tierName: identity.name, price, period };
     if (action === 'current') {
       return {
-        label: `You are on ${identity.name} · ${price}${period}`,
-        sub: 'Manage or cancel in your store settings',
+        label: t('subscription.ctaCurrentLabel', params),
+        sub: t('subscription.ctaCurrentSub'),
         disabled: true,
       } as const;
     }
     if (action === 'upgrade') {
       return {
-        label: `Upgrade to ${identity.name} · ${price}${period}`,
-        sub: 'Prorated instantly · Billed via your store account',
+        label: t('subscription.ctaUpgradeLabel', params),
+        sub: t('subscription.ctaUpgradeSub'),
         disabled: false,
       } as const;
     }
     if (action === 'downgrade') {
       return {
-        label: `Switch to ${identity.name} · ${price}${period}`,
-        sub: 'Takes effect at the end of your current period',
+        label: t('subscription.ctaSwitchLabel', params),
+        sub: t('subscription.ctaSwitchSub'),
         disabled: false,
       } as const;
     }
     return {
-      label: `Begin with ${identity.name} · ${price}${period}`,
-      sub: 'Cancel anytime in your store settings',
+      label: t('subscription.ctaBeginLabel', params),
+      sub: t('subscription.ctaBeginSub'),
       disabled: false,
     } as const;
-  }, [billing, current, priceFor, selected]);
+  }, [billing, current, priceFor, selected, t]);
 
   if (loadingProducts) {
     return (
       <DivineScreenWrapper>
         <View style={styles.center}>
-          <OmLoader size={48} label="Opening the sacred store…" />
+          <OmLoader size={48} label={t('subscription.loadingProducts')} />
         </View>
       </DivineScreenWrapper>
     );
@@ -262,10 +270,8 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Begin Your Sacred Journey</Text>
-          <Text style={styles.subtitle}>
-            Choose the path that calls to your dharma
-          </Text>
+          <Text style={styles.title}>{t('subscription.plansTitle')}</Text>
+          <Text style={styles.subtitle}>{t('subscription.plansSubtitle')}</Text>
         </View>
 
         <View style={styles.togglePad}>
@@ -275,16 +281,21 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         <View style={styles.planStack}>
           {ALL_TIERS.map((tier) => {
             const isFree = tier === 'free';
-            const price = isFree ? 'Free' : priceFor(tier as PaidTier, billing);
+            const price = isFree
+              ? t('subscription.priceFree')
+              : priceFor(tier as PaidTier, billing);
             const pricePeriod = isFree
-              ? 'forever'
+              ? t('subscription.periodForever')
               : billing === 'monthly'
-                ? '/month'
-                : '/year';
-            const features = featureListFor(tier);
+                ? t('subscription.periodPerMonth')
+                : t('subscription.periodPerYear');
+            const features = featureListFor(tier, t);
 
             // For annual plans on paid tiers, surface a per-month
             // equivalent label so users feel the saving viscerally.
+            // The price is rendered in USD because the underlying
+            // TIER_CONFIGS prices are USD; only the surrounding "/mo"
+            // text localizes, via subscription.perMonthEquivalent.
             let perMonthEquivalent: string | undefined;
             let originalPrice: string | undefined;
             if (!isFree && billing === 'yearly') {
@@ -292,7 +303,9 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
               const monthly = TIER_CONFIGS[tier].prices.monthly.usd;
               if (yearly > 0 && monthly > 0) {
                 const perMonth = yearly / 12;
-                perMonthEquivalent = `≈ $${perMonth.toFixed(2)}/mo`;
+                perMonthEquivalent = t('subscription.perMonthEquivalent', {
+                  price: `$${perMonth.toFixed(2)}`,
+                });
                 const annualIfMonthly = monthly * 12;
                 if (annualIfMonthly > yearly) {
                   originalPrice = `$${annualIfMonthly.toFixed(0)}`;
@@ -319,11 +332,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.legal}>
-          <Text style={styles.legalText}>
-            Billed via Google Play / App Store. Subscriptions auto-renew unless
-            cancelled at least 24 hours before the end of the current period.
-            Manage or cancel anytime in your store account.
-          </Text>
+          <Text style={styles.legalText}>{t('subscription.legalText')}</Text>
           <View style={styles.legalLinks}>
             <Pressable
               onPress={() => {
@@ -335,7 +344,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
                 router.push('/terms');
               }}
             >
-              <Text style={styles.legalLink}>Terms of Service</Text>
+              <Text style={styles.legalLink}>{t('subscription.linkTerms')}</Text>
             </Pressable>
             <Text style={styles.legalDot}>·</Text>
             <Pressable
@@ -343,12 +352,14 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
                 router.push('/privacy');
               }}
             >
-              <Text style={styles.legalLink}>Privacy Policy</Text>
+              <Text style={styles.legalLink}>{t('subscription.linkPrivacy')}</Text>
             </Pressable>
           </View>
           <Pressable onPress={handleRestore} disabled={restoring}>
             <Text style={styles.restoreText}>
-              {restoring ? 'Restoring…' : 'Restore purchases'}
+              {restoring
+                ? t('subscription.linkRestoring')
+                : t('subscription.linkRestore')}
             </Text>
           </Pressable>
         </View>
@@ -358,7 +369,7 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
       <View style={styles.stickyBottom}>
         {purchasing ? (
           <View style={styles.ctaLoading}>
-            <OmLoader size={36} label="Opening sacred payment…" />
+            <OmLoader size={36} label={t('subscription.loadingPurchase')} />
           </View>
         ) : (
           <Pressable
@@ -427,35 +438,42 @@ function deriveBillingFromSku(sku: string | null): BillingPeriod | null {
   return null;
 }
 
-function featureListFor(tier: SubscriptionTier): string[] {
+/**
+ * Build the per-tier feature list, threading the i18n `t` function through
+ * so each line localizes against the active UI language.
+ */
+function featureListFor(
+  tier: SubscriptionTier,
+  t: (key: string, params?: Record<string, string>) => string,
+): string[] {
   const f = TIER_CONFIGS[tier].features;
   const lines: string[] = [];
   if (tier === 'free') {
-    lines.push('Daily wisdom & mood tracking');
-    if (f.kiaanDivineChat) lines.push('5 KIAAN questions / month');
-    lines.push('One active wisdom journey');
+    lines.push(t('subscription.featureDailyWisdom'));
+    if (f.kiaanDivineChat) lines.push(t('subscription.featureKiaanFreeQuota'));
+    lines.push(t('subscription.featureOneJourney'));
     return lines;
   }
   if (f.kiaanDivineChat) {
     lines.push(
       tier === 'bhakta'
-        ? '50 KIAAN questions / month'
+        ? t('subscription.featureKiaanBhaktaQuota')
         : tier === 'sadhak'
-          ? '300 KIAAN questions / month'
-          : 'Unlimited KIAAN questions'
+          ? t('subscription.featureKiaanSadhakQuota')
+          : t('subscription.featureKiaanUnlimited'),
     );
   }
-  if (f.kiaanVoiceCompanion) lines.push('Divine Voice Companion');
-  if (f.kiaanSoulReading) lines.push('Soul Reading insights');
-  if (f.kiaanQuantumDive) lines.push('Quantum Dive journeys');
-  if (f.encryptedJournal) lines.push('Encrypted Sacred Journal');
-  if (f.advancedAnalytics) lines.push('KarmaLytix insights');
-  if (f.offlineAccess) lines.push('Offline access');
-  if (f.arthaReframing) lines.push('Ardha reframing tool');
-  if (f.viyogaDetachment) lines.push('Viyoga detachment practice');
-  if (f.relationshipCompass) lines.push('Relationship Compass');
-  if (f.dedicatedSupport) lines.push('Dedicated support');
-  else if (f.prioritySupport) lines.push('Priority support');
+  if (f.kiaanVoiceCompanion) lines.push(t('subscription.featureDivineVoice'));
+  if (f.kiaanSoulReading) lines.push(t('subscription.featureSoulReading'));
+  if (f.kiaanQuantumDive) lines.push(t('subscription.featureQuantumDive'));
+  if (f.encryptedJournal) lines.push(t('subscription.featureEncryptedJournal'));
+  if (f.advancedAnalytics) lines.push(t('subscription.featureKarmalytix'));
+  if (f.offlineAccess) lines.push(t('subscription.featureOffline'));
+  if (f.arthaReframing) lines.push(t('subscription.featureArdha'));
+  if (f.viyogaDetachment) lines.push(t('subscription.featureViyoga'));
+  if (f.relationshipCompass) lines.push(t('subscription.featureRelationship'));
+  if (f.dedicatedSupport) lines.push(t('subscription.featureDedicatedSupport'));
+  else if (f.prioritySupport) lines.push(t('subscription.featurePrioritySupport'));
   // 8 max to match the spec's "8 listed" Sadhak ask.
   return lines.slice(0, tier === 'siddha' ? 8 : tier === 'sadhak' ? 8 : 5);
 }
