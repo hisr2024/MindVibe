@@ -4,5 +4,32 @@
   "moodCheckIn": "भवतः मनःस्थितिः कीदृशी?",
   "activeJourney": "भवतः सक्रिया यात्रा",
   "noJourneys": "रूपान्तरणाय यात्रामारभध्वम्",
-  "startJourney": "यात्रामारभध्वम्"
+  "startJourney": "यात्रामारभध्वम्",
+
+  "wordmarkA11yLabel": "Kiaanverse — सखा, भवतः आध्यात्मिकः साथी",
+  "wordmarkSubtitle": "सखा · भवतः आध्यात्मिकः साथी",
+  "openProfileA11y": "परिचयं उद्घाटयतु",
+  "defaultUserName": "पवित्र-साधकः",
+
+  "openTodaysWisdomA11y": "अद्यतनं प्रज्ञानम् उद्घाटयतु",
+  "verseRef": "श्रीमद्भगवद्गीता — अध्यायः {{chapter}} · श्लोकः {{verse}}",
+  "askSakha": "सखां पृच्छतु →",
+  "askSakhaA11y": "अस्मिन् श्लोके सखां पृच्छतु",
+  "listenToVerseA11y": "अद्यतनं श्लोकं श्रृणोतु",
+  "stopVerseA11y": "श्लोकं स्थापयतु",
+  "bookmarkVerseA11y": "इमं श्लोकं संरक्षयतु",
+  "removeBookmarkA11y": "पट्टिकां अपसारयतु",
+
+  "sacredToolsHeader": "पवित्र-साधनानि",
+  "toolEmotionalReset": "भावनात्मक-पुनःस्थापनम्",
+  "toolArdha": "अर्थ",
+  "toolKarmaReset": "कर्म-पुनःस्थापनम्",
+  "toolViyoga": "वियोग",
+  "toolAllTools": "सर्वाणि साधनानि",
+  "toolNameA11y": "{{name}} साधनम्",
+
+  "daysOfSacredPractice": "पवित्र-साधनायाः\nदिनानि",
+  "phasesLabel": "चरणानि",
+  "continueArrow": "अनुवर्तयतु →",
+  "continueSadhanaA11y": "साधनां अनुवर्तयतु"
 }

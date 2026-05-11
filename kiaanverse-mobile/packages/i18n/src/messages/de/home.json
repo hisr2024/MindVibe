@@ -4,5 +4,32 @@
   "moodCheckIn": "Wie fühlst du dich?",
   "activeJourney": "Deine aktive Reise",
   "noJourneys": "Beginne eine Reise und starte deine Wandlung",
-  "startJourney": "Reise beginnen"
+  "startJourney": "Reise beginnen",
+
+  "wordmarkA11yLabel": "Kiaanverse — Sakha, dein spiritueller Begleiter",
+  "wordmarkSubtitle": "Sakha · dein spiritueller Begleiter",
+  "openProfileA11y": "Profil öffnen",
+  "defaultUserName": "Heiliger Suchender",
+
+  "openTodaysWisdomA11y": "Weisheit des Tages öffnen",
+  "verseRef": "Bhagavad Gita — Kap. {{chapter}} · V. {{verse}}",
+  "askSakha": "Sakha fragen →",
+  "askSakhaA11y": "Sakha zu diesem Vers fragen",
+  "listenToVerseA11y": "Vers des Tages anhören",
+  "stopVerseA11y": "Vers-Wiedergabe stoppen",
+  "bookmarkVerseA11y": "Diesen Vers merken",
+  "removeBookmarkA11y": "Lesezeichen entfernen",
+
+  "sacredToolsHeader": "Heilige Werkzeuge",
+  "toolEmotionalReset": "Emotionaler Reset",
+  "toolArdha": "Ardha",
+  "toolKarmaReset": "Karma-Reset",
+  "toolViyoga": "Viyoga",
+  "toolAllTools": "Alle Werkzeuge",
+  "toolNameA11y": "Werkzeug {{name}}",
+
+  "daysOfSacredPractice": "Tage heiliger\nPraxis",
+  "phasesLabel": "Phasen",
+  "continueArrow": "Weiter →",
+  "continueSadhanaA11y": "Sadhana fortsetzen"
 }

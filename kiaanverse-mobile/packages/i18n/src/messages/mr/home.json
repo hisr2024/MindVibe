@@ -4,5 +4,32 @@
   "moodCheckIn": "तुम्हाला कसे वाटत आहे?",
   "activeJourney": "तुमचा सुरू असलेला प्रवास",
   "noJourneys": "तुमच्या परिवर्तनाची सुरुवात करण्यासाठी एक प्रवास सुरू करा",
-  "startJourney": "प्रवास सुरू करा"
+  "startJourney": "प्रवास सुरू करा",
+
+  "wordmarkA11yLabel": "Kiaanverse — सखा, तुमचा आध्यात्मिक साथी",
+  "wordmarkSubtitle": "सखा · तुमचा आध्यात्मिक साथी",
+  "openProfileA11y": "प्रोफाइल उघडा",
+  "defaultUserName": "पवित्र साधक",
+
+  "openTodaysWisdomA11y": "आजची बुद्धी उघडा",
+  "verseRef": "भगवद्गीता — अध्याय {{chapter}} · श्लोक {{verse}}",
+  "askSakha": "सख्याला विचारा →",
+  "askSakhaA11y": "या श्लोकाविषयी सख्याला विचारा",
+  "listenToVerseA11y": "आजचा श्लोक ऐका",
+  "stopVerseA11y": "श्लोक प्लेबॅक थांबवा",
+  "bookmarkVerseA11y": "हा श्लोक जतन करा",
+  "removeBookmarkA11y": "बुकमार्क काढा",
+
+  "sacredToolsHeader": "पवित्र साधने",
+  "toolEmotionalReset": "भावनिक रीसेट",
+  "toolArdha": "अर्थ",
+  "toolKarmaReset": "कर्म रीसेट",
+  "toolViyoga": "वियोग",
+  "toolAllTools": "सर्व साधने",
+  "toolNameA11y": "{{name}} साधन",
+
+  "daysOfSacredPractice": "पवित्र साधनेचे\nदिवस",
+  "phasesLabel": "टप्पे",
+  "continueArrow": "सुरू ठेवा →",
+  "continueSadhanaA11y": "साधना सुरू ठेवा"
 }

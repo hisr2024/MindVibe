@@ -4,5 +4,32 @@
   "moodCheckIn": "আপনি কেমন অনুভব করছেন?",
   "activeJourney": "আপনার চলমান যাত্রা",
   "noJourneys": "আপনার রূপান্তর শুরু করতে একটি যাত্রা আরম্ভ করুন",
-  "startJourney": "যাত্রা শুরু করুন"
+  "startJourney": "যাত্রা শুরু করুন",
+
+  "wordmarkA11yLabel": "Kiaanverse — সখা, আপনার আধ্যাত্মিক সঙ্গী",
+  "wordmarkSubtitle": "সখা · আপনার আধ্যাত্মিক সঙ্গী",
+  "openProfileA11y": "প্রোফাইল খুলুন",
+  "defaultUserName": "পবিত্র অন্বেষক",
+
+  "openTodaysWisdomA11y": "আজকের জ্ঞান খুলুন",
+  "verseRef": "শ্রীমদ্‌ভগবদ্‌গীতা — অধ্যায় {{chapter}} · শ্লোক {{verse}}",
+  "askSakha": "সখাকে জিজ্ঞাসা করুন →",
+  "askSakhaA11y": "এই শ্লোক সম্পর্কে সখাকে জিজ্ঞাসা করুন",
+  "listenToVerseA11y": "আজকের শ্লোক শুনুন",
+  "stopVerseA11y": "শ্লোক প্লেব্যাক বন্ধ করুন",
+  "bookmarkVerseA11y": "এই শ্লোকটি সংরক্ষণ করুন",
+  "removeBookmarkA11y": "বুকমার্ক সরান",
+
+  "sacredToolsHeader": "পবিত্র সরঞ্জাম",
+  "toolEmotionalReset": "আবেগ পুনঃস্থাপন",
+  "toolArdha": "অর্থ",
+  "toolKarmaReset": "কর্ম পুনঃস্থাপন",
+  "toolViyoga": "বিয়োগ",
+  "toolAllTools": "সমস্ত সরঞ্জাম",
+  "toolNameA11y": "{{name}} সরঞ্জাম",
+
+  "daysOfSacredPractice": "পবিত্র সাধনার\nদিন",
+  "phasesLabel": "পর্যায়",
+  "continueArrow": "চালিয়ে যান →",
+  "continueSadhanaA11y": "সাধনা চালিয়ে যান"
 }

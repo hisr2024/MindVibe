@@ -4,5 +4,32 @@
   "moodCheckIn": "Come ti senti?",
   "activeJourney": "Il tuo viaggio attivo",
   "noJourneys": "Inizia un viaggio per avviare la tua trasformazione",
-  "startJourney": "Inizia il viaggio"
+  "startJourney": "Inizia il viaggio",
+
+  "wordmarkA11yLabel": "Kiaanverse — Sakha, il tuo compagno spirituale",
+  "wordmarkSubtitle": "Sakha · il tuo compagno spirituale",
+  "openProfileA11y": "Apri profilo",
+  "defaultUserName": "Cercatore sacro",
+
+  "openTodaysWisdomA11y": "Apri la saggezza di oggi",
+  "verseRef": "Bhagavad Gita — Cap. {{chapter}} · V. {{verse}}",
+  "askSakha": "Chiedi a Sakha →",
+  "askSakhaA11y": "Chiedi a Sakha di questo verso",
+  "listenToVerseA11y": "Ascolta il verso del giorno",
+  "stopVerseA11y": "Interrompi la riproduzione del verso",
+  "bookmarkVerseA11y": "Salva questo verso nei preferiti",
+  "removeBookmarkA11y": "Rimuovi dai preferiti",
+
+  "sacredToolsHeader": "Strumenti sacri",
+  "toolEmotionalReset": "Reset emotivo",
+  "toolArdha": "Ardha",
+  "toolKarmaReset": "Reset del karma",
+  "toolViyoga": "Viyoga",
+  "toolAllTools": "Tutti gli strumenti",
+  "toolNameA11y": "Strumento {{name}}",
+
+  "daysOfSacredPractice": "Giorni di\npratica sacra",
+  "phasesLabel": "Fasi",
+  "continueArrow": "Continua →",
+  "continueSadhanaA11y": "Continua la sadhana"
 }

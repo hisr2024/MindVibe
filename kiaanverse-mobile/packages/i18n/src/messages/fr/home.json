@@ -4,5 +4,32 @@
   "moodCheckIn": "Comment vous sentez-vous ?",
   "activeJourney": "Votre parcours en cours",
   "noJourneys": "Commencez un parcours pour amorcer votre transformation",
-  "startJourney": "Commencer le parcours"
+  "startJourney": "Commencer le parcours",
+
+  "wordmarkA11yLabel": "Kiaanverse — Sakha, ton compagnon spirituel",
+  "wordmarkSubtitle": "Sakha · ton compagnon spirituel",
+  "openProfileA11y": "Ouvrir le profil",
+  "defaultUserName": "Chercheur sacré",
+
+  "openTodaysWisdomA11y": "Ouvrir la sagesse du jour",
+  "verseRef": "Bhagavad-Gîtâ — Ch. {{chapter}} · V. {{verse}}",
+  "askSakha": "Demander à Sakha →",
+  "askSakhaA11y": "Demander à Sakha à propos de ce verset",
+  "listenToVerseA11y": "Écouter le verset du jour",
+  "stopVerseA11y": "Arrêter la lecture du verset",
+  "bookmarkVerseA11y": "Ajouter ce verset aux favoris",
+  "removeBookmarkA11y": "Retirer le favori",
+
+  "sacredToolsHeader": "Outils sacrés",
+  "toolEmotionalReset": "Réinitialisation émotionnelle",
+  "toolArdha": "Ardha",
+  "toolKarmaReset": "Réinitialisation karmique",
+  "toolViyoga": "Viyoga",
+  "toolAllTools": "Tous les outils",
+  "toolNameA11y": "Outil {{name}}",
+
+  "daysOfSacredPractice": "Jours de\npratique sacrée",
+  "phasesLabel": "Phases",
+  "continueArrow": "Continuer →",
+  "continueSadhanaA11y": "Continuer la sadhana"
 }

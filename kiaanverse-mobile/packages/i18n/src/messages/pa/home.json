@@ -4,5 +4,32 @@
   "moodCheckIn": "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?",
   "activeJourney": "ਤੁਹਾਡੀ ਚੱਲ ਰਹੀ ਯਾਤਰਾ",
   "noJourneys": "ਆਪਣੇ ਪਰਿਵਰਤਨ ਦੀ ਸ਼ੁਰੂਆਤ ਲਈ ਇੱਕ ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ",
-  "startJourney": "ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ"
+  "startJourney": "ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ",
+
+  "wordmarkA11yLabel": "Kiaanverse — ਸਖਾ, ਤੁਹਾਡਾ ਆਤਮਿਕ ਸਾਥੀ",
+  "wordmarkSubtitle": "ਸਖਾ · ਤੁਹਾਡਾ ਆਤਮਿਕ ਸਾਥੀ",
+  "openProfileA11y": "ਪ੍ਰੋਫ਼ਾਈਲ ਖੋਲ੍ਹੋ",
+  "defaultUserName": "ਪਵਿੱਤਰ ਖੋਜੀ",
+
+  "openTodaysWisdomA11y": "ਅੱਜ ਦੀ ਬੁੱਧੀ ਖੋਲ੍ਹੋ",
+  "verseRef": "ਭਗਵਦ ਗੀਤਾ — ਅਧਿਆਇ {{chapter}} · ਸ਼ਲੋਕ {{verse}}",
+  "askSakha": "ਸਖੇ ਨੂੰ ਪੁੱਛੋ →",
+  "askSakhaA11y": "ਇਸ ਸ਼ਲੋਕ ਬਾਰੇ ਸਖੇ ਨੂੰ ਪੁੱਛੋ",
+  "listenToVerseA11y": "ਅੱਜ ਦਾ ਸ਼ਲੋਕ ਸੁਣੋ",
+  "stopVerseA11y": "ਸ਼ਲੋਕ ਪਲੇਬੈਕ ਰੋਕੋ",
+  "bookmarkVerseA11y": "ਇਸ ਸ਼ਲੋਕ ਨੂੰ ਸੰਭਾਲੋ",
+  "removeBookmarkA11y": "ਬੁਕਮਾਰਕ ਹਟਾਓ",
+
+  "sacredToolsHeader": "ਪਵਿੱਤਰ ਔਜ਼ਾਰ",
+  "toolEmotionalReset": "ਭਾਵਨਾਤਮਕ ਰੀਸੈੱਟ",
+  "toolArdha": "ਅਰਥ",
+  "toolKarmaReset": "ਕਰਮ ਰੀਸੈੱਟ",
+  "toolViyoga": "ਵਿਯੋਗ",
+  "toolAllTools": "ਸਾਰੇ ਔਜ਼ਾਰ",
+  "toolNameA11y": "{{name}} ਔਜ਼ਾਰ",
+
+  "daysOfSacredPractice": "ਪਵਿੱਤਰ ਸਾਧਨਾ ਦੇ\nਦਿਨ",
+  "phasesLabel": "ਪੜਾਅ",
+  "continueArrow": "ਜਾਰੀ ਰੱਖੋ →",
+  "continueSadhanaA11y": "ਸਾਧਨਾ ਜਾਰੀ ਰੱਖੋ"
 }

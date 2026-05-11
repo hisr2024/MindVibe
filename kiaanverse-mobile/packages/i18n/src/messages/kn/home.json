@@ -4,5 +4,32 @@
   "moodCheckIn": "ನೀವು ಹೇಗೆ ಭಾವಿಸುತ್ತಿದ್ದೀರಿ?",
   "activeJourney": "ನಿಮ್ಮ ಸಕ್ರಿಯ ಪ್ರಯಾಣ",
   "noJourneys": "ನಿಮ್ಮ ರೂಪಾಂತರವನ್ನು ಪ್ರಾರಂಭಿಸಲು ಪ್ರಯಾಣ ಆರಂಭಿಸಿ",
-  "startJourney": "ಪ್ರಯಾಣ ಆರಂಭಿಸಿ"
+  "startJourney": "ಪ್ರಯಾಣ ಆರಂಭಿಸಿ",
+
+  "wordmarkA11yLabel": "Kiaanverse — ಸಖಾ, ನಿಮ್ಮ ಆಧ್ಯಾತ್ಮಿಕ ಸಂಗಾತಿ",
+  "wordmarkSubtitle": "ಸಖಾ · ನಿಮ್ಮ ಆಧ್ಯಾತ್ಮಿಕ ಸಂಗಾತಿ",
+  "openProfileA11y": "ಪ್ರೊಫೈಲ್ ತೆರೆಯಿರಿ",
+  "defaultUserName": "ಪವಿತ್ರ ಅನ್ವೇಷಕ",
+
+  "openTodaysWisdomA11y": "ಇಂದಿನ ಜ್ಞಾನವನ್ನು ತೆರೆಯಿರಿ",
+  "verseRef": "ಭಗವದ್ಗೀತೆ — ಅಧ್ಯಾ. {{chapter}} · ಶ್ಲೋ. {{verse}}",
+  "askSakha": "ಸಖಾನನ್ನು ಕೇಳಿ →",
+  "askSakhaA11y": "ಈ ಶ್ಲೋಕದ ಬಗ್ಗೆ ಸಖಾನನ್ನು ಕೇಳಿ",
+  "listenToVerseA11y": "ಇಂದಿನ ಶ್ಲೋಕವನ್ನು ಕೇಳಿ",
+  "stopVerseA11y": "ಶ್ಲೋಕ ಪ್ಲೇಬ್ಯಾಕ್ ನಿಲ್ಲಿಸಿ",
+  "bookmarkVerseA11y": "ಈ ಶ್ಲೋಕವನ್ನು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಿ",
+  "removeBookmarkA11y": "ಬುಕ್‌ಮಾರ್ಕ್ ತೆಗೆಯಿರಿ",
+
+  "sacredToolsHeader": "ಪವಿತ್ರ ಸಾಧನಗಳು",
+  "toolEmotionalReset": "ಭಾವನಾತ್ಮಕ ರೀಸೆಟ್",
+  "toolArdha": "ಅರ್ಥ",
+  "toolKarmaReset": "ಕರ್ಮ ರೀಸೆಟ್",
+  "toolViyoga": "ವಿಯೋಗ",
+  "toolAllTools": "ಎಲ್ಲಾ ಸಾಧನಗಳು",
+  "toolNameA11y": "{{name}} ಸಾಧನ",
+
+  "daysOfSacredPractice": "ಪವಿತ್ರ ಸಾಧನೆಯ\nದಿನಗಳು",
+  "phasesLabel": "ಹಂತಗಳು",
+  "continueArrow": "ಮುಂದುವರಿಸಿ →",
+  "continueSadhanaA11y": "ಸಾಧನೆಯನ್ನು ಮುಂದುವರಿಸಿ"
 }
