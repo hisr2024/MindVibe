@@ -31,6 +31,24 @@ import enWisdom from './messages/en/wisdom.json';
 import enSadhana from './messages/en/sadhana.json';
 import enSubscription from './messages/en/subscription.json';
 import enOnboarding from './messages/en/onboarding.json';
+import enVibePlayer from './messages/en/vibe-player.json';
+
+// Vibe Player — per-locale bundles (registered in Batch 7).
+import hiVibePlayer from './messages/hi/vibe-player.json';
+import saVibePlayer from './messages/sa/vibe-player.json';
+import taVibePlayer from './messages/ta/vibe-player.json';
+import teVibePlayer from './messages/te/vibe-player.json';
+import bnVibePlayer from './messages/bn/vibe-player.json';
+import mrVibePlayer from './messages/mr/vibe-player.json';
+import guVibePlayer from './messages/gu/vibe-player.json';
+import knVibePlayer from './messages/kn/vibe-player.json';
+import mlVibePlayer from './messages/ml/vibe-player.json';
+import paVibePlayer from './messages/pa/vibe-player.json';
+import deVibePlayer from './messages/de/vibe-player.json';
+import frVibePlayer from './messages/fr/vibe-player.json';
+import esVibePlayer from './messages/es/vibe-player.json';
+import itVibePlayer from './messages/it/vibe-player.json';
+import ptVibePlayer from './messages/pt/vibe-player.json';
 
 // Onboarding — per-locale bundles (registered in Batch 6).
 import hiOnboarding from './messages/hi/onboarding.json';
@@ -276,6 +294,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   sadhana: enSadhana,
   subscription: enSubscription,
   onboarding: enOnboarding,
+  'vibe-player': enVibePlayer,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -283,7 +302,6 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   'emotional-reset': {},
   'karma-reset': {},
   community: {},
-  'vibe-player': {},
 };
 
 /**
@@ -305,6 +323,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: hiSadhana,
     subscription: hiSubscription,
     onboarding: hiOnboarding,
+    'vibe-player': hiVibePlayer,
   },
   sa: {
     common: saCommon,
@@ -319,6 +338,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: saSadhana,
     subscription: saSubscription,
     onboarding: saOnboarding,
+    'vibe-player': saVibePlayer,
   },
   ta: {
     common: taCommon,
@@ -333,6 +353,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: taSadhana,
     subscription: taSubscription,
     onboarding: taOnboarding,
+    'vibe-player': taVibePlayer,
   },
   te: {
     common: teCommon,
@@ -347,6 +368,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: teSadhana,
     subscription: teSubscription,
     onboarding: teOnboarding,
+    'vibe-player': teVibePlayer,
   },
   bn: {
     common: bnCommon,
@@ -361,6 +383,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: bnSadhana,
     subscription: bnSubscription,
     onboarding: bnOnboarding,
+    'vibe-player': bnVibePlayer,
   },
   mr: {
     common: mrCommon,
@@ -375,6 +398,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: mrSadhana,
     subscription: mrSubscription,
     onboarding: mrOnboarding,
+    'vibe-player': mrVibePlayer,
   },
   gu: {
     common: guCommon,
@@ -389,6 +413,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: guSadhana,
     subscription: guSubscription,
     onboarding: guOnboarding,
+    'vibe-player': guVibePlayer,
   },
   kn: {
     common: knCommon,
@@ -403,6 +428,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: knSadhana,
     subscription: knSubscription,
     onboarding: knOnboarding,
+    'vibe-player': knVibePlayer,
   },
   ml: {
     common: mlCommon,
@@ -417,6 +443,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: mlSadhana,
     subscription: mlSubscription,
     onboarding: mlOnboarding,
+    'vibe-player': mlVibePlayer,
   },
   pa: {
     common: paCommon,
@@ -431,6 +458,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: paSadhana,
     subscription: paSubscription,
     onboarding: paOnboarding,
+    'vibe-player': paVibePlayer,
   },
   de: {
     common: deCommon,
@@ -445,6 +473,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: deSadhana,
     subscription: deSubscription,
     onboarding: deOnboarding,
+    'vibe-player': deVibePlayer,
   },
   fr: {
     common: frCommon,
@@ -459,6 +488,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: frSadhana,
     subscription: frSubscription,
     onboarding: frOnboarding,
+    'vibe-player': frVibePlayer,
   },
   es: {
     common: esCommon,
@@ -473,6 +503,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: esSadhana,
     subscription: esSubscription,
     onboarding: esOnboarding,
+    'vibe-player': esVibePlayer,
   },
   it: {
     common: itCommon,
@@ -487,6 +518,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: itSadhana,
     subscription: itSubscription,
     onboarding: itOnboarding,
+    'vibe-player': itVibePlayer,
   },
   pt: {
     common: ptCommon,
@@ -501,6 +533,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     sadhana: ptSadhana,
     subscription: ptSubscription,
     onboarding: ptOnboarding,
+    'vibe-player': ptVibePlayer,
   },
 };
 

@@ -41,6 +41,7 @@ import { DivineBackground, LoadingMandala, useTheme } from '@kiaanverse/ui';
 import { useMeditationTracks } from '@kiaanverse/api';
 import type { MeditationTrack } from '@kiaanverse/api';
 import { useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   CategoryPills,
@@ -61,13 +62,11 @@ const TEXT_MUTED = 'rgba(200,191,168,0.7)';
 
 /**
  * Today's verse is a hard-coded seed until the API exposes a daily-verse
- * endpoint. The content is wisdom-appropriate and accurate to BG 2.47.
+ * endpoint. Sanskrit text stays Devanagari across every locale (it IS
+ * Sanskrit); the meaning + reference route through i18n at the call site.
  */
 const TODAY_VERSE = {
   sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन',
-  meaning:
-    'You have a right to perform your duty, but not to the fruits of your action.',
-  reference: 'Bhagavad Gita 2.47',
 } as const;
 
 /**
@@ -86,123 +85,63 @@ const TODAY_VERSE = {
 const SOUNDHELIX = (n: number) =>
   `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${n}.mp3`;
 
-const BUILTIN_TRACKS: readonly MeditationTrack[] = [
-  {
-    id: 'builtin-om-chanting',
-    title: 'Sacred Om Chanting',
-    artist: 'ॐ मन्त्र',
-    duration: 600,
-    category: 'mantra',
-    audioUrl: SOUNDHELIX(1),
-    description: 'The primordial sound of creation',
-  },
-  {
-    id: 'builtin-gayatri',
-    title: 'Gayatri Mantra',
-    artist: 'गायत्री मन्त्र',
-    duration: 480,
-    category: 'mantra',
-    audioUrl: SOUNDHELIX(2),
-    description: 'The universal prayer',
-  },
-  {
-    id: 'builtin-morning-raaga',
-    title: 'Morning Raaga Meditation',
-    artist: 'प्रभात ध्यान',
-    duration: 900,
-    category: 'meditation',
-    audioUrl: SOUNDHELIX(3),
-    description: 'Sunrise sacred sounds',
-  },
-  {
-    id: 'builtin-gita-ch2',
-    title: 'Bhagavad Gita Ch.2',
-    artist: 'गीता अध्याय २',
-    duration: 1920,
-    category: 'chanting',
-    audioUrl: SOUNDHELIX(4),
-    description: 'Sankhya Yoga — wisdom of the eternal',
-  },
-  {
-    id: 'builtin-tibetan-bowls',
-    title: 'Tibetan Singing Bowls',
-    artist: 'ध्यान नाद',
-    duration: 1200,
-    category: 'meditation',
-    audioUrl: SOUNDHELIX(5),
-    description: 'Sacred resonance for deep meditation',
-  },
-  {
-    id: 'builtin-krishna-bhajan',
-    title: 'Krishna Bhajan',
-    artist: 'कृष्ण भजन',
-    duration: 720,
-    category: 'chanting',
-    audioUrl: SOUNDHELIX(6),
-    description: 'Devotional songs of the divine',
-  },
-  {
-    id: 'builtin-forest-peace',
-    title: 'Forest of Peace',
-    artist: 'शान्ति वन',
-    duration: 1800,
-    category: 'ambient',
-    audioUrl: SOUNDHELIX(7),
-    description: '40Hz divine frequency meditation',
-  },
-  {
-    id: 'builtin-shiva-dhyana',
-    title: 'Shiva Dhyana',
-    artist: 'शिव ध्यान',
-    duration: 720,
-    category: 'meditation',
-    audioUrl: SOUNDHELIX(8),
-    description: 'Sacred meditation for inner stillness',
-  },
-  {
-    id: 'builtin-mahamrityunjaya',
-    title: 'Mahamrityunjaya Mantra',
-    artist: 'महामृत्युंजय मन्त्र',
-    duration: 540,
-    category: 'mantra',
-    audioUrl: SOUNDHELIX(9),
-    description: 'The great death-conquering mantra',
-  },
-  {
-    id: 'builtin-evening-peace',
-    title: 'Evening Peace Ambient',
-    artist: 'सायं शान्ति',
-    duration: 1500,
-    category: 'ambient',
-    audioUrl: SOUNDHELIX(10),
-    description: 'Wind down with soothing sacred tones',
-  },
-  {
-    id: 'builtin-kirtan-bliss',
-    title: 'Kirtan Bliss',
-    artist: 'कीर्तन आनन्द',
-    duration: 660,
-    category: 'chanting',
-    audioUrl: SOUNDHELIX(11),
-    description: 'Devotional chanting for uplifting the heart',
-  },
-  {
-    id: 'builtin-chakra-balancing',
-    title: 'Chakra Balancing Meditation',
-    artist: '७ चक्र',
-    duration: 1080,
-    category: 'meditation',
-    audioUrl: SOUNDHELIX(12),
-    description: 'Solfeggio frequencies for all 7 chakras',
-  },
+/**
+ * Builtin track seeds — the static shape (id, audio, duration, Sanskrit
+ * artist) lives in code; the user-visible title + description route
+ * through i18n via `titleKey` / `descriptionKey` so each locale shows
+ * its own copy. The Sanskrit `artist` strings are sacred Devanagari
+ * names and stay as-is across every UI locale.
+ */
+interface BuiltinTrackSeed {
+  readonly id: string;
+  readonly titleKey: string;
+  readonly artist: string;
+  readonly duration: number;
+  readonly category: string;
+  readonly audioUrl: string;
+  readonly descriptionKey: string;
+}
+
+const BUILTIN_TRACK_SEEDS: readonly BuiltinTrackSeed[] = [
+  { id: 'builtin-om-chanting', titleKey: 'vibe-player.trackOmChantingTitle', descriptionKey: 'vibe-player.trackOmChantingDescription', artist: 'ॐ मन्त्र', duration: 600, category: 'mantra', audioUrl: SOUNDHELIX(1) },
+  { id: 'builtin-gayatri', titleKey: 'vibe-player.trackGayatriTitle', descriptionKey: 'vibe-player.trackGayatriDescription', artist: 'गायत्री मन्त्र', duration: 480, category: 'mantra', audioUrl: SOUNDHELIX(2) },
+  { id: 'builtin-morning-raaga', titleKey: 'vibe-player.trackMorningRaagaTitle', descriptionKey: 'vibe-player.trackMorningRaagaDescription', artist: 'प्रभात ध्यान', duration: 900, category: 'meditation', audioUrl: SOUNDHELIX(3) },
+  { id: 'builtin-gita-ch2', titleKey: 'vibe-player.trackGitaCh2Title', descriptionKey: 'vibe-player.trackGitaCh2Description', artist: 'गीता अध्याय २', duration: 1920, category: 'chanting', audioUrl: SOUNDHELIX(4) },
+  { id: 'builtin-tibetan-bowls', titleKey: 'vibe-player.trackTibetanBowlsTitle', descriptionKey: 'vibe-player.trackTibetanBowlsDescription', artist: 'ध्यान नाद', duration: 1200, category: 'meditation', audioUrl: SOUNDHELIX(5) },
+  { id: 'builtin-krishna-bhajan', titleKey: 'vibe-player.trackKrishnaBhajanTitle', descriptionKey: 'vibe-player.trackKrishnaBhajanDescription', artist: 'कृष्ण भजन', duration: 720, category: 'chanting', audioUrl: SOUNDHELIX(6) },
+  { id: 'builtin-forest-peace', titleKey: 'vibe-player.trackForestPeaceTitle', descriptionKey: 'vibe-player.trackForestPeaceDescription', artist: 'शान्ति वन', duration: 1800, category: 'ambient', audioUrl: SOUNDHELIX(7) },
+  { id: 'builtin-shiva-dhyana', titleKey: 'vibe-player.trackShivaDhyanaTitle', descriptionKey: 'vibe-player.trackShivaDhyanaDescription', artist: 'शिव ध्यान', duration: 720, category: 'meditation', audioUrl: SOUNDHELIX(8) },
+  { id: 'builtin-mahamrityunjaya', titleKey: 'vibe-player.trackMahamrityunjayaTitle', descriptionKey: 'vibe-player.trackMahamrityunjayaDescription', artist: 'महामृत्युंजय मन्त्र', duration: 540, category: 'mantra', audioUrl: SOUNDHELIX(9) },
+  { id: 'builtin-evening-peace', titleKey: 'vibe-player.trackEveningPeaceTitle', descriptionKey: 'vibe-player.trackEveningPeaceDescription', artist: 'सायं शान्ति', duration: 1500, category: 'ambient', audioUrl: SOUNDHELIX(10) },
+  { id: 'builtin-kirtan-bliss', titleKey: 'vibe-player.trackKirtanBlissTitle', descriptionKey: 'vibe-player.trackKirtanBlissDescription', artist: 'कीर्तन आनन्द', duration: 660, category: 'chanting', audioUrl: SOUNDHELIX(11) },
+  { id: 'builtin-chakra-balancing', titleKey: 'vibe-player.trackChakraBalancingTitle', descriptionKey: 'vibe-player.trackChakraBalancingDescription', artist: '७ चक्र', duration: 1080, category: 'meditation', audioUrl: SOUNDHELIX(12) },
 ];
+
+/** Localize seeds into the `MeditationTrack` shape the rest of the screen
+ *  consumes, threading `t` through so each title/description renders in
+ *  the active UI language. */
+function buildBuiltinTracks(
+  t: (key: string) => string,
+): readonly MeditationTrack[] {
+  return BUILTIN_TRACK_SEEDS.map((seed) => ({
+    id: seed.id,
+    title: t(seed.titleKey),
+    artist: seed.artist,
+    duration: seed.duration,
+    category: seed.category,
+    audioUrl: seed.audioUrl,
+    description: t(seed.descriptionKey),
+  }));
+}
 
 /** Filter builtins by the API category string the parent is currently querying. */
 function selectBuiltinTracks(
-  apiCategory: string | undefined
+  apiCategory: string | undefined,
+  t: (key: string) => string,
 ): readonly MeditationTrack[] {
-  if (!apiCategory) return BUILTIN_TRACKS;
-  return BUILTIN_TRACKS.filter((t) => t.category === apiCategory);
+  const all = buildBuiltinTracks(t);
+  if (!apiCategory) return all;
+  return all.filter((track) => track.category === apiCategory);
 }
 
 // ---------------------------------------------------------------------------
@@ -211,11 +150,11 @@ function selectBuiltinTracks(
 
 type VibeTab = 'library' | 'gita' | 'mymusic' | 'playing';
 
-const TABS: readonly { key: VibeTab; label: string }[] = [
-  { key: 'library', label: 'Library' },
-  { key: 'gita', label: 'Gita' },
-  { key: 'mymusic', label: 'My Music' },
-  { key: 'playing', label: 'Playing' },
+const TABS: readonly { key: VibeTab; labelKey: string }[] = [
+  { key: 'library', labelKey: 'vibe-player.tabLibrary' },
+  { key: 'gita', labelKey: 'vibe-player.tabGita' },
+  { key: 'mymusic', labelKey: 'vibe-player.tabMyMusic' },
+  { key: 'playing', labelKey: 'vibe-player.tabPlaying' },
 ];
 
 function SegmentedTabs({
@@ -225,6 +164,7 @@ function SegmentedTabs({
   value: VibeTab;
   onChange: (tab: VibeTab) => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
   // Read the active palette so tab pills + chips stop rendering hardcoded
   // navy-indigo even when the user picks Forest / Maroon / Black-&-Gold.
   const { theme } = useTheme();
@@ -242,13 +182,14 @@ function SegmentedTabs({
     <View style={styles.tabBar} accessibilityRole="tablist">
       {TABS.map((tab) => {
         const active = tab.key === value;
+        const label = t(tab.labelKey);
         return (
           <Pressable
             key={tab.key}
             onPress={() => handlePress(tab.key)}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
-            accessibilityLabel={`${tab.label} tab`}
+            accessibilityLabel={t('vibe-player.tabA11y', { label })}
             style={[
               styles.tabPill,
               { backgroundColor: pillBg },
@@ -259,7 +200,7 @@ function SegmentedTabs({
               style={[styles.tabLabel, active && styles.tabLabelActive]}
               numberOfLines={1}
             >
-              {tab.label}
+              {label}
             </Text>
           </Pressable>
         );
@@ -293,6 +234,7 @@ function LibrarySection({
   bookmarks,
   onToggleBookmark,
 }: LibrarySectionProps): React.JSX.Element {
+  const { t } = useTranslation();
   const apiCategory = resolveApiCategory(filter);
   const { data: apiTracks, isLoading } = useMeditationTracks(apiCategory);
 
@@ -302,8 +244,8 @@ function LibrarySection({
     () =>
       apiTracks && apiTracks.length > 0
         ? apiTracks
-        : selectBuiltinTracks(apiCategory),
-    [apiTracks, apiCategory]
+        : selectBuiltinTracks(apiCategory, t),
+    [apiTracks, apiCategory, t]
   );
 
   const renderTrack = useCallback(
@@ -342,8 +284,8 @@ function LibrarySection({
         <View style={styles.listHeaderStack}>
           <DailyVerseBanner
             sanskrit={TODAY_VERSE.sanskrit}
-            meaning={TODAY_VERSE.meaning}
-            reference={TODAY_VERSE.reference}
+            meaning={t('vibe-player.todayVerseMeaning')}
+            reference={t('vibe-player.todayVerseReference')}
             onPress={onDailyVersePress}
           />
           <CategoryPills value={filter} onChange={onFilterChange} />
@@ -357,7 +299,7 @@ function LibrarySection({
         ) : (
           <View style={styles.stateContainer}>
             <Text style={styles.emptyText}>
-              No tracks available in this category yet.
+              {t('vibe-player.emptyCategoryText')}
             </Text>
           </View>
         )
@@ -372,6 +314,7 @@ function LibrarySection({
 // ---------------------------------------------------------------------------
 
 export default function VibePlayerLibraryScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<VibeTab>('library');
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -386,8 +329,8 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
     () =>
       apiTracks && apiTracks.length > 0
         ? apiTracks
-        : selectBuiltinTracks(apiCategory),
-    [apiTracks, apiCategory]
+        : selectBuiltinTracks(apiCategory, t),
+    [apiTracks, apiCategory, t]
   );
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
@@ -451,9 +394,11 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
       // Pick a per-category SoundHelix URL as an explicit fallback so a CDN
       // hiccup on the primary request doesn't take the player down. The
       // bridge ALSO substitutes when audioUrl itself is empty/non-playable.
+      // We read from BUILTIN_TRACK_SEEDS directly (no need to localize the
+      // titles just to find a URL).
       const builtinFallback =
-        BUILTIN_TRACKS.find((b) => b.category === track.category)?.audioUrl ??
-        BUILTIN_TRACKS[0]?.audioUrl;
+        BUILTIN_TRACK_SEEDS.find((b) => b.category === track.category)?.audioUrl ??
+        BUILTIN_TRACK_SEEDS[0]?.audioUrl;
 
       void playTrack({
         id: track.id,
@@ -477,13 +422,13 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         // bridge has already tried the primary URL AND its category-keyed
         // fallback. Surface a single, actionable error.
         Alert.alert(
-          'Playback error',
-          `${result.message}\n\nTip: tap "Add your music" to play tracks straight from your device.`,
-          [{ text: 'OK', style: 'default' }]
+          t('vibe-player.playbackErrorTitle'),
+          t('vibe-player.playbackErrorBody', { message: result.message }),
+          [{ text: t('common.ok'), style: 'default' }],
         );
       });
     },
-    [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router]
+    [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router, t]
   );
 
   const handleDailyVersePress = useCallback(() => {
@@ -501,14 +446,13 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   const headerBlock = useMemo(
     () => (
       <View style={styles.headerBlock}>
-        <Text style={styles.title}>KIAAN Vibe</Text>
-        <Text style={styles.subtitle}>Sacred Sound Library</Text>
-        <Text style={styles.muted}>
-          Mantras · Meditation · Bhagavad Gita · Bhajans · Binaural
-        </Text>
+        {/* "KIAAN Vibe" is the brand name and stays untranslated. */}
+        <Text style={styles.title}>{t('vibe-player.title')}</Text>
+        <Text style={styles.subtitle}>{t('vibe-player.subtitle')}</Text>
+        <Text style={styles.muted}>{t('vibe-player.genresList')}</Text>
       </View>
     ),
-    []
+    [t]
   );
 
   return (
