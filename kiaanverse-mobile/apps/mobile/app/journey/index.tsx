@@ -35,6 +35,7 @@ import {
   type Journey,
   type JourneyTemplate,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   JourneyCard,
@@ -49,13 +50,14 @@ const TEXT_MUTED = 'rgba(200,191,168,0.75)';
 
 type TabKey = 'discover' | 'active' | 'completed';
 
-const TABS: readonly { key: TabKey; label: string }[] = [
-  { key: 'discover', label: 'Discover' },
-  { key: 'active', label: 'Active' },
-  { key: 'completed', label: 'Completed' },
+const TABS: readonly { key: TabKey; labelKey: string }[] = [
+  { key: 'discover', labelKey: 'journeys.tabDiscover' },
+  { key: 'active', labelKey: 'journeys.tabActive' },
+  { key: 'completed', labelKey: 'journeys.tabCompleted' },
 ];
 
 export default function JourneyDiscoverScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -195,7 +197,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
             void refetchTemplates();
           },
           loading: templatesLoading,
-          emptyText: 'No journeys in this category yet.',
+          emptyText: t('journeys.emptyDiscover'),
           showFilter: true,
         };
       case 'active':
@@ -207,7 +209,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
             void refetchActive();
           },
           loading: false,
-          emptyText: 'No active journeys — begin one from Discover.',
+          emptyText: t('journeys.emptyActive'),
           showFilter: false,
         };
       case 'completed':
@@ -219,7 +221,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
             void refetchCompleted();
           },
           loading: false,
-          emptyText: 'No completed journeys yet — your first victory awaits.',
+          emptyText: t('journeys.emptyCompleted'),
           showFilter: false,
         };
     }
@@ -238,6 +240,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
     refetchActive,
     refetchCompleted,
     templatesLoading,
+    t,
   ]);
 
   return (
@@ -246,26 +249,30 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
         <Text
           style={styles.titleSanskrit}
           accessibilityRole="header"
-          accessibilityLabel="Shadripu Journeys"
+          accessibilityLabel={t('journeys.discoverA11y')}
         >
+          {/* "षड्रिपु" (shadripu) — Sanskrit brand identity, kept Devanagari
+              across every UI locale. Only the trailing English "Journeys"
+              localizes. */}
           <Text style={styles.titleSanskritHead}>षड्रिपु</Text>
           {'  '}
-          Journeys
+          {t('journeys.discoverTitle')}
         </Text>
-        <Text style={styles.subtitle}>Transform your inner enemies</Text>
+        <Text style={styles.subtitle}>{t('journeys.discoverSubtitle')}</Text>
 
         <View style={styles.tabRow}>
-          {TABS.map((t) => {
-            const active = tab === t.key;
+          {TABS.map((tab1) => {
+            const active = tab === tab1.key;
+            const label = t(tab1.labelKey);
             return (
               <TabPill
-                key={t.key}
-                label={t.label}
+                key={tab1.key}
+                label={label}
                 active={active}
                 onPress={() => {
                   if (active) return;
                   void Haptics.selectionAsync();
-                  setTab(t.key);
+                  setTab(tab1.key);
                 }}
               />
             );
@@ -306,7 +313,7 @@ export default function JourneyDiscoverScreen(): React.JSX.Element {
           tabState.loading ? (
             <View style={styles.state}>
               <LoadingMandala size={64} />
-              <Text style={styles.emptyText}>Unveiling sacred paths…</Text>
+              <Text style={styles.emptyText}>{t('journeys.loadingPaths')}</Text>
             </View>
           ) : (
             <View style={styles.state}>
