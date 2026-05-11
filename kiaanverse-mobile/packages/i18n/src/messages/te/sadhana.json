@@ -1,0 +1,20 @@
+{
+  "backA11y": "వెనుకకు",
+  "sectionTag": "నిత్య సాధన",
+  "title": "నిత్య పవిత్ర సాధన",
+
+  "completedTitle": "సాధన పూర్తయింది",
+  "completedBody": "ప్రతి దశ సమర్పించబడింది. రేపు మళ్ళీ ప్రారంభించడానికి తిరిగి రండి.",
+  "returnHomeButton": "హోమ్‌కు తిరిగి వెళ్ళు",
+  "completionWithStreak": "నిత్య సాధన పూర్తి. శ్రేణి: {{streak}} రోజులు.",
+  "completionFirstDay": "నిత్య సాధన పూర్తి. మీ శ్రేణి ఈ రోజు ప్రారంభం.",
+
+  "historyTitle": "సాధన చరిత్ర",
+  "statCurrent": "ప్రస్తుతం",
+  "statLongest": "అత్యంత పొడవైనది",
+  "statTotalDays": "మొత్తం రోజులు",
+  "previousMonthA11y": "మునుపటి నెల",
+  "nextMonthA11y": "తదుపరి నెల",
+  "recentPracticesHeader": "ఇటీవలి సాధనలు",
+  "verseLabel": "శ్లోకం: {{verseId}}"
+}

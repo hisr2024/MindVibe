@@ -1,0 +1,20 @@
+{
+  "backA11y": "ফিরে যান",
+  "sectionTag": "নিত্য সাধনা",
+  "title": "দৈনিক পবিত্র সাধনা",
+
+  "completedTitle": "সাধনা সম্পূর্ণ",
+  "completedBody": "প্রতিটি ধাপ অর্পিত হয়েছে। আগামীকাল আবার শুরু করতে ফিরে আসুন।",
+  "returnHomeButton": "হোমে ফিরে যান",
+  "completionWithStreak": "নিত্য সাধনা সম্পূর্ণ। ধারা: {{streak}} দিন।",
+  "completionFirstDay": "নিত্য সাধনা সম্পূর্ণ। আপনার ধারা আজ থেকে শুরু।",
+
+  "historyTitle": "সাধনার ইতিহাস",
+  "statCurrent": "বর্তমান",
+  "statLongest": "দীর্ঘতম",
+  "statTotalDays": "মোট দিন",
+  "previousMonthA11y": "পূর্ববর্তী মাস",
+  "nextMonthA11y": "পরবর্তী মাস",
+  "recentPracticesHeader": "সাম্প্রতিক সাধনা",
+  "verseLabel": "শ্লোক: {{verseId}}"
+}

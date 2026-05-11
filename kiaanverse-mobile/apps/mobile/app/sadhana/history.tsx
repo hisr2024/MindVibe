@@ -28,9 +28,10 @@ import {
 } from '@kiaanverse/ui';
 import { useSadhanaHistory, useSadhanaStreak } from '@kiaanverse/api';
 import type { SadhanaRecord } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { StreakFlame } from '../../components/sadhana/StreakFlame';
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+/** Mood emoji is universal — no localization needed. */
 const MOOD_LABELS: Record<number, string> = {
   1: '😔',
   2: '😕',
@@ -39,8 +40,36 @@ const MOOD_LABELS: Record<number, string> = {
   5: '😊',
 };
 
-function getMonthName(month: number): string {
-  return new Date(2026, month, 1).toLocaleDateString('en-US', {
+/**
+ * Resolve an Intl-friendly locale tag from the i18n locale code, falling
+ * back to en-US when the active code isn't a valid BCP 47 tag (e.g. 'sa'
+ * has no full Intl support on most engines).
+ */
+function safeIntlLocale(code: string): string {
+  try {
+    const supported = Intl.DateTimeFormat.supportedLocalesOf([code]);
+    return supported.length > 0 ? supported[0]! : 'en-US';
+  } catch {
+    return 'en-US';
+  }
+}
+
+/** Localized weekday short names (Sun, Mon, ...) for the calendar header. */
+function getWeekdayShortNames(intlLocale: string): readonly string[] {
+  // Anchor to a known Sunday (2024-01-07 was a Sunday) so day 0..6 maps to
+  // Sun..Sat regardless of the locale's first-day-of-week convention. The
+  // caller renders the cells in Sun-first order to match getDay().
+  const fmt = new Intl.DateTimeFormat(intlLocale, { weekday: 'short' });
+  const sunday = new Date(2024, 0, 7);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    return fmt.format(d);
+  });
+}
+
+function getMonthName(month: number, intlLocale: string): string {
+  return new Date(2026, month, 1).toLocaleDateString(intlLocale, {
     month: 'long',
   });
 }
@@ -53,8 +82,8 @@ function getFirstDayOfWeek(year: number, month: number): number {
   return new Date(year, month, 1).getDay();
 }
 
-function formatRecordDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatRecordDate(iso: string, intlLocale: string): string {
+  return new Date(iso).toLocaleDateString(intlLocale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -62,6 +91,9 @@ function formatRecordDate(iso: string): string {
 }
 
 export default function SadhanaHistoryScreen(): React.JSX.Element {
+  const { t, locale } = useTranslation();
+  const intlLocale = useMemo(() => safeIntlLocale(locale), [locale]);
+  const weekdays = useMemo(() => getWeekdayShortNames(intlLocale), [intlLocale]);
   const router = useRouter();
   const { data: records, isLoading, refetch } = useSadhanaHistory(90);
   const { data: streakData } = useSadhanaStreak();
@@ -137,7 +169,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
       <View style={styles.recordCard}>
         <View style={styles.recordHeader}>
           <Text variant="caption" color={colors.text.muted}>
-            {formatRecordDate(item.date ?? item.completed_at ?? '')}
+            {formatRecordDate(item.date ?? item.completed_at ?? '', intlLocale)}
           </Text>
           {item.mood_score ? (
             <Text variant="body">{MOOD_LABELS[item.mood_score] ?? ''}</Text>
@@ -145,7 +177,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
         </View>
         {item.verse_id ? (
           <Text variant="caption" color={colors.primary[300]}>
-            Verse: {item.verse_id}
+            {t('sadhana.verseLabel', { verseId: item.verse_id })}
           </Text>
         ) : null}
         {item.reflection ? (
@@ -159,7 +191,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
         ) : null}
       </View>
     ),
-    []
+    [intlLocale, t]
   );
 
   const keyExtractor = useCallback((item: SadhanaRecord) => item.id, []);
@@ -172,7 +204,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
           <View style={styles.statItem}>
             <StreakFlame streak={streak} size={28} />
             <Text variant="caption" color={colors.text.muted}>
-              Current
+              {t('sadhana.statCurrent')}
             </Text>
           </View>
           <View style={styles.statItem}>
@@ -180,7 +212,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
               {longestStreak}
             </Text>
             <Text variant="caption" color={colors.text.muted}>
-              Longest
+              {t('sadhana.statLongest')}
             </Text>
           </View>
           <View style={styles.statItem}>
@@ -188,7 +220,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
               {totalDays}
             </Text>
             <Text variant="caption" color={colors.text.muted}>
-              Total Days
+              {t('sadhana.statTotalDays')}
             </Text>
           </View>
         </View>
@@ -202,19 +234,19 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
             <Pressable
               onPress={handlePrevMonth}
               hitSlop={12}
-              accessibilityLabel="Previous month"
+              accessibilityLabel={t('sadhana.previousMonthA11y')}
             >
               <Text variant="h2" color={colors.text.secondary}>
                 {'<'}
               </Text>
             </Pressable>
             <Text variant="body" color={colors.text.primary}>
-              {getMonthName(viewMonth)} {viewYear}
+              {getMonthName(viewMonth, intlLocale)} {viewYear}
             </Text>
             <Pressable
               onPress={handleNextMonth}
               hitSlop={12}
-              accessibilityLabel="Next month"
+              accessibilityLabel={t('sadhana.nextMonthA11y')}
             >
               <Text variant="h2" color={colors.text.secondary}>
                 {'>'}
@@ -222,10 +254,12 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
             </Pressable>
           </View>
 
-          {/* Weekday Headers */}
+          {/* Weekday Headers — sourced from Intl so each locale renders
+              its own short-form names (Sun/Mon/... in English,
+              Lun/Mar/... in Spanish, सोम/मंगल/... in Hindi). */}
           <View style={styles.weekRow}>
-            {WEEKDAYS.map((day) => (
-              <View key={day} style={styles.dayCell}>
+            {weekdays.map((day, idx) => (
+              <View key={`${idx}-${day}`} style={styles.dayCell}>
                 <Text
                   variant="caption"
                   color={colors.text.muted}
@@ -273,7 +307,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
           color={colors.text.secondary}
           style={styles.sectionTitle}
         >
-          Recent Practices
+          {t('sadhana.recentPracticesHeader')}
         </Text>
       </Animated.View>
     ),
@@ -286,12 +320,15 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
       calendarDays,
       handlePrevMonth,
       handleNextMonth,
+      intlLocale,
+      weekdays,
+      t,
     ]
   );
 
   return (
     <Screen>
-      <GoldenHeader title="Sadhana History" onBack={() => router.back()} />
+      <GoldenHeader title={t('sadhana.historyTitle')} onBack={() => router.back()} />
 
       <FlatList
         data={records ?? []}

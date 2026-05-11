@@ -28,6 +28,24 @@ import enJournal from './messages/en/journal.json';
 import enAnalytics from './messages/en/analytics.json';
 import enSettings from './messages/en/settings.json';
 import enWisdom from './messages/en/wisdom.json';
+import enSadhana from './messages/en/sadhana.json';
+
+// Sadhana — per-locale bundles (registered alongside Wisdom in Batch 4).
+import hiSadhana from './messages/hi/sadhana.json';
+import saSadhana from './messages/sa/sadhana.json';
+import taSadhana from './messages/ta/sadhana.json';
+import teSadhana from './messages/te/sadhana.json';
+import bnSadhana from './messages/bn/sadhana.json';
+import mrSadhana from './messages/mr/sadhana.json';
+import guSadhana from './messages/gu/sadhana.json';
+import knSadhana from './messages/kn/sadhana.json';
+import mlSadhana from './messages/ml/sadhana.json';
+import paSadhana from './messages/pa/sadhana.json';
+import deSadhana from './messages/de/sadhana.json';
+import frSadhana from './messages/fr/sadhana.json';
+import esSadhana from './messages/es/sadhana.json';
+import itSadhana from './messages/it/sadhana.json';
+import ptSadhana from './messages/pt/sadhana.json';
 
 // Wisdom — only English populated for now; other locales fall back at runtime.
 // They'll be authored alongside the wisdom-screen refactor.
@@ -219,13 +237,13 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   analytics: enAnalytics,
   settings: enSettings,
   wisdom: enWisdom,
+  sadhana: enSadhana,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
   tools: {},
   'emotional-reset': {},
   'karma-reset': {},
-  sadhana: {},
   community: {},
   'vibe-player': {},
 };
@@ -246,6 +264,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: hiJourneys,
     settings: hiSettings,
     wisdom: hiWisdom,
+    sadhana: hiSadhana,
   },
   sa: {
     common: saCommon,
@@ -257,6 +276,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: saJourneys,
     settings: saSettings,
     wisdom: saWisdom,
+    sadhana: saSadhana,
   },
   ta: {
     common: taCommon,
@@ -268,6 +288,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: taJourneys,
     settings: taSettings,
     wisdom: taWisdom,
+    sadhana: taSadhana,
   },
   te: {
     common: teCommon,
@@ -279,6 +300,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: teJourneys,
     settings: teSettings,
     wisdom: teWisdom,
+    sadhana: teSadhana,
   },
   bn: {
     common: bnCommon,
@@ -290,6 +312,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: bnJourneys,
     settings: bnSettings,
     wisdom: bnWisdom,
+    sadhana: bnSadhana,
   },
   mr: {
     common: mrCommon,
@@ -301,6 +324,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: mrJourneys,
     settings: mrSettings,
     wisdom: mrWisdom,
+    sadhana: mrSadhana,
   },
   gu: {
     common: guCommon,
@@ -312,6 +336,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: guJourneys,
     settings: guSettings,
     wisdom: guWisdom,
+    sadhana: guSadhana,
   },
   kn: {
     common: knCommon,
@@ -323,6 +348,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: knJourneys,
     settings: knSettings,
     wisdom: knWisdom,
+    sadhana: knSadhana,
   },
   ml: {
     common: mlCommon,
@@ -334,6 +360,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: mlJourneys,
     settings: mlSettings,
     wisdom: mlWisdom,
+    sadhana: mlSadhana,
   },
   pa: {
     common: paCommon,
@@ -345,6 +372,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: paJourneys,
     settings: paSettings,
     wisdom: paWisdom,
+    sadhana: paSadhana,
   },
   de: {
     common: deCommon,
@@ -356,6 +384,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: deJourneys,
     settings: deSettings,
     wisdom: deWisdom,
+    sadhana: deSadhana,
   },
   fr: {
     common: frCommon,
@@ -367,6 +396,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: frJourneys,
     settings: frSettings,
     wisdom: frWisdom,
+    sadhana: frSadhana,
   },
   es: {
     common: esCommon,
@@ -378,6 +408,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: esJourneys,
     settings: esSettings,
     wisdom: esWisdom,
+    sadhana: esSadhana,
   },
   it: {
     common: itCommon,
@@ -389,6 +420,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: itJourneys,
     settings: itSettings,
     wisdom: itWisdom,
+    sadhana: itSadhana,
   },
   pt: {
     common: ptCommon,
@@ -400,6 +432,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journeys: ptJourneys,
     settings: ptSettings,
     wisdom: ptWisdom,
+    sadhana: ptSadhana,
   },
 };
 

@@ -1,0 +1,20 @@
+{
+  "backA11y": "प्रत्यागच्छतु",
+  "sectionTag": "नित्य-साधना",
+  "title": "दैनिकी पवित्र-साधना",
+
+  "completedTitle": "साधना समाप्ता",
+  "completedBody": "सर्वं चरणं समर्पितम्। पुनरारम्भाय श्वः प्रत्यागच्छतु।",
+  "returnHomeButton": "गृहं प्रति प्रत्यागच्छतु",
+  "completionWithStreak": "नित्य-साधना सम्पूर्णा। श्रृङ्खला: {{streak}} दिनानि।",
+  "completionFirstDay": "नित्य-साधना सम्पूर्णा। श्रृङ्खला अद्यतः आरब्धा।",
+
+  "historyTitle": "साधना-इतिहासः",
+  "statCurrent": "वर्तमानम्",
+  "statLongest": "दीर्घतमम्",
+  "statTotalDays": "सर्व-दिनानि",
+  "previousMonthA11y": "पूर्वः मासः",
+  "nextMonthA11y": "उत्तरः मासः",
+  "recentPracticesHeader": "साम्प्रत-साधनाः",
+  "verseLabel": "श्लोकः: {{verseId}}"
+}

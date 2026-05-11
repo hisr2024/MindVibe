@@ -1,0 +1,20 @@
+{
+  "backA11y": "Indietro",
+  "sectionTag": "NITYA SADHANA",
+  "title": "Pratica sacra quotidiana",
+
+  "completedTitle": "La sadhana è suggellata",
+  "completedBody": "Ogni fase è stata offerta. Torna domani per ricominciare.",
+  "returnHomeButton": "Torna alla home",
+  "completionWithStreak": "Nitya Sadhana completata. Striscia: {{streak}} giorni.",
+  "completionFirstDay": "Nitya Sadhana completata. La tua striscia inizia oggi.",
+
+  "historyTitle": "Cronologia della sadhana",
+  "statCurrent": "Attuale",
+  "statLongest": "La più lunga",
+  "statTotalDays": "Giorni totali",
+  "previousMonthA11y": "Mese precedente",
+  "nextMonthA11y": "Mese successivo",
+  "recentPracticesHeader": "Pratiche recenti",
+  "verseLabel": "Verso: {{verseId}}"
+}
