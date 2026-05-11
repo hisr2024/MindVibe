@@ -26,6 +26,7 @@ import enFeatures from './messages/en/features.json';
 import enDivine from './messages/en/divine.json';
 import enJournal from './messages/en/journal.json';
 import enAnalytics from './messages/en/analytics.json';
+import enSettings from './messages/en/settings.json';
 
 // Hindi
 import hiCommon from './messages/hi/common.json';
@@ -35,6 +36,7 @@ import hiKiaan from './messages/hi/kiaan.json';
 import hiNavigation from './messages/hi/navigation.json';
 import hiErrors from './messages/hi/errors.json';
 import hiJourneys from './messages/hi/journeys.json';
+import hiSettings from './messages/hi/settings.json';
 
 // Sanskrit
 import saCommon from './messages/sa/common.json';
@@ -44,6 +46,7 @@ import saKiaan from './messages/sa/kiaan.json';
 import saNavigation from './messages/sa/navigation.json';
 import saErrors from './messages/sa/errors.json';
 import saJourneys from './messages/sa/journeys.json';
+import saSettings from './messages/sa/settings.json';
 
 // Tamil
 import taCommon from './messages/ta/common.json';
@@ -53,6 +56,7 @@ import taKiaan from './messages/ta/kiaan.json';
 import taNavigation from './messages/ta/navigation.json';
 import taErrors from './messages/ta/errors.json';
 import taJourneys from './messages/ta/journeys.json';
+import taSettings from './messages/ta/settings.json';
 
 // Telugu
 import teCommon from './messages/te/common.json';
@@ -62,6 +66,7 @@ import teKiaan from './messages/te/kiaan.json';
 import teNavigation from './messages/te/navigation.json';
 import teErrors from './messages/te/errors.json';
 import teJourneys from './messages/te/journeys.json';
+import teSettings from './messages/te/settings.json';
 
 // Bengali
 import bnCommon from './messages/bn/common.json';
@@ -71,6 +76,7 @@ import bnKiaan from './messages/bn/kiaan.json';
 import bnNavigation from './messages/bn/navigation.json';
 import bnErrors from './messages/bn/errors.json';
 import bnJourneys from './messages/bn/journeys.json';
+import bnSettings from './messages/bn/settings.json';
 
 // Marathi
 import mrCommon from './messages/mr/common.json';
@@ -80,6 +86,7 @@ import mrKiaan from './messages/mr/kiaan.json';
 import mrNavigation from './messages/mr/navigation.json';
 import mrErrors from './messages/mr/errors.json';
 import mrJourneys from './messages/mr/journeys.json';
+import mrSettings from './messages/mr/settings.json';
 
 // Gujarati
 import guCommon from './messages/gu/common.json';
@@ -89,6 +96,7 @@ import guKiaan from './messages/gu/kiaan.json';
 import guNavigation from './messages/gu/navigation.json';
 import guErrors from './messages/gu/errors.json';
 import guJourneys from './messages/gu/journeys.json';
+import guSettings from './messages/gu/settings.json';
 
 // Kannada
 import knCommon from './messages/kn/common.json';
@@ -98,6 +106,7 @@ import knKiaan from './messages/kn/kiaan.json';
 import knNavigation from './messages/kn/navigation.json';
 import knErrors from './messages/kn/errors.json';
 import knJourneys from './messages/kn/journeys.json';
+import knSettings from './messages/kn/settings.json';
 
 // Malayalam
 import mlCommon from './messages/ml/common.json';
@@ -107,6 +116,7 @@ import mlKiaan from './messages/ml/kiaan.json';
 import mlNavigation from './messages/ml/navigation.json';
 import mlErrors from './messages/ml/errors.json';
 import mlJourneys from './messages/ml/journeys.json';
+import mlSettings from './messages/ml/settings.json';
 
 // Punjabi
 import paCommon from './messages/pa/common.json';
@@ -116,6 +126,7 @@ import paKiaan from './messages/pa/kiaan.json';
 import paNavigation from './messages/pa/navigation.json';
 import paErrors from './messages/pa/errors.json';
 import paJourneys from './messages/pa/journeys.json';
+import paSettings from './messages/pa/settings.json';
 
 // German
 import deCommon from './messages/de/common.json';
@@ -125,6 +136,7 @@ import deKiaan from './messages/de/kiaan.json';
 import deNavigation from './messages/de/navigation.json';
 import deErrors from './messages/de/errors.json';
 import deJourneys from './messages/de/journeys.json';
+import deSettings from './messages/de/settings.json';
 
 // French
 import frCommon from './messages/fr/common.json';
@@ -134,6 +146,7 @@ import frKiaan from './messages/fr/kiaan.json';
 import frNavigation from './messages/fr/navigation.json';
 import frErrors from './messages/fr/errors.json';
 import frJourneys from './messages/fr/journeys.json';
+import frSettings from './messages/fr/settings.json';
 
 // Spanish
 import esCommon from './messages/es/common.json';
@@ -143,6 +156,7 @@ import esKiaan from './messages/es/kiaan.json';
 import esNavigation from './messages/es/navigation.json';
 import esErrors from './messages/es/errors.json';
 import esJourneys from './messages/es/journeys.json';
+import esSettings from './messages/es/settings.json';
 
 // Italian
 import itCommon from './messages/it/common.json';
@@ -152,6 +166,7 @@ import itKiaan from './messages/it/kiaan.json';
 import itNavigation from './messages/it/navigation.json';
 import itErrors from './messages/it/errors.json';
 import itJourneys from './messages/it/journeys.json';
+import itSettings from './messages/it/settings.json';
 
 // Portuguese
 import ptCommon from './messages/pt/common.json';
@@ -161,6 +176,7 @@ import ptKiaan from './messages/pt/kiaan.json';
 import ptNavigation from './messages/pt/navigation.json';
 import ptErrors from './messages/pt/errors.json';
 import ptJourneys from './messages/pt/journeys.json';
+import ptSettings from './messages/pt/settings.json';
 
 type LocaleBundle = Partial<Record<TranslationNamespace, TranslationMessages>>;
 
@@ -182,6 +198,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   divine: enDivine,
   journal: enJournal,
   analytics: enAnalytics,
+  settings: enSettings,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -191,7 +208,6 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   sadhana: {},
   community: {},
   'vibe-player': {},
-  settings: {},
 };
 
 /**
@@ -208,6 +224,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: hiNavigation,
     errors: hiErrors,
     journeys: hiJourneys,
+    settings: hiSettings,
   },
   sa: {
     common: saCommon,
@@ -217,6 +234,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: saNavigation,
     errors: saErrors,
     journeys: saJourneys,
+    settings: saSettings,
   },
   ta: {
     common: taCommon,
@@ -226,6 +244,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: taNavigation,
     errors: taErrors,
     journeys: taJourneys,
+    settings: taSettings,
   },
   te: {
     common: teCommon,
@@ -235,6 +254,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: teNavigation,
     errors: teErrors,
     journeys: teJourneys,
+    settings: teSettings,
   },
   bn: {
     common: bnCommon,
@@ -244,6 +264,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: bnNavigation,
     errors: bnErrors,
     journeys: bnJourneys,
+    settings: bnSettings,
   },
   mr: {
     common: mrCommon,
@@ -253,6 +274,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: mrNavigation,
     errors: mrErrors,
     journeys: mrJourneys,
+    settings: mrSettings,
   },
   gu: {
     common: guCommon,
@@ -262,6 +284,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: guNavigation,
     errors: guErrors,
     journeys: guJourneys,
+    settings: guSettings,
   },
   kn: {
     common: knCommon,
@@ -271,6 +294,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: knNavigation,
     errors: knErrors,
     journeys: knJourneys,
+    settings: knSettings,
   },
   ml: {
     common: mlCommon,
@@ -280,6 +304,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: mlNavigation,
     errors: mlErrors,
     journeys: mlJourneys,
+    settings: mlSettings,
   },
   pa: {
     common: paCommon,
@@ -289,6 +314,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: paNavigation,
     errors: paErrors,
     journeys: paJourneys,
+    settings: paSettings,
   },
   de: {
     common: deCommon,
@@ -298,6 +324,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: deNavigation,
     errors: deErrors,
     journeys: deJourneys,
+    settings: deSettings,
   },
   fr: {
     common: frCommon,
@@ -307,6 +334,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: frNavigation,
     errors: frErrors,
     journeys: frJourneys,
+    settings: frSettings,
   },
   es: {
     common: esCommon,
@@ -316,6 +344,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: esNavigation,
     errors: esErrors,
     journeys: esJourneys,
+    settings: esSettings,
   },
   it: {
     common: itCommon,
@@ -325,6 +354,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: itNavigation,
     errors: itErrors,
     journeys: itJourneys,
+    settings: itSettings,
   },
   pt: {
     common: ptCommon,
@@ -334,6 +364,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     navigation: ptNavigation,
     errors: ptErrors,
     journeys: ptJourneys,
+    settings: ptSettings,
   },
 };
 

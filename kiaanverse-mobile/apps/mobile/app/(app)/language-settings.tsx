@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { DivineScreenWrapper, SacredCard } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
-import { locales, translatedLocales, type Locale } from '@kiaanverse/i18n';
+import { locales, translatedLocales, useTranslation, type Locale } from '@kiaanverse/i18n';
 import { useUserPreferencesStore } from '@kiaanverse/store';
 
 declare const __DEV__: boolean;
@@ -25,6 +25,7 @@ declare const __DEV__: boolean;
 const TRANSLATED_SET = new Set<Locale>(translatedLocales);
 
 export default function LanguageSettings(): React.JSX.Element {
+  const { t } = useTranslation();
   const locale = useUserPreferencesStore((s) => s.locale);
   const setLocale = useUserPreferencesStore((s) => s.setLocale);
 
@@ -56,7 +57,7 @@ export default function LanguageSettings(): React.JSX.Element {
         style={{ flex: 1, padding: 16 }}
         contentContainerStyle={{ paddingBottom: 80 }}
       >
-        <Text style={styles.title}>Language</Text>
+        <Text style={styles.title}>{t('settings.languageTitle')}</Text>
         <SacredCard style={{ padding: 0 }}>
           {locales.map((lang) => {
             const isSelected = locale === lang.code;
@@ -83,7 +84,7 @@ export default function LanguageSettings(): React.JSX.Element {
                   </Text>
                 </View>
                 {!hasTranslation && (
-                  <Text style={styles.fallbackTag}>EN fallback</Text>
+                  <Text style={styles.fallbackTag}>{t('settings.englishFallbackTag')}</Text>
                 )}
                 {isSelected && <Text style={styles.check}>✓</Text>}
               </TouchableOpacity>

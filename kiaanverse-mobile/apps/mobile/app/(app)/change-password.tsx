@@ -32,6 +32,7 @@ import {
   SacredInput,
 } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const TEXT_PRIMARY = '#F0EBE1';
 const TEXT_MUTED = 'rgba(240,235,225,0.5)';
@@ -53,20 +54,21 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 }
 
 /** Client-side pre-flight validation matching the server policy. Returns
- *  an error string or null when the password passes every local check. */
+ *  the i18n key of the violated rule, or null when the password passes. */
 function validateNewPassword(pwd: string, current: string): string | null {
-  if (pwd.length < 8) return 'Password must be at least 8 characters.';
-  if (pwd.length > 128) return 'Password must be at most 128 characters.';
-  if (!/[A-Z]/.test(pwd)) return 'Add at least one uppercase letter.';
-  if (!/[a-z]/.test(pwd)) return 'Add at least one lowercase letter.';
-  if (!/[0-9]/.test(pwd)) return 'Add at least one digit.';
-  if (!/[^A-Za-z0-9]/.test(pwd)) return 'Add at least one special character.';
+  if (pwd.length < 8) return 'settings.passwordMinChars';
+  if (pwd.length > 128) return 'settings.passwordMaxChars';
+  if (!/[A-Z]/.test(pwd)) return 'settings.passwordNeedsUpper';
+  if (!/[a-z]/.test(pwd)) return 'settings.passwordNeedsLower';
+  if (!/[0-9]/.test(pwd)) return 'settings.passwordNeedsDigit';
+  if (!/[^A-Za-z0-9]/.test(pwd)) return 'settings.passwordNeedsSpecial';
   if (current.length > 0 && pwd === current)
-    return 'New password must be different from your current password.';
+    return 'settings.passwordSameAsCurrent';
   return null;
 }
 
 export default function ChangePasswordScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const [current, setCurrent] = useState('');
   const [newPass, setNewPass] = useState('');
@@ -76,10 +78,10 @@ export default function ChangePasswordScreen(): React.JSX.Element {
   const fieldsFilled =
     current.length > 0 && newPass.length > 0 && confirm.length > 0;
 
-  const previewError = useMemo(() => {
+  const previewErrorKey = useMemo(() => {
     if (!newPass && !confirm) return null;
     if (newPass && confirm && newPass !== confirm)
-      return 'New password and confirmation must match.';
+      return 'settings.passwordsMustMatch';
     if (newPass) return validateNewPassword(newPass, current);
     return null;
   }, [newPass, confirm, current]);
@@ -87,14 +89,14 @@ export default function ChangePasswordScreen(): React.JSX.Element {
   const handleChange = async () => {
     if (newPass !== confirm) {
       Alert.alert(
-        'Passwords do not match',
-        'Please re-enter the new password.'
+        t('settings.passwordsMismatchTitle'),
+        t('settings.passwordsMismatchMessage'),
       );
       return;
     }
-    const policyError = validateNewPassword(newPass, current);
-    if (policyError) {
-      Alert.alert('Password too weak', policyError);
+    const policyKey = validateNewPassword(newPass, current);
+    if (policyKey) {
+      Alert.alert(t('settings.passwordTooWeakTitle'), t(policyKey));
       return;
     }
 
@@ -104,13 +106,15 @@ export default function ChangePasswordScreen(): React.JSX.Element {
         current_password: current,
         new_password: newPass,
       });
-      Alert.alert('Password changed', 'Your password has been updated. 🙏', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      Alert.alert(
+        t('settings.passwordChangedTitle'),
+        t('settings.passwordChangedMessage'),
+        [{ text: t('common.ok'), onPress: () => router.back() }],
+      );
     } catch (err) {
       Alert.alert(
-        'Could not change password',
-        extractErrorMessage(err, 'Please try again in a moment.')
+        t('settings.couldNotChangePasswordTitle'),
+        extractErrorMessage(err, t('settings.genericRetry')),
       );
     } finally {
       setLoading(false);
@@ -132,24 +136,21 @@ export default function ChangePasswordScreen(): React.JSX.Element {
             onPress={() => router.back()}
             style={styles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('settings.back')}
             hitSlop={12}
           >
-            <Text style={styles.backText}>{'‹ Back'}</Text>
+            <Text style={styles.backText}>{`‹ ${t('settings.back')}`}</Text>
           </Pressable>
 
-          <Text style={styles.title}>Change Password</Text>
-          <Text style={styles.lede}>
-            For your security we re-verify your current password before setting
-            a new one.
-          </Text>
+          <Text style={styles.title}>{t('settings.changePasswordTitle')}</Text>
+          <Text style={styles.lede}>{t('settings.changePasswordLede')}</Text>
 
           <GoldenDivider style={styles.divider} />
 
           <SacredInput
             value={current}
             onChangeText={setCurrent}
-            placeholder="Current password"
+            placeholder={t('settings.currentPasswordPlaceholder')}
             secureTextEntry
             autoCapitalize="none"
             autoComplete="current-password"
@@ -159,7 +160,7 @@ export default function ChangePasswordScreen(): React.JSX.Element {
           <SacredInput
             value={newPass}
             onChangeText={setNewPass}
-            placeholder="New password"
+            placeholder={t('settings.newPasswordPlaceholder')}
             secureTextEntry
             autoCapitalize="none"
             autoComplete="new-password"
@@ -169,25 +170,26 @@ export default function ChangePasswordScreen(): React.JSX.Element {
           <SacredInput
             value={confirm}
             onChangeText={setConfirm}
-            placeholder="Confirm new password"
+            placeholder={t('settings.confirmPasswordPlaceholder')}
             secureTextEntry
             autoCapitalize="none"
             autoComplete="new-password"
             textContentType="newPassword"
-            {...(previewError ? { error: previewError } : {})}
+            {...(previewErrorKey ? { error: t(previewErrorKey) } : {})}
             containerStyle={styles.inputGap}
           />
 
-          <Text style={styles.rule}>
-            Minimum 8 characters with upper, lower, a digit, and a special
-            character.
-          </Text>
+          <Text style={styles.rule}>{t('settings.passwordRule')}</Text>
 
           <GoldenButton
-            title={loading ? 'Changing…' : 'Change Password'}
+            title={
+              loading
+                ? t('settings.changingButton')
+                : t('settings.changePasswordButton')
+            }
             onPress={handleChange}
             loading={loading}
-            disabled={loading || !fieldsFilled || previewError !== null}
+            disabled={loading || !fieldsFilled || previewErrorKey !== null}
             style={styles.cta}
           />
         </ScrollView>
