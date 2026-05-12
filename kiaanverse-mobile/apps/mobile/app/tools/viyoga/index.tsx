@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
 import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
+import { useTranslation } from '@kiaanverse/i18n';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -73,6 +74,7 @@ function TearDrop(): React.JSX.Element {
 
 export default function ViyogaIntro(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const voice = useVoicePrefill<{
     absence_topic?: string;
     person_role?: string;
@@ -81,7 +83,7 @@ export default function ViyogaIntro(): React.JSX.Element {
   const voiceLabel =
     voice.prefill?.absence_topic ??
     voice.prefill?.person_role ??
-    'the longing you named';
+    t('viyogaLongingFallback');
 
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
@@ -115,8 +117,8 @@ export default function ViyogaIntro(): React.JSX.Element {
         <TearDrop />
 
         <Text style={s.titleSkt}>वियोग</Text>
-        <Text style={s.titleEng}>The Sacred Space of Longing</Text>
-        <Text style={s.subtitle}>Even in separation, there is union</Text>
+        <Text style={s.titleEng}>{t('viyogaIntroTitleEng')}</Text>
+        <Text style={s.subtitle}>{t('viyogaIntroSubtitle')}</Text>
       </Animated.View>
 
       <View style={[s.footer, { paddingBottom: insets.bottom + 24 }]}>
@@ -124,9 +126,9 @@ export default function ViyogaIntro(): React.JSX.Element {
           style={s.beginBtn}
           onPress={handleBegin}
           accessibilityRole="button"
-          accessibilityLabel="Enter this Space"
+          accessibilityLabel={t('viyogaEnterSpace')}
         >
-          <Text style={s.beginText}>Enter this Space</Text>
+          <Text style={s.beginText}>{t('viyogaEnterSpace')}</Text>
         </TouchableOpacity>
       </View>
     </View>

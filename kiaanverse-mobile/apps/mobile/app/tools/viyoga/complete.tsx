@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const FLAME_COUNT = 5;
 
@@ -27,6 +28,7 @@ function formatOfferedDate(): string {
 
 export default function ViyogaComplete(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const { resetFlow } = useSacredFlow('viyoga');
 
   const offeredDate = useMemo(formatOfferedDate, []);
@@ -67,7 +69,9 @@ export default function ViyogaComplete(): React.JSX.Element {
     >
       <View
         style={s.flames}
-        accessibilityLabel={`All ${FLAME_COUNT} flames are lit`}
+        accessibilityLabel={t('viyogaCompleteAllFlamesA11y', {
+          n: String(FLAME_COUNT),
+        })}
       >
         {Array.from({ length: FLAME_COUNT }).map((_, i) => (
           <Text key={i} style={s.flame}>
@@ -76,40 +80,40 @@ export default function ViyogaComplete(): React.JSX.Element {
         ))}
       </View>
 
-      <Text style={s.om} accessibilityLabel="OM">
+      <Text style={s.om} accessibilityLabel={t('viyogaCompleteOmA11y')}>
         ॐ
       </Text>
 
-      <Text style={s.complete}>VIYOGA COMPLETE</Text>
+      <Text style={s.complete}>{t('viyogaCompleteLabel')}</Text>
 
-      <Text style={s.date}>Offered on {offeredDate}</Text>
+      <Text style={s.date}>{t('viyogaCompleteOfferedOn', { date: offeredDate })}</Text>
 
       <View style={s.buttons}>
         <TouchableOpacity
           style={s.btn}
           onPress={handleHome}
           accessibilityRole="button"
-          accessibilityLabel="Return to home"
+          accessibilityLabel={t('viyogaCompleteReturnHomeA11y')}
         >
-          <Text style={s.btnText}>Return to Home</Text>
+          <Text style={s.btnText}>{t('viyogaCompleteReturnHome')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={s.btn}
           onPress={handleJournal}
           accessibilityRole="button"
-          accessibilityLabel="Journal this offering"
+          accessibilityLabel={t('viyogaCompleteJournalA11y')}
         >
-          <Text style={s.btnText}>Journal This</Text>
+          <Text style={s.btnText}>{t('viyogaCompleteJournal')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={s.btn}
           onPress={handleSakha}
           accessibilityRole="button"
-          accessibilityLabel="Talk to Sakha"
+          accessibilityLabel={t('viyogaCompleteTalkSakhaA11y')}
         >
-          <Text style={[s.btnText, s.btnTextGold]}>Talk to Sakha</Text>
+          <Text style={[s.btnText, s.btnTextGold]}>{t('viyogaCompleteTalkSakha')}</Text>
         </TouchableOpacity>
       </View>
     </View>

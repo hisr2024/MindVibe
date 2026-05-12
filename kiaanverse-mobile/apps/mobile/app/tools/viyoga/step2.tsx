@@ -37,26 +37,32 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
 import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
+import { useTranslation } from '@kiaanverse/i18n';
 
-// ── Intensity points — exact copy from the kiaanverse screenshot ──────────
+// ── Intensity points — exact copy from the kiaanverse screenshot.
+// `eng` is fed into the backend flow as the locale-stable canonical
+// value (the server stores it untranslated); `engKey` is what the UI
+// renders so the visible label localizes.
 interface IntensityPoint {
   readonly value: number;
   readonly skt: string;
   readonly eng: string;
+  readonly engKey: string;
 }
 
 const INTENSITY_POINTS: readonly IntensityPoint[] = [
-  { value: 0, skt: 'नव', eng: 'Fresh' },
-  { value: 1, skt: 'उपस्थित', eng: 'Present' },
-  { value: 2, skt: 'गहरा', eng: 'Deep' },
-  { value: 3, skt: 'पुराना', eng: 'Old' },
-  { value: 4, skt: 'शाश्वत', eng: 'Eternal' },
+  { value: 0, skt: 'नव', eng: 'Fresh', engKey: 'viyogaIntensityFresh' },
+  { value: 1, skt: 'उपस्थित', eng: 'Present', engKey: 'viyogaIntensityPresent' },
+  { value: 2, skt: 'गहरा', eng: 'Deep', engKey: 'viyogaIntensityDeep' },
+  { value: 3, skt: 'पुराना', eng: 'Old', engKey: 'viyogaIntensityOld' },
+  { value: 4, skt: 'शाश्वत', eng: 'Eternal', engKey: 'viyogaIntensityEternal' },
 ];
 
 const DEFAULT_INTENSITY: IntensityPoint = INTENSITY_POINTS[2] ?? {
   value: 2,
   skt: 'गहरा',
   eng: 'Deep',
+  engKey: 'viyogaIntensityDeep',
 };
 
 // ── Intensity slider — custom 5-point, gesture-free (tap-to-select) ───────
@@ -64,11 +70,13 @@ const DEFAULT_INTENSITY: IntensityPoint = INTENSITY_POINTS[2] ?? {
 interface IntensitySliderProps {
   readonly value: number;
   readonly onChange: (value: number) => void;
+  readonly t: (key: string) => string;
 }
 
 function IntensitySlider({
   value,
   onChange,
+  t,
 }: IntensitySliderProps): React.JSX.Element {
   const { width: screenWidth } = useWindowDimensions();
   // ScrollView paddingHorizontal is 20, and we give the slider room to breathe.
@@ -106,18 +114,21 @@ function IntensitySlider({
         <Animated.View style={[s.trackFill, fillStyle]} />
         <Animated.View style={[s.thumb, thumbStyle]} />
 
-        {INTENSITY_POINTS.map((p) => (
-          <Pressable
-            key={p.value}
-            onPress={() => handleSelect(p.value)}
-            style={[s.tickTarget, { left: p.value * segmentWidth - 20 }]}
-            accessibilityRole="adjustable"
-            accessibilityLabel={p.eng}
-            accessibilityValue={{ text: p.eng }}
-          >
-            <View style={[s.tick, p.value <= value && s.tickActive]} />
-          </Pressable>
-        ))}
+        {INTENSITY_POINTS.map((p) => {
+          const label = t(p.engKey);
+          return (
+            <Pressable
+              key={p.value}
+              onPress={() => handleSelect(p.value)}
+              style={[s.tickTarget, { left: p.value * segmentWidth - 20 }]}
+              accessibilityRole="adjustable"
+              accessibilityLabel={label}
+              accessibilityValue={{ text: label }}
+            >
+              <View style={[s.tick, p.value <= value && s.tickActive]} />
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={[s.sliderLabels, { width: trackWidth }]}>
@@ -127,7 +138,7 @@ function IntensitySlider({
               {p.skt}
             </Text>
             <Text style={[s.sliderEng, value === i && s.sliderEngActive]}>
-              {p.eng}
+              {t(p.engKey)}
             </Text>
           </View>
         ))}
@@ -140,6 +151,7 @@ function IntensitySlider({
 
 export default function ViyogaStep2(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const { updateAnswer, status } = useSacredFlow('viyoga');
 
   const [separatedFrom, setSeparatedFrom] = useState('');
@@ -179,27 +191,25 @@ export default function ViyogaStep2(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={s.question}>Who or what are you separated from?</Text>
+        <Text style={s.question}>{t('viyogaStep2Q1')}</Text>
         <TextInput
           style={s.textInput}
           value={separatedFrom}
           onChangeText={setSeparatedFrom}
-          placeholder="A name, a place, a version of yourself..."
+          placeholder={t('viyogaStep2Q1Placeholder')}
           placeholderTextColor="rgba(240,235,225,0.25)"
           autoCapitalize="words"
         />
 
-        <Text style={s.question}>How far does this separation feel?</Text>
-        <IntensitySlider value={intensity} onChange={setIntensity} />
+        <Text style={s.question}>{t('viyogaStep2Q2')}</Text>
+        <IntensitySlider value={intensity} onChange={setIntensity} t={t} />
 
-        <Text style={s.wishQuestion}>
-          What do you wish you could say to them?
-        </Text>
+        <Text style={s.wishQuestion}>{t('viyogaWishQuestion')}</Text>
         <ShankhaVoiceInput
           style={[s.textInput, s.wishInput]}
           value={wishToSay}
           onChangeText={setWishToSay}
-          placeholder="I wish... (or tap the conch to speak)"
+          placeholder={t('viyogaWishPlaceholder')}
           multiline
           numberOfLines={4}
           dictationMode="append"
@@ -212,7 +222,7 @@ export default function ViyogaStep2(): React.JSX.Element {
           onPress={handleSubmit}
           disabled={!canSubmit || isCalling}
           accessibilityRole="button"
-          accessibilityLabel="Bring this to Sakha"
+          accessibilityLabel={t('viyogaBringToSakhaA11y')}
           accessibilityState={{ disabled: !canSubmit || isCalling }}
         >
           <LinearGradient
@@ -222,7 +232,7 @@ export default function ViyogaStep2(): React.JSX.Element {
             end={{ x: 1, y: 0 }}
           >
             <Text style={s.ctaBtnText}>
-              {isCalling ? 'Listening...' : 'Bring This to Sakha'}
+              {isCalling ? t('viyogaListening') : t('viyogaBringToSakhaCta')}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
