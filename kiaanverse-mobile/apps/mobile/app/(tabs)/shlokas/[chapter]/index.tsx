@@ -30,6 +30,7 @@ import {
   ShlokaCard,
 } from '@kiaanverse/ui';
 import { useGitaChapterDetail, type GitaVerseSummary } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const GOLD = '#D4A017';
 const GOLD_SOFT = 'rgba(212, 160, 23, 0.35)';
@@ -64,9 +65,10 @@ interface VerseRowProps {
   readonly verse: GitaVerseSummary;
   readonly index: number;
   readonly onPress: (chapter: number, verse: number) => void;
+  readonly verseRowA11y: string;
 }
 
-function VerseRow({ verse, index, onPress }: VerseRowProps): React.JSX.Element {
+function VerseRow({ verse, index, onPress, verseRowA11y }: VerseRowProps): React.JSX.Element {
   const handlePress = useCallback(
     () => onPress(verse.chapter, verse.verse),
     [onPress, verse.chapter, verse.verse]
@@ -81,7 +83,7 @@ function VerseRow({ verse, index, onPress }: VerseRowProps): React.JSX.Element {
       <Pressable
         onPress={handlePress}
         accessibilityRole="button"
-        accessibilityLabel={`Verse ${verse.chapter}.${verse.verse}`}
+        accessibilityLabel={verseRowA11y}
       >
         <ShlokaCard
           sanskrit={verse.sanskrit ?? ''}
@@ -98,6 +100,7 @@ export default function ChapterDetailScreen(): React.JSX.Element {
   const { chapter } = useLocalSearchParams<{ chapter: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('wisdom');
 
   const chapterId = Number(chapter);
   const validChapter =
@@ -121,9 +124,17 @@ export default function ChapterDetailScreen(): React.JSX.Element {
 
   const renderVerse = useCallback<ListRenderItem<GitaVerseSummary>>(
     ({ item, index }) => (
-      <VerseRow verse={item} index={index} onPress={openVerse} />
+      <VerseRow
+        verse={item}
+        index={index}
+        onPress={openVerse}
+        verseRowA11y={t('gitaVerseRowA11y', {
+          chapter: String(item.chapter),
+          verse: String(item.verse),
+        })}
+      />
     ),
-    [openVerse]
+    [openVerse, t]
   );
 
   const listHeader = useMemo(() => {
@@ -141,7 +152,10 @@ export default function ChapterDetailScreen(): React.JSX.Element {
         ) : null}
         <Text style={styles.summaryTitle}>{data.name}</Text>
         <Text style={styles.summaryMeta}>
-          Chapter {data.chapter} — {data.verse_count} verses
+          {t('chapterMetaFormat', {
+            number: String(data.chapter),
+            count: String(data.verse_count),
+          })}
         </Text>
         {data.summary ? (
           <Text style={styles.summaryBody}>{data.summary}</Text>
@@ -149,17 +163,15 @@ export default function ChapterDetailScreen(): React.JSX.Element {
         <GoldenDivider style={styles.divider} />
       </View>
     );
-  }, [data, sanskritName]);
+  }, [data, sanskritName, t]);
 
   if (!validChapter) {
     return (
       <DivineScreenWrapper>
-        <ChapterHeader title="Unknown chapter" onBack={() => router.back()} />
+        <ChapterHeader title={t('chapterUnknownTitle')} onBack={() => router.back()} />
         <View style={styles.state}>
-          <Text style={styles.errorTitle}>Chapter not found</Text>
-          <Text style={styles.stateHint}>
-            The Bhagavad Gita has 18 chapters — please pick one from 1 to 18.
-          </Text>
+          <Text style={styles.errorTitle}>{t('chapterNotFound')}</Text>
+          <Text style={styles.stateHint}>{t('chapterPickHint')}</Text>
         </View>
       </DivineScreenWrapper>
     );
@@ -168,26 +180,26 @@ export default function ChapterDetailScreen(): React.JSX.Element {
   return (
     <DivineScreenWrapper>
       <ChapterHeader
-        title={data?.name ?? `Chapter ${chapterId}`}
-        subtitle={data ? `${data.verse_count} verses` : undefined}
+        title={data?.name ?? t('chapterDefaultTitle', { number: String(chapterId) })}
+        subtitle={
+          data
+            ? t('chapterVerseCount', { count: String(data.verse_count) })
+            : undefined
+        }
         onBack={() => router.back()}
+        backA11y={t('goBackA11y')}
       />
 
       {isLoading && !data ? (
         <View style={styles.state}>
-          <OmLoader size={64} label="Opening the chapter…" />
+          <OmLoader size={64} label={t('chapterOpeningLoader')} />
         </View>
       ) : error && !data ? (
         <View style={styles.state}>
-          <Text style={styles.errorTitle}>
-            This chapter is temporarily unavailable
-          </Text>
-          <Text style={styles.stateHint}>
-            Your offline cache will be used when available. You can try again
-            below.
-          </Text>
+          <Text style={styles.errorTitle}>{t('chapterTempUnavailable')}</Text>
+          <Text style={styles.stateHint}>{t('chapterOfflineHint')}</Text>
           <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-            <Text style={styles.retryText}>Retry</Text>
+            <Text style={styles.retryText}>{t('gitaRetryButton')}</Text>
           </Pressable>
         </View>
       ) : (
@@ -203,9 +215,7 @@ export default function ChapterDetailScreen(): React.JSX.Element {
           ItemSeparatorComponent={VerseSeparator}
           ListEmptyComponent={
             <View style={styles.state}>
-              <Text style={styles.stateHint}>
-                No verses have been loaded yet for this chapter.
-              </Text>
+              <Text style={styles.stateHint}>{t('chapterNoVersesLoaded')}</Text>
             </View>
           }
           showsVerticalScrollIndicator={false}
@@ -223,19 +233,21 @@ interface ChapterHeaderProps {
   readonly title: string;
   readonly subtitle?: string | undefined;
   readonly onBack: () => void;
+  readonly backA11y?: string;
 }
 
 function ChapterHeader({
   title,
   subtitle,
   onBack,
+  backA11y,
 }: ChapterHeaderProps): React.JSX.Element {
   return (
     <View style={styles.header}>
       <Pressable
         onPress={onBack}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={backA11y ?? 'Go back'}
         hitSlop={12}
         style={styles.backButton}
       >

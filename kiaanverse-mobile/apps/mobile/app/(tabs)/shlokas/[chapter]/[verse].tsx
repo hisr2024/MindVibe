@@ -48,6 +48,7 @@ import {
 } from '@kiaanverse/ui';
 import { useGitaTranslations, useGitaVerseDetail } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const GOLD = '#D4A017';
 const GOLD_SOFT = 'rgba(212, 160, 23, 0.35)';
@@ -63,6 +64,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
   }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('wisdom');
 
   const chapterNum = Number(chapter);
   const verseNum = Number(verse);
@@ -106,7 +108,10 @@ export default function VerseDetailScreen(): React.JSX.Element {
   const handleShare = useCallback(async () => {
     if (!data?.verse) return;
     const v = data.verse;
-    const reference = `Bhagavad Gita ${v.chapter}.${v.verse}`;
+    const reference = t('verseRefBgFormat', {
+      chapter: String(v.chapter),
+      verse: String(v.verse),
+    });
     const translit = translations?.translations?.transliteration?.trim() ?? '';
     const message = [
       reference,
@@ -116,7 +121,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
       '',
       v.english,
       '',
-      '— Shared from Kiaanverse',
+      t('shareFooter'),
     ]
       .filter((l) => l !== undefined)
       .join('\n');
@@ -126,7 +131,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
     } catch {
       // User cancelled or share sheet failed — no state to roll back.
     }
-  }, [data, translations]);
+  }, [data, translations, t]);
 
   // ── TTS playback handled by <ListenButton segments={...}> below.
   // The segment list (Sanskrit → English → Hindi) is computed during
@@ -156,9 +161,12 @@ export default function VerseDetailScreen(): React.JSX.Element {
   const handleAskSakha = useCallback(() => {
     if (!data?.verse) return;
     const v = data.verse;
-    const reference = `Bhagavad Gita ${v.chapter}.${v.verse}`;
+    const reference = t('verseRefBgFormat', {
+      chapter: String(v.chapter),
+      verse: String(v.verse),
+    });
     const prefill = [
-      `Please explain ${reference}:`,
+      t('verseAskSakhaPrefill', { reference }),
       '',
       v.sanskrit,
       '',
@@ -171,18 +179,15 @@ export default function VerseDetailScreen(): React.JSX.Element {
       pathname: '/(tabs)/chat',
       params: { context: prefill, verseId: `${v.chapter}.${v.verse}` },
     });
-  }, [data, router]);
+  }, [data, router, t]);
 
   if (!paramsValid) {
     return (
       <DivineScreenWrapper>
-        <Header title="Unknown verse" onBack={() => router.back()} />
+        <Header title={t('verseUnknownTitle')} onBack={() => router.back()} backA11y={t('goBackA11y')} />
         <View style={styles.state}>
-          <Text style={styles.errorTitle}>Verse reference is invalid</Text>
-          <Text style={styles.stateHint}>
-            A valid verse looks like 2.47. Please return to the chapter and
-            choose a verse from the list.
-          </Text>
+          <Text style={styles.errorTitle}>{t('verseInvalidTitle')}</Text>
+          <Text style={styles.stateHint}>{t('verseInvalidBody')}</Text>
         </View>
       </DivineScreenWrapper>
     );
@@ -192,11 +197,15 @@ export default function VerseDetailScreen(): React.JSX.Element {
     return (
       <DivineScreenWrapper>
         <Header
-          title={`Chapter ${chapterNum} · Verse ${verseNum}`}
+          title={t('verseChapterVerseTitle', {
+            chapter: String(chapterNum),
+            verse: String(verseNum),
+          })}
           onBack={() => router.back()}
+          backA11y={t('goBackA11y')}
         />
         <View style={styles.state}>
-          <OmLoader size={72} label="Unveiling the verse…" />
+          <OmLoader size={72} label={t('verseLoaderLabel')} />
         </View>
       </DivineScreenWrapper>
     );
@@ -206,17 +215,18 @@ export default function VerseDetailScreen(): React.JSX.Element {
     return (
       <DivineScreenWrapper>
         <Header
-          title={`Chapter ${chapterNum} · Verse ${verseNum}`}
+          title={t('verseChapterVerseTitle', {
+            chapter: String(chapterNum),
+            verse: String(verseNum),
+          })}
           onBack={() => router.back()}
+          backA11y={t('goBackA11y')}
         />
         <View style={styles.state}>
-          <Text style={styles.errorTitle}>Unable to open this verse</Text>
-          <Text style={styles.stateHint}>
-            Please check your connection. Previously viewed verses remain
-            available offline.
-          </Text>
+          <Text style={styles.errorTitle}>{t('verseUnableToOpen')}</Text>
+          <Text style={styles.stateHint}>{t('verseConnectionPreviousHint')}</Text>
           <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-            <Text style={styles.retryText}>Retry</Text>
+            <Text style={styles.retryText}>{t('gitaRetryButton')}</Text>
           </Pressable>
         </View>
       </DivineScreenWrapper>
@@ -225,7 +235,10 @@ export default function VerseDetailScreen(): React.JSX.Element {
 
   const v = data.verse;
   const translit = translations?.translations?.transliteration ?? '';
-  const reference = `Bhagavad Gita ${v.chapter}.${v.verse}`;
+  const reference = t('verseRefBgFormat', {
+    chapter: String(v.chapter),
+    verse: String(v.verse),
+  });
 
   return (
     <DivineScreenWrapper>
@@ -233,6 +246,9 @@ export default function VerseDetailScreen(): React.JSX.Element {
         title={reference}
         subtitle={v.theme ? v.theme.replace(/_/g, ' ') : undefined}
         onBack={() => router.back()}
+        backA11y={t('goBackA11y')}
+        bookmarkA11y={t('bookmarkVerseA11y')}
+        removeBookmarkA11y={t('removeBookmarkA11y')}
         isBookmarked={isBookmarked}
         onToggleBookmark={handleToggleBookmark}
       />
@@ -266,7 +282,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
             entering={FadeIn.delay(200).duration(400)}
             style={styles.hindiBlock}
           >
-            <Text style={styles.hindiLabel}>Hindi</Text>
+            <Text style={styles.hindiLabel}>{t('verseHindiLabel')}</Text>
             <Text
               style={styles.hindiText}
               accessibilityLanguage="hi"
@@ -281,7 +297,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
           <Animated.View entering={FadeIn.delay(260).duration(400)}>
             <GoldenDivider style={styles.divider} />
             <View style={styles.principleBlock}>
-              <Text style={styles.principleLabel}>Principle</Text>
+              <Text style={styles.principleLabel}>{t('versePrincipleLabel')}</Text>
               <Text style={styles.principleText}>{v.principle}</Text>
             </View>
           </Animated.View>
@@ -292,11 +308,11 @@ export default function VerseDetailScreen(): React.JSX.Element {
           style={styles.ctaRow}
         >
           <DivineButton
-            title="Ask Sakha about this verse"
+            title={t('verseAskSakhaButton')}
             onPress={handleAskSakha}
             variant="primary"
             leftAccessory={<Sparkles size={18} color="#FFFFFF" />}
-            accessibilityLabel={`Ask Sakha about ${reference}`}
+            accessibilityLabel={t('verseAskSakhaA11y', { reference })}
           />
         </Animated.View>
 
@@ -307,9 +323,9 @@ export default function VerseDetailScreen(): React.JSX.Element {
           <ListenButton
             segments={listenSegments}
             variant="secondary"
-            idleLabel="Listen to verse"
-            accessibilityLabelIdle="Listen to verse aloud (Sanskrit, English, Hindi)"
-            accessibilityLabelPlaying="Stop verse playback"
+            idleLabel={t('verseListenLabel')}
+            accessibilityLabelIdle={t('verseListenA11y')}
+            accessibilityLabelPlaying={t('verseStopA11y')}
           />
         </Animated.View>
 
@@ -318,18 +334,18 @@ export default function VerseDetailScreen(): React.JSX.Element {
           style={styles.ctaRow}
         >
           <DivineButton
-            title="Share verse"
+            title={t('verseShareLabel')}
             onPress={handleShare}
             variant="secondary"
             leftAccessory={<Share2 size={16} color={GOLD} />}
-            accessibilityLabel="Share this verse"
+            accessibilityLabel={t('verseShareA11y')}
           />
         </Animated.View>
 
         {data.related_verses.length > 0 ? (
           <Animated.View entering={FadeIn.delay(420).duration(400)}>
             <GoldenDivider withGlyph style={styles.divider} />
-            <Text style={styles.relatedLabel}>Related verses</Text>
+            <Text style={styles.relatedLabel}>{t('verseRelatedLabel')}</Text>
             <View style={styles.relatedList}>
               {data.related_verses.map((r) => (
                 <Pressable
@@ -338,7 +354,10 @@ export default function VerseDetailScreen(): React.JSX.Element {
                     router.push(`/(tabs)/shlokas/${r.chapter}/${r.verse}`)
                   }
                   accessibilityRole="button"
-                  accessibilityLabel={`Open verse ${r.chapter}.${r.verse}`}
+                  accessibilityLabel={t('gitaOpenVerseA11y', {
+                    chapter: String(r.chapter),
+                    verse: String(r.verse),
+                  })}
                   style={styles.relatedCard}
                 >
                   <Text style={styles.relatedRef}>{r.verse_id}</Text>
@@ -372,6 +391,9 @@ interface HeaderProps {
   readonly title: string;
   readonly subtitle?: string | undefined;
   readonly onBack: () => void;
+  readonly backA11y?: string;
+  readonly bookmarkA11y?: string;
+  readonly removeBookmarkA11y?: string;
   readonly isBookmarked?: boolean;
   readonly onToggleBookmark?: () => void;
 }
@@ -380,6 +402,9 @@ function Header({
   title,
   subtitle,
   onBack,
+  backA11y,
+  bookmarkA11y,
+  removeBookmarkA11y,
   isBookmarked,
   onToggleBookmark,
 }: HeaderProps): React.JSX.Element {
@@ -388,7 +413,7 @@ function Header({
       <Pressable
         onPress={onBack}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={backA11y ?? 'Go back'}
         hitSlop={12}
         style={styles.backButton}
       >
@@ -409,7 +434,9 @@ function Header({
           onPress={onToggleBookmark}
           accessibilityRole="button"
           accessibilityLabel={
-            isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'
+            isBookmarked
+              ? (removeBookmarkA11y ?? 'Remove bookmark')
+              : (bookmarkA11y ?? 'Bookmark this verse')
           }
           accessibilityState={{ selected: isBookmarked ?? false }}
           hitSlop={12}
