@@ -37,5 +37,15 @@
   "journeysDescription": "अंतर्गत रणक्षेत्र · ६ शत्रू",
 
   "sacredReflectionsName": "पवित्र चिंतन",
-  "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल आणि अंतर्दृष्टी"
+  "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल आणि अंतर्दृष्टी",
+
+  "dashboardSubtitle": "रूपांतर, स्पष्टता आणि अंतःशांतीसाठी साधने",
+  "sectionInsights": "कर्म अंतर्दृष्टी",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "तुमच्या साधनेतील नमुने",
+  "karmaFootprintName": "कर्म पाऊलखुणा",
+  "karmaFootprintDescription": "तुमच्या कर्म लहरींचा मागोवा घ्या",
+  "karmaTreeName": "कर्म वृक्ष",
+  "karmaTreeDescription": "तुमची जिवंत धर्म-छाया"
 }

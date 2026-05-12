@@ -37,5 +37,15 @@
   "journeysDescription": "Le champ de bataille intérieur · 6 ennemis",
 
   "sacredReflectionsName": "Réflexions sacrées",
-  "sacredReflectionsDescription": "Journal chiffré & intuitions"
+  "sacredReflectionsDescription": "Journal chiffré & intuitions",
+
+  "dashboardSubtitle": "Instruments de transformation, clarté et paix intérieure",
+  "sectionInsights": "Aperçus karmiques",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "Motifs dans ta pratique",
+  "karmaFootprintName": "Empreinte karmique",
+  "karmaFootprintDescription": "Suis tes ondes karmiques",
+  "karmaTreeName": "Arbre karmique",
+  "karmaTreeDescription": "Ta canopée dharmique vivante"
 }

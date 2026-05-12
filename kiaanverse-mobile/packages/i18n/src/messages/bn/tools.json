@@ -37,5 +37,15 @@
   "journeysDescription": "অন্তঃরণক্ষেত্র · ৬ শত্রু",
 
   "sacredReflectionsName": "পবিত্র চিন্তা",
-  "sacredReflectionsDescription": "এনক্রিপ্টেড জার্নাল ও অন্তর্দৃষ্টি"
+  "sacredReflectionsDescription": "এনক্রিপ্টেড জার্নাল ও অন্তর্দৃষ্টি",
+
+  "dashboardSubtitle": "রূপান্তর, স্পষ্টতা ও অন্তঃশান্তির জন্য যন্ত্র",
+  "sectionInsights": "কর্ম অন্তর্দৃষ্টি",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "আপনার সাধনায় প্যাটার্ন",
+  "karmaFootprintName": "কর্ম পদচিহ্ন",
+  "karmaFootprintDescription": "আপনার কর্ম তরঙ্গ অনুসরণ করুন",
+  "karmaTreeName": "কর্ম বৃক্ষ",
+  "karmaTreeDescription": "আপনার জীবন্ত ধর্ম-ছাউনি"
 }

@@ -37,5 +37,15 @@
   "journeysDescription": "ఆంతరిక రణభూమి · 6 శత్రువులు",
 
   "sacredReflectionsName": "పవిత్ర చింతనలు",
-  "sacredReflectionsDescription": "ఎన్‌క్రిప్టెడ్ జర్నల్ & అంతర్దృష్టులు"
+  "sacredReflectionsDescription": "ఎన్‌క్రిప్టెడ్ జర్నల్ & అంతర్దృష్టులు",
+
+  "dashboardSubtitle": "మార్పు, స్పష్టత, అంతఃశాంతి కోసం ఉపకరణాలు",
+  "sectionInsights": "కర్మ అంతర్దృష్టి",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "మీ సాధనలో నమూనాలు",
+  "karmaFootprintName": "కర్మ పాదముద్ర",
+  "karmaFootprintDescription": "మీ కర్మ తరంగాలను అనుసరించండి",
+  "karmaTreeName": "కర్మ వృక్షం",
+  "karmaTreeDescription": "మీ సజీవ ధర్మ ఛత్రం"
 }

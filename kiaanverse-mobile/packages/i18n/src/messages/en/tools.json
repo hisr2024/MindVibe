@@ -37,5 +37,15 @@
   "journeysDescription": "The inner battlefield · 6 enemies",
 
   "sacredReflectionsName": "Sacred Reflections",
-  "sacredReflectionsDescription": "Encrypted journal & insights"
+  "sacredReflectionsDescription": "Encrypted journal & insights",
+
+  "dashboardSubtitle": "Instruments for transformation, clarity, and inner peace",
+  "sectionInsights": "Karma Insights",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "Patterns in your practice",
+  "karmaFootprintName": "Karma Footprint",
+  "karmaFootprintDescription": "Track your karmic ripples",
+  "karmaTreeName": "Karma Tree",
+  "karmaTreeDescription": "Your living dharma canopy"
 }

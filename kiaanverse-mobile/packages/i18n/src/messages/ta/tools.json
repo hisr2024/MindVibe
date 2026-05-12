@@ -37,5 +37,15 @@
   "journeysDescription": "உள் போர்க்களம் · 6 எதிரிகள்",
 
   "sacredReflectionsName": "புனிதச் சிந்தனைகள்",
-  "sacredReflectionsDescription": "மறையாக்கப்பட்ட நாட்குறிப்பு & நுண்ணறிவு"
+  "sacredReflectionsDescription": "மறையாக்கப்பட்ட நாட்குறிப்பு & நுண்ணறிவு",
+
+  "dashboardSubtitle": "மாற்றம், தெளிவு, உள் அமைதிக்கான கருவிகள்",
+  "sectionInsights": "கர்ம நுண்ணறிவு",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "உங்கள் சாதனையில் வடிவங்கள்",
+  "karmaFootprintName": "கர்ம காலடி",
+  "karmaFootprintDescription": "உங்கள் கர்ம அலைகளைப் பின்தொடரு",
+  "karmaTreeName": "கர்ம மரம்",
+  "karmaTreeDescription": "உங்கள் உயிருள்ள தர்ம மரப்பந்தல்"
 }

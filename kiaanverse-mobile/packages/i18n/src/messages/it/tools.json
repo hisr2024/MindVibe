@@ -37,5 +37,15 @@
   "journeysDescription": "Il campo di battaglia interiore · 6 nemici",
 
   "sacredReflectionsName": "Riflessioni sacre",
-  "sacredReflectionsDescription": "Diario cifrato e intuizioni"
+  "sacredReflectionsDescription": "Diario cifrato e intuizioni",
+
+  "dashboardSubtitle": "Strumenti per trasformazione, chiarezza e pace interiore",
+  "sectionInsights": "Intuizioni karmiche",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "Schemi nella tua pratica",
+  "karmaFootprintName": "Impronta karmica",
+  "karmaFootprintDescription": "Traccia le tue onde karmiche",
+  "karmaTreeName": "Albero karmico",
+  "karmaTreeDescription": "La tua chioma dharmica vivente"
 }

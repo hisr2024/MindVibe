@@ -37,5 +37,15 @@
   "journeysDescription": "आन्तरिक रणक्षेत्र · 6 शत्रु",
 
   "sacredReflectionsName": "पावन चिन्तन",
-  "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल एवं अंतर्दृष्टि"
+  "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल एवं अंतर्दृष्टि",
+
+  "dashboardSubtitle": "रूपान्तरण, स्पष्टता एवं अंतःशांति हेतु उपकरण",
+  "sectionInsights": "कर्म अंतर्दृष्टि",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "आपकी साधना में पैटर्न",
+  "karmaFootprintName": "कर्म पदचिह्न",
+  "karmaFootprintDescription": "अपनी कर्म-तरंगों का अनुसरण करें",
+  "karmaTreeName": "कर्म वृक्ष",
+  "karmaTreeDescription": "आपकी जीवंत धर्म-छत्र"
 }

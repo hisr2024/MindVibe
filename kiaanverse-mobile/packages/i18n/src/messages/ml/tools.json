@@ -37,5 +37,15 @@
   "journeysDescription": "ആന്തരിക യുദ്ധക്കളം · 6 ശത്രുക്കൾ",
 
   "sacredReflectionsName": "പവിത്ര ചിന്തനങ്ങൾ",
-  "sacredReflectionsDescription": "എൻക്രിപ്റ്റഡ് ജേണലും ഉൾക്കാഴ്ചകളും"
+  "sacredReflectionsDescription": "എൻക്രിപ്റ്റഡ് ജേണലും ഉൾക്കാഴ്ചകളും",
+
+  "dashboardSubtitle": "രൂപാന്തരം, വ്യക്തത, ആന്തരിക സമാധാനത്തിനായുള്ള ഉപകരണങ്ങൾ",
+  "sectionInsights": "കർമ്മ ഉൾക്കാഴ്ചകൾ",
+
+  "karmalytixName": "KarmaLytix",
+  "karmalytixDescription": "നിങ്ങളുടെ സാധനയിലെ പാറ്റേണുകൾ",
+  "karmaFootprintName": "കർമ്മ കാൽപാട്",
+  "karmaFootprintDescription": "നിങ്ങളുടെ കർമ്മ തരംഗങ്ങൾ പിന്തുടരുക",
+  "karmaTreeName": "കർമ്മ വൃക്ഷം",
+  "karmaTreeDescription": "നിങ്ങളുടെ ജീവനുള്ള ധർമ്മ കുട"
 }
