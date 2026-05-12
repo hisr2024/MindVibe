@@ -34,6 +34,7 @@ import enOnboarding from './messages/en/onboarding.json';
 import enVibePlayer from './messages/en/vibe-player.json';
 import enSupport from './messages/en/support.json';
 import enTools from './messages/en/tools.json';
+import enVoice from './messages/en/voice.json';
 
 // Support — per-locale bundles (registered in Batch 9).
 //
@@ -57,6 +58,25 @@ import frSupport from './messages/fr/support.json';
 import esSupport from './messages/es/support.json';
 import itSupport from './messages/it/support.json';
 import ptSupport from './messages/pt/support.json';
+
+// Voice — per-locale bundles (registered in Batch 19).
+// Used by the Voice Companion (Sakha) cluster: index, crisis,
+// onboarding, quota, transcript.
+import hiVoice from './messages/hi/voice.json';
+import saVoice from './messages/sa/voice.json';
+import taVoice from './messages/ta/voice.json';
+import teVoice from './messages/te/voice.json';
+import bnVoice from './messages/bn/voice.json';
+import mrVoice from './messages/mr/voice.json';
+import guVoice from './messages/gu/voice.json';
+import knVoice from './messages/kn/voice.json';
+import mlVoice from './messages/ml/voice.json';
+import paVoice from './messages/pa/voice.json';
+import deVoice from './messages/de/voice.json';
+import frVoice from './messages/fr/voice.json';
+import esVoice from './messages/es/voice.json';
+import itVoice from './messages/it/voice.json';
+import ptVoice from './messages/pt/voice.json';
 
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
@@ -340,6 +360,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   'vibe-player': enVibePlayer,
   support: enSupport,
   tools: enTools,
+  voice: enVoice,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -370,6 +391,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': hiVibePlayer,
     support: hiSupport,
     tools: hiTools,
+    voice: hiVoice,
   },
   sa: {
     common: saCommon,
@@ -387,6 +409,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': saVibePlayer,
     support: saSupport,
     tools: saTools,
+    voice: saVoice,
   },
   ta: {
     common: taCommon,
@@ -404,6 +427,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': taVibePlayer,
     support: taSupport,
     tools: taTools,
+    voice: taVoice,
   },
   te: {
     common: teCommon,
@@ -421,6 +445,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': teVibePlayer,
     support: teSupport,
     tools: teTools,
+    voice: teVoice,
   },
   bn: {
     common: bnCommon,
@@ -438,6 +463,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': bnVibePlayer,
     support: bnSupport,
     tools: bnTools,
+    voice: bnVoice,
   },
   mr: {
     common: mrCommon,
@@ -454,6 +480,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     onboarding: mrOnboarding,
     'vibe-player': mrVibePlayer,
     tools: mrTools,
+    voice: mrVoice,
   },
   gu: {
     common: guCommon,
@@ -470,6 +497,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     onboarding: guOnboarding,
     'vibe-player': guVibePlayer,
     tools: guTools,
+    voice: guVoice,
   },
   kn: {
     common: knCommon,
@@ -486,6 +514,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     onboarding: knOnboarding,
     'vibe-player': knVibePlayer,
     tools: knTools,
+    voice: knVoice,
   },
   ml: {
     common: mlCommon,
@@ -502,6 +531,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     onboarding: mlOnboarding,
     'vibe-player': mlVibePlayer,
     tools: mlTools,
+    voice: mlVoice,
   },
   pa: {
     common: paCommon,
@@ -518,6 +548,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     onboarding: paOnboarding,
     'vibe-player': paVibePlayer,
     tools: paTools,
+    voice: paVoice,
   },
   de: {
     common: deCommon,
@@ -535,6 +566,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': deVibePlayer,
     support: deSupport,
     tools: deTools,
+    voice: deVoice,
   },
   fr: {
     common: frCommon,
@@ -552,6 +584,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': frVibePlayer,
     support: frSupport,
     tools: frTools,
+    voice: frVoice,
   },
   es: {
     common: esCommon,
@@ -569,6 +602,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': esVibePlayer,
     support: esSupport,
     tools: esTools,
+    voice: esVoice,
   },
   it: {
     common: itCommon,
@@ -586,6 +620,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': itVibePlayer,
     support: itSupport,
     tools: itTools,
+    voice: itVoice,
   },
   pt: {
     common: ptCommon,
@@ -603,6 +638,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': ptVibePlayer,
     support: ptSupport,
     tools: ptTools,
+    voice: ptVoice,
   },
 };
 

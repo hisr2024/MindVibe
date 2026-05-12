@@ -15,19 +15,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useVoiceStore } from '../../voice/stores/voiceStore';
+import { useTranslation } from '@kiaanverse/i18n';
 
-const TIER_PRESET: Record<
+// Tier label/subtitle is resolved at render via t() so each locale
+// gets localized copy without changing the tier IDs (which feed the
+// backend over the quota.reason wire format).
+const TIER_KEYS: Record<
   'free' | 'bhakta' | 'sadhak' | 'siddha',
-  { label: string; subtitle: string }
+  { labelKey: string; subtitleKey: string }
 > = {
-  free: { label: 'Free', subtitle: 'You are here' },
-  bhakta: { label: 'Bhakta', subtitle: '30 min/day · Friend + Voice Guide' },
-  sadhak: { label: 'Sadhak', subtitle: 'Unlimited · all engines · offline cache' },
-  siddha: { label: 'Siddha', subtitle: 'Unlimited + priority queue + custom voice' },
+  free: { labelKey: 'vcQuotaTierFree', subtitleKey: 'vcQuotaTierFreeSub' },
+  bhakta: { labelKey: 'vcQuotaTierBhakta', subtitleKey: 'vcQuotaTierBhaktaSub' },
+  sadhak: { labelKey: 'vcQuotaTierSadhak', subtitleKey: 'vcQuotaTierSadhakSub' },
+  siddha: { labelKey: 'vcQuotaTierSiddha', subtitleKey: 'vcQuotaTierSiddhaSub' },
 };
 
 export default function VoiceQuotaSheet() {
   const router = useRouter();
+  const { t } = useTranslation('voice');
   const quota = useVoiceStore((s) => s.quota);
 
   if (!quota) {
@@ -39,59 +44,56 @@ export default function VoiceQuotaSheet() {
     <SafeAreaView style={styles.root}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close"
+        accessibilityLabel={t('vcQuotaCloseA11y')}
         style={styles.dismissArea}
         onPress={() => router.back()}
       />
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.headline}>Sakha is for those who walk further</Text>
+          <Text style={styles.headline}>{t('vcQuotaHeadline')}</Text>
           <Text style={styles.body}>{quota.reason}</Text>
 
           <View style={styles.matrix}>
-            {(['free', 'bhakta', 'sadhak', 'siddha'] as const).map((t) => {
-              const isCurrent = t === quota.tier;
-              const preset = TIER_PRESET[t];
+            {(['free', 'bhakta', 'sadhak', 'siddha'] as const).map((tier) => {
+              const isCurrent = tier === quota.tier;
+              const preset = TIER_KEYS[tier];
               return (
                 <View
-                  key={t}
+                  key={tier}
                   style={[styles.tierRow, isCurrent ? styles.tierRowCurrent : null]}
                 >
                   <View style={styles.tierMeta}>
                     <Text style={[styles.tierLabel, isCurrent ? styles.tierLabelCurrent : null]}>
-                      {preset.label}
+                      {t(preset.labelKey)}
                     </Text>
-                    <Text style={styles.tierSubtitle}>{preset.subtitle}</Text>
+                    <Text style={styles.tierSubtitle}>{t(preset.subtitleKey)}</Text>
                   </View>
-                  {isCurrent ? <Text style={styles.youBadge}>you</Text> : null}
+                  {isCurrent ? <Text style={styles.youBadge}>{t('vcQuotaYou')}</Text> : null}
                 </View>
               );
             })}
           </View>
 
-          <Text style={styles.note}>
-            No countdown. No pressure. Tap below to walk further whenever
-            it feels right.
-          </Text>
+          <Text style={styles.note}>{t('vcQuotaNote')}</Text>
         </ScrollView>
 
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Upgrade tier"
+            accessibilityLabel={t('vcQuotaUpgradeA11y')}
             style={styles.cta}
             onPress={() => router.push('/subscription')}
           >
-            <Text style={styles.ctaText}>Walk further</Text>
+            <Text style={styles.ctaText}>{t('vcQuotaWalkFurther')}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Not now"
+            accessibilityLabel={t('vcQuotaNotNowA11y')}
             style={styles.dismissBtn}
             onPress={() => router.back()}
           >
-            <Text style={styles.dismissText}>Not now</Text>
+            <Text style={styles.dismissText}>{t('vcQuotaNotNow')}</Text>
           </Pressable>
         </View>
       </View>
