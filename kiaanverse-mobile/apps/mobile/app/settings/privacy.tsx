@@ -32,9 +32,11 @@ import {
   useRequestExport,
 } from '@kiaanverse/api';
 import { API_CONFIG } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function PrivacySettingsScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('settings');
   const {
     data: status,
     refetch,
@@ -58,11 +60,11 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
     } catch (err: unknown) {
       const msg =
         (err as { response?: { status: number } })?.response?.status === 429
-          ? 'You can request one export per 24 hours.'
-          : 'Failed to queue export. Please try again.';
-      Alert.alert('Export', msg);
+          ? t('privacyExportRateLimited')
+          : t('privacyExportFailed');
+      Alert.alert(t('privacyExportAlertTitle'), msg);
     }
-  }, [requestExport]);
+  }, [requestExport, t]);
 
   const startPolling = useCallback(() => {
     if (polling) return;
@@ -93,17 +95,12 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
   const handleRequestDeletion = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      'Delete Your Account',
-      'Your account will be scheduled for permanent deletion in 30 days. ' +
-        'During this time you can cancel at any time.\n\n' +
-        '• All data permanently erased\n' +
-        '• Stripe subscription cancelled\n' +
-        '• Encrypted journal entries deleted\n' +
-        '• Cannot be undone after 30 days',
+      t('privacyDeleteAlertTitle'),
+      t('privacyDeleteAlertBody'),
       [
-        { text: 'Keep My Account', style: 'cancel' },
+        { text: t('privacyKeepAccount'), style: 'cancel' },
         {
-          text: 'Delete in 30 Days',
+          text: t('privacyDelete30Days'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -113,24 +110,24 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
               );
             } catch {
               Alert.alert(
-                'Error',
-                'Failed to schedule deletion. Please try again.'
+                t('privacyErrorTitle'),
+                t('privacyDeletionFailed')
               );
             }
           },
         },
       ]
     );
-  }, [requestDeletion]);
+  }, [requestDeletion, t]);
 
   const handleCancelDeletion = useCallback(() => {
     Alert.alert(
-      'Cancel Deletion',
-      'Your account will be fully restored. Are you sure?',
+      t('privacyCancelDelTitle'),
+      t('privacyCancelDelBody'),
       [
-        { text: 'No', style: 'cancel' },
+        { text: t('privacyNoButton'), style: 'cancel' },
         {
-          text: 'Yes, Keep My Account',
+          text: t('privacyYesKeepButton'),
           onPress: async () => {
             try {
               await cancelDeletion.mutateAsync();
@@ -139,15 +136,15 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
               );
             } catch {
               Alert.alert(
-                'Error',
-                'Failed to cancel deletion. Please try again.'
+                t('privacyErrorTitle'),
+                t('privacyCancelDelFailed')
               );
             }
           },
         },
       ]
     );
-  }, [cancelDeletion]);
+  }, [cancelDeletion, t]);
 
   // ─── Helpers ──────────────────────────────────────────
   const gracePeriodDate = status?.deletion?.grace_period_ends_at
@@ -168,20 +165,16 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
 
   return (
     <Screen scroll>
-      <GoldenHeader title="Your Privacy" onBack={() => router.back()} />
+      <GoldenHeader title={t('privacyTitle')} onBack={() => router.back()} />
 
       {/* Deletion banner */}
       {isDeletionPending && gracePeriodDate && (
         <Card style={[styles.card, styles.dangerCard]}>
           <Text variant="label" color={colors.semantic.error}>
-            Account Deletion Scheduled
+            {t('privacyDeletionBannerTitle')}
           </Text>
           <Text variant="caption" color={colors.text.muted} style={styles.mt4}>
-            Your account will be permanently deleted on{' '}
-            <Text variant="caption" color={colors.text.primary}>
-              {gracePeriodDate}
-            </Text>
-            .
+            {t('privacyDeletionBannerFmt', { date: gracePeriodDate })}
           </Text>
           <Pressable
             onPress={handleCancelDeletion}
@@ -194,23 +187,22 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
               style={styles.underline}
             >
               {cancelDeletion.isPending
-                ? 'Cancelling…'
-                : 'Cancel deletion request'}
+                ? t('privacyCancellingButton')
+                : t('privacyCancelRequestLink')}
             </Text>
           </Pressable>
         </Card>
       )}
 
       {/* Export section */}
-      <SectionHeader title="Download My Data" />
+      <SectionHeader title={t('privacyExportSection')} />
       <Card style={styles.card}>
         <Text variant="caption" color={colors.text.muted} style={styles.mb8}>
-          Art. 20 — Right to data portability. Includes your conversations,
-          practice data, and account info as a ZIP archive.
+          {t('privacyExportDesc')}
         </Text>
 
         {isExportReady && (
-          <GoldenButton title="Download ZIP" onPress={handleDownload} />
+          <GoldenButton title={t('privacyDownloadButton')} onPress={handleDownload} />
         )}
 
         {isExportPending && (
@@ -218,8 +210,8 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
             <View style={[styles.statusDot, styles.statusDotActive]} />
             <Text variant="caption" color={colors.text.secondary}>
               {exportStatus === 'pending'
-                ? 'Export queued…'
-                : 'Building your archive…'}
+                ? t('privacyExportQueued')
+                : t('privacyExportBuilding')}
             </Text>
           </View>
         )}
@@ -228,7 +220,7 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
           exportStatus === 'failed' ||
           exportStatus === 'expired') && (
           <GoldenButton
-            title={requestExport.isPending ? 'Requesting…' : 'Request Export'}
+            title={requestExport.isPending ? t('privacyRequestingButton') : t('privacyRequestExport')}
             onPress={handleRequestExport}
             disabled={requestExport.isPending}
           />
@@ -240,22 +232,22 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
             color={colors.text.muted}
             style={[styles.mt4, styles.textCenter]}
           >
-            Link expires{' '}
-            {new Date(status.export.expires_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            {t('privacyLinkExpiresFmt', {
+              date: new Date(status.export.expires_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
             })}
           </Text>
         )}
       </Card>
 
       {/* Delete section */}
-      <SectionHeader title="Delete My Account" />
+      <SectionHeader title={t('privacyDeleteSection')} />
       <Card style={styles.card}>
         <Text variant="caption" color={colors.text.muted} style={styles.mb8}>
-          Art. 17 — Right to erasure. All your data will be permanently deleted
-          after a 30-day grace period.
+          {t('privacyDeleteDesc')}
         </Text>
 
         {!isDeletionPending && (
@@ -266,8 +258,8 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
           >
             <Text variant="label" color={colors.semantic.error}>
               {requestDeletion.isPending
-                ? 'Scheduling…'
-                : 'Request Account Deletion'}
+                ? t('privacySchedulingButton')
+                : t('privacyRequestDeletion')}
             </Text>
           </Pressable>
         )}
@@ -275,7 +267,7 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
 
       {/* Footer */}
       <Text variant="caption" color={colors.text.muted} style={styles.footer}>
-        Questions? sacredquest2@gmail.com
+        {t('privacyFooterEmail')}
       </Text>
     </Screen>
   );

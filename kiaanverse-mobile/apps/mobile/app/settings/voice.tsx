@@ -47,6 +47,7 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   type DivinePersona,
@@ -96,36 +97,34 @@ const LANGUAGE_OPTIONS: ReadonlyArray<{
 ];
 
 // ── PERSONA OPTIONS ──────────────────────────────────────────────────
-const PERSONA_OPTIONS: ReadonlyArray<{
-  readonly value: DivinePersona;
-  readonly label: string;
-  readonly description: string;
-}> = [
-  {
-    value: 'divine',
-    label: 'Divine',
-    description: 'Slow, contemplative, soothing. Default.',
-  },
-  {
-    value: 'friend',
-    label: 'Friend',
-    description: 'Warm, conversational, natural pace.',
-  },
-  {
-    value: 'storyteller',
-    label: 'Storyteller',
-    description: 'Slow, deeper, theatrical. Best for verses.',
-  },
+// `value` is the canonical persona ID stored in user prefs; the label
+// and description are resolved at render via `t(PERSONA_LABEL_KEYS[value])`.
+const PERSONA_VALUES: ReadonlyArray<DivinePersona> = [
+  'divine',
+  'friend',
+  'storyteller',
 ];
 
+const PERSONA_LABEL_KEYS: Record<DivinePersona, string> = {
+  divine: 'voicePersonaDivine',
+  friend: 'voicePersonaFriend',
+  storyteller: 'voicePersonaStoryteller',
+};
+
+const PERSONA_DESC_KEYS: Record<DivinePersona, string> = {
+  divine: 'voicePersonaDivineDesc',
+  friend: 'voicePersonaFriendDesc',
+  storyteller: 'voicePersonaStorytellerDesc',
+};
+
 // ── QUALITY BADGE LABELS ─────────────────────────────────────────────
-const QUALITY_LABELS: Record<VoiceOption['quality'], string> = {
-  studio: 'Studio',
-  neural2: 'Neural2',
-  neural: 'Neural',
-  wavenet: 'WaveNet',
-  local: 'On-device',
-  standard: 'Standard',
+const QUALITY_LABEL_KEYS: Record<VoiceOption['quality'], string> = {
+  studio: 'voiceQualityStudio',
+  neural2: 'voiceQualityNeural2',
+  neural: 'voiceQualityNeural',
+  wavenet: 'voiceQualityWavenet',
+  local: 'voiceQualityLocal',
+  standard: 'voiceQualityStandard',
 };
 
 const QUALITY_COLORS: Record<VoiceOption['quality'], string> = {
@@ -140,6 +139,7 @@ const QUALITY_COLORS: Record<VoiceOption['quality'], string> = {
 // ── COMPONENT ────────────────────────────────────────────────────────
 export default function VoiceSettingsScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('settings');
 
   const [language, setLanguage] = useState<string>('en-IN');
   const [voices, setVoices] = useState<VoiceOption[]>([]);
@@ -250,22 +250,20 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
 
   return (
     <Screen scroll>
-      <GoldenHeader title="Voice" onBack={() => router.back()} />
+      <GoldenHeader title={t('voiceScreenTitle')} onBack={() => router.back()} />
 
       {/* Intro */}
       <Card style={styles.card}>
         <Text variant="label" color={colors.text.primary}>
-          The voice of Sakha
+          {t('voiceIntroTitle')}
         </Text>
         <Text variant="caption" color={colors.text.muted} style={styles.mt4}>
-          Choose the voice that feels most divine and calm to you. Studio
-          and Neural2 voices sound the most natural; older voices may
-          sound robotic. Tap Play to hear each one before deciding.
+          {t('voiceIntroBody')}
         </Text>
       </Card>
 
       {/* Language tabs */}
-      <SectionHeader title="Language" />
+      <SectionHeader title={t('voiceSectionLanguage')} />
       <Card style={styles.card}>
         <View style={styles.langRow}>
           {LANGUAGE_OPTIONS.map((opt) => (
@@ -300,13 +298,10 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
           section entirely so the picker stays focused. */}
       {cloudVoices.length > 0 ? (
         <>
-          <SectionHeader title="Most Natural · Cloud Voices" />
+          <SectionHeader title={t('voiceSectionCloud')} />
           <Card style={styles.card}>
             <Text variant="caption" color={colors.text.muted} style={styles.mb8}>
-              Cloud voices use the device's network to fetch studio-grade
-              audio from ElevenLabs, Sarvam Bulbul, or Bhashini. First
-              play of a phrase takes a moment; replays are instant from
-              cache.
+              {t('voiceCloudDesc')}
             </Text>
             {cloudVoices.map((v, idx) => (
               <React.Fragment key={v.id}>
@@ -354,7 +349,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       color={colors.text.muted}
                       style={styles.mt2}
                     >
-                      {v.gender} · {v.supportedLanguages.length} languages
+                      {v.gender} · {t('voiceLanguagesFmt', { count: v.supportedLanguages.length })}
                     </Text>
                   </Pressable>
                   <View style={styles.voiceRowActions}>
@@ -364,8 +359,8 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       accessibilityRole="button"
                       accessibilityLabel={
                         previewingId === v.id
-                          ? `Stop ${v.name} preview`
-                          : `Preview ${v.name} from ${PROVIDER_LABELS[v.provider]}`
+                          ? t('voiceStopPreviewA11yFmt', { name: v.name })
+                          : t('voicePreviewA11yFmt', { name: v.name, provider: PROVIDER_LABELS[v.provider] })
                       }
                       accessibilityState={{ busy: previewingId === v.id }}
                       hitSlop={8}
@@ -375,7 +370,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                         color={colors.primary[300]}
                         style={styles.previewBtnText}
                       >
-                        {previewingId === v.id ? '◼ Stop' : '▶ Play'}
+                        {previewingId === v.id ? t('voiceStopPreview') : t('voicePlay')}
                       </Text>
                     </Pressable>
                     {selected === v.id ? (
@@ -394,7 +389,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
       ) : null}
 
       {/* Voice list */}
-      <SectionHeader title="On-device Voice" />
+      <SectionHeader title={t('voiceSectionOnDevice')} />
       <Card style={styles.card}>
         {/* Auto row */}
         <Pressable
@@ -408,14 +403,14 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
         >
           <View style={styles.voiceRowMain}>
             <Text variant="label" color={colors.text.primary}>
-              Auto (best for language)
+              {t('voiceAutoLabel')}
             </Text>
             <Text
               variant="caption"
               color={colors.text.muted}
               style={styles.mt2}
             >
-              Picks the most natural voice your device offers.
+              {t('voiceAutoDesc')}
             </Text>
           </View>
           {selected === undefined ? (
@@ -437,8 +432,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
         ) : sortedVoices.length === 0 ? (
           <View style={styles.emptyRow}>
             <Text variant="caption" color={colors.text.muted}>
-              No voices found for this language. Install a TTS engine
-              update from your device settings to unlock more voices.
+              {t('voiceNoVoicesFound')}
             </Text>
           </View>
         ) : (
@@ -474,7 +468,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                         color={QUALITY_COLORS[v.quality]}
                         style={styles.qualityBadgeText}
                       >
-                        {QUALITY_LABELS[v.quality]}
+                        {t(QUALITY_LABEL_KEYS[v.quality])}
                       </Text>
                     </View>
                   </View>
@@ -494,8 +488,8 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                     accessibilityRole="button"
                     accessibilityLabel={
                       previewingId === v.identifier
-                        ? `Stop ${v.name} preview`
-                        : `Preview ${v.name}`
+                        ? t('voiceStopPreviewA11yFmt', { name: v.name })
+                        : t('voicePreviewSimpleA11yFmt', { name: v.name })
                     }
                     accessibilityState={{ busy: previewingId === v.identifier }}
                     hitSlop={8}
@@ -505,7 +499,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       color={colors.primary[300]}
                       style={styles.previewBtnText}
                     >
-                      {previewingId === v.identifier ? '◼ Stop' : '▶ Play'}
+                      {previewingId === v.identifier ? t('voiceStopPreview') : t('voicePlay')}
                     </Text>
                   </Pressable>
                   {selected === v.identifier ? (
@@ -523,33 +517,33 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
       </Card>
 
       {/* Persona */}
-      <SectionHeader title="Voice Persona" />
+      <SectionHeader title={t('voiceSectionPersona')} />
       <Card style={styles.card}>
-        {PERSONA_OPTIONS.map((opt, idx) => (
-          <React.Fragment key={opt.value}>
+        {PERSONA_VALUES.map((value, idx) => (
+          <React.Fragment key={value}>
             {idx > 0 ? <Divider /> : null}
             <Pressable
-              onPress={() => void handlePersonaChange(opt.value)}
+              onPress={() => void handlePersonaChange(value)}
               style={[
                 styles.voiceRow,
-                persona === opt.value && styles.voiceRowSelected,
+                persona === value && styles.voiceRowSelected,
               ]}
               accessibilityRole="button"
-              accessibilityState={{ selected: persona === opt.value }}
+              accessibilityState={{ selected: persona === value }}
             >
               <View style={styles.voiceRowMain}>
                 <Text variant="label" color={colors.text.primary}>
-                  {opt.label}
+                  {t(PERSONA_LABEL_KEYS[value])}
                 </Text>
                 <Text
                   variant="caption"
                   color={colors.text.muted}
                   style={styles.mt2}
                 >
-                  {opt.description}
+                  {t(PERSONA_DESC_KEYS[value])}
                 </Text>
               </View>
-              {persona === opt.value ? (
+              {persona === value ? (
                 <View style={styles.checkmark}>
                   <Text variant="caption" color={colors.primary[300]}>
                     ✓

@@ -23,12 +23,23 @@ import {
 } from '@kiaanverse/ui';
 import { useUserSettings, useUpdateSettings } from '@kiaanverse/api';
 import { useAuthStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 type ThemeValue = 'dark' | 'light' | 'auto';
 const THEME_OPTIONS: ThemeValue[] = ['dark', 'light', 'auto'];
 
+// Theme key — resolved via t() at render. The value (`ThemeValue`) is
+// the canonical stable ID stored in user settings; only the visible
+// chip label is localized.
+const THEME_LABEL_KEYS: Record<ThemeValue, string> = {
+  dark: 'themeDark',
+  light: 'themeLight',
+  auto: 'themeAuto',
+};
+
 export default function SettingsScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('settings');
   const { data: settings } = useUserSettings();
   const updateSettings = useUpdateSettings();
   const { logout } = useAuthStore();
@@ -51,12 +62,12 @@ export default function SettingsScreen(): React.JSX.Element {
 
   const handleClearCache = useCallback(() => {
     Alert.alert(
-      'Clear Cache',
-      'This will remove all locally cached data. Continue?',
+      t('clearCacheAlertTitle'),
+      t('clearCacheAlertBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancelButton'), style: 'cancel' },
         {
-          text: 'Clear',
+          text: t('clearButton'),
           onPress: () => {
             void Haptics.notificationAsync(
               Haptics.NotificationFeedbackType.Success
@@ -65,13 +76,13 @@ export default function SettingsScreen(): React.JSX.Element {
         },
       ]
     );
-  }, []);
+  }, [t]);
 
   const handleSignOut = useCallback(() => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('signOutAlertTitle'), t('signOutAlertBody'), [
+      { text: t('cancelButton'), style: 'cancel' },
       {
-        text: 'Sign Out',
+        text: t('signOut'),
         style: 'destructive',
         onPress: () => {
           void Haptics.notificationAsync(
@@ -81,16 +92,16 @@ export default function SettingsScreen(): React.JSX.Element {
         },
       },
     ]);
-  }, [logout]);
+  }, [logout, t]);
 
   const handleDeleteAccount = useCallback(() => {
     Alert.alert(
-      'Delete Account',
-      'This action is irreversible. All your data, journeys, and reflections will be permanently deleted. Are you absolutely sure?',
+      t('deleteAccountAlertTitle'),
+      t('deleteAccountAlertBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancelButton'), style: 'cancel' },
         {
-          text: 'Delete My Account',
+          text: t('deleteAccountConfirm'),
           style: 'destructive',
           onPress: () => {
             void Haptics.notificationAsync(
@@ -100,20 +111,20 @@ export default function SettingsScreen(): React.JSX.Element {
         },
       ]
     );
-  }, []);
+  }, [t]);
 
   const currentTheme = settings?.theme ?? 'dark';
 
   return (
     <Screen scroll>
-      <GoldenHeader title="Settings" onBack={() => router.back()} />
+      <GoldenHeader title={t('screenTitle')} onBack={() => router.back()} />
 
       {/* Notifications */}
-      <SectionHeader title="Notifications" />
+      <SectionHeader title={t('sectionNotifications')} />
       <Card style={styles.card}>
         <SettingRow
-          label="Push Notifications"
-          description="Daily reminders and updates"
+          label={t('pushNotifLabel')}
+          description={t('pushNotifDesc')}
         >
           <Switch
             value={settings?.notifications_enabled ?? true}
@@ -127,21 +138,21 @@ export default function SettingsScreen(): React.JSX.Element {
         </SettingRow>
         <Divider />
         <SettingRow
-          label="Daily Reminder Time"
-          description={settings?.daily_reminder_time ?? '07:00 AM'}
+          label={t('dailyReminderLabel')}
+          description={settings?.daily_reminder_time ?? t('dailyReminderDefault')}
         />
       </Card>
 
       {/* Language */}
-      <SectionHeader title="Language" />
+      <SectionHeader title={t('sectionLanguage')} />
       <Card style={styles.card}>
         <SettingRow
-          label="Language"
-          description={settings?.language ?? 'English'}
+          label={t('languageLabel')}
+          description={settings?.language ?? t('languageDefault')}
         >
           <Pressable style={styles.changeButton}>
             <Text variant="caption" color={colors.primary[300]}>
-              Change
+              {t('changeButton')}
             </Text>
           </Pressable>
         </SettingRow>
@@ -149,7 +160,7 @@ export default function SettingsScreen(): React.JSX.Element {
 
       {/* Voice — choose the most natural voice + persona for Sakha
           across Listen buttons, Voice Companion, and verse readings. */}
-      <SectionHeader title="Voice" />
+      <SectionHeader title={t('sectionVoice')} />
       <Card style={styles.card}>
         <Pressable
           onPress={() => {
@@ -157,11 +168,11 @@ export default function SettingsScreen(): React.JSX.Element {
             router.push('/settings/voice');
           }}
           accessibilityRole="button"
-          accessibilityLabel="Voice settings — pick voice and persona"
+          accessibilityLabel={t('voiceSettingsA11y')}
         >
           <SettingRow
-            label="Voice & Persona"
-            description="Pick the most natural voice on your device · preview before selecting"
+            label={t('voicePersonaLabel')}
+            description={t('voicePersonaDesc')}
           >
             <Text variant="caption" color={colors.primary[300]}>
               ›
@@ -171,28 +182,31 @@ export default function SettingsScreen(): React.JSX.Element {
       </Card>
 
       {/* Appearance */}
-      <SectionHeader title="Appearance" />
+      <SectionHeader title={t('sectionAppearance')} />
       <Card style={styles.card}>
-        <SettingRow label="Theme" description={`Current: ${currentTheme}`}>
+        <SettingRow
+          label={t('themeLabel')}
+          description={t('themeCurrentFmt', { theme: t(THEME_LABEL_KEYS[currentTheme]) })}
+        >
           <View style={styles.themeRow}>
-            {THEME_OPTIONS.map((t) => (
+            {THEME_OPTIONS.map((themeValue) => (
               <Pressable
-                key={t}
+                key={themeValue}
                 style={[
                   styles.themeChip,
-                  currentTheme === t && styles.themeChipActive,
+                  currentTheme === themeValue && styles.themeChipActive,
                 ]}
-                onPress={() => handleThemeChange(t)}
+                onPress={() => handleThemeChange(themeValue)}
                 accessibilityRole="button"
-                accessibilityState={{ selected: currentTheme === t }}
+                accessibilityState={{ selected: currentTheme === themeValue }}
               >
                 <Text
                   variant="caption"
                   color={
-                    currentTheme === t ? colors.primary[300] : colors.text.muted
+                    currentTheme === themeValue ? colors.primary[300] : colors.text.muted
                   }
                 >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                  {t(THEME_LABEL_KEYS[themeValue])}
                 </Text>
               </Pressable>
             ))}
@@ -201,11 +215,11 @@ export default function SettingsScreen(): React.JSX.Element {
       </Card>
 
       {/* Security */}
-      <SectionHeader title="Security" />
+      <SectionHeader title={t('sectionSecurity')} />
       <Card style={styles.card}>
         <SettingRow
-          label="Biometric Login"
-          description="Use Face ID / Fingerprint"
+          label={t('biometricLabel')}
+          description={t('biometricDesc')}
         >
           <Switch
             value={settings?.biometric_enabled ?? false}
@@ -219,8 +233,8 @@ export default function SettingsScreen(): React.JSX.Element {
         </SettingRow>
         <Divider />
         <SettingRow
-          label="Journal Encryption"
-          description="Encrypt all sacred reflections"
+          label={t('journalEncLabel')}
+          description={t('journalEncDesc')}
         >
           <Switch
             value={settings?.journal_encryption ?? true}
@@ -235,11 +249,11 @@ export default function SettingsScreen(): React.JSX.Element {
       </Card>
 
       {/* Data */}
-      <SectionHeader title="Data" />
+      <SectionHeader title={t('sectionData')} />
       <Card style={styles.card}>
         <SettingRow
-          label="Offline Mode"
-          description="Cache content for offline access"
+          label={t('offlineModeLabel')}
+          description={t('offlineModeDesc')}
         >
           <Switch
             value={settings?.offline_mode ?? true}
@@ -254,20 +268,20 @@ export default function SettingsScreen(): React.JSX.Element {
         <Divider />
         <Pressable onPress={handleClearCache} style={styles.actionRow}>
           <Text variant="body" color={colors.text.primary}>
-            Clear Cache
+            {t('clearCacheAction')}
           </Text>
           <Text variant="caption" color={colors.text.muted}>
-            Free up storage space
+            {t('clearCacheDesc')}
           </Text>
         </Pressable>
       </Card>
 
       {/* About */}
-      <SectionHeader title="About" />
+      <SectionHeader title={t('sectionAbout')} />
       <Card style={styles.card}>
-        <SettingRow label="App Version" description="Kiaanverse v1.0.0">
+        <SettingRow label={t('appVersionLabel')} description={t('appVersionDesc')}>
           <Text variant="caption" color={colors.text.muted}>
-            1.0.0
+            {t('appVersionValue')}
           </Text>
         </SettingRow>
         <Divider />
@@ -276,38 +290,38 @@ export default function SettingsScreen(): React.JSX.Element {
           style={styles.linkRow}
         >
           <Text variant="body" color={colors.text.primary}>
-            Your Privacy & Data
+            {t('privacyDataLink')}
           </Text>
           <Text variant="caption" color={colors.text.muted}>
-            Export · Delete
+            {t('privacyDataLinkDesc')}
           </Text>
         </Pressable>
         <Divider />
         <Pressable style={styles.linkRow}>
           <Text variant="body" color={colors.text.primary}>
-            Privacy Policy
+            {t('privacyPolicyLink')}
           </Text>
         </Pressable>
         <Divider />
         <Pressable style={styles.linkRow}>
           <Text variant="body" color={colors.text.primary}>
-            Terms of Service
+            {t('termsOfServiceLink')}
           </Text>
         </Pressable>
       </Card>
 
       {/* Account */}
-      <SectionHeader title="Account" />
+      <SectionHeader title={t('sectionAccount')} />
       <Card style={styles.card}>
         <Pressable onPress={handleSignOut} style={styles.signOutRow}>
           <Text variant="label" color={colors.semantic.error}>
-            Sign Out
+            {t('signOut')}
           </Text>
         </Pressable>
         <Divider />
         <Pressable onPress={handleDeleteAccount} style={styles.deleteRow}>
           <Text variant="caption" color={colors.semantic.error}>
-            Delete Account
+            {t('deleteAccountAction')}
           </Text>
         </Pressable>
       </Card>
