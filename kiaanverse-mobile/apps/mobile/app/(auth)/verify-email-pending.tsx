@@ -26,10 +26,12 @@ import {
   spacing,
   useTheme,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
 export default function VerifyEmailPendingScreen(): React.JSX.Element {
+  const { t } = useTranslation('auth');
   const { theme } = useTheme();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -41,7 +43,7 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
 
   const handleResend = useCallback(async () => {
     if (!email) {
-      setError('We do not have your email on file. Please sign out and sign in again.');
+      setError(t('pendingEmailNotOnFile'));
       return;
     }
     setSending(true);
@@ -52,12 +54,12 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
     } catch (err) {
       setError(
         (err as { message?: string })?.message ??
-          `Could not send a fresh email right now. Try again or email ${SUPPORT_EMAIL}.`,
+          t('pendingCouldNotSendNow', { supportEmail: SUPPORT_EMAIL }),
       );
     } finally {
       setSending(false);
     }
-  }, [email]);
+  }, [email, t]);
 
   const handleSignOut = useCallback(async () => {
     await logout();
@@ -73,7 +75,7 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
       <View style={styles.center}>
         <Text style={styles.glyph}>📧</Text>
         <Text variant="h2" align="center" style={styles.title}>
-          One last step
+          {t('pendingTitle')}
         </Text>
         <Text
           variant="caption"
@@ -81,10 +83,9 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
           align="center"
           style={styles.body}
         >
-          We sent a verification link to{'\n'}
-          <Text color={colors.primary[500]}>{email || 'your email'}</Text>.
-          {'\n\n'}
-          Tap it to confirm your address. Once verified, you can return here and continue.
+          {t('pendingBody', {
+            email: email || t('pendingYourEmailFallback'),
+          })}
         </Text>
 
         {sent ? (
@@ -94,7 +95,7 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
             align="center"
             style={styles.body}
           >
-            ✓ Fresh email on its way. Check your inbox (and spam folder).
+            {t('pendingFreshEmailOnTheWay')}
           </Text>
         ) : null}
         {error ? (
@@ -110,12 +111,14 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
 
         <View style={styles.actions}>
           <GoldenButton
-            title={sending ? 'Sending…' : 'Resend verification email'}
+            title={
+              sending ? t('pendingSending') : t('pendingResendVerificationEmail')
+            }
             onPress={handleResend}
             disabled={sending || !email}
           />
           <GoldenButton
-            title="Sign out"
+            title={t('pendingSignOut')}
             variant="secondary"
             onPress={handleSignOut}
           />
@@ -127,7 +130,7 @@ export default function VerifyEmailPendingScreen(): React.JSX.Element {
           align="center"
           style={styles.support}
         >
-          Need help? Email {SUPPORT_EMAIL}.
+          {t('pendingNeedHelp', { supportEmail: SUPPORT_EMAIL })}
         </Text>
       </View>
     </Screen>

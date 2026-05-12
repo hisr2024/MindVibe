@@ -12,7 +12,7 @@
  * Security: No credentials logged. Tokens handled by authStore + SecureStore.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -34,22 +34,10 @@ import { useTranslation } from '@kiaanverse/i18n';
 
 const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
-// ---------------------------------------------------------------------------
-// Validation Schema
-// ---------------------------------------------------------------------------
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Enter a valid email address'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -68,6 +56,23 @@ export default function LoginScreen(): React.JSX.Element {
     authenticateWithBiometric,
     devLogin,
   } = useAuthStore();
+
+  // Validation messages are localized — rebuild the schema when locale changes
+  // so error text reads in the active language.
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z
+          .string()
+          .min(1, t('validationEmailRequired'))
+          .email(t('validationEmailInvalid')),
+        password: z
+          .string()
+          .min(1, t('validationPasswordRequired'))
+          .min(8, t('validationPasswordMin8')),
+      }),
+    [t],
+  );
 
   const {
     control,
@@ -95,7 +100,7 @@ export default function LoginScreen(): React.JSX.Element {
   const handleResendVerification = useCallback(async () => {
     const email = getValues('email').trim();
     if (!email) {
-      setResendError('Enter your email above first.');
+      setResendError(t('loginEnterEmailFirst'));
       return;
     }
     setResending(true);
@@ -106,12 +111,12 @@ export default function LoginScreen(): React.JSX.Element {
     } catch (err) {
       setResendError(
         (err as { message?: string })?.message ??
-          `Could not send a fresh email. Please email ${SUPPORT_EMAIL}.`,
+          t('loginCouldNotSendFreshEmail', { supportEmail: SUPPORT_EMAIL }),
       );
     } finally {
       setResending(false);
     }
-  }, [getValues]);
+  }, [getValues, t]);
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -133,7 +138,7 @@ export default function LoginScreen(): React.JSX.Element {
         <View style={styles.loadingContainer}>
           <LoadingMandala size={160} />
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Signing in...
+            {t('loginSigningIn')}
           </Text>
         </View>
       </Screen>
@@ -148,10 +153,10 @@ export default function LoginScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text variant="h1" align="center">
-            Kiaanverse
+            {t('loginAppName')}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Your spiritual companion
+            {t('loginTagline')}
           </Text>
         </View>
 
@@ -162,7 +167,7 @@ export default function LoginScreen(): React.JSX.Element {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label={t('email')}
-                placeholder="you@example.com"
+                placeholder={t('loginEmailPlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -181,7 +186,7 @@ export default function LoginScreen(): React.JSX.Element {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label={t('password')}
-                placeholder="Enter your password"
+                placeholder={t('loginPasswordPlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -207,7 +212,7 @@ export default function LoginScreen(): React.JSX.Element {
             <View style={{ gap: spacing.xs }}>
               {resendSent ? (
                 <Text variant="caption" color={colors.primary[500]}>
-                  ✓ Fresh verification email sent. Check your inbox (and spam).
+                  {t('loginFreshEmailSent')}
                 </Text>
               ) : null}
               {resendError ? (
@@ -216,14 +221,18 @@ export default function LoginScreen(): React.JSX.Element {
                 </Text>
               ) : null}
               <GoldenButton
-                title={resending ? 'Sending…' : 'Resend verification email'}
+                title={
+                  resending
+                    ? t('loginSending')
+                    : t('loginResendVerificationEmail')
+                }
                 variant="secondary"
                 onPress={handleResendVerification}
                 disabled={resending}
                 testID="resend-verification-from-login"
               />
               <Text variant="caption" color={colors.text.muted}>
-                Still nothing? Email {SUPPORT_EMAIL}.
+                {t('loginStillNothing', { supportEmail: SUPPORT_EMAIL })}
               </Text>
             </View>
           ) : null}
@@ -238,7 +247,7 @@ export default function LoginScreen(): React.JSX.Element {
           {/* Biometric unlock — shown only when available + previously enabled */}
           {biometricAvailable && biometricEnabled ? (
             <GoldenButton
-              title="Sign in with biometrics"
+              title={t('loginSignInWithBiometrics')}
               variant="secondary"
               onPress={handleBiometric}
               disabled={isLoading}
@@ -248,7 +257,7 @@ export default function LoginScreen(): React.JSX.Element {
 
           <Link href="/(auth)/forgot-password" style={styles.forgotLink}>
             <Text variant="caption" color={colors.primary[300]}>
-              Forgot password?
+              {t('loginForgotPasswordLink')}
             </Text>
           </Link>
         </View>
@@ -270,7 +279,7 @@ export default function LoginScreen(): React.JSX.Element {
         {__DEV__ ? (
           <View style={styles.devSection}>
             <GoldenButton
-              title="Dev Login"
+              title={t('loginDevLogin')}
               variant="ghost"
               onPress={devLogin}
               testID="dev-login-button"
