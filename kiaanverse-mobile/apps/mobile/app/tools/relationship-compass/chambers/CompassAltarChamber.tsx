@@ -33,6 +33,7 @@ import {
 import { CompassRose } from '../components/CompassRose';
 import type { GunaName } from '../hooks/useGunaCalculation';
 import { ShankhaVoiceInput } from '../../../../voice/components/ShankhaVoiceInput';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -69,6 +70,7 @@ export function CompassAltarChamber({
   onGunaReadingChange,
   onProceed,
 }: CompassAltarChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const handleSelect = useCallback(
     (type: RelationshipTypeData) => {
       void Haptics.selectionAsync().catch(() => {});
@@ -99,7 +101,7 @@ export function CompassAltarChamber({
           entering={FadeInUp.delay(700).duration(500)}
           style={styles.titleEnglish}
         >
-          Relationship Compass
+          {t('rcHeaderTitle')}
         </Animated.Text>
       </Animated.View>
 
@@ -107,7 +109,7 @@ export function CompassAltarChamber({
         entering={FadeInUp.delay(900).duration(400)}
         style={styles.prompt}
       >
-        Who are you bringing to the Compass?
+        {t('rcAltarPrompt')}
       </Animated.Text>
 
       <Animated.View entering={FadeInDown.delay(1000).duration(400)}>
@@ -122,7 +124,7 @@ export function CompassAltarChamber({
               <Pressable
                 key={type.id}
                 accessibilityRole="button"
-                accessibilityLabel={`${type.label} relationship`}
+                accessibilityLabel={t('rcAltarTypeA11y', { label: type.label })}
                 accessibilityState={{ selected }}
                 onPress={() => handleSelect(type)}
                 style={[
@@ -154,10 +156,10 @@ export function CompassAltarChamber({
           <ShankhaVoiceInput
             value={partnerName}
             onChangeText={onNameChange}
-            placeholder={`Their name (optional)`}
+            placeholder={t('rcAltarNamePlaceholder')}
             style={styles.nameInput}
             maxLength={64}
-            accessibilityLabel="Partner name"
+            accessibilityLabel={t('rcAltarNameA11y')}
             dictationMode="append"
             />
         </Animated.View>
@@ -168,9 +170,7 @@ export function CompassAltarChamber({
           entering={FadeInDown.delay(120).duration(360)}
           style={styles.gunaBlock}
         >
-          <Text style={styles.gunaPrompt}>
-            How does this relationship feel right now?
-          </Text>
+          <Text style={styles.gunaPrompt}>{t('rcAltarGunaPrompt')}</Text>
 
           <View style={styles.gunaTrackWrap}>
             {GUNA_STEPS.map((g) => {
@@ -181,7 +181,7 @@ export function CompassAltarChamber({
                   onPress={() => handleGunaPress(g.value)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
-                  accessibilityLabel={`Set initial reading to ${g.label}`}
+                  accessibilityLabel={t('rcAltarGunaA11y', { label: g.label })}
                   style={[
                     styles.gunaPill,
                     active && {
@@ -213,7 +213,7 @@ export function CompassAltarChamber({
         style={styles.cta}
       >
         <GoldenButton
-          title="Open the Compass"
+          title={t('rcAltarCta')}
           onPress={onProceed}
           disabled={!relationshipType}
           variant="divine"

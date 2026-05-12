@@ -32,6 +32,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { GoldenButton } from '@kiaanverse/ui';
 
 import type { CompassTransmission } from '../hooks/useCompassWisdom';
+import { useTranslation } from '@kiaanverse/i18n';
 import { formatShortDateTime } from '../utils/formatDate';
 
 /**
@@ -56,11 +57,11 @@ const CARD_BG = 'rgba(22, 26, 66, 0.65)';
 const ROSE = '#F8AFAA';
 const TRANSMISSION_BORDER = 'rgba(248, 175, 170, 0.18)';
 
-const LOADING_MESSAGES: readonly string[] = [
-  'The Compass is finding your direction...',
-  'Reading the gunas of your connection...',
-  'Krishna is illuminating the path...',
-  'The dharmic wisdom is flowing...',
+const LOADING_KEYS: readonly string[] = [
+  'rcGitaLoading1',
+  'rcGitaLoading2',
+  'rcGitaLoading3',
+  'rcGitaLoading4',
 ] as const;
 
 export interface GitaCounselChamberProps {
@@ -206,6 +207,7 @@ export function GitaCounselChamber({
   partnerName,
   onContinue,
 }: GitaCounselChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const [messageIndex, setMessageIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showFullText, setShowFullText] = useState(false);
@@ -215,7 +217,7 @@ export function GitaCounselChamber({
   useEffect(() => {
     if (!loading) return;
     const id = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+      setMessageIndex((i) => (i + 1) % LOADING_KEYS.length);
     }, 3000);
     return () => clearInterval(id);
   }, [loading]);
@@ -293,7 +295,7 @@ export function GitaCounselChamber({
           entering={FadeIn.duration(450)}
           style={styles.loadingMessage}
         >
-          {LOADING_MESSAGES[messageIndex]}
+          {t(LOADING_KEYS[messageIndex] ?? 'rcGitaLoading1')}
         </Animated.Text>
       </View>
     );
@@ -307,13 +309,18 @@ export function GitaCounselChamber({
       >
         <View style={styles.transmissionHeader}>
           <View style={styles.transmissionTitleBlock}>
-            <Text style={styles.transmissionTitle}>Relationship Compass's</Text>
-            <Text style={styles.transmissionTitle}>Transmission</Text>
+            <Text style={styles.transmissionTitle}>{t('rcGitaTransmissionTitle1')}</Text>
+            <Text style={styles.transmissionTitle}>{t('rcGitaTransmissionTitle2')}</Text>
             <View style={styles.badgeRow}>
               <View style={styles.gitaBadge}>
                 <Text style={styles.gitaBadgeText}>
-                  ॐ Gita Wisdom ({transmission.verseCount} verse
-                  {transmission.verseCount === 1 ? '' : 's'})
+                  {t('rcGitaBadgeOmFmt', {
+                    count: String(transmission.verseCount),
+                    verseWord:
+                      transmission.verseCount === 1
+                        ? t('rcGitaVerseSingular')
+                        : t('rcGitaVersePlural'),
+                  })}
                 </Text>
               </View>
             </View>
@@ -324,16 +331,16 @@ export function GitaCounselChamber({
             <Pressable
               onPress={onCopy}
               accessibilityRole="button"
-              accessibilityLabel="Copy transmission"
+              accessibilityLabel={t('rcGitaCopyA11y')}
               style={styles.iconButton}
             >
-              <Text style={styles.iconButtonLabel}>Copy</Text>
+              <Text style={styles.iconButtonLabel}>{t('rcGitaCopyLabel')}</Text>
             </Pressable>
             <Pressable
               onPress={onSpeak}
               accessibilityRole="button"
               accessibilityLabel={
-                isSpeaking ? 'Stop reading' : 'Read transmission aloud'
+                isSpeaking ? t('rcGitaStopReadA11y') : t('rcGitaReadA11y')
               }
               style={[
                 styles.iconButton,
@@ -350,14 +357,14 @@ export function GitaCounselChamber({
 
         <View style={styles.controlsRow}>
           <Pressable onPress={expandAll} style={styles.controlPill}>
-            <Text style={styles.controlPillText}>Expand All</Text>
+            <Text style={styles.controlPillText}>{t('rcGitaExpandAll')}</Text>
           </Pressable>
           <Pressable onPress={collapseAll} style={styles.controlPill}>
-            <Text style={styles.controlPillText}>Collapse All</Text>
+            <Text style={styles.controlPillText}>{t('rcGitaCollapseAll')}</Text>
           </Pressable>
           <Pressable onPress={toggleFullText} style={styles.controlPill}>
             <Text style={styles.controlPillText}>
-              {showFullText ? 'Step View' : 'Full Text'}
+              {showFullText ? t('rcGitaStepView') : t('rcGitaFullText')}
             </Text>
           </Pressable>
         </View>
@@ -383,13 +390,11 @@ export function GitaCounselChamber({
           entering={FadeInDown.delay(120).duration(360)}
           style={styles.footer}
         >
-          💙 Here to help you navigate this with clarity and compassion
+          {t('rcGitaFooter')}
         </Animated.Text>
 
         {transmission.source === 'fallback' ? (
-          <Text style={styles.fallbackNotice}>
-            Showing your offline guide while the network is calm.
-          </Text>
+          <Text style={styles.fallbackNotice}>{t('rcGitaFallback')}</Text>
         ) : null}
       </Animated.View>
 
@@ -397,8 +402,8 @@ export function GitaCounselChamber({
         <GoldenButton
           title={
             partnerName.trim()
-              ? `Set Intention with ${partnerName.trim()}`
-              : 'Set Your Dharmic Intention'
+              ? t('rcGitaIntentionWithPartnerFmt', { name: partnerName.trim() })
+              : t('rcGitaSetIntentionCta')
           }
           onPress={onContinue}
           variant="divine"
