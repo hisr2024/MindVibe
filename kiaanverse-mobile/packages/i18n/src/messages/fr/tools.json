@@ -47,5 +47,24 @@
   "karmaFootprintName": "Empreinte karmique",
   "karmaFootprintDescription": "Suis tes ondes karmiques",
   "karmaTreeName": "Arbre karmique",
-  "karmaTreeDescription": "Ta canopée dharmique vivante"
+  "karmaTreeDescription": "Ta canopée dharmique vivante",
+
+  "karmicTreeTitle": "Arbre karmique",
+  "karmicTreeRootsFallback": "tes racines",
+  "karmicTreeTagline1": "Les branches de tes motifs sont encore en cours de cartographie.",
+  "karmicTreeTagline2": "Cet outil sacré est encore en culture — Sakha te préviendra quand il éclora.",
+  "karmicTreeBackToArmoryA11y": "Retour au tableau de bord des Outils",
+  "karmicTreeBackToArmoryCta": "Retour à l'Arsenal",
+
+  "karmaResetPatternFallback": "le motif que tu as nommé",
+  "emotionalResetReflectionFallback": "ta réflexion",
+
+  "goBackA11y": "Retour",
+  "backButton": "< Retour",
+  "erStepBreathe": "Respirer",
+  "erStepVisualize": "Visualiser",
+  "erStepWisdom": "Sagesse",
+  "erStepAffirm": "Affirmer",
+  "erStepReflect": "Réfléchir",
+  "erStepComplete": "Terminer"
 }

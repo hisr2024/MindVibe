@@ -47,5 +47,24 @@
   "karmaFootprintName": "कर्म पदचिह्न",
   "karmaFootprintDescription": "अपनी कर्म-तरंगों का अनुसरण करें",
   "karmaTreeName": "कर्म वृक्ष",
-  "karmaTreeDescription": "आपकी जीवंत धर्म-छत्र"
+  "karmaTreeDescription": "आपकी जीवंत धर्म-छत्र",
+
+  "karmicTreeTitle": "कर्म वृक्ष",
+  "karmicTreeRootsFallback": "आपकी जड़ें",
+  "karmicTreeTagline1": "आपके पैटर्न की शाखाएँ अभी भी मानचित्रित की जा रही हैं।",
+  "karmicTreeTagline2": "यह पावन साधन अब भी विकसित हो रहा है — खिलने पर सखा सूचित करेंगे।",
+  "karmicTreeBackToArmoryA11y": "साधन डैशबोर्ड पर लौटें",
+  "karmicTreeBackToArmoryCta": "शस्त्रागार पर लौटें",
+
+  "karmaResetPatternFallback": "जो पैटर्न आपने नामित किया",
+  "emotionalResetReflectionFallback": "आपका चिंतन",
+
+  "goBackA11y": "वापस जाएँ",
+  "backButton": "< वापस",
+  "erStepBreathe": "श्वास",
+  "erStepVisualize": "दर्शन",
+  "erStepWisdom": "ज्ञान",
+  "erStepAffirm": "संकल्प",
+  "erStepReflect": "चिंतन",
+  "erStepComplete": "पूर्ण"
 }

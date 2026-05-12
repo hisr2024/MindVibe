@@ -47,5 +47,24 @@
   "karmaFootprintName": "Pegada kármica",
   "karmaFootprintDescription": "Acompanha as tuas ondas kármicas",
   "karmaTreeName": "Árvore kármica",
-  "karmaTreeDescription": "A tua copa dhármica viva"
+  "karmaTreeDescription": "A tua copa dhármica viva",
+
+  "karmicTreeTitle": "Árvore kármica",
+  "karmicTreeRootsFallback": "as tuas raízes",
+  "karmicTreeTagline1": "Os ramos dos teus padrões ainda estão a ser mapeados.",
+  "karmicTreeTagline2": "Esta ferramenta sagrada ainda está a ser cultivada — o Sakha avisar-te-á quando florescer.",
+  "karmicTreeBackToArmoryA11y": "Voltar ao painel das Ferramentas",
+  "karmicTreeBackToArmoryCta": "Voltar ao Arsenal",
+
+  "karmaResetPatternFallback": "o padrão que nomeaste",
+  "emotionalResetReflectionFallback": "a tua reflexão",
+
+  "goBackA11y": "Voltar",
+  "backButton": "< Voltar",
+  "erStepBreathe": "Respirar",
+  "erStepVisualize": "Visualizar",
+  "erStepWisdom": "Sabedoria",
+  "erStepAffirm": "Afirmar",
+  "erStepReflect": "Refletir",
+  "erStepComplete": "Concluir"
 }

@@ -47,5 +47,24 @@
   "karmaFootprintName": "कर्म पाऊलखुणा",
   "karmaFootprintDescription": "तुमच्या कर्म लहरींचा मागोवा घ्या",
   "karmaTreeName": "कर्म वृक्ष",
-  "karmaTreeDescription": "तुमची जिवंत धर्म-छाया"
+  "karmaTreeDescription": "तुमची जिवंत धर्म-छाया",
+
+  "karmicTreeTitle": "कर्म वृक्ष",
+  "karmicTreeRootsFallback": "तुमची मुळे",
+  "karmicTreeTagline1": "तुमच्या नमुन्यांच्या शाखा अद्याप मॅप होत आहेत.",
+  "karmicTreeTagline2": "हे पवित्र साधन अद्याप विकसित होत आहे — फुलल्यावर सखा कळवतील.",
+  "karmicTreeBackToArmoryA11y": "साधन डॅशबोर्डवर परत जा",
+  "karmicTreeBackToArmoryCta": "शस्त्रागारावर परत",
+
+  "karmaResetPatternFallback": "तुम्ही नाव दिलेला नमुना",
+  "emotionalResetReflectionFallback": "तुमचे चिंतन",
+
+  "goBackA11y": "मागे जा",
+  "backButton": "< मागे",
+  "erStepBreathe": "श्वास",
+  "erStepVisualize": "दर्शन",
+  "erStepWisdom": "ज्ञान",
+  "erStepAffirm": "संकल्प",
+  "erStepReflect": "चिंतन",
+  "erStepComplete": "पूर्ण"
 }

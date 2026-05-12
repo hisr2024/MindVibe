@@ -47,5 +47,24 @@
   "karmaFootprintName": "ਕਰਮ ਪੈੜ",
   "karmaFootprintDescription": "ਆਪਣੀਆਂ ਕਰਮ-ਲਹਿਰਾਂ ਨੂੰ ਟਰੈਕ ਕਰੋ",
   "karmaTreeName": "ਕਰਮ ਰੁੱਖ",
-  "karmaTreeDescription": "ਤੁਹਾਡੀ ਜੀਵੰਤ ਧਰਮ-ਛਾਂ"
+  "karmaTreeDescription": "ਤੁਹਾਡੀ ਜੀਵੰਤ ਧਰਮ-ਛਾਂ",
+
+  "karmicTreeTitle": "ਕਰਮ ਰੁੱਖ",
+  "karmicTreeRootsFallback": "ਤੁਹਾਡੀਆਂ ਜੜ੍ਹਾਂ",
+  "karmicTreeTagline1": "ਤੁਹਾਡੇ ਪੈਟਰਨਾਂ ਦੀਆਂ ਟਾਹਣੀਆਂ ਅਜੇ ਮੈਪ ਕੀਤੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ।",
+  "karmicTreeTagline2": "ਇਹ ਪਵਿੱਤਰ ਸਾਧਨ ਅਜੇ ਵਿਕਸਤ ਹੋ ਰਿਹਾ ਹੈ — ਖਿੜਨ 'ਤੇ ਸਖਾ ਦੱਸੇਗਾ।",
+  "karmicTreeBackToArmoryA11y": "ਸਾਧਨ ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+  "karmicTreeBackToArmoryCta": "ਸ਼ਸਤਰਾਗਾਰ 'ਤੇ ਵਾਪਸ",
+
+  "karmaResetPatternFallback": "ਜੋ ਪੈਟਰਨ ਤੁਸੀਂ ਨਾਮ ਦਿੱਤਾ",
+  "emotionalResetReflectionFallback": "ਤੁਹਾਡਾ ਚਿੰਤਨ",
+
+  "goBackA11y": "ਵਾਪਸ ਜਾਓ",
+  "backButton": "< ਵਾਪਸ",
+  "erStepBreathe": "ਸਾਹ",
+  "erStepVisualize": "ਦਰਸ਼ਨ",
+  "erStepWisdom": "ਗਿਆਨ",
+  "erStepAffirm": "ਸੰਕਲਪ",
+  "erStepReflect": "ਚਿੰਤਨ",
+  "erStepComplete": "ਪੂਰਾ"
 }

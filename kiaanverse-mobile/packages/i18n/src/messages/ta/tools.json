@@ -47,5 +47,24 @@
   "karmaFootprintName": "கர்ம காலடி",
   "karmaFootprintDescription": "உங்கள் கர்ம அலைகளைப் பின்தொடரு",
   "karmaTreeName": "கர்ம மரம்",
-  "karmaTreeDescription": "உங்கள் உயிருள்ள தர்ம மரப்பந்தல்"
+  "karmaTreeDescription": "உங்கள் உயிருள்ள தர்ம மரப்பந்தல்",
+
+  "karmicTreeTitle": "கர்ம மரம்",
+  "karmicTreeRootsFallback": "உங்கள் வேர்கள்",
+  "karmicTreeTagline1": "உங்கள் வடிவங்களின் கிளைகள் இன்னும் வரைபடம் ஆக்கப்படுகின்றன.",
+  "karmicTreeTagline2": "இந்த புனிதக் கருவி இன்னும் வளர்கிறது — மலரும்போது சகா உங்களுக்கு அறிவிப்பார்.",
+  "karmicTreeBackToArmoryA11y": "கருவி டாஷ்போர்டுக்குத் திரும்பு",
+  "karmicTreeBackToArmoryCta": "ஆயுதக் களத்திற்குத் திரும்பு",
+
+  "karmaResetPatternFallback": "நீங்கள் பெயரிட்ட வடிவம்",
+  "emotionalResetReflectionFallback": "உங்கள் சிந்தனை",
+
+  "goBackA11y": "திரும்பு",
+  "backButton": "< திரும்பு",
+  "erStepBreathe": "சுவாசம்",
+  "erStepVisualize": "கற்பனை",
+  "erStepWisdom": "ஞானம்",
+  "erStepAffirm": "உறுதிமொழி",
+  "erStepReflect": "சிந்தனை",
+  "erStepComplete": "முடிந்தது"
 }

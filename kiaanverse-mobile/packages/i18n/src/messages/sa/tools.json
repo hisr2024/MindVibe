@@ -47,5 +47,24 @@
   "karmaFootprintName": "कर्म-पदचिह्नम्",
   "karmaFootprintDescription": "स्व-कर्म-तरङ्गाणाम् अनुसरणं कुरुत",
   "karmaTreeName": "कर्म-वृक्षः",
-  "karmaTreeDescription": "तव जीवन्ती धर्म-छाया"
+  "karmaTreeDescription": "तव जीवन्ती धर्म-छाया",
+
+  "karmicTreeTitle": "कर्म-वृक्षः",
+  "karmicTreeRootsFallback": "तव मूलानि",
+  "karmicTreeTagline1": "तव प्रतिमानानां शाखाः अद्यापि मानचित्रिताः क्रियन्ते।",
+  "karmicTreeTagline2": "इदं पावन-साधनं अद्यापि विकाशं प्राप्नोति — विकसिते सति सखा त्वां सूचयिष्यति।",
+  "karmicTreeBackToArmoryA11y": "साधन-फलकं प्रति प्रत्यागच्छतु",
+  "karmicTreeBackToArmoryCta": "शस्त्रागारं प्रति प्रत्यागच्छतु",
+
+  "karmaResetPatternFallback": "त्वया नामिता प्रतिमा",
+  "emotionalResetReflectionFallback": "तव चिन्तनम्",
+
+  "goBackA11y": "प्रत्यागच्छतु",
+  "backButton": "< प्रत्यागच्छ",
+  "erStepBreathe": "श्वसनम्",
+  "erStepVisualize": "दर्शनम्",
+  "erStepWisdom": "ज्ञानम्",
+  "erStepAffirm": "सङ्कल्पः",
+  "erStepReflect": "चिन्तनम्",
+  "erStepComplete": "सम्पूर्णम्"
 }

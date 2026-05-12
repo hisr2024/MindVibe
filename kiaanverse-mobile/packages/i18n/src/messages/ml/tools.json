@@ -47,5 +47,24 @@
   "karmaFootprintName": "കർമ്മ കാൽപാട്",
   "karmaFootprintDescription": "നിങ്ങളുടെ കർമ്മ തരംഗങ്ങൾ പിന്തുടരുക",
   "karmaTreeName": "കർമ്മ വൃക്ഷം",
-  "karmaTreeDescription": "നിങ്ങളുടെ ജീവനുള്ള ധർമ്മ കുട"
+  "karmaTreeDescription": "നിങ്ങളുടെ ജീവനുള്ള ധർമ്മ കുട",
+
+  "karmicTreeTitle": "കർമ്മ വൃക്ഷം",
+  "karmicTreeRootsFallback": "നിങ്ങളുടെ വേരുകൾ",
+  "karmicTreeTagline1": "നിങ്ങളുടെ പാറ്റേണുകളുടെ ശാഖകൾ ഇപ്പോഴും മാപ്പ് ചെയ്യപ്പെടുകയാണ്.",
+  "karmicTreeTagline2": "ഈ പവിത്ര ഉപകരണം ഇപ്പോഴും വളർച്ചയിലാണ് — പൂക്കുമ്പോൾ സഖ അറിയിക്കും.",
+  "karmicTreeBackToArmoryA11y": "ഉപകരണ ഡാഷ്‌ബോർഡിലേക്ക് മടങ്ങുക",
+  "karmicTreeBackToArmoryCta": "ആയുധശാലയിലേക്ക് മടങ്ങുക",
+
+  "karmaResetPatternFallback": "നിങ്ങൾ പേരിട്ട പാറ്റേൺ",
+  "emotionalResetReflectionFallback": "നിങ്ങളുടെ ചിന്തനം",
+
+  "goBackA11y": "മടങ്ങുക",
+  "backButton": "< മടങ്ങുക",
+  "erStepBreathe": "ശ്വാസം",
+  "erStepVisualize": "ദർശനം",
+  "erStepWisdom": "ജ്ഞാനം",
+  "erStepAffirm": "സങ്കല്പം",
+  "erStepReflect": "ചിന്തനം",
+  "erStepComplete": "പൂർണ്ണം"
 }

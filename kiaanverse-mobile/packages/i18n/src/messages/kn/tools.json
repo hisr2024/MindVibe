@@ -47,5 +47,24 @@
   "karmaFootprintName": "ಕರ್ಮ ಹೆಜ್ಜೆಗುರುತು",
   "karmaFootprintDescription": "ನಿಮ್ಮ ಕರ್ಮ ತರಂಗಗಳನ್ನು ಅನುಸರಿಸಿ",
   "karmaTreeName": "ಕರ್ಮ ವೃಕ್ಷ",
-  "karmaTreeDescription": "ನಿಮ್ಮ ಜೀವಂತ ಧರ್ಮ ಛತ್ರ"
+  "karmaTreeDescription": "ನಿಮ್ಮ ಜೀವಂತ ಧರ್ಮ ಛತ್ರ",
+
+  "karmicTreeTitle": "ಕರ್ಮ ವೃಕ್ಷ",
+  "karmicTreeRootsFallback": "ನಿಮ್ಮ ಬೇರುಗಳು",
+  "karmicTreeTagline1": "ನಿಮ್ಮ ಮಾದರಿಗಳ ಶಾಖೆಗಳು ಇನ್ನೂ ನಕ್ಷೆ ಮಾಡಲಾಗುತ್ತಿದೆ.",
+  "karmicTreeTagline2": "ಈ ಪವಿತ್ರ ಸಾಧನ ಇನ್ನೂ ಬೆಳವಣಿಗೆಯಲ್ಲಿದೆ — ಅರಳಿದಾಗ ಸಖಾ ತಿಳಿಸುತ್ತಾರೆ.",
+  "karmicTreeBackToArmoryA11y": "ಸಾಧನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+  "karmicTreeBackToArmoryCta": "ಆಯುಧಾಗಾರಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+
+  "karmaResetPatternFallback": "ನೀವು ಹೆಸರಿಸಿದ ಮಾದರಿ",
+  "emotionalResetReflectionFallback": "ನಿಮ್ಮ ಚಿಂತನೆ",
+
+  "goBackA11y": "ಹಿಂದೆ",
+  "backButton": "< ಹಿಂದೆ",
+  "erStepBreathe": "ಉಸಿರಾಟ",
+  "erStepVisualize": "ದರ್ಶನ",
+  "erStepWisdom": "ಜ್ಞಾನ",
+  "erStepAffirm": "ಸಂಕಲ್ಪ",
+  "erStepReflect": "ಚಿಂತನೆ",
+  "erStepComplete": "ಪೂರ್ಣ"
 }

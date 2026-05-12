@@ -47,5 +47,24 @@
   "karmaFootprintName": "કર્મ પદચિહ્ન",
   "karmaFootprintDescription": "તમારી કર્મ-તરંગો અનુસરો",
   "karmaTreeName": "કર્મ વૃક્ષ",
-  "karmaTreeDescription": "તમારી જીવંત ધર્મ-છાંયડી"
+  "karmaTreeDescription": "તમારી જીવંત ધર્મ-છાંયડી",
+
+  "karmicTreeTitle": "કર્મ વૃક્ષ",
+  "karmicTreeRootsFallback": "તમારા મૂળ",
+  "karmicTreeTagline1": "તમારી પેટર્નની શાખાઓ હજુ મેપ થઈ રહી છે.",
+  "karmicTreeTagline2": "આ પવિત્ર સાધન હજુ વિકસી રહ્યું છે — જ્યારે ખીલશે ત્યારે સખા જણાવશે.",
+  "karmicTreeBackToArmoryA11y": "સાધન ડેશબોર્ડ પર પાછા જાઓ",
+  "karmicTreeBackToArmoryCta": "શસ્ત્રાગાર પર પાછા",
+
+  "karmaResetPatternFallback": "તમે નામ આપેલી પેટર્ન",
+  "emotionalResetReflectionFallback": "તમારું ચિંતન",
+
+  "goBackA11y": "પાછા જાઓ",
+  "backButton": "< પાછા",
+  "erStepBreathe": "શ્વાસ",
+  "erStepVisualize": "દર્શન",
+  "erStepWisdom": "જ્ઞાન",
+  "erStepAffirm": "સંકલ્પ",
+  "erStepReflect": "ચિંતન",
+  "erStepComplete": "પૂર્ણ"
 }

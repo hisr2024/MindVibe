@@ -47,5 +47,24 @@
   "karmaFootprintName": "కర్మ పాదముద్ర",
   "karmaFootprintDescription": "మీ కర్మ తరంగాలను అనుసరించండి",
   "karmaTreeName": "కర్మ వృక్షం",
-  "karmaTreeDescription": "మీ సజీవ ధర్మ ఛత్రం"
+  "karmaTreeDescription": "మీ సజీవ ధర్మ ఛత్రం",
+
+  "karmicTreeTitle": "కర్మ వృక్షం",
+  "karmicTreeRootsFallback": "మీ మూలాలు",
+  "karmicTreeTagline1": "మీ నమూనాల కొమ్మలు ఇంకా మ్యాప్ చేయబడుతున్నాయి.",
+  "karmicTreeTagline2": "ఈ పవిత్ర ఉపకరణం ఇంకా అభివృద్ధి చెందుతోంది — వికసించినప్పుడు సఖా మీకు తెలియజేస్తాడు.",
+  "karmicTreeBackToArmoryA11y": "సాధనాల డాష్‌బోర్డ్‌కు తిరిగి వెళ్లండి",
+  "karmicTreeBackToArmoryCta": "ఆయుధాగారానికి తిరిగి",
+
+  "karmaResetPatternFallback": "మీరు పేరు పెట్టిన నమూనా",
+  "emotionalResetReflectionFallback": "మీ ఆలోచన",
+
+  "goBackA11y": "వెనుకకు",
+  "backButton": "< వెనుకకు",
+  "erStepBreathe": "శ్వాస",
+  "erStepVisualize": "దర్శనం",
+  "erStepWisdom": "జ్ఞానం",
+  "erStepAffirm": "సంకల్పం",
+  "erStepReflect": "ఆలోచన",
+  "erStepComplete": "పూర్తి"
 }

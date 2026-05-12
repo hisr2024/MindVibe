@@ -47,5 +47,24 @@
   "karmaFootprintName": "Impronta karmica",
   "karmaFootprintDescription": "Traccia le tue onde karmiche",
   "karmaTreeName": "Albero karmico",
-  "karmaTreeDescription": "La tua chioma dharmica vivente"
+  "karmaTreeDescription": "La tua chioma dharmica vivente",
+
+  "karmicTreeTitle": "Albero karmico",
+  "karmicTreeRootsFallback": "le tue radici",
+  "karmicTreeTagline1": "I rami dei tuoi schemi sono ancora in fase di mappatura.",
+  "karmicTreeTagline2": "Questo strumento sacro è ancora in coltivazione — Sakha te lo dirà quando sboccerà.",
+  "karmicTreeBackToArmoryA11y": "Torna alla dashboard degli Strumenti",
+  "karmicTreeBackToArmoryCta": "Torna all'Armeria",
+
+  "karmaResetPatternFallback": "lo schema che hai nominato",
+  "emotionalResetReflectionFallback": "la tua riflessione",
+
+  "goBackA11y": "Indietro",
+  "backButton": "< Indietro",
+  "erStepBreathe": "Respirare",
+  "erStepVisualize": "Visualizzare",
+  "erStepWisdom": "Saggezza",
+  "erStepAffirm": "Affermare",
+  "erStepReflect": "Riflettere",
+  "erStepComplete": "Completare"
 }

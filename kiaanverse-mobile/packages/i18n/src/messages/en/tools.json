@@ -47,5 +47,24 @@
   "karmaFootprintName": "Karma Footprint",
   "karmaFootprintDescription": "Track your karmic ripples",
   "karmaTreeName": "Karma Tree",
-  "karmaTreeDescription": "Your living dharma canopy"
+  "karmaTreeDescription": "Your living dharma canopy",
+
+  "karmicTreeTitle": "Karmic Tree",
+  "karmicTreeRootsFallback": "your roots",
+  "karmicTreeTagline1": "The branches of your patterns are still being mapped.",
+  "karmicTreeTagline2": "This sacred tool is in cultivation — Sakha will let you know when it blossoms.",
+  "karmicTreeBackToArmoryA11y": "Return to the Tools dashboard",
+  "karmicTreeBackToArmoryCta": "Return to the Armory",
+
+  "karmaResetPatternFallback": "the pattern you named",
+  "emotionalResetReflectionFallback": "your reflection",
+
+  "goBackA11y": "Go back",
+  "backButton": "< Back",
+  "erStepBreathe": "Breathe",
+  "erStepVisualize": "Visualize",
+  "erStepWisdom": "Wisdom",
+  "erStepAffirm": "Affirm",
+  "erStepReflect": "Reflect",
+  "erStepComplete": "Complete"
 }

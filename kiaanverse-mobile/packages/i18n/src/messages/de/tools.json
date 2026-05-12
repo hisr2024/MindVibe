@@ -47,5 +47,24 @@
   "karmaFootprintName": "Karma-Fußabdruck",
   "karmaFootprintDescription": "Verfolge deine karmischen Wellen",
   "karmaTreeName": "Karma-Baum",
-  "karmaTreeDescription": "Dein lebendiges Dharma-Kronendach"
+  "karmaTreeDescription": "Dein lebendiges Dharma-Kronendach",
+
+  "karmicTreeTitle": "Karmischer Baum",
+  "karmicTreeRootsFallback": "deine Wurzeln",
+  "karmicTreeTagline1": "Die Äste deiner Muster werden noch kartiert.",
+  "karmicTreeTagline2": "Dieses heilige Werkzeug wird noch kultiviert — Sakha sagt dir Bescheid, sobald es erblüht.",
+  "karmicTreeBackToArmoryA11y": "Zurück zum Tools-Dashboard",
+  "karmicTreeBackToArmoryCta": "Zurück zur Rüstkammer",
+
+  "karmaResetPatternFallback": "das Muster, das du benannt hast",
+  "emotionalResetReflectionFallback": "deine Reflexion",
+
+  "goBackA11y": "Zurück",
+  "backButton": "< Zurück",
+  "erStepBreathe": "Atmen",
+  "erStepVisualize": "Visualisieren",
+  "erStepWisdom": "Weisheit",
+  "erStepAffirm": "Bekräftigen",
+  "erStepReflect": "Reflektieren",
+  "erStepComplete": "Abschließen"
 }

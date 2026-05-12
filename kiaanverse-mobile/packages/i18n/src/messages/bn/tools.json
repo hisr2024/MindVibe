@@ -47,5 +47,24 @@
   "karmaFootprintName": "কর্ম পদচিহ্ন",
   "karmaFootprintDescription": "আপনার কর্ম তরঙ্গ অনুসরণ করুন",
   "karmaTreeName": "কর্ম বৃক্ষ",
-  "karmaTreeDescription": "আপনার জীবন্ত ধর্ম-ছাউনি"
+  "karmaTreeDescription": "আপনার জীবন্ত ধর্ম-ছাউনি",
+
+  "karmicTreeTitle": "কর্ম বৃক্ষ",
+  "karmicTreeRootsFallback": "আপনার শিকড়",
+  "karmicTreeTagline1": "আপনার প্যাটার্নের শাখা এখনও মানচিত্র করা হচ্ছে।",
+  "karmicTreeTagline2": "এই পবিত্র যন্ত্র এখনও বিকশিত হচ্ছে — ফুটে উঠলে সখা জানাবেন।",
+  "karmicTreeBackToArmoryA11y": "সরঞ্জাম ড্যাশবোর্ডে ফিরুন",
+  "karmicTreeBackToArmoryCta": "অস্ত্রাগারে ফিরুন",
+
+  "karmaResetPatternFallback": "যে প্যাটার্ন আপনি নাম দিয়েছেন",
+  "emotionalResetReflectionFallback": "আপনার চিন্তা",
+
+  "goBackA11y": "ফিরে যান",
+  "backButton": "< ফিরুন",
+  "erStepBreathe": "শ্বাস",
+  "erStepVisualize": "কল্পনা",
+  "erStepWisdom": "জ্ঞান",
+  "erStepAffirm": "সংকল্প",
+  "erStepReflect": "চিন্তন",
+  "erStepComplete": "সম্পূর্ণ"
 }
