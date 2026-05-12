@@ -46,6 +46,7 @@ import {
   type IAPProduct,
   TIER_CONFIGS,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,6 +74,7 @@ interface TierCardProps {
 }
 
 function TierCard({
+  tier,
   name,
   price,
   monthlyEquivalent,
@@ -85,6 +87,7 @@ function TierCard({
   onSelect,
   disabled,
 }: TierCardProps): React.JSX.Element {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const c = theme.colors;
 
@@ -127,7 +130,9 @@ function TierCard({
       <Text style={[styles.tierPrice, { color: c.textPrimary }]}>{price}</Text>
       {monthlyEquivalent && (
         <Text variant="caption" color={c.textTertiary}>
-          {monthlyEquivalent}/mo when billed yearly
+          {t('subscription.paywallMonthlyEquivalent', {
+            price: monthlyEquivalent,
+          })}
         </Text>
       )}
       <Text
@@ -149,7 +154,7 @@ function TierCard({
         ]}
       >
         <Text variant="caption" color={c.textPrimary} style={styles.quotaLabel}>
-          KIAAN Questions
+          {t('subscription.paywallKiaanQuotaLabel')}
         </Text>
         <Text style={[styles.quotaValue, { color: c.accent }]}>
           {kiaanQuota}
@@ -187,7 +192,7 @@ function TierCard({
           ]}
         >
           <Text variant="label" color={colors.semantic.success}>
-            Current Plan
+            {t('subscription.paywallCurrentPlan')}
           </Text>
         </View>
       ) : (
@@ -206,7 +211,9 @@ function TierCard({
             variant="label"
             color={isPopular ? c.background : colors.raw.white}
           >
-            {price === 'Free' ? 'Get Started Free' : 'Subscribe Now'}
+            {tier === 'free'
+              ? t('subscription.paywallCtaFree')
+              : t('subscription.paywallCtaSubscribe')}
           </Text>
         </TouchableOpacity>
       )}
@@ -218,50 +225,57 @@ function TierCard({
 // Feature lists for display — aligned with web pricing page
 // ---------------------------------------------------------------------------
 
-const TIER_FEATURES: Record<SubscriptionTier, string[]> = {
+/**
+ * Per-tier feature i18n keys. Each tier's feature list resolves at
+ * render time via t() so the bullets localize against the active UI
+ * locale. Tier order + count is preserved from the original literal
+ * tables so the visual layout doesn't shift.
+ */
+const TIER_FEATURE_KEYS: Record<SubscriptionTier, readonly string[]> = {
   free: [
-    '5 KIAAN questions/month',
-    'Divine Chat & Friend Mode',
-    'Mood tracking',
-    'Daily wisdom',
-    'Basic breathing exercises',
-    '1 Wisdom Journey',
-    'Community access',
+    'subscription.paywallFeatFree1',
+    'subscription.paywallFeatFree2',
+    'subscription.paywallFeatFree3',
+    'subscription.paywallFeatFree4',
+    'subscription.paywallFeatFree5',
+    'subscription.paywallFeatFree6',
+    'subscription.paywallFeatFree7',
   ],
   bhakta: [
-    '50 KIAAN questions/month',
-    'All Seeker features',
-    'Encrypted journal',
-    '3 Wisdom Journeys',
-    '90-day data retention',
+    'subscription.paywallFeatBhakta1',
+    'subscription.paywallFeatBhakta2',
+    'subscription.paywallFeatBhakta3',
+    'subscription.paywallFeatBhakta4',
+    'subscription.paywallFeatBhakta5',
   ],
   sadhak: [
-    '300 KIAAN questions/month',
-    'All Bhakta features',
-    'Voice Companion (17 languages)',
-    'Soul Reading & Quantum Dive',
-    'KIAAN Agent',
-    'Ardha, Viyoga & Emotional Reset',
-    'Relationship Compass',
-    '10 Wisdom Journeys',
-    'Advanced mood analytics',
-    'Offline access & priority support',
+    'subscription.paywallFeatSadhak1',
+    'subscription.paywallFeatSadhak2',
+    'subscription.paywallFeatSadhak3',
+    'subscription.paywallFeatSadhak4',
+    'subscription.paywallFeatSadhak5',
+    'subscription.paywallFeatSadhak6',
+    'subscription.paywallFeatSadhak7',
+    'subscription.paywallFeatSadhak8',
+    'subscription.paywallFeatSadhak9',
+    'subscription.paywallFeatSadhak10',
   ],
   siddha: [
-    'Unlimited KIAAN questions',
-    'All Sadhak features',
-    'Unlimited Wisdom Journeys',
-    'Dedicated support',
-    'Team features',
-    'Priority voice processing',
+    'subscription.paywallFeatSiddha1',
+    'subscription.paywallFeatSiddha2',
+    'subscription.paywallFeatSiddha3',
+    'subscription.paywallFeatSiddha4',
+    'subscription.paywallFeatSiddha5',
+    'subscription.paywallFeatSiddha6',
   ],
 };
 
-const KIAAN_QUOTA_DISPLAY: Record<SubscriptionTier, string> = {
-  free: '5/month',
-  bhakta: '50/month',
-  sadhak: '300/month',
-  siddha: 'Unlimited',
+/** Per-tier KIAAN quota display key. */
+const KIAAN_QUOTA_KEY: Record<SubscriptionTier, string> = {
+  free: 'subscription.paywallQuotaFree',
+  bhakta: 'subscription.paywallQuotaBhakta',
+  sadhak: 'subscription.paywallQuotaSadhak',
+  siddha: 'subscription.paywallQuotaSiddha',
 };
 
 // ---------------------------------------------------------------------------
@@ -275,6 +289,7 @@ function BillingToggle({
   billingPeriod: BillingPeriod;
   onToggle: (period: BillingPeriod) => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const c = theme.colors;
 
@@ -297,7 +312,7 @@ function BillingToggle({
           variant="label"
           color={billingPeriod === 'monthly' ? c.background : c.textSecondary}
         >
-          Monthly
+          {t('subscription.billingMonthly')}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -312,7 +327,7 @@ function BillingToggle({
           variant="label"
           color={billingPeriod === 'yearly' ? c.background : c.textSecondary}
         >
-          Yearly
+          {t('subscription.billingAnnual')}
         </Text>
         <View
           style={[
@@ -323,7 +338,7 @@ function BillingToggle({
           <Text
             style={[styles.saveBadgeText, { color: colors.semantic.success }]}
           >
-            Save 20%
+            {t('subscription.paywallSaveBadge')}
           </Text>
         </View>
       </TouchableOpacity>
@@ -336,6 +351,7 @@ function BillingToggle({
 // ---------------------------------------------------------------------------
 
 export default function SubscriptionScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useTheme();
   const c = theme.colors;
@@ -379,7 +395,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
   // Get localized price from store products, fallback to config
   const getPrice = useCallback(
     (targetTier: SubscriptionTier): string => {
-      if (targetTier === 'free') return 'Free';
+      if (targetTier === 'free') return t('subscription.priceFree');
 
       const product = products.find(
         (p) => p.tier === targetTier && p.billingPeriod === billingPeriod
@@ -389,7 +405,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
       const config = TIER_CONFIGS[targetTier];
       return config.priceDisplay[billingPeriod].usd;
     },
-    [products, billingPeriod]
+    [products, billingPeriod, t]
   );
 
   // Get monthly equivalent for yearly pricing
@@ -422,9 +438,16 @@ export default function SubscriptionScreen(): React.JSX.Element {
             if (result.success) {
               setTier(result.tier, result.expiresAt);
               Alert.alert(
-                'Welcome to ' + TIER_CONFIGS[result.tier].name,
-                'Your subscription is now active. Enjoy your spiritual journey!',
-                [{ text: 'Continue', onPress: () => router.back() }]
+                t('subscription.paywallWelcomeTitle', {
+                  tierName: TIER_CONFIGS[result.tier].name,
+                }),
+                t('subscription.paywallWelcomeBody'),
+                [
+                  {
+                    text: t('subscription.continueButton'),
+                    onPress: () => router.back(),
+                  },
+                ],
               );
             }
           },
@@ -437,9 +460,9 @@ export default function SubscriptionScreen(): React.JSX.Element {
             if (isSubscriptionUnavailableError(errorMsg)) {
               setPurchaseStatus('idle');
               Alert.alert(
-                'Coming soon 🙏',
-                'This plan will be available very soon. Thank you for your patience.',
-                [{ text: 'OK' }]
+                t('subscription.alertComingSoonTitle'),
+                t('subscription.alertComingSoonBody'),
+                [{ text: t('common.ok') }],
               );
               return;
             }
@@ -450,7 +473,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
         // Error already handled by onError callback
       }
     },
-    [router, setTier, setPurchaseStatus, clearError, billingPeriod]
+    [router, setTier, setPurchaseStatus, clearError, billingPeriod, t]
   );
 
   // Handle restore
@@ -463,17 +486,24 @@ export default function SubscriptionScreen(): React.JSX.Element {
     if (result.success) {
       setTier(result.tier, result.expiresAt);
       Alert.alert(
-        'Purchases Restored',
-        `Your ${TIER_CONFIGS[result.tier].name} subscription has been restored.`,
-        [{ text: 'Continue', onPress: () => router.back() }]
+        t('subscription.paywallRestoredTitle'),
+        t('subscription.paywallRestoredBody', {
+          tierName: TIER_CONFIGS[result.tier].name,
+        }),
+        [
+          {
+            text: t('subscription.continueButton'),
+            onPress: () => router.back(),
+          },
+        ],
       );
     } else {
       setPurchaseStatus(
         'error',
-        result.error ?? 'No purchases found to restore.'
+        result.error ?? t('subscription.paywallNoRestoreError'),
       );
     }
-  }, [router, setTier, setPurchaseStatus, clearError]);
+  }, [router, setTier, setPurchaseStatus, clearError, t]);
 
   // Handle retry after failure
   const handleRetry = useCallback(() => {
@@ -501,6 +531,8 @@ export default function SubscriptionScreen(): React.JSX.Element {
             { backgroundColor: colors.alpha.whiteMedium },
           ]}
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('subscription.paywallCloseA11y')}
           activeOpacity={0.7}
         >
           <Text variant="body" color={colors.raw.white}>
@@ -508,11 +540,10 @@ export default function SubscriptionScreen(): React.JSX.Element {
           </Text>
         </TouchableOpacity>
         <Text variant="h2" color={c.textPrimary} align="center">
-          Choose Your Path to Inner Peace
+          {t('subscription.paywallHeaderTitle')}
         </Text>
         <Text variant="bodySmall" color={c.textSecondary} align="center">
-          Every plan includes the same quality KIAAN guidance. Choose based on
-          how often you&apos;d like to connect.
+          {t('subscription.paywallHeaderSubtitle')}
         </Text>
       </View>
 
@@ -526,10 +557,10 @@ export default function SubscriptionScreen(): React.JSX.Element {
             style={styles.loadingText}
           >
             {purchaseStatus === 'restoring'
-              ? 'Restoring purchases...'
+              ? t('subscription.paywallLoadingRestoring')
               : purchaseStatus === 'verifying'
-                ? 'Verifying purchase...'
-                : 'Processing payment...'}
+                ? t('subscription.paywallLoadingVerifying')
+                : t('subscription.paywallLoadingPayment')}
           </Text>
         </View>
       )}
@@ -554,7 +585,7 @@ export default function SubscriptionScreen(): React.JSX.Element {
           </Text>
           <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
             <Text variant="label" color={c.accent}>
-              Retry
+              {t('subscription.paywallErrorRetry')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -580,31 +611,31 @@ export default function SubscriptionScreen(): React.JSX.Element {
               color={c.textTertiary}
               style={styles.loadingProductsText}
             >
-              Loading plans...
+              {t('subscription.paywallLoadingProducts')}
             </Text>
           </View>
         ) : (
           <>
-            {allTiers.map((t) => (
+            {allTiers.map((tierKey) => (
               <TierCard
-                key={t}
-                tier={t}
-                name={TIER_CONFIGS[t].name}
-                price={getPrice(t)}
-                monthlyEquivalent={getMonthlyEquivalent(t)}
-                description={TIER_CONFIGS[t].description}
-                kiaanQuota={KIAAN_QUOTA_DISPLAY[t]}
-                features={TIER_FEATURES[t]}
-                isCurrentTier={tier === t}
-                isPopular={t === 'sadhak'}
+                key={tierKey}
+                tier={tierKey}
+                name={TIER_CONFIGS[tierKey].name}
+                price={getPrice(tierKey)}
+                monthlyEquivalent={getMonthlyEquivalent(tierKey)}
+                description={TIER_CONFIGS[tierKey].description}
+                kiaanQuota={t(KIAAN_QUOTA_KEY[tierKey])}
+                features={TIER_FEATURE_KEYS[tierKey].map((k) => t(k))}
+                isCurrentTier={tier === tierKey}
+                isPopular={tierKey === 'sadhak'}
                 badge={
-                  t === 'sadhak'
-                    ? 'Most Popular'
-                    : t === 'siddha'
-                      ? 'Unlimited'
+                  tierKey === 'sadhak'
+                    ? t('subscription.paywallBadgeMostPopular')
+                    : tierKey === 'siddha'
+                      ? t('subscription.paywallBadgeUnlimited')
                       : undefined
                 }
-                onSelect={() => handlePurchase(t)}
+                onSelect={() => handlePurchase(tierKey)}
                 disabled={isProcessing}
               />
             ))}
@@ -623,36 +654,43 @@ export default function SubscriptionScreen(): React.JSX.Element {
             color={c.textTertiary}
             style={styles.restoreButtonText}
           >
-            Restore Purchases
+            {t('subscription.ctaRestorePurchases')}
           </Text>
         </TouchableOpacity>
 
         {/* KIAAN Promise */}
         <GlowCard variant="golden" style={styles.promiseCard}>
           <Text variant="label" color={c.textPrimary}>
-            The KIAAN Promise
+            {t('subscription.paywallPromiseTitle')}
           </Text>
           <Text variant="bodySmall" color={c.textSecondary}>
-            Every user receives the same quality of guidance from KIAAN—the only
-            difference is how many questions you can ask each month.
+            {t('subscription.paywallPromiseBody')}
           </Text>
         </GlowCard>
 
-        {/* Legal text */}
+        {/* Legal text — composed from atomic localized fragments so each
+            locale can phrase auto-renew / cancellation / charge naturally.
+            Platform conditional swaps the cancel + charge sentences. */}
         <Text
           variant="caption"
           color={c.textTertiary}
           align="center"
           style={styles.legalText}
         >
-          Subscriptions auto-renew{' '}
-          {billingPeriod === 'yearly' ? 'annually' : 'monthly'}. Cancel anytime
-          in{' '}
+          {t('subscription.paywallLegalAutoRenew', {
+            period:
+              billingPeriod === 'yearly'
+                ? t('subscription.paywallLegalPeriodAnnually')
+                : t('subscription.paywallLegalPeriodMonthly'),
+          })}
+          {' '}
           {Platform.OS === 'ios'
-            ? 'Settings → Subscriptions'
-            : 'Google Play → Subscriptions'}
-          . Payment will be charged to your{' '}
-          {Platform.OS === 'ios' ? 'Apple ID' : 'Google Play'} account.
+            ? t('subscription.paywallLegalCancelIos')
+            : t('subscription.paywallLegalCancelAndroid')}
+          {' '}
+          {Platform.OS === 'ios'
+            ? t('subscription.paywallLegalChargeIos')
+            : t('subscription.paywallLegalChargeAndroid')}
         </Text>
       </ScrollView>
     </Screen>
