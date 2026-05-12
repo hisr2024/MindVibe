@@ -32,6 +32,30 @@ import enSadhana from './messages/en/sadhana.json';
 import enSubscription from './messages/en/subscription.json';
 import enOnboarding from './messages/en/onboarding.json';
 import enVibePlayer from './messages/en/vibe-player.json';
+import enSupport from './messages/en/support.json';
+
+// Support — per-locale bundles (registered in Batch 9).
+//
+// 11 of the 15 supported locales have full hand-translated support
+// bundles (legal text + FAQ + contact). The remaining 5 — Marathi,
+// Gujarati, Kannada, Malayalam, Punjabi — fall back to the English
+// `support` namespace at runtime via resolveMessages() (this file
+// returns `enBundle[namespace]` when a locale has no entry). This
+// keeps help / contact / terms / privacy / data-privacy screens
+// readable in English for those users while every other namespace in
+// their locale stays localized. A follow-up batch can author the
+// missing 5 bundles once we have legal review for the additional
+// languages.
+import hiSupport from './messages/hi/support.json';
+import saSupport from './messages/sa/support.json';
+import taSupport from './messages/ta/support.json';
+import teSupport from './messages/te/support.json';
+import bnSupport from './messages/bn/support.json';
+import deSupport from './messages/de/support.json';
+import frSupport from './messages/fr/support.json';
+import esSupport from './messages/es/support.json';
+import itSupport from './messages/it/support.json';
+import ptSupport from './messages/pt/support.json';
 
 // Vibe Player — per-locale bundles (registered in Batch 7).
 import hiVibePlayer from './messages/hi/vibe-player.json';
@@ -295,6 +319,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   subscription: enSubscription,
   onboarding: enOnboarding,
   'vibe-player': enVibePlayer,
+  support: enSupport,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -324,6 +349,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: hiSubscription,
     onboarding: hiOnboarding,
     'vibe-player': hiVibePlayer,
+    support: hiSupport,
   },
   sa: {
     common: saCommon,
@@ -339,6 +365,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: saSubscription,
     onboarding: saOnboarding,
     'vibe-player': saVibePlayer,
+    support: saSupport,
   },
   ta: {
     common: taCommon,
@@ -354,6 +381,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: taSubscription,
     onboarding: taOnboarding,
     'vibe-player': taVibePlayer,
+    support: taSupport,
   },
   te: {
     common: teCommon,
@@ -369,6 +397,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: teSubscription,
     onboarding: teOnboarding,
     'vibe-player': teVibePlayer,
+    support: teSupport,
   },
   bn: {
     common: bnCommon,
@@ -384,6 +413,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: bnSubscription,
     onboarding: bnOnboarding,
     'vibe-player': bnVibePlayer,
+    support: bnSupport,
   },
   mr: {
     common: mrCommon,
@@ -474,6 +504,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: deSubscription,
     onboarding: deOnboarding,
     'vibe-player': deVibePlayer,
+    support: deSupport,
   },
   fr: {
     common: frCommon,
@@ -489,6 +520,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: frSubscription,
     onboarding: frOnboarding,
     'vibe-player': frVibePlayer,
+    support: frSupport,
   },
   es: {
     common: esCommon,
@@ -504,6 +536,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: esSubscription,
     onboarding: esOnboarding,
     'vibe-player': esVibePlayer,
+    support: esSupport,
   },
   it: {
     common: itCommon,
@@ -519,6 +552,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: itSubscription,
     onboarding: itOnboarding,
     'vibe-player': itVibePlayer,
+    support: itSupport,
   },
   pt: {
     common: ptCommon,
@@ -534,6 +568,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     subscription: ptSubscription,
     onboarding: ptOnboarding,
     'vibe-player': ptVibePlayer,
+    support: ptSupport,
   },
 };
 

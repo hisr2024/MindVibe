@@ -20,6 +20,7 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen, GoldenHeader, SacredCard } from '@kiaanverse/ui';
 import { Text } from 'react-native';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const GOLD = '#D4A017';
 const SACRED_WHITE = '#F0EBE1';
@@ -28,83 +29,83 @@ const CRISIS_RED = '#dc2626';
 
 const CONTACT_EMAIL = 'sacredquest2@gmail.com';
 
-interface Category {
-  readonly label: string;
-  readonly subject: string;
-  readonly body: string;
-  readonly hint: string;
+/**
+ * Category metadata — each entry references its i18n keys. The screen
+ * resolves them at render time so each locale supplies its own label,
+ * subject line, body template, and inline hint.
+ */
+interface CategoryKey {
+  readonly id: string;
+  readonly labelKey: string;
+  readonly subjectKey: string;
+  readonly bodyKey: string;
+  readonly hintKey: string;
 }
 
-const CATEGORIES: readonly Category[] = [
+const CATEGORY_KEYS: readonly CategoryKey[] = [
   {
-    label: 'General question',
-    subject: 'Kiaanverse — General question',
-    body: 'Tell us what’s on your mind:',
-    hint: 'We answer within 7 business days.',
+    id: 'general',
+    labelKey: 'support.cat1Label',
+    subjectKey: 'support.cat1Subject',
+    bodyKey: 'support.cat1Body',
+    hintKey: 'support.cat1Hint',
   },
   {
-    label: 'Account or login issue',
-    subject: 'Kiaanverse — Account / login issue',
-    body:
-      'Please include:\n• The email you signed up with\n• What happens when ' +
-      'you try to log in\n• Whether you can see this message means you’re ' +
-      'logged in on at least one device\n\nDescription:',
-    hint: 'Include your account email so we can locate the record.',
+    id: 'account',
+    labelKey: 'support.cat2Label',
+    subjectKey: 'support.cat2Subject',
+    bodyKey: 'support.cat2Body',
+    hintKey: 'support.cat2Hint',
   },
   {
-    label: 'Billing or subscription',
-    subject: 'Kiaanverse — Billing / subscription',
-    body:
-      'Please include:\n• Your store order ID (visible in Google Play / App ' +
-      'Store receipt)\n• What charge you’re asking about\n• Whether you ' +
-      'are looking for a refund or a restoration\n\nDescription:',
-    hint: 'Order IDs from your store receipt help us resolve faster.',
+    id: 'billing',
+    labelKey: 'support.cat3Label',
+    subjectKey: 'support.cat3Subject',
+    bodyKey: 'support.cat3Body',
+    hintKey: 'support.cat3Hint',
   },
   {
-    label: 'Bug report',
-    subject: 'Kiaanverse — Bug report',
-    body:
-      'Please include:\n• Device + Android / iOS version\n• What you ' +
-      'expected to happen\n• What actually happened\n• Steps to reproduce ' +
-      '(if you can)\n\nA screenshot or short screen-recording attached to ' +
-      'this email is the single biggest accelerator.\n\nDescription:',
-    hint: 'A screenshot or screen-recording cuts triage time in half.',
+    id: 'bug',
+    labelKey: 'support.cat4Label',
+    subjectKey: 'support.cat4Subject',
+    bodyKey: 'support.cat4Body',
+    hintKey: 'support.cat4Hint',
   },
   {
-    label: 'Feature request',
-    subject: 'Kiaanverse — Feature request',
-    body:
-      'Tell us about the moment when you wished the app could do this:',
-    hint: 'Real stories beat abstract feature names.',
+    id: 'feature',
+    labelKey: 'support.cat5Label',
+    subjectKey: 'support.cat5Subject',
+    bodyKey: 'support.cat5Body',
+    hintKey: 'support.cat5Hint',
   },
   {
-    label: 'Privacy or data export',
-    subject: 'Kiaanverse — Privacy / data export request',
-    body:
-      'Please tell us:\n• Whether you want a full data export, a deletion, ' +
-      'or another GDPR right\n• Your account email\n\nWe respond within 7 ' +
-      'business days as required by GDPR.\n\nDescription:',
-    hint: 'Per GDPR, we respond within 7 business days.',
+    id: 'privacy',
+    labelKey: 'support.cat6Label',
+    subjectKey: 'support.cat6Subject',
+    bodyKey: 'support.cat6Body',
+    hintKey: 'support.cat6Hint',
   },
   {
-    label: 'Press or partnerships',
-    subject: 'Kiaanverse — Press / partnership inquiry',
-    body: 'Tell us about your outlet or organisation and what you’re hoping to discuss:',
-    hint: 'Please include your name, organisation, and timeline.',
+    id: 'press',
+    labelKey: 'support.cat7Label',
+    subjectKey: 'support.cat7Subject',
+    bodyKey: 'support.cat7Body',
+    hintKey: 'support.cat7Hint',
   },
 ];
 
-function buildMailto(category: Category): string {
-  const subject = encodeURIComponent(category.subject);
-  const body = encodeURIComponent(`${category.body}\n\n`);
-  return `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+function buildMailto(subject: string, body: string): string {
+  const s = encodeURIComponent(subject);
+  const b = encodeURIComponent(`${body}\n\n`);
+  return `mailto:${CONTACT_EMAIL}?subject=${s}&body=${b}`;
 }
 
 export default function ContactUsScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
 
-  const openCategory = (cat: Category): void => {
-    void Linking.openURL(buildMailto(cat));
+  const openCategory = (cat: CategoryKey): void => {
+    void Linking.openURL(buildMailto(t(cat.subjectKey), t(cat.bodyKey)));
   };
 
   const openPlainMail = (): void => {
@@ -113,62 +114,57 @@ export default function ContactUsScreen(): React.JSX.Element {
 
   return (
     <Screen scroll gradient gradientVariant="cosmic">
-      <GoldenHeader title="Contact Us" onBack={() => router.back()} />
+      <GoldenHeader title={t('support.contactTitle')} onBack={() => router.back()} />
 
       <SacredCard style={[styles.card, styles.crisisCard]}>
         <Text style={[styles.eyebrow, styles.crisisEyebrow]}>
-          IF YOU ARE IN CRISIS
+          {t('support.ifInCrisis')}
         </Text>
-        <Text style={styles.crisisBody}>
-          We are not a crisis service and we cannot answer in real time.
-          Please reach a trained human now. India: iCall +91-9152987821.
-          US: dial or text 988. UK: 116 123. Or your local emergency
-          number. We are here for everything else.
-        </Text>
+        <Text style={styles.crisisBody}>{t('support.contactCrisisBody')}</Text>
       </SacredCard>
 
       <SacredCard style={styles.card}>
-        <Text style={styles.eyebrow}>WRITE TO US</Text>
-        <Text style={styles.intro}>
-          Pick the category that fits best — we use the subject line to
-          route your message to the right person on our side.
-        </Text>
+        <Text style={styles.eyebrow}>{t('support.contactEyebrow')}</Text>
+        <Text style={styles.intro}>{t('support.contactIntro')}</Text>
 
         <Pressable
           onPress={openPlainMail}
           accessibilityRole="link"
-          accessibilityLabel={`Email ${CONTACT_EMAIL}`}
+          accessibilityLabel={t('support.contactEmailA11y', { email: CONTACT_EMAIL })}
           style={styles.emailRow}
         >
-          <Text style={styles.emailLabel}>Direct email</Text>
+          <Text style={styles.emailLabel}>{t('support.contactDirectEmail')}</Text>
           <Text style={styles.emailAddress}>{CONTACT_EMAIL}</Text>
         </Pressable>
 
         <View style={styles.categories}>
-          {CATEGORIES.map((cat) => (
-            <Pressable
-              key={cat.label}
-              onPress={() => openCategory(cat)}
-              accessibilityRole="button"
-              accessibilityLabel={`Email ${CONTACT_EMAIL} about ${cat.label}`}
-              style={({ pressed }) => [
-                styles.categoryRow,
-                pressed && styles.categoryRowPressed,
-              ]}
-            >
-              <View style={styles.categoryText}>
-                <Text style={styles.categoryLabel}>{cat.label}</Text>
-                <Text style={styles.categoryHint}>{cat.hint}</Text>
-              </View>
-              <Text style={styles.chevron}>›</Text>
-            </Pressable>
-          ))}
+          {CATEGORY_KEYS.map((cat) => {
+            const label = t(cat.labelKey);
+            return (
+              <Pressable
+                key={cat.id}
+                onPress={() => openCategory(cat)}
+                accessibilityRole="button"
+                accessibilityLabel={t('support.contactCategoryA11y', {
+                  email: CONTACT_EMAIL,
+                  label,
+                })}
+                style={({ pressed }) => [
+                  styles.categoryRow,
+                  pressed && styles.categoryRowPressed,
+                ]}
+              >
+                <View style={styles.categoryText}>
+                  <Text style={styles.categoryLabel}>{label}</Text>
+                  <Text style={styles.categoryHint}>{t(cat.hintKey)}</Text>
+                </View>
+                <Text style={styles.chevron}>›</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
-        <Text style={styles.footer}>
-          We are a small team. Every email is read by a human. We answer
-          within 7 business days — usually much sooner.
-        </Text>
+        <Text style={styles.footer}>{t('support.contactFooter')}</Text>
       </SacredCard>
     </Screen>
   );

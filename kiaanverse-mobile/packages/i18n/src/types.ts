@@ -31,7 +31,8 @@ export type TranslationNamespace =
   | 'settings'
   | 'wisdom'
   | 'subscription'
-  | 'onboarding';
+  | 'onboarding'
+  | 'support';
 
 /** Nested translation messages — supports one level of nesting */
 export type TranslationMessages = Record<string, string | Record<string, string>>;
