@@ -2,5 +2,7 @@
   "placeholder": "Pregúntale a Sakha lo que quieras…",
   "thinking": "Sakha está reflexionando…",
   "error": "Sakha no está disponible ahora mismo",
-  "welcome": "Soy Sakha, tu compañero espiritual. ¿Cómo puedo guiarte hoy?"
+  "welcome": "Soy Sakha, tu compañero espiritual. ¿Cómo puedo guiarte hoy?",
+  "chatHeroPrompt": "¿Qué pesa en tu corazón?",
+  "chatOfflineBanner": "Pareces estar sin conexión. Escucharé en cuanto vuelva la conexión."
 }

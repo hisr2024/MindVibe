@@ -1,0 +1,41 @@
+{
+  "hubTitle": "पावन साधन",
+  "hubSubtitle": "आंतरिक रूपान्तरण हेतु प्रत्येक शास्त्र एवं उपकरण",
+
+  "sectionVoice": "पावन ध्वनि",
+  "sectionScriptures": "पावन शास्त्र",
+  "sectionWisdom": "ज्ञान-साधन",
+  "sectionHealing": "उपचार-साधन",
+  "sectionPaths": "पावन मार्ग",
+  "sectionSound": "पावन नाद",
+
+  "voiceCompanionName": "सखा — ध्वनि साथी",
+  "voiceCompanionDescription": "दिव्य मित्र से बात करें",
+
+  "gitaName": "भगवद्गीता",
+  "gitaDescription": "18 अध्याय · 700 श्लोक",
+
+  "ardhaName": "अर्थ",
+  "ardhaDescription": "अपना दृष्टिकोण पुनः गढ़ें",
+
+  "viyogaName": "वियोग",
+  "viyogaDescription": "त्याग की कला",
+
+  "relationshipCompassName": "सम्बन्ध-दिशा सूचक",
+  "relationshipCompassDescription": "धर्म-निर्देशित स्पष्टता",
+
+  "emotionalResetName": "भावनात्मक पुनर्स्थापना",
+  "emotionalResetDescription": "भावनाओं को मुक्त करें और रूपान्तरित करें",
+
+  "karmaResetName": "कर्म पुनर्निर्धारण",
+  "karmaResetDescription": "कर्म-पैटर्न का उपचार करें",
+
+  "wisdomRoomsName": "ज्ञान-कक्ष",
+  "wisdomRoomsDescription": "साधकों के पावन वृत्त",
+
+  "journeysName": "यात्राएँ",
+  "journeysDescription": "आन्तरिक रणक्षेत्र · 6 शत्रु",
+
+  "sacredReflectionsName": "पावन चिन्तन",
+  "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल एवं अंतर्दृष्टि"
+}

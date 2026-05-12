@@ -2,5 +2,7 @@
   "placeholder": "Ask Sakha anything...",
   "thinking": "Sakha is reflecting...",
   "error": "Sakha is unavailable right now",
-  "welcome": "I am Sakha, your spiritual companion. How may I guide you today?"
+  "welcome": "I am Sakha, your spiritual companion. How may I guide you today?",
+  "chatHeroPrompt": "What weighs upon your heart?",
+  "chatOfflineBanner": "You appear to be offline. I will listen as soon as the connection returns."
 }

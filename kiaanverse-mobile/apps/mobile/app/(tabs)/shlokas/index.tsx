@@ -32,6 +32,7 @@ import Animated from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { Screen, useDivineEntrance } from '@kiaanverse/ui';
 import { useVibePlayerStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   SectionHeader,
@@ -55,9 +56,9 @@ const CARD_STAGGER_MS = 60;
 
 interface ToolDescriptor {
   readonly id: string;
-  readonly name: string;
+  readonly nameKey: string;
   readonly sanskrit: string;
-  readonly description: string;
+  readonly descriptionKey: string;
   readonly color: string;
   readonly icon: string;
   readonly route: string;
@@ -69,9 +70,9 @@ interface ToolDescriptor {
 const VOICE_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'voice-companion',
-    name: 'Sakha — Voice Companion',
+    nameKey: 'voiceCompanionName',
     sanskrit: 'सखा · शङ्ख',
-    description: 'Speak with the divine friend',
+    descriptionKey: 'voiceCompanionDescription',
     color: DIVINE_GOLD,
     icon: '🐚',
     route: '/voice-companion',
@@ -81,9 +82,9 @@ const VOICE_TOOLS: readonly ToolDescriptor[] = [
 const SCRIPTURE_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'bhagavad-gita',
-    name: 'Bhagavad Gita',
+    nameKey: 'gitaName',
     sanskrit: 'भगवद्गीता',
-    description: '18 chapters · 700 shlokas',
+    descriptionKey: 'gitaDescription',
     color: DIVINE_GOLD,
     icon: '📜',
     route: '/(tabs)/shlokas/gita',
@@ -94,27 +95,27 @@ const SCRIPTURE_TOOLS: readonly ToolDescriptor[] = [
 const WISDOM_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'ardha',
-    name: 'Ardha',
+    nameKey: 'ardhaName',
     sanskrit: 'अर्थ',
-    description: 'Reframe your perspective',
+    descriptionKey: 'ardhaDescription',
     color: DESIRE_AMBER,
     icon: '💡',
     route: '/tools/ardha',
   },
   {
     id: 'viyoga',
-    name: 'Viyoga',
+    nameKey: 'viyogaName',
     sanskrit: 'वियोग',
-    description: 'The art of letting go',
+    descriptionKey: 'viyogaDescription',
     color: PEACOCK_TEAL,
     icon: '🌊',
     route: '/tools/viyoga',
   },
   {
     id: 'relationship-compass',
-    name: 'Relationship Compass',
+    nameKey: 'relationshipCompassName',
     sanskrit: 'संबंध सूत्र',
-    description: 'Dharma-guided clarity',
+    descriptionKey: 'relationshipCompassDescription',
     color: GREED_GREEN,
     icon: '🧭',
     route: '/tools/relationship-compass',
@@ -124,18 +125,18 @@ const WISDOM_TOOLS: readonly ToolDescriptor[] = [
 const HEALING_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'emotional-reset',
-    name: 'Emotional Reset',
+    nameKey: 'emotionalResetName',
     sanskrit: 'भावनात्मक पुनर्स्थापना',
-    description: 'Release and transform emotions',
+    descriptionKey: 'emotionalResetDescription',
     color: ANGER_RED,
     icon: '🔥',
     route: '/tools/emotional-reset',
   },
   {
     id: 'karma-reset',
-    name: 'Karma Reset',
+    nameKey: 'karmaResetName',
     sanskrit: 'कर्म पुनर्निर्धारण',
-    description: 'Heal karmic patterns',
+    descriptionKey: 'karmaResetDescription',
     color: DELUSION_PURPLE,
     icon: '☸',
     route: '/tools/karma-reset',
@@ -148,27 +149,27 @@ const HEALING_TOOLS: readonly ToolDescriptor[] = [
 const PATH_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'wisdom-rooms',
-    name: 'Wisdom Rooms',
+    nameKey: 'wisdomRoomsName',
     sanskrit: 'ज्ञान कक्ष',
-    description: 'Sacred circles of seekers',
+    descriptionKey: 'wisdomRoomsDescription',
     color: GREED_GREEN,
     icon: '🏛',
     route: '/wisdom-rooms',
   },
   {
     id: 'journeys',
-    name: 'Journeys',
+    nameKey: 'journeysName',
     sanskrit: 'षड्रिपु',
-    description: 'The inner battlefield · 6 enemies',
+    descriptionKey: 'journeysDescription',
     color: ANGER_RED,
     icon: '⚔️',
     route: '/(tabs)/journeys',
   },
   {
     id: 'sacred-reflections',
-    name: 'Sacred Reflections',
+    nameKey: 'sacredReflectionsName',
     sanskrit: 'पवित्र चिन्तन',
-    description: 'Encrypted journal & insights',
+    descriptionKey: 'sacredReflectionsDescription',
     color: DIVINE_GOLD,
     icon: '🪷',
     route: '/journal',
@@ -177,6 +178,7 @@ const PATH_TOOLS: readonly ToolDescriptor[] = [
 
 export default function SacredToolsHubScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
   const isPlaying = useVibePlayerStore((s) => s.isPlaying);
@@ -196,11 +198,11 @@ export default function SacredToolsHubScreen(): React.JSX.Element {
   const sections = useMemo(
     () =>
       [
-        { title: 'Sacred Voice', tools: VOICE_TOOLS },
-        { title: 'Sacred Scriptures', tools: SCRIPTURE_TOOLS },
-        { title: 'Wisdom Tools', tools: WISDOM_TOOLS },
-        { title: 'Healing Tools', tools: HEALING_TOOLS },
-        { title: 'Sacred Paths', tools: PATH_TOOLS },
+        { titleKey: 'sectionVoice', tools: VOICE_TOOLS },
+        { titleKey: 'sectionScriptures', tools: SCRIPTURE_TOOLS },
+        { titleKey: 'sectionWisdom', tools: WISDOM_TOOLS },
+        { titleKey: 'sectionHealing', tools: HEALING_TOOLS },
+        { titleKey: 'sectionPaths', tools: PATH_TOOLS },
       ] as const,
     []
   );
@@ -218,26 +220,27 @@ export default function SacredToolsHubScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text style={styles.title} accessibilityRole="header">
-            Sacred Tools
+            {t('hubTitle')}
           </Text>
           <Text style={styles.subtitle}>
-            Every scripture and instrument for inner transformation
+            {t('hubSubtitle')}
           </Text>
         </View>
 
         {sections.map((section, sectionIndex) => (
           <ToolSection
-            key={section.title}
-            title={section.title}
+            key={section.titleKey}
+            title={t(section.titleKey)}
             tools={section.tools}
             sectionDelay={sectionIndex * SECTION_STAGGER_MS}
             onToolPress={handleToolPress}
+            t={t}
           />
         ))}
 
         {/* SACRED SOUND — full-width KIAAN Vibe card. */}
         <AnimatedEntrance delay={vibePlayerDelay}>
-          <SectionHeader title="Sacred Sound" />
+          <SectionHeader title={t('sectionSound')} />
         </AnimatedEntrance>
         <AnimatedEntrance delay={vibePlayerDelay + CARD_STAGGER_MS}>
           <View style={styles.vibeWrap}>
@@ -259,6 +262,7 @@ interface ToolSectionProps {
   readonly tools: readonly ToolDescriptor[];
   readonly sectionDelay: number;
   readonly onToolPress: (route: string) => void;
+  readonly t: (key: string) => string;
 }
 
 function ToolSection({
@@ -266,6 +270,7 @@ function ToolSection({
   tools,
   sectionDelay,
   onToolPress,
+  t,
 }: ToolSectionProps): React.JSX.Element {
   return (
     <View style={styles.section}>
@@ -279,9 +284,9 @@ function ToolSection({
             delay={sectionDelay + (cardIndex + 1) * CARD_STAGGER_MS}
           >
             <ToolCard
-              name={tool.name}
+              name={t(tool.nameKey)}
               sanskrit={tool.sanskrit}
-              description={tool.description}
+              description={t(tool.descriptionKey)}
               color={tool.color}
               icon={tool.icon}
               onPress={() => onToolPress(tool.route)}
