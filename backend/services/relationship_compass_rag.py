@@ -1,4 +1,10 @@
-# CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
+# ============================================================================
+# CONFIDENTIAL — TRADE SECRET — © 2026 Kiaanverse. All Rights Reserved.
+# Protected under the Indian Trade Secret framework, U.S. Defend Trade
+# Secrets Act (18 U.S.C. § 1836), and EU Trade Secrets Directive (2016/943).
+# Unauthorized access, use, reproduction, or disclosure is strictly prohibited.
+# See /CONFIDENTIAL_NOTICE.md for full terms.
+# ============================================================================
 """Gita-only retrieval and validation for Relationship Compass."""
 from __future__ import annotations
 

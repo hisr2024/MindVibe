@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ============================================================================
+# CONFIDENTIAL — TRADE SECRET — © 2026 Kiaanverse. All Rights Reserved.
+# Protected under the Indian Trade Secret framework, U.S. Defend Trade
+# Secrets Act (18 U.S.C. § 1836), and EU Trade Secrets Directive (2016/943).
+# Unauthorized access, use, reproduction, or disclosure is strictly prohibited.
+# See /CONFIDENTIAL_NOTICE.md for full terms.
+# ============================================================================
 """
 KIAAN Wake Word Training Data Generator
 

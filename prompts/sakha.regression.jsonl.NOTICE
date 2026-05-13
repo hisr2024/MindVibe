@@ -1,0 +1,17 @@
+============================================================================
+CONFIDENTIAL — TRADE SECRET — © 2026 Kiaanverse. All Rights Reserved.
+============================================================================
+
+This NOTICE applies to the sibling file `sakha.regression.jsonl`.
+
+The Sakha regression corpus, including prompts, expected completions,
+evaluation criteria, and scoring rubrics, constitutes proprietary trade
+secret information of Kiaanverse used to maintain the Sakha persona
+across model upgrades and prompt revisions.
+
+Protected under the Indian Trade Secret framework, U.S. Defend Trade
+Secrets Act (18 U.S.C. § 1836), and EU Trade Secrets Directive (2016/943).
+
+Unauthorized access, use, reproduction, disclosure, publication, or
+training of any machine-learning model upon this corpus is strictly
+prohibited. See /CONFIDENTIAL_NOTICE.md for full terms.
