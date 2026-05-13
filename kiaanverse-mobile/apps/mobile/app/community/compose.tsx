@@ -29,12 +29,14 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useCreatePost, useCommunityCircles } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 const MAX_CHARS = 500;
 
 export default function ComposeScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('community');
   const createPost = useCreatePost();
   const { data: circles } = useCommunityCircles();
 
@@ -83,12 +85,9 @@ export default function ComposeScreen(): React.JSX.Element {
       await createPost.mutateAsync(payload);
       router.back();
     } catch {
-      Alert.alert(
-        'Could Not Post',
-        'Your wisdom could not be shared right now. Please try again.'
-      );
+      Alert.alert(t('composeErrorTitle'), t('composeErrorBody'));
     }
-  }, [canSubmit, content, selectedCircleId, tagsInput, createPost, router]);
+  }, [canSubmit, content, selectedCircleId, tagsInput, createPost, router, t]);
 
   const availableCircles = useMemo(
     () => (circles ?? []).filter((c) => c.isJoined),
@@ -102,7 +101,7 @@ export default function ComposeScreen(): React.JSX.Element {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={spacing.navHeight}
       >
-        <GoldenHeader title="Share Wisdom" onBack={() => router.back()} />
+        <GoldenHeader title={t('composeTitle')} onBack={() => router.back()} />
 
         <ScrollView
           style={styles.flex}
@@ -113,11 +112,11 @@ export default function ComposeScreen(): React.JSX.Element {
           {/* Content Input */}
           <View style={styles.contentSection}>
             <Text variant="label" color={colors.text.secondary}>
-              What wisdom would you like to share?
+              {t('composePromptLabel')}
             </Text>
             <ShankhaVoiceInput
               style={styles.contentInput}
-              placeholder="Share your thoughts, insights, or a question..."
+              placeholder={t('composePromptPlaceholder')}
               value={content}
               onChangeText={handleContentChange}
               multiline
@@ -131,7 +130,7 @@ export default function ComposeScreen(): React.JSX.Element {
               color={charCountColor}
               style={styles.charCount}
             >
-              {charsRemaining} characters remaining
+              {t('composeCharsRemainingFmt', { count: charsRemaining })}
             </Text>
           </View>
 
@@ -139,7 +138,7 @@ export default function ComposeScreen(): React.JSX.Element {
           {availableCircles.length > 0 ? (
             <View style={styles.circleSection}>
               <Text variant="label" color={colors.text.secondary}>
-                Post to Circle (optional)
+                {t('composeCircleLabel')}
               </Text>
               <ScrollView
                 horizontal
@@ -177,8 +176,8 @@ export default function ComposeScreen(): React.JSX.Element {
 
           {/* Tags */}
           <Input
-            label="Tags (comma-separated)"
-            placeholder="wisdom, meditation, gratitude..."
+            label={t('composeTagsLabel')}
+            placeholder={t('composeTagsPlaceholder')}
             value={tagsInput}
             onChangeText={setTagsInput}
             autoCapitalize="none"
@@ -188,7 +187,7 @@ export default function ComposeScreen(): React.JSX.Element {
           {/* Submit */}
           <View style={styles.submitContainer}>
             <GoldenButton
-              title="Share Wisdom"
+              title={t('composeSubmitButton')}
               onPress={handleSubmit}
               loading={createPost.isPending}
               disabled={!canSubmit}

@@ -1,0 +1,26 @@
+{
+  "screenTitle": "Comunidade",
+  "tabFeed": "Feed",
+  "tabCircles": "Círculos",
+  "feedEmpty": "A comunidade aguarda suas primeiras palavras de sabedoria.",
+  "circlesEmpty": "Ainda não há círculos de sabedoria disponíveis.\nVolte em breve.",
+  "composeFabA11y": "Compor nova postagem",
+
+  "composeTitle": "Compartilhar sabedoria",
+  "composePromptLabel": "Qual sabedoria você gostaria de compartilhar?",
+  "composePromptPlaceholder": "Compartilhe seus pensamentos, ideias ou uma pergunta...",
+  "composeCharsRemainingFmt": "{{count}} caracteres restantes",
+  "composeCircleLabel": "Publicar no círculo (opcional)",
+  "composeTagsLabel": "Tags (separadas por vírgula)",
+  "composeTagsPlaceholder": "sabedoria, meditação, gratidão...",
+  "composeSubmitButton": "Compartilhar sabedoria",
+  "composeErrorTitle": "Não foi possível publicar",
+  "composeErrorBody": "Sua sabedoria não pôde ser compartilhada agora. Tente novamente.",
+
+  "circleFallbackTitle": "Círculo",
+  "circleMembersFmt": "{{count}} membros",
+  "circleJoinButton": "Entrar no círculo",
+  "circleJoinedBadge": "✓ Inscrito",
+  "circlePostsLabel": "Postagens",
+  "circlePostsEmpty": "Ainda não há postagens neste círculo.\nSeja o primeiro a compartilhar sabedoria."
+}

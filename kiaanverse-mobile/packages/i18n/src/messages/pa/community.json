@@ -1,0 +1,26 @@
+{
+  "screenTitle": "ਭਾਈਚਾਰਾ",
+  "tabFeed": "ਫੀਡ",
+  "tabCircles": "ਚੱਕਰ",
+  "feedEmpty": "ਭਾਈਚਾਰਾ ਤੁਹਾਡੇ ਪਹਿਲੇ ਗਿਆਨ-ਸ਼ਬਦਾਂ ਦੀ ਉਡੀਕ ਕਰ ਰਿਹਾ ਹੈ।",
+  "circlesEmpty": "ਅਜੇ ਤੱਕ ਕੋਈ ਗਿਆਨ ਚੱਕਰ ਉਪਲਬਧ ਨਹੀਂ।\nਛੇਤੀ ਹੀ ਫੇਰ ਦੇਖੋ।",
+  "composeFabA11y": "ਨਵੀਂ ਪੋਸਟ ਲਿਖੋ",
+
+  "composeTitle": "ਗਿਆਨ ਸਾਂਝਾ ਕਰੋ",
+  "composePromptLabel": "ਤੁਸੀਂ ਕਿਹੜਾ ਗਿਆਨ ਸਾਂਝਾ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
+  "composePromptPlaceholder": "ਆਪਣੇ ਵਿਚਾਰ, ਸੂਝ, ਜਾਂ ਸਵਾਲ ਸਾਂਝਾ ਕਰੋ...",
+  "composeCharsRemainingFmt": "{{count}} ਅੱਖਰ ਬਾਕੀ",
+  "composeCircleLabel": "ਚੱਕਰ ਵਿੱਚ ਪੋਸਟ ਕਰੋ (ਚੋਣਵਾਂ)",
+  "composeTagsLabel": "ਟੈਗ (ਕੌਮੇ ਨਾਲ ਵੱਖ)",
+  "composeTagsPlaceholder": "ਗਿਆਨ, ਧਿਆਨ, ਧੰਨਵਾਦ...",
+  "composeSubmitButton": "ਗਿਆਨ ਸਾਂਝਾ ਕਰੋ",
+  "composeErrorTitle": "ਪੋਸਟ ਨਹੀਂ ਹੋ ਸਕੀ",
+  "composeErrorBody": "ਤੁਹਾਡਾ ਗਿਆਨ ਹੁਣੇ ਸਾਂਝਾ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+
+  "circleFallbackTitle": "ਚੱਕਰ",
+  "circleMembersFmt": "{{count}} ਮੈਂਬਰ",
+  "circleJoinButton": "ਚੱਕਰ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ",
+  "circleJoinedBadge": "✓ ਸ਼ਾਮਲ",
+  "circlePostsLabel": "ਪੋਸਟਾਂ",
+  "circlePostsEmpty": "ਇਸ ਚੱਕਰ ਵਿੱਚ ਅਜੇ ਕੋਈ ਪੋਸਟ ਨਹੀਂ।\nਗਿਆਨ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਪਹਿਲੇ ਬਣੋ।"
+}

@@ -1,0 +1,26 @@
+{
+  "screenTitle": "సమాజం",
+  "tabFeed": "ఫీడ్",
+  "tabCircles": "వలయాలు",
+  "feedEmpty": "మీ మొదటి జ్ఞాన పదాల కోసం సమాజం ఎదురు చూస్తోంది.",
+  "circlesEmpty": "ఇంకా జ్ఞాన వలయాలు లేవు.\nత్వరలో మళ్లీ చూడండి.",
+  "composeFabA11y": "కొత్త పోస్ట్ రాయండి",
+
+  "composeTitle": "జ్ఞానం పంచుకోండి",
+  "composePromptLabel": "ఏ జ్ఞానం పంచుకోవాలనుకుంటున్నారు?",
+  "composePromptPlaceholder": "మీ ఆలోచనలు, అంతర్దృష్టులు లేదా ప్రశ్నను పంచుకోండి...",
+  "composeCharsRemainingFmt": "{{count}} అక్షరాలు మిగిలి ఉన్నాయి",
+  "composeCircleLabel": "వలయంలో పోస్ట్ చేయండి (ఐచ్ఛికం)",
+  "composeTagsLabel": "ట్యాగ్‌లు (కామాతో వేరు)",
+  "composeTagsPlaceholder": "జ్ఞానం, ధ్యానం, కృతజ్ఞత...",
+  "composeSubmitButton": "జ్ఞానం పంచుకోండి",
+  "composeErrorTitle": "పోస్ట్ చేయలేకపోయాం",
+  "composeErrorBody": "మీ జ్ఞానం ఇప్పుడు పంచుకోబడలేకపోయింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+
+  "circleFallbackTitle": "వలయం",
+  "circleMembersFmt": "{{count}} సభ్యులు",
+  "circleJoinButton": "వలయంలో చేరండి",
+  "circleJoinedBadge": "✓ చేరారు",
+  "circlePostsLabel": "పోస్ట్‌లు",
+  "circlePostsEmpty": "ఈ వలయంలో ఇంకా పోస్ట్‌లు లేవు.\nజ్ఞానం పంచుకునే మొదటివారవ్వండి."
+}

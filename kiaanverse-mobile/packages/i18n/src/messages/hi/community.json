@@ -1,0 +1,26 @@
+{
+  "screenTitle": "समुदाय",
+  "tabFeed": "फ़ीड",
+  "tabCircles": "मंडल",
+  "feedEmpty": "समुदाय आपके पहले ज्ञान शब्दों की प्रतीक्षा कर रहा है।",
+  "circlesEmpty": "अभी कोई ज्ञान मंडल उपलब्ध नहीं है।\nजल्द ही फिर देखें।",
+  "composeFabA11y": "नया पोस्ट लिखें",
+
+  "composeTitle": "ज्ञान साझा करें",
+  "composePromptLabel": "आप कौन सा ज्ञान साझा करना चाहेंगे?",
+  "composePromptPlaceholder": "अपने विचार, अंतर्दृष्टि, या प्रश्न साझा करें...",
+  "composeCharsRemainingFmt": "{{count}} अक्षर शेष",
+  "composeCircleLabel": "मंडल में पोस्ट करें (वैकल्पिक)",
+  "composeTagsLabel": "टैग (अल्पविराम से अलग)",
+  "composeTagsPlaceholder": "ज्ञान, ध्यान, कृतज्ञता...",
+  "composeSubmitButton": "ज्ञान साझा करें",
+  "composeErrorTitle": "पोस्ट नहीं हो सका",
+  "composeErrorBody": "आपका ज्ञान अभी साझा नहीं हो सका। कृपया पुनः प्रयास करें।",
+
+  "circleFallbackTitle": "मंडल",
+  "circleMembersFmt": "{{count}} सदस्य",
+  "circleJoinButton": "मंडल में शामिल हों",
+  "circleJoinedBadge": "✓ शामिल",
+  "circlePostsLabel": "पोस्ट",
+  "circlePostsEmpty": "इस मंडल में अभी कोई पोस्ट नहीं।\nज्ञान साझा करने वाले पहले बनें।"
+}

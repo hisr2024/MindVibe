@@ -1,0 +1,26 @@
+{
+  "screenTitle": "समुदायः",
+  "tabFeed": "प्रवाहः",
+  "tabCircles": "मण्डलानि",
+  "feedEmpty": "समुदायः भवतः प्रथम-ज्ञान-शब्दान् प्रतीक्षते।",
+  "circlesEmpty": "इदानीं किमपि ज्ञान-मण्डलं नास्ति।\nशीघ्रं पुनः पश्यतु।",
+  "composeFabA11y": "नवीन-प्रवेशं लिखतु",
+
+  "composeTitle": "ज्ञानं विभजताम्",
+  "composePromptLabel": "किं ज्ञानं भवान् विभजितुम् इच्छति?",
+  "composePromptPlaceholder": "स्वविचारान्, अन्तर्दृष्टीः, अथवा प्रश्नं विभजताम्...",
+  "composeCharsRemainingFmt": "{{count}} अक्षराणि शेषाणि",
+  "composeCircleLabel": "मण्डले प्रकटयतु (वैकल्पिकम्)",
+  "composeTagsLabel": "अंशकाः (अल्पविरामेन पृथक्)",
+  "composeTagsPlaceholder": "ज्ञानम्, ध्यानम्, कृतज्ञता...",
+  "composeSubmitButton": "ज्ञानं विभजताम्",
+  "composeErrorTitle": "प्रकाशितुं न शक्तम्",
+  "composeErrorBody": "भवतः ज्ञानम् इदानीं विभक्तुं न शक्तम्। कृपया पुनः प्रयत्यताम्।",
+
+  "circleFallbackTitle": "मण्डलम्",
+  "circleMembersFmt": "{{count}} सदस्याः",
+  "circleJoinButton": "मण्डले मिलतु",
+  "circleJoinedBadge": "✓ मिलितम्",
+  "circlePostsLabel": "प्रवेशाः",
+  "circlePostsEmpty": "अस्मिन् मण्डले इदानीं केऽपि प्रवेशाः न सन्ति।\nप्रथमं ज्ञानं विभजताम्।"
+}

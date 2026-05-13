@@ -35,6 +35,7 @@ import enVibePlayer from './messages/en/vibe-player.json';
 import enSupport from './messages/en/support.json';
 import enTools from './messages/en/tools.json';
 import enVoice from './messages/en/voice.json';
+import enCommunity from './messages/en/community.json';
 
 // Support — per-locale bundles (registered in Batch 9).
 //
@@ -77,6 +78,22 @@ import frVoice from './messages/fr/voice.json';
 import esVoice from './messages/es/voice.json';
 import itVoice from './messages/it/voice.json';
 import ptVoice from './messages/pt/voice.json';
+
+import hiCommunity from './messages/hi/community.json';
+import saCommunity from './messages/sa/community.json';
+import taCommunity from './messages/ta/community.json';
+import teCommunity from './messages/te/community.json';
+import bnCommunity from './messages/bn/community.json';
+import mrCommunity from './messages/mr/community.json';
+import guCommunity from './messages/gu/community.json';
+import knCommunity from './messages/kn/community.json';
+import mlCommunity from './messages/ml/community.json';
+import paCommunity from './messages/pa/community.json';
+import deCommunity from './messages/de/community.json';
+import frCommunity from './messages/fr/community.json';
+import esCommunity from './messages/es/community.json';
+import itCommunity from './messages/it/community.json';
+import ptCommunity from './messages/pt/community.json';
 
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
@@ -361,12 +378,12 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   support: enSupport,
   tools: enTools,
   voice: enVoice,
+  community: enCommunity,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
   'emotional-reset': {},
   'karma-reset': {},
-  community: {},
 };
 
 /**
@@ -392,6 +409,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: hiSupport,
     tools: hiTools,
     voice: hiVoice,
+    community: hiCommunity,
   },
   sa: {
     common: saCommon,
@@ -410,6 +428,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: saSupport,
     tools: saTools,
     voice: saVoice,
+    community: saCommunity,
   },
   ta: {
     common: taCommon,
@@ -428,6 +447,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: taSupport,
     tools: taTools,
     voice: taVoice,
+    community: taCommunity,
   },
   te: {
     common: teCommon,
@@ -446,6 +466,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: teSupport,
     tools: teTools,
     voice: teVoice,
+    community: teCommunity,
   },
   bn: {
     common: bnCommon,
@@ -464,6 +485,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: bnSupport,
     tools: bnTools,
     voice: bnVoice,
+    community: bnCommunity,
   },
   mr: {
     common: mrCommon,
@@ -481,6 +503,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': mrVibePlayer,
     tools: mrTools,
     voice: mrVoice,
+    community: mrCommunity,
   },
   gu: {
     common: guCommon,
@@ -498,6 +521,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': guVibePlayer,
     tools: guTools,
     voice: guVoice,
+    community: guCommunity,
   },
   kn: {
     common: knCommon,
@@ -515,6 +539,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': knVibePlayer,
     tools: knTools,
     voice: knVoice,
+    community: knCommunity,
   },
   ml: {
     common: mlCommon,
@@ -532,6 +557,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': mlVibePlayer,
     tools: mlTools,
     voice: mlVoice,
+    community: mlCommunity,
   },
   pa: {
     common: paCommon,
@@ -549,6 +575,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     'vibe-player': paVibePlayer,
     tools: paTools,
     voice: paVoice,
+    community: paCommunity,
   },
   de: {
     common: deCommon,
@@ -567,6 +594,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: deSupport,
     tools: deTools,
     voice: deVoice,
+    community: deCommunity,
   },
   fr: {
     common: frCommon,
@@ -585,6 +613,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: frSupport,
     tools: frTools,
     voice: frVoice,
+    community: frCommunity,
   },
   es: {
     common: esCommon,
@@ -603,6 +632,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: esSupport,
     tools: esTools,
     voice: esVoice,
+    community: esCommunity,
   },
   it: {
     common: itCommon,
@@ -621,6 +651,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: itSupport,
     tools: itTools,
     voice: itVoice,
+    community: itCommunity,
   },
   pt: {
     common: ptCommon,
@@ -639,6 +670,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     support: ptSupport,
     tools: ptTools,
     voice: ptVoice,
+    community: ptCommunity,
   },
 };
 
