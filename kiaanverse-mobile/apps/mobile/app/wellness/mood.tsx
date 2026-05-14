@@ -39,6 +39,7 @@ import {
   type MoodEntry,
 } from '@kiaanverse/api';
 import { useMoodStore, MOOD_STATES, useWellnessStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 // ---------------------------------------------------------------------------
@@ -79,6 +80,7 @@ function MoodDetailCard({
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
+  const { t } = useTranslation('wellness');
   const moodInfo = MOOD_STATES.find((m) => m.id === moodId);
   if (!moodInfo) return null;
 
@@ -121,7 +123,7 @@ function MoodDetailCard({
         <View style={styles.versesRow}>
           <BookOpen size={14} color={c.textTertiary} />
           <Text variant="caption" color={c.textSecondary}>
-            Gita: {moodInfo.linkedVerses.join(', ')}
+            {t('moodGitaPrefixFmt', { verses: moodInfo.linkedVerses.join(', ') })}
           </Text>
         </View>
 
@@ -133,10 +135,10 @@ function MoodDetailCard({
               const [ch, v] = ref.split('.');
               router.push(`/(tabs)/shlokas/${ch}/${v}`);
             }}
-            accessibilityLabel="Read linked verse"
+            accessibilityLabel={t('moodReadVerseA11y')}
           >
             <Text variant="caption" color={colors.primary[300]}>
-              Read verse &rarr;
+              {t('moodReadVerseLink')}
             </Text>
           </Pressable>
         ) : null}
@@ -152,6 +154,7 @@ function MoodDetailCard({
 function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
+  const { t } = useTranslation('wellness');
 
   const chartWidth = 320;
   const chartHeight = 140;
@@ -192,7 +195,7 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
   return (
     <View style={styles.chartContainer}>
       <Text variant="label" color={c.textSecondary} style={styles.chartTitle}>
-        30-Day Mood Journey
+        {t('moodChartTitle')}
       </Text>
       <Svg width={chartWidth} height={chartHeight}>
         {/* Center line (neutral) */}
@@ -260,10 +263,10 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
       </Svg>
       <View style={styles.chartLabels}>
         <Text variant="caption" color={c.textTertiary}>
-          30 days ago
+          {t('moodChartDaysAgo')}
         </Text>
         <Text variant="caption" color={c.textTertiary}>
-          Today
+          {t('moodChartToday')}
         </Text>
       </View>
     </View>
@@ -277,6 +280,7 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
 function InsightsSection(): React.JSX.Element | null {
   const { theme } = useTheme();
   const c = theme.colors;
+  const { t } = useTranslation('wellness');
   const moodHistory = useWellnessStore((s) => s.moodHistory);
   const streak = useWellnessStore((s) => s.streak);
 
@@ -297,7 +301,7 @@ function InsightsSection(): React.JSX.Element | null {
         <View style={styles.insightsHeader}>
           <TrendingUp size={16} color={colors.primary[300]} />
           <Text variant="label" color={c.textSecondary}>
-            Mood Insights
+            {t('moodInsightsTitle')}
           </Text>
         </View>
         <View
@@ -307,11 +311,11 @@ function InsightsSection(): React.JSX.Element | null {
           ]}
         >
           <Text variant="bodySmall" color={c.textPrimary}>
-            Your dominant mood recently: {dominant[0]} ({dominant[1]} entries)
+            {t('moodDominantFmt', { mood: dominant[0], count: dominant[1] })}
           </Text>
           {streak > 1 ? (
             <Text variant="caption" color={c.textSecondary}>
-              {streak}-day tracking streak — keep going!
+              {t('moodStreakFmt', { count: streak })}
             </Text>
           ) : null}
         </View>
@@ -328,6 +332,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
+  const { t } = useTranslation('wellness');
 
   const { selectedMood, note, selectMood, setNote, markLogged } =
     useMoodStore();
@@ -394,7 +399,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
   return (
     <Screen>
       <GoldenHeader
-        title="Mood &amp; Wellness"
+        title={t('moodScreenTitle')}
         onBack={() => router.back()}
         testID="mood-header"
       />
@@ -411,7 +416,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
             align="center"
             style={styles.sectionLabel}
           >
-            How are you feeling right now?
+            {t('moodSectionLabel')}
           </Text>
           <MoodRing
             {...(ringMood !== undefined ? { selectedMood: ringMood } : {})}
@@ -437,12 +442,12 @@ export default function MoodTrackingScreen(): React.JSX.Element {
                     color: c.textPrimary,
                   },
                 ]}
-                placeholder="Add a reflection (optional)..."
+                placeholder={t('moodNotePlaceholder')}
                 value={note}
                 onChangeText={setNote}
                 multiline
                 maxLength={500}
-                accessibilityLabel="Mood reflection note"
+                accessibilityLabel={t('moodNoteA11y')}
                 dictationMode="append"
                 />
             </Animated.View>
@@ -456,10 +461,10 @@ export default function MoodTrackingScreen(): React.JSX.Element {
                 { backgroundColor: colors.primary[500] },
               ]}
               accessibilityRole="button"
-              accessibilityLabel="Log mood"
+              accessibilityLabel={t('moodLogA11y')}
             >
               <Text variant="label" color={colors.primary[100]} align="center">
-                {createMood.isPending ? 'Logging...' : 'Log Mood'}
+                {createMood.isPending ? t('moodLoggingButton') : t('moodLogButton')}
               </Text>
             </Pressable>
           </>
@@ -489,7 +494,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
         ) : (
           <View style={styles.emptyChart}>
             <Text variant="bodySmall" color={c.textTertiary} align="center">
-              Start logging your mood to see your 30-day journey
+              {t('moodEmptyChartMessage')}
             </Text>
           </View>
         )}

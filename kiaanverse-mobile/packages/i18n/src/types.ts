@@ -33,7 +33,8 @@ export type TranslationNamespace =
   | 'subscription'
   | 'onboarding'
   | 'support'
-  | 'voice';
+  | 'voice'
+  | 'wellness';
 
 /** Nested translation messages — supports one level of nesting */
 export type TranslationMessages = Record<string, string | Record<string, string>>;

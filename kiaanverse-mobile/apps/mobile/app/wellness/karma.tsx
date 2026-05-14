@@ -30,49 +30,29 @@ import {
   type KarmaNodeData,
   type KarmaTreeLevel,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 // ---------------------------------------------------------------------------
 // Tree Level Config
 // ---------------------------------------------------------------------------
 
+// `id` is the canonical level identifier (matches `KarmaTreeLevel`). The
+// human-readable `name` + `description` resolve at render via t() from the
+// `karmaLevel*Name` / `karmaLevel*Desc` key pair.
 interface TreeLevelInfo {
-  readonly name: string;
+  readonly id: 'seed' | 'sapling' | 'young_tree' | 'mighty_tree' | 'sacred_tree';
+  readonly nameKey: string;
+  readonly descKey: string;
   readonly emoji: string;
   readonly minPoints: number;
-  readonly description: string;
 }
 
 const TREE_LEVELS: readonly TreeLevelInfo[] = [
-  {
-    name: 'Seed',
-    emoji: '🌱',
-    minPoints: 0,
-    description: 'Your journey begins. Plant the first seed of wisdom.',
-  },
-  {
-    name: 'Sapling',
-    emoji: '🌿',
-    minPoints: 10,
-    description: 'Your sapling grows with each mindful action.',
-  },
-  {
-    name: 'Young Tree',
-    emoji: '🌳',
-    minPoints: 30,
-    description: 'Roots deepen. Branches reach toward the light.',
-  },
-  {
-    name: 'Mighty Tree',
-    emoji: '🏔️',
-    minPoints: 60,
-    description: 'Strong and steady, offering shade to all.',
-  },
-  {
-    name: 'Sacred Tree',
-    emoji: '✨',
-    minPoints: 100,
-    description: 'The Bodhi tree of your spiritual journey.',
-  },
+  { id: 'seed', nameKey: 'karmaLevelSeedName', descKey: 'karmaLevelSeedDesc', emoji: '🌱', minPoints: 0 },
+  { id: 'sapling', nameKey: 'karmaLevelSaplingName', descKey: 'karmaLevelSaplingDesc', emoji: '🌿', minPoints: 10 },
+  { id: 'young_tree', nameKey: 'karmaLevelYoungTreeName', descKey: 'karmaLevelYoungTreeDesc', emoji: '🌳', minPoints: 30 },
+  { id: 'mighty_tree', nameKey: 'karmaLevelMightyTreeName', descKey: 'karmaLevelMightyTreeDesc', emoji: '🏔️', minPoints: 60 },
+  { id: 'sacred_tree', nameKey: 'karmaLevelSacredTreeName', descKey: 'karmaLevelSacredTreeDesc', emoji: '✨', minPoints: 100 },
 ] as const;
 
 const LEVEL_TO_INDEX: Record<KarmaTreeLevel, number> = {
@@ -110,6 +90,7 @@ function LevelProgress({
 }): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
+  const { t } = useTranslation('wellness');
   const current = getLevelInfo(level);
   const next = getNextLevel(level);
 
@@ -134,10 +115,10 @@ function LevelProgress({
           <Text variant="h2">{current.emoji}</Text>
           <View style={styles.levelText}>
             <Text variant="label" color={c.textPrimary}>
-              {current.name}
+              {t(current.nameKey)}
             </Text>
             <Text variant="caption" color={c.textSecondary}>
-              {current.description}
+              {t(current.descKey)}
             </Text>
           </View>
         </View>
@@ -146,7 +127,7 @@ function LevelProgress({
         <View style={styles.pointsRow}>
           <Award size={14} color={colors.primary[300]} />
           <Text variant="label" color={colors.primary[300]}>
-            {totalPoints} karma points
+            {t('karmaPointsFmt', { count: totalPoints })}
           </Text>
         </View>
 
@@ -170,12 +151,16 @@ function LevelProgress({
               />
             </View>
             <Text variant="caption" color={c.textTertiary}>
-              {next.minPoints - totalPoints} points to {next.emoji} {next.name}
+              {t('karmaPointsToNextFmt', {
+                count: next.minPoints - totalPoints,
+                emoji: next.emoji,
+                name: t(next.nameKey),
+              })}
             </Text>
           </View>
         ) : (
           <Text variant="caption" color={colors.primary[300]}>
-            You have reached the highest level
+            {t('karmaMaxLevelMessage')}
           </Text>
         )}
       </View>
@@ -197,6 +182,7 @@ function NodeDetail({
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
+  const { t } = useTranslation('wellness');
 
   return (
     <Animated.View entering={FadeIn.duration(300)}>
@@ -213,10 +199,10 @@ function NodeDetail({
           <Pressable
             onPress={onClose}
             hitSlop={8}
-            accessibilityLabel="Close detail"
+            accessibilityLabel={t('karmaCloseDetailA11y')}
           >
             <Text variant="caption" color={c.textTertiary}>
-              Close
+              {t('karmaCloseButton')}
             </Text>
           </Pressable>
         </View>
@@ -228,17 +214,15 @@ function NodeDetail({
         <View style={styles.nodePointsRow}>
           <Award size={12} color={colors.primary[300]} />
           <Text variant="caption" color={colors.primary[300]}>
-            +{node.points} karma points
+            {t('karmaPointsAddFmt', { count: node.points })}
           </Text>
           {node.completed ? (
             <Text variant="caption" color={colors.semantic.success}>
-              {' '}
-              &bull; Completed
+              {t('karmaStatusCompleted')}
             </Text>
           ) : (
             <Text variant="caption" color={c.textTertiary}>
-              {' '}
-              &bull; Pending
+              {t('karmaStatusPending')}
             </Text>
           )}
         </View>
@@ -252,10 +236,10 @@ function NodeDetail({
               }
               onClose();
             }}
-            accessibilityLabel="Read linked wisdom"
+            accessibilityLabel={t('karmaReadWisdomA11y')}
           >
             <Text variant="caption" color={colors.primary[300]}>
-              Read Gita {node.linkedWisdom} &rarr;
+              {t('karmaReadWisdomFmt', { ref: node.linkedWisdom })}
             </Text>
           </Pressable>
         ) : null}
@@ -272,6 +256,7 @@ export default function KarmaTreeScreen(): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
+  const { t } = useTranslation('wellness');
 
   const { data, isLoading, error } = useKarmaTree();
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(
@@ -305,7 +290,7 @@ export default function KarmaTreeScreen(): React.JSX.Element {
   return (
     <Screen>
       <GoldenHeader
-        title="Karma Tree"
+        title={t('karmaScreenTitle')}
         onBack={() => router.back()}
         testID="karma-header"
       />
@@ -322,16 +307,16 @@ export default function KarmaTreeScreen(): React.JSX.Element {
           <View style={styles.centerState}>
             <LoadingMandala size={80} />
             <Text variant="bodySmall" color={c.textSecondary}>
-              Growing your tree...
+              {t('karmaLoadingMessage')}
             </Text>
           </View>
         ) : error ? (
           <View style={styles.centerState}>
             <Text variant="body" color={colors.semantic.error}>
-              Unable to load karma tree
+              {t('karmaErrorTitle')}
             </Text>
             <Text variant="bodySmall" color={c.textSecondary}>
-              Please check your connection and try again
+              {t('karmaErrorBody')}
             </Text>
           </View>
         ) : treeNodes.length > 0 ? (
@@ -348,10 +333,10 @@ export default function KarmaTreeScreen(): React.JSX.Element {
           <View style={styles.emptyTree}>
             <Sprout size={48} color={c.textTertiary} />
             <Text variant="body" color={c.textSecondary} align="center">
-              Your karma tree is a seed
+              {t('karmaEmptyTitle')}
             </Text>
             <Text variant="bodySmall" color={c.textTertiary} align="center">
-              Complete practices and absorb wisdom to grow your tree
+              {t('karmaEmptyBody')}
             </Text>
           </View>
         )}
@@ -371,14 +356,14 @@ export default function KarmaTreeScreen(): React.JSX.Element {
             color={c.textSecondary}
             style={styles.guideTitle}
           >
-            Growth Stages
+            {t('karmaGrowthStagesTitle')}
           </Text>
           <View style={styles.levelGuide}>
             {TREE_LEVELS.map((lvl, i) => {
               const isActive = i <= LEVEL_TO_INDEX[level];
               return (
                 <View
-                  key={lvl.name}
+                  key={lvl.id}
                   style={[
                     styles.levelItem,
                     {
@@ -394,10 +379,10 @@ export default function KarmaTreeScreen(): React.JSX.Element {
                       variant="caption"
                       color={isActive ? colors.primary[300] : c.textTertiary}
                     >
-                      {lvl.name}
+                      {t(lvl.nameKey)}
                     </Text>
                     <Text variant="caption" color={c.textTertiary}>
-                      {lvl.minPoints}+ pts
+                      {t('karmaLevelPointsFmt', { count: lvl.minPoints })}
                     </Text>
                   </View>
                 </View>

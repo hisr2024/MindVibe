@@ -36,6 +36,7 @@ import enSupport from './messages/en/support.json';
 import enTools from './messages/en/tools.json';
 import enVoice from './messages/en/voice.json';
 import enCommunity from './messages/en/community.json';
+import enWellness from './messages/en/wellness.json';
 
 // Support — per-locale bundles (registered in Batch 9).
 //
@@ -126,6 +127,22 @@ import frJournal from './messages/fr/journal.json';
 import esJournal from './messages/es/journal.json';
 import itJournal from './messages/it/journal.json';
 import ptJournal from './messages/pt/journal.json';
+
+import hiWellness from './messages/hi/wellness.json';
+import saWellness from './messages/sa/wellness.json';
+import taWellness from './messages/ta/wellness.json';
+import teWellness from './messages/te/wellness.json';
+import bnWellness from './messages/bn/wellness.json';
+import mrWellness from './messages/mr/wellness.json';
+import guWellness from './messages/gu/wellness.json';
+import knWellness from './messages/kn/wellness.json';
+import mlWellness from './messages/ml/wellness.json';
+import paWellness from './messages/pa/wellness.json';
+import deWellness from './messages/de/wellness.json';
+import frWellness from './messages/fr/wellness.json';
+import esWellness from './messages/es/wellness.json';
+import itWellness from './messages/it/wellness.json';
+import ptWellness from './messages/pt/wellness.json';
 
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
@@ -411,6 +428,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   tools: enTools,
   voice: enVoice,
   community: enCommunity,
+  wellness: enWellness,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -444,6 +462,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: hiCommunity,
     analytics: hiAnalytics,
     journal: hiJournal,
+    wellness: hiWellness,
   },
   sa: {
     common: saCommon,
@@ -465,6 +484,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: saCommunity,
     analytics: saAnalytics,
     journal: saJournal,
+    wellness: saWellness,
   },
   ta: {
     common: taCommon,
@@ -486,6 +506,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: taCommunity,
     analytics: taAnalytics,
     journal: taJournal,
+    wellness: taWellness,
   },
   te: {
     common: teCommon,
@@ -507,6 +528,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: teCommunity,
     analytics: teAnalytics,
     journal: teJournal,
+    wellness: teWellness,
   },
   bn: {
     common: bnCommon,
@@ -528,6 +550,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: bnCommunity,
     analytics: bnAnalytics,
     journal: bnJournal,
+    wellness: bnWellness,
   },
   mr: {
     common: mrCommon,
@@ -548,6 +571,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: mrCommunity,
     analytics: mrAnalytics,
     journal: mrJournal,
+    wellness: mrWellness,
   },
   gu: {
     common: guCommon,
@@ -568,6 +592,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: guCommunity,
     analytics: guAnalytics,
     journal: guJournal,
+    wellness: guWellness,
   },
   kn: {
     common: knCommon,
@@ -588,6 +613,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: knCommunity,
     analytics: knAnalytics,
     journal: knJournal,
+    wellness: knWellness,
   },
   ml: {
     common: mlCommon,
@@ -608,6 +634,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: mlCommunity,
     analytics: mlAnalytics,
     journal: mlJournal,
+    wellness: mlWellness,
   },
   pa: {
     common: paCommon,
@@ -628,6 +655,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: paCommunity,
     analytics: paAnalytics,
     journal: paJournal,
+    wellness: paWellness,
   },
   de: {
     common: deCommon,
@@ -649,6 +677,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: deCommunity,
     analytics: deAnalytics,
     journal: deJournal,
+    wellness: deWellness,
   },
   fr: {
     common: frCommon,
@@ -670,6 +699,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: frCommunity,
     analytics: frAnalytics,
     journal: frJournal,
+    wellness: frWellness,
   },
   es: {
     common: esCommon,
@@ -691,6 +721,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: esCommunity,
     analytics: esAnalytics,
     journal: esJournal,
+    wellness: esWellness,
   },
   it: {
     common: itCommon,
@@ -712,6 +743,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: itCommunity,
     analytics: itAnalytics,
     journal: itJournal,
+    wellness: itWellness,
   },
   pt: {
     common: ptCommon,
@@ -733,6 +765,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     community: ptCommunity,
     analytics: ptAnalytics,
     journal: ptJournal,
+    wellness: ptWellness,
   },
 };
 
