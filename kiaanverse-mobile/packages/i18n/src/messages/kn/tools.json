@@ -1,64 +1,48 @@
 {
   "hubTitle": "ಪವಿತ್ರ ಸಾಧನಗಳು",
   "hubSubtitle": "ಆಂತರಿಕ ರೂಪಾಂತರಕ್ಕಾಗಿ ಪ್ರತಿಯೊಂದು ಶಾಸ್ತ್ರ ಮತ್ತು ಉಪಕರಣ",
-
   "sectionVoice": "ಪವಿತ್ರ ಧ್ವನಿ",
   "sectionScriptures": "ಪವಿತ್ರ ಶಾಸ್ತ್ರಗಳು",
   "sectionWisdom": "ಜ್ಞಾನ-ಸಾಧನಗಳು",
   "sectionHealing": "ಚಿಕಿತ್ಸಾ-ಸಾಧನಗಳು",
   "sectionPaths": "ಪವಿತ್ರ ಮಾರ್ಗಗಳು",
   "sectionSound": "ಪವಿತ್ರ ನಾದ",
-
   "voiceCompanionName": "ಸಖಾ — ಧ್ವನಿ ಸಂಗಾತಿ",
   "voiceCompanionDescription": "ದಿವ್ಯ ಮಿತ್ರನೊಂದಿಗೆ ಮಾತನಾಡಿ",
-
   "gitaName": "ಭಗವದ್ಗೀತೆ",
   "gitaDescription": "೧೮ ಅಧ್ಯಾಯಗಳು · ೭೦೦ ಶ್ಲೋಕಗಳು",
-
   "ardhaName": "ಅರ್ಧ",
   "ardhaDescription": "ನಿಮ್ಮ ದೃಷ್ಟಿಕೋನವನ್ನು ಮರು-ಚೌಕಟ್ಟು ಮಾಡಿ",
-
   "viyogaName": "ವಿಯೋಗ",
   "viyogaDescription": "ತ್ಯಾಗದ ಕಲೆ",
-
   "relationshipCompassName": "ಸಂಬಂಧ ದಿಕ್ಸೂಚಿ",
   "relationshipCompassDescription": "ಧರ್ಮ-ನಿರ್ದೇಶಿತ ಸ್ಪಷ್ಟತೆ",
-
   "emotionalResetName": "ಭಾವನಾತ್ಮಕ ರೀಸೆಟ್",
   "emotionalResetDescription": "ಭಾವನೆಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ ಪರಿವರ್ತಿಸಿ",
-
   "karmaResetName": "ಕರ್ಮ ರೀಸೆಟ್",
   "karmaResetDescription": "ಕರ್ಮ-ಮಾದರಿಗಳನ್ನು ಗುಣಪಡಿಸಿ",
-
   "wisdomRoomsName": "ಜ್ಞಾನ ಕೋಣೆಗಳು",
   "wisdomRoomsDescription": "ಸಾಧಕರ ಪವಿತ್ರ ವೃತ್ತಗಳು",
-
   "journeysName": "ಪ್ರಯಾಣಗಳು",
   "journeysDescription": "ಆಂತರಿಕ ರಣರಂಗ · ೬ ಶತ್ರುಗಳು",
-
   "sacredReflectionsName": "ಪವಿತ್ರ ಚಿಂತನೆಗಳು",
   "sacredReflectionsDescription": "ಎನ್‌ಕ್ರಿಪ್ಟೆಡ್ ಜರ್ನಲ್ ಮತ್ತು ಒಳನೋಟಗಳು",
-
   "dashboardSubtitle": "ರೂಪಾಂತರ, ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿಗಾಗಿ ಸಾಧನಗಳು",
   "sectionInsights": "ಕರ್ಮ ಒಳನೋಟಗಳು",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "ನಿಮ್ಮ ಸಾಧನೆಯಲ್ಲಿನ ಮಾದರಿಗಳು",
   "karmaFootprintName": "ಕರ್ಮ ಹೆಜ್ಜೆಗುರುತು",
   "karmaFootprintDescription": "ನಿಮ್ಮ ಕರ್ಮ ತರಂಗಗಳನ್ನು ಅನುಸರಿಸಿ",
   "karmaTreeName": "ಕರ್ಮ ವೃಕ್ಷ",
   "karmaTreeDescription": "ನಿಮ್ಮ ಜೀವಂತ ಧರ್ಮ ಛತ್ರ",
-
   "karmicTreeTitle": "ಕರ್ಮ ವೃಕ್ಷ",
   "karmicTreeRootsFallback": "ನಿಮ್ಮ ಬೇರುಗಳು",
   "karmicTreeTagline1": "ನಿಮ್ಮ ಮಾದರಿಗಳ ಶಾಖೆಗಳು ಇನ್ನೂ ನಕ್ಷೆ ಮಾಡಲಾಗುತ್ತಿದೆ.",
   "karmicTreeTagline2": "ಈ ಪವಿತ್ರ ಸಾಧನ ಇನ್ನೂ ಬೆಳವಣಿಗೆಯಲ್ಲಿದೆ — ಅರಳಿದಾಗ ಸಖಾ ತಿಳಿಸುತ್ತಾರೆ.",
   "karmicTreeBackToArmoryA11y": "ಸಾಧನ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ",
   "karmicTreeBackToArmoryCta": "ಆಯುಧಾಗಾರಕ್ಕೆ ಹಿಂತಿರುಗಿ",
-
   "karmaResetPatternFallback": "ನೀವು ಹೆಸರಿಸಿದ ಮಾದರಿ",
   "emotionalResetReflectionFallback": "ನಿಮ್ಮ ಚಿಂತನೆ",
-
   "goBackA11y": "ಹಿಂದೆ",
   "backButton": "< ಹಿಂದೆ",
   "erStepBreathe": "ಉಸಿರಾಟ",
@@ -67,7 +51,6 @@
   "erStepAffirm": "ಸಂಕಲ್ಪ",
   "erStepReflect": "ಚಿಂತನೆ",
   "erStepComplete": "ಪೂರ್ಣ",
-
   "ardhaTitle": "ಅರ್ಧ",
   "ardhaTagline": "ಧರ್ಮ ಮತ್ತು ಉನ್ನತ ಪ್ರಜ್ಞೆಯ ಮೂಲಕ ಆತ್ಮ-ಪುನರ್ವ್ಯಾಖ್ಯಾನ",
   "ardhaQuote": "“ಅಸತ್ತಿಗೆ ಅಸ್ತಿತ್ವವಿಲ್ಲ, ಸತ್ತಿಗೆ ಎಂದೂ ಅಂತ್ಯವಿಲ್ಲ.”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA vs CBT",
   "ardhaCbtBody": "CBT ವಿಕೃತ ಆಲೋಚನೆಯನ್ನು ಸರಿಪಡಿಸುತ್ತದೆ. ARDHA ತಪ್ಪು ಗುರುತಿಸುವಿಕೆಯನ್ನು ಸರಿಪಡಿಸುತ್ತದೆ. CBT ಕಾರ್ಯಶೀಲ ಅಹಂನನ್ನು ಬಲಪಡಿಸಿದರೆ, ARDHA ಅಹಂ-ತಾದಾತ್ಮ್ಯವನ್ನು ಸಡಿಲಿಸುತ್ತದೆ — ಸರಿಯಾದ ಕ್ರಿಯೆಯ ಮೂಲಕ ಆಂತರಿಕ ಸ್ವಾತಂತ್ರ್ಯದ ಕಡೆಗೆ.",
   "ardhaCbtFlow": "ಆತ್ಮ ಭೇದ → ರಾಗ-ದ್ವೇಷ ಸ್ಕ್ಯಾನ್ → ಧರ್ಮ ಸಮನ್ವಯ → ಹೃದಯ ಸಮತ್ವ → ಅರ್ಪಣೆ",
-
   "ardhaErrSession": "ನಿಮ್ಮ ಸೆಷನ್ ಮುಗಿದಿದೆ. ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
   "ardhaErrOffline": "ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲಾಗದು. ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   "ardhaErrServer": "ARDHA ಆಳವಾದ ಧ್ಯಾನದಿಂದ ಎಚ್ಚರಗೊಳ್ಳುತ್ತಿದೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   "ardhaErrGeneric": "ARDHA ಈಗ ಪುನರ್ವ್ಯಾಖ್ಯಾನ ಮಾಡಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   "ardhaErrPrefix": "ARDHA ಪುನರ್ವ್ಯಾಖ್ಯಾನ ಮಾಡಲಾಗಲಿಲ್ಲ: {{message}}",
-
   "ardhaResultCardTitle": "ಅರ್ಧ-ದ\nಪುನರ್ವ್ಯಾಖ್ಯಾನ",
   "ardhaQuickBadge": "⚡ ತ್ವರಿತ ಪುನರ್ವ್ಯಾಖ್ಯಾನ",
   "ardhaCopyA11y": "ಪುನರ್ವ್ಯಾಖ್ಯಾನ ಪಠ್ಯ ನಕಲಿಸಿ",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "ಮನೆಗೆ ಹಿಂತಿರುಗಿ",
   "ardhaJournalThis": "ಇದನ್ನು ಜರ್ನಲ್ ಮಾಡಿ",
   "ardhaReframeAgain": "ಮತ್ತೆ ಪುನರ್ವ್ಯಾಖ್ಯಾನ",
-
   "viyogaIntroTitleEng": "ಆಸೆಯ ಪವಿತ್ರ ಸ್ಥಳ",
   "viyogaIntroSubtitle": "ವಿರಹದಲ್ಲೂ ಒಕ್ಕೂಟ ಇದೆ",
   "viyogaEnterSpace": "ಈ ಸ್ಥಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ",
   "viyogaLongingFallback": "ನೀವು ಹೆಸರಿಸಿದ ಆಸೆ",
-
   "viyogaStep1Question": "ನಿಮ್ಮ ವಿರಹ ಯಾವ ರೂಪ ತಾಳುತ್ತದೆ?",
   "viyogaSepDeath": "ಮರಣದ ಮೂಲಕ ವಿರಹ",
   "viyogaSepDeathDesc": "ಒಂದು ಆತ್ಮ ಎಲ್ಲೆ ದಾಟಿದೆ",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "ದೈವದ ಬಯಕೆ",
   "viyogaSepDivineDesc": "ಆಧ್ಯಾತ್ಮಿಕ ವಿರಹ, ಕತ್ತಲೆ ರಾತ್ರಿ",
   "viyogaContinue": "ಮುಂದುವರಿಸಿ",
-
   "viyogaStep2Q1": "ನೀವು ಯಾರಿಂದ / ಯಾವುದರಿಂದ ಬೇರ್ಪಟ್ಟಿದ್ದೀರಿ?",
   "viyogaStep2Q1Placeholder": "ಒಂದು ಹೆಸರು, ಒಂದು ಸ್ಥಳ, ನಿಮ್ಮ ಒಂದು ರೂಪ...",
   "viyogaStep2Q2": "ಈ ವಿರಹ ಎಷ್ಟು ದೂರವಿದೆ ಎಂದು ಭಾಸವಾಗುತ್ತದೆ?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "ಇದನ್ನು ಸಖಾ ಬಳಿಗೆ ತನ್ನಿ",
   "viyogaBringToSakhaCta": "ಇದನ್ನು ಸಖಾ ಬಳಿಗೆ ತನ್ನಿ",
   "viyogaListening": "ಆಲಿಸುತ್ತಿದೆ...",
-
   "viyogaSec1Label": "ನನಗೆ ಅರ್ಥವಾಯಿತು",
   "viyogaSec2Label": "ಇದನ್ನು ನೋಡುವ ಬೇರೆ ರೀತಿ",
   "viyogaSec3Label": "ಈಗಲೇ ಇದನ್ನು ಪ್ರಯತ್ನಿಸಿ",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "ಪೂರ್ಣ ಪಠ್ಯ ತೋರಿಸಿ",
   "viyogaTxContinue": "ಧ್ಯಾನಕ್ಕೆ ಮುಂದುವರಿಯಿರಿ →",
   "viyogaTxContinueA11y": "ಧ್ಯಾನಕ್ಕೆ ಮುಂದುವರಿಯಿರಿ",
-
   "viyogaMedScreenOfA11y": "{{total}}-ರಲ್ಲಿ ಪರದೆ {{n}}-ಗೆ ಹೋಗಿ",
   "viyogaMedBackToTx": "ಪ್ರಸಾರಕ್ಕೆ ಹಿಂತಿರುಗಿ",
   "viyogaMedPrevSentence": "ಹಿಂದಿನ ವಾಕ್ಯ",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "ಸ್ವಯಂ",
   "viyogaMedEnd": "ಕೊನೆಗೊಳಿಸಿ",
   "viyogaMedEndA11y": "ಧ್ಯಾನ ಕೊನೆಗೊಳಿಸಿ",
-
   "viyogaReleaseQuestion": "ನೀವು ಏನನ್ನು ಬಿಡುಗಡೆ ಮಾಡಲು ಬಯಸುತ್ತೀರಿ?",
   "viyogaReleaseSubtitle": "ಪ್ರೇಮವಲ್ಲ. ನೆನಪಲ್ಲ. ಆದರೆ ನೋವಿನ ಭಾರ.",
   "viyogaReleasePlaceholder": "ನಾನು ಬಿಡುಗಡೆ ಮಾಡುತ್ತೇನೆ...",
   "viyogaReleaseOfferA11y": "ಪವಿತ್ರ ಅಗ್ನಿಗೆ ಅರ್ಪಿಸಿ",
   "viyogaReleaseOfferCta": "ಪವಿತ್ರ ಅಗ್ನಿಗೆ ಅರ್ಪಿಸಿ",
-
   "viyogaCompleteOmA11y": "ಓಂ",
   "viyogaCompleteLabel": "ವಿಯೋಗ ಪೂರ್ಣ",
   "viyogaCompleteOfferedOn": "{{date}}ರಂದು ಅರ್ಪಿತ",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "ಈ ಅರ್ಪಣೆಯನ್ನು ಜರ್ನಲ್ ಮಾಡಿ",
   "viyogaCompleteTalkSakha": "ಸಖಾರಿಗೆ ಮಾತನಾಡಿ",
   "viyogaCompleteTalkSakhaA11y": "ಸಖಾರಿಗೆ ಮಾತನಾಡಿ",
-
   "viyogaMedScreen1": "ನೀವು ಹೊತ್ತುಕೊಂಡಿರುವ ಆಸೆ ಪವಿತ್ರವಾಗಿದೆ.",
   "viyogaMedScreen2": "ಇದು ದೌರ್ಬಲ್ಯವಲ್ಲ. ಹೋಗಲು ಜಾಗವಿಲ್ಲದ ಪ್ರೇಮ ಇದು.",
   "viyogaMedScreen3": "ನಿಮಗೆ ನೆನಪಿರುವದನ್ನು ಉಸಿರಿನಲ್ಲಿ ತೆಗೆದುಕೊಳ್ಳಿ.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "ನೀವು ಬೇರು ಕಿತ್ತವರಲ್ಲ. ನಿಮ್ಮ ಬೇರುಗಳು ಎಲ್ಲೆಡೆ ಹಬ್ಬಿವೆ.",
   "viyogaMedScreen8": "ಬಂಧ ನಿಲ್ಲುತ್ತದೆ. ಯಾವಾಗಲೂ ನಿಲ್ಲುತ್ತದೆ.",
   "viyogaMedScreen9": "ನಿಧಾನವಾಗಿ ಉಸಿರು ಬಿಡಿ. ನೀವು ಇರಬೇಕಾದ ಸ್ಥಳದಲ್ಲೇ ಇದ್ದೀರಿ.",
-
   "rcHeaderTitle": "ಸಂಬಂಧ ದಿಕ್ಸೂಚಿ",
   "rcBackA11y": "ಹಿಂದೆ",
   "rcNotificationsA11y": "ಅಧಿಸೂಚನೆಗಳು",
   "rcLongingFallback": "ನೀವು ಹೆಸರಿಸಿದ ಬಂಧ",
   "rcProgressStepA11y": "{{total}}-ರಲ್ಲಿ ಹಂತ {{n}}",
-
   "rcAltarPrompt": "ನೀವು ದಿಕ್ಸೂಚಿಯ ಬಳಿಗೆ ಯಾರನ್ನು ತರುತ್ತಿದ್ದೀರಿ?",
   "rcAltarTypeA11y": "{{label}} ಸಂಬಂಧ",
   "rcAltarNamePlaceholder": "ಅವರ ಹೆಸರು (ಐಚ್ಛಿಕ)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "ಈಗ ಈ ಸಂಬಂಧ ಹೇಗೆ ಅನಿಸುತ್ತದೆ?",
   "rcAltarGunaA11y": "ಆರಂಭಿಕ ಓದುವಿಕೆಯನ್ನು {{label}}-ಗೆ ಹೊಂದಿಸಿ",
   "rcAltarCta": "ದಿಕ್ಸೂಚಿಯನ್ನು ತೆರೆಯಿರಿ",
-
   "rcGunaMirrorYourSituation": "ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿ",
   "rcGunaMirrorOptional": "(ಐಚ್ಛಿಕ)",
   "rcGunaMirrorPlaceholder": "ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಯನ್ನು ನಿಮ್ಮ ಪದಗಳಲ್ಲಿ ವಿವರಿಸಿ...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "ಸಮತೋಲಿತ ಶಕ್ತಿ",
   "rcGunaMirrorPredominantlyFmt": "ಮುಖ್ಯವಾಗಿ {{guna}}",
   "rcGunaMirrorCta": "ನಿಮ್ಮ ಧರ್ಮ ನಕ್ಷೆಯನ್ನು ಪಡೆಯಿರಿ",
-
   "rcDharmaMapInterpretFmt": "ನಿಮ್ಮ ಸಂಬಂಧ {{nameClause}}ಬಲವಾದ {{high}} ({{highSkt}}) ತೋರಿಸುತ್ತದೆ ಆದರೆ ಕಡಿಮೆ {{low}} ({{lowSkt}}).",
   "rcDharmaMapNameClauseFmt": "{{name}} ಜೊತೆ ",
   "rcDharmaMapCta": "ಗೀತೆಯ ಜ್ಞಾನವನ್ನು ಪಡೆಯಿರಿ",
-
   "rcGitaLoading1": "ದಿಕ್ಸೂಚಿ ನಿಮ್ಮ ದಿಕ್ಕನ್ನು ಹುಡುಕುತ್ತಿದೆ...",
   "rcGitaLoading2": "ನಿಮ್ಮ ಸಂಬಂಧದ ಗುಣಗಳನ್ನು ಓದುತ್ತಿದೆ...",
   "rcGitaLoading3": "ಕೃಷ್ಣ ಮಾರ್ಗವನ್ನು ಪ್ರಕಾಶಿಸುತ್ತಿದ್ದಾನೆ...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "ನೆಟ್‌ವರ್ಕ್ ಶಾಂತ — ನಿಮ್ಮ ಆಫ್‌ಲೈನ್ ಮಾರ್ಗದರ್ಶಿ ತೋರಿಸಲಾಗುತ್ತಿದೆ.",
   "rcGitaIntentionWithPartnerFmt": "{{name}} ಜೊತೆ ಸಂಕಲ್ಪ ಇರಿಸಿ",
   "rcGitaSetIntentionCta": "ನಿಮ್ಮ ಧಾರ್ಮಿಕ ಸಂಕಲ್ಪ ಇರಿಸಿ",
-
   "rcIntentionTitle": "ನಿಮ್ಮ ಧಾರ್ಮಿಕ ಸಂಕಲ್ಪ ಇರಿಸಿ",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}} ಜೊತೆ ನನ್ನ ಸಂಬಂಧದಲ್ಲಿ, ನಾನು {{quality}} ಆಯ್ಕೆ ಮಾಡುತ್ತೇನೆ. (ಅಥವಾ ಶಂಖವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮಾತನಾಡಿ)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "ನಿಮ್ಮ ಸಂಕಲ್ಪವನ್ನು ಇಲ್ಲಿ ಬರೆಯಿರಿ... (ಅಥವಾ ಶಂಖವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮಾತನಾಡಿ)",
   "rcIntentionA11y": "ನಿಮ್ಮ ಸಂಕಲ್ಪ",
   "rcIntentionCta": "ನನ್ನ ದಿಕ್ಸೂಚಿಯನ್ನು ಮುದ್ರಿಸಿ",
-
   "rcSealTitleWord1": "ನಿಮ್ಮ",
   "rcSealTitleWord2": "ದಿಕ್ಸೂಚಿ",
   "rcSealTitleWord3": "ಈಗ",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "ದಿನಾಂಕ:",
   "rcSealReturnHome": "ಮನೆಗೆ ಹಿಂತಿರುಗಿ",
   "rcSealJournal": "ಇದನ್ನು ಜರ್ನಲ್ ಮಾಡಿ",
-  "rcSealTalkSakha": "ಸಖಾರಿಗೆ ಮಾತನಾಡಿ"
+  "rcSealTalkSakha": "ಸಖಾರಿಗೆ ಮಾತನಾಡಿ",
+  "kfpScreenTitle": "ಕರ್ಮ ಹೆಜ್ಜೆಗುರುತು",
+  "kfpSubtitle": "ಲೋಕದಲ್ಲಿ ನಿಮ್ಮ ಕರ್ಮ-ತರಂಗಗಳು",
+  "kfpTotalKarmaLabel": "ಒಟ್ಟು ಕರ್ಮ",
+  "kfpPositiveActionsFmt": "{{count}} ಸಕಾರಾತ್ಮಕ ಕ್ರಿಯೆಗಳು",
+  "kfpAreasOfGrowthLabel": "ಬೆಳವಣಿಗೆಯ ಕ್ಷೇತ್ರಗಳು",
+  "kfpRippleEffectsLabel": "ತರಂಗ ಪರಿಣಾಮಗಳು",
+  "kfpEmptyMessage": "ನಿಮ್ಮ ಕರ್ಮ ಪ್ರಯಾಣ ಕಾಯುತ್ತಿದೆ.\nಕೆಳಗೆ ನಿಮ್ಮ ಮೊದಲ ಕ್ರಿಯೆಯನ್ನು ದಾಖಲಿಸಿ.",
+  "kfpLogNewActionButton": "ಹೊಸ ಕ್ರಿಯೆಯನ್ನು ದಾಖಲಿಸಿ",
+  "kfpModalTitle": "ಕರ್ಮ ಕ್ರಿಯೆಯನ್ನು ದಾಖಲಿಸಿ",
+  "kfpActionLabel": "ನೀವು ಏನು ಮಾಡಿದಿರಿ?",
+  "kfpActionPlaceholder": "ನಿಮ್ಮ ಕ್ರಿಯೆಯನ್ನು ವಿವರಿಸಿ...",
+  "kfpImpactLabel": "ಇದರ ಪ್ರಭಾವ ಏನು?",
+  "kfpImpactPlaceholder": "ಇದು ಇತರರ ಮೇಲೆ ಹೇಗೆ ಪ್ರಭಾವ ಬೀರಿತು...",
+  "kfpLogActionButton": "ಕ್ರಿಯೆಯನ್ನು ದಾಖಲಿಸಿ",
+  "kfpCancelButton": "ರದ್ದು"
 }

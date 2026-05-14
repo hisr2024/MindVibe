@@ -286,5 +286,21 @@
   "rcSealDateLabel": "Date:",
   "rcSealReturnHome": "Return to Home",
   "rcSealJournal": "Journal This",
-  "rcSealTalkSakha": "Talk to Sakha"
+  "rcSealTalkSakha": "Talk to Sakha",
+
+  "kfpScreenTitle": "Karma Footprint",
+  "kfpSubtitle": "Your karmic ripples in the world",
+  "kfpTotalKarmaLabel": "Total Karma",
+  "kfpPositiveActionsFmt": "{{count}} positive actions",
+  "kfpAreasOfGrowthLabel": "Areas of Growth",
+  "kfpRippleEffectsLabel": "Ripple Effects",
+  "kfpEmptyMessage": "Your karmic journey awaits.\nLog your first action below.",
+  "kfpLogNewActionButton": "Log New Action",
+  "kfpModalTitle": "Log Karmic Action",
+  "kfpActionLabel": "What did you do?",
+  "kfpActionPlaceholder": "Describe your action...",
+  "kfpImpactLabel": "What impact did it have?",
+  "kfpImpactPlaceholder": "How did it affect others...",
+  "kfpLogActionButton": "Log Action",
+  "kfpCancelButton": "Cancel"
 }

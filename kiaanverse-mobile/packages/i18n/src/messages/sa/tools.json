@@ -1,64 +1,48 @@
 {
   "hubTitle": "पावन-साधनानि",
   "hubSubtitle": "आन्तरिक-परिवर्तनाय सर्वशास्त्राणि सर्वोपकरणानि च",
-
   "sectionVoice": "पावन-वाणी",
   "sectionScriptures": "पावन-शास्त्राणि",
   "sectionWisdom": "ज्ञान-साधनानि",
   "sectionHealing": "चिकित्सा-साधनानि",
   "sectionPaths": "पावन-मार्गाः",
   "sectionSound": "पावन-नादः",
-
   "voiceCompanionName": "सखा — वाक्-सहायः",
   "voiceCompanionDescription": "दिव्य-मित्रेण सह सम्भाषतु",
-
   "gitaName": "भगवद्गीता",
   "gitaDescription": "१८ अध्यायाः · ७०० श्लोकाः",
-
   "ardhaName": "अर्थः",
   "ardhaDescription": "स्व-दृष्टिकोणं पुनः-गठयतु",
-
   "viyogaName": "वियोगः",
   "viyogaDescription": "त्याग-कला",
-
   "relationshipCompassName": "सम्बन्ध-दिग्दर्शकः",
   "relationshipCompassDescription": "धर्म-निर्देशिता स्पष्टता",
-
   "emotionalResetName": "भावनात्मक-पुनःस्थापनम्",
   "emotionalResetDescription": "भावनाः मुक्ताः कुरुत परिवर्तयत च",
-
   "karmaResetName": "कर्म-पुनः-निर्धारणम्",
   "karmaResetDescription": "कर्म-पद्धतीनां चिकित्सा",
-
   "wisdomRoomsName": "ज्ञान-कक्षाः",
   "wisdomRoomsDescription": "साधकानां पावन-वृत्तानि",
-
   "journeysName": "यात्राः",
   "journeysDescription": "आन्तरिक-रणक्षेत्रम् · षड्रिपवः",
-
   "sacredReflectionsName": "पावन-चिन्तनम्",
   "sacredReflectionsDescription": "गोप्य-वृत्तान्तः अन्तर्दृष्टयश्च",
-
   "dashboardSubtitle": "परिवर्तनाय, स्पष्टतायै, अन्तःशान्त्यै च उपकरणानि",
   "sectionInsights": "कर्म-अन्तर्दृष्टयः",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "तव साधनायां प्रतिमानम्",
   "karmaFootprintName": "कर्म-पदचिह्नम्",
   "karmaFootprintDescription": "स्व-कर्म-तरङ्गाणाम् अनुसरणं कुरुत",
   "karmaTreeName": "कर्म-वृक्षः",
   "karmaTreeDescription": "तव जीवन्ती धर्म-छाया",
-
   "karmicTreeTitle": "कर्म-वृक्षः",
   "karmicTreeRootsFallback": "तव मूलानि",
   "karmicTreeTagline1": "तव प्रतिमानानां शाखाः अद्यापि मानचित्रिताः क्रियन्ते।",
   "karmicTreeTagline2": "इदं पावन-साधनं अद्यापि विकाशं प्राप्नोति — विकसिते सति सखा त्वां सूचयिष्यति।",
   "karmicTreeBackToArmoryA11y": "साधन-फलकं प्रति प्रत्यागच्छतु",
   "karmicTreeBackToArmoryCta": "शस्त्रागारं प्रति प्रत्यागच्छतु",
-
   "karmaResetPatternFallback": "त्वया नामिता प्रतिमा",
   "emotionalResetReflectionFallback": "तव चिन्तनम्",
-
   "goBackA11y": "प्रत्यागच्छतु",
   "backButton": "< प्रत्यागच्छ",
   "erStepBreathe": "श्वसनम्",
@@ -67,7 +51,6 @@
   "erStepAffirm": "सङ्कल्पः",
   "erStepReflect": "चिन्तनम्",
   "erStepComplete": "सम्पूर्णम्",
-
   "ardhaTitle": "अर्धम्",
   "ardhaTagline": "धर्मेण उच्चतर-चेतनया च आत्म-पुनर्व्याख्या",
   "ardhaQuote": "“असतो न विद्यते भावः, सतो नाभाव उच्यते।”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA उत CBT",
   "ardhaCbtBody": "CBT विकृत-चिन्तनं संशोधयति। ARDHA भ्रान्त-पहिचानं संशोधयति। यत्र CBT कार्यशीलम् अहं दृढीकरोति, तत्र ARDHA अहं-तादात्म्यं शिथिलयति — सम्यक्-कर्मणा आन्तरिक-स्वातन्त्र्यं प्रति।",
   "ardhaCbtFlow": "आत्म-भेदः → राग-द्वेष-स्कैन → धर्म-संरेखणम् → हृदय-समत्वम् → अर्पणम्",
-
   "ardhaErrSession": "भवतः सत्रं समाप्तम्। कृपया पुनः साइन इन् कुरुत।",
   "ardhaErrOffline": "जालं न उपलब्धम्। सम्बन्धं पश्यतु पुनः प्रयतताम् च।",
   "ardhaErrServer": "ARDHA गभीर-ध्यानात् जाग्रत्। कृपया क्षणानन्तरं पुनः प्रयतताम्।",
   "ardhaErrGeneric": "ARDHA सम्प्रति पुनर्व्याख्यां कर्तुं न शक्तवान्। कृपया पुनः प्रयतताम्।",
   "ardhaErrPrefix": "ARDHA पुनर्व्याख्यां कर्तुं न शक्तवान्: {{message}}",
-
   "ardhaResultCardTitle": "अर्धस्य\nपुनर्व्याख्या",
   "ardhaQuickBadge": "⚡ शीघ्र-पुनर्व्याख्या",
   "ardhaCopyA11y": "पुनर्व्याख्या-पाठं प्रतिलिख्यताम्",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "गृहं प्रत्यागच्छतु",
   "ardhaJournalThis": "इदं वृत्तान्ते लिख्यताम्",
   "ardhaReframeAgain": "पुनः पुनर्व्याख्या",
-
   "viyogaIntroTitleEng": "विरहस्य पावन-स्थानम्",
   "viyogaIntroSubtitle": "वियोगे अपि मिलनम्",
   "viyogaEnterSpace": "अस्मिन् स्थाने प्रविशतु",
   "viyogaLongingFallback": "त्वया नामितः विरहः",
-
   "viyogaStep1Question": "तव वियोगः कस्य रूपस्य?",
   "viyogaSepDeath": "मृत्योः वियोगः",
   "viyogaSepDeathDesc": "एका आत्मा देहलीं अतिक्रान्तवती",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "ईश्वर-कामना",
   "viyogaSepDivineDesc": "आध्यात्मिकः वियोगः, अन्धकार-रात्रिः",
   "viyogaContinue": "अग्रे गच्छतु",
-
   "viyogaStep2Q1": "त्वं कस्मात् वियुक्तः?",
   "viyogaStep2Q1Placeholder": "एकं नाम, एकं स्थानम्, स्वस्य एकं रूपम्...",
   "viyogaStep2Q2": "अयं वियोगः कियद् दूरः प्रतीयते?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "इदं सख्या समीपं नयतु",
   "viyogaBringToSakhaCta": "इदं सख्या समीपं नयतु",
   "viyogaListening": "शृणोति...",
-
   "viyogaSec1Label": "अहं जानामि",
   "viyogaSec2Label": "एनं द्रष्टुं अन्यः मार्गः",
   "viyogaSec3Label": "इदानीम् एव परीक्षयतु",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "पूर्ण-पाठं दर्शयतु",
   "viyogaTxContinue": "ध्यानं प्रति गच्छतु →",
   "viyogaTxContinueA11y": "ध्यानं प्रति गच्छतु",
-
   "viyogaMedScreenOfA11y": "{{total}}-तः पटलं {{n}} प्रति गच्छतु",
   "viyogaMedBackToTx": "प्रेषणं प्रति प्रत्यागच्छतु",
   "viyogaMedPrevSentence": "पूर्व-वाक्यम्",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "स्वतः",
   "viyogaMedEnd": "समाप्तम्",
   "viyogaMedEndA11y": "ध्यानं समापयतु",
-
   "viyogaReleaseQuestion": "त्वं किं त्यक्तुं इच्छसि?",
   "viyogaReleaseSubtitle": "न प्रेमः। न स्मृतिः। केवलं वेदनायाः भारः।",
   "viyogaReleasePlaceholder": "अहं त्यजामि...",
   "viyogaReleaseOfferA11y": "पावनाग्नये अर्पयतु",
   "viyogaReleaseOfferCta": "पावनाग्नये अर्पयतु",
-
   "viyogaCompleteOmA11y": "ॐ",
   "viyogaCompleteLabel": "वियोगः सम्पूर्णः",
   "viyogaCompleteOfferedOn": "{{date}} इति दिने अर्पितम्",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "इदम् अर्पणं वृत्तान्ते लिख्यताम्",
   "viyogaCompleteTalkSakha": "सख्या सह सम्भाषतु",
   "viyogaCompleteTalkSakhaA11y": "सख्या सह सम्भाषतु",
-
   "viyogaMedScreen1": "यं विरहं त्वं वहसि सः पावनः।",
   "viyogaMedScreen2": "एषा दुर्बलता न। एषः प्रेमः यस्य गन्तुं स्थानं नास्ति।",
   "viyogaMedScreen3": "यद् स्मरसि तं श्वासे गृहाण।",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "त्वं उत्खातः न। तव मूलानि सर्वत्र विस्तीर्णानि।",
   "viyogaMedScreen8": "बन्धनं तिष्ठति। सदा तिष्ठति।",
   "viyogaMedScreen9": "शनैः शनैः निःश्वसतु। त्वं तत्र असि यत्र भवितव्यम्।",
-
   "rcHeaderTitle": "सम्बन्ध-दिग्दर्शकः",
   "rcBackA11y": "प्रत्यागच्छतु",
   "rcNotificationsA11y": "सूचनाः",
   "rcLongingFallback": "त्वया नामितः बन्धः",
   "rcProgressStepA11y": "{{total}}-तः सोपानं {{n}}",
-
   "rcAltarPrompt": "त्वं कं दिग्दर्शकं प्रति आनयसि?",
   "rcAltarTypeA11y": "{{label}}-सम्बन्धः",
   "rcAltarNamePlaceholder": "तेषां नाम (वैकल्पिकम्)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "इदानीम् अयं सम्बन्धः कीदृशः अनुभूयते?",
   "rcAltarGunaA11y": "प्रारम्भिक-पठनं {{label}} इति निर्धारयतु",
   "rcAltarCta": "दिग्दर्शकं उद्घाटयतु",
-
   "rcGunaMirrorYourSituation": "तव स्थितिः",
   "rcGunaMirrorOptional": "(वैकल्पिकम्)",
   "rcGunaMirrorPlaceholder": "स्व-स्थितिं स्व-शब्दैः वर्णयतु...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "सन्तुलिता ऊर्जा",
   "rcGunaMirrorPredominantlyFmt": "मुख्यतः {{guna}}",
   "rcGunaMirrorCta": "स्व-धर्म-मानचित्रं प्राप्नोतु",
-
   "rcDharmaMapInterpretFmt": "तव सम्बन्धः {{nameClause}}दृढं {{high}} ({{highSkt}}) दर्शयति परं क्षीणं {{low}} ({{lowSkt}})।",
   "rcDharmaMapNameClauseFmt": "{{name}}-सह ",
   "rcDharmaMapCta": "गीता-ज्ञानं प्राप्नोतु",
-
   "rcGitaLoading1": "दिग्दर्शकः तव दिशां अन्वेषयति...",
   "rcGitaLoading2": "तव सम्बन्धस्य गुणान् पठति...",
   "rcGitaLoading3": "कृष्णः मार्गं प्रकाशयति...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "जालं शान्तं — तव असम्बद्ध-मार्गदर्शकं दर्शितम्।",
   "rcGitaIntentionWithPartnerFmt": "{{name}}-सह सङ्कल्पं स्थापयतु",
   "rcGitaSetIntentionCta": "स्व-धार्मिक-सङ्कल्पं स्थापयतु",
-
   "rcIntentionTitle": "स्व-धार्मिक-सङ्कल्पं स्थापयतु",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}}-सह मम सम्बन्धे, अहं {{quality}} वृणोमि। (वा शङ्खं स्पृश्य वदतु)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "स्व-सङ्कल्पम् अत्र लिख्यताम्... (वा शङ्खं स्पृश्य वदतु)",
   "rcIntentionA11y": "तव सङ्कल्पः",
   "rcIntentionCta": "मम दिग्दर्शकं मुद्रयतु",
-
   "rcSealTitleWord1": "तव",
   "rcSealTitleWord2": "दिग्दर्शकः",
   "rcSealTitleWord3": "अधुना",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "दिनाङ्कः:",
   "rcSealReturnHome": "गृहं प्रत्यागच्छतु",
   "rcSealJournal": "इदं वृत्तान्ते लिख्यताम्",
-  "rcSealTalkSakha": "सख्या सह सम्भाषतु"
+  "rcSealTalkSakha": "सख्या सह सम्भाषतु",
+  "kfpScreenTitle": "कर्म-पदचिह्नम्",
+  "kfpSubtitle": "जगति भवतः कर्म-तरङ्गाः",
+  "kfpTotalKarmaLabel": "समग्र-कर्म",
+  "kfpPositiveActionsFmt": "{{count}} सकारात्मक-कार्याणि",
+  "kfpAreasOfGrowthLabel": "वर्धन-क्षेत्राणि",
+  "kfpRippleEffectsLabel": "तरङ्ग-प्रभावाः",
+  "kfpEmptyMessage": "भवतः कर्म-यात्रा प्रतीक्षते।\nअधः प्रथमं कार्यं लिखतु।",
+  "kfpLogNewActionButton": "नवीन-कार्यं लिखतु",
+  "kfpModalTitle": "कार्मिक-कार्यं लिखतु",
+  "kfpActionLabel": "किं कृतम्?",
+  "kfpActionPlaceholder": "स्वकार्यं वर्णयतु...",
+  "kfpImpactLabel": "तस्य कः प्रभावः अभवत्?",
+  "kfpImpactPlaceholder": "तत् अन्यान् कथं प्रभावितवत्...",
+  "kfpLogActionButton": "कार्यं लिखतु",
+  "kfpCancelButton": "निरस्तं करोतु"
 }

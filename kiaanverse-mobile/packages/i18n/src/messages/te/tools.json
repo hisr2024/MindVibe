@@ -1,64 +1,48 @@
 {
   "hubTitle": "పవిత్ర సాధనాలు",
   "hubSubtitle": "ఆంతరిక పరివర్తనకు ప్రతి శాస్త్రం మరియు ఉపకరణం",
-
   "sectionVoice": "పవిత్ర స్వరం",
   "sectionScriptures": "పవిత్ర శాస్త్రాలు",
   "sectionWisdom": "జ్ఞాన సాధనాలు",
   "sectionHealing": "ఉపశమన సాధనాలు",
   "sectionPaths": "పవిత్ర మార్గాలు",
   "sectionSound": "పవిత్ర నాదం",
-
   "voiceCompanionName": "సఖా — వాయిస్ సహచరుడు",
   "voiceCompanionDescription": "దివ్య మిత్రుడితో మాట్లాడండి",
-
   "gitaName": "భగవద్గీత",
   "gitaDescription": "18 అధ్యాయాలు · 700 శ్లోకాలు",
-
   "ardhaName": "అర్థ",
   "ardhaDescription": "మీ దృక్కోణాన్ని తిరిగి అమర్చండి",
-
   "viyogaName": "వియోగ",
   "viyogaDescription": "వదిలివేసే కళ",
-
   "relationshipCompassName": "సంబంధ దిక్సూచి",
   "relationshipCompassDescription": "ధర్మంతో నడిచే స్పష్టత",
-
   "emotionalResetName": "భావోద్వేగ రీసెట్",
   "emotionalResetDescription": "భావాలను విడిచిపెట్టి మార్చండి",
-
   "karmaResetName": "కర్మ రీసెట్",
   "karmaResetDescription": "కర్మ నమూనాలను నయం చేయండి",
-
   "wisdomRoomsName": "జ్ఞాన గదులు",
   "wisdomRoomsDescription": "సాధకుల పవిత్ర వలయాలు",
-
   "journeysName": "ప్రయాణాలు",
   "journeysDescription": "ఆంతరిక రణభూమి · 6 శత్రువులు",
-
   "sacredReflectionsName": "పవిత్ర చింతనలు",
   "sacredReflectionsDescription": "ఎన్‌క్రిప్టెడ్ జర్నల్ & అంతర్దృష్టులు",
-
   "dashboardSubtitle": "మార్పు, స్పష్టత, అంతఃశాంతి కోసం ఉపకరణాలు",
   "sectionInsights": "కర్మ అంతర్దృష్టి",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "మీ సాధనలో నమూనాలు",
   "karmaFootprintName": "కర్మ పాదముద్ర",
   "karmaFootprintDescription": "మీ కర్మ తరంగాలను అనుసరించండి",
   "karmaTreeName": "కర్మ వృక్షం",
   "karmaTreeDescription": "మీ సజీవ ధర్మ ఛత్రం",
-
   "karmicTreeTitle": "కర్మ వృక్షం",
   "karmicTreeRootsFallback": "మీ మూలాలు",
   "karmicTreeTagline1": "మీ నమూనాల కొమ్మలు ఇంకా మ్యాప్ చేయబడుతున్నాయి.",
   "karmicTreeTagline2": "ఈ పవిత్ర ఉపకరణం ఇంకా అభివృద్ధి చెందుతోంది — వికసించినప్పుడు సఖా మీకు తెలియజేస్తాడు.",
   "karmicTreeBackToArmoryA11y": "సాధనాల డాష్‌బోర్డ్‌కు తిరిగి వెళ్లండి",
   "karmicTreeBackToArmoryCta": "ఆయుధాగారానికి తిరిగి",
-
   "karmaResetPatternFallback": "మీరు పేరు పెట్టిన నమూనా",
   "emotionalResetReflectionFallback": "మీ ఆలోచన",
-
   "goBackA11y": "వెనుకకు",
   "backButton": "< వెనుకకు",
   "erStepBreathe": "శ్వాస",
@@ -67,7 +51,6 @@
   "erStepAffirm": "సంకల్పం",
   "erStepReflect": "ఆలోచన",
   "erStepComplete": "పూర్తి",
-
   "ardhaTitle": "అర్ధ",
   "ardhaTagline": "ధర్మం మరియు ఉన్నత చైతన్యం ద్వారా ఆత్మ-పునఃవ్యాఖ్యానం",
   "ardhaQuote": "“అసత్తుకు ఉనికి లేదు, సత్తు ఎన్నడూ నశించదు.”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA vs CBT",
   "ardhaCbtBody": "CBT వికృత ఆలోచనను సరిచేస్తుంది. ARDHA తప్పుడు గుర్తింపును సరిచేస్తుంది. CBT క్రియాశీల అహాన్ని బలపరిస్తే, ARDHA అహ-తాదాత్మ్యాన్ని వదులు చేస్తుంది — సరైన చర్య ద్వారా అంతః స్వేచ్ఛ వైపు.",
   "ardhaCbtFlow": "ఆత్మ భేదం → రాగ-ద్వేష స్కాన్ → ధర్మ సర్దుబాటు → హృదయ సమత్వం → అర్పణ",
-
   "ardhaErrSession": "మీ సెషన్ గడువు ముగిసింది. దయచేసి మళ్లీ సైన్ ఇన్ అవ్వండి.",
   "ardhaErrOffline": "నెట్‌వర్క్ చేరువలో లేదు. మీ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
   "ardhaErrServer": "ARDHA లోతైన ధ్యానం నుండి మేల్కొంటోంది. కొంత సేపటి తర్వాత మళ్లీ ప్రయత్నించండి.",
   "ardhaErrGeneric": "ARDHA ఇప్పుడు పునఃవ్యాఖ్యానం చేయలేకపోయింది. మళ్లీ ప్రయత్నించండి.",
   "ardhaErrPrefix": "ARDHA పునఃవ్యాఖ్యానం చేయలేకపోయింది: {{message}}",
-
   "ardhaResultCardTitle": "అర్ధ యొక్క\nపునఃవ్యాఖ్యానం",
   "ardhaQuickBadge": "⚡ త్వరిత పునఃవ్యాఖ్యానం",
   "ardhaCopyA11y": "పునఃవ్యాఖ్యాన టెక్స్ట్‌ను కాపీ చేయండి",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "హోమ్‌కు తిరిగి",
   "ardhaJournalThis": "దీనిని జర్నల్‌లో రాయండి",
   "ardhaReframeAgain": "మళ్లీ పునఃవ్యాఖ్యానం",
-
   "viyogaIntroTitleEng": "ఆకాంక్షల పవిత్ర స్థలం",
   "viyogaIntroSubtitle": "విరహంలోనూ ఐక్యత ఉంది",
   "viyogaEnterSpace": "ఈ స్థలంలోకి ప్రవేశించండి",
   "viyogaLongingFallback": "మీరు పేరు పెట్టిన విరహం",
-
   "viyogaStep1Question": "మీ విరహం ఏ రూపంలో ఉంది?",
   "viyogaSepDeath": "మరణం ద్వారా విరహం",
   "viyogaSepDeathDesc": "ఒక ఆత్మ సరిహద్దును దాటింది",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "దైవం కోసం వాంఛ",
   "viyogaSepDivineDesc": "ఆధ్యాత్మిక విరహం, చీకటి రాత్రి",
   "viyogaContinue": "కొనసాగించు",
-
   "viyogaStep2Q1": "మీరు ఎవరి/ఎవరి నుండి విడిపోయారు?",
   "viyogaStep2Q1Placeholder": "ఒక పేరు, ఒక ప్రదేశం, మీ ఒక రూపం...",
   "viyogaStep2Q2": "ఈ విరహం ఎంత దూరం అనిపిస్తుంది?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "దీనిని సఖా వద్దకు తీసుకురండి",
   "viyogaBringToSakhaCta": "దీనిని సఖా వద్దకు తీసుకురండి",
   "viyogaListening": "వింటోంది...",
-
   "viyogaSec1Label": "నాకు అర్థమైంది",
   "viyogaSec2Label": "దీనిని చూడడానికి మరో మార్గం",
   "viyogaSec3Label": "ఇప్పుడే దీన్ని ప్రయత్నించండి",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "పూర్తి వచనం చూపండి",
   "viyogaTxContinue": "ధ్యానానికి కొనసాగండి →",
   "viyogaTxContinueA11y": "ధ్యానానికి కొనసాగండి",
-
   "viyogaMedScreenOfA11y": "{{total}}-లో స్క్రీన్ {{n}}-కి వెళ్లండి",
   "viyogaMedBackToTx": "ప్రసారానికి తిరిగి",
   "viyogaMedPrevSentence": "మునుపటి వాక్యం",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "ఆటో",
   "viyogaMedEnd": "ముగించు",
   "viyogaMedEndA11y": "ధ్యానం ముగించండి",
-
   "viyogaReleaseQuestion": "మీరు ఏమి విడుదల చేయాలనుకుంటున్నారు?",
   "viyogaReleaseSubtitle": "ప్రేమ కాదు. జ్ఞాపకం కాదు. కానీ వేదన భారం.",
   "viyogaReleasePlaceholder": "నేను విడుదల చేస్తున్నాను...",
   "viyogaReleaseOfferA11y": "పవిత్ర అగ్నికి అర్పించండి",
   "viyogaReleaseOfferCta": "పవిత్ర అగ్నికి అర్పించండి",
-
   "viyogaCompleteOmA11y": "ఓం",
   "viyogaCompleteLabel": "వియోగం పూర్తి",
   "viyogaCompleteOfferedOn": "{{date}}న అర్పించబడింది",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "ఈ అర్పణను జర్నల్‌లో రాయండి",
   "viyogaCompleteTalkSakha": "సఖాతో మాట్లాడండి",
   "viyogaCompleteTalkSakhaA11y": "సఖాతో మాట్లాడండి",
-
   "viyogaMedScreen1": "మీరు మోస్తున్న విరహం పవిత్రమైనది.",
   "viyogaMedScreen2": "ఇది బలహీనత కాదు. వెళ్ళడానికి స్థలం లేని ప్రేమ ఇది.",
   "viyogaMedScreen3": "మీరు గుర్తుచేసుకున్న దానిని ఊపిరిలో తీసుకోండి.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "మీరు మూలాలు లేని వారు కాదు. మీ మూలాలు అన్ని వైపులా విస్తరిస్తాయి.",
   "viyogaMedScreen8": "బంధం నిలుస్తుంది. అది ఎప్పుడూ నిలుస్తుంది.",
   "viyogaMedScreen9": "మెల్లగా ఊపిరి విడవండి. మీరు ఉండవలసిన చోటే ఉన్నారు.",
-
   "rcHeaderTitle": "సంబంధ దిక్సూచి",
   "rcBackA11y": "వెనుకకు",
   "rcNotificationsA11y": "నోటిఫికేషన్‌లు",
   "rcLongingFallback": "మీరు పేరు పెట్టిన బంధం",
   "rcProgressStepA11y": "{{total}}-లో దశ {{n}}",
-
   "rcAltarPrompt": "మీరు దిక్సూచి వద్దకు ఎవరిని తీసుకువస్తున్నారు?",
   "rcAltarTypeA11y": "{{label}} సంబంధం",
   "rcAltarNamePlaceholder": "వారి పేరు (ఐచ్ఛికం)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "ఇప్పుడు ఈ సంబంధం ఎలా అనిపిస్తుంది?",
   "rcAltarGunaA11y": "ప్రారంభ రీడింగ్‌ను {{label}}కు సెట్ చేయండి",
   "rcAltarCta": "దిక్సూచిని తెరువండి",
-
   "rcGunaMirrorYourSituation": "మీ పరిస్థితి",
   "rcGunaMirrorOptional": "(ఐచ్ఛికం)",
   "rcGunaMirrorPlaceholder": "మీ పరిస్థితిని మీ మాటల్లో వివరించండి...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "సమతుల్య శక్తి",
   "rcGunaMirrorPredominantlyFmt": "ప్రధానంగా {{guna}}",
   "rcGunaMirrorCta": "మీ ధర్మ మ్యాప్ పొందండి",
-
   "rcDharmaMapInterpretFmt": "మీ సంబంధం {{nameClause}}బలమైన {{high}} ({{highSkt}}) చూపిస్తుంది కానీ తగ్గిన {{low}} ({{lowSkt}}).",
   "rcDharmaMapNameClauseFmt": "{{name}}తో ",
   "rcDharmaMapCta": "గీత యొక్క జ్ఞానం పొందండి",
-
   "rcGitaLoading1": "దిక్సూచి మీ దిశను కనుగొంటోంది...",
   "rcGitaLoading2": "మీ సంబంధం యొక్క గుణాలను చదువుతోంది...",
   "rcGitaLoading3": "కృష్ణుడు మార్గాన్ని వెలిగిస్తున్నాడు...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "నెట్‌వర్క్ ప్రశాంతంగా ఉంది — మీ ఆఫ్‌లైన్ గైడ్ చూపబడుతోంది.",
   "rcGitaIntentionWithPartnerFmt": "{{name}}తో సంకల్పం పెట్టండి",
   "rcGitaSetIntentionCta": "మీ ధార్మిక సంకల్పం పెట్టండి",
-
   "rcIntentionTitle": "మీ ధార్మిక సంకల్పం పెట్టండి",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}}తో నా సంబంధంలో, నేను {{quality}}ని ఎంచుకుంటున్నాను. (లేదా శంఖాన్ని తాకి మాట్లాడండి)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "మీ సంకల్పం ఇక్కడ రాయండి... (లేదా శంఖాన్ని తాకి మాట్లాడండి)",
   "rcIntentionA11y": "మీ సంకల్పం",
   "rcIntentionCta": "నా దిక్సూచిని ముద్రించండి",
-
   "rcSealTitleWord1": "మీ",
   "rcSealTitleWord2": "దిక్సూచి",
   "rcSealTitleWord3": "ఇప్పుడు",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "తేదీ:",
   "rcSealReturnHome": "హోమ్‌కు తిరిగి",
   "rcSealJournal": "దీనిని జర్నల్‌లో రాయండి",
-  "rcSealTalkSakha": "సఖాతో మాట్లాడండి"
+  "rcSealTalkSakha": "సఖాతో మాట్లాడండి",
+  "kfpScreenTitle": "కర్మ ముద్ర",
+  "kfpSubtitle": "ప్రపంచంలో మీ కర్మ తరంగాలు",
+  "kfpTotalKarmaLabel": "మొత్తం కర్మ",
+  "kfpPositiveActionsFmt": "{{count}} సానుకూల చర్యలు",
+  "kfpAreasOfGrowthLabel": "ఎదుగుదల రంగాలు",
+  "kfpRippleEffectsLabel": "తరంగ ప్రభావాలు",
+  "kfpEmptyMessage": "మీ కర్మ ప్రయాణం ఎదురు చూస్తోంది.\nదిగువ మీ మొదటి చర్యను నమోదు చేయండి.",
+  "kfpLogNewActionButton": "కొత్త చర్యను నమోదు చేయండి",
+  "kfpModalTitle": "కర్మ చర్యను నమోదు చేయండి",
+  "kfpActionLabel": "మీరు ఏం చేశారు?",
+  "kfpActionPlaceholder": "మీ చర్యను వివరించండి...",
+  "kfpImpactLabel": "దాని ప్రభావం ఏమిటి?",
+  "kfpImpactPlaceholder": "ఇది ఇతరులను ఎలా ప్రభావితం చేసింది...",
+  "kfpLogActionButton": "చర్యను నమోదు చేయండి",
+  "kfpCancelButton": "రద్దు"
 }

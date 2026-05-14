@@ -26,6 +26,7 @@ import {
   radii,
 } from '@kiaanverse/ui';
 import { useKarmaFootprint } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 interface RippleEffect {
   action: string;
@@ -35,6 +36,7 @@ interface RippleEffect {
 
 export default function KarmaFootprintScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const { data, isLoading } = useKarmaFootprint();
   const [showLogModal, setShowLogModal] = useState(false);
   const [newAction, setNewAction] = useState('');
@@ -81,7 +83,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <Screen>
-        <GoldenHeader title="Karma Footprint" onBack={() => router.back()} />
+        <GoldenHeader title={t('kfpScreenTitle')} onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <LoadingMandala size={80} />
         </View>
@@ -91,7 +93,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Karma Footprint" onBack={() => router.back()} />
+      <GoldenHeader title={t('kfpScreenTitle')} onBack={() => router.back()} />
 
       <FlatList
         data={data?.ripple_effects ?? []}
@@ -102,7 +104,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
         ListHeaderComponent={
           <View style={styles.headerContent}>
             <Text variant="body" color={colors.text.secondary} align="center">
-              Your karmic ripples in the world
+              {t('kfpSubtitle')}
             </Text>
 
             {/* Total karma display */}
@@ -111,7 +113,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
               style={styles.karmaDisplay}
             >
               <Text variant="caption" color={colors.text.muted} align="center">
-                Total Karma
+                {t('kfpTotalKarmaLabel')}
               </Text>
               <Text
                 variant="h1"
@@ -126,7 +128,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
                 color={colors.primary[300]}
                 align="center"
               >
-                {data?.positive_actions ?? 0} positive actions
+                {t('kfpPositiveActionsFmt', { count: data?.positive_actions ?? 0 })}
               </Text>
             </Animated.View>
 
@@ -138,7 +140,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
                   color={colors.text.muted}
                   style={styles.sectionLabel}
                 >
-                  Areas of Growth
+                  {t('kfpAreasOfGrowthLabel')}
                 </Text>
                 <View style={styles.chipRow}>
                   {data.areas_of_growth.map((area) => (
@@ -170,20 +172,20 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
               color={colors.text.muted}
               style={styles.sectionLabel}
             >
-              Ripple Effects
+              {t('kfpRippleEffectsLabel')}
             </Text>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text variant="body" color={colors.text.muted} align="center">
-              Your karmic journey awaits.{'\n'}Log your first action below.
+              {t('kfpEmptyMessage')}
             </Text>
           </View>
         }
         ListFooterComponent={
           <View style={styles.footerContainer}>
-            <GoldenButton title="Log New Action" onPress={handleOpenModal} />
+            <GoldenButton title={t('kfpLogNewActionButton')} onPress={handleOpenModal} />
           </View>
         }
       />
@@ -196,24 +198,24 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
         >
           <Pressable style={styles.modalContent} onPress={() => {}}>
             <Text variant="h3" color={colors.text.primary} align="center">
-              Log Karmic Action
+              {t('kfpModalTitle')}
             </Text>
             <Input
-              label="What did you do?"
-              placeholder="Describe your action..."
+              label={t('kfpActionLabel')}
+              placeholder={t('kfpActionPlaceholder')}
               value={newAction}
               onChangeText={setNewAction}
               multiline
             />
             <Input
-              label="What impact did it have?"
-              placeholder="How did it affect others..."
+              label={t('kfpImpactLabel')}
+              placeholder={t('kfpImpactPlaceholder')}
               value={newImpact}
               onChangeText={setNewImpact}
               multiline
             />
             <GoldenButton
-              title="Log Action"
+              title={t('kfpLogActionButton')}
               onPress={handleLogAction}
               disabled={!newAction.trim()}
             />
@@ -222,7 +224,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
               style={styles.cancelButton}
             >
               <Text variant="body" color={colors.text.muted} align="center">
-                Cancel
+                {t('kfpCancelButton')}
               </Text>
             </Pressable>
           </Pressable>

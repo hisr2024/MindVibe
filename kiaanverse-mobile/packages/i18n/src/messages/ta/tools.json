@@ -1,64 +1,48 @@
 {
   "hubTitle": "புனித கருவிகள்",
   "hubSubtitle": "உள் மாற்றத்திற்கான ஒவ்வொரு வேதமும் கருவியும்",
-
   "sectionVoice": "புனித குரல்",
   "sectionScriptures": "புனித வேதங்கள்",
   "sectionWisdom": "ஞானக் கருவிகள்",
   "sectionHealing": "உபசார கருவிகள்",
   "sectionPaths": "புனித பாதைகள்",
   "sectionSound": "புனித ஒலி",
-
   "voiceCompanionName": "சகா — குரல் துணை",
   "voiceCompanionDescription": "தெய்வீக நண்பருடன் பேசு",
-
   "gitaName": "பகவத் கீதை",
   "gitaDescription": "18 அத்தியாயங்கள் · 700 ஶ்லோகங்கள்",
-
   "ardhaName": "அர்தா",
   "ardhaDescription": "உங்கள் பார்வையை மறு-வடிவமாக்கு",
-
   "viyogaName": "வியோகம்",
   "viyogaDescription": "துறவின் கலை",
-
   "relationshipCompassName": "உறவு திசைகாட்டி",
   "relationshipCompassDescription": "தர்மம் வழிநடத்தும் தெளிவு",
-
   "emotionalResetName": "உணர்வு மீட்டமைப்பு",
   "emotionalResetDescription": "உணர்வுகளை விடுவித்து மாற்று",
-
   "karmaResetName": "கர்ம மீட்டமைப்பு",
   "karmaResetDescription": "கர்ம பாங்குகளை குணப்படுத்து",
-
   "wisdomRoomsName": "ஞான அறைகள்",
   "wisdomRoomsDescription": "தேடுவோரின் புனித வட்டங்கள்",
-
   "journeysName": "பயணங்கள்",
   "journeysDescription": "உள் போர்க்களம் · 6 எதிரிகள்",
-
   "sacredReflectionsName": "புனிதச் சிந்தனைகள்",
   "sacredReflectionsDescription": "மறையாக்கப்பட்ட நாட்குறிப்பு & நுண்ணறிவு",
-
   "dashboardSubtitle": "மாற்றம், தெளிவு, உள் அமைதிக்கான கருவிகள்",
   "sectionInsights": "கர்ம நுண்ணறிவு",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "உங்கள் சாதனையில் வடிவங்கள்",
   "karmaFootprintName": "கர்ம காலடி",
   "karmaFootprintDescription": "உங்கள் கர்ம அலைகளைப் பின்தொடரு",
   "karmaTreeName": "கர்ம மரம்",
   "karmaTreeDescription": "உங்கள் உயிருள்ள தர்ம மரப்பந்தல்",
-
   "karmicTreeTitle": "கர்ம மரம்",
   "karmicTreeRootsFallback": "உங்கள் வேர்கள்",
   "karmicTreeTagline1": "உங்கள் வடிவங்களின் கிளைகள் இன்னும் வரைபடம் ஆக்கப்படுகின்றன.",
   "karmicTreeTagline2": "இந்த புனிதக் கருவி இன்னும் வளர்கிறது — மலரும்போது சகா உங்களுக்கு அறிவிப்பார்.",
   "karmicTreeBackToArmoryA11y": "கருவி டாஷ்போர்டுக்குத் திரும்பு",
   "karmicTreeBackToArmoryCta": "ஆயுதக் களத்திற்குத் திரும்பு",
-
   "karmaResetPatternFallback": "நீங்கள் பெயரிட்ட வடிவம்",
   "emotionalResetReflectionFallback": "உங்கள் சிந்தனை",
-
   "goBackA11y": "திரும்பு",
   "backButton": "< திரும்பு",
   "erStepBreathe": "சுவாசம்",
@@ -67,7 +51,6 @@
   "erStepAffirm": "உறுதிமொழி",
   "erStepReflect": "சிந்தனை",
   "erStepComplete": "முடிந்தது",
-
   "ardhaTitle": "அர்த",
   "ardhaTagline": "தர்மம் மற்றும் உயர் விழிப்புணர்வு வழியாக ஆத்ம மறு-வடிவமைப்பு",
   "ardhaQuote": "“அசத்துக்கு இருப்பு இல்லை, சத் ஒருபோதும் முடிவடைவதில்லை.”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA vs CBT",
   "ardhaCbtBody": "CBT சிதைந்த சிந்தனையைச் சரிசெய்கிறது. ARDHA தவறான அடையாளத்தைச் சரிசெய்கிறது. CBT செயல்படும் அஹத்தை வலுப்படுத்தும் இடத்தில், ARDHA அஹ-தாதாத்மியத்தைத் தளர்த்துகிறது — சரியான செயல் வழியாக உள் சுதந்திரத்தை நோக்கி.",
   "ardhaCbtFlow": "ஆத்ம பேதம் → ராக-த்வேஷ ஸ்கேன் → தர்ம ஒத்திசைவு → ஹ்ருதய சமத்வம் → அர்ப்பணை",
-
   "ardhaErrSession": "உங்கள் அமர்வு காலாவதியானது. மீண்டும் சைன் இன் செய்யவும்.",
   "ardhaErrOffline": "நெட்வொர்க் கிடைக்கவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலவும்.",
   "ardhaErrServer": "ARDHA ஆழ்த்தியானத்திலிருந்து விழித்துக்கொண்டிருக்கிறது. சிறிது நேரத்தில் மீண்டும் முயலவும்.",
   "ardhaErrGeneric": "ARDHA இப்போது மறு-வடிவமைக்க முடியவில்லை. மீண்டும் முயலவும்.",
   "ardhaErrPrefix": "ARDHA மறு-வடிவமைக்க முடியவில்லை: {{message}}",
-
   "ardhaResultCardTitle": "அர்தாவின்\nமறு-வடிவமைப்பு",
   "ardhaQuickBadge": "⚡ விரைவு மறு-வடிவமைப்பு",
   "ardhaCopyA11y": "மறு-வடிவமைப்பு உரையை நகலெடு",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "முகப்புக்குத் திரும்பு",
   "ardhaJournalThis": "இதை நாட்குறிப்பில் எழுது",
   "ardhaReframeAgain": "மீண்டும் மறு-வடிவமைப்பு",
-
   "viyogaIntroTitleEng": "ஏக்கத்தின் புனித இடம்",
   "viyogaIntroSubtitle": "பிரிவிலும் ஐக்கியம் உண்டு",
   "viyogaEnterSpace": "இந்த இடத்திற்குள் நுழை",
   "viyogaLongingFallback": "நீங்கள் பெயர் கொடுத்த ஏக்கம்",
-
   "viyogaStep1Question": "உங்கள் பிரிவு என்ன வடிவம் கொண்டது?",
   "viyogaSepDeath": "மரணத்தினால் பிரிவு",
   "viyogaSepDeathDesc": "ஒரு ஆன்மா எல்லையைக் கடந்துவிட்டது",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "தெய்வத்திற்கான ஏக்கம்",
   "viyogaSepDivineDesc": "ஆன்மிக பிரிவு, இருண்ட இரவு",
   "viyogaContinue": "தொடர்",
-
   "viyogaStep2Q1": "நீங்கள் யாரிடமிருந்து / எதிலிருந்து பிரிந்திருக்கிறீர்கள்?",
   "viyogaStep2Q1Placeholder": "ஒரு பெயர், ஒரு இடம், உங்களின் ஒரு பதிப்பு...",
   "viyogaStep2Q2": "இந்தப் பிரிவு எவ்வளவு தூரம் உணரப்படுகிறது?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "இதை சகாவிடம் கொண்டுவாரும்",
   "viyogaBringToSakhaCta": "இதை சகாவிடம் கொண்டுவாரும்",
   "viyogaListening": "கேட்கிறது...",
-
   "viyogaSec1Label": "எனக்குப் புரிகிறது",
   "viyogaSec2Label": "இதைப் பார்க்க மற்றொரு வழி",
   "viyogaSec3Label": "இப்போதே இதை முயலுங்கள்",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "முழு உரையைக் காட்டு",
   "viyogaTxContinue": "தியானத்திற்கு செல் →",
   "viyogaTxContinueA11y": "தியானத்திற்கு செல்",
-
   "viyogaMedScreenOfA11y": "{{total}}-ல் திரை {{n}}-க்குச் செல்",
   "viyogaMedBackToTx": "செய்திக்குத் திரும்பு",
   "viyogaMedPrevSentence": "முந்தைய வாக்கியம்",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "தானியங்கி",
   "viyogaMedEnd": "முடி",
   "viyogaMedEndA11y": "தியானத்தை முடி",
-
   "viyogaReleaseQuestion": "நீங்கள் எதை விடுவிக்க விரும்புகிறீர்கள்?",
   "viyogaReleaseSubtitle": "அன்பு அல்ல. நினைவு அல்ல. ஆனால் வலியின் சுமை.",
   "viyogaReleasePlaceholder": "நான் விடுவிக்கிறேன்...",
   "viyogaReleaseOfferA11y": "புனித நெருப்புக்கு அர்ப்பணி",
   "viyogaReleaseOfferCta": "புனித நெருப்புக்கு அர்ப்பணி",
-
   "viyogaCompleteOmA11y": "ஓம்",
   "viyogaCompleteLabel": "வியோகம் முற்றுப்பெற்றது",
   "viyogaCompleteOfferedOn": "{{date}}-ல் அர்ப்பணிக்கப்பட்டது",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "இந்த அர்ப்பணிப்பை நாட்குறிப்பில் எழுது",
   "viyogaCompleteTalkSakha": "சகாவுடன் பேசு",
   "viyogaCompleteTalkSakhaA11y": "சகாவுடன் பேசு",
-
   "viyogaMedScreen1": "நீங்கள் சுமந்து செல்லும் ஏக்கம் புனிதமானது.",
   "viyogaMedScreen2": "இது பலவீனம் அல்ல. செல்லுமிடம் இல்லாத அன்பு இது.",
   "viyogaMedScreen3": "நினைவில் இருப்பதை சுவாசத்தில் ஏற்றுக்கொள்.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "நீங்கள் வேருக்கிழந்தவர் அல்ல. உங்கள் வேர்கள் எல்லா இடத்திலும் பரவியுள்ளன.",
   "viyogaMedScreen8": "பந்தம் நிலைக்கிறது. அது எப்போதும் நிலைக்கிறது.",
   "viyogaMedScreen9": "மெதுவாக சுவாசம் வெளியேற்று. நீங்கள் இருக்க வேண்டிய இடத்திலேயே இருக்கிறீர்கள்.",
-
   "rcHeaderTitle": "உறவு திசைகாட்டி",
   "rcBackA11y": "திரும்பு",
   "rcNotificationsA11y": "அறிவிப்புகள்",
   "rcLongingFallback": "நீங்கள் பெயரிட்ட பந்தம்",
   "rcProgressStepA11y": "{{total}}-ல் படி {{n}}",
-
   "rcAltarPrompt": "திசைகாட்டிக்கு யாரை அழைத்து வருகிறீர்கள்?",
   "rcAltarTypeA11y": "{{label}} உறவு",
   "rcAltarNamePlaceholder": "அவர்களின் பெயர் (விருப்பத்திற்கேற்ப)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "இப்போது இந்த உறவு எவ்வாறு உணரப்படுகிறது?",
   "rcAltarGunaA11y": "ஆரம்ப வாசிப்பை {{label}}-க்கு அமை",
   "rcAltarCta": "திசைகாட்டியைத் திற",
-
   "rcGunaMirrorYourSituation": "உங்கள் நிலை",
   "rcGunaMirrorOptional": "(விருப்பத்திற்கேற்ப)",
   "rcGunaMirrorPlaceholder": "உங்கள் நிலையை உங்கள் சொற்களில் விவரிக்கவும்...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "சமநிலை ஆற்றல்",
   "rcGunaMirrorPredominantlyFmt": "முதன்மையாக {{guna}}",
   "rcGunaMirrorCta": "உங்கள் தர்ம வரைபடம் பெறு",
-
   "rcDharmaMapInterpretFmt": "உங்கள் உறவு {{nameClause}}வலுவான {{high}} ({{highSkt}})-ஐ காட்டுகிறது, ஆனால் குறைந்த {{low}} ({{lowSkt}})-ஐ.",
   "rcDharmaMapNameClauseFmt": "{{name}}-உடன் ",
   "rcDharmaMapCta": "கீதையின் ஞானத்தைப் பெறு",
-
   "rcGitaLoading1": "திசைகாட்டி உங்கள் திசையை கண்டறிகிறது...",
   "rcGitaLoading2": "உங்கள் உறவின் குணங்களை வாசிக்கிறது...",
   "rcGitaLoading3": "கிருஷ்ணர் வழியை ஒளிரச்செய்கிறார்...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "வலையமைப்பு அமைதியாக உள்ளது — உங்கள் ஆஃப்லைன் வழிகாட்டி காட்டப்படுகிறது.",
   "rcGitaIntentionWithPartnerFmt": "{{name}}-உடன் சங்கல்பம் அமை",
   "rcGitaSetIntentionCta": "உங்கள் தர்ம சங்கல்பத்தை அமை",
-
   "rcIntentionTitle": "உங்கள் தர்ம சங்கல்பத்தை அமை",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}}-உடனான என் உறவில், நான் {{quality}}-ஐ தேர்ந்தெடுக்கிறேன். (அல்லது சங்கைத் தொட்டுப் பேசவும்)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "உங்கள் சங்கல்பத்தை இங்கே எழுதவும்... (அல்லது சங்கைத் தொட்டுப் பேசவும்)",
   "rcIntentionA11y": "உங்கள் சங்கல்பம்",
   "rcIntentionCta": "என் திசைகாட்டியை முத்திரையிடு",
-
   "rcSealTitleWord1": "உங்கள்",
   "rcSealTitleWord2": "திசைகாட்டி",
   "rcSealTitleWord3": "இப்போது",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "தேதி:",
   "rcSealReturnHome": "முகப்புக்குத் திரும்பு",
   "rcSealJournal": "இதை நாட்குறிப்பில் எழுது",
-  "rcSealTalkSakha": "சகாவுடன் பேசு"
+  "rcSealTalkSakha": "சகாவுடன் பேசு",
+  "kfpScreenTitle": "கர்ம தடம்",
+  "kfpSubtitle": "உலகில் உங்கள் கர்ம அலைகள்",
+  "kfpTotalKarmaLabel": "மொத்த கர்மா",
+  "kfpPositiveActionsFmt": "{{count}} நேர்மறை செயல்கள்",
+  "kfpAreasOfGrowthLabel": "வளர்ச்சி பகுதிகள்",
+  "kfpRippleEffectsLabel": "அலை விளைவுகள்",
+  "kfpEmptyMessage": "உங்கள் கர்ம பயணம் காத்திருக்கிறது.\nகீழே உங்கள் முதல் செயலைப் பதிவு செய்யவும்.",
+  "kfpLogNewActionButton": "புதிய செயலைப் பதிவு செய்",
+  "kfpModalTitle": "கர்ம செயலைப் பதிவு செய்",
+  "kfpActionLabel": "என்ன செய்தீர்கள்?",
+  "kfpActionPlaceholder": "உங்கள் செயலை விவரிக்கவும்...",
+  "kfpImpactLabel": "என்ன தாக்கத்தை ஏற்படுத்தியது?",
+  "kfpImpactPlaceholder": "அது மற்றவர்களை எவ்வாறு பாதித்தது...",
+  "kfpLogActionButton": "செயலைப் பதிவு செய்",
+  "kfpCancelButton": "ரத்து"
 }

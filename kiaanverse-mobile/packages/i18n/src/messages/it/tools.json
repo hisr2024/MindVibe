@@ -1,64 +1,48 @@
 {
   "hubTitle": "Strumenti sacri",
   "hubSubtitle": "Ogni scrittura e strumento per la trasformazione interiore",
-
   "sectionVoice": "Voce sacra",
   "sectionScriptures": "Scritture sacre",
   "sectionWisdom": "Strumenti di saggezza",
   "sectionHealing": "Strumenti di guarigione",
   "sectionPaths": "Vie sacre",
   "sectionSound": "Suono sacro",
-
   "voiceCompanionName": "Sakha — Compagno vocale",
   "voiceCompanionDescription": "Parla con l'amico divino",
-
   "gitaName": "Bhagavad Gita",
   "gitaDescription": "18 capitoli · 700 shloka",
-
   "ardhaName": "Ardha",
   "ardhaDescription": "Riformula la tua prospettiva",
-
   "viyogaName": "Viyoga",
   "viyogaDescription": "L'arte del lasciar andare",
-
   "relationshipCompassName": "Bussola relazionale",
   "relationshipCompassDescription": "Chiarezza guidata dal dharma",
-
   "emotionalResetName": "Reset emotivo",
   "emotionalResetDescription": "Libera e trasforma le emozioni",
-
   "karmaResetName": "Reset karmico",
   "karmaResetDescription": "Guarisci schemi karmici",
-
   "wisdomRoomsName": "Sale della saggezza",
   "wisdomRoomsDescription": "Cerchi sacri di ricercatori",
-
   "journeysName": "Viaggi",
   "journeysDescription": "Il campo di battaglia interiore · 6 nemici",
-
   "sacredReflectionsName": "Riflessioni sacre",
   "sacredReflectionsDescription": "Diario cifrato e intuizioni",
-
   "dashboardSubtitle": "Strumenti per trasformazione, chiarezza e pace interiore",
   "sectionInsights": "Intuizioni karmiche",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "Schemi nella tua pratica",
   "karmaFootprintName": "Impronta karmica",
   "karmaFootprintDescription": "Traccia le tue onde karmiche",
   "karmaTreeName": "Albero karmico",
   "karmaTreeDescription": "La tua chioma dharmica vivente",
-
   "karmicTreeTitle": "Albero karmico",
   "karmicTreeRootsFallback": "le tue radici",
   "karmicTreeTagline1": "I rami dei tuoi schemi sono ancora in fase di mappatura.",
   "karmicTreeTagline2": "Questo strumento sacro è ancora in coltivazione — Sakha te lo dirà quando sboccerà.",
   "karmicTreeBackToArmoryA11y": "Torna alla dashboard degli Strumenti",
   "karmicTreeBackToArmoryCta": "Torna all'Armeria",
-
   "karmaResetPatternFallback": "lo schema che hai nominato",
   "emotionalResetReflectionFallback": "la tua riflessione",
-
   "goBackA11y": "Indietro",
   "backButton": "< Indietro",
   "erStepBreathe": "Respirare",
@@ -67,7 +51,6 @@
   "erStepAffirm": "Affermare",
   "erStepReflect": "Riflettere",
   "erStepComplete": "Completare",
-
   "ardhaTitle": "Ardha",
   "ardhaTagline": "Riformulazione dell'Atma attraverso Dharma e coscienza superiore",
   "ardhaQuote": "«L'irreale non ha esistenza, il reale non cessa mai di essere.»",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA vs CBT",
   "ardhaCbtBody": "La TCC corregge il pensiero distorto. ARDHA corregge l'identità errata. Dove la TCC rafforza l'ego funzionale, ARDHA scioglie l'identificazione con l'ego — verso la libertà interiore attraverso l'azione retta.",
   "ardhaCbtFlow": "Distinzione Atma → Scansione Raga-Dvesha → Allineamento Dharma → Hrdaya Samatvam → Arpana",
-
   "ardhaErrSession": "La tua sessione è scaduta. Accedi di nuovo.",
   "ardhaErrOffline": "La rete non è raggiungibile. Controlla la connessione e riprova.",
   "ardhaErrServer": "ARDHA si sta svegliando da una meditazione profonda. Riprova tra poco.",
   "ardhaErrGeneric": "ARDHA non è riuscita a riformulare ora. Riprova.",
   "ardhaErrPrefix": "ARDHA non ha potuto riformulare: {{message}}",
-
   "ardhaResultCardTitle": "Riformulazione\ndi Ardha",
   "ardhaQuickBadge": "⚡ Riformulazione rapida",
   "ardhaCopyA11y": "Copia il testo della riformulazione",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "Torna alla Home",
   "ardhaJournalThis": "Annota nel Diario",
   "ardhaReframeAgain": "Riformula di nuovo",
-
   "viyogaIntroTitleEng": "Lo spazio sacro del desiderio",
   "viyogaIntroSubtitle": "Anche nella separazione c'è unione",
   "viyogaEnterSpace": "Entra in questo spazio",
   "viyogaLongingFallback": "il desiderio che hai nominato",
-
   "viyogaStep1Question": "Che forma ha la tua separazione?",
   "viyogaSepDeath": "Partenza attraverso la morte",
   "viyogaSepDeathDesc": "Un'anima ha varcato la soglia",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "Desiderio del Divino",
   "viyogaSepDivineDesc": "Separazione spirituale, la notte oscura",
   "viyogaContinue": "Continua",
-
   "viyogaStep2Q1": "Da chi o cosa sei separato?",
   "viyogaStep2Q1Placeholder": "Un nome, un luogo, una versione di te stesso...",
   "viyogaStep2Q2": "Quanto lontano sembra questa separazione?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "Porta questo a Sakha",
   "viyogaBringToSakhaCta": "Porta questo a Sakha",
   "viyogaListening": "Ascolta...",
-
   "viyogaSec1Label": "Capisco",
   "viyogaSec2Label": "Un altro modo di vederlo",
   "viyogaSec3Label": "Prova questo ora",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "Mostra testo completo",
   "viyogaTxContinue": "Continua alla Meditazione →",
   "viyogaTxContinueA11y": "Continua alla meditazione",
-
   "viyogaMedScreenOfA11y": "Vai alla schermata {{n}} di {{total}}",
   "viyogaMedBackToTx": "Torna alla trasmissione",
   "viyogaMedPrevSentence": "Frase precedente",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "Auto",
   "viyogaMedEnd": "Fine",
   "viyogaMedEndA11y": "Termina meditazione",
-
   "viyogaReleaseQuestion": "Cosa desideri rilasciare?",
   "viyogaReleaseSubtitle": "Non l'amore. Non il ricordo. Ma il peso del dolore.",
   "viyogaReleasePlaceholder": "Rilascio...",
   "viyogaReleaseOfferA11y": "Offri al Fuoco Sacro",
   "viyogaReleaseOfferCta": "Offri al Fuoco Sacro",
-
   "viyogaCompleteOmA11y": "OM",
   "viyogaCompleteLabel": "VIYOGA COMPLETO",
   "viyogaCompleteOfferedOn": "Offerto il {{date}}",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "Annota questa offerta nel diario",
   "viyogaCompleteTalkSakha": "Parla con Sakha",
   "viyogaCompleteTalkSakhaA11y": "Parla con Sakha",
-
   "viyogaMedScreen1": "Il desiderio che porti è sacro.",
   "viyogaMedScreen2": "Non è debolezza. È amore senza un luogo dove andare.",
   "viyogaMedScreen3": "Inspira ciò che ricordi.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "Non sei sradicato. Le tue radici si estendono ovunque.",
   "viyogaMedScreen8": "Il legame regge. Regge sempre.",
   "viyogaMedScreen9": "Espira lentamente. Sei esattamente dove devi essere.",
-
   "rcHeaderTitle": "Bussola relazionale",
   "rcBackA11y": "Indietro",
   "rcNotificationsA11y": "Notifiche",
   "rcLongingFallback": "il legame che hai nominato",
   "rcProgressStepA11y": "Passo {{n}} di {{total}}",
-
   "rcAltarPrompt": "Chi stai portando alla Bussola?",
   "rcAltarTypeA11y": "Relazione: {{label}}",
   "rcAltarNamePlaceholder": "Il loro nome (facoltativo)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "Come ti senti in questa relazione ora?",
   "rcAltarGunaA11y": "Imposta la lettura iniziale su {{label}}",
   "rcAltarCta": "Apri la Bussola",
-
   "rcGunaMirrorYourSituation": "La tua situazione",
   "rcGunaMirrorOptional": "(facoltativo)",
   "rcGunaMirrorPlaceholder": "Descrivi la tua situazione con parole tue...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "Energia bilanciata",
   "rcGunaMirrorPredominantlyFmt": "Prevalentemente {{guna}}",
   "rcGunaMirrorCta": "Ottieni la tua Mappa del Dharma",
-
   "rcDharmaMapInterpretFmt": "La tua relazione {{nameClause}}mostra forte {{high}} ({{highSkt}}) ma debole {{low}} ({{lowSkt}}).",
   "rcDharmaMapNameClauseFmt": "con {{name}} ",
   "rcDharmaMapCta": "Ricevi la saggezza della Gita",
-
   "rcGitaLoading1": "La Bussola trova la tua direzione...",
   "rcGitaLoading2": "Legge le guna della tua connessione...",
   "rcGitaLoading3": "Krishna illumina il cammino...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "La rete è tranquilla — viene mostrata la tua guida offline.",
   "rcGitaIntentionWithPartnerFmt": "Imposta l'intenzione con {{name}}",
   "rcGitaSetIntentionCta": "Imposta la tua intenzione dharmica",
-
   "rcIntentionTitle": "Imposta la tua intenzione dharmica",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "Nella mia relazione con {{name}}, scelgo {{quality}}. (o tocca la conchiglia per parlare)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "Scrivi qui il tuo sankalpa... (o tocca la conchiglia per parlare)",
   "rcIntentionA11y": "La tua intenzione",
   "rcIntentionCta": "Sigilla la mia Bussola",
-
   "rcSealTitleWord1": "La tua",
   "rcSealTitleWord2": "Bussola",
   "rcSealTitleWord3": "è",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "Data:",
   "rcSealReturnHome": "Torna alla Home",
   "rcSealJournal": "Annota nel Diario",
-  "rcSealTalkSakha": "Parla con Sakha"
+  "rcSealTalkSakha": "Parla con Sakha",
+  "kfpScreenTitle": "Impronta karmica",
+  "kfpSubtitle": "Le tue onde karmiche nel mondo",
+  "kfpTotalKarmaLabel": "Karma totale",
+  "kfpPositiveActionsFmt": "{{count}} azioni positive",
+  "kfpAreasOfGrowthLabel": "Aree di crescita",
+  "kfpRippleEffectsLabel": "Effetti a catena",
+  "kfpEmptyMessage": "Il tuo viaggio karmico ti aspetta.\nRegistra la tua prima azione qui sotto.",
+  "kfpLogNewActionButton": "Registra nuova azione",
+  "kfpModalTitle": "Registra azione karmica",
+  "kfpActionLabel": "Cosa hai fatto?",
+  "kfpActionPlaceholder": "Descrivi la tua azione...",
+  "kfpImpactLabel": "Che impatto ha avuto?",
+  "kfpImpactPlaceholder": "Come ha influenzato gli altri...",
+  "kfpLogActionButton": "Registra azione",
+  "kfpCancelButton": "Annulla"
 }

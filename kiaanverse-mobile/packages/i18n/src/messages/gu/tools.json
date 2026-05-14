@@ -1,64 +1,48 @@
 {
   "hubTitle": "પવિત્ર સાધનો",
   "hubSubtitle": "આંતરિક રૂપાંતર માટે દરેક શાસ્ત્ર અને ઉપકરણ",
-
   "sectionVoice": "પવિત્ર વાણી",
   "sectionScriptures": "પવિત્ર શાસ્ત્રો",
   "sectionWisdom": "જ્ઞાન-સાધનો",
   "sectionHealing": "ઉપચાર-સાધનો",
   "sectionPaths": "પવિત્ર માર્ગો",
   "sectionSound": "પવિત્ર નાદ",
-
   "voiceCompanionName": "સખા — વોઇસ સાથી",
   "voiceCompanionDescription": "દિવ્ય મિત્ર સાથે વાત કરો",
-
   "gitaName": "ભગવદ્ગીતા",
   "gitaDescription": "૧૮ અધ્યાય · ૭૦૦ શ્લોક",
-
   "ardhaName": "અર્થ",
   "ardhaDescription": "તમારો દૃષ્ટિકોણ ફરી ઘડો",
-
   "viyogaName": "વિયોગ",
   "viyogaDescription": "ત્યાગની કળા",
-
   "relationshipCompassName": "સંબંધ દિશાસૂચક",
   "relationshipCompassDescription": "ધર્મ-નિર્દેશિત સ્પષ્ટતા",
-
   "emotionalResetName": "ભાવનાત્મક રીસેટ",
   "emotionalResetDescription": "ભાવનાઓને મુક્ત કરો અને રૂપાંતરિત કરો",
-
   "karmaResetName": "કર્મ રીસેટ",
   "karmaResetDescription": "કર્મ-પેટર્નનો ઉપચાર કરો",
-
   "wisdomRoomsName": "જ્ઞાન ખંડ",
   "wisdomRoomsDescription": "સાધકોના પવિત્ર વર્તુળો",
-
   "journeysName": "યાત્રાઓ",
   "journeysDescription": "આંતરિક રણભૂમિ · ૬ શત્રુ",
-
   "sacredReflectionsName": "પવિત્ર ચિંતન",
   "sacredReflectionsDescription": "એન્ક્રિપ્ટેડ જર્નલ અને અંતર્દૃષ્ટિ",
-
   "dashboardSubtitle": "રૂપાંતર, સ્પષ્ટતા અને આંતરિક શાંતિ માટેના સાધનો",
   "sectionInsights": "કર્મ અંતર્દૃષ્ટિ",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "તમારી સાધનામાં પેટર્ન",
   "karmaFootprintName": "કર્મ પદચિહ્ન",
   "karmaFootprintDescription": "તમારી કર્મ-તરંગો અનુસરો",
   "karmaTreeName": "કર્મ વૃક્ષ",
   "karmaTreeDescription": "તમારી જીવંત ધર્મ-છાંયડી",
-
   "karmicTreeTitle": "કર્મ વૃક્ષ",
   "karmicTreeRootsFallback": "તમારા મૂળ",
   "karmicTreeTagline1": "તમારી પેટર્નની શાખાઓ હજુ મેપ થઈ રહી છે.",
   "karmicTreeTagline2": "આ પવિત્ર સાધન હજુ વિકસી રહ્યું છે — જ્યારે ખીલશે ત્યારે સખા જણાવશે.",
   "karmicTreeBackToArmoryA11y": "સાધન ડેશબોર્ડ પર પાછા જાઓ",
   "karmicTreeBackToArmoryCta": "શસ્ત્રાગાર પર પાછા",
-
   "karmaResetPatternFallback": "તમે નામ આપેલી પેટર્ન",
   "emotionalResetReflectionFallback": "તમારું ચિંતન",
-
   "goBackA11y": "પાછા જાઓ",
   "backButton": "< પાછા",
   "erStepBreathe": "શ્વાસ",
@@ -67,7 +51,6 @@
   "erStepAffirm": "સંકલ્પ",
   "erStepReflect": "ચિંતન",
   "erStepComplete": "પૂર્ણ",
-
   "ardhaTitle": "અર્ધ",
   "ardhaTagline": "ધર્મ અને ઉચ્ચ ચેતના દ્વારા આત્મ-પુનર્વ્યાખ્યા",
   "ardhaQuote": "“અસતનું અસ્તિત્વ નથી, સત કદી નાશ પામતું નથી.”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA વિરુદ્ધ CBT",
   "ardhaCbtBody": "CBT વિકૃત વિચારને સુધારે છે. ARDHA ભ્રાંત પહેચાનને સુધારે છે. જ્યાં CBT કાર્યશીલ અહંને મજબૂત કરે છે, ત્યાં ARDHA અહં-તાદાત્મ્યને ઢીલું કરે છે — યોગ્ય ક્રિયા દ્વારા આંતરિક સ્વતંત્રતા તરફ.",
   "ardhaCbtFlow": "આત્મ ભેદ → રાગ-દ્વેષ સ્કેન → ધર્મ સંરેખણ → હૃદય સમત્વ → અર્પણ",
-
   "ardhaErrSession": "તમારું સત્ર સમાપ્ત. ફરી સાઇન ઇન કરો.",
   "ardhaErrOffline": "નેટવર્ક ઉપલબ્ધ નથી. કનેક્શન તપાસી ફરી પ્રયાસ કરો.",
   "ardhaErrServer": "ARDHA ગહન ધ્યાનમાંથી જાગી રહ્યું છે. થોડી વાર પછી ફરી પ્રયાસ કરો.",
   "ardhaErrGeneric": "ARDHA હાલમાં પુનર્વ્યાખ્યા કરી શક્યું નથી. ફરી પ્રયાસ કરો.",
   "ardhaErrPrefix": "ARDHA પુનર્વ્યાખ્યા કરી શક્યું નથી: {{message}}",
-
   "ardhaResultCardTitle": "અર્ધ-ની\nપુનર્વ્યાખ્યા",
   "ardhaQuickBadge": "⚡ ઝડપી પુનર્વ્યાખ્યા",
   "ardhaCopyA11y": "પુનર્વ્યાખ્યા ટેક્સ્ટ કૉપિ",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "હોમ પર પાછા",
   "ardhaJournalThis": "આ જર્નલ કરો",
   "ardhaReframeAgain": "ફરી પુનર્વ્યાખ્યા",
-
   "viyogaIntroTitleEng": "ઝંખનાનું પવિત્ર સ્થાન",
   "viyogaIntroSubtitle": "વિરહમાં પણ મિલન છે",
   "viyogaEnterSpace": "આ સ્થાનમાં પ્રવેશ કરો",
   "viyogaLongingFallback": "તમે જે ઝંખનાને નામ આપ્યું",
-
   "viyogaStep1Question": "તમારો વિરહ કયા સ્વરૂપનો છે?",
   "viyogaSepDeath": "મૃત્યુ દ્વારા વિરહ",
   "viyogaSepDeathDesc": "એક આત્માએ સીમા પાર કરી",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "દિવ્યતાની ઝંખના",
   "viyogaSepDivineDesc": "આધ્યાત્મિક વિરહ, અંધારી રાત",
   "viyogaContinue": "ચાલુ રાખો",
-
   "viyogaStep2Q1": "તમે કોની / શેનાથી વિરહિત છો?",
   "viyogaStep2Q1Placeholder": "એક નામ, એક સ્થાન, તમારું એક રૂપ...",
   "viyogaStep2Q2": "આ વિરહ કેટલો દૂર લાગે છે?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "આને સખા પાસે લાવો",
   "viyogaBringToSakhaCta": "આને સખા પાસે લાવો",
   "viyogaListening": "સાંભળે છે...",
-
   "viyogaSec1Label": "મને સમજાય છે",
   "viyogaSec2Label": "આને જોવાનો બીજો માર્ગ",
   "viyogaSec3Label": "હમણાં જ આ અજમાવો",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "પૂર્ણ લખાણ બતાવો",
   "viyogaTxContinue": "ધ્યાન પર જાઓ →",
   "viyogaTxContinueA11y": "ધ્યાન પર જાઓ",
-
   "viyogaMedScreenOfA11y": "{{total}}-માંથી સ્ક્રીન {{n}} પર જાઓ",
   "viyogaMedBackToTx": "પ્રસારણ પર પાછા",
   "viyogaMedPrevSentence": "પાછલું વાક્ય",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "ઑટો",
   "viyogaMedEnd": "પૂર્ણ",
   "viyogaMedEndA11y": "ધ્યાન સમાપ્ત",
-
   "viyogaReleaseQuestion": "તમે શું મુક્ત કરવા માગો છો?",
   "viyogaReleaseSubtitle": "પ્રેમ નહીં. સ્મૃતિ નહીં. ફક્ત પીડાનો ભાર.",
   "viyogaReleasePlaceholder": "હું મુક્ત કરું છું...",
   "viyogaReleaseOfferA11y": "પવિત્ર અગ્નિને અર્પણ",
   "viyogaReleaseOfferCta": "પવિત્ર અગ્નિને અર્પણ",
-
   "viyogaCompleteOmA11y": "ૐ",
   "viyogaCompleteLabel": "વિયોગ પૂર્ણ",
   "viyogaCompleteOfferedOn": "{{date}}-ના રોજ અર્પિત",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "આ અર્પણ જર્નલ કરો",
   "viyogaCompleteTalkSakha": "સખા સાથે વાત કરો",
   "viyogaCompleteTalkSakhaA11y": "સખા સાથે વાત કરો",
-
   "viyogaMedScreen1": "તમે જે ઝંખના વહન કરો છો તે પવિત્ર છે.",
   "viyogaMedScreen2": "આ નબળાઈ નથી. જવાનું સ્થાન ન હોય તેવો પ્રેમ છે.",
   "viyogaMedScreen3": "જે યાદ છે તેને શ્વાસમાં લો.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "તમે ઊખડેલા નથી. તમારા મૂળ ચારે બાજુ ફેલાયેલા છે.",
   "viyogaMedScreen8": "બંધન ટકે છે. હંમેશા ટકે છે.",
   "viyogaMedScreen9": "ધીરે શ્વાસ છોડો. તમે જ્યાં હોવા જોઈએ ત્યાં જ છો.",
-
   "rcHeaderTitle": "સંબંધ દિશાસૂચક",
   "rcBackA11y": "પાછા",
   "rcNotificationsA11y": "સૂચનાઓ",
   "rcLongingFallback": "તમે નામ આપેલો બંધન",
   "rcProgressStepA11y": "{{total}}-માંથી પગલું {{n}}",
-
   "rcAltarPrompt": "તમે દિશાસૂચક પાસે કોને લાવી રહ્યા છો?",
   "rcAltarTypeA11y": "{{label}} સંબંધ",
   "rcAltarNamePlaceholder": "તેમનું નામ (વૈકલ્પિક)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "અત્યારે આ સંબંધ કેવો લાગે છે?",
   "rcAltarGunaA11y": "પ્રારંભિક વાંચન {{label}} પર સેટ કરો",
   "rcAltarCta": "દિશાસૂચક ખોલો",
-
   "rcGunaMirrorYourSituation": "તમારી પરિસ્થિતિ",
   "rcGunaMirrorOptional": "(વૈકલ્પિક)",
   "rcGunaMirrorPlaceholder": "તમારી પરિસ્થિતિ તમારા શબ્દોમાં વર્ણવો...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "સંતુલિત ઊર્જા",
   "rcGunaMirrorPredominantlyFmt": "મુખ્યત્વે {{guna}}",
   "rcGunaMirrorCta": "તમારો ધર્મ નકશો મેળવો",
-
   "rcDharmaMapInterpretFmt": "તમારો સંબંધ {{nameClause}}મજબૂત {{high}} ({{highSkt}}) દર્શાવે છે પણ ઓછું {{low}} ({{lowSkt}}).",
   "rcDharmaMapNameClauseFmt": "{{name}} સાથે ",
   "rcDharmaMapCta": "ગીતાનું જ્ઞાન મેળવો",
-
   "rcGitaLoading1": "દિશાસૂચક તમારી દિશા શોધી રહ્યો છે...",
   "rcGitaLoading2": "તમારા સંબંધના ગુણો વાંચી રહ્યો છે...",
   "rcGitaLoading3": "કૃષ્ણ માર્ગ પ્રકાશિત કરી રહ્યા છે...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "નેટવર્ક શાંત છે — તમારો ઑફલાઇન માર્ગદર્શક દર્શાવાય છે.",
   "rcGitaIntentionWithPartnerFmt": "{{name}} સાથે સંકલ્પ મૂકો",
   "rcGitaSetIntentionCta": "તમારો ધાર્મિક સંકલ્પ મૂકો",
-
   "rcIntentionTitle": "તમારો ધાર્મિક સંકલ્પ મૂકો",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}} સાથે મારા સંબંધમાં, હું {{quality}} પસંદ કરું છું. (અથવા શંખ સ્પર્શી બોલો)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "તમારો સંકલ્પ અહીં લખો... (અથવા શંખ સ્પર્શી બોલો)",
   "rcIntentionA11y": "તમારો સંકલ્પ",
   "rcIntentionCta": "મારા દિશાસૂચકને મુદ્રિત કરો",
-
   "rcSealTitleWord1": "તમારો",
   "rcSealTitleWord2": "દિશાસૂચક",
   "rcSealTitleWord3": "હવે",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "તારીખ:",
   "rcSealReturnHome": "હોમ પર પાછા",
   "rcSealJournal": "આ જર્નલ કરો",
-  "rcSealTalkSakha": "સખા સાથે વાત કરો"
+  "rcSealTalkSakha": "સખા સાથે વાત કરો",
+  "kfpScreenTitle": "કર્મ પદચિહ્ન",
+  "kfpSubtitle": "જગતમાં તમારી કર્મ-તરંગો",
+  "kfpTotalKarmaLabel": "કુલ કર્મ",
+  "kfpPositiveActionsFmt": "{{count}} સકારાત્મક ક્રિયાઓ",
+  "kfpAreasOfGrowthLabel": "વિકાસના ક્ષેત્રો",
+  "kfpRippleEffectsLabel": "તરંગ અસરો",
+  "kfpEmptyMessage": "તમારી કર્મ યાત્રા રાહ જુએ છે.\nનીચે તમારી પહેલી ક્રિયા નોંધો.",
+  "kfpLogNewActionButton": "નવી ક્રિયા નોંધો",
+  "kfpModalTitle": "કર્મ ક્રિયા નોંધો",
+  "kfpActionLabel": "તમે શું કર્યું?",
+  "kfpActionPlaceholder": "તમારી ક્રિયા વર્ણવો...",
+  "kfpImpactLabel": "તેની શી અસર પડી?",
+  "kfpImpactPlaceholder": "તેણે અન્યોને કેવી રીતે અસર કરી...",
+  "kfpLogActionButton": "ક્રિયા નોંધો",
+  "kfpCancelButton": "રદ"
 }

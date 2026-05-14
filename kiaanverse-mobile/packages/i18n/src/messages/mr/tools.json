@@ -1,64 +1,48 @@
 {
   "hubTitle": "पवित्र साधने",
   "hubSubtitle": "अंतर्गत परिवर्तनासाठी प्रत्येक शास्त्र आणि उपकरण",
-
   "sectionVoice": "पवित्र वाणी",
   "sectionScriptures": "पवित्र शास्त्रे",
   "sectionWisdom": "ज्ञान-साधने",
   "sectionHealing": "उपचार-साधने",
   "sectionPaths": "पवित्र मार्ग",
   "sectionSound": "पवित्र नाद",
-
   "voiceCompanionName": "सखा — व्हॉइस साथीदार",
   "voiceCompanionDescription": "दिव्य मित्राशी बोला",
-
   "gitaName": "भगवद्गीता",
   "gitaDescription": "१८ अध्याय · ७०० श्लोक",
-
   "ardhaName": "अर्थ",
   "ardhaDescription": "तुमचा दृष्टिकोन पुन्हा घडवा",
-
   "viyogaName": "वियोग",
   "viyogaDescription": "त्यागाची कला",
-
   "relationshipCompassName": "नातेसंबंध दिशादर्शक",
   "relationshipCompassDescription": "धर्म-निर्देशित स्पष्टता",
-
   "emotionalResetName": "भावनिक रीसेट",
   "emotionalResetDescription": "भावना मुक्त करा आणि बदला",
-
   "karmaResetName": "कर्म रीसेट",
   "karmaResetDescription": "कर्म-नमुन्यांचा उपचार करा",
-
   "wisdomRoomsName": "ज्ञान कक्ष",
   "wisdomRoomsDescription": "साधकांची पवित्र मंडळे",
-
   "journeysName": "यात्रा",
   "journeysDescription": "अंतर्गत रणक्षेत्र · ६ शत्रू",
-
   "sacredReflectionsName": "पवित्र चिंतन",
   "sacredReflectionsDescription": "एन्क्रिप्टेड जर्नल आणि अंतर्दृष्टी",
-
   "dashboardSubtitle": "रूपांतर, स्पष्टता आणि अंतःशांतीसाठी साधने",
   "sectionInsights": "कर्म अंतर्दृष्टी",
-
   "karmalytixName": "KarmaLytix",
   "karmalytixDescription": "तुमच्या साधनेतील नमुने",
   "karmaFootprintName": "कर्म पाऊलखुणा",
   "karmaFootprintDescription": "तुमच्या कर्म लहरींचा मागोवा घ्या",
   "karmaTreeName": "कर्म वृक्ष",
   "karmaTreeDescription": "तुमची जिवंत धर्म-छाया",
-
   "karmicTreeTitle": "कर्म वृक्ष",
   "karmicTreeRootsFallback": "तुमची मुळे",
   "karmicTreeTagline1": "तुमच्या नमुन्यांच्या शाखा अद्याप मॅप होत आहेत.",
   "karmicTreeTagline2": "हे पवित्र साधन अद्याप विकसित होत आहे — फुलल्यावर सखा कळवतील.",
   "karmicTreeBackToArmoryA11y": "साधन डॅशबोर्डवर परत जा",
   "karmicTreeBackToArmoryCta": "शस्त्रागारावर परत",
-
   "karmaResetPatternFallback": "तुम्ही नाव दिलेला नमुना",
   "emotionalResetReflectionFallback": "तुमचे चिंतन",
-
   "goBackA11y": "मागे जा",
   "backButton": "< मागे",
   "erStepBreathe": "श्वास",
@@ -67,7 +51,6 @@
   "erStepAffirm": "संकल्प",
   "erStepReflect": "चिंतन",
   "erStepComplete": "पूर्ण",
-
   "ardhaTitle": "अर्ध",
   "ardhaTagline": "धर्म आणि उच्चतर जाणीवेद्वारे आत्म-पुनर्व्याख्या",
   "ardhaQuote": "“असत्ला अस्तित्व नाही, सत् कधीच नष्ट होत नाही.”",
@@ -93,13 +76,11 @@
   "ardhaCbtTitle": "ARDHA विरुद्ध CBT",
   "ardhaCbtBody": "CBT विकृत विचार दुरुस्त करते. ARDHA चुकीची ओळख दुरुस्त करते. जिथे CBT कार्यशील अहंला बळकट करते, तिथे ARDHA अहं-तादात्म्य सैल करते — योग्य कृतीद्वारे आंतरिक स्वातंत्र्याकडे.",
   "ardhaCbtFlow": "आत्म भेद → राग-द्वेष स्कॅन → धर्म संरेखन → हृदय समत्व → अर्पण",
-
   "ardhaErrSession": "तुमचे सत्र संपले. कृपया पुन्हा साइन इन करा.",
   "ardhaErrOffline": "नेटवर्क उपलब्ध नाही. कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.",
   "ardhaErrServer": "ARDHA खोल ध्यानातून जागे होत आहे. क्षणानंतर पुन्हा प्रयत्न करा.",
   "ardhaErrGeneric": "ARDHA आत्ता पुनर्व्याख्या करू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
   "ardhaErrPrefix": "ARDHA पुनर्व्याख्या करू शकले नाही: {{message}}",
-
   "ardhaResultCardTitle": "अर्ध-ची\nपुनर्व्याख्या",
   "ardhaQuickBadge": "⚡ त्वरित पुनर्व्याख्या",
   "ardhaCopyA11y": "पुनर्व्याख्या मजकूर कॉपी",
@@ -122,12 +103,10 @@
   "ardhaReturnHome": "होमवर परत",
   "ardhaJournalThis": "हे जर्नल करा",
   "ardhaReframeAgain": "पुन्हा पुनर्व्याख्या",
-
   "viyogaIntroTitleEng": "तळमळीचे पवित्र स्थान",
   "viyogaIntroSubtitle": "विरहातही मिलन आहे",
   "viyogaEnterSpace": "या स्थानात प्रवेश करा",
   "viyogaLongingFallback": "तुम्ही ज्या तळमळीला नाव दिले",
-
   "viyogaStep1Question": "तुमचा विरह कोणत्या रूपात आहे?",
   "viyogaSepDeath": "मृत्यूद्वारे विभक्तता",
   "viyogaSepDeathDesc": "एका आत्म्याने सीमा ओलांडली",
@@ -142,7 +121,6 @@
   "viyogaSepDivine": "दिव्यतेची तळमळ",
   "viyogaSepDivineDesc": "आध्यात्मिक विरह, अंधारी रात्र",
   "viyogaContinue": "पुढे",
-
   "viyogaStep2Q1": "तुम्ही कोणापासून / कशापासून विभक्त आहात?",
   "viyogaStep2Q1Placeholder": "एक नाव, एक ठिकाण, स्वतःचे एक रूप...",
   "viyogaStep2Q2": "हा विरह किती दूर वाटतो?",
@@ -156,7 +134,6 @@
   "viyogaBringToSakhaA11y": "हे सख्याकडे आणा",
   "viyogaBringToSakhaCta": "हे सख्याकडे आणा",
   "viyogaListening": "ऐकत आहेत...",
-
   "viyogaSec1Label": "मला समजते",
   "viyogaSec2Label": "हे पाहण्याचा वेगळा मार्ग",
   "viyogaSec3Label": "आत्ताच हे करून पाहा",
@@ -177,7 +154,6 @@
   "viyogaTxFullTextA11y": "पूर्ण मजकूर दाखवा",
   "viyogaTxContinue": "ध्यानावर जा →",
   "viyogaTxContinueA11y": "ध्यानावर जा",
-
   "viyogaMedScreenOfA11y": "{{total}}-पैकी स्क्रीन {{n}}-वर जा",
   "viyogaMedBackToTx": "प्रसारणावर परत जा",
   "viyogaMedPrevSentence": "मागील वाक्य",
@@ -188,13 +164,11 @@
   "viyogaMedAutoOff": "स्वयं",
   "viyogaMedEnd": "समाप्त",
   "viyogaMedEndA11y": "ध्यान संपवा",
-
   "viyogaReleaseQuestion": "तुम्हाला काय सोडायचे आहे?",
   "viyogaReleaseSubtitle": "प्रेम नाही. स्मृती नाही. फक्त वेदनेचा भार.",
   "viyogaReleasePlaceholder": "मी सोडतो/सोडते...",
   "viyogaReleaseOfferA11y": "पवित्र अग्नीला अर्पण करा",
   "viyogaReleaseOfferCta": "पवित्र अग्नीला अर्पण करा",
-
   "viyogaCompleteOmA11y": "ॐ",
   "viyogaCompleteLabel": "वियोग पूर्ण",
   "viyogaCompleteOfferedOn": "{{date}}-रोजी अर्पित",
@@ -205,7 +179,6 @@
   "viyogaCompleteJournalA11y": "हे अर्पण जर्नल करा",
   "viyogaCompleteTalkSakha": "सख्याशी बोला",
   "viyogaCompleteTalkSakhaA11y": "सख्याशी बोला",
-
   "viyogaMedScreen1": "तुम्ही जी तळमळ बाळगता ती पवित्र आहे.",
   "viyogaMedScreen2": "ही दुर्बलता नाही. हे प्रेम आहे ज्याला कोठेही जायचे नाही.",
   "viyogaMedScreen3": "जे तुम्हाला आठवते ते श्वासात घ्या.",
@@ -215,13 +188,11 @@
   "viyogaMedScreen7": "तुम्ही उपटलेले नाही. तुमची मुळे सर्वत्र पसरली आहेत.",
   "viyogaMedScreen8": "बंध टिकतो. नेहमी टिकतो.",
   "viyogaMedScreen9": "हळूहळू श्वास सोडा. तुम्ही जिथे असावे तिथेच आहात.",
-
   "rcHeaderTitle": "नातेसंबंध दिशादर्शक",
   "rcBackA11y": "मागे",
   "rcNotificationsA11y": "सूचना",
   "rcLongingFallback": "तुम्ही नाव दिलेला बंध",
   "rcProgressStepA11y": "{{total}}-पैकी पायरी {{n}}",
-
   "rcAltarPrompt": "तुम्ही दिशादर्शकाकडे कोणाला आणत आहात?",
   "rcAltarTypeA11y": "{{label}} नातेसंबंध",
   "rcAltarNamePlaceholder": "त्यांचे नाव (पर्यायी)",
@@ -229,7 +200,6 @@
   "rcAltarGunaPrompt": "आत्ता हा नातेसंबंध कसा वाटतो?",
   "rcAltarGunaA11y": "प्रारंभिक वाचन {{label}}-वर सेट करा",
   "rcAltarCta": "दिशादर्शक उघडा",
-
   "rcGunaMirrorYourSituation": "तुमची परिस्थिती",
   "rcGunaMirrorOptional": "(पर्यायी)",
   "rcGunaMirrorPlaceholder": "तुमची परिस्थिती तुमच्या शब्दात वर्णन करा...",
@@ -238,11 +208,9 @@
   "rcGunaMirrorBalanced": "संतुलित ऊर्जा",
   "rcGunaMirrorPredominantlyFmt": "मुख्यतः {{guna}}",
   "rcGunaMirrorCta": "तुमचा धर्म नकाशा घ्या",
-
   "rcDharmaMapInterpretFmt": "तुमचा नातेसंबंध {{nameClause}}मजबूत {{high}} ({{highSkt}}) दाखवतो परंतु कमी {{low}} ({{lowSkt}}).",
   "rcDharmaMapNameClauseFmt": "{{name}}-सह ",
   "rcDharmaMapCta": "गीतेचे ज्ञान घ्या",
-
   "rcGitaLoading1": "दिशादर्शक तुमची दिशा शोधत आहे...",
   "rcGitaLoading2": "तुमच्या नातेसंबंधाचे गुण वाचत आहे...",
   "rcGitaLoading3": "कृष्ण मार्ग प्रकाशित करत आहेत...",
@@ -264,7 +232,6 @@
   "rcGitaFallback": "नेटवर्क शांत आहे — तुमचा ऑफलाइन मार्गदर्शक दाखवला जात आहे.",
   "rcGitaIntentionWithPartnerFmt": "{{name}}-सह संकल्प ठेवा",
   "rcGitaSetIntentionCta": "तुमचा धार्मिक संकल्प ठेवा",
-
   "rcIntentionTitle": "तुमचा धार्मिक संकल्प ठेवा",
   "rcIntentionQualityA11y": "{{label}} — {{description}}",
   "rcIntentionWithPartnerFmt": "{{name}}-सह माझ्या नातेसंबंधात, मी {{quality}} निवडतो/निवडते. (किंवा शंखाला स्पर्श करून बोला)",
@@ -273,7 +240,6 @@
   "rcIntentionPlaceholder": "तुमचा संकल्प इथे लिहा... (किंवा शंखाला स्पर्श करून बोला)",
   "rcIntentionA11y": "तुमचा संकल्प",
   "rcIntentionCta": "माझा दिशादर्शक मुद्रित करा",
-
   "rcSealTitleWord1": "तुमचा",
   "rcSealTitleWord2": "दिशादर्शक",
   "rcSealTitleWord3": "आता",
@@ -286,5 +252,20 @@
   "rcSealDateLabel": "दिनांक:",
   "rcSealReturnHome": "होमवर परत",
   "rcSealJournal": "हे जर्नल करा",
-  "rcSealTalkSakha": "सख्याशी बोला"
+  "rcSealTalkSakha": "सख्याशी बोला",
+  "kfpScreenTitle": "कर्म ठसा",
+  "kfpSubtitle": "जगात तुमच्या कर्म-तरंगा",
+  "kfpTotalKarmaLabel": "एकूण कर्म",
+  "kfpPositiveActionsFmt": "{{count}} सकारात्मक कृती",
+  "kfpAreasOfGrowthLabel": "विकासाची क्षेत्रे",
+  "kfpRippleEffectsLabel": "तरंग परिणाम",
+  "kfpEmptyMessage": "तुमचा कर्म प्रवास वाट पाहत आहे.\nखाली तुमची पहिली कृती नोंदवा.",
+  "kfpLogNewActionButton": "नवीन कृती नोंदवा",
+  "kfpModalTitle": "कर्म-कृती नोंदवा",
+  "kfpActionLabel": "तुम्ही काय केले?",
+  "kfpActionPlaceholder": "तुमच्या कृतीचे वर्णन करा...",
+  "kfpImpactLabel": "त्याचा काय परिणाम झाला?",
+  "kfpImpactPlaceholder": "त्याने इतरांना कसा प्रभावित केला...",
+  "kfpLogActionButton": "कृती नोंदवा",
+  "kfpCancelButton": "रद्द"
 }
