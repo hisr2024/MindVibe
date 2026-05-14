@@ -590,6 +590,17 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
 
 
 if __name__ == "__main__":
+    import os as _os
+    if _os.getenv("MINDVIBE_GITA_SEED_ENABLED", "0") != "1":
+        import sys as _sys
+        _sys.stderr.write(
+            "ERROR: Gita seed script is disabled pending PD-baseline corpus.\n"
+            "  Set MINDVIBE_GITA_SEED_ENABLED=1 only after the modernized\n"
+            "  PD-baseline corpus (Phase 1A) has been produced, verified,\n"
+            "  and committed to the proprietary repo. See internal\n"
+            "  IP-drafts/_telang_baseline/README.md for the workflow.\n"
+        )
+        raise SystemExit(2)
     parser = argparse.ArgumentParser(
         description="Seed complete Bhagavad Gita database with 700 verses"
     )
