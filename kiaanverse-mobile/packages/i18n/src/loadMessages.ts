@@ -95,6 +95,22 @@ import esCommunity from './messages/es/community.json';
 import itCommunity from './messages/it/community.json';
 import ptCommunity from './messages/pt/community.json';
 
+import hiAnalytics from './messages/hi/analytics.json';
+import saAnalytics from './messages/sa/analytics.json';
+import taAnalytics from './messages/ta/analytics.json';
+import teAnalytics from './messages/te/analytics.json';
+import bnAnalytics from './messages/bn/analytics.json';
+import mrAnalytics from './messages/mr/analytics.json';
+import guAnalytics from './messages/gu/analytics.json';
+import knAnalytics from './messages/kn/analytics.json';
+import mlAnalytics from './messages/ml/analytics.json';
+import paAnalytics from './messages/pa/analytics.json';
+import deAnalytics from './messages/de/analytics.json';
+import frAnalytics from './messages/fr/analytics.json';
+import esAnalytics from './messages/es/analytics.json';
+import itAnalytics from './messages/it/analytics.json';
+import ptAnalytics from './messages/pt/analytics.json';
+
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
 import hiTools from './messages/hi/tools.json';
@@ -410,6 +426,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: hiTools,
     voice: hiVoice,
     community: hiCommunity,
+    analytics: hiAnalytics,
   },
   sa: {
     common: saCommon,
@@ -429,6 +446,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: saTools,
     voice: saVoice,
     community: saCommunity,
+    analytics: saAnalytics,
   },
   ta: {
     common: taCommon,
@@ -448,6 +466,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: taTools,
     voice: taVoice,
     community: taCommunity,
+    analytics: taAnalytics,
   },
   te: {
     common: teCommon,
@@ -467,6 +486,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: teTools,
     voice: teVoice,
     community: teCommunity,
+    analytics: teAnalytics,
   },
   bn: {
     common: bnCommon,
@@ -486,6 +506,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: bnTools,
     voice: bnVoice,
     community: bnCommunity,
+    analytics: bnAnalytics,
   },
   mr: {
     common: mrCommon,
@@ -504,6 +525,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: mrTools,
     voice: mrVoice,
     community: mrCommunity,
+    analytics: mrAnalytics,
   },
   gu: {
     common: guCommon,
@@ -522,6 +544,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: guTools,
     voice: guVoice,
     community: guCommunity,
+    analytics: guAnalytics,
   },
   kn: {
     common: knCommon,
@@ -540,6 +563,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: knTools,
     voice: knVoice,
     community: knCommunity,
+    analytics: knAnalytics,
   },
   ml: {
     common: mlCommon,
@@ -558,6 +582,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: mlTools,
     voice: mlVoice,
     community: mlCommunity,
+    analytics: mlAnalytics,
   },
   pa: {
     common: paCommon,
@@ -576,6 +601,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: paTools,
     voice: paVoice,
     community: paCommunity,
+    analytics: paAnalytics,
   },
   de: {
     common: deCommon,
@@ -595,6 +621,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: deTools,
     voice: deVoice,
     community: deCommunity,
+    analytics: deAnalytics,
   },
   fr: {
     common: frCommon,
@@ -614,6 +641,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: frTools,
     voice: frVoice,
     community: frCommunity,
+    analytics: frAnalytics,
   },
   es: {
     common: esCommon,
@@ -633,6 +661,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: esTools,
     voice: esVoice,
     community: esCommunity,
+    analytics: esAnalytics,
   },
   it: {
     common: itCommon,
@@ -652,6 +681,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: itTools,
     voice: itVoice,
     community: itCommunity,
+    analytics: itAnalytics,
   },
   pt: {
     common: ptCommon,
@@ -671,6 +701,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     tools: ptTools,
     voice: ptVoice,
     community: ptCommunity,
+    analytics: ptAnalytics,
   },
 };
 

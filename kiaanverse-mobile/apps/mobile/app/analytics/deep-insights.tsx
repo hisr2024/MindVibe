@@ -27,6 +27,7 @@ import {
   useGunaBalance,
   useEmotionalPatterns,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 /** Color mapping for the three gunas */
 const GUNA_COLORS: Record<string, string> = {
@@ -35,14 +36,16 @@ const GUNA_COLORS: Record<string, string> = {
   tamas: '#6C3483',
 };
 
-const GUNA_LABELS: Record<string, string> = {
-  sattva: 'Sattva (Purity)',
-  rajas: 'Rajas (Passion)',
-  tamas: 'Tamas (Inertia)',
+// Stable ID → translation key. Visible label resolved via `t()` at render.
+const GUNA_LABEL_KEYS: Record<string, string> = {
+  sattva: 'diGunaSattva',
+  rajas: 'diGunaRajas',
+  tamas: 'diGunaTamas',
 };
 
 export default function DeepInsightsScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('analytics');
   const { data: insights, isLoading: insightsLoading } = useDeepInsights();
   const { data: guna, isLoading: gunaLoading } = useGunaBalance();
   const { data: patterns, isLoading: patternsLoading } = useEmotionalPatterns();
@@ -52,11 +55,11 @@ export default function DeepInsightsScreen(): React.JSX.Element {
   if (isLoading) {
     return (
       <Screen>
-        <GoldenHeader title="Deep Insights" onBack={() => router.back()} />
+        <GoldenHeader title={t('diScreenTitle')} onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <LoadingMandala size={80} />
           <Text variant="body" color={colors.primary[300]}>
-            Analyzing your inner landscape...
+            {t('diLoadingMessage')}
           </Text>
         </View>
       </Screen>
@@ -65,7 +68,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Deep Insights" onBack={() => router.back()} />
+      <GoldenHeader title={t('diScreenTitle')} onBack={() => router.back()} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -76,7 +79,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.duration(500)}>
             <Card style={styles.gunaCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Guna Balance
+                {t('diGunaSectionLabel')}
               </Text>
 
               {(['sattva', 'rajas', 'tamas'] as const).map((gunaKey) => {
@@ -94,7 +97,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                         }
                         style={isDominant ? styles.dominantLabel : undefined}
                       >
-                        {GUNA_LABELS[gunaKey]}
+                        {t(GUNA_LABEL_KEYS[gunaKey])}
                       </Text>
                       <Text variant="caption" color={colors.text.muted}>
                         {value}%
@@ -133,7 +136,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.delay(200).duration(500)}>
             <Card style={styles.patternsCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Emotional Patterns
+                {t('diPatternsSectionLabel')}
               </Text>
 
               {patterns.map((pattern, index) => (
@@ -143,13 +146,13 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                       {pattern.pattern_name}
                     </Text>
                     <Text variant="caption" color={colors.text.muted}>
-                      {pattern.frequency}x
+                      {t('diFrequencyFmt', { count: pattern.frequency })}
                     </Text>
                   </View>
 
                   {pattern.triggers.length > 0 ? (
                     <Text variant="bodySmall" color={colors.text.secondary}>
-                      Triggers: {pattern.triggers.join(', ')}
+                      {t('diTriggersFmt', { triggers: pattern.triggers.join(', ') })}
                     </Text>
                   ) : null}
 
@@ -175,7 +178,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.delay(400).duration(500)}>
             <Card style={styles.recsCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Personalized Recommendations
+                {t('diRecommendationsSectionLabel')}
               </Text>
               {insights.recommendations.map((rec, index) => (
                 <View key={index} style={styles.recRow}>
@@ -200,7 +203,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.delay(600).duration(500)}>
             <Card style={styles.versesCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Verses for Growth
+                {t('diVersesSectionLabel')}
               </Text>
               {insights.linked_verses.map((v, index) => (
                 <View key={index} style={styles.verseRow}>

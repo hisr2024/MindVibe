@@ -25,5 +25,28 @@
   "dynamicWisdomFirstWeek": "Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.",
   "dynamicNote": "Generated fresh each week by KIAAN · Grounded in Gita philosophy",
   "refreshMirror": "Refresh Sacred Mirror",
-  "viewJourneyInsights": "View Journey Insights"
+  "viewJourneyInsights": "View Journey Insights",
+
+  "diScreenTitle": "Deep Insights",
+  "diLoadingMessage": "Analyzing your inner landscape...",
+  "diGunaSectionLabel": "Guna Balance",
+  "diGunaSattva": "Sattva (Purity)",
+  "diGunaRajas": "Rajas (Passion)",
+  "diGunaTamas": "Tamas (Inertia)",
+  "diPatternsSectionLabel": "Emotional Patterns",
+  "diFrequencyFmt": "{{count}}x",
+  "diTriggersFmt": "Triggers: {{triggers}}",
+  "diRecommendationsSectionLabel": "Personalized Recommendations",
+  "diVersesSectionLabel": "Verses for Growth",
+
+  "jiScreenTitle": "Your Journey Insights",
+  "jiMoodTrendsLabel": "Mood Trends",
+  "jiEmptyChartMessage": "No mood data yet for this period.",
+  "jiWeeklySummaryLabel": "Weekly Summary",
+  "jiTopInsightFmt": "Top insight: {{insight}}",
+  "jiJourneyProgressLabel": "Journey Progress",
+  "jiCompletedLabel": "Completed",
+  "jiActiveLabel": "Active",
+  "jiStreakDaysLabel": "Streak Days",
+  "jiViewDeepInsightsButton": "View Deep Insights"
 }
