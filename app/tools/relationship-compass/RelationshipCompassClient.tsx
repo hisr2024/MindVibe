@@ -300,7 +300,7 @@ export default function RelationshipCompassClient() {
       subtitle="Dharma-Guided Relationship Clarity"
       modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.relationship-compass', 'Relationship Mode')}`}
       verse={{
-        english: 'One who sees all beings in the Self and the Self in all beings never shrinks from anything.',
+        english: '',
         reference: 'Bhagavad Gita 6.29',
       }}
       leftContent={leftContent}

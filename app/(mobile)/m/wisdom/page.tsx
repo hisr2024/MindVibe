@@ -51,7 +51,7 @@ const FALLBACK_VERSE: DailyVerse = {
   chapter: 4,
   verse: 7,
   sanskrit: 'यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥',
-  translation: 'When injustice rises, so does the force that corrects it. Be part of that force.',
+  translation: '',
   commentary: 'Whenever there is a decline of Dharma, O Arjuna, and an uprising of Adharma, then I incarnate myself. Let this courage live in you today.',
   theme: 'courage',
 }

@@ -229,7 +229,7 @@ export default function MobileEmotionalResetPage() {
         shloka: {
           sanskrit: '\u0927\u0943\u0924\u093F\u0938\u094D\u092E\u0943\u0924\u093F\u0932\u092D\u0938\u094D\u0924\u0924\u094D\u0924\u094D\u0935\u0902',
           transliteration: 'dhritis smritir labhas tattvam',
-          translation: 'Fortitude, memory, wisdom, and steadfastness \u2014 these are born of sattva.',
+          translation: '',
           reference: 'BG 18.43',
         },
         reflection: 'The Gita reminds us that within every storm of emotion lies the unchanged Atman. Like the ocean remains deep even when its surface churns, your true self is unshaken.',

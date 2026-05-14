@@ -166,23 +166,23 @@ interface ChapterMeta {
 
 const CHAPTER_META: Record<number, ChapterMeta> = {
   1: { transliteration: 'Arjuna Vishada Yoga', english: "Arjuna's Dejection" },
-  2: { transliteration: 'Sankhya Yoga', english: 'Transcendental Knowledge' },
+  2: { transliteration: 'Sankhya Yoga', english: '' },
   3: { transliteration: 'Karma Yoga', english: 'Path of Action' },
-  4: { transliteration: 'Jnana Karma Sannyas Yoga', english: 'Knowledge & Renunciation' },
-  5: { transliteration: 'Karma Sannyas Yoga', english: 'Renunciation of Action' },
-  6: { transliteration: 'Atma Samyama Yoga', english: 'Self-Mastery through Meditation' },
-  7: { transliteration: 'Jnana Vijnana Yoga', english: 'Knowledge of the Absolute' },
+  4: { transliteration: 'Jnana Karma Sannyas Yoga', english: '' },
+  5: { transliteration: 'Karma Sannyas Yoga', english: '' },
+  6: { transliteration: 'Atma Samyama Yoga', english: '' },
+  7: { transliteration: 'Jnana Vijnana Yoga', english: '' },
   8: { transliteration: 'Aksara Brahma Yoga', english: 'Attaining the Supreme' },
   9: { transliteration: 'Raja Vidya Raja Guhya Yoga', english: 'The Royal Knowledge' },
   10: { transliteration: 'Vibhuti Yoga', english: 'Divine Manifestations' },
   11: { transliteration: 'Vishwarupa Darsana Yoga', english: 'The Universal Form' },
   12: { transliteration: 'Bhakti Yoga', english: 'Path of Devotion' },
-  13: { transliteration: 'Kshetra Yoga', english: 'Field & Knower of Field' },
-  14: { transliteration: 'Guna Traya Yoga', english: 'The Three Modes of Nature' },
+  13: { transliteration: 'Kshetra Yoga', english: '' },
+  14: { transliteration: 'Guna Traya Yoga', english: '' },
   15: { transliteration: 'Purushottama Yoga', english: 'The Supreme Person' },
-  16: { transliteration: 'Daivasura Yoga', english: 'Divine & Demonic Qualities' },
+  16: { transliteration: 'Daivasura Yoga', english: '' },
   17: { transliteration: 'Shraddha Traya Yoga', english: 'Three Types of Faith' },
-  18: { transliteration: 'Moksha Sannyas Yoga', english: 'Liberation Through Renunciation' },
+  18: { transliteration: 'Moksha Sannyas Yoga', english: '' },
 };
 
 export default function ReadMoreVerseScreen(): React.JSX.Element {
