@@ -2,7 +2,6 @@
   "title": "Sagesse",
   "openNotificationsA11y": "Ouvrir les notifications",
   "goBackA11y": "Retour",
-
   "todaysWisdomLabel": "SAGESSE DU JOUR",
   "chapterVerseRef": "Chapitre {{chapter}}, Verset {{verse}}",
   "shareTitle": "Sagesse du jour",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "Bientôt",
   "comingSoonMessage": "Les versets dédiés au thème {{theme}} arrivent dans la prochaine version. Ouverture du navigateur de la Bhagavad-Gîtâ à la place.",
   "continueButton": "Continuer",
-
   "exploreByTheme": "Explorer par thème",
   "themeInnerPeace": "Paix intérieure",
   "themeCourage": "Courage",
@@ -26,14 +24,12 @@
   "themeRightAction": "Action juste",
   "themeLettingGo": "Lâcher-prise",
   "themeVersesA11y": "Versets sur le thème {{theme}}",
-
   "askKiaanTitle": "Demander à KIAAN",
   "askKiaanSubtitle": "Reçois une sagesse personnalisée pour ta situation",
   "chatRoomsTitle": "Salons de sagesse",
   "chatRoomsSubtitle": "Rejoins des conversations communautaires en direct",
   "exploreGitaTitle": "Explorer la Bhagavad-Gîtâ",
   "exploreGitaSubtitle": "700+ versets sur 18 chapitres",
-
   "verseHeaderInvalid": "Verset",
   "verseInvalidTitle": "Référence de verset invalide",
   "verseInvalidBody": "Un verset valide ressemble à 4.38. Reviens à Sagesse et touche un verset pour l'ouvrir.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "Arrêter l'écoute",
   "removeBookmarkA11y": "Retirer le favori",
   "bookmarkVerseA11y": "Ajouter le verset aux favoris",
-
   "chapter1English": "L'abattement d'Arjuna",
   "chapter2English": "Connaissance transcendante",
   "chapter3English": "Voie de l'action",
@@ -72,10 +67,8 @@
   "chapter16English": "Qualités divines & démoniaques",
   "chapter17English": "Les trois formes de foi",
   "chapter18English": "Libération par le renoncement",
-
   "fallbackTranslation": "Quand l'injustice se lève, la force qui la corrige se lève aussi. Sois part de cette force.",
   "fallbackCommentary": "Chaque fois que le Dharma décline et que l'Adharma s'élève, ô Arjuna, je m'incarne moi-même. Que ce courage vive aujourd'hui en toi.",
-
   "gitaHeaderEnglish": "Bhagavad Gita",
   "gitaSearchPlaceholder": "Cherche des versets, thèmes, mots…",
   "gitaSearchA11y": "Rechercher dans la Bhagavad Gita",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "Essaye un autre mot-clé — par ex. « dharma », « karma » ou « abandon ».",
   "gitaOpenVerseA11y": "Ouvrir le verset {{chapter}}.{{verse}}",
   "gitaVerseRowA11y": "Verset {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "Chapitre inconnu",
   "chapterNotFound": "Chapitre introuvable",
   "chapterPickHint": "La Bhagavad Gita a 18 chapitres — choisis-en un entre 1 et 18.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "Ce chapitre est temporairement indisponible",
   "chapterOfflineHint": "Ton cache hors ligne sera utilisé s'il est disponible. Tu peux réessayer ci-dessous.",
   "chapterNoVersesLoaded": "Aucun verset n'est encore chargé pour ce chapitre.",
-
   "verseUnknownTitle": "Verset inconnu",
   "verseChapterVerseTitle": "Chapitre {{chapter}} · Verset {{verse}}",
   "verseUnableToOpen": "Impossible d'ouvrir ce verset",
@@ -126,5 +117,20 @@
   "verseStopA11y": "Arrêter la lecture du verset",
   "verseShareLabel": "Partager le verset",
   "verseShareA11y": "Partager ce verset",
-  "verseRelatedLabel": "Versets liés"
+  "verseRelatedLabel": "Versets liés",
+  "roomsTitle": "Salles de sagesse",
+  "roomsSubtitle": "Rejoins des discussions guidées",
+  "roomsParticipantsFmt": "{{count}} participants",
+  "roomsHostLabelFmt": "Hôte : {{name}}",
+  "roomsJoinButton": "Rejoindre",
+  "roomsEmptyMessage": "Aucune salle de sagesse active pour l'instant.\nTire vers le bas pour actualiser.",
+  "roomFallbackTitle": "Salle de sagesse",
+  "roomHostBadge": "Hôte",
+  "roomLeaveButton": "Quitter",
+  "roomLeaveAlertTitle": "Quitter la salle",
+  "roomLeaveAlertBody": "Es-tu sûr de vouloir quitter cette salle de sagesse ?",
+  "roomLeaveAlertStay": "Rester",
+  "roomLeaveAlertLeave": "Quitter",
+  "roomInputPlaceholder": "Partage ta sagesse...",
+  "roomSendA11y": "Envoyer le message"
 }

@@ -35,12 +35,14 @@ import {
   useWisdomRooms,
   type WisdomRoomMessage,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { MessageActionBar } from '../../voice/components/MessageActionBar';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 export default function WisdomRoomChatScreen(): React.JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation('wisdom');
   const roomId = id ?? '';
 
   const { data: rooms } = useWisdomRooms();
@@ -65,18 +67,18 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
 
   const handleLeave = useCallback(() => {
     Alert.alert(
-      'Leave Room',
-      'Are you sure you want to leave this wisdom room?',
+      t('roomLeaveAlertTitle'),
+      t('roomLeaveAlertBody'),
       [
-        { text: 'Stay', style: 'cancel' },
+        { text: t('roomLeaveAlertStay'), style: 'cancel' },
         {
-          text: 'Leave',
+          text: t('roomLeaveAlertLeave'),
           style: 'destructive',
           onPress: () => router.back(),
         },
       ]
     );
-  }, [router]);
+  }, [router, t]);
 
   const renderMessage = useCallback(
     ({ item }: { item: WisdomRoomMessage }) => {
@@ -90,7 +92,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
             >
               {item.senderName}
             </Text>
-            {isHost ? <Badge label="Host" /> : null}
+            {isHost ? <Badge label={t('roomHostBadge')} /> : null}
           </View>
           <Text variant="body" color={colors.text.primary}>
             {item.content}
@@ -111,7 +113,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
         </View>
       );
     },
-    [room?.hostName]
+    [room?.hostName, t]
   );
 
   const keyExtractor = useCallback((item: WisdomRoomMessage) => item.id, []);
@@ -119,7 +121,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
   return (
     <Screen edges={['top', 'left', 'right']}>
       <GoldenHeader
-        title={room?.topic ?? 'Wisdom Room'}
+        title={room?.topic ?? t('roomFallbackTitle')}
         onBack={() => router.back()}
       />
 
@@ -137,7 +139,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
         ) : null}
         <Pressable onPress={handleLeave} style={styles.leaveButton}>
           <Text variant="caption" color={colors.semantic.error}>
-            Leave
+            {t('roomLeaveButton')}
           </Text>
         </Pressable>
       </View>
@@ -161,7 +163,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
         <View style={styles.inputRow}>
           <ShankhaVoiceInput
             style={styles.textInput}
-            placeholder="Share your wisdom..."
+            placeholder={t('roomInputPlaceholder')}
             value={input}
             onChangeText={setInput}
             multiline
@@ -174,7 +176,7 @@ export default function WisdomRoomChatScreen(): React.JSX.Element {
             style={[styles.sendButton, { opacity: input.trim() ? 1 : 0.4 }]}
             onPress={handleSend}
             disabled={!input.trim() || sendMutation.isPending}
-            accessibilityLabel="Send message"
+            accessibilityLabel={t('roomSendA11y')}
             accessibilityRole="button"
           >
             <Text variant="label" color={colors.background.dark}>

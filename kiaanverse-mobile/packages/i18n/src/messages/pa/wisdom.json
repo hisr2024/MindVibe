@@ -2,7 +2,6 @@
   "title": "ਗਿਆਨ",
   "openNotificationsA11y": "ਸੂਚਨਾਵਾਂ ਖੋਲ੍ਹੋ",
   "goBackA11y": "ਪਿੱਛੇ ਜਾਓ",
-
   "todaysWisdomLabel": "ਅੱਜ ਦਾ ਗਿਆਨ",
   "chapterVerseRef": "ਅਧਿਆਇ {{chapter}}, ਸ਼ਲੋਕ {{verse}}",
   "shareTitle": "ਅੱਜ ਦਾ ਗਿਆਨ",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "ਜਲਦੀ ਆ ਰਿਹਾ",
   "comingSoonMessage": "{{theme}} ਲਈ ਚੁਣੇ ਹੋਏ ਸ਼ਲੋਕ ਅਗਲੇ ਅਪਡੇਟ ਵਿੱਚ ਆਉਣਗੇ। ਹੁਣੇ ਭਗਵਦ ਗੀਤਾ ਬਰਾਊਜ਼ਰ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ।",
   "continueButton": "ਜਾਰੀ ਰੱਖੋ",
-
   "exploreByTheme": "ਵਿਸ਼ੇ ਮੁਤਾਬਕ ਲੱਭੋ",
   "themeInnerPeace": "ਅੰਦਰੂਨੀ ਸ਼ਾਂਤੀ",
   "themeCourage": "ਹਿੰਮਤ",
@@ -26,14 +24,12 @@
   "themeRightAction": "ਸਹੀ ਕਰਮ",
   "themeLettingGo": "ਛੱਡ ਦੇਣਾ",
   "themeVersesA11y": "{{theme}} ਸੰਬੰਧੀ ਸ਼ਲੋਕ",
-
   "askKiaanTitle": "KIAAN ਨੂੰ ਪੁੱਛੋ",
   "askKiaanSubtitle": "ਆਪਣੀ ਸਥਿਤੀ ਲਈ ਨਿੱਜੀ ਗਿਆਨ ਪ੍ਰਾਪਤ ਕਰੋ",
   "chatRoomsTitle": "ਗਿਆਨ ਚਰਚਾ ਕਮਰੇ",
   "chatRoomsSubtitle": "ਲਾਈਵ ਭਾਈਚਾਰਾ ਗੱਲਬਾਤ ਵਿੱਚ ਜੁੜੋ",
   "exploreGitaTitle": "ਭਗਵਦ ਗੀਤਾ ਦੀ ਖੋਜ",
   "exploreGitaSubtitle": "੧੮ ਅਧਿਆਇਆਂ ਵਿੱਚ ੭੦੦+ ਸ਼ਲੋਕ",
-
   "verseHeaderInvalid": "ਸ਼ਲੋਕ",
   "verseInvalidTitle": "ਸ਼ਲੋਕ ਸੰਦਰਭ ਅਵੈਧ",
   "verseInvalidBody": "ਇੱਕ ਵੈਧ ਸ਼ਲੋਕ 4.38 ਵਾਂਗ ਦਿਖਦਾ ਹੈ। ਗਿਆਨ ਉੱਤੇ ਵਾਪਸ ਜਾ ਕੇ ਕੋਈ ਸ਼ਲੋਕ ਟੈਪ ਕਰੋ।",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "ਸੁਣਨਾ ਰੋਕੋ",
   "removeBookmarkA11y": "ਬੁੱਕਮਾਰਕ ਹਟਾਓ",
   "bookmarkVerseA11y": "ਸ਼ਲੋਕ ਬੁੱਕਮਾਰਕ ਕਰੋ",
-
   "chapter1English": "ਅਰਜੁਨ ਦਾ ਵਿਸ਼ਾਦ",
   "chapter2English": "ਸਾਂਖਯ ਗਿਆਨ",
   "chapter3English": "ਕਰਮ-ਮਾਰਗ",
@@ -72,10 +67,8 @@
   "chapter16English": "ਦੈਵੀ ਤੇ ਆਸੁਰੀ ਗੁਣ",
   "chapter17English": "ਤਿੰਨ ਪ੍ਰਕਾਰ ਦੀ ਸ਼ਰਧਾ",
   "chapter18English": "ਸੰਨਿਆਸ ਰਾਹੀਂ ਮੋਕਸ਼",
-
   "fallbackTranslation": "ਜਦੋਂ ਅਨਿਆਂ ਉੱਠਦਾ ਹੈ, ਉਸ ਨੂੰ ਸਹੀ ਕਰਨ ਵਾਲੀ ਸ਼ਕਤੀ ਵੀ ਉੱਠਦੀ ਹੈ। ਉਸ ਸ਼ਕਤੀ ਦਾ ਹਿੱਸਾ ਬਣੋ।",
   "fallbackCommentary": "ਜਦ-ਜਦ ਧਰਮ ਦਾ ਨਿਘਾਰ ਅਤੇ ਅਧਰਮ ਦਾ ਉਥਾਨ ਹੁੰਦਾ ਹੈ, ਹੇ ਅਰਜੁਨ, ਮੈਂ ਆਪ ਪ੍ਰਗਟ ਹੁੰਦਾ ਹਾਂ। ਅੱਜ ਇਹ ਹਿੰਮਤ ਤੇਰੇ ਵਿੱਚ ਵੀ ਜੀਵੇ।",
-
   "gitaHeaderEnglish": "ਭਗਵਦ ਗੀਤਾ",
   "gitaSearchPlaceholder": "ਸ਼ਲੋਕ, ਵਿਸ਼ੇ, ਸ਼ਬਦ ਖੋਜੋ…",
   "gitaSearchA11y": "ਭਗਵਦ ਗੀਤਾ ਵਿੱਚ ਖੋਜੋ",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "ਹੋਰ ਕੀਵਰਡ ਅਜ਼ਮਾਓ — ਜਿਵੇਂ \"ਧਰਮ\", \"ਕਰਮ\" ਜਾਂ \"ਸ਼ਰਣਾਗਤੀ\"।",
   "gitaOpenVerseA11y": "ਸ਼ਲੋਕ {{chapter}}.{{verse}} ਖੋਲ੍ਹੋ",
   "gitaVerseRowA11y": "ਸ਼ਲੋਕ {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "ਅਣਜਾਣ ਅਧਿਆਏ",
   "chapterNotFound": "ਅਧਿਆਏ ਨਹੀਂ ਮਿਲਿਆ",
   "chapterPickHint": "ਭਗਵਦ ਗੀਤਾ ਵਿੱਚ 18 ਅਧਿਆਏ ਹਨ — ਕਿਰਪਾ ਕਰਕੇ 1 ਤੋਂ 18 ਵਿੱਚੋਂ ਚੁਣੋ।",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "ਇਹ ਅਧਿਆਏ ਅਸਥਾਈ ਤੌਰ 'ਤੇ ਉਪਲਬਧ ਨਹੀਂ",
   "chapterOfflineHint": "ਉਪਲਬਧ ਹੋਣ 'ਤੇ ਤੁਹਾਡੀ ਔਫ਼ਲਾਈਨ ਕੈਸ਼ ਵਰਤੀ ਜਾਵੇਗੀ। ਹੇਠਾਂ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰ ਸਕਦੇ ਹੋ।",
   "chapterNoVersesLoaded": "ਇਸ ਅਧਿਆਏ ਲਈ ਅਜੇ ਕੋਈ ਸ਼ਲੋਕ ਲੋਡ ਨਹੀਂ ਹੋਏ।",
-
   "verseUnknownTitle": "ਅਣਜਾਣ ਸ਼ਲੋਕ",
   "verseChapterVerseTitle": "ਅਧਿਆਏ {{chapter}} · ਸ਼ਲੋਕ {{verse}}",
   "verseUnableToOpen": "ਇਹ ਸ਼ਲੋਕ ਖੁੱਲ੍ਹ ਨਹੀਂ ਸਕਿਆ",
@@ -126,5 +117,20 @@
   "verseStopA11y": "ਸ਼ਲੋਕ ਪਲੇਬੈਕ ਰੋਕੋ",
   "verseShareLabel": "ਸ਼ਲੋਕ ਸਾਂਝਾ ਕਰੋ",
   "verseShareA11y": "ਇਹ ਸ਼ਲੋਕ ਸਾਂਝਾ ਕਰੋ",
-  "verseRelatedLabel": "ਸਬੰਧਤ ਸ਼ਲੋਕ"
+  "verseRelatedLabel": "ਸਬੰਧਤ ਸ਼ਲੋਕ",
+  "roomsTitle": "ਗਿਆਨ ਕਮਰੇ",
+  "roomsSubtitle": "ਮਾਰਗਦਰਸ਼ਿਤ ਚਰਚਾਵਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ",
+  "roomsParticipantsFmt": "{{count}} ਸ਼ਾਮਲ",
+  "roomsHostLabelFmt": "ਮੇਜ਼ਬਾਨ: {{name}}",
+  "roomsJoinButton": "ਸ਼ਾਮਲ ਹੋਵੋ",
+  "roomsEmptyMessage": "ਹੁਣ ਕੋਈ ਸਰਗਰਮ ਗਿਆਨ ਕਮਰੇ ਨਹੀਂ।\nਰਿਫ੍ਰੈਸ਼ ਕਰਨ ਲਈ ਹੇਠਾਂ ਖਿੱਚੋ।",
+  "roomFallbackTitle": "ਗਿਆਨ ਕਮਰਾ",
+  "roomHostBadge": "ਮੇਜ਼ਬਾਨ",
+  "roomLeaveButton": "ਛੱਡੋ",
+  "roomLeaveAlertTitle": "ਕਮਰਾ ਛੱਡੋ",
+  "roomLeaveAlertBody": "ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਹੋ ਕਿ ਇਹ ਗਿਆਨ ਕਮਰਾ ਛੱਡਣਾ ਚਾਹੁੰਦੇ ਹੋ?",
+  "roomLeaveAlertStay": "ਰਹੋ",
+  "roomLeaveAlertLeave": "ਛੱਡੋ",
+  "roomInputPlaceholder": "ਆਪਣਾ ਗਿਆਨ ਸਾਂਝਾ ਕਰੋ...",
+  "roomSendA11y": "ਸੁਨੇਹਾ ਭੇਜੋ"
 }

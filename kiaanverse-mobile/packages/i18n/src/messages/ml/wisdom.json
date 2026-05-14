@@ -2,7 +2,6 @@
   "title": "ജ്ഞാനം",
   "openNotificationsA11y": "അറിയിപ്പുകൾ തുറക്കുക",
   "goBackA11y": "തിരികെ പോകുക",
-
   "todaysWisdomLabel": "ഇന്നത്തെ ജ്ഞാനം",
   "chapterVerseRef": "അദ്ധ്യായം {{chapter}}, ശ്ലോകം {{verse}}",
   "shareTitle": "ഇന്നത്തെ ജ്ഞാനം",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "ഉടൻ വരുന്നു",
   "comingSoonMessage": "{{theme}} സംബന്ധിച്ച തിരഞ്ഞെടുത്ത ശ്ലോകങ്ങൾ അടുത്ത പതിപ്പിൽ വരും. തൽക്കാലം ഭഗവദ്ഗീത ബ്രൗസർ തുറക്കുന്നു.",
   "continueButton": "തുടരുക",
-
   "exploreByTheme": "വിഷയം പ്രകാരം പര്യവേക്ഷണം",
   "themeInnerPeace": "ആന്തരിക ശാന്തി",
   "themeCourage": "ധൈര്യം",
@@ -26,14 +24,12 @@
   "themeRightAction": "ശരിയായ കർമ്മം",
   "themeLettingGo": "നിരാസക്തി",
   "themeVersesA11y": "{{theme}} സംബന്ധിച്ച ശ്ലോകങ്ങൾ",
-
   "askKiaanTitle": "KIAAN-നോട് ചോദിക്കുക",
   "askKiaanSubtitle": "നിങ്ങളുടെ സാഹചര്യത്തിന് വ്യക്തിഗത ജ്ഞാനം",
   "chatRoomsTitle": "ജ്ഞാന ചാറ്റ് മുറികൾ",
   "chatRoomsSubtitle": "ലൈവ് സമൂഹ സംഭാഷണങ്ങളിൽ ചേരുക",
   "exploreGitaTitle": "ഭഗവദ്ഗീത പര്യവേക്ഷണം ചെയ്യുക",
   "exploreGitaSubtitle": "18 അദ്ധ്യായങ്ങളിൽ 700+ ശ്ലോകങ്ങൾ",
-
   "verseHeaderInvalid": "ശ്ലോകം",
   "verseInvalidTitle": "ശ്ലോക റഫറൻസ് അസാധുവാണ്",
   "verseInvalidBody": "സാധുവായ ശ്ലോകം 4.38 പോലെ കാണപ്പെടും. ജ്ഞാനത്തിലേക്ക് മടങ്ങി ഒരു ശ്ലോകം തൊടുക.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "കേൾക്കൽ നിർത്തുക",
   "removeBookmarkA11y": "ബുക്ക്മാർക്ക് നീക്കുക",
   "bookmarkVerseA11y": "ശ്ലോകം ബുക്ക്മാർക്ക് ചെയ്യുക",
-
   "chapter1English": "അർജുനന്റെ വിഷാദം",
   "chapter2English": "സാംഖ്യ ജ്ഞാനം",
   "chapter3English": "കർമ്മ-മാർഗ്ഗം",
@@ -72,10 +67,8 @@
   "chapter16English": "ദൈവിക, ആസുരിക ഗുണങ്ങൾ",
   "chapter17English": "മൂന്നു തരത്തിലുള്ള ശ്രദ്ധ",
   "chapter18English": "സന്ന്യാസത്തിലൂടെ മോക്ഷം",
-
   "fallbackTranslation": "അനീതി ഉയരുമ്പോൾ, അതിനെ തിരുത്തുന്ന ശക്തിയും ഉയരും. ആ ശക്തിയുടെ ഭാഗമാകുക.",
   "fallbackCommentary": "ധർമ്മം ക്ഷയിക്കുകയും അധർമ്മം ഉയരുകയും ചെയ്യുമ്പോഴെല്ലാം, അർജുനാ, ഞാൻ സ്വയം അവതരിക്കുന്നു. ഈ ധൈര്യം ഇന്ന് നിന്നിലും ജീവിക്കട്ടെ.",
-
   "gitaHeaderEnglish": "ഭഗവദ്ഗീത",
   "gitaSearchPlaceholder": "ശ്ലോകം, വിഷയം, വാക്കുകൾ തിരയുക…",
   "gitaSearchA11y": "ഭഗവദ്ഗീതയിൽ തിരയുക",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "മറ്റൊരു കീവേഡ് ശ്രമിക്കുക — ഉദാ. \"ധർമ്മം\", \"കർമ്മം\", അല്ലെങ്കിൽ \"ശരണാഗതി\".",
   "gitaOpenVerseA11y": "ശ്ലോകം {{chapter}}.{{verse}} തുറക്കുക",
   "gitaVerseRowA11y": "ശ്ലോകം {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "അജ്ഞാത അധ്യായം",
   "chapterNotFound": "അധ്യായം കണ്ടെത്തിയില്ല",
   "chapterPickHint": "ഭഗവദ്ഗീതയിൽ 18 അധ്യായങ്ങൾ ഉണ്ട് — ദയവായി 1 മുതൽ 18 വരെ ഒന്ന് തിരഞ്ഞെടുക്കുക.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "ഈ അധ്യായം താൽക്കാലികമായി ലഭ്യമല്ല",
   "chapterOfflineHint": "ലഭ്യമാകുമ്പോൾ നിങ്ങളുടെ ഓഫ്‌ലൈൻ കാഷ് ഉപയോഗിക്കും. താഴെ വീണ്ടും ശ്രമിക്കാം.",
   "chapterNoVersesLoaded": "ഈ അധ്യായത്തിന് ഇതുവരെ ശ്ലോകങ്ങൾ ലോഡ് ചെയ്തിട്ടില്ല.",
-
   "verseUnknownTitle": "അജ്ഞാത ശ്ലോകം",
   "verseChapterVerseTitle": "അധ്യായം {{chapter}} · ശ്ലോകം {{verse}}",
   "verseUnableToOpen": "ഈ ശ്ലോകം തുറക്കാൻ കഴിയില്ല",
@@ -126,5 +117,20 @@
   "verseStopA11y": "ശ്ലോക പ്ലേബാക്ക് നിർത്തുക",
   "verseShareLabel": "ശ്ലോകം പങ്കിടുക",
   "verseShareA11y": "ഈ ശ്ലോകം പങ്കിടുക",
-  "verseRelatedLabel": "ബന്ധപ്പെട്ട ശ്ലോകങ്ങൾ"
+  "verseRelatedLabel": "ബന്ധപ്പെട്ട ശ്ലോകങ്ങൾ",
+  "roomsTitle": "ജ്ഞാന മുറികൾ",
+  "roomsSubtitle": "നയിക്കപ്പെടുന്ന ചർച്ചകളിൽ ചേരുക",
+  "roomsParticipantsFmt": "{{count}} പേർ ചേർന്നു",
+  "roomsHostLabelFmt": "ആതിഥേയൻ: {{name}}",
+  "roomsJoinButton": "ചേരുക",
+  "roomsEmptyMessage": "ഇപ്പോൾ സജീവ ജ്ഞാന മുറികളൊന്നുമില്ല.\nപുതുക്കാൻ താഴേക്ക് വലിക്കുക.",
+  "roomFallbackTitle": "ജ്ഞാന മുറി",
+  "roomHostBadge": "ആതിഥേയൻ",
+  "roomLeaveButton": "വിട്ടുപോകുക",
+  "roomLeaveAlertTitle": "മുറി വിടുക",
+  "roomLeaveAlertBody": "ഈ ജ്ഞാന മുറി വിടാൻ താങ്കൾക്ക് ഉറപ്പാണോ?",
+  "roomLeaveAlertStay": "നിൽക്കുക",
+  "roomLeaveAlertLeave": "വിടുക",
+  "roomInputPlaceholder": "നിങ്ങളുടെ ജ്ഞാനം പങ്കിടുക...",
+  "roomSendA11y": "സന്ദേശം അയക്കുക"
 }

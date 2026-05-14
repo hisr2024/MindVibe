@@ -29,9 +29,11 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useWisdomRooms, type WisdomRoom } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function WisdomRoomsListScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('wisdom');
   const { data: rooms, isLoading, refetch, isRefetching } = useWisdomRooms();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -65,7 +67,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
                 {item.topic}
               </Text>
             </View>
-            <Badge label={`${item.participantCount} joined`} />
+            <Badge label={t('roomsParticipantsFmt', { count: item.participantCount })} />
           </View>
 
           {item.description ? (
@@ -80,10 +82,10 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
 
           <View style={styles.roomFooter}>
             <Text variant="caption" color={colors.text.muted}>
-              Host: {item.hostName}
+              {t('roomsHostLabelFmt', { name: item.hostName })}
             </Text>
             <GoldenButton
-              title="Join"
+              title={t('roomsJoinButton')}
               onPress={() => handleJoin(item.id)}
               style={styles.joinButton}
               variant="divine"
@@ -92,7 +94,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
         </Card>
       </Animated.View>
     ),
-    [handleJoin]
+    [handleJoin, t]
   );
 
   const keyExtractor = useCallback((item: WisdomRoom) => item.id, []);
@@ -100,7 +102,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
   if (isLoading && !rooms) {
     return (
       <Screen>
-        <GoldenHeader title="Wisdom Rooms" onBack={() => router.back()} />
+        <GoldenHeader title={t('roomsTitle')} onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <LoadingMandala size={60} />
         </View>
@@ -110,7 +112,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Wisdom Rooms" onBack={() => router.back()} />
+      <GoldenHeader title={t('roomsTitle')} onBack={() => router.back()} />
 
       <Text
         variant="body"
@@ -118,7 +120,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
         align="center"
         style={styles.subtitle}
       >
-        Join guided discussions
+        {t('roomsSubtitle')}
       </Text>
 
       <FlatList
@@ -138,7 +140,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text variant="body" color={colors.text.muted} align="center">
-              No active wisdom rooms right now.{'\n'}Pull down to refresh.
+              {t('roomsEmptyMessage')}
             </Text>
           </View>
         }

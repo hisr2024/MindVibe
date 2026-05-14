@@ -2,7 +2,6 @@
   "title": "ज्ञान",
   "openNotificationsA11y": "सूचना उघडा",
   "goBackA11y": "मागे जा",
-
   "todaysWisdomLabel": "आजचे ज्ञान",
   "chapterVerseRef": "अध्याय {{chapter}}, श्लोक {{verse}}",
   "shareTitle": "आजचे ज्ञान",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "लवकरच",
   "comingSoonMessage": "{{theme}}-संबंधी निवडक श्लोक पुढच्या आवृत्तीत येतील. आत्ता भगवद्गीता ब्राउझर उघडत आहोत.",
   "continueButton": "सुरू ठेवा",
-
   "exploreByTheme": "विषयानुसार शोधा",
   "themeInnerPeace": "अंतःशांती",
   "themeCourage": "धैर्य",
@@ -26,14 +24,12 @@
   "themeRightAction": "योग्य कर्म",
   "themeLettingGo": "अनासक्ती",
   "themeVersesA11y": "{{theme}} संबंधी श्लोक",
-
   "askKiaanTitle": "KIAANला विचारा",
   "askKiaanSubtitle": "तुमच्या परिस्थितीसाठी वैयक्तिक ज्ञान मिळवा",
   "chatRoomsTitle": "ज्ञान चर्चा खोल्या",
   "chatRoomsSubtitle": "लाइव्ह सामुदायिक संवादात सामील व्हा",
   "exploreGitaTitle": "भगवद्गीता शोधा",
   "exploreGitaSubtitle": "१८ अध्यायांमध्ये ७००+ श्लोक",
-
   "verseHeaderInvalid": "श्लोक",
   "verseInvalidTitle": "श्लोक संदर्भ अवैध",
   "verseInvalidBody": "वैध श्लोक 4.38 सारखा दिसतो. ज्ञानावर परत जा आणि कोणताही श्लोक टॅप करा.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "ऐकणे थांबवा",
   "removeBookmarkA11y": "बुकमार्क काढा",
   "bookmarkVerseA11y": "श्लोक बुकमार्क करा",
-
   "chapter1English": "अर्जुनाचा विषाद",
   "chapter2English": "सांख्य ज्ञान",
   "chapter3English": "कर्म-मार्ग",
@@ -72,10 +67,8 @@
   "chapter16English": "दैवी व आसुरी गुण",
   "chapter17English": "तीन प्रकारची श्रद्धा",
   "chapter18English": "संन्यासाद्वारे मोक्ष",
-
   "fallbackTranslation": "जेव्हा अन्याय उठतो, तेव्हा त्याला सुधारणारी शक्तीही उठते. त्या शक्तीचा अंश बन.",
   "fallbackCommentary": "जेव्हा-जेव्हा धर्माचा ऱ्हास व अधर्माचा उदय होतो, तेव्हा-तेव्हा मी स्वतः अवतार घेतो. हे धैर्य आज तुझ्यातही जिवंत राहो.",
-
   "gitaHeaderEnglish": "भगवद्गीता",
   "gitaSearchPlaceholder": "श्लोक, विषय, शब्द शोधा…",
   "gitaSearchA11y": "भगवद्गीतेत शोधा",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "दुसरा कीवर्ड वापरा — उदा. \"धर्म\", \"कर्म\", किंवा \"शरणागती\".",
   "gitaOpenVerseA11y": "श्लोक {{chapter}}.{{verse}} उघडा",
   "gitaVerseRowA11y": "श्लोक {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "अज्ञात अध्याय",
   "chapterNotFound": "अध्याय सापडला नाही",
   "chapterPickHint": "भगवद्गीतेत १८ अध्याय आहेत — कृपया १ ते १८ मधून निवडा.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "हा अध्याय तात्पुरता उपलब्ध नाही",
   "chapterOfflineHint": "उपलब्ध असेल तेव्हा तुमचा ऑफलाइन कॅशे वापरला जाईल. खाली पुन्हा प्रयत्न करता येईल.",
   "chapterNoVersesLoaded": "या अध्यायासाठी अद्याप कोणतेही श्लोक लोड झालेले नाहीत.",
-
   "verseUnknownTitle": "अज्ञात श्लोक",
   "verseChapterVerseTitle": "अध्याय {{chapter}} · श्लोक {{verse}}",
   "verseUnableToOpen": "हा श्लोक उघडता आला नाही",
@@ -126,5 +117,20 @@
   "verseStopA11y": "श्लोक प्लेबॅक थांबवा",
   "verseShareLabel": "श्लोक शेअर करा",
   "verseShareA11y": "हा श्लोक शेअर करा",
-  "verseRelatedLabel": "संबंधित श्लोक"
+  "verseRelatedLabel": "संबंधित श्लोक",
+  "roomsTitle": "ज्ञान कक्ष",
+  "roomsSubtitle": "मार्गदर्शित चर्चांमध्ये सामील व्हा",
+  "roomsParticipantsFmt": "{{count}} सामील",
+  "roomsHostLabelFmt": "यजमान: {{name}}",
+  "roomsJoinButton": "सामील व्हा",
+  "roomsEmptyMessage": "आत्ता कोणतेही सक्रिय ज्ञान कक्ष नाहीत.\nरिफ्रेश करण्यासाठी खाली ओढा.",
+  "roomFallbackTitle": "ज्ञान कक्ष",
+  "roomHostBadge": "यजमान",
+  "roomLeaveButton": "बाहेर पडा",
+  "roomLeaveAlertTitle": "कक्ष सोडा",
+  "roomLeaveAlertBody": "तुम्हाला खात्रीने या ज्ञान कक्षातून बाहेर पडायचे आहे का?",
+  "roomLeaveAlertStay": "थांबा",
+  "roomLeaveAlertLeave": "सोडा",
+  "roomInputPlaceholder": "तुमचे ज्ञान सामायिक करा...",
+  "roomSendA11y": "संदेश पाठवा"
 }

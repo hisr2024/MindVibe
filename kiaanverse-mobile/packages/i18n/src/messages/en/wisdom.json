@@ -126,5 +126,21 @@
   "verseStopA11y": "Stop verse playback",
   "verseShareLabel": "Share verse",
   "verseShareA11y": "Share this verse",
-  "verseRelatedLabel": "Related verses"
+  "verseRelatedLabel": "Related verses",
+
+  "roomsTitle": "Wisdom Rooms",
+  "roomsSubtitle": "Join guided discussions",
+  "roomsParticipantsFmt": "{{count}} joined",
+  "roomsHostLabelFmt": "Host: {{name}}",
+  "roomsJoinButton": "Join",
+  "roomsEmptyMessage": "No active wisdom rooms right now.\nPull down to refresh.",
+  "roomFallbackTitle": "Wisdom Room",
+  "roomHostBadge": "Host",
+  "roomLeaveButton": "Leave",
+  "roomLeaveAlertTitle": "Leave Room",
+  "roomLeaveAlertBody": "Are you sure you want to leave this wisdom room?",
+  "roomLeaveAlertStay": "Stay",
+  "roomLeaveAlertLeave": "Leave",
+  "roomInputPlaceholder": "Share your wisdom...",
+  "roomSendA11y": "Send message"
 }

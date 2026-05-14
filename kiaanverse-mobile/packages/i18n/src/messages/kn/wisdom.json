@@ -2,7 +2,6 @@
   "title": "ಜ್ಞಾನ",
   "openNotificationsA11y": "ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರೆಯಿರಿ",
   "goBackA11y": "ಹಿಂದೆ ಹೋಗಿ",
-
   "todaysWisdomLabel": "ಇಂದಿನ ಜ್ಞಾನ",
   "chapterVerseRef": "ಅಧ್ಯಾಯ {{chapter}}, ಶ್ಲೋಕ {{verse}}",
   "shareTitle": "ಇಂದಿನ ಜ್ಞಾನ",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "ಶೀಘ್ರದಲ್ಲೇ",
   "comingSoonMessage": "{{theme}} ಕುರಿತು ಆಯ್ದ ಶ್ಲೋಕಗಳು ಮುಂದಿನ ಬಿಡುಗಡೆಯಲ್ಲಿ ಬರಲಿವೆ. ಸದ್ಯಕ್ಕೆ ಭಗವದ್ಗೀತೆ ಬ್ರೌಸರ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ.",
   "continueButton": "ಮುಂದುವರಿಸಿ",
-
   "exploreByTheme": "ವಿಷಯವಾಗಿ ಅನ್ವೇಷಿಸಿ",
   "themeInnerPeace": "ಆಂತರಿಕ ಶಾಂತಿ",
   "themeCourage": "ಧೈರ್ಯ",
@@ -26,14 +24,12 @@
   "themeRightAction": "ಸರಿಯಾದ ಕ್ರಿಯೆ",
   "themeLettingGo": "ಬಿಡುವಿಕೆ",
   "themeVersesA11y": "{{theme}} ಕುರಿತು ಶ್ಲೋಕಗಳು",
-
   "askKiaanTitle": "KIAANಗೆ ಕೇಳಿ",
   "askKiaanSubtitle": "ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಗೆ ವೈಯಕ್ತಿಕ ಜ್ಞಾನ ಪಡೆಯಿರಿ",
   "chatRoomsTitle": "ಜ್ಞಾನ ಚಾಟ್ ಕೋಣೆಗಳು",
   "chatRoomsSubtitle": "ನೇರ ಸಮುದಾಯ ಸಂಭಾಷಣೆಗಳಲ್ಲಿ ಸೇರಿರಿ",
   "exploreGitaTitle": "ಭಗವದ್ಗೀತೆಯನ್ನು ಅನ್ವೇಷಿಸಿ",
   "exploreGitaSubtitle": "೧೮ ಅಧ್ಯಾಯಗಳಲ್ಲಿ ೭೦೦+ ಶ್ಲೋಕಗಳು",
-
   "verseHeaderInvalid": "ಶ್ಲೋಕ",
   "verseInvalidTitle": "ಶ್ಲೋಕ ಉಲ್ಲೇಖ ಅಸಮಂಜಸ",
   "verseInvalidBody": "ಮಾನ್ಯ ಶ್ಲೋಕ 4.38 ರಂತೆ ಕಾಣುತ್ತದೆ. ಜ್ಞಾನಕ್ಕೆ ಹಿಂದಿರುಗಿ ಯಾವುದಾದರೂ ಶ್ಲೋಕವನ್ನು ಸ್ಪರ್ಶಿಸಿ.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "ಕೇಳುವಿಕೆಯನ್ನು ನಿಲ್ಲಿಸಿ",
   "removeBookmarkA11y": "ಬುಕ್‌ಮಾರ್ಕ್ ತೆಗೆಯಿರಿ",
   "bookmarkVerseA11y": "ಶ್ಲೋಕವನ್ನು ಬುಕ್‌ಮಾರ್ಕ್ ಮಾಡಿ",
-
   "chapter1English": "ಅರ್ಜುನನ ವಿಷಾದ",
   "chapter2English": "ಸಾಂಖ್ಯ ಜ್ಞಾನ",
   "chapter3English": "ಕರ್ಮ ಮಾರ್ಗ",
@@ -72,10 +67,8 @@
   "chapter16English": "ದೈವೀ ಮತ್ತು ಆಸುರೀ ಗುಣಗಳು",
   "chapter17English": "ಮೂರು ರೀತಿಯ ಶ್ರದ್ಧೆ",
   "chapter18English": "ಸಂನ್ಯಾಸದ ಮೂಲಕ ಮೋಕ್ಷ",
-
   "fallbackTranslation": "ಅನ್ಯಾಯ ಎದ್ದಾಗ, ಅದನ್ನು ಸರಿಪಡಿಸುವ ಶಕ್ತಿಯೂ ಏಳುತ್ತದೆ. ಆ ಶಕ್ತಿಯ ಭಾಗವಾಗಿ ಇರಿ.",
   "fallbackCommentary": "ಧರ್ಮವು ಕ್ಷೀಣಿಸಿ ಅಧರ್ಮವು ಏಳುವಾಗಲೆಲ್ಲಾ, ಅರ್ಜುನಾ, ನಾನು ಅವತಾರವೆತ್ತುತ್ತೇನೆ. ಈ ಧೈರ್ಯ ಇಂದು ನಿನ್ನಲ್ಲೂ ಜೀವಿಸಲಿ.",
-
   "gitaHeaderEnglish": "ಭಗವದ್ಗೀತೆ",
   "gitaSearchPlaceholder": "ಶ್ಲೋಕಗಳು, ವಿಷಯಗಳು, ಪದಗಳನ್ನು ಹುಡುಕಿ…",
   "gitaSearchA11y": "ಭಗವದ್ಗೀತೆಯಲ್ಲಿ ಹುಡುಕಿ",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "ಬೇರೆ ಕೀವರ್ಡ್ ಪ್ರಯತ್ನಿಸಿ — ಉದಾ. \"ಧರ್ಮ\", \"ಕರ್ಮ\", ಅಥವಾ \"ಶರಣಾಗತಿ\".",
   "gitaOpenVerseA11y": "ಶ್ಲೋಕ {{chapter}}.{{verse}} ತೆರೆಯಿರಿ",
   "gitaVerseRowA11y": "ಶ್ಲೋಕ {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "ಅಪರಿಚಿತ ಅಧ್ಯಾಯ",
   "chapterNotFound": "ಅಧ್ಯಾಯ ಸಿಗಲಿಲ್ಲ",
   "chapterPickHint": "ಭಗವದ್ಗೀತೆಯಲ್ಲಿ ೧೮ ಅಧ್ಯಾಯಗಳಿವೆ — ದಯವಿಟ್ಟು ೧ ರಿಂದ ೧೮ ರ ನಡುವೆ ಒಂದನ್ನು ಆರಿಸಿ.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "ಈ ಅಧ್ಯಾಯ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ",
   "chapterOfflineHint": "ಲಭ್ಯವಿದ್ದಾಗ ನಿಮ್ಮ ಆಫ್‌ಲೈನ್ ಕ್ಯಾಶ್ ಬಳಸಲಾಗುತ್ತದೆ. ಕೆಳಗೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಬಹುದು.",
   "chapterNoVersesLoaded": "ಈ ಅಧ್ಯಾಯಕ್ಕೆ ಇನ್ನೂ ಶ್ಲೋಕಗಳು ಲೋಡ್ ಆಗಿಲ್ಲ.",
-
   "verseUnknownTitle": "ಅಪರಿಚಿತ ಶ್ಲೋಕ",
   "verseChapterVerseTitle": "ಅಧ್ಯಾಯ {{chapter}} · ಶ್ಲೋಕ {{verse}}",
   "verseUnableToOpen": "ಈ ಶ್ಲೋಕವನ್ನು ತೆರೆಯಲಾಗಲಿಲ್ಲ",
@@ -126,5 +117,20 @@
   "verseStopA11y": "ಶ್ಲೋಕ ಪ್ಲೇಬ್ಯಾಕ್ ನಿಲ್ಲಿಸಿ",
   "verseShareLabel": "ಶ್ಲೋಕ ಹಂಚಿಕೊಳ್ಳಿ",
   "verseShareA11y": "ಈ ಶ್ಲೋಕವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
-  "verseRelatedLabel": "ಸಂಬಂಧಿತ ಶ್ಲೋಕಗಳು"
+  "verseRelatedLabel": "ಸಂಬಂಧಿತ ಶ್ಲೋಕಗಳು",
+  "roomsTitle": "ಜ್ಞಾನ ಕೋಣೆಗಳು",
+  "roomsSubtitle": "ಮಾರ್ಗದರ್ಶಿತ ಚರ್ಚೆಗಳಲ್ಲಿ ಸೇರಿ",
+  "roomsParticipantsFmt": "{{count}} ಸೇರಿದ್ದಾರೆ",
+  "roomsHostLabelFmt": "ಆತಿಥೇಯ: {{name}}",
+  "roomsJoinButton": "ಸೇರಿ",
+  "roomsEmptyMessage": "ಈಗ ಯಾವುದೇ ಸಕ್ರಿಯ ಜ್ಞಾನ ಕೋಣೆಗಳಿಲ್ಲ.\nರಿಫ್ರೆಶ್ ಮಾಡಲು ಕೆಳಗೆ ಎಳೆಯಿರಿ.",
+  "roomFallbackTitle": "ಜ್ಞಾನ ಕೋಣೆ",
+  "roomHostBadge": "ಆತಿಥೇಯ",
+  "roomLeaveButton": "ಬಿಡಿ",
+  "roomLeaveAlertTitle": "ಕೋಣೆ ಬಿಡಿ",
+  "roomLeaveAlertBody": "ನೀವು ಖಚಿತವಾಗಿ ಈ ಜ್ಞಾನ ಕೋಣೆಯನ್ನು ಬಿಡಲು ಬಯಸುತ್ತೀರಾ?",
+  "roomLeaveAlertStay": "ಇರಿ",
+  "roomLeaveAlertLeave": "ಬಿಡಿ",
+  "roomInputPlaceholder": "ನಿಮ್ಮ ಜ್ಞಾನ ಹಂಚಿಕೊಳ್ಳಿ...",
+  "roomSendA11y": "ಸಂದೇಶ ಕಳುಹಿಸಿ"
 }

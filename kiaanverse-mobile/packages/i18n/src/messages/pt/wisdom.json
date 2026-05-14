@@ -2,7 +2,6 @@
   "title": "Sabedoria",
   "openNotificationsA11y": "Abrir notificações",
   "goBackA11y": "Voltar",
-
   "todaysWisdomLabel": "SABEDORIA DE HOJE",
   "chapterVerseRef": "Capítulo {{chapter}}, Verso {{verse}}",
   "shareTitle": "Sabedoria de hoje",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "Em breve",
   "comingSoonMessage": "Os versos sobre {{theme}} chegam na próxima versão. A abrir o navegador do Bhagavad Gita por agora.",
   "continueButton": "Continuar",
-
   "exploreByTheme": "Explorar por tema",
   "themeInnerPeace": "Paz interior",
   "themeCourage": "Coragem",
@@ -26,14 +24,12 @@
   "themeRightAction": "Acção justa",
   "themeLettingGo": "Desapego",
   "themeVersesA11y": "Versos sobre {{theme}}",
-
   "askKiaanTitle": "Perguntar ao KIAAN",
   "askKiaanSubtitle": "Recebe sabedoria personalizada para a tua situação",
   "chatRoomsTitle": "Salas de sabedoria",
   "chatRoomsSubtitle": "Junta-te a conversas comunitárias ao vivo",
   "exploreGitaTitle": "Explorar o Bhagavad Gita",
   "exploreGitaSubtitle": "700+ versos em 18 capítulos",
-
   "verseHeaderInvalid": "Verso",
   "verseInvalidTitle": "Referência de verso inválida",
   "verseInvalidBody": "Um verso válido tem a forma 4.38. Volta a Sabedoria e toca num verso para o abrir.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "Parar a escuta",
   "removeBookmarkA11y": "Remover marcador",
   "bookmarkVerseA11y": "Marcar verso",
-
   "chapter1English": "A aflição de Arjuna",
   "chapter2English": "Conhecimento transcendental",
   "chapter3English": "Caminho da acção",
@@ -72,10 +67,8 @@
   "chapter16English": "Qualidades divinas e demoníacas",
   "chapter17English": "Três tipos de fé",
   "chapter18English": "Libertação pela renúncia",
-
   "fallbackTranslation": "Quando a injustiça se levanta, levanta-se também a força que a corrige. Faz parte dessa força.",
   "fallbackCommentary": "Sempre que o Dharma declina e o Adharma se ergue, ó Arjuna, eu mesmo me encarno. Que esta coragem viva hoje em ti.",
-
   "gitaHeaderEnglish": "Bhagavad Gita",
   "gitaSearchPlaceholder": "Pesquisa versos, temas, palavras…",
   "gitaSearchA11y": "Pesquisar na Bhagavad Gita",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "Tenta outra palavra-chave — por ex. «dharma», «karma» ou «entrega».",
   "gitaOpenVerseA11y": "Abrir verso {{chapter}}.{{verse}}",
   "gitaVerseRowA11y": "Verso {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "Capítulo desconhecido",
   "chapterNotFound": "Capítulo não encontrado",
   "chapterPickHint": "A Bhagavad Gita tem 18 capítulos — escolhe um entre 1 e 18.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "Este capítulo está temporariamente indisponível",
   "chapterOfflineHint": "A tua cache offline será usada quando disponível. Podes tentar de novo abaixo.",
   "chapterNoVersesLoaded": "Ainda não foram carregados versos para este capítulo.",
-
   "verseUnknownTitle": "Verso desconhecido",
   "verseChapterVerseTitle": "Capítulo {{chapter}} · Verso {{verse}}",
   "verseUnableToOpen": "Não é possível abrir este verso",
@@ -126,5 +117,20 @@
   "verseStopA11y": "Parar reprodução do verso",
   "verseShareLabel": "Partilhar verso",
   "verseShareA11y": "Partilhar este verso",
-  "verseRelatedLabel": "Versos relacionados"
+  "verseRelatedLabel": "Versos relacionados",
+  "roomsTitle": "Salas de sabedoria",
+  "roomsSubtitle": "Junte-se a discussões guiadas",
+  "roomsParticipantsFmt": "{{count}} participantes",
+  "roomsHostLabelFmt": "Anfitrião: {{name}}",
+  "roomsJoinButton": "Entrar",
+  "roomsEmptyMessage": "Nenhuma sala de sabedoria ativa agora.\nPuxe para baixo para atualizar.",
+  "roomFallbackTitle": "Sala de sabedoria",
+  "roomHostBadge": "Anfitrião",
+  "roomLeaveButton": "Sair",
+  "roomLeaveAlertTitle": "Sair da sala",
+  "roomLeaveAlertBody": "Tem certeza de que deseja sair desta sala de sabedoria?",
+  "roomLeaveAlertStay": "Ficar",
+  "roomLeaveAlertLeave": "Sair",
+  "roomInputPlaceholder": "Compartilhe sua sabedoria...",
+  "roomSendA11y": "Enviar mensagem"
 }

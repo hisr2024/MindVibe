@@ -2,7 +2,6 @@
   "title": "జ్ఞానం",
   "openNotificationsA11y": "నోటిఫికేషన్‌లను తెరువు",
   "goBackA11y": "వెనుకకు వెళ్ళు",
-
   "todaysWisdomLabel": "నేటి జ్ఞానం",
   "chapterVerseRef": "అధ్యాయం {{chapter}}, శ్లోకం {{verse}}",
   "shareTitle": "నేటి జ్ఞానం",
@@ -17,7 +16,6 @@
   "comingSoonTitle": "త్వరలో",
   "comingSoonMessage": "{{theme}}కు సంబంధించిన ఎంపికచేసిన శ్లోకాలు తదుపరి విడుదలలో వస్తాయి. ప్రస్తుతం భగవద్గీత బ్రౌజర్‌ను తెరుస్తున్నాము.",
   "continueButton": "కొనసాగించు",
-
   "exploreByTheme": "విషయం వారీగా అన్వేషించు",
   "themeInnerPeace": "అంతరంగ శాంతి",
   "themeCourage": "ధైర్యం",
@@ -26,14 +24,12 @@
   "themeRightAction": "సరైన కర్మ",
   "themeLettingGo": "విడిచిపెట్టడం",
   "themeVersesA11y": "{{theme}}కు సంబంధించిన శ్లోకాలు",
-
   "askKiaanTitle": "KIAANను అడుగు",
   "askKiaanSubtitle": "మీ పరిస్థితికి తగిన వ్యక్తిగత జ్ఞానం పొందండి",
   "chatRoomsTitle": "జ్ఞాన చర్చా గదులు",
   "chatRoomsSubtitle": "ప్రత్యక్ష సమాజ సంభాషణలలో పాల్గొనండి",
   "exploreGitaTitle": "భగవద్గీతను అన్వేషించు",
   "exploreGitaSubtitle": "18 అధ్యాయాలలో 700+ శ్లోకాలు",
-
   "verseHeaderInvalid": "శ్లోకం",
   "verseInvalidTitle": "శ్లోక సూచన చెల్లదు",
   "verseInvalidBody": "సరైన శ్లోకం 4.38 వలె కనిపిస్తుంది. జ్ఞానానికి తిరిగి వెళ్ళి శ్లోకాన్ని తాకండి.",
@@ -53,7 +49,6 @@
   "stopListeningA11y": "వినడం ఆపు",
   "removeBookmarkA11y": "బుక్‌మార్క్‌ను తీసివేయి",
   "bookmarkVerseA11y": "శ్లోకాన్ని బుక్‌మార్క్ చేయి",
-
   "chapter1English": "అర్జునుని విషాదం",
   "chapter2English": "సాంఖ్య జ్ఞానం",
   "chapter3English": "కర్మ మార్గం",
@@ -72,10 +67,8 @@
   "chapter16English": "దైవ-అసుర గుణాలు",
   "chapter17English": "మూడు రకాల శ్రద్ధ",
   "chapter18English": "సన్యాస మోక్షం",
-
   "fallbackTranslation": "అన్యాయం పుట్టినప్పుడు, దానిని సరిచేసే శక్తి కూడా పుడుతుంది. ఆ శక్తిలో భాగం కా.",
   "fallbackCommentary": "ధర్మం క్షీణించి అధర్మం పెరిగినప్పుడల్లా, ఓ అర్జునా, నేనే అవతరిస్తాను. ఈ ధైర్యం ఈ రోజు నీలో నివసించుగాక.",
-
   "gitaHeaderEnglish": "భగవద్గీత",
   "gitaSearchPlaceholder": "శ్లోకాలు, విషయాలు, పదాలు వెతకండి…",
   "gitaSearchA11y": "భగవద్గీతలో వెతకండి",
@@ -100,7 +93,6 @@
   "gitaTryAnotherKeyword": "మరొక కీవర్డ్ ప్రయత్నించండి — ఉదా. \"ధర్మం\", \"కర్మ\", లేదా \"శరణాగతి\".",
   "gitaOpenVerseA11y": "శ్లోకం {{chapter}}.{{verse}} తెరువు",
   "gitaVerseRowA11y": "శ్లోకం {{chapter}}.{{verse}}",
-
   "chapterUnknownTitle": "తెలియని అధ్యాయం",
   "chapterNotFound": "అధ్యాయం కనుగొనబడలేదు",
   "chapterPickHint": "భగవద్గీతలో 18 అధ్యాయాలు ఉన్నాయి — దయచేసి 1 నుండి 18 వరకు ఎంచుకోండి.",
@@ -111,7 +103,6 @@
   "chapterTempUnavailable": "ఈ అధ్యాయం తాత్కాలికంగా అందుబాటులో లేదు",
   "chapterOfflineHint": "అందుబాటులో ఉన్నప్పుడు మీ ఆఫ్‌లైన్ క్యాష్ ఉపయోగించబడుతుంది. కింద మళ్లీ ప్రయత్నించవచ్చు.",
   "chapterNoVersesLoaded": "ఈ అధ్యాయానికి ఇంకా శ్లోకాలు లోడ్ కాలేదు.",
-
   "verseUnknownTitle": "తెలియని శ్లోకం",
   "verseChapterVerseTitle": "అధ్యాయం {{chapter}} · శ్లోకం {{verse}}",
   "verseUnableToOpen": "ఈ శ్లోకాన్ని తెరువలేకపోతోంది",
@@ -126,5 +117,20 @@
   "verseStopA11y": "శ్లోక ప్లేబ్యాక్ ఆపండి",
   "verseShareLabel": "శ్లోకం పంచుకోండి",
   "verseShareA11y": "ఈ శ్లోకాన్ని పంచుకోండి",
-  "verseRelatedLabel": "సంబంధిత శ్లోకాలు"
+  "verseRelatedLabel": "సంబంధిత శ్లోకాలు",
+  "roomsTitle": "జ్ఞాన గదులు",
+  "roomsSubtitle": "మార్గదర్శక చర్చల్లో చేరండి",
+  "roomsParticipantsFmt": "{{count}} చేరారు",
+  "roomsHostLabelFmt": "ఆతిథేయుడు: {{name}}",
+  "roomsJoinButton": "చేరండి",
+  "roomsEmptyMessage": "ఇప్పుడు చురుకైన జ్ఞాన గదులు లేవు.\nరిఫ్రెష్ చేయడానికి కిందికి లాగండి.",
+  "roomFallbackTitle": "జ్ఞాన గది",
+  "roomHostBadge": "ఆతిథేయుడు",
+  "roomLeaveButton": "నిష్క్రమించు",
+  "roomLeaveAlertTitle": "గది వదిలి వెళ్ళండి",
+  "roomLeaveAlertBody": "మీరు ఈ జ్ఞాన గది వదిలి వెళ్ళాలనుకుంటున్నారా?",
+  "roomLeaveAlertStay": "ఉండండి",
+  "roomLeaveAlertLeave": "వదిలి వెళ్ళు",
+  "roomInputPlaceholder": "మీ జ్ఞానం పంచుకోండి...",
+  "roomSendA11y": "సందేశం పంపండి"
 }
