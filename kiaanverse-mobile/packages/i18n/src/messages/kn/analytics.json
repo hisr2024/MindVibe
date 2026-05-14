@@ -26,7 +26,6 @@
   "dynamicNote": "ಪ್ರತಿ ವಾರ KIAAN ನಿಂದ ಹೊಸದಾಗಿ ಉತ್ಪಾದಿಸಲಾಗಿದೆ · ಗೀತಾ ತತ್ತ್ವದಲ್ಲಿ ಆಧಾರಿತ",
   "refreshMirror": "ಪವಿತ್ರ ದರ್ಪಣವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ",
   "viewJourneyInsights": "ಪ್ರಯಾಣ ಒಳನೋಟಗಳನ್ನು ನೋಡಿ",
-
   "diScreenTitle": "ಆಳವಾದ ಒಳನೋಟಗಳು",
   "diLoadingMessage": "ನಿಮ್ಮ ಆಂತರಿಕ ಭೂದೃಶ್ಯವನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ…",
   "diGunaSectionLabel": "ಗುಣ ಸಮತೋಲನ",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ಪ್ರಚೋದಕಗಳು: {{triggers}}",
   "diRecommendationsSectionLabel": "ವೈಯಕ್ತಿಕ ಶಿಫಾರಸುಗಳು",
   "diVersesSectionLabel": "ಬೆಳವಣಿಗೆಗೆ ಶ್ಲೋಕಗಳು",
-
   "jiScreenTitle": "ನಿಮ್ಮ ಪ್ರಯಾಣ ಒಳನೋಟಗಳು",
   "jiMoodTrendsLabel": "ಮೂಡ್ ಪ್ರವೃತ್ತಿಗಳು",
   "jiEmptyChartMessage": "ಈ ಅವಧಿಗೆ ಇನ್ನೂ ಮೂಡ್ ಡೇಟಾ ಇಲ್ಲ.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "ಪೂರ್ಣ",
   "jiActiveLabel": "ಸಕ್ರಿಯ",
   "jiStreakDaysLabel": "ಸತತ ದಿನಗಳು",
-  "jiViewDeepInsightsButton": "ಆಳವಾದ ಒಳನೋಟಗಳನ್ನು ನೋಡಿ"
+  "jiViewDeepInsightsButton": "ಆಳವಾದ ಒಳನೋಟಗಳನ್ನು ನೋಡಿ",
+  "kxScreenTitle": "ಕರ್ಮಲೈಟಿಕ್ಸ್",
+  "kxSubtitle": "ಕರ್ಮ-ದರ್ಪಣ · Kiaan AI ಮೂಲಕ ಧಾರ್ಮಿಕ ವಿಶ್ಲೇಷಣೆ",
+  "kxInsufficientTitle": "ನಿಮ್ಮ ದರ್ಪಣ ಕಾಯುತ್ತಿದೆ",
+  "kxInsufficientNeedFmt": "ಈ ವಾರ ಇನ್ನೂ {{count}} ಪ್ರತಿಬಿಂಬಗಳನ್ನು ಬರೆಯಿರಿ, KIAAN ಮಾದರಿಗಳಿಂದ ನಿಮ್ಮ ಪವಿತ್ರ ದರ್ಪಣವನ್ನು ರೂಪಿಸುತ್ತದೆ.",
+  "kxInsufficientFallback": "ಕೆಲವು ದಿನ ಜರ್ನಲ್ ಬರೆಯಿರಿ — ನಂತರ ಸಖನ ಸಾಪ್ತಾಹಿಕ ಪ್ರತಿಬಿಂಬಕ್ಕಾಗಿ ಮರಳಿ.",
+  "kxBeginReflectionCta": "ಒಂದು ಪ್ರತಿಬಿಂಬವನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+  "kxKarmicAlignmentLabel": "ಕಾರ್ಮಿಕ ಸಮಾಲೋಚನೆ",
+  "kxKarmaDimensionsLabel": "ಕರ್ಮ ಆಯಾಮಗಳು",
+  "kxCardMirror": "ದರ್ಪಣ",
+  "kxCardPattern": "ಗಮನಿಸಿದ ಮಾದರಿ",
+  "kxCardGitaEchoFmt": "ಗೀತಾ ಪ್ರತಿಧ್ವನಿ · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "ಬೆಳವಣಿಗೆಯ ಅಂಚು",
+  "kxCardBlessing": "ಆಶೀರ್ವಾದ",
+  "kxCardDynamicWisdom": "ಡೈನಮಿಕ್ ಜ್ಞಾನ · ಜ್ಞಾನ ಕೇಂದ್ರ",
+  "kxRegeneratingButton": "ಮತ್ತೆ ಸೃಷ್ಟಿಸುತ್ತಿದೆ…",
+  "kxRegenerateButton": "KIAAN ನಿಂದ ಹೊಸ ದರ್ಪಣಕ್ಕಾಗಿ ಕೇಳಿ",
+  "kxBackToSacredA11y": "ಪವಿತ್ರ ಪ್ರತಿಬಿಂಬಕ್ಕೆ ಮರಳಿ",
+  "kxBackToSacredLink": "← ಪವಿತ್ರ ಪ್ರತಿಬಿಂಬಕ್ಕೆ",
+  "kxPrivacyNote": "🔒 ಕರ್ಮಲೈಟಿಕ್ಸ್ ಕೇವಲ ಸಾದಾ ಮೂಡ್ + ಟ್ಯಾಗ್ ಮೆಟಾಡೇಟಾ ಓದುತ್ತದೆ. ನಿಮ್ಮ ಪ್ರತಿಬಿಂಬದ ವಿಷಯ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಎಂಡ್-ಟು-ಎಂಡ್ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ."
 }

@@ -26,7 +26,6 @@
   "dynamicNote": "દર સપ્તાહે KIAAN દ્વારા તાજું ઉત્પન્ન · ગીતા તત્ત્વજ્ઞાન પર આધારિત",
   "refreshMirror": "પવિત્ર દર્પણ રિફ્રેશ કરો",
   "viewJourneyInsights": "યાત્રા આંતરદૃષ્ટિ જુઓ",
-
   "diScreenTitle": "ગહન આંતરદૃષ્ટિ",
   "diLoadingMessage": "તમારા આંતરિક ભૂદૃશ્યનું વિશ્લેષણ…",
   "diGunaSectionLabel": "ગુણ સંતુલન",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ટ્રિગર: {{triggers}}",
   "diRecommendationsSectionLabel": "વ્યક્તિગત ભલામણો",
   "diVersesSectionLabel": "વૃદ્ધિ માટેના શ્લોકો",
-
   "jiScreenTitle": "તમારી યાત્રા આંતરદૃષ્ટિ",
   "jiMoodTrendsLabel": "મૂડ વલણો",
   "jiEmptyChartMessage": "આ સમયગાળા માટે હજુ સુધી મૂડ ડેટા નથી.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "પૂર્ણ",
   "jiActiveLabel": "સક્રિય",
   "jiStreakDaysLabel": "સતત દિવસો",
-  "jiViewDeepInsightsButton": "ગહન આંતરદૃષ્ટિ જુઓ"
+  "jiViewDeepInsightsButton": "ગહન આંતરદૃષ્ટિ જુઓ",
+  "kxScreenTitle": "કર્મલૈટિક્સ",
+  "kxSubtitle": "કર્મ-દર્પણ · Kiaan AI દ્વારા ધાર્મિક વિશ્લેષણ",
+  "kxInsufficientTitle": "તમારું દર્પણ રાહ જુએ છે",
+  "kxInsufficientNeedFmt": "આ સપ્તાહે વધુ {{count}} પ્રતિબિંબ લખો, KIAAN ભાતો પરથી તમારું પવિત્ર દર્પણ ઘડશે.",
+  "kxInsufficientFallback": "થોડા દિવસ જર્નલ લખો — પછી સખાના સાપ્તાહિક પ્રતિબિંબ માટે પાછા ફરો.",
+  "kxBeginReflectionCta": "એક પ્રતિબિંબ શરૂ કરો",
+  "kxKarmicAlignmentLabel": "કાર્મિક સંરેખણ",
+  "kxKarmaDimensionsLabel": "કર્મ પરિમાણો",
+  "kxCardMirror": "દર્પણ",
+  "kxCardPattern": "જોવામાં આવેલી ભાત",
+  "kxCardGitaEchoFmt": "ગીતા પ્રતિધ્વનિ · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "વિકાસની ધાર",
+  "kxCardBlessing": "આશીર્વાદ",
+  "kxCardDynamicWisdom": "ગતિશીલ જ્ઞાન · જ્ઞાન કેન્દ્ર",
+  "kxRegeneratingButton": "ફરીથી બનાવી રહ્યું છે…",
+  "kxRegenerateButton": "KIAAN ને તાજા દર્પણ માટે પૂછો",
+  "kxBackToSacredA11y": "પવિત્ર પ્રતિબિંબ પર પાછા",
+  "kxBackToSacredLink": "← પવિત્ર પ્રતિબિંબ પર",
+  "kxPrivacyNote": "🔒 કર્મલૈટિક્સ ફક્ત સાદા મૂડ + ટૅગ મેટાડેટા વાંચે છે. તમારા પ્રતિબિંબનું મૂળ તમારા ઉપકરણ પર એન્ડ-ટુ-એન્ડ એન્ક્રિપ્ટેડ રહે છે."
 }

@@ -26,7 +26,6 @@
   "dynamicNote": "Generado fresco cada semana por KIAAN · Basado en la filosofía de la Gita",
   "refreshMirror": "Actualizar Espejo Sagrado",
   "viewJourneyInsights": "Ver Perspectivas del Viaje",
-
   "diScreenTitle": "Perspectivas Profundas",
   "diLoadingMessage": "Analizando tu paisaje interior…",
   "diGunaSectionLabel": "Equilibrio de Gunas",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "Desencadenantes: {{triggers}}",
   "diRecommendationsSectionLabel": "Recomendaciones Personalizadas",
   "diVersesSectionLabel": "Versos para el Crecimiento",
-
   "jiScreenTitle": "Tus Perspectivas del Viaje",
   "jiMoodTrendsLabel": "Tendencias de Ánimo",
   "jiEmptyChartMessage": "Aún no hay datos de ánimo para este período.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "Completado",
   "jiActiveLabel": "Activo",
   "jiStreakDaysLabel": "Días de Racha",
-  "jiViewDeepInsightsButton": "Ver Perspectivas Profundas"
+  "jiViewDeepInsightsButton": "Ver Perspectivas Profundas",
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Análisis dhármico por Kiaan AI",
+  "kxInsufficientTitle": "Tu espejo aguarda",
+  "kxInsufficientNeedFmt": "Escribe {{count}} reflexiones más esta semana y KIAAN forjará tu Espejo Sagrado a partir de los patrones.",
+  "kxInsufficientFallback": "Lleva un diario unos días — luego vuelve para la reflexión semanal de Sakha.",
+  "kxBeginReflectionCta": "Comenzar una reflexión",
+  "kxKarmicAlignmentLabel": "ALINEACIÓN KÁRMICA",
+  "kxKarmaDimensionsLabel": "DIMENSIONES KÁRMICAS",
+  "kxCardMirror": "EL ESPEJO",
+  "kxCardPattern": "PATRÓN OBSERVADO",
+  "kxCardGitaEchoFmt": "ECO DE LA GITA · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "BORDE DE CRECIMIENTO",
+  "kxCardBlessing": "BENDICIÓN",
+  "kxCardDynamicWisdom": "SABIDURÍA DINÁMICA · NÚCLEO DE SABIDURÍA",
+  "kxRegeneratingButton": "Regenerando…",
+  "kxRegenerateButton": "Pídele a KIAAN un espejo fresco",
+  "kxBackToSacredA11y": "Volver a la Reflexión Sagrada",
+  "kxBackToSacredLink": "← Volver a la Reflexión Sagrada",
+  "kxPrivacyNote": "🔒 Karmalytix solo lee metadatos de ánimo y etiquetas en texto plano. El contenido de tus reflexiones permanece cifrado de extremo a extremo en tu dispositivo."
 }

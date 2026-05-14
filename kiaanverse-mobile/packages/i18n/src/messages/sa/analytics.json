@@ -26,7 +26,6 @@
   "dynamicNote": "प्रति-सप्ताहं KIAAN-द्वारा नूतनं जातम् · गीता-दर्शने आधारितम्",
   "refreshMirror": "पवित्र-दर्पणं नवीकरोतु",
   "viewJourneyInsights": "यात्रा-अन्तर्दृष्टीः पश्यतु",
-
   "diScreenTitle": "गभीर-अन्तर्दृष्टयः",
   "diLoadingMessage": "भवतः आन्तरिक-दृश्यस्य विश्लेषणं क्रियते…",
   "diGunaSectionLabel": "गुण-सन्तुलनम्",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "उद्दीपकाः: {{triggers}}",
   "diRecommendationsSectionLabel": "व्यक्तिगत-सिफारिशाः",
   "diVersesSectionLabel": "वृद्धये श्लोकाः",
-
   "jiScreenTitle": "भवतः यात्रा-अन्तर्दृष्टयः",
   "jiMoodTrendsLabel": "मनो-प्रवृत्तयः",
   "jiEmptyChartMessage": "अस्मिन् काले इदानीं किमपि मनो-दत्तं नास्ति।",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "पूर्णम्",
   "jiActiveLabel": "सक्रियम्",
   "jiStreakDaysLabel": "श्रृङ्खला-दिनानि",
-  "jiViewDeepInsightsButton": "गभीर-अन्तर्दृष्टीः पश्यतु"
+  "jiViewDeepInsightsButton": "गभीर-अन्तर्दृष्टीः पश्यतु",
+  "kxScreenTitle": "कर्मलैटिक्स",
+  "kxSubtitle": "कर्म-दर्पणम् · Kiaan-AI द्वारा धार्मिक-विश्लेषणम्",
+  "kxInsufficientTitle": "भवतः दर्पणं प्रतीक्षते",
+  "kxInsufficientNeedFmt": "अस्मिन् सप्ताहे {{count}} अधिक-चिन्तनानि लिखतु तदा KIAAN-ः प्रतिमानेभ्यः भवतः पवित्र-दर्पणं रचयिष्यति।",
+  "kxInsufficientFallback": "कतिचित् दिनान् यावत् लेखनं कुरुतु — ततः सखस्य साप्ताहिक-चिन्तनाय पुनः आगच्छतु।",
+  "kxBeginReflectionCta": "चिन्तनं आरभतु",
+  "kxKarmicAlignmentLabel": "कार्मिक-संरेखणम्",
+  "kxKarmaDimensionsLabel": "कर्म-आयामाः",
+  "kxCardMirror": "दर्पणम्",
+  "kxCardPattern": "लक्षितं प्रतिमानम्",
+  "kxCardGitaEchoFmt": "गीता-प्रतिध्वनिः · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "वर्धन-सीमा",
+  "kxCardBlessing": "आशीर्वादः",
+  "kxCardDynamicWisdom": "गतिशील-ज्ञानम् · ज्ञान-केन्द्रम्",
+  "kxRegeneratingButton": "पुनः निर्मीयते…",
+  "kxRegenerateButton": "KIAAN-तः नवीन-दर्पणं याचताम्",
+  "kxBackToSacredA11y": "पवित्र-चिन्तनं प्रति प्रतिनिवर्ततु",
+  "kxBackToSacredLink": "← पवित्र-चिन्तनं प्रति",
+  "kxPrivacyNote": "🔒 कर्मलैटिक्स केवलं प्रकटित-मनो + अंशक-मेटा-दत्तानि पठति। भवतः चिन्तन-मूलं भवतः उपकरणे अन्त्यान्त्य-गुप्तीकृतं तिष्ठति।"
 }

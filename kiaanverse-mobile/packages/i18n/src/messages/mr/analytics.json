@@ -26,7 +26,6 @@
   "dynamicNote": "प्रत्येक आठवड्यात KIAAN द्वारे ताजे निर्माण · गीता तत्त्वज्ञानात आधारित",
   "refreshMirror": "पवित्र दर्पण रिफ्रेश करा",
   "viewJourneyInsights": "यात्रा अंतर्दृष्टी पहा",
-
   "diScreenTitle": "गहन अंतर्दृष्टी",
   "diLoadingMessage": "तुमच्या आंतरिक भूदृश्याचे विश्लेषण…",
   "diGunaSectionLabel": "गुण संतुलन",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ट्रिगर: {{triggers}}",
   "diRecommendationsSectionLabel": "वैयक्तिक शिफारसी",
   "diVersesSectionLabel": "वाढीसाठी श्लोक",
-
   "jiScreenTitle": "तुमच्या यात्रा अंतर्दृष्टी",
   "jiMoodTrendsLabel": "मूड कल",
   "jiEmptyChartMessage": "या कालावधीसाठी अद्याप मूड डेटा नाही.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "पूर्ण",
   "jiActiveLabel": "सक्रिय",
   "jiStreakDaysLabel": "सलग दिवस",
-  "jiViewDeepInsightsButton": "गहन अंतर्दृष्टी पहा"
+  "jiViewDeepInsightsButton": "गहन अंतर्दृष्टी पहा",
+  "kxScreenTitle": "कर्मलैटिक्स",
+  "kxSubtitle": "कर्म-दर्पण · Kiaan AI द्वारे धार्मिक विश्लेषण",
+  "kxInsufficientTitle": "तुमचा दर्पण प्रतीक्षेत आहे",
+  "kxInsufficientNeedFmt": "या आठवड्यात आणखी {{count}} चिंतने लिहा, KIAAN नमुन्यांमधून तुमचा पवित्र दर्पण घडवेल.",
+  "kxInsufficientFallback": "काही दिवस जर्नल लिहा — मग सख्याच्या साप्ताहिक चिंतनासाठी परत या.",
+  "kxBeginReflectionCta": "एक चिंतन सुरू करा",
+  "kxKarmicAlignmentLabel": "कार्मिक संरेखण",
+  "kxKarmaDimensionsLabel": "कर्म परिमाणे",
+  "kxCardMirror": "दर्पण",
+  "kxCardPattern": "लक्षात आलेला नमुना",
+  "kxCardGitaEchoFmt": "गीता प्रतिध्वनी · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "विकास सीमा",
+  "kxCardBlessing": "आशीर्वाद",
+  "kxCardDynamicWisdom": "गतिशील ज्ञान · ज्ञान केंद्र",
+  "kxRegeneratingButton": "पुन्हा निर्माण होत आहे…",
+  "kxRegenerateButton": "KIAAN ला ताज्या दर्पणासाठी विचारा",
+  "kxBackToSacredA11y": "पवित्र चिंतनाकडे परत",
+  "kxBackToSacredLink": "← पवित्र चिंतनाकडे",
+  "kxPrivacyNote": "🔒 कर्मलैटिक्स फक्त सामान्य मूड + टॅग मेटाडेटा वाचतो. तुमच्या चिंतनाचे मूळ तुमच्या डिव्हाइसवर एंड-टू-एंड एन्क्रिप्टेड राहते."
 }

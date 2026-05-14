@@ -26,7 +26,6 @@
   "dynamicNote": "ഓരോ ആഴ്ചയും KIAAN പുതുതായി ഉണ്ടാക്കുന്നു · ഗീതാ തത്ത്വശാസ്ത്രത്തിൽ അധിഷ്ഠിതം",
   "refreshMirror": "പവിത്ര കണ്ണാടി പുതുക്കുക",
   "viewJourneyInsights": "യാത്രാ ഉൾക്കാഴ്ചകൾ കാണുക",
-
   "diScreenTitle": "ആഴമേറിയ ഉൾക്കാഴ്ചകൾ",
   "diLoadingMessage": "നിങ്ങളുടെ ആന്തരിക ഭൂപ്രകൃതി വിശകലനം ചെയ്യുന്നു…",
   "diGunaSectionLabel": "ഗുണ സന്തുലനം",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ട്രിഗ്ഗറുകൾ: {{triggers}}",
   "diRecommendationsSectionLabel": "വ്യക്തിഗത ശുപാർശകൾ",
   "diVersesSectionLabel": "വളർച്ചയ്ക്കായുള്ള ശ്ലോകങ്ങൾ",
-
   "jiScreenTitle": "നിങ്ങളുടെ യാത്രാ ഉൾക്കാഴ്ചകൾ",
   "jiMoodTrendsLabel": "മൂഡ് പ്രവണതകൾ",
   "jiEmptyChartMessage": "ഈ കാലയളവിലേക്ക് ഇതുവരെ മൂഡ് ഡാറ്റ ഇല്ല.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "പൂർത്തിയായി",
   "jiActiveLabel": "സജീവം",
   "jiStreakDaysLabel": "തുടർച്ചയായ ദിവസങ്ങൾ",
-  "jiViewDeepInsightsButton": "ആഴമേറിയ ഉൾക്കാഴ്ചകൾ കാണുക"
+  "jiViewDeepInsightsButton": "ആഴമേറിയ ഉൾക്കാഴ്ചകൾ കാണുക",
+  "kxScreenTitle": "കർമ്മലൈറ്റിക്സ്",
+  "kxSubtitle": "കർമ്മ-ദർപ്പണം · Kiaan AI വഴി ധാർമ്മിക വിശകലനം",
+  "kxInsufficientTitle": "നിങ്ങളുടെ കണ്ണാടി കാത്തിരിക്കുന്നു",
+  "kxInsufficientNeedFmt": "ഈ ആഴ്ച ഇനിയും {{count}} പ്രതിഫലനങ്ങൾ എഴുതുക, KIAAN പാറ്റേണുകളിൽ നിന്ന് നിങ്ങളുടെ പവിത്ര കണ്ണാടി രൂപപ്പെടുത്തും.",
+  "kxInsufficientFallback": "കുറച്ച് ദിവസം ജേണൽ എഴുതുക — പിന്നെ സഖന്റെ പ്രതിവാര പ്രതിഫലനത്തിന് മടങ്ങിവരുക.",
+  "kxBeginReflectionCta": "ഒരു പ്രതിഫലനം ആരംഭിക്കുക",
+  "kxKarmicAlignmentLabel": "കാർമ്മിക സംരേഖണം",
+  "kxKarmaDimensionsLabel": "കർമ്മ മാനങ്ങൾ",
+  "kxCardMirror": "കണ്ണാടി",
+  "kxCardPattern": "കണ്ടെത്തിയ പാറ്റേൺ",
+  "kxCardGitaEchoFmt": "ഗീതാ പ്രതിധ്വനി · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "വളർച്ചയുടെ അരികു",
+  "kxCardBlessing": "അനുഗ്രഹം",
+  "kxCardDynamicWisdom": "ഡൈനാമിക് ജ്ഞാനം · ജ്ഞാന കേന്ദ്രം",
+  "kxRegeneratingButton": "വീണ്ടും സൃഷ്ടിക്കുന്നു…",
+  "kxRegenerateButton": "KIAAN-നോട് പുതിയ കണ്ണാടി ചോദിക്കുക",
+  "kxBackToSacredA11y": "പവിത്ര പ്രതിഫലനത്തിലേക്ക് മടങ്ങുക",
+  "kxBackToSacredLink": "← പവിത്ര പ്രതിഫലനത്തിലേക്ക്",
+  "kxPrivacyNote": "🔒 കർമ്മലൈറ്റിക്സ് വെറും സാധാരണ മൂഡ് + ടാഗ് മെറ്റാഡാറ്റ മാത്രമേ വായിക്കൂ. നിങ്ങളുടെ പ്രതിഫലന ഉള്ളടക്കം നിങ്ങളുടെ ഉപകരണത്തിൽ എൻഡ്-ടു-എൻഡ് എൻക്രിപ്റ്റ് ചെയ്തിരിക്കും."
 }

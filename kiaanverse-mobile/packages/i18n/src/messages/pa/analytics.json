@@ -26,7 +26,6 @@
   "dynamicNote": "ਹਰ ਹਫ਼ਤੇ KIAAN ਦੁਆਰਾ ਤਾਜ਼ਾ ਪੈਦਾ ਕੀਤਾ ਜਾਂਦਾ · ਗੀਤਾ ਫ਼ਲਸਫ਼ੇ ਵਿੱਚ ਆਧਾਰਿਤ",
   "refreshMirror": "ਪਵਿੱਤਰ ਸ਼ੀਸ਼ਾ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
   "viewJourneyInsights": "ਯਾਤਰਾ ਸੂਝਾਂ ਦੇਖੋ",
-
   "diScreenTitle": "ਡੂੰਘੀਆਂ ਸੂਝਾਂ",
   "diLoadingMessage": "ਤੁਹਾਡੇ ਅੰਦਰੂਨੀ ਦ੍ਰਿਸ਼ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ…",
   "diGunaSectionLabel": "ਗੁਣ ਸੰਤੁਲਨ",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ਟਰਿੱਗਰ: {{triggers}}",
   "diRecommendationsSectionLabel": "ਨਿੱਜੀ ਸਿਫ਼ਾਰਸ਼ਾਂ",
   "diVersesSectionLabel": "ਵਿਕਾਸ ਲਈ ਸ਼ਲੋਕ",
-
   "jiScreenTitle": "ਤੁਹਾਡੀਆਂ ਯਾਤਰਾ ਸੂਝਾਂ",
   "jiMoodTrendsLabel": "ਮੂਡ ਰੁਝਾਨ",
   "jiEmptyChartMessage": "ਇਸ ਮਿਆਦ ਲਈ ਅਜੇ ਕੋਈ ਮੂਡ ਡੇਟਾ ਨਹੀਂ।",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "ਪੂਰਾ",
   "jiActiveLabel": "ਸਰਗਰਮ",
   "jiStreakDaysLabel": "ਲਗਾਤਾਰ ਦਿਨ",
-  "jiViewDeepInsightsButton": "ਡੂੰਘੀਆਂ ਸੂਝਾਂ ਦੇਖੋ"
+  "jiViewDeepInsightsButton": "ਡੂੰਘੀਆਂ ਸੂਝਾਂ ਦੇਖੋ",
+  "kxScreenTitle": "ਕਰਮਲੈਟਿਕਸ",
+  "kxSubtitle": "ਕਰਮ-ਦਰਪਣ · Kiaan AI ਰਾਹੀਂ ਧਾਰਮਿਕ ਵਿਸ਼ਲੇਸ਼ਣ",
+  "kxInsufficientTitle": "ਤੁਹਾਡਾ ਸ਼ੀਸ਼ਾ ਉਡੀਕ ਰਿਹਾ ਹੈ",
+  "kxInsufficientNeedFmt": "ਇਸ ਹਫ਼ਤੇ ਹੋਰ {{count}} ਚਿੰਤਨ ਲਿਖੋ, KIAAN ਨਮੂਨਿਆਂ ਤੋਂ ਤੁਹਾਡਾ ਪਵਿੱਤਰ ਸ਼ੀਸ਼ਾ ਘੜੇਗਾ।",
+  "kxInsufficientFallback": "ਕੁਝ ਦਿਨ ਜਰਨਲ ਲਿਖੋ — ਫਿਰ ਸਖਾ ਦੇ ਹਫ਼ਤਾਵਾਰੀ ਚਿੰਤਨ ਲਈ ਵਾਪਸ ਆਓ।",
+  "kxBeginReflectionCta": "ਇੱਕ ਚਿੰਤਨ ਸ਼ੁਰੂ ਕਰੋ",
+  "kxKarmicAlignmentLabel": "ਕਾਰਮਿਕ ਸੰਰੇਖਣ",
+  "kxKarmaDimensionsLabel": "ਕਰਮ ਮਾਪ",
+  "kxCardMirror": "ਸ਼ੀਸ਼ਾ",
+  "kxCardPattern": "ਨੋਟ ਕੀਤੀ ਨਮੂਨਾ",
+  "kxCardGitaEchoFmt": "ਗੀਤਾ ਗੂੰਜ · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "ਵਿਕਾਸ ਦੀ ਹੱਦ",
+  "kxCardBlessing": "ਅਸ਼ੀਰਵਾਦ",
+  "kxCardDynamicWisdom": "ਗਤੀਸ਼ੀਲ ਗਿਆਨ · ਗਿਆਨ ਕੇਂਦਰ",
+  "kxRegeneratingButton": "ਮੁੜ ਬਣਾ ਰਿਹਾ ਹੈ…",
+  "kxRegenerateButton": "KIAAN ਨੂੰ ਤਾਜ਼ੇ ਸ਼ੀਸ਼ੇ ਲਈ ਪੁੱਛੋ",
+  "kxBackToSacredA11y": "ਪਵਿੱਤਰ ਚਿੰਤਨ ਵੱਲ ਵਾਪਸ",
+  "kxBackToSacredLink": "← ਪਵਿੱਤਰ ਚਿੰਤਨ ਵੱਲ",
+  "kxPrivacyNote": "🔒 ਕਰਮਲੈਟਿਕਸ ਸਿਰਫ਼ ਸਾਦਾ ਮੂਡ + ਟੈਗ ਮੈਟਾਡੇਟਾ ਪੜ੍ਹਦਾ ਹੈ। ਤੁਹਾਡੇ ਚਿੰਤਨਾਂ ਦਾ ਮੁੱਖ ਹਿੱਸਾ ਤੁਹਾਡੇ ਡਿਵਾਈਸ 'ਤੇ ਏਂਡ-ਟੂ-ਏਂਡ ਏਨਕ੍ਰਿਪਟਡ ਰਹਿੰਦਾ ਹੈ।"
 }

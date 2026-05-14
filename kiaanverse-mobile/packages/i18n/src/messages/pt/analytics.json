@@ -26,7 +26,6 @@
   "dynamicNote": "Gerado fresco a cada semana pelo KIAAN · Enraizado na filosofia da Gita",
   "refreshMirror": "Atualizar Espelho Sagrado",
   "viewJourneyInsights": "Ver insights da jornada",
-
   "diScreenTitle": "Insights Profundos",
   "diLoadingMessage": "Analisando sua paisagem interior…",
   "diGunaSectionLabel": "Equilíbrio dos Gunas",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "Gatilhos: {{triggers}}",
   "diRecommendationsSectionLabel": "Recomendações Personalizadas",
   "diVersesSectionLabel": "Versos para o Crescimento",
-
   "jiScreenTitle": "Seus Insights da Jornada",
   "jiMoodTrendsLabel": "Tendências de humor",
   "jiEmptyChartMessage": "Ainda não há dados de humor para este período.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "Concluído",
   "jiActiveLabel": "Ativo",
   "jiStreakDaysLabel": "Dias de sequência",
-  "jiViewDeepInsightsButton": "Ver Insights Profundos"
+  "jiViewDeepInsightsButton": "Ver Insights Profundos",
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Análise dhármica por Kiaan AI",
+  "kxInsufficientTitle": "Seu espelho aguarda",
+  "kxInsufficientNeedFmt": "Escreva mais {{count}} reflexões esta semana e o KIAAN moldará seu Espelho Sagrado a partir dos padrões.",
+  "kxInsufficientFallback": "Faça um diário por alguns dias — depois volte para a reflexão semanal do Sakha.",
+  "kxBeginReflectionCta": "Começar uma reflexão",
+  "kxKarmicAlignmentLabel": "ALINHAMENTO KÁRMICO",
+  "kxKarmaDimensionsLabel": "DIMENSÕES KÁRMICAS",
+  "kxCardMirror": "O ESPELHO",
+  "kxCardPattern": "PADRÃO NOTADO",
+  "kxCardGitaEchoFmt": "ECO DA GITA · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "BORDA DE CRESCIMENTO",
+  "kxCardBlessing": "BÊNÇÃO",
+  "kxCardDynamicWisdom": "SABEDORIA DINÂMICA · NÚCLEO DE SABEDORIA",
+  "kxRegeneratingButton": "Regenerando…",
+  "kxRegenerateButton": "Peça ao KIAAN um espelho fresco",
+  "kxBackToSacredA11y": "Voltar à Reflexão Sagrada",
+  "kxBackToSacredLink": "← Voltar à Reflexão Sagrada",
+  "kxPrivacyNote": "🔒 O Karmalytix só lê metadados de humor e tags em texto claro. O conteúdo de suas reflexões permanece criptografado de ponta a ponta no seu dispositivo."
 }

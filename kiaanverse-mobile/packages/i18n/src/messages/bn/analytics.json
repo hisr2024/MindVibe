@@ -26,7 +26,6 @@
   "dynamicNote": "প্রতি সপ্তাহে KIAAN দ্বারা তাজা উৎপন্ন · গীতা দর্শনে ভিত্তিক",
   "refreshMirror": "পবিত্র দর্পণ রিফ্রেশ করুন",
   "viewJourneyInsights": "যাত্রা অন্তর্দৃষ্টি দেখুন",
-
   "diScreenTitle": "গভীর অন্তর্দৃষ্টি",
   "diLoadingMessage": "আপনার অভ্যন্তরীণ ভূদৃশ্য বিশ্লেষণ করছে…",
   "diGunaSectionLabel": "গুণ ভারসাম্য",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "ট্রিগার: {{triggers}}",
   "diRecommendationsSectionLabel": "ব্যক্তিগত সুপারিশ",
   "diVersesSectionLabel": "বৃদ্ধির জন্য শ্লোক",
-
   "jiScreenTitle": "আপনার যাত্রা অন্তর্দৃষ্টি",
   "jiMoodTrendsLabel": "মেজাজ প্রবণতা",
   "jiEmptyChartMessage": "এই সময়ের জন্য এখনও কোনও মেজাজ ডেটা নেই।",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "সম্পন্ন",
   "jiActiveLabel": "সক্রিয়",
   "jiStreakDaysLabel": "ধারাবাহিক দিন",
-  "jiViewDeepInsightsButton": "গভীর অন্তর্দৃষ্টি দেখুন"
+  "jiViewDeepInsightsButton": "গভীর অন্তর্দৃষ্টি দেখুন",
+  "kxScreenTitle": "কর্মলাইটিক্স",
+  "kxSubtitle": "কর্ম-দর্পণ · Kiaan AI দ্বারা ধার্মিক বিশ্লেষণ",
+  "kxInsufficientTitle": "আপনার দর্পণ অপেক্ষা করছে",
+  "kxInsufficientNeedFmt": "এই সপ্তাহে আরও {{count}}টি প্রতিফলন লিখুন, KIAAN প্যাটার্ন থেকে আপনার পবিত্র দর্পণ তৈরি করবে।",
+  "kxInsufficientFallback": "কয়েক দিন জার্নাল লিখুন — তারপর সখার সাপ্তাহিক প্রতিফলনের জন্য ফিরে আসুন।",
+  "kxBeginReflectionCta": "একটি প্রতিফলন শুরু করুন",
+  "kxKarmicAlignmentLabel": "কার্মিক সংরেখণ",
+  "kxKarmaDimensionsLabel": "কর্ম মাত্রা",
+  "kxCardMirror": "দর্পণ",
+  "kxCardPattern": "লক্ষিত প্যাটার্ন",
+  "kxCardGitaEchoFmt": "গীতা প্রতিধ্বনি · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "বৃদ্ধির সীমা",
+  "kxCardBlessing": "আশীর্বাদ",
+  "kxCardDynamicWisdom": "গতিশীল জ্ঞান · জ্ঞান কেন্দ্র",
+  "kxRegeneratingButton": "পুনরায় তৈরি হচ্ছে…",
+  "kxRegenerateButton": "KIAAN-কে নতুন দর্পণের জন্য জিজ্ঞাসা করুন",
+  "kxBackToSacredA11y": "পবিত্র প্রতিফলনে ফিরে যান",
+  "kxBackToSacredLink": "← পবিত্র প্রতিফলনে",
+  "kxPrivacyNote": "🔒 কর্মলাইটিক্স কেবল সাধারণ মেজাজ + ট্যাগ মেটাডেটা পড়ে। আপনার প্রতিফলনের বিষয়বস্তু আপনার ডিভাইসে এন্ড-টু-এন্ড এনক্রিপ্ট করা থাকে।"
 }

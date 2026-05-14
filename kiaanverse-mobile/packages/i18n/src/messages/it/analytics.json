@@ -26,7 +26,6 @@
   "dynamicNote": "Generato fresco ogni settimana da KIAAN · Radicato nella filosofia della Gita",
   "refreshMirror": "Aggiorna Specchio Sacro",
   "viewJourneyInsights": "Visualizza approfondimenti del viaggio",
-
   "diScreenTitle": "Approfondimenti profondi",
   "diLoadingMessage": "Analizzo il tuo paesaggio interiore…",
   "diGunaSectionLabel": "Equilibrio dei Guna",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "Trigger: {{triggers}}",
   "diRecommendationsSectionLabel": "Raccomandazioni personalizzate",
   "diVersesSectionLabel": "Versi per la crescita",
-
   "jiScreenTitle": "I tuoi approfondimenti del viaggio",
   "jiMoodTrendsLabel": "Tendenze dell'umore",
   "jiEmptyChartMessage": "Ancora nessun dato sull'umore per questo periodo.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "Completato",
   "jiActiveLabel": "Attivo",
   "jiStreakDaysLabel": "Giorni di striscia",
-  "jiViewDeepInsightsButton": "Visualizza approfondimenti profondi"
+  "jiViewDeepInsightsButton": "Visualizza approfondimenti profondi",
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Analisi dharmica tramite Kiaan AI",
+  "kxInsufficientTitle": "Il tuo specchio attende",
+  "kxInsufficientNeedFmt": "Scrivi altre {{count}} riflessioni questa settimana e KIAAN modellerà il tuo Specchio Sacro dai pattern.",
+  "kxInsufficientFallback": "Tieni un diario per qualche giorno — poi torna per la riflessione settimanale di Sakha.",
+  "kxBeginReflectionCta": "Inizia una riflessione",
+  "kxKarmicAlignmentLabel": "ALLINEAMENTO KARMICO",
+  "kxKarmaDimensionsLabel": "DIMENSIONI KARMICHE",
+  "kxCardMirror": "LO SPECCHIO",
+  "kxCardPattern": "SCHEMA NOTATO",
+  "kxCardGitaEchoFmt": "ECO DELLA GITA · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "BORDO DI CRESCITA",
+  "kxCardBlessing": "BENEDIZIONE",
+  "kxCardDynamicWisdom": "SAGGEZZA DINAMICA · NUCLEO DI SAGGEZZA",
+  "kxRegeneratingButton": "Rigenerazione…",
+  "kxRegenerateButton": "Chiedi a KIAAN uno specchio fresco",
+  "kxBackToSacredA11y": "Torna alla Riflessione Sacra",
+  "kxBackToSacredLink": "← Torna alla Riflessione Sacra",
+  "kxPrivacyNote": "🔒 Karmalytix legge solo metadati di umore e tag in chiaro. Il contenuto delle tue riflessioni rimane cifrato end-to-end sul tuo dispositivo."
 }

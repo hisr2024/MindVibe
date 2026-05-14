@@ -26,7 +26,6 @@
   "dynamicNote": "Généré frais chaque semaine par KIAAN · Enraciné dans la philosophie de la Gita",
   "refreshMirror": "Rafraîchir le miroir sacré",
   "viewJourneyInsights": "Voir les aperçus de voyage",
-
   "diScreenTitle": "Aperçus profonds",
   "diLoadingMessage": "Analyse de ton paysage intérieur…",
   "diGunaSectionLabel": "Équilibre des Gunas",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "Déclencheurs : {{triggers}}",
   "diRecommendationsSectionLabel": "Recommandations personnalisées",
   "diVersesSectionLabel": "Versets pour la croissance",
-
   "jiScreenTitle": "Tes aperçus de voyage",
   "jiMoodTrendsLabel": "Tendances d'humeur",
   "jiEmptyChartMessage": "Pas encore de données d'humeur pour cette période.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "Complété",
   "jiActiveLabel": "Actif",
   "jiStreakDaysLabel": "Jours consécutifs",
-  "jiViewDeepInsightsButton": "Voir les aperçus profonds"
+  "jiViewDeepInsightsButton": "Voir les aperçus profonds",
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Analyse dharmique par Kiaan AI",
+  "kxInsufficientTitle": "Ton miroir attend",
+  "kxInsufficientNeedFmt": "Écris encore {{count}} réflexions cette semaine et KIAAN façonnera ton Miroir Sacré à partir des motifs.",
+  "kxInsufficientFallback": "Tiens un journal quelques jours — puis reviens pour la réflexion hebdomadaire de Sakha.",
+  "kxBeginReflectionCta": "Commencer une réflexion",
+  "kxKarmicAlignmentLabel": "ALIGNEMENT KARMIQUE",
+  "kxKarmaDimensionsLabel": "DIMENSIONS KARMIQUES",
+  "kxCardMirror": "LE MIROIR",
+  "kxCardPattern": "MOTIF REPÉRÉ",
+  "kxCardGitaEchoFmt": "ÉCHO DE LA GITA · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "BORD DE CROISSANCE",
+  "kxCardBlessing": "BÉNÉDICTION",
+  "kxCardDynamicWisdom": "SAGESSE DYNAMIQUE · NOYAU DE SAGESSE",
+  "kxRegeneratingButton": "Régénération…",
+  "kxRegenerateButton": "Demander un miroir frais à KIAAN",
+  "kxBackToSacredA11y": "Retour à la Réflexion Sacrée",
+  "kxBackToSacredLink": "← Retour à la Réflexion Sacrée",
+  "kxPrivacyNote": "🔒 Karmalytix ne lit que les métadonnées d'humeur et de tags en clair. Le contenu de tes réflexions reste chiffré de bout en bout sur ton appareil."
 }

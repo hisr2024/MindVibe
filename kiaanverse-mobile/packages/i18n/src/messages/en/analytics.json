@@ -48,5 +48,25 @@
   "jiCompletedLabel": "Completed",
   "jiActiveLabel": "Active",
   "jiStreakDaysLabel": "Streak Days",
-  "jiViewDeepInsightsButton": "View Deep Insights"
+  "jiViewDeepInsightsButton": "View Deep Insights",
+
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Dharmic Analysis via Kiaan AI",
+  "kxInsufficientTitle": "Your mirror awaits",
+  "kxInsufficientNeedFmt": "Write {{count}} more reflections this week and KIAAN will craft your Sacred Mirror from the patterns.",
+  "kxInsufficientFallback": "Journal for a few days — then return for Sakha's weekly reflection.",
+  "kxBeginReflectionCta": "Begin a reflection",
+  "kxKarmicAlignmentLabel": "KARMIC ALIGNMENT",
+  "kxKarmaDimensionsLabel": "KARMA DIMENSIONS",
+  "kxCardMirror": "THE MIRROR",
+  "kxCardPattern": "PATTERN NOTICED",
+  "kxCardGitaEchoFmt": "GITA ECHO · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "GROWTH EDGE",
+  "kxCardBlessing": "BLESSING",
+  "kxCardDynamicWisdom": "DYNAMIC WISDOM · WISDOM CORE",
+  "kxRegeneratingButton": "Regenerating…",
+  "kxRegenerateButton": "Ask KIAAN for a fresh mirror",
+  "kxBackToSacredA11y": "Back to Sacred Reflection",
+  "kxBackToSacredLink": "← Back to Sacred Reflection",
+  "kxPrivacyNote": "🔒 Karmalytix only reads plaintext mood + tag metadata. Your reflection bodies stay end-to-end encrypted on your device."
 }

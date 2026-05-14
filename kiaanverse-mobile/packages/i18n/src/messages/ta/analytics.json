@@ -26,7 +26,6 @@
   "dynamicNote": "ஒவ்வொரு வாரமும் KIAAN-ஆல் புதியதாக உருவாக்கப்படுகிறது · கீதை தத்துவத்தில் அடிப்படையாக",
   "refreshMirror": "புனித கண்ணாடியைப் புதுப்பி",
   "viewJourneyInsights": "பயண நுண்ணறிவுகளைக் காண்",
-
   "diScreenTitle": "ஆழ்ந்த நுண்ணறிவுகள்",
   "diLoadingMessage": "உங்கள் உள் நிலப்பரப்பை பகுப்பாய்வு செய்கிறது…",
   "diGunaSectionLabel": "குண சமநிலை",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "தூண்டுதல்கள்: {{triggers}}",
   "diRecommendationsSectionLabel": "தனிப்பயன் பரிந்துரைகள்",
   "diVersesSectionLabel": "வளர்ச்சிக்கான வசனங்கள்",
-
   "jiScreenTitle": "உங்கள் பயண நுண்ணறிவுகள்",
   "jiMoodTrendsLabel": "மனநிலை போக்குகள்",
   "jiEmptyChartMessage": "இந்த காலத்திற்கு இன்னும் மனநிலை தரவு இல்லை.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "நிறைவு",
   "jiActiveLabel": "செயலில்",
   "jiStreakDaysLabel": "தொடர் நாட்கள்",
-  "jiViewDeepInsightsButton": "ஆழ்ந்த நுண்ணறிவுகளைக் காண்"
+  "jiViewDeepInsightsButton": "ஆழ்ந்த நுண்ணறிவுகளைக் காண்",
+  "kxScreenTitle": "கர்மலைடிக்ஸ்",
+  "kxSubtitle": "கர்ம-தர்ப்பணம் · Kiaan AI மூலம் தர்ம பகுப்பாய்வு",
+  "kxInsufficientTitle": "உங்கள் கண்ணாடி காத்திருக்கிறது",
+  "kxInsufficientNeedFmt": "இந்த வாரம் இன்னும் {{count}} பிரதிபலிப்புகளை எழுதுங்கள், KIAAN பாணிகளிலிருந்து உங்கள் புனித கண்ணாடியை வடிவமைக்கும்.",
+  "kxInsufficientFallback": "சில நாட்கள் நாட்குறிப்பில் எழுதுங்கள் — பின்னர் சகாவின் வாராந்திர பிரதிபலிப்புக்கு திரும்புங்கள்.",
+  "kxBeginReflectionCta": "ஒரு பிரதிபலிப்பைத் தொடங்கு",
+  "kxKarmicAlignmentLabel": "கர்ம சீரமைப்பு",
+  "kxKarmaDimensionsLabel": "கர்ம பரிமாணங்கள்",
+  "kxCardMirror": "கண்ணாடி",
+  "kxCardPattern": "காணப்பட்ட பாணி",
+  "kxCardGitaEchoFmt": "கீதை எதிரொலி · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "வளர்ச்சி எல்லை",
+  "kxCardBlessing": "ஆசிர்வாதம்",
+  "kxCardDynamicWisdom": "டைனமிக் ஞானம் · ஞான மையம்",
+  "kxRegeneratingButton": "மீண்டும் உருவாக்குகிறது…",
+  "kxRegenerateButton": "KIAAN-ஐ புதிய கண்ணாடிக்காக கேள்",
+  "kxBackToSacredA11y": "புனித பிரதிபலிப்புக்கு திரும்பு",
+  "kxBackToSacredLink": "← புனித பிரதிபலிப்புக்கு",
+  "kxPrivacyNote": "🔒 கர்மலைடிக்ஸ் மனநிலை + டேக் மெட்டாடேட்டாவை மட்டுமே படிக்கிறது. உங்கள் பிரதிபலிப்பு உள்ளடக்கம் உங்கள் சாதனத்தில் இறுதி-இறுதி என்க்ரிப்ட் செய்யப்பட்டே இருக்கிறது."
 }

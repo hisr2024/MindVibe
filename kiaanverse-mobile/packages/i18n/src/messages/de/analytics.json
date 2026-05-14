@@ -26,7 +26,6 @@
   "dynamicNote": "Jede Woche frisch von KIAAN erzeugt · Verwurzelt in der Gita-Philosophie",
   "refreshMirror": "Heiligen Spiegel aktualisieren",
   "viewJourneyInsights": "Reise-Einblicke ansehen",
-
   "diScreenTitle": "Tiefe Einblicke",
   "diLoadingMessage": "Analysiere deine innere Landschaft…",
   "diGunaSectionLabel": "Guna-Balance",
@@ -38,7 +37,6 @@
   "diTriggersFmt": "Auslöser: {{triggers}}",
   "diRecommendationsSectionLabel": "Persönliche Empfehlungen",
   "diVersesSectionLabel": "Verse für Wachstum",
-
   "jiScreenTitle": "Deine Reise-Einblicke",
   "jiMoodTrendsLabel": "Stimmungsverläufe",
   "jiEmptyChartMessage": "Noch keine Stimmungsdaten für diesen Zeitraum.",
@@ -48,5 +46,24 @@
   "jiCompletedLabel": "Abgeschlossen",
   "jiActiveLabel": "Aktiv",
   "jiStreakDaysLabel": "Streak-Tage",
-  "jiViewDeepInsightsButton": "Tiefe Einblicke ansehen"
+  "jiViewDeepInsightsButton": "Tiefe Einblicke ansehen",
+  "kxScreenTitle": "Karmalytix",
+  "kxSubtitle": "कर्म-दर्पण · Dharmische Analyse durch Kiaan AI",
+  "kxInsufficientTitle": "Dein Spiegel wartet",
+  "kxInsufficientNeedFmt": "Schreibe diese Woche noch {{count}} Reflexionen und KIAAN gestaltet aus den Mustern deinen Heiligen Spiegel.",
+  "kxInsufficientFallback": "Journale ein paar Tage — kehre dann zurück für Sakhas wöchentliche Reflexion.",
+  "kxBeginReflectionCta": "Eine Reflexion beginnen",
+  "kxKarmicAlignmentLabel": "KARMISCHE AUSRICHTUNG",
+  "kxKarmaDimensionsLabel": "KARMA-DIMENSIONEN",
+  "kxCardMirror": "DER SPIEGEL",
+  "kxCardPattern": "MUSTER ERKANNT",
+  "kxCardGitaEchoFmt": "GITA-ECHO · BG {{chapter}}.{{verse}}",
+  "kxCardGrowthEdge": "WACHSTUMSKANTE",
+  "kxCardBlessing": "SEGEN",
+  "kxCardDynamicWisdom": "DYNAMISCHE WEISHEIT · WEISHEITSKERN",
+  "kxRegeneratingButton": "Wird neu generiert…",
+  "kxRegenerateButton": "KIAAN um einen frischen Spiegel bitten",
+  "kxBackToSacredA11y": "Zurück zur Heiligen Reflexion",
+  "kxBackToSacredLink": "← Zurück zur Heiligen Reflexion",
+  "kxPrivacyNote": "🔒 Karmalytix liest nur Klartext-Stimmung + Tag-Metadaten. Deine Reflexionsinhalte bleiben Ende-zu-Ende-verschlüsselt auf deinem Gerät."
 }
