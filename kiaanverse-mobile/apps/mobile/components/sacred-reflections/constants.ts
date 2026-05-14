@@ -147,15 +147,18 @@ export const MAX_USER_TAGS = 5;
 
 export type SacredTab = 'editor' | 'browse' | 'kiaan' | 'calendar';
 
+/** Each tab carries a stable `id` (used in app state) plus an i18n `labelKey`
+ *  resolved via t() at render. `sanskrit` is brand-fixed Devanagari across all
+ *  locales — kept literal in the constant. */
 export const SACRED_TABS: readonly {
   readonly id: SacredTab;
-  readonly label: string;
+  readonly labelKey: string;
   readonly sanskrit: string;
 }[] = [
-  { id: 'editor', label: 'EDITOR', sanskrit: 'लेख' },
-  { id: 'browse', label: 'BROWSE', sanskrit: 'पठन' },
-  { id: 'kiaan', label: 'KIAAN', sanskrit: 'बोध' },
-  { id: 'calendar', label: 'CALENDAR', sanskrit: 'तिथि' },
+  { id: 'editor', labelKey: 'tabEditorLabel', sanskrit: 'लेख' },
+  { id: 'browse', labelKey: 'tabBrowseLabel', sanskrit: 'पठन' },
+  { id: 'kiaan', labelKey: 'tabKiaanLabel', sanskrit: 'बोध' },
+  { id: 'calendar', labelKey: 'tabCalendarLabel', sanskrit: 'तिथि' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -172,8 +175,10 @@ export const BROWSE_FILTER_IDS: readonly (MoodId | 'all')[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Copy strings (kept inline — not i18n'd yet; the web app uses English +
-// Devanagari pairings and i18n doesn't have sacred-reflections keys yet).
+// COPY — literal English fallback strings. Kept around so tab components
+// that haven't been refactored to useTranslation yet (Editor/Browse/Kiaan/
+// Calendar) keep rendering English without breakage. New code should call
+// `t(COPY_KEYS.heading)` from the `sacred-reflections` i18n namespace.
 // ---------------------------------------------------------------------------
 
 export const COPY = {
@@ -196,4 +201,27 @@ export const COPY = {
     "Journal for a few days — then return here for Sakha's weekly reflection.",
   calendarCurrent: 'CURRENT STREAK',
   calendarLongest: 'LONGEST STREAK',
+} as const;
+
+/** i18n key mirror of COPY. Components that have been refactored to use
+ *  `useTranslation('sacred-reflections')` should resolve their copy via
+ *  `t(COPY_KEYS.heading)` etc. Once every consumer is migrated, COPY itself
+ *  can be deleted. */
+export const COPY_KEYS = {
+  heading: 'heading',
+  headingSanskrit: 'headingSanskrit',
+  moodPrompt: 'moodPrompt',
+  titlePlaceholder: 'titlePlaceholder',
+  bodyPlaceholder: 'bodyPlaceholder',
+  encryptionNotice: 'encryptionNotice',
+  ctaOffer: 'ctaOffer',
+  browseHeading: 'browseHeading',
+  browseSanskrit: 'browseSanskrit',
+  browseSearch: 'browseSearch',
+  emptyLibraryTitle: 'emptyLibraryTitle',
+  emptyLibrarySub: 'emptyLibrarySub',
+  kiaanEmptyTitle: 'kiaanEmptyTitle',
+  kiaanEmptySub: 'kiaanEmptySub',
+  calendarCurrent: 'calendarCurrent',
+  calendarLongest: 'calendarLongest',
 } as const;

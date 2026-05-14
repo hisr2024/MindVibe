@@ -38,6 +38,7 @@ import enVoice from './messages/en/voice.json';
 import enCommunity from './messages/en/community.json';
 import enWellness from './messages/en/wellness.json';
 import enArrival from './messages/en/arrival.json';
+import enSacredReflections from './messages/en/sacred-reflections.json';
 
 // Support — per-locale bundles (registered in Batch 9).
 //
@@ -160,6 +161,22 @@ import frArrival from './messages/fr/arrival.json';
 import esArrival from './messages/es/arrival.json';
 import itArrival from './messages/it/arrival.json';
 import ptArrival from './messages/pt/arrival.json';
+
+import hiSacredReflections from './messages/hi/sacred-reflections.json';
+import saSacredReflections from './messages/sa/sacred-reflections.json';
+import taSacredReflections from './messages/ta/sacred-reflections.json';
+import teSacredReflections from './messages/te/sacred-reflections.json';
+import bnSacredReflections from './messages/bn/sacred-reflections.json';
+import mrSacredReflections from './messages/mr/sacred-reflections.json';
+import guSacredReflections from './messages/gu/sacred-reflections.json';
+import knSacredReflections from './messages/kn/sacred-reflections.json';
+import mlSacredReflections from './messages/ml/sacred-reflections.json';
+import paSacredReflections from './messages/pa/sacred-reflections.json';
+import deSacredReflections from './messages/de/sacred-reflections.json';
+import frSacredReflections from './messages/fr/sacred-reflections.json';
+import esSacredReflections from './messages/es/sacred-reflections.json';
+import itSacredReflections from './messages/it/sacred-reflections.json';
+import ptSacredReflections from './messages/pt/sacred-reflections.json';
 
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
@@ -447,6 +464,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   community: enCommunity,
   wellness: enWellness,
   arrival: enArrival,
+  'sacred-reflections': enSacredReflections,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -482,6 +500,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: hiJournal,
     wellness: hiWellness,
     arrival: hiArrival,
+    'sacred-reflections': hiSacredReflections,
   },
   sa: {
     common: saCommon,
@@ -505,6 +524,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: saJournal,
     wellness: saWellness,
     arrival: saArrival,
+    'sacred-reflections': saSacredReflections,
   },
   ta: {
     common: taCommon,
@@ -528,6 +548,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: taJournal,
     wellness: taWellness,
     arrival: taArrival,
+    'sacred-reflections': taSacredReflections,
   },
   te: {
     common: teCommon,
@@ -551,6 +572,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: teJournal,
     wellness: teWellness,
     arrival: teArrival,
+    'sacred-reflections': teSacredReflections,
   },
   bn: {
     common: bnCommon,
@@ -574,6 +596,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: bnJournal,
     wellness: bnWellness,
     arrival: bnArrival,
+    'sacred-reflections': bnSacredReflections,
   },
   mr: {
     common: mrCommon,
@@ -596,6 +619,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: mrJournal,
     wellness: mrWellness,
     arrival: mrArrival,
+    'sacred-reflections': mrSacredReflections,
   },
   gu: {
     common: guCommon,
@@ -618,6 +642,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: guJournal,
     wellness: guWellness,
     arrival: guArrival,
+    'sacred-reflections': guSacredReflections,
   },
   kn: {
     common: knCommon,
@@ -640,6 +665,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: knJournal,
     wellness: knWellness,
     arrival: knArrival,
+    'sacred-reflections': knSacredReflections,
   },
   ml: {
     common: mlCommon,
@@ -662,6 +688,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: mlJournal,
     wellness: mlWellness,
     arrival: mlArrival,
+    'sacred-reflections': mlSacredReflections,
   },
   pa: {
     common: paCommon,
@@ -684,6 +711,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: paJournal,
     wellness: paWellness,
     arrival: paArrival,
+    'sacred-reflections': paSacredReflections,
   },
   de: {
     common: deCommon,
@@ -707,6 +735,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: deJournal,
     wellness: deWellness,
     arrival: deArrival,
+    'sacred-reflections': deSacredReflections,
   },
   fr: {
     common: frCommon,
@@ -730,6 +759,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: frJournal,
     wellness: frWellness,
     arrival: frArrival,
+    'sacred-reflections': frSacredReflections,
   },
   es: {
     common: esCommon,
@@ -753,6 +783,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: esJournal,
     wellness: esWellness,
     arrival: esArrival,
+    'sacred-reflections': esSacredReflections,
   },
   it: {
     common: itCommon,
@@ -776,6 +807,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: itJournal,
     wellness: itWellness,
     arrival: itArrival,
+    'sacred-reflections': itSacredReflections,
   },
   pt: {
     common: ptCommon,
@@ -799,6 +831,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     journal: ptJournal,
     wellness: ptWellness,
     arrival: ptArrival,
+    'sacred-reflections': ptSacredReflections,
   },
 };
 

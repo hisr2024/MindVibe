@@ -26,10 +26,11 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { SacredTabBar } from '../components/sacred-reflections/SacredTabBar';
 import {
-  COPY,
+  COPY_KEYS,
   type SacredTab,
 } from '../components/sacred-reflections/constants';
 import { EditorTab } from '../components/sacred-reflections/EditorTab';
@@ -39,18 +40,19 @@ import { CalendarTab } from '../components/sacred-reflections/CalendarTab';
 
 export default function SacredReflectionsScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('sacred-reflections');
   const [activeTab, setActiveTab] = useState<SacredTab>('editor');
 
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <GoldenHeader title={COPY.heading} />
+        <GoldenHeader title={t(COPY_KEYS.heading)} />
         <Text
           variant="caption"
           color={colors.primary[500]}
           style={styles.headerSanskrit}
         >
-          {COPY.headingSanskrit}
+          {t(COPY_KEYS.headingSanskrit)}
         </Text>
         <SacredTabBar active={activeTab} onChange={setActiveTab} />
 

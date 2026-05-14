@@ -22,6 +22,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { GoldenButton, Text, colors, spacing } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   getIsoWeekKey,
@@ -30,6 +31,10 @@ import {
 } from '../../utils/sacredReflectionEncryption';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
+/** Stable English IDs persisted to backend for KarmaLytix analysis. The
+ *  visible chip label is resolved at render via `t(CHALLENGE_LABEL_KEYS[id])`
+ *  so the locale changes but the persisted dharmic_challenge field doesn't
+ *  drift (the backend depends on stable English tokens here). */
 const CHALLENGE_OPTIONS = [
   'Anger',
   'Fear',
@@ -39,7 +44,17 @@ const CHALLENGE_OPTIONS = [
   'Confusion',
 ] as const;
 
+const CHALLENGE_LABEL_KEYS: Record<(typeof CHALLENGE_OPTIONS)[number], string> = {
+  Anger: 'assessmentChallengeAnger',
+  Fear: 'assessmentChallengeFear',
+  Attachment: 'assessmentChallengeAttachment',
+  Pride: 'assessmentChallengePride',
+  Greed: 'assessmentChallengeGreed',
+  Confusion: 'assessmentChallengeConfusion',
+};
+
 export function WeeklyAssessment(): React.JSX.Element | null {
+  const { t } = useTranslation('sacred-reflections');
   const [isDue, setIsDue] = useState<boolean | null>(null);
   const [weekKey, setWeekKey] = useState<string>(() =>
     getIsoWeekKey(new Date())
@@ -99,16 +114,16 @@ export function WeeklyAssessment(): React.JSX.Element | null {
     <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
       <View style={styles.header}>
         <Text variant="h3" color={colors.primary[500]} style={styles.title}>
-          🌀 Weekly Sacred Assessment
+          {t('assessmentTitle')}
         </Text>
         <Text variant="caption" color={colors.text.muted} style={styles.sub}>
-          Plaintext — powers KarmaLytix. Choose your words with care.
+          {t('assessmentSub')}
         </Text>
       </View>
 
       {/* Q1 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-        What was your greatest dharmic challenge this week?
+        {t('assessmentQ1Prompt')}
       </Text>
       <View style={styles.chipRow}>
         {CHALLENGE_OPTIONS.map((opt) => {
@@ -130,7 +145,7 @@ export function WeeklyAssessment(): React.JSX.Element | null {
                   selected ? colors.background.dark : colors.text.secondary
                 }
               >
-                {opt}
+                {t(CHALLENGE_LABEL_KEYS[opt])}
               </Text>
             </Pressable>
           );
@@ -139,12 +154,12 @@ export function WeeklyAssessment(): React.JSX.Element | null {
 
       {/* Q2 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-        Which Gita teaching felt most alive this week?
+        {t('assessmentQ2Prompt')}
       </Text>
       <ShankhaVoiceInput
         value={gitaTeaching}
         onChangeText={setGitaTeaching}
-        placeholder="e.g. Nishkama Karma, surrender, impermanence…"
+        placeholder={t('assessmentQ2Placeholder')}
         style={styles.input}
         maxLength={200}
         dictationMode="append"
@@ -152,7 +167,7 @@ export function WeeklyAssessment(): React.JSX.Element | null {
 
       {/* Q3 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-        How consistent was your practice? (1–5)
+        {t('assessmentQ3Prompt')}
       </Text>
       <View style={styles.consistencyRow}>
         {[1, 2, 3, 4, 5].map((n) => {
@@ -166,7 +181,7 @@ export function WeeklyAssessment(): React.JSX.Element | null {
               }}
               style={[styles.dot, filled && styles.dotFilled]}
               accessibilityRole="button"
-              accessibilityLabel={`Practice consistency ${n} of 5`}
+              accessibilityLabel={t('assessmentConsistencyA11yFmt', { n })}
               accessibilityState={{ selected: consistency === n }}
             >
               <Text
@@ -182,12 +197,12 @@ export function WeeklyAssessment(): React.JSX.Element | null {
 
       {/* Q4 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-        What pattern are you noticing in yourself?
+        {t('assessmentQ4Prompt')}
       </Text>
       <ShankhaVoiceInput
         value={pattern}
         onChangeText={setPattern}
-        placeholder="e.g. I react to criticism with anger…"
+        placeholder={t('assessmentQ4Placeholder')}
         style={styles.input}
         maxLength={280}
         multiline
@@ -196,19 +211,19 @@ export function WeeklyAssessment(): React.JSX.Element | null {
 
       {/* Q5 */}
       <Text variant="label" color={colors.text.primary} style={styles.qLabel}>
-        What sankalpa do you carry into next week?
+        {t('assessmentQ5Prompt')}
       </Text>
       <ShankhaVoiceInput
         value={sankalpa}
         onChangeText={setSankalpa}
-        placeholder="e.g. I will respond instead of react…"
+        placeholder={t('assessmentQ5Placeholder')}
         style={styles.input}
         maxLength={200}
         dictationMode="append"
         />
 
       <GoldenButton
-        title={isSaving ? 'Saving…' : 'Save this week’s assessment'}
+        title={isSaving ? t('assessmentSavingButton') : t('assessmentSaveButton')}
         onPress={handleSave}
         disabled={isSaving}
         style={styles.saveButton}
