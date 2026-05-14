@@ -117,6 +117,23 @@ export const MOOD_BY_ID: Record<MoodId, MoodDef> = MOODS.reduce(
   {} as Record<MoodId, MoodDef>
 );
 
+/** Map mood ID → i18n key for the visible label. Resolves at render via
+ *  `t(MOOD_LABEL_KEYS[id])` so the canonical `id` stays the wire format
+ *  while the display label localizes. Sanskrit + emoji stay literal
+ *  (brand-fixed across locales). */
+export const MOOD_LABEL_KEYS: Record<MoodId, string> = {
+  peaceful: 'moodPeacefulLabel',
+  grateful: 'moodGratefulLabel',
+  seeking: 'moodSeekingLabel',
+  heavy: 'moodHeavyLabel',
+  radiant: 'moodRadiantLabel',
+  wounded: 'moodWoundedLabel',
+  hopeful: 'moodHopefulLabel',
+  anxious: 'moodAnxiousLabel',
+  angry: 'moodAngryLabel',
+  neutral: 'moodNeutralLabel',
+};
+
 // ---------------------------------------------------------------------------
 // Dharmic tag chips (mirrors the 12 chips on Kiaanverse.com EDITOR screen).
 // ---------------------------------------------------------------------------
@@ -137,6 +154,24 @@ export const SACRED_TAGS = [
 ] as const;
 
 export type SacredTag = (typeof SACRED_TAGS)[number];
+
+/** Map sacred-tag canonical ID → i18n key. Canonical IDs travel with the
+ *  encrypted journal as plaintext tags[] so KarmaLytix sees stable English
+ *  tokens; the display label resolves via `t(TAG_LABEL_KEYS[tag])`. */
+export const TAG_LABEL_KEYS: Record<SacredTag, string> = {
+  gratitude: 'tagGratitude',
+  reflection: 'tagReflection',
+  growth: 'tagGrowth',
+  dharma: 'tagDharma',
+  shadow: 'tagShadow',
+  healing: 'tagHealing',
+  surrender: 'tagSurrender',
+  clarity: 'tagClarity',
+  forgiveness: 'tagForgiveness',
+  courage: 'tagCourage',
+  grief: 'tagGrief',
+  joy: 'tagJoy',
+};
 
 /** Hard cap on user-selected tags (mood is counted separately). */
 export const MAX_USER_TAGS = 5;
