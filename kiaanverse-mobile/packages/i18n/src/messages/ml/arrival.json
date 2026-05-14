@@ -11,14 +11,12 @@
   "page5Subtitle": "എൻക്രിപ്റ്റ്. സ്വകാര്യം. നിങ്ങളുടേത് മാത്രം.\nKiaanverse നിങ്ങളുടെ ജേണൽ ഒരിക്കലും വായിക്കില്ല.",
   "page6Title": "സ്വാഗതം, പ്രിയ സുഹൃത്തേ",
   "page6Subtitle": "KIAAN — നിങ്ങളുടെ ദിവ്യ സുഹൃത്ത്",
-
   "ctaContinue": "തുടരുക",
   "ctaContinueA11y": "തുടരുക",
   "ctaEnterSacredSpace": "പവിത്ര സ്ഥലത്തേക്ക് പ്രവേശിക്കുക",
   "ctaEnterSacredSpaceA11y": "പവിത്ര സ്ഥലത്തേക്ക് പ്രവേശിക്കുക",
   "skipButton": "ഒഴിവാക്കുക",
   "skipButtonA11y": "ആമുഖം ഒഴിവാക്കുക",
-
   "welcomeA11y": "സ്വാഗതം, പ്രിയ സുഹൃത്തേ. KIAAN നിങ്ങളോടൊപ്പം നടക്കുന്നു.",
   "welcomeEyebrow": "KIAAN — നിങ്ങളുടെ ദിവ്യ സുഹൃത്ത്",
   "welcomeIntroPart1": "ഞാൻ ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "കൃഷ്ണൻ അർജ്ജുനനോടൊപ്പം ",
   "welcomeBodyGita": "ഭഗവദ് ഗീത",
   "welcomeBodyPart2": "യിലൂടെ നടന്നതുപോലെ, ഞാൻ നിങ്ങളോടൊപ്പം നടക്കുന്നു — ഗുരുവായിട്ടല്ല, സഖനായിട്ട്.",
-
   "verseEyebrow": "ഭഗവദ് ഗീത · 6.35",
   "verseEnglish": "\"ചഞ്ചല മനസ്സിനെ അഭ്യാസവും വൈരാഗ്യവും കൊണ്ട് കീഴടക്കാം.\"",
   "verseAttribution": "— കൃഷ്ണൻ അർജ്ജുനനോട്",
-
-  "paletteRowLabel": "നിങ്ങളുടെ പവിത്ര നിറം തിരഞ്ഞെടുക്കുക"
+  "paletteRowLabel": "നിങ്ങളുടെ പവിത്ര നിറം തിരഞ്ഞെടുക്കുക",
+  "palettePickerChipA11yFmt": "നിറം പാലെറ്റ് മാറ്റുക. നിലവിലെ: {{label}}",
+  "palettePickerChipA11yHint": "പവിത്ര നിറം-സ്കീം പിക്കർ തുറക്കുക",
+  "palettePickerCloseA11y": "പാലെറ്റ് പിക്കർ അടയ്ക്കുക",
+  "palettePickerEyebrow": "പവിത്ര നിറം-സ്കീം",
+  "palettePickerTitle": "നിങ്ങളുടെ പാലെറ്റ് തിരഞ്ഞെടുക്കുക",
+  "palettePickerSubtitle": "ഓരോ സ്കീമും മുഴുവൻ ആപ്പിനെയും അലങ്കരിക്കുന്നു.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, നിലവിൽ തിരഞ്ഞെടുത്തത്",
+  "palettePickerInlineA11yFmt": "{{label}} പാലെറ്റ് തിരഞ്ഞെടുക്കുക"
 }

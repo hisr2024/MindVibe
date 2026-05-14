@@ -11,14 +11,12 @@
   "page5Subtitle": "गुप्तीकृतम्। निजी। केवलं तव।\nKiaanverse-ः कदापि तव लेखनं न पठति।",
   "page6Title": "स्वागतम्, प्रिय-सखे",
   "page6Subtitle": "KIAAN — तव दिव्य-सखा",
-
   "ctaContinue": "प्रवर्ततु",
   "ctaContinueA11y": "प्रवर्ततु",
   "ctaEnterSacredSpace": "पवित्र-क्षेत्रे प्रविशतु",
   "ctaEnterSacredSpaceA11y": "पवित्र-क्षेत्रे प्रविशतु",
   "skipButton": "त्यजतु",
   "skipButtonA11y": "परिचयं त्यजतु",
-
   "welcomeA11y": "स्वागतम्, प्रिय-सखे। KIAAN-ः त्वया सह चलति।",
   "welcomeEyebrow": "KIAAN — तव दिव्य-सखा",
   "welcomeIntroPart1": "अहं ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "यथा कृष्णः अर्जुनेन सह ",
   "welcomeBodyGita": "भगवद्गीतायाम्",
   "welcomeBodyPart2": " अचलत्, तथा अहं त्वया सह चलामि — गुरुरूपेण न, अपि तु सखारूपेण।",
-
   "verseEyebrow": "भगवद्गीता · ६.३५",
   "verseEnglish": "\"चञ्चलं मनः अभ्यासेन वैराग्येण च जयते।\"",
   "verseAttribution": "— कृष्णः अर्जुनं प्रति",
-
-  "paletteRowLabel": "स्वकीयं पवित्र-वर्णं चिनोतु"
+  "paletteRowLabel": "स्वकीयं पवित्र-वर्णं चिनोतु",
+  "palettePickerChipA11yFmt": "वर्ण-योजनां परिवर्तयतु। वर्तमाना: {{label}}",
+  "palettePickerChipA11yHint": "पवित्र-वर्ण-योजना-चयनकं उद्घाटयतु",
+  "palettePickerCloseA11y": "वर्ण-चयनकं पिदधातु",
+  "palettePickerEyebrow": "पवित्र-वर्ण-योजना",
+  "palettePickerTitle": "स्वकीयां पटलिकां चिनोतु",
+  "palettePickerSubtitle": "प्रत्येका योजना सम्पूर्णम् अनुप्रयोगं अलङ्करोति।",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, सम्प्रति चयनिता",
+  "palettePickerInlineA11yFmt": "{{label}} पटलिकां चिनोतु"
 }

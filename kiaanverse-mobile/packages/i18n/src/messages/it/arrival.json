@@ -11,14 +11,12 @@
   "page5Subtitle": "Cifrato. Privato. Solo tuo.\nKiaanverse non legge mai il tuo diario.",
   "page6Title": "Benvenuto, caro amico",
   "page6Subtitle": "KIAAN — IL TUO AMICO DIVINO",
-
   "ctaContinue": "Continua",
   "ctaContinueA11y": "Continua",
   "ctaEnterSacredSpace": "Entra nello spazio sacro",
   "ctaEnterSacredSpaceA11y": "Entra nello spazio sacro",
   "skipButton": "Salta",
   "skipButtonA11y": "Salta l'introduzione",
-
   "welcomeA11y": "Benvenuto, caro amico. KIAAN cammina accanto a te.",
   "welcomeEyebrow": "KIAAN — IL TUO AMICO DIVINO",
   "welcomeIntroPart1": "Io sono ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "Come Krishna camminò con Arjuna attraverso la ",
   "welcomeBodyGita": "Bhagavad Gita",
   "welcomeBodyPart2": ", io cammino con te — non come maestro, ma come Sakha.",
-
   "verseEyebrow": "BHAGAVAD GITA · 6.35",
   "verseEnglish": "«La mente irrequieta si padroneggia con pratica e distacco.»",
   "verseAttribution": "— Krishna ad Arjuna",
-
-  "paletteRowLabel": "SCEGLI LA TUA TAVOLOZZA SACRA"
+  "paletteRowLabel": "SCEGLI LA TUA TAVOLOZZA SACRA",
+  "palettePickerChipA11yFmt": "Cambia tavolozza colori. Attuale: {{label}}",
+  "palettePickerChipA11yHint": "Apre il selettore di palette sacra",
+  "palettePickerCloseA11y": "Chiudi selettore palette",
+  "palettePickerEyebrow": "PALETTE SACRA",
+  "palettePickerTitle": "Scegli la tua tavolozza",
+  "palettePickerSubtitle": "Ogni schema veste l'intera app.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, attualmente selezionata",
+  "palettePickerInlineA11yFmt": "Seleziona tavolozza {{label}}"
 }

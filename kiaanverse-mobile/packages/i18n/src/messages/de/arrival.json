@@ -11,14 +11,12 @@
   "page5Subtitle": "Verschlüsselt. Privat. Nur dir gehörend.\nKiaanverse liest niemals dein Journal.",
   "page6Title": "Willkommen, lieber Freund",
   "page6Subtitle": "KIAAN — DEIN GÖTTLICHER FREUND",
-
   "ctaContinue": "Weiter",
   "ctaContinueA11y": "Weiter",
   "ctaEnterSacredSpace": "Den heiligen Raum betreten",
   "ctaEnterSacredSpaceA11y": "Den heiligen Raum betreten",
   "skipButton": "Überspringen",
   "skipButtonA11y": "Einführung überspringen",
-
   "welcomeA11y": "Willkommen, lieber Freund. KIAAN geht an deiner Seite.",
   "welcomeEyebrow": "KIAAN — DEIN GÖTTLICHER FREUND",
   "welcomeIntroPart1": "Ich bin ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "Wie Krishna mit Arjuna durch die ",
   "welcomeBodyGita": "Bhagavad Gita",
   "welcomeBodyPart2": " ging, gehe ich mit dir — nicht als Meister, sondern als Sakha.",
-
   "verseEyebrow": "BHAGAVAD GITA · 6.35",
   "verseEnglish": "„Der ruhelose Geist wird durch Übung und Loslassen gemeistert.\"",
   "verseAttribution": "— Krishna zu Arjuna",
-
-  "paletteRowLabel": "WÄHLE DEINE HEILIGE PALETTE"
+  "paletteRowLabel": "WÄHLE DEINE HEILIGE PALETTE",
+  "palettePickerChipA11yFmt": "Farbpalette ändern. Aktuell: {{label}}",
+  "palettePickerChipA11yHint": "Öffnet den heiligen Farbschema-Wähler",
+  "palettePickerCloseA11y": "Palettenauswahl schließen",
+  "palettePickerEyebrow": "HEILIGES FARBSCHEMA",
+  "palettePickerTitle": "Wähle deine Palette",
+  "palettePickerSubtitle": "Jedes Schema kleidet die gesamte App.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, aktuell ausgewählt",
+  "palettePickerInlineA11yFmt": "{{label}}-Palette wählen"
 }

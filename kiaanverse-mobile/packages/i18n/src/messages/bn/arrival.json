@@ -11,14 +11,12 @@
   "page5Subtitle": "এনক্রিপ্ট। ব্যক্তিগত। শুধু আপনার।\nKiaanverse কখনো আপনার জার্নাল পড়ে না।",
   "page6Title": "স্বাগতম, প্রিয় বন্ধু",
   "page6Subtitle": "KIAAN — আপনার দিব্য বন্ধু",
-
   "ctaContinue": "চালিয়ে যান",
   "ctaContinueA11y": "চালিয়ে যান",
   "ctaEnterSacredSpace": "পবিত্র স্থানে প্রবেশ করুন",
   "ctaEnterSacredSpaceA11y": "পবিত্র স্থানে প্রবেশ করুন",
   "skipButton": "এড়িয়ে যান",
   "skipButtonA11y": "পরিচয় এড়িয়ে যান",
-
   "welcomeA11y": "স্বাগতম, প্রিয় বন্ধু। KIAAN আপনার সঙ্গে চলেন।",
   "welcomeEyebrow": "KIAAN — আপনার দিব্য বন্ধু",
   "welcomeIntroPart1": "আমি ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "যেমন কৃষ্ণ অর্জুনের সঙ্গে ",
   "welcomeBodyGita": "ভগবদ্ গীতা",
   "welcomeBodyPart2": "র মধ্য দিয়ে হেঁটেছিলেন, তেমনি আমি আপনার সঙ্গে হাঁটি — গুরু হিসেবে নয়, সখা হিসেবে।",
-
   "verseEyebrow": "ভগবদ্ গীতা · ৬.৩৫",
   "verseEnglish": "\"চঞ্চল মন অনুশীলন ও বৈরাগ্যের দ্বারা জয় করা হয়।\"",
   "verseAttribution": "— কৃষ্ণ অর্জুনকে",
-
-  "paletteRowLabel": "আপনার পবিত্র রঙ বেছে নিন"
+  "paletteRowLabel": "আপনার পবিত্র রঙ বেছে নিন",
+  "palettePickerChipA11yFmt": "রঙের প্যালেট পরিবর্তন। বর্তমান: {{label}}",
+  "palettePickerChipA11yHint": "পবিত্র রঙ-স্কিম পিকার খুলুন",
+  "palettePickerCloseA11y": "প্যালেট পিকার বন্ধ করুন",
+  "palettePickerEyebrow": "পবিত্র রঙ-স্কিম",
+  "palettePickerTitle": "আপনার প্যালেট বেছে নিন",
+  "palettePickerSubtitle": "প্রতিটি স্কিম পুরো অ্যাপকে সাজায়।",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, বর্তমানে নির্বাচিত",
+  "palettePickerInlineA11yFmt": "{{label}} প্যালেট নির্বাচন করুন"
 }

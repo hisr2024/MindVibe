@@ -11,14 +11,12 @@
   "page5Subtitle": "एन्क्रिप्टेड। निजी। केवल आपका।\nKiaanverse कभी आपकी जर्नल नहीं पढ़ता।",
   "page6Title": "स्वागत, प्रिय मित्र",
   "page6Subtitle": "KIAAN — आपका दिव्य मित्र",
-
   "ctaContinue": "जारी रखें",
   "ctaContinueA11y": "जारी रखें",
   "ctaEnterSacredSpace": "पवित्र स्थान में प्रवेश करें",
   "ctaEnterSacredSpaceA11y": "पवित्र स्थान में प्रवेश करें",
   "skipButton": "छोड़ें",
   "skipButtonA11y": "परिचय छोड़ें",
-
   "welcomeA11y": "स्वागत, प्रिय मित्र। KIAAN आपके साथ चलता है।",
   "welcomeEyebrow": "KIAAN — आपका दिव्य मित्र",
   "welcomeIntroPart1": "मैं ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "जैसे कृष्ण ने अर्जुन के साथ ",
   "welcomeBodyGita": "भगवद् गीता",
   "welcomeBodyPart2": " में चले, वैसे मैं आपके साथ चलता हूँ — गुरु के रूप में नहीं, बल्कि सखा के रूप में।",
-
   "verseEyebrow": "भगवद् गीता · 6.35",
   "verseEnglish": "\"चंचल मन पर अभ्यास और वैराग्य से विजय पाई जाती है।\"",
   "verseAttribution": "— कृष्ण से अर्जुन को",
-
-  "paletteRowLabel": "अपना पवित्र रंग चुनें"
+  "paletteRowLabel": "अपना पवित्र रंग चुनें",
+  "palettePickerChipA11yFmt": "रंग बदलें। वर्तमान: {{label}}",
+  "palettePickerChipA11yHint": "पवित्र रंग योजना चयनकर्ता खोलें",
+  "palettePickerCloseA11y": "रंग चयनकर्ता बंद करें",
+  "palettePickerEyebrow": "पवित्र रंग योजना",
+  "palettePickerTitle": "अपनी पैलेट चुनें",
+  "palettePickerSubtitle": "हर योजना पूरे ऐप को सजाती है।",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, वर्तमान में चयनित",
+  "palettePickerInlineA11yFmt": "{{label}} पैलेट चुनें"
 }

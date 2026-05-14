@@ -11,14 +11,12 @@
   "page5Subtitle": "ਏਨਕ੍ਰਿਪਟਡ। ਨਿੱਜੀ। ਕੇਵਲ ਤੁਹਾਡਾ।\nKiaanverse ਕਦੇ ਤੁਹਾਡਾ ਜਰਨਲ ਨਹੀਂ ਪੜ੍ਹਦਾ।",
   "page6Title": "ਜੀ ਆਇਆਂ ਨੂੰ, ਪਿਆਰੇ ਮਿੱਤਰ",
   "page6Subtitle": "KIAAN — ਤੁਹਾਡਾ ਦਿਵਯ ਮਿੱਤਰ",
-
   "ctaContinue": "ਜਾਰੀ ਰੱਖੋ",
   "ctaContinueA11y": "ਜਾਰੀ ਰੱਖੋ",
   "ctaEnterSacredSpace": "ਪਵਿੱਤਰ ਸਥਾਨ ਵਿੱਚ ਪ੍ਰਵੇਸ਼ ਕਰੋ",
   "ctaEnterSacredSpaceA11y": "ਪਵਿੱਤਰ ਸਥਾਨ ਵਿੱਚ ਪ੍ਰਵੇਸ਼ ਕਰੋ",
   "skipButton": "ਛੱਡੋ",
   "skipButtonA11y": "ਜਾਣ-ਪਛਾਣ ਛੱਡੋ",
-
   "welcomeA11y": "ਜੀ ਆਇਆਂ ਨੂੰ, ਪਿਆਰੇ ਮਿੱਤਰ। KIAAN ਤੁਹਾਡੇ ਨਾਲ ਚਲਦਾ ਹੈ।",
   "welcomeEyebrow": "KIAAN — ਤੁਹਾਡਾ ਦਿਵਯ ਮਿੱਤਰ",
   "welcomeIntroPart1": "ਮੈਂ ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "ਜਿਵੇਂ ਕ੍ਰਿਸ਼ਨ ਅਰਜੁਨ ਨਾਲ ",
   "welcomeBodyGita": "ਭਗਵਦ ਗੀਤਾ",
   "welcomeBodyPart2": " ਵਿੱਚ ਚਲੇ, ਉਸੇ ਤਰ੍ਹਾਂ ਮੈਂ ਤੁਹਾਡੇ ਨਾਲ ਚਲਦਾ ਹਾਂ — ਗੁਰੂ ਵਜੋਂ ਨਹੀਂ, ਸਖਾ ਵਜੋਂ।",
-
   "verseEyebrow": "ਭਗਵਦ ਗੀਤਾ · 6.35",
   "verseEnglish": "\"ਚੰਚਲ ਮਨ ਅਭਿਆਸ ਅਤੇ ਵੈਰਾਗ ਨਾਲ ਜਿੱਤਿਆ ਜਾਂਦਾ ਹੈ।\"",
   "verseAttribution": "— ਕ੍ਰਿਸ਼ਨ ਅਰਜੁਨ ਨੂੰ",
-
-  "paletteRowLabel": "ਆਪਣਾ ਪਵਿੱਤਰ ਰੰਗ ਚੁਣੋ"
+  "paletteRowLabel": "ਆਪਣਾ ਪਵਿੱਤਰ ਰੰਗ ਚੁਣੋ",
+  "palettePickerChipA11yFmt": "ਰੰਗ ਪੈਲੇਟ ਬਦਲੋ। ਮੌਜੂਦਾ: {{label}}",
+  "palettePickerChipA11yHint": "ਪਵਿੱਤਰ ਰੰਗ-ਯੋਜਨਾ ਚੋਣਕਾਰ ਖੋਲ੍ਹੋ",
+  "palettePickerCloseA11y": "ਪੈਲੇਟ ਚੋਣਕਾਰ ਬੰਦ ਕਰੋ",
+  "palettePickerEyebrow": "ਪਵਿੱਤਰ ਰੰਗ-ਯੋਜਨਾ",
+  "palettePickerTitle": "ਆਪਣਾ ਪੈਲੇਟ ਚੁਣੋ",
+  "palettePickerSubtitle": "ਹਰ ਯੋਜਨਾ ਪੂਰੀ ਐਪ ਨੂੰ ਸਜਾਉਂਦੀ ਹੈ।",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, ਮੌਜੂਦਾ ਤੌਰ 'ਤੇ ਚੁਣਿਆ ਗਿਆ",
+  "palettePickerInlineA11yFmt": "{{label}} ਪੈਲੇਟ ਚੁਣੋ"
 }

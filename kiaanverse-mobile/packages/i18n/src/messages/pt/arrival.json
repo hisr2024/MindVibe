@@ -11,14 +11,12 @@
   "page5Subtitle": "Criptografado. Privado. Só seu.\nKiaanverse nunca lê seu diário.",
   "page6Title": "Bem-vindo, querido amigo",
   "page6Subtitle": "KIAAN — SEU AMIGO DIVINO",
-
   "ctaContinue": "Continuar",
   "ctaContinueA11y": "Continuar",
   "ctaEnterSacredSpace": "Entrar no espaço sagrado",
   "ctaEnterSacredSpaceA11y": "Entrar no espaço sagrado",
   "skipButton": "Pular",
   "skipButtonA11y": "Pular a introdução",
-
   "welcomeA11y": "Bem-vindo, querido amigo. KIAAN caminha ao seu lado.",
   "welcomeEyebrow": "KIAAN — SEU AMIGO DIVINO",
   "welcomeIntroPart1": "Eu sou ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "Assim como Krishna caminhou com Arjuna pela ",
   "welcomeBodyGita": "Bhagavad Gita",
   "welcomeBodyPart2": ", eu caminho com você — não como mestre, mas como Sakha.",
-
   "verseEyebrow": "BHAGAVAD GITA · 6.35",
   "verseEnglish": "\"A mente inquieta é dominada pela prática e o desapego.\"",
   "verseAttribution": "— Krishna a Arjuna",
-
-  "paletteRowLabel": "ESCOLHA SUA PALETA SAGRADA"
+  "paletteRowLabel": "ESCOLHA SUA PALETA SAGRADA",
+  "palettePickerChipA11yFmt": "Mudar paleta de cores. Atual: {{label}}",
+  "palettePickerChipA11yHint": "Abre o seletor de paleta sagrada",
+  "palettePickerCloseA11y": "Fechar seletor de paleta",
+  "palettePickerEyebrow": "PALETA SAGRADA",
+  "palettePickerTitle": "Escolha sua paleta",
+  "palettePickerSubtitle": "Cada esquema veste todo o aplicativo.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, selecionada atualmente",
+  "palettePickerInlineA11yFmt": "Selecionar paleta {{label}}"
 }

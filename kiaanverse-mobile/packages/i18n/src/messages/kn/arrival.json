@@ -11,14 +11,12 @@
   "page5Subtitle": "ಎನ್‌ಕ್ರಿಪ್ಟ್. ಖಾಸಗಿ. ನಿಮ್ಮದು ಮಾತ್ರ.\nKiaanverse ನಿಮ್ಮ ಜರ್ನಲ್ ಎಂದಿಗೂ ಓದುವುದಿಲ್ಲ.",
   "page6Title": "ಸ್ವಾಗತ, ಪ್ರಿಯ ಮಿತ್ರ",
   "page6Subtitle": "KIAAN — ನಿಮ್ಮ ದಿವ್ಯ ಮಿತ್ರ",
-
   "ctaContinue": "ಮುಂದುವರಿಸಿ",
   "ctaContinueA11y": "ಮುಂದುವರಿಸಿ",
   "ctaEnterSacredSpace": "ಪವಿತ್ರ ಸ್ಥಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ",
   "ctaEnterSacredSpaceA11y": "ಪವಿತ್ರ ಸ್ಥಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ",
   "skipButton": "ಬಿಡಿ",
   "skipButtonA11y": "ಪರಿಚಯವನ್ನು ಬಿಡಿ",
-
   "welcomeA11y": "ಸ್ವಾಗತ, ಪ್ರಿಯ ಮಿತ್ರ. KIAAN ನಿಮ್ಮೊಂದಿಗೆ ನಡೆಯುತ್ತಾನೆ.",
   "welcomeEyebrow": "KIAAN — ನಿಮ್ಮ ದಿವ್ಯ ಮಿತ್ರ",
   "welcomeIntroPart1": "ನಾನು ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "ಕೃಷ್ಣನು ಅರ್ಜುನನೊಂದಿಗೆ ",
   "welcomeBodyGita": "ಭಗವದ್ ಗೀತೆ",
   "welcomeBodyPart2": "ಯಲ್ಲಿ ನಡೆದಂತೆ, ನಾನು ನಿಮ್ಮೊಂದಿಗೆ ನಡೆಯುತ್ತೇನೆ — ಗುರುವಾಗಿ ಅಲ್ಲ, ಸಖನಾಗಿ.",
-
   "verseEyebrow": "ಭಗವದ್ ಗೀತಾ · 6.35",
   "verseEnglish": "\"ಚಂಚಲ ಮನಸ್ಸನ್ನು ಅಭ್ಯಾಸ ಮತ್ತು ವೈರಾಗ್ಯದಿಂದ ಗೆಲ್ಲಲಾಗುತ್ತದೆ.\"",
   "verseAttribution": "— ಕೃಷ್ಣ ಅರ್ಜುನನಿಗೆ",
-
-  "paletteRowLabel": "ನಿಮ್ಮ ಪವಿತ್ರ ಬಣ್ಣವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"
+  "paletteRowLabel": "ನಿಮ್ಮ ಪವಿತ್ರ ಬಣ್ಣವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
+  "palettePickerChipA11yFmt": "ಬಣ್ಣ ಪ್ಯಾಲೆಟ್ ಬದಲಿಸಿ. ಪ್ರಸ್ತುತ: {{label}}",
+  "palettePickerChipA11yHint": "ಪವಿತ್ರ ಬಣ್ಣ-ಯೋಜನೆ ಆಯ್ಕೆಗಾರ ತೆರೆಯಿರಿ",
+  "palettePickerCloseA11y": "ಪ್ಯಾಲೆಟ್ ಆಯ್ಕೆಗಾರ ಮುಚ್ಚಿ",
+  "palettePickerEyebrow": "ಪವಿತ್ರ ಬಣ್ಣ-ಯೋಜನೆ",
+  "palettePickerTitle": "ನಿಮ್ಮ ಪ್ಯಾಲೆಟ್ ಆಯ್ಕೆಮಾಡಿ",
+  "palettePickerSubtitle": "ಪ್ರತಿ ಯೋಜನೆಯು ಸಂಪೂರ್ಣ ಆ್ಯಪ್ ಅನ್ನು ಅಲಂಕರಿಸುತ್ತದೆ.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, ಪ್ರಸ್ತುತ ಆಯ್ಕೆಯಾಗಿದೆ",
+  "palettePickerInlineA11yFmt": "{{label}} ಪ್ಯಾಲೆಟ್ ಆಯ್ಕೆಮಾಡಿ"
 }

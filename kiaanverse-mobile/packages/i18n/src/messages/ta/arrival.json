@@ -11,14 +11,12 @@
   "page5Subtitle": "என்க்ரிப்ட். தனிப்பட்ட. உங்களுக்கு மட்டுமே.\nKiaanverse உங்கள் நாட்குறிப்பை ஒருபோதும் படிக்காது.",
   "page6Title": "வரவேற்கிறோம், அன்பு நண்பரே",
   "page6Subtitle": "KIAAN — உங்கள் தெய்வீக நண்பன்",
-
   "ctaContinue": "தொடர்க",
   "ctaContinueA11y": "தொடர்க",
   "ctaEnterSacredSpace": "புனித இடத்தில் நுழைக",
   "ctaEnterSacredSpaceA11y": "புனித இடத்தில் நுழைக",
   "skipButton": "தவிர்",
   "skipButtonA11y": "அறிமுகத்தைத் தவிர்",
-
   "welcomeA11y": "வரவேற்கிறோம், அன்பு நண்பரே. KIAAN உங்களோடு நடக்கிறார்.",
   "welcomeEyebrow": "KIAAN — உங்கள் தெய்வீக நண்பன்",
   "welcomeIntroPart1": "நான் ",
@@ -28,10 +26,17 @@
   "welcomeBodyPart1": "கிருஷ்ணன் அர்ஜுனனோடு ",
   "welcomeBodyGita": "பகவத் கீதையில்",
   "welcomeBodyPart2": " நடந்தது போல், நான் உங்களோடு நடக்கிறேன் — குருவாக அல்ல, ஆனால் சகாவாக.",
-
   "verseEyebrow": "பகவத் கீதை · 6.35",
   "verseEnglish": "\"அமைதியற்ற மனம் பயிற்சி மற்றும் வைராக்கியத்தால் தோற்கடிக்கப்படுகிறது.\"",
   "verseAttribution": "— கிருஷ்ணன் அர்ஜுனனிடம்",
-
-  "paletteRowLabel": "உங்கள் புனித நிறத்தைத் தேர்வு செய்க"
+  "paletteRowLabel": "உங்கள் புனித நிறத்தைத் தேர்வு செய்க",
+  "palettePickerChipA11yFmt": "வண்ணத் தட்டை மாற்று. தற்போதைய: {{label}}",
+  "palettePickerChipA11yHint": "புனித வண்ணத் திட்ட தேர்வாளரைத் திற",
+  "palettePickerCloseA11y": "வண்ணத் தேர்வாளரை மூடு",
+  "palettePickerEyebrow": "புனித வண்ணத் திட்டம்",
+  "palettePickerTitle": "உங்கள் தட்டைத் தேர்ந்தெடு",
+  "palettePickerSubtitle": "ஒவ்வொரு திட்டமும் முழு பயன்பாட்டையும் அலங்கரிக்கிறது.",
+  "palettePickerCardA11yFmt": "{{label}}",
+  "palettePickerCardA11ySelectedFmt": "{{label}}, தற்போது தேர்ந்தெடுக்கப்பட்டது",
+  "palettePickerInlineA11yFmt": "{{label}} தட்டைத் தேர்ந்தெடு"
 }
