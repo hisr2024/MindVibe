@@ -157,7 +157,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_6_17",
             "chapter": 6,
             "verse": 17,
-            "translation": "One who is moderate in eating, sleeping, working, and recreation can mitigate all material pains by practicing yoga.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Physical balance through moderation",
             "application_guide": "Establish regular routines for eating, sleeping, and activity.",
             "voice_intro": "For physical wellbeing, the Gita teaches us about moderation."
@@ -168,7 +168,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_4_29",
             "chapter": 4,
             "verse": 29,
-            "translation": "Still others practice breath control as sacrifice, regulating the incoming and outgoing breath.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Vital energy through breath",
             "application_guide": "Practice conscious breathing to regulate life force.",
             "voice_intro": "For energy balance, ancient wisdom guides us to the breath."
@@ -179,7 +179,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_6_5",
             "chapter": 6,
             "verse": 5,
-            "translation": "One must elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the conditioned soul, and its enemy as well.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Mind as friend or foe",
             "application_guide": "Train your mind to be your ally through positive self-talk.",
             "voice_intro": "Your mind can be your greatest friend or your greatest challenge."
@@ -188,7 +188,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_6_35",
             "chapter": 6,
             "verse": 35,
-            "translation": "The mind is restless and difficult to curb, but it can be controlled through practice and detachment.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Mastering the restless mind",
             "application_guide": "With consistent practice, the turbulent mind becomes still.",
             "voice_intro": "Even the most restless mind can find peace through practice."
@@ -199,7 +199,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_2_47",
             "chapter": 2,
             "verse": 47,
-            "translation": "You have a right to perform your duty, but not to the fruits of action. Never consider yourself the cause of results, nor be attached to inaction.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Wisdom of detached action",
             "application_guide": "Focus on the quality of your actions, not the outcomes.",
             "voice_intro": "True wisdom lies in acting without attachment to results."
@@ -210,7 +210,7 @@ LAYER_GITA_VERSES: dict[str, list[dict[str, Any]]] = {
             "verse_id": "BG_6_20",
             "chapter": 6,
             "verse": 20,
-            "translation": "When the mind, disciplined through yoga, rests in the Self, free from all desires, one is said to be established in yoga.",
+            "translation": "<placeholder pending PD-baseline rebuild>",
             "relevance": "Resting in blissful awareness",
             "application_guide": "Allow moments of simply being, free from wanting.",
             "voice_intro": "When desires quiet, natural bliss emerges."

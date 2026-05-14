@@ -43,13 +43,13 @@ SOURCES_DATA = [
     {
         "name": "Gita Press Gorakhpur",
         "description": "One of the most renowned publishers of Hindu scriptures in India, founded in 1923",
-        "url": "https://www.gitapress.org/",
+        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
         "credibility_rating": 5,
     },
     {
         "name": "ISKCON (International Society for Krishna Consciousness)",
         "description": "Bhagavad-gita As It Is by A.C. Bhaktivedanta Swami Prabhupada",
-        "url": "https://www.iskcon.org/",
+        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
         "credibility_rating": 5,
     },
     {
@@ -61,7 +61,7 @@ SOURCES_DATA = [
     {
         "name": "Swami Sivananda Divine Life Society",
         "description": "Translation and commentary by Swami Sivananda",
-        "url": "https://www.sivanandaonline.org/",
+        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
         "credibility_rating": 5,
     },
 ]

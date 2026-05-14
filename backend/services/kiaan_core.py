@@ -448,7 +448,7 @@ class KIAANCore:
         This fetches authentic Gita teachings from:
         - YouTube (ISKCON, Swami Mukundananda, Gaur Gopal Das, etc.)
         - Audio platforms (Spotify, Apple Music, Gaana, JioSaavn podcasts)
-        - Web sources (IIT Kanpur Gita Supersite, holy-bhagavad-gita.org, etc.)
+        - Web sources (IIT Kanpur Gita Supersite, [REMOVED-PENDING-LICENSE-REVIEW], etc.)
 
         All content is validated for strict Bhagavad Gita compliance.
 

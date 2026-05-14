@@ -69,11 +69,11 @@ TRUSTED_PODCAST_FEEDS = [
 
 TRUSTED_WEB_DOMAINS = [
     "gitasupersite.iitk.ac.in",
-    "holy-bhagavad-gita.org",
+    "[REMOVED-PENDING-LICENSE-REVIEW]",
     "bhagavad-gita.org",
-    "asitis.com",
-    "gitapress.org",
-    "vedabase.io",
+    "[REMOVED-PENDING-LICENSE-REVIEW]",
+    "[REMOVED-PENDING-LICENSE-REVIEW]",
+    "[REMOVED-PENDING-LICENSE-REVIEW]",
     "wisdomlib.org",
     "sacred-texts.com",
 ]

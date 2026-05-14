@@ -53,8 +53,8 @@ TRUSTED_GITA_SOURCES = [
     "iskcon", "chinmaya", "ramakrishna", "vedanta", "gita-society",
     "bhaktivedanta", "sivananda", "yogananda", "vivekananda",
     # Domains
-    "gitasupersite.iitk.ac.in", "holy-bhagavad-gita.org", "bhagavad-gita.org",
-    "asitis.com", "gitapress.org", "vedabase.io", "gitadaily.com",
+    "gitasupersite.iitk.ac.in", "[REMOVED-PENDING-LICENSE-REVIEW]", "bhagavad-gita.org",
+    "[REMOVED-PENDING-LICENSE-REVIEW]", "[REMOVED-PENDING-LICENSE-REVIEW]", "[REMOVED-PENDING-LICENSE-REVIEW]", "gitadaily.com",
     # YouTube channels (IDs/names)
     "ISKCON", "ChinmayaMission", "SwamiMukundananda", "GaurGopalDas",
     "SadguruJV", "ArtOfLiving", "BrahmaKumaris",
@@ -382,13 +382,13 @@ class ContentFetcher:
         # Curated Gita RSS feeds
         self.gita_rss_feeds = [
             "https://feeds.feedburner.com/gitadaily",
-            "https://www.holy-bhagavad-gita.org/rss",
+            "https://[REMOVED-PENDING-LICENSE-REVIEW]",
         ]
 
         # Curated Gita websites for scraping
         self.gita_websites = [
             {
-                "url": "https://www.holy-bhagavad-gita.org",
+                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
                 "name": "Holy Bhagavad Gita",
                 "type": "verse_commentary"
             },
@@ -398,7 +398,7 @@ class ContentFetcher:
                 "type": "academic"
             },
             {
-                "url": "https://asitis.com",
+                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
                 "name": "Bhagavad Gita As It Is",
                 "type": "iskcon_commentary"
             },
@@ -538,7 +538,7 @@ class ContentFetcher:
             },
             {
                 "name": "ISKCON Desire Tree Lectures",
-                "url": "https://iskcondesiretree.com/podcast/feed",
+                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
                 "platform": "iskcon"
             },
         ]

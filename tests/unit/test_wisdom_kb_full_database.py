@@ -171,7 +171,7 @@ class TestWisdomKnowledgeBaseFullDatabase:
                 "chapter": 2,
                 "verse_number": 56,
                 "theme": "equanimity",
-                "english": "Remain steady in joy and sorrow",
+                "english": "<placeholder pending PD-baseline rebuild>",
                 "context": "About emotional balance",
                 "mental_health_applications": ["mindfulness", "equanimity"],
             },
@@ -262,7 +262,7 @@ class TestGitaVerseWrapper:
             "chapter": 2,
             "verse_number": 47,
             "theme": "action_without_attachment",
-            "english": "You have the right to perform your duties",
+            "english": "<placeholder pending PD-baseline rebuild>",
             "hindi": "तुम्हारा अधिकार केवल कर्म करने में है",
             "sanskrit": "कर्मण्येवाधिकारस्ते",
             "context": "About performing duty",
@@ -314,7 +314,7 @@ class TestGitaServiceExtensions:
         verse.sanskrit = "कर्मण्येवाधिकारस्ते"
         verse.transliteration = "karmanye vadhikaraste"
         verse.hindi = "तुम्हारा अधिकार केवल कर्म करने में है"
-        verse.english = "You have the right to perform your duties"
+        verse.english = "<placeholder pending PD-baseline rebuild>"
         verse.word_meanings = {"karma": "action"}
         verse.principle = "Focus on action, not results"
         verse.theme = "action_without_attachment"
@@ -331,7 +331,7 @@ class TestGitaServiceExtensions:
         assert result["chapter"] == 2
         assert result["verse_number"] == 47
         assert result["theme"] == "action_without_attachment"
-        assert result["english"] == "You have the right to perform your duties"
+        assert result["english"] == "<placeholder pending PD-baseline rebuild>"
         assert result["hindi"] == "तुम्हारा अधिकार केवल कर्म करने में है"
         assert result["sanskrit"] == "कर्मण्येवाधिकारस्ते"
         assert result["context"] == "Focus on action, not results"  # principle as context
@@ -429,7 +429,7 @@ class TestMentalHealthTagBoost:
                 "chapter": 2,
                 "verse_number": 47,
                 "theme": "action",
-                "english": "Focus on managing your anxiety through work",
+                "english": "<placeholder pending PD-baseline rebuild>",
                 "context": "About duty",
                 "mental_health_applications": ["anxiety_management"],
             },
@@ -438,7 +438,7 @@ class TestMentalHealthTagBoost:
                 "chapter": 2,
                 "verse_number": 56,
                 "theme": "peace",
-                "english": "Focus on managing your anxiety through peace",
+                "english": "<placeholder pending PD-baseline rebuild>",
                 "context": "About duty",
                 "mental_health_applications": ["meditation_support"],
             },

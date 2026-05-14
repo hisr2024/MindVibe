@@ -8,7 +8,7 @@ open-source Gita repositories and generates modern-day applications.
 
 Architecture:
     GitaWisdomAutoEnricher (orchestrator)
-    ├── OpenSourceGitaFetcher (pulls from bhagavad-gita.org, vedabase.io, etc.)
+    ├── OpenSourceGitaFetcher (pulls from bhagavad-gita.org, [REMOVED-PENDING-LICENSE-REVIEW], etc.)
     ├── PracticalWisdomGenerator (creates actionable modern applications)
     ├── GitaAmbitValidator (strict 18-chapter/700-verse compliance)
     ├── MultiPassGitaAuthenticator (3-pass text validation before storage)
@@ -806,7 +806,7 @@ class OpenSourceGitaFetcher:
     Supported sources:
     1. bhagavad-gita.org (Rapid API — free tier, 100 requests/day)
     2. Local Gita corpus (data/gita/gita_verses_complete.json)
-    3. vedabase.io structured data
+    3. [REMOVED-PENDING-LICENSE-REVIEW] structured data
     """
 
     # Chapter-to-theme mapping from Gita for enrichment context

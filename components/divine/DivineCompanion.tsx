@@ -42,11 +42,11 @@ const LOVING_VERSES = [
     reference: "Gita 9.29",
   },
   {
-    verse: "Abandon all dharmas and surrender to me alone. I shall liberate you from all sins. Do not grieve.",
+    verse: "<placeholder pending PD-baseline rebuild>",
     reference: "Gita 18.66",
   },
   {
-    verse: "The one who sees me everywhere and sees everything in me - I am never lost to them, and they are never lost to me.",
+    verse: "<placeholder pending PD-baseline rebuild>",
     reference: "Gita 6.30",
   },
   {

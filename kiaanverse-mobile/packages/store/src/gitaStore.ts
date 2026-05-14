@@ -29,8 +29,7 @@ export interface VerseRef {
 /**
  * Curated list of verses that ship with real Sanskrit + English in the
  * backend Gita corpus (data/gita/chapters/*.json). Most verses in the seed
- * corpus are placeholders — `"english": "Bhagavad Gita Chapter X, Verse Y
- * teaches wisdom on <theme>."` — so a naive random pick across all 700
+ * corpus are placeholders — `"english": "<placeholder pending PD-baseline rebuild>"` — so a naive random pick across all 700
  * verses lands on a placeholder ~96 % of the time and the home screen
  * shows "teaches wisdom on devotion" instead of a real shloka.
  *
