@@ -37,5 +37,31 @@
   "q2Label": "Which Gita teaching felt most alive this week?",
   "q3Label": "How consistent was your practice? (1–5)",
   "q4Label": "What pattern are you noticing in yourself?",
-  "q5Label": "What sankalpa do you carry into next week?"
+  "q5Label": "What sankalpa do you carry into next week?",
+
+  "moodHeavy": "Heavy",
+  "moodUnsettled": "Unsettled",
+  "moodNeutral": "Neutral",
+  "moodPeaceful": "Peaceful",
+  "moodBlissful": "Blissful",
+
+  "detailEditScreenTitle": "Edit Reflection",
+  "detailCancelEditingA11y": "Cancel editing",
+  "detailTitleLabel": "Title (optional)",
+  "detailTitlePlaceholder": "Give your reflection a name...",
+  "detailContentPlaceholder": "Pour your heart onto this sacred page...",
+  "detailContentA11y": "Edit journal content",
+  "detailTagsLabel": "Tags",
+  "detailTagsPlaceholder": "gratitude, morning, clarity...",
+  "detailSaveButton": "Save Changes",
+  "detailEmptyAlertTitle": "Empty Reflection",
+  "detailEmptyAlertBody": "Please write something before saving.",
+  "detailSaveErrorBody": "Your changes could not be saved right now. Please try again.",
+  "detailDeleteErrorTitle": "Error",
+  "detailDeleteErrorBody": "Could not delete this reflection. Please try again.",
+  "detailEncryptedAtRest": "🔒 Encrypted at rest",
+  "detailShowActionsA11y": "Show entry actions",
+  "detailEditActionA11y": "Edit entry",
+  "detailEditAction": "Edit Reflection",
+  "detailDeleteActionA11y": "Delete this reflection"
 }
