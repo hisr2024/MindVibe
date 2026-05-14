@@ -84,5 +84,32 @@
   "tagForgiveness": "forgiveness",
   "tagCourage": "courage",
   "tagGrief": "grief",
-  "tagJoy": "joy"
+  "tagJoy": "joy",
+
+  "browseStatTotalTitle": "TOTAL",
+  "browseStatTotalLabel": "reflections",
+  "browseStatMonthTitle": "THIS MONTH",
+  "browseStatMonthLabel": "entries",
+  "browseStatStreakTitle": "STREAK",
+  "browseStatStreakLabel": "🔥 days",
+  "browseEntryEncryptedFallback": "(encrypted reflection)",
+  "browseEntryA11yFmt": "Open reflection {{name}}",
+  "browseEmptyFiltered": "No reflections match that filter",
+  "browseEmptyUnfiltered": "Your sacred library awaits your first offering",
+  "browseFilterAll": "All",
+  "browseFilterA11yFmt": "Filter {{label}}",
+
+  "kiaanInsufficientFmt": "Write {{count}} more reflections this week to unlock your Sacred Mirror.",
+  "kiaanBeginReflectionCta": "Begin a reflection →",
+  "kiaanWeeklyMirrorSection": "SAKHA'S WEEKLY MIRROR",
+  "kiaanPatternNotedCard": "PATTERN NOTICED",
+  "kiaanGitaEchoFmt": "GITA ECHO · BG {{chapter}}.{{verse}}",
+  "kiaanBlessingCard": "BLESSING",
+  "kiaanOpenFullButton": "Open Full Sacred Mirror",
+  "kiaanRefreshingButton": "Refreshing…",
+  "kiaanFreshMirrorLink": "↻ Ask for a fresh mirror",
+
+  "calendarPrevMonthA11y": "Previous month",
+  "calendarNextMonthA11y": "Next month",
+  "calendarStreakDaysSuffix": "days"
 }

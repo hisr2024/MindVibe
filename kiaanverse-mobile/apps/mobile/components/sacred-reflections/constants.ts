@@ -210,38 +210,12 @@ export const BROWSE_FILTER_IDS: readonly (MoodId | 'all')[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// COPY — literal English fallback strings. Kept around so tab components
-// that haven't been refactored to useTranslation yet (Editor/Browse/Kiaan/
-// Calendar) keep rendering English without breakage. New code should call
-// `t(COPY_KEYS.heading)` from the `sacred-reflections` i18n namespace.
+// COPY_KEYS — i18n key constants for the sacred-reflections surface. Each
+// value is a translation key in the `sacred-reflections` namespace; consumers
+// resolve via `t(COPY_KEYS.heading)` etc. Sanskrit values resolve to the same
+// Devanagari literal across all locales (brand-fixed).
 // ---------------------------------------------------------------------------
 
-export const COPY = {
-  heading: 'Sacred Reflection',
-  headingSanskrit: 'आत्म-चिंतन',
-  moodPrompt: 'HOW DO YOU FEEL?',
-  titlePlaceholder: 'Give this reflection a title...',
-  bodyPlaceholder:
-    'What stirs in you today? Let the words come without judgment...',
-  encryptionNotice:
-    'Encrypted end-to-end · Only mood and tags are visible to KIAAN',
-  ctaOffer: 'Offer This Reflection',
-  browseHeading: 'Your Reflections',
-  browseSanskrit: 'आत्म-चिंतन',
-  browseSearch: 'Search your reflections...',
-  emptyLibraryTitle: 'Your sacred library awaits',
-  emptyLibrarySub: 'Return to the Editor tab to begin.',
-  kiaanEmptyTitle: 'Your sacred library awaits',
-  kiaanEmptySub:
-    "Journal for a few days — then return here for Sakha's weekly reflection.",
-  calendarCurrent: 'CURRENT STREAK',
-  calendarLongest: 'LONGEST STREAK',
-} as const;
-
-/** i18n key mirror of COPY. Components that have been refactored to use
- *  `useTranslation('sacred-reflections')` should resolve their copy via
- *  `t(COPY_KEYS.heading)` etc. Once every consumer is migrated, COPY itself
- *  can be deleted. */
 export const COPY_KEYS = {
   heading: 'heading',
   headingSanskrit: 'headingSanskrit',

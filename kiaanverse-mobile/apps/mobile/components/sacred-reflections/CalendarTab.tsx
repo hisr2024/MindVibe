@@ -14,25 +14,42 @@ import * as Haptics from 'expo-haptics';
 import { Text, colors, spacing } from '@kiaanverse/ui';
 import { useJournalEntries } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
-import { COPY } from './constants';
+import { COPY_KEYS } from './constants';
 
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const;
+/** Localized month name + year. Falls back to en-US on ICU-incomplete
+ *  Hermes builds. */
+function formatMonthYear(date: Date, locale: string): string {
+  try {
+    return date.toLocaleDateString(locale, {
+      month: 'long',
+      year: 'numeric',
+    });
+  } catch {
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+}
 
-const WEEK_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
+/** Locale-aware narrow weekday glyphs for the 7-column header row. Builds
+ *  the row off a fixed reference Sunday so we always get S–S in the user's
+ *  script (e.g. "र सो म मं बु गु शु" for Hindi). */
+function getWeekHeaders(locale: string): readonly string[] {
+  // 2024-01-07 was a Sunday — picked as a stable anchor.
+  const sunday = new Date(2024, 0, 7);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    try {
+      return d.toLocaleDateString(locale, { weekday: 'narrow' });
+    } catch {
+      return d.toLocaleDateString('en-US', { weekday: 'narrow' });
+    }
+  });
+}
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -106,9 +123,11 @@ function computeStreaks(entries: readonly JournalEntry[]): {
 }
 
 export function CalendarTab(): React.JSX.Element {
+  const { t, locale } = useTranslation('sacred-reflections');
   const { data } = useJournalEntries();
   const entries = useMemo(() => data?.entries ?? [], [data]);
   const [viewDate, setViewDate] = useState(new Date());
+  const weekHeaders = useMemo(() => getWeekHeaders(locale), [locale]);
 
   const streaks = useMemo(() => computeStreaks(entries), [entries]);
 
@@ -162,13 +181,15 @@ export function CalendarTab(): React.JSX.Element {
       <View style={styles.streakRow}>
         <StreakCard
           value={streaks.current}
-          title={COPY.calendarCurrent}
+          title={t(COPY_KEYS.calendarCurrent)}
           glyph={'\u{1F525}'}
+          daysSuffix={t('calendarStreakDaysSuffix')}
         />
         <StreakCard
           value={streaks.longest}
-          title={COPY.calendarLongest}
+          title={t(COPY_KEYS.calendarLongest)}
           glyph={'\u{2728}'}
+          daysSuffix={t('calendarStreakDaysSuffix')}
         />
       </View>
 
@@ -178,7 +199,7 @@ export function CalendarTab(): React.JSX.Element {
           onPress={handlePrev}
           style={styles.monthButton}
           accessibilityRole="button"
-          accessibilityLabel="Previous month"
+          accessibilityLabel={t('calendarPrevMonthA11y')}
         >
           <Text variant="h3" color={colors.primary[500]}>
             ←
@@ -189,13 +210,13 @@ export function CalendarTab(): React.JSX.Element {
           color={colors.text.primary}
           style={styles.monthLabel}
         >
-          {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
+          {formatMonthYear(viewDate, locale)}
         </Text>
         <Pressable
           onPress={handleNext}
           style={styles.monthButton}
           accessibilityRole="button"
-          accessibilityLabel="Next month"
+          accessibilityLabel={t('calendarNextMonthA11y')}
         >
           <Text variant="h3" color={colors.primary[500]}>
             →
@@ -205,7 +226,7 @@ export function CalendarTab(): React.JSX.Element {
 
       {/* Weekday headers */}
       <View style={styles.weekHeaderRow}>
-        {WEEK_HEADERS.map((h, i) => (
+        {weekHeaders.map((h, i) => (
           <Text
             key={i}
             variant="caption"
@@ -255,10 +276,12 @@ function StreakCard({
   value,
   title,
   glyph,
+  daysSuffix,
 }: {
   readonly value: number;
   readonly title: string;
   readonly glyph: string;
+  readonly daysSuffix: string;
 }): React.JSX.Element {
   return (
     <View style={styles.streakCard}>
@@ -273,7 +296,7 @@ function StreakCard({
         {title}
       </Text>
       <Text variant="caption" color={colors.text.secondary}>
-        {glyph} days
+        {glyph} {daysSuffix}
       </Text>
     </View>
   );
