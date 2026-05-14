@@ -23,12 +23,15 @@ practical spiritual wellness applications.
 
 import hashlib
 import logging
+import os
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
 
 logger = logging.getLogger(__name__)
+
+_INGESTION_ENV_FLAG = "MINDVIBE_EXTERNAL_INGESTION_ENABLED"
 
 
 class GitaWisdomSource(str, Enum):
@@ -1017,5 +1020,22 @@ compassion and freedom from hostility toward any creature.""",
             }
 
 
-# Global instance
-indian_gita_sources = IndianGitaSourcesService()
+# Global instance — gated by MINDVIBE_EXTERNAL_INGESTION_ENABLED=1.
+# External-source content (Gita Press, Sivananda, Chinmayananda, etc.)
+# is disabled by default pending licensing review of upstream third-party
+# content providers. When the flag is unset, any attribute access on
+# ``indian_gita_sources`` raises a clear RuntimeError; route handlers
+# surface that as an HTTP error rather than serving infringing content.
+class _GatedIndianGitaSources:
+    def __getattr__(self, name: str) -> Any:
+        raise RuntimeError(
+            "Indian Gita sources service is disabled pending external-source "
+            f"licensing review. Set {_INGESTION_ENV_FLAG}=1 only after legal "
+            "sign-off."
+        )
+
+
+if os.getenv(_INGESTION_ENV_FLAG, "0") == "1":
+    indian_gita_sources: Any = IndianGitaSourcesService()
+else:
+    indian_gita_sources = _GatedIndianGitaSources()  # type: ignore[assignment]
