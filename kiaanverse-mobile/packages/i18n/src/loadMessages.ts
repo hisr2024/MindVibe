@@ -37,6 +37,7 @@ import enTools from './messages/en/tools.json';
 import enVoice from './messages/en/voice.json';
 import enCommunity from './messages/en/community.json';
 import enWellness from './messages/en/wellness.json';
+import enArrival from './messages/en/arrival.json';
 
 // Support — per-locale bundles (registered in Batch 9).
 //
@@ -143,6 +144,22 @@ import frWellness from './messages/fr/wellness.json';
 import esWellness from './messages/es/wellness.json';
 import itWellness from './messages/it/wellness.json';
 import ptWellness from './messages/pt/wellness.json';
+
+import hiArrival from './messages/hi/arrival.json';
+import saArrival from './messages/sa/arrival.json';
+import taArrival from './messages/ta/arrival.json';
+import teArrival from './messages/te/arrival.json';
+import bnArrival from './messages/bn/arrival.json';
+import mrArrival from './messages/mr/arrival.json';
+import guArrival from './messages/gu/arrival.json';
+import knArrival from './messages/kn/arrival.json';
+import mlArrival from './messages/ml/arrival.json';
+import paArrival from './messages/pa/arrival.json';
+import deArrival from './messages/de/arrival.json';
+import frArrival from './messages/fr/arrival.json';
+import esArrival from './messages/es/arrival.json';
+import itArrival from './messages/it/arrival.json';
+import ptArrival from './messages/pt/arrival.json';
 
 // Tools — per-locale bundles (registered in Batch 12).
 // Used by Sacred Tools Hub (shlokas/index.tsx) and downstream tool screens.
@@ -429,6 +446,7 @@ const enBundle: Record<TranslationNamespace, TranslationMessages> = {
   voice: enVoice,
   community: enCommunity,
   wellness: enWellness,
+  arrival: enArrival,
   // Namespaces still pending content — empty objects keep the type
   // exhaustive without shipping copy. The t() helper falls back to the
   // key string for these until the bundles land.
@@ -463,6 +481,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: hiAnalytics,
     journal: hiJournal,
     wellness: hiWellness,
+    arrival: hiArrival,
   },
   sa: {
     common: saCommon,
@@ -485,6 +504,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: saAnalytics,
     journal: saJournal,
     wellness: saWellness,
+    arrival: saArrival,
   },
   ta: {
     common: taCommon,
@@ -507,6 +527,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: taAnalytics,
     journal: taJournal,
     wellness: taWellness,
+    arrival: taArrival,
   },
   te: {
     common: teCommon,
@@ -529,6 +550,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: teAnalytics,
     journal: teJournal,
     wellness: teWellness,
+    arrival: teArrival,
   },
   bn: {
     common: bnCommon,
@@ -551,6 +573,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: bnAnalytics,
     journal: bnJournal,
     wellness: bnWellness,
+    arrival: bnArrival,
   },
   mr: {
     common: mrCommon,
@@ -572,6 +595,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: mrAnalytics,
     journal: mrJournal,
     wellness: mrWellness,
+    arrival: mrArrival,
   },
   gu: {
     common: guCommon,
@@ -593,6 +617,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: guAnalytics,
     journal: guJournal,
     wellness: guWellness,
+    arrival: guArrival,
   },
   kn: {
     common: knCommon,
@@ -614,6 +639,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: knAnalytics,
     journal: knJournal,
     wellness: knWellness,
+    arrival: knArrival,
   },
   ml: {
     common: mlCommon,
@@ -635,6 +661,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: mlAnalytics,
     journal: mlJournal,
     wellness: mlWellness,
+    arrival: mlArrival,
   },
   pa: {
     common: paCommon,
@@ -656,6 +683,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: paAnalytics,
     journal: paJournal,
     wellness: paWellness,
+    arrival: paArrival,
   },
   de: {
     common: deCommon,
@@ -678,6 +706,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: deAnalytics,
     journal: deJournal,
     wellness: deWellness,
+    arrival: deArrival,
   },
   fr: {
     common: frCommon,
@@ -700,6 +729,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: frAnalytics,
     journal: frJournal,
     wellness: frWellness,
+    arrival: frArrival,
   },
   es: {
     common: esCommon,
@@ -722,6 +752,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: esAnalytics,
     journal: esJournal,
     wellness: esWellness,
+    arrival: esArrival,
   },
   it: {
     common: itCommon,
@@ -744,6 +775,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: itAnalytics,
     journal: itJournal,
     wellness: itWellness,
+    arrival: itArrival,
   },
   pt: {
     common: ptCommon,
@@ -766,6 +798,7 @@ const bundles: Partial<Record<Locale, LocaleBundle>> = {
     analytics: ptAnalytics,
     journal: ptJournal,
     wellness: ptWellness,
+    arrival: ptArrival,
   },
 };
 
