@@ -1,0 +1,20 @@
+{
+  "backA11y": "પાછળ",
+  "sectionTag": "નિત્ય સાધના",
+  "title": "દૈનિક પવિત્ર સાધના",
+
+  "completedTitle": "સાધના સંપૂર્ણ",
+  "completedBody": "દરેક તબક્કો અર્પણ થયો. કાલે ફરી શરૂ કરવા માટે પાછા આવો.",
+  "returnHomeButton": "મુખ્ય પૃષ્ઠ પર પાછા જાઓ",
+  "completionWithStreak": "નિત્ય સાધના સંપૂર્ણ. ધારા: {{streak}} દિવસ.",
+  "completionFirstDay": "નિત્ય સાધના સંપૂર્ણ. તમારી ધારા આજથી શરૂ.",
+
+  "historyTitle": "સાધનાનો ઇતિહાસ",
+  "statCurrent": "વર્તમાન",
+  "statLongest": "સૌથી લાંબી",
+  "statTotalDays": "કુલ દિવસો",
+  "previousMonthA11y": "પાછલો મહિનો",
+  "nextMonthA11y": "આગળનો મહિનો",
+  "recentPracticesHeader": "તાજેતરની સાધનાઓ",
+  "verseLabel": "શ્લોક: {{verseId}}"
+}

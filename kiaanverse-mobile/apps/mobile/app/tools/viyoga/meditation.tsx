@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '@kiaanverse/i18n';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -32,16 +33,17 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
 
-const DEFAULT_SCREENS: readonly string[] = [
-  'The longing you carry is sacred.',
-  'It is not weakness. It is love with nowhere to go.',
-  'Breathe in what you remember.',
-  'You carry it within you. It lives in your bones.',
-  'The separation is real. The connection is also real.',
-  'Distance cannot sever what is written into you.',
-  'You are not uprooted. Your roots stretch everywhere.',
-  'The bond holds. It always holds.',
-  'Breathe out slowly. You are exactly where you are meant to be.',
+/** Default-meditation key list (resolved at render via t()). */
+const DEFAULT_SCREEN_KEYS: readonly string[] = [
+  'viyogaMedScreen1',
+  'viyogaMedScreen2',
+  'viyogaMedScreen3',
+  'viyogaMedScreen4',
+  'viyogaMedScreen5',
+  'viyogaMedScreen6',
+  'viyogaMedScreen7',
+  'viyogaMedScreen8',
+  'viyogaMedScreen9',
 ];
 
 const AUTO_ADVANCE_MS = 4000;
@@ -50,16 +52,17 @@ const FADE_IN_MS = 400;
 
 export default function ViyogaMeditation(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const { flow } = useSacredFlow('viyoga');
 
-  // Use the response's copy when present; fall through to defaults so the
-  // screen is never empty (a user landing here from deep-link wouldn't
-  // have an aiResponse).
+  // Use the response's copy when present; fall through to localized
+  // defaults so the screen is never empty (a user landing here from
+  // deep-link wouldn't have an aiResponse).
   const screens: readonly string[] =
     flow.aiResponse?.meditationScreens &&
     flow.aiResponse.meditationScreens.length > 0
       ? flow.aiResponse.meditationScreens
-      : DEFAULT_SCREENS;
+      : DEFAULT_SCREEN_KEYS.map((k) => t(k));
 
   const [current, setCurrent] = useState(0);
   const [autoMode, setAutoMode] = useState(false);
@@ -159,7 +162,10 @@ export default function ViyogaMeditation(): React.JSX.Element {
               }}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={`Go to screen ${i + 1} of ${screens.length}`}
+              accessibilityLabel={t('viyogaMedScreenOfA11y', {
+                n: String(i + 1),
+                total: String(screens.length),
+              })}
             >
               <View style={[s.dot, i === current && s.dotActive]} />
             </Pressable>
@@ -171,32 +177,32 @@ export default function ViyogaMeditation(): React.JSX.Element {
             onPress={handleBack}
             accessibilityRole="button"
             accessibilityLabel={
-              isFirst ? 'Back to transmission' : 'Previous sentence'
+              isFirst ? t('viyogaMedBackToTx') : t('viyogaMedPrevSentence')
             }
           >
-            <Text style={s.navBtn}>← Back</Text>
+            <Text style={s.navBtn}>{t('viyogaMedBack')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleAuto}
             accessibilityRole="button"
             accessibilityLabel={
-              autoMode ? 'Pause auto-advance' : 'Start auto-advance'
+              autoMode ? t('viyogaMedAutoPause') : t('viyogaMedAutoStart')
             }
             accessibilityState={{ selected: autoMode }}
             disabled={current === lastIndex && !autoMode}
           >
             <Text style={[s.navBtn, autoMode && s.navBtnActive]}>
-              {autoMode ? '⏸ Auto' : 'Auto'}
+              {autoMode ? t('viyogaMedAutoOn') : t('viyogaMedAutoOff')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleEnd}
             accessibilityRole="button"
-            accessibilityLabel="End meditation"
+            accessibilityLabel={t('viyogaMedEndA11y')}
           >
-            <Text style={s.navBtn}>End</Text>
+            <Text style={s.navBtn}>{t('viyogaMedEnd')}</Text>
           </TouchableOpacity>
         </View>
       </View>

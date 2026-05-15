@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}}માંથી પગલું {{current}}",
+  "progressDotA11yCurrent": "{{total}}માંથી પગલું {{current}}, વર્તમાન",
+  "continueButton": "ચાલુ રાખો",
+
+  "welcomeTitle": "સખાને મળો",
+  "welcomeBody": "આંતરિક શાંતિના માર્ગે તમારો દિવ્ય સાથી — શ્રીમદ્ ભગવદ્ ગીતાના કાલાતીત જ્ઞાનથી માર્ગદર્શિત.",
+  "welcomeCta": "તમારી યાત્રા શરૂ કરો",
+
+  "purposeTitle": "તમને અહીં શું લાવ્યું?",
+  "purposeSubtitle": "તમારી અંદર પડઘો પાડે તે બધું પસંદ કરો",
+  "purposePeace": "શાંતિ",
+  "purposeWisdom": "જ્ઞાન",
+  "purposeGuidance": "માર્ગદર્શન",
+  "purposeHealing": "ઉપચાર",
+  "purposePurpose": "ઉદ્દેશ્ય",
+
+  "gitaTitle": "ગીતા જાણો છો?",
+  "gitaSubtitle": "આ સખાને તમારા સ્તર પ્રમાણે જ્ઞાન આપવામાં મદદ કરશે",
+  "gitaLevelNever": "ક્યારેય વાંચી નથી",
+  "gitaLevelCurious": "જિજ્ઞાસુ",
+  "gitaLevelBeginner": "નવોદિત",
+  "gitaLevelPractitioner": "સાધક",
+  "gitaLevelScholar": "વિદ્વાન",
+
+  "practiceTitle": "દૈનિક સાધનાનો સમય",
+  "practiceSubtitle": "તમે તમારી દૈનિક આધ્યાત્મિક યાદ ક્યારે ઇચ્છો છો?",
+  "practiceAm": "સવારે",
+  "practicePm": "સાંજે",
+  "practiceHourA11y": "{{hour}} વાગ્યે",
+
+  "readyVerse": "\"તમને તમારા નિર્ધારિત કર્મ કરવાનો અધિકાર છે, પરંતુ તે કર્મના ફળ પર અધિકાર નથી.\"",
+  "readyVerseAttribution": "— શ્રીમદ્ ભગવદ્ ગીતા ૨.૪૭",
+  "readyTitle": "તમે તૈયાર છો",
+  "readyBody": "તમારા આધ્યાત્મિક માર્ગ પર રહેવા માટે દૈનિક યાદ સક્રિય કરો, અથવા હમણાં અન્વેષણ શરૂ કરો.",
+  "readyCtaEnable": "સૂચનાઓ સક્રિય કરો અને શરૂ કરો",
+  "readyCtaSkip": "સૂચનાઓ વિના શરૂ કરો",
+  "readyRequesting": "પરવાનગી મંગાય રહી છે..."
+}

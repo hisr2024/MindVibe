@@ -22,7 +22,7 @@
  * the hero, badge, and downstream subscription screens never drift.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -43,6 +43,7 @@ import {
 } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
 import { useAuthStore, type SubscriptionTier } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { ProfileHero, StatsRow } from '../../components/profile';
 
@@ -84,70 +85,62 @@ function toSubscriptionTier(raw: unknown): SubscriptionTier {
 }
 
 interface MenuItem {
-  readonly label: string;
+  /** i18n key for the menu label, e.g. "settings.menuEditProfile". */
+  readonly labelKey: string;
   readonly route: string;
   readonly icon: string;
   readonly gold?: boolean;
 }
 
 interface MenuSection {
-  readonly title: string;
+  /** i18n key for the section heading. */
+  readonly titleKey: string;
   readonly items: readonly MenuItem[];
 }
 
 const MENU_SECTIONS: readonly MenuSection[] = [
   {
-    title: 'Account',
+    titleKey: 'settings.sectionAccount',
     items: [
       // Group-segment-stripped — see the matching comment in the
       // Legal block below for the full rationale.
-      { label: 'Edit Profile', route: '/edit-profile', icon: '✦' },
-      { label: 'Change Password', route: '/change-password', icon: '🔒' },
-      { label: 'Language', route: '/language-settings', icon: '🌐' },
-      { label: 'Notifications', route: '/notifications', icon: '🔔' },
+      { labelKey: 'settings.menuEditProfile', route: '/edit-profile', icon: '✦' },
+      { labelKey: 'settings.menuChangePassword', route: '/change-password', icon: '🔒' },
+      { labelKey: 'settings.menuLanguage', route: '/language-settings', icon: '🌐' },
+      { labelKey: 'settings.menuNotifications', route: '/notifications', icon: '🔔' },
     ],
   },
   {
-    title: 'Subscription',
+    titleKey: 'settings.sectionSubscription',
     items: [
-      {
-        label: 'My Subscription',
-        route: '/subscription',
-        icon: '✦',
-        gold: true,
-      },
-      {
-        label: 'Upgrade Plan',
-        route: '/subscription/plans',
-        icon: '⬆',
-        gold: true,
-      },
+      { labelKey: 'settings.menuMySubscription', route: '/subscription', icon: '✦', gold: true },
+      { labelKey: 'settings.menuUpgradePlan', route: '/subscription/plans', icon: '⬆', gold: true },
       // Billing History entry removed: no app/(app)/billing-history.tsx
       // exists yet, so tapping previously 404'd. Restore once the
       // backend transaction-history endpoint + screen are ready.
     ],
   },
   {
-    title: 'Sacred Tools',
+    titleKey: 'settings.sectionSacredTools',
     items: [
-      { label: 'My Journeys', route: '/journey', icon: '🗺' },
-      { label: 'Karma Footprint', route: '/karma-footprint', icon: '☸' },
-      { label: 'KarmaLytix', route: '/karmalytix', icon: '📊' },
+      { labelKey: 'settings.menuMyJourneys', route: '/journey', icon: '🗺' },
+      { labelKey: 'settings.menuKarmaFootprint', route: '/karma-footprint', icon: '☸' },
+      { labelKey: 'settings.menuKarmalytix', route: '/karmalytix', icon: '📊' },
     ],
   },
   {
-    title: 'Support',
+    titleKey: 'settings.sectionSupport',
     items: [
       // Group-segment-stripped routes — `app/(app)/help.tsx` is
       // reachable as /help, not /(app)/help. See the matching comment
       // in the Legal block below for the full rationale.
-      { label: 'Help Center', route: '/help', icon: '❓' },
-      { label: 'Contact Us', route: '/contact', icon: '✉' },
-      { label: 'Rate the App', route: 'external:rate', icon: '⭐' },
+      { labelKey: 'settings.menuHelpCenter', route: '/help', icon: '❓' },
+      { labelKey: 'settings.menuContactUs', route: '/contact', icon: '✉' },
+      { labelKey: 'settings.menuRateApp', route: 'external:rate', icon: '⭐' },
     ],
   },
   {
-    title: 'Legal',
+    titleKey: 'settings.sectionLegal',
     items: [
       // Expo Router 3.5 strips group segments from URL paths — pushing
       // `/(app)/privacy` is treated as a literal path containing the
@@ -156,14 +149,15 @@ const MENU_SECTIONS: readonly MenuSection[] = [
       // production AABs. The actual file at app/(app)/privacy.tsx is
       // reachable as /privacy because the `(app)` group is purely
       // organisational.
-      { label: 'Privacy Policy', route: '/privacy', icon: '📄' },
-      { label: 'Terms of Service', route: '/terms', icon: '📄' },
-      { label: 'Data & Privacy', route: '/data-privacy', icon: '🛡' },
+      { labelKey: 'settings.menuPrivacyPolicy', route: '/privacy', icon: '📄' },
+      { labelKey: 'settings.menuTermsOfService', route: '/terms', icon: '📄' },
+      { labelKey: 'settings.menuDataPrivacy', route: '/data-privacy', icon: '🛡' },
     ],
   },
 ];
 
 export default function ProfileScreen(): React.JSX.Element {
+  const { t, locale } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
@@ -217,12 +211,12 @@ export default function ProfileScreen(): React.JSX.Element {
 
   const handleSignOut = useCallback(() => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out of Kiaanverse?',
+      t('settings.signOutConfirmTitle'),
+      t('settings.signOutConfirmMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sign Out',
+          text: t('settings.signOut'),
           style: 'destructive',
           onPress: async () => {
             setSigningOut(true);
@@ -230,15 +224,35 @@ export default function ProfileScreen(): React.JSX.Element {
             router.replace('/(auth)/login');
           },
         },
-      ]
+      ],
     );
-  }, [logout]);
+  }, [logout, t]);
+
+  // Localized member-since date — uses the active app locale (with a
+  // safe fallback to en-US when the active code isn't a valid Intl tag).
+  const memberSinceText = useMemo(() => {
+    if (!profile?.created_at) return null;
+    let intlLocale = 'en-US';
+    try {
+      // `Intl.DateTimeFormat.supportedLocalesOf` will throw on invalid
+      // tags; the catch keeps us on en-US in that case.
+      const supported = Intl.DateTimeFormat.supportedLocalesOf([locale]);
+      if (supported.length > 0) intlLocale = supported[0]!;
+    } catch {
+      // keep en-US
+    }
+    const date = new Date(profile.created_at).toLocaleDateString(intlLocale, {
+      month: 'long',
+      year: 'numeric',
+    });
+    return t('settings.memberSince', { date });
+  }, [profile?.created_at, locale, t]);
 
   if (loading) {
     return (
       <DivineScreenWrapper>
         <View style={styles.center}>
-          <OmLoader size={48} label="Loading your sacred profile…" />
+          <OmLoader size={48} label={t('settings.loadingProfile')} />
         </View>
       </DivineScreenWrapper>
     );
@@ -256,7 +270,7 @@ export default function ProfileScreen(): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
       >
         <ProfileHero
-          name={profile?.name ?? 'Sacred Seeker'}
+          name={profile?.name ?? t('settings.defaultUserName')}
           email={profile?.email ?? undefined}
           photoUrl={profile?.profile_photo_url ?? null}
           tier={tier}
@@ -272,37 +286,40 @@ export default function ProfileScreen(): React.JSX.Element {
         </View>
 
         {MENU_SECTIONS.map((section) => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+          <View key={section.titleKey} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t(section.titleKey)}</Text>
             <SacredCard
               style={styles.sectionCard}
               contentStyle={styles.sectionCardContent}
             >
-              {section.items.map((item, idx) => (
-                <React.Fragment key={item.route}>
-                  <TouchableOpacity
-                    style={styles.menuItem}
-                    onPress={() => handleMenuPress(item.route)}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityLabel={item.label}
-                  >
-                    <Text style={styles.menuIcon}>{item.icon}</Text>
-                    <Text
-                      style={[
-                        styles.menuLabel,
-                        item.gold ? styles.menuLabelGold : null,
-                      ]}
+              {section.items.map((item, idx) => {
+                const label = t(item.labelKey);
+                return (
+                  <React.Fragment key={item.route}>
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => handleMenuPress(item.route)}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={label}
                     >
-                      {item.label}
-                    </Text>
-                    <Text style={styles.menuChevron}>›</Text>
-                  </TouchableOpacity>
-                  {idx < section.items.length - 1 ? (
-                    <GoldenDivider style={styles.menuDivider} />
-                  ) : null}
-                </React.Fragment>
-              ))}
+                      <Text style={styles.menuIcon}>{item.icon}</Text>
+                      <Text
+                        style={[
+                          styles.menuLabel,
+                          item.gold ? styles.menuLabelGold : null,
+                        ]}
+                      >
+                        {label}
+                      </Text>
+                      <Text style={styles.menuChevron}>›</Text>
+                    </TouchableOpacity>
+                    {idx < section.items.length - 1 ? (
+                      <GoldenDivider style={styles.menuDivider} />
+                    ) : null}
+                  </React.Fragment>
+                );
+              })}
             </SacredCard>
           </View>
         ))}
@@ -312,21 +329,15 @@ export default function ProfileScreen(): React.JSX.Element {
           onPress={handleSignOut}
           disabled={signingOut}
           accessibilityRole="button"
-          accessibilityLabel="Sign out"
+          accessibilityLabel={t('settings.signOut')}
         >
           <Text style={styles.signOutText}>
-            {signingOut ? 'Signing out…' : 'Sign Out'}
+            {signingOut ? t('settings.signingOut') : t('settings.signOut')}
           </Text>
         </TouchableOpacity>
 
-        {profile?.created_at ? (
-          <Text style={styles.memberSince}>
-            Sacred seeker since{' '}
-            {new Date(profile.created_at).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </Text>
+        {memberSinceText ? (
+          <Text style={styles.memberSince}>{memberSinceText}</Text>
         ) : null}
       </ScrollView>
     </DivineScreenWrapper>

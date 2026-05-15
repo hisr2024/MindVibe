@@ -25,6 +25,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const GOLD_BRIGHT = '#E8B54A';
 const GOLD_DIM = 'rgba(232, 181, 74, 0.32)';
@@ -119,6 +120,7 @@ function SacredProgressFlamesInner({
   style,
   testID,
 }: SacredProgressFlamesProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const indices = Array.from({ length: total }, (_, i) => i);
 
   return (
@@ -126,7 +128,10 @@ function SacredProgressFlamesInner({
       style={[styles.row, style]}
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: total - 1, now: current }}
-      accessibilityLabel={`Step ${current + 1} of ${total}`}
+      accessibilityLabel={t('rcProgressStepA11y', {
+        n: String(current + 1),
+        total: String(total),
+      })}
       testID={testID}
     >
       {indices.map((i) => {

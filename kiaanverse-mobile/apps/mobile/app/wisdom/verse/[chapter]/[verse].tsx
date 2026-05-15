@@ -58,6 +58,7 @@ import {
   useGitaVerse,
 } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 import * as SecureStore from 'expo-secure-store';
 
 import {
@@ -92,8 +93,10 @@ const PURPLE_TEXT = '#C4B5FD';
 // ── Voice catalogue (mirrors GITA_STATS.voices on the web) ────────────────
 interface VoiceConfig {
   readonly id: string;
+  /** Sacred persona name — stays untranslated across every locale. */
   readonly name: string;
-  readonly description: string;
+  /** i18n key for the descriptive byline shown under the pill row. */
+  readonly descriptionKey: string;
   /** TTS rate. expo-speech accepts 0.0–2.0, contemplative pacing under 1. */
   readonly speed: number;
   /** Locale hint passed to expo-speech. Different locales pick different
@@ -113,7 +116,7 @@ const VOICES: readonly [VoiceConfig, ...VoiceConfig[]] = [
   {
     id: 'divine-krishna',
     name: 'Krishna',
-    description: 'The divine voice of the Paramatma',
+    descriptionKey: 'wisdom.voiceKrishnaDescription',
     speed: 0.8,
     language: 'en-IN',
     pitch: 0.95,
@@ -122,7 +125,7 @@ const VOICES: readonly [VoiceConfig, ...VoiceConfig[]] = [
   {
     id: 'divine-saraswati',
     name: 'Saraswati',
-    description: 'The goddess of knowledge and sacred speech',
+    descriptionKey: 'wisdom.voiceSaraswatiDescription',
     speed: 0.82,
     language: 'hi-IN',
     pitch: 1.15,
@@ -131,7 +134,7 @@ const VOICES: readonly [VoiceConfig, ...VoiceConfig[]] = [
   {
     id: 'sarvam-rishi',
     name: 'Rishi',
-    description: 'The ancient sage — masculine, grounded',
+    descriptionKey: 'wisdom.voiceRishiDescription',
     speed: 0.85,
     language: 'en-GB',
     pitch: 0.9,
@@ -140,7 +143,7 @@ const VOICES: readonly [VoiceConfig, ...VoiceConfig[]] = [
   {
     id: 'elevenlabs-nova',
     name: 'Nova',
-    description: 'Clear and conversational — for newcomers',
+    descriptionKey: 'wisdom.voiceNovaDescription',
     speed: 0.9,
     language: 'en-US',
     pitch: 1.05,
@@ -159,33 +162,41 @@ const DEFAULT_VOICE_ID = 'divine-krishna';
 // transliteration ("Jnana Karma Sannyas Yoga") for the header sub-row. We
 // embed the same table so the native screen renders identical text instead
 // of an ad-hoc derivation from the corpus name.
+//
+// Transliterations are the canonical Sanskrit chapter names and stay
+// fixed across every UI locale — they are the chapter identifiers in
+// IAST. The short "english" name routes through i18n so each locale
+// shows a translated header subtitle ("Knowledge & Renunciation" in
+// English, "Wissen & Entsagung" in German, etc.).
 interface ChapterMeta {
   readonly transliteration: string;
-  readonly english: string;
+  /** i18n key for the localized short title (en/wisdom.json). */
+  readonly englishKey: string;
 }
 
 const CHAPTER_META: Record<number, ChapterMeta> = {
-  1: { transliteration: 'Arjuna Vishada Yoga', english: "Arjuna's Dejection" },
-  2: { transliteration: 'Sankhya Yoga', english: '' },
-  3: { transliteration: 'Karma Yoga', english: 'Path of Action' },
-  4: { transliteration: 'Jnana Karma Sannyas Yoga', english: '' },
-  5: { transliteration: 'Karma Sannyas Yoga', english: '' },
-  6: { transliteration: 'Atma Samyama Yoga', english: '' },
-  7: { transliteration: 'Jnana Vijnana Yoga', english: '' },
-  8: { transliteration: 'Aksara Brahma Yoga', english: 'Attaining the Supreme' },
-  9: { transliteration: 'Raja Vidya Raja Guhya Yoga', english: 'The Royal Knowledge' },
-  10: { transliteration: 'Vibhuti Yoga', english: 'Divine Manifestations' },
-  11: { transliteration: 'Vishwarupa Darsana Yoga', english: 'The Universal Form' },
-  12: { transliteration: 'Bhakti Yoga', english: 'Path of Devotion' },
-  13: { transliteration: 'Kshetra Yoga', english: '' },
-  14: { transliteration: 'Guna Traya Yoga', english: '' },
-  15: { transliteration: 'Purushottama Yoga', english: 'The Supreme Person' },
-  16: { transliteration: 'Daivasura Yoga', english: '' },
-  17: { transliteration: 'Shraddha Traya Yoga', english: 'Three Types of Faith' },
-  18: { transliteration: 'Moksha Sannyas Yoga', english: '' },
+  1: { transliteration: 'Arjuna Vishada Yoga', englishKey: 'wisdom.chapter1English' },
+  2: { transliteration: 'Sankhya Yoga', englishKey: 'wisdom.chapter2English' },
+  3: { transliteration: 'Karma Yoga', englishKey: 'wisdom.chapter3English' },
+  4: { transliteration: 'Jnana Karma Sannyas Yoga', englishKey: 'wisdom.chapter4English' },
+  5: { transliteration: 'Karma Sannyas Yoga', englishKey: 'wisdom.chapter5English' },
+  6: { transliteration: 'Atma Samyama Yoga', englishKey: 'wisdom.chapter6English' },
+  7: { transliteration: 'Jnana Vijnana Yoga', englishKey: 'wisdom.chapter7English' },
+  8: { transliteration: 'Aksara Brahma Yoga', englishKey: 'wisdom.chapter8English' },
+  9: { transliteration: 'Raja Vidya Raja Guhya Yoga', englishKey: 'wisdom.chapter9English' },
+  10: { transliteration: 'Vibhuti Yoga', englishKey: 'wisdom.chapter10English' },
+  11: { transliteration: 'Vishwarupa Darsana Yoga', englishKey: 'wisdom.chapter11English' },
+  12: { transliteration: 'Bhakti Yoga', englishKey: 'wisdom.chapter12English' },
+  13: { transliteration: 'Kshetra Yoga', englishKey: 'wisdom.chapter13English' },
+  14: { transliteration: 'Guna Traya Yoga', englishKey: 'wisdom.chapter14English' },
+  15: { transliteration: 'Purushottama Yoga', englishKey: 'wisdom.chapter15English' },
+  16: { transliteration: 'Daivasura Yoga', englishKey: 'wisdom.chapter16English' },
+  17: { transliteration: 'Shraddha Traya Yoga', englishKey: 'wisdom.chapter17English' },
+  18: { transliteration: 'Moksha Sannyas Yoga', englishKey: 'wisdom.chapter18English' },
 };
 
 export default function ReadMoreVerseScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { chapter, verse } = useLocalSearchParams<{
@@ -313,10 +324,10 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
   // back to the bundled corpus name only if a chapter index is somehow
   // missing from the table (shouldn't happen — all 18 are present).
   const curatedMeta = CHAPTER_META[chapterNum];
-  const chapterEnglish =
-    curatedMeta?.english ??
-    chapterMeta?.nameEnglish?.replace(/^The Yoga of\s+/i, '') ??
-    `Chapter ${chapterNum}`;
+  const chapterEnglish = curatedMeta
+    ? t(curatedMeta.englishKey)
+    : chapterMeta?.nameEnglish?.replace(/^The Yoga of\s+/i, '') ??
+      `${t('wisdom.verseHeaderInvalid')} ${chapterNum}`;
   const chapterUpperLatin = useMemo(
     () => (curatedMeta?.transliteration ?? '').toUpperCase(),
     [curatedMeta],
@@ -356,15 +367,19 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
       () => undefined,
     );
+    const ref = t('wisdom.verseRefBgFormat', {
+      chapter: String(chapterNum),
+      verse: String(verseNum),
+    });
     const message = [
-      `Bhagavad Gita ${chapterNum}.${verseNum}`,
+      ref,
       '',
       sanskrit,
       transliteration,
       '',
       translation,
       '',
-      '— Shared from Kiaanverse',
+      t('wisdom.shareFooter'),
     ]
       .filter((line) => line !== undefined)
       .join('\n');
@@ -380,6 +395,7 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
     chapterNum,
     paramsValid,
     sanskrit,
+    t,
     transliteration,
     translation,
     verseNum,
@@ -416,17 +432,16 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
     return (
       <DivineScreenWrapper>
         <Header
-          title="Verse"
+          title={t('wisdom.verseHeaderInvalid')}
           insetTop={insets.top}
           onBack={() => router.back()}
           onBell={() => router.push('/(app)/notifications' as never)}
+          backA11y={t('wisdom.goBackA11y')}
+          bellA11y={t('wisdom.openNotificationsA11y')}
         />
         <View style={styles.stateBox}>
-          <Text style={styles.stateTitle}>Verse reference is invalid</Text>
-          <Text style={styles.stateBody}>
-            A valid verse looks like 4.38. Return to Wisdom and tap a verse to
-            open it.
-          </Text>
+          <Text style={styles.stateTitle}>{t('wisdom.verseInvalidTitle')}</Text>
+          <Text style={styles.stateBody}>{t('wisdom.verseInvalidBody')}</Text>
         </View>
       </DivineScreenWrapper>
     );
@@ -441,9 +456,11 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
           insetTop={insets.top}
           onBack={() => router.back()}
           onBell={() => router.push('/(app)/notifications' as never)}
+          backA11y={t('wisdom.goBackA11y')}
+          bellA11y={t('wisdom.openNotificationsA11y')}
         />
         <View style={styles.stateBox}>
-          <OmLoader size={64} label="Unveiling the verse…" />
+          <OmLoader size={64} label={t('wisdom.verseLoaderLabel')} />
         </View>
       </DivineScreenWrapper>
     );
@@ -457,6 +474,8 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
         insetTop={insets.top}
         onBack={() => router.back()}
         onBell={() => router.push('/(app)/notifications' as never)}
+        backA11y={t('wisdom.goBackA11y')}
+        bellA11y={t('wisdom.openNotificationsA11y')}
       />
 
       <ScrollView
@@ -481,12 +500,12 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
           <View style={styles.navArrows}>
             <NavArrow
               onPress={() => goToVerse(-1)}
-              accessibilityLabel="Previous verse"
+              accessibilityLabel={t('wisdom.previousVerseA11y')}
               icon={<ChevronLeft size={18} color={GOLD} />}
             />
             <NavArrow
               onPress={() => goToVerse(1)}
-              accessibilityLabel="Next verse"
+              accessibilityLabel={t('wisdom.nextVerseA11y')}
               icon={<ChevronRight size={18} color={GOLD} />}
             />
           </View>
@@ -535,7 +554,7 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
           entering={FadeIn.delay(280).duration(360)}
           style={styles.voiceSection}
         >
-          <Text style={styles.voiceLabel}>LISTENING VOICE</Text>
+          <Text style={styles.voiceLabel}>{t('wisdom.listeningVoiceLabel')}</Text>
 
           <ScrollView
             horizontal
@@ -558,7 +577,7 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
                       : null,
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`${voice.name} voice`}
+                  accessibilityLabel={t('wisdom.voiceNameA11y', { name: voice.name })}
                   accessibilityState={{ selected }}
                 >
                   <Text
@@ -576,9 +595,12 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
             })}
           </ScrollView>
 
-          <Text style={styles.voiceDescription}>{selectedVoice.description}</Text>
+          <Text style={styles.voiceDescription}>{t(selectedVoice.descriptionKey)}</Text>
           <Text style={styles.voiceNote}>
-            {`${selectedVoice.name}'s voice is set to ${selectedVoice.speed.toFixed(2).replace(/0$/, '')}× for sacred reverence`}
+            {t('wisdom.voicePaceNote', {
+              name: selectedVoice.name,
+              rate: selectedVoice.speed.toFixed(2).replace(/0$/, ''),
+            })}
           </Text>
         </Animated.View>
 
@@ -594,7 +616,9 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
               pressed && { opacity: 0.85 },
             ]}
             accessibilityRole="button"
-            accessibilityLabel={isSpeaking ? 'Stop listening' : 'Listen'}
+            accessibilityLabel={
+              isSpeaking ? t('wisdom.stopListeningA11y') : t('wisdom.listenA11y')
+            }
           >
             <LinearGradient
               colors={['rgba(140,103,225,0.30)', 'rgba(108,79,178,0.20)']}
@@ -608,7 +632,7 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
               <Play size={18} color={PURPLE_TEXT} fill={PURPLE_TEXT} />
             )}
             <Text style={styles.listenText}>
-              {isSpeaking ? 'Stop' : 'Listen'}
+              {isSpeaking ? t('wisdom.stopButton') : t('wisdom.listenButton')}
             </Text>
           </Pressable>
 
@@ -624,7 +648,9 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
             ]}
             accessibilityRole="button"
             accessibilityLabel={
-              isBookmarked ? 'Remove bookmark' : 'Bookmark verse'
+              isBookmarked
+                ? t('wisdom.removeBookmarkA11y')
+                : t('wisdom.bookmarkVerseA11y')
             }
             accessibilityState={{ selected: isBookmarked }}
           >
@@ -642,7 +668,7 @@ export default function ReadMoreVerseScreen(): React.JSX.Element {
               pressed && { opacity: 0.8 },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Share verse"
+            accessibilityLabel={t('wisdom.shareVerseA11y')}
           >
             <Share2 size={20} color={TEXT_SECONDARY} />
           </Pressable>
@@ -660,6 +686,8 @@ interface HeaderProps {
   readonly insetTop: number;
   readonly onBack: () => void;
   readonly onBell: () => void;
+  readonly backA11y: string;
+  readonly bellA11y: string;
 }
 
 function Header({
@@ -668,13 +696,15 @@ function Header({
   insetTop,
   onBack,
   onBell,
+  backA11y,
+  bellA11y,
 }: HeaderProps): React.JSX.Element {
   return (
     <View style={[styles.header, { paddingTop: insetTop + 8 }]}>
       <Pressable
         onPress={onBack}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={backA11y}
         hitSlop={12}
         style={styles.headerBtn}
       >
@@ -695,7 +725,7 @@ function Header({
       <Pressable
         onPress={onBell}
         accessibilityRole="button"
-        accessibilityLabel="Open notifications"
+        accessibilityLabel={bellA11y}
         hitSlop={12}
         style={styles.headerBtn}
       >

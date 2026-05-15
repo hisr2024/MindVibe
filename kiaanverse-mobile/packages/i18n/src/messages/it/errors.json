@@ -1,0 +1,7 @@
+{
+  "network": "Errore di rete. Controlla la connessione.",
+  "server": "Errore del server. Riprova più tardi.",
+  "notFound": "Non trovato",
+  "unauthorized": "Accedi per continuare",
+  "timeout": "Tempo di richiesta scaduto. Riprova."
+}

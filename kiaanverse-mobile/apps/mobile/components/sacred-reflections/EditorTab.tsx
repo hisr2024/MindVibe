@@ -31,12 +31,15 @@ import {
   useVoiceRecorder,
 } from '@kiaanverse/ui';
 import { api, useCreateJournal } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
-  COPY,
+  COPY_KEYS,
   MAX_USER_TAGS,
+  MOOD_LABEL_KEYS,
   MOODS,
   SACRED_TAGS,
+  TAG_LABEL_KEYS,
   type MoodId,
   type SacredTag,
 } from './constants';
@@ -89,6 +92,7 @@ async function transcribeAudio(
 }
 
 export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
+  const { t } = useTranslation('sacred-reflections');
   const createJournal = useCreateJournal();
   const [mood, setMood] = useState<MoodId | null>(null);
   const [title, setTitle] = useState('');
@@ -124,7 +128,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
   const voiceLabel =
     voice.prefill?.prefill_text?.slice(0, 40) ??
     voice.prefill?.verse_ref ??
-    'today\'s reflection';
+    t('editorVoiceFallbackLabel');
 
   const {
     startRecording,
@@ -166,13 +170,13 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           Haptics.NotificationFeedbackType.Success
         );
       } else if (voiceError) {
-        Alert.alert('Voice unavailable', voiceError);
+        Alert.alert(t('editorVoiceUnavailableTitle'), voiceError);
       }
       return;
     }
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await startRecording();
-  }, [isRecording, voiceStatus, voiceError, startRecording, stopRecording]);
+  }, [isRecording, voiceStatus, voiceError, startRecording, stopRecording, t]);
 
   // Cancel any in-flight recording if the component unmounts mid-flow —
   // the hook itself already unloads on unmount, this is just belt-and-braces.
@@ -184,14 +188,11 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
 
   const handleOffer = useCallback(async () => {
     if (!mood) {
-      Alert.alert('How do you feel?', 'Please select your current mood first.');
+      Alert.alert(t('editorAlertMoodTitle'), t('editorAlertMoodBody'));
       return;
     }
     if (body.trim().length === 0) {
-      Alert.alert(
-        'Sacred space awaits',
-        'Let the words come. Write your reflection before offering it.'
-      );
+      Alert.alert(t('editorAlertBodyTitle'), t('editorAlertBodyBody'));
       return;
     }
 
@@ -226,14 +227,14 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
       onSaved();
     } catch (err) {
       Alert.alert(
-        'Could not offer reflection',
-        err instanceof Error ? err.message : 'Please try again in a moment.'
+        t('editorAlertSaveErrorTitle'),
+        err instanceof Error ? err.message : t('editorAlertSaveErrorFallback')
       );
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsSaving(false);
     }
-  }, [mood, title, body, selectedTags, createJournal, onSaved]);
+  }, [mood, title, body, selectedTags, createJournal, onSaved, t]);
 
   const wordCount =
     body.trim().length === 0 ? 0 : body.trim().split(/\s+/).length;
@@ -258,7 +259,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           color={colors.primary[500]}
           style={styles.sectionLabel}
         >
-          {COPY.moodPrompt}
+          {t(COPY_KEYS.moodPrompt)}
         </Text>
         <ScrollView
           horizontal
@@ -267,6 +268,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         >
           {MOODS.map((m) => {
             const isActive = mood === m.id;
+            const localizedLabel = t(MOOD_LABEL_KEYS[m.id]);
             return (
               <Pressable
                 key={m.id}
@@ -280,7 +282,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
                 ]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isActive }}
-                accessibilityLabel={`Mood ${m.label}`}
+                accessibilityLabel={t('editorMoodA11yFmt', { label: localizedLabel })}
               >
                 <Text style={styles.moodEmoji}>{m.emoji}</Text>
                 <Text
@@ -295,7 +297,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
                   color={isActive ? colors.text.primary : colors.text.secondary}
                   style={styles.moodLabel}
                 >
-                  {m.label}
+                  {localizedLabel}
                 </Text>
               </Pressable>
             );
@@ -306,7 +308,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
         <ShankhaVoiceInput
           value={title}
           onChangeText={setTitle}
-          placeholder={COPY.titlePlaceholder}
+          placeholder={t(COPY_KEYS.titlePlaceholder)}
           style={styles.titleInput}
           maxLength={120}
           returnKeyType="next"
@@ -319,7 +321,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           <ShankhaVoiceInput
             value={body}
             onChangeText={setBody}
-            placeholder={COPY.bodyPlaceholder}
+            placeholder={t(COPY_KEYS.bodyPlaceholder)}
             style={styles.bodyInput}
             multiline
             maxLength={10_000}
@@ -338,10 +340,10 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
             accessibilityRole="button"
             accessibilityLabel={
               isRecording
-                ? 'Stop recording and transcribe'
+                ? t('editorVoiceStopA11y')
                 : voiceStatus === 'transcribing'
-                  ? 'Transcribing your reflection'
-                  : 'Start voice dictation'
+                  ? t('editorVoiceTranscribingA11y')
+                  : t('editorVoiceStartA11y')
             }
             accessibilityState={{ busy: voiceStatus === 'transcribing' }}
             disabled={voiceStatus === 'transcribing'}
@@ -359,12 +361,12 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           style={styles.wordCount}
         >
           {isRecording
-            ? `\u{1F534} Recording · ${durationSeconds}s — tap ■ to stop`
+            ? t('editorWordRecordingFmt', { seconds: durationSeconds })
             : voiceStatus === 'transcribing'
-              ? '\u{1F4AC} Transcribing your words…'
+              ? t('editorWordTranscribing')
               : wordCount === 0
-                ? 'Begin writing...'
-                : `✨ ${wordCount} word${wordCount === 1 ? '' : 's'} offered`}
+                ? t('editorWordBegin')
+                : t('editorWordCountFmt', { count: wordCount })}
         </Text>
 
         {/* ---- Tag chips ---- */}
@@ -385,7 +387,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
                     isActive ? colors.background.dark : colors.text.secondary
                   }
                 >
-                  #{tag}
+                  #{t(TAG_LABEL_KEYS[tag])}
                 </Text>
               </Pressable>
             );
@@ -403,13 +405,13 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
             color={colors.text.secondary}
             style={styles.encryptionText}
           >
-            {COPY.encryptionNotice}
+            {t(COPY_KEYS.encryptionNotice)}
           </Text>
         </Animated.View>
 
         {/* ---- CTA ---- */}
         <GoldenButton
-          title={isSaving ? 'Offering...' : COPY.ctaOffer}
+          title={isSaving ? t('editorOfferingButton') : t(COPY_KEYS.ctaOffer)}
           onPress={handleOffer}
           disabled={isSaving}
           style={styles.cta}

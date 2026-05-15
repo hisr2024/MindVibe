@@ -40,6 +40,7 @@ import {
 } from '@kiaanverse/ui';
 import { api } from '@kiaanverse/api';
 import { useAuthStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const TEXT_PRIMARY = '#F0EBE1';
 const TEXT_MUTED = 'rgba(240,235,225,0.5)';
@@ -60,6 +61,7 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 }
 
 export default function EditProfileScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
@@ -72,7 +74,10 @@ export default function EditProfileScreen(): React.JSX.Element {
 
   const handleSave = useCallback(async () => {
     if (trimmed.length === 0) {
-      Alert.alert('Name required', 'Your sacred name cannot be empty.');
+      Alert.alert(
+        t('settings.nameRequiredTitle'),
+        t('settings.nameRequiredMessage'),
+      );
       return;
     }
 
@@ -115,19 +120,19 @@ export default function EditProfileScreen(): React.JSX.Element {
       }
 
       Alert.alert(
-        'Profile updated',
-        'Your sacred identity has been updated. 🙏',
-        [{ text: 'OK', onPress: () => router.back() }]
+        t('settings.profileUpdatedTitle'),
+        t('settings.profileUpdatedMessage'),
+        [{ text: t('common.ok'), onPress: () => router.back() }],
       );
     } catch (err) {
       Alert.alert(
-        'Could not update profile',
-        extractErrorMessage(err, 'Please try again in a moment.')
+        t('settings.couldNotUpdateProfileTitle'),
+        extractErrorMessage(err, t('settings.genericRetry')),
       );
     } finally {
       setLoading(false);
     }
-  }, [trimmed, user, setUser, router]);
+  }, [trimmed, user, setUser, router, t]);
 
   return (
     <DivineScreenWrapper>
@@ -144,21 +149,21 @@ export default function EditProfileScreen(): React.JSX.Element {
             onPress={() => router.back()}
             style={styles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('settings.back')}
             hitSlop={12}
           >
-            <Text style={styles.backText}>{'‹ Back'}</Text>
+            <Text style={styles.backText}>{`‹ ${t('settings.back')}`}</Text>
           </Pressable>
 
-          <Text style={styles.title}>Edit Profile</Text>
+          <Text style={styles.title}>{t('settings.editProfileTitle')}</Text>
 
           <GoldenDivider style={styles.divider} />
 
-          <Text style={styles.label}>Display name</Text>
+          <Text style={styles.label}>{t('settings.displayNameLabel')}</Text>
           <SacredInput
             value={name}
             onChangeText={setName}
-            placeholder="Your sacred name"
+            placeholder={t('settings.displayNamePlaceholder')}
             autoFocus
             autoCapitalize="words"
             autoComplete="name"
@@ -167,23 +172,24 @@ export default function EditProfileScreen(): React.JSX.Element {
             returnKeyType="done"
             onSubmitEditing={handleSave}
           />
-          <Text style={styles.note}>
-            This name appears on your profile and in KIAAN greetings.
-          </Text>
+          <Text style={styles.note}>{t('settings.displayNameNote')}</Text>
 
           {user?.email ? (
             <>
-              <Text style={[styles.label, styles.labelSpaced]}>Email</Text>
-              <Text style={styles.readOnly}>{user.email}</Text>
-              <Text style={styles.note}>
-                Email changes are not yet supported. Contact support to update
-                it.
+              <Text style={[styles.label, styles.labelSpaced]}>
+                {t('settings.emailLabel')}
               </Text>
+              <Text style={styles.readOnly}>{user.email}</Text>
+              <Text style={styles.note}>{t('settings.emailChangeNote')}</Text>
             </>
           ) : null}
 
           <GoldenButton
-            title={loading ? 'Saving…' : 'Save Changes'}
+            title={
+              loading
+                ? t('settings.savingButton')
+                : t('settings.saveChangesButton')
+            }
             onPress={handleSave}
             loading={loading}
             disabled={loading || !hasChanges}

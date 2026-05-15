@@ -12,7 +12,7 @@
  * email address before they can log in (backend returns 403 on unverified).
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -34,32 +34,12 @@ import { useTranslation } from '@kiaanverse/i18n';
 
 const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
-// ---------------------------------------------------------------------------
-// Validation Schema
-// ---------------------------------------------------------------------------
-
-const registerSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, 'Name is required')
-      .min(2, 'Name must be at least 2 characters'),
-    email: z
-      .string()
-      .min(1, 'Email is required')
-      .email('Enter a valid email address'),
-    password: z
-      .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -82,6 +62,33 @@ export default function RegisterScreen(): React.JSX.Element {
   const [resending, setResending] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
+
+  const registerSchema = useMemo(
+    () =>
+      z
+        .object({
+          name: z
+            .string()
+            .min(1, t('validationNameRequired'))
+            .min(2, t('validationNameMin2')),
+          email: z
+            .string()
+            .min(1, t('validationEmailRequired'))
+            .email(t('validationEmailInvalid')),
+          password: z
+            .string()
+            .min(1, t('validationPasswordRequired'))
+            .min(8, t('validationPasswordMin8')),
+          confirmPassword: z
+            .string()
+            .min(1, t('validationConfirmPasswordRequired')),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t('validationPasswordsDoNotMatch'),
+          path: ['confirmPassword'],
+        }),
+    [t],
+  );
 
   const {
     control,
@@ -113,7 +120,7 @@ export default function RegisterScreen(): React.JSX.Element {
         <View style={styles.loadingContainer}>
           <LoadingMandala size={160} />
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Creating your account...
+            {t('registerCreatingAccount')}
           </Text>
         </View>
       </Screen>
@@ -124,7 +131,7 @@ export default function RegisterScreen(): React.JSX.Element {
   const handleResend = useCallback(async () => {
     if (!signupEmail) {
       setResendError(
-        `We do not have your email on file. Try signing up again or email ${SUPPORT_EMAIL}.`,
+        t('registerEmailNotOnFile', { supportEmail: SUPPORT_EMAIL }),
       );
       return;
     }
@@ -136,15 +143,17 @@ export default function RegisterScreen(): React.JSX.Element {
     } catch (err) {
       setResendError(
         (err as { message?: string })?.message ??
-          `Could not send a fresh email right now. Please email ${SUPPORT_EMAIL}.`,
+          t('registerCouldNotSendNow', { supportEmail: SUPPORT_EMAIL }),
       );
     } finally {
       setResending(false);
     }
-  }, [signupEmail]);
+  }, [signupEmail, t]);
 
   // After successful signup — show one of two outcome screens.
   if (signupPendingVerification) {
+    const emailDisplay = signupEmail ?? t('registerYourEmailFallback');
+
     // Branch A: backend confirmed the email actually shipped. Original
     // happy-path copy.
     if (signupVerificationSent) {
@@ -152,15 +161,13 @@ export default function RegisterScreen(): React.JSX.Element {
         <Screen>
           <View style={styles.verificationContainer}>
             <Text variant="h2" align="center">
-              Check your email
+              {t('registerCheckYourEmail')}
             </Text>
             <Text variant="body" color={colors.text.muted} align="center">
-              We sent a verification link to{' '}
-              <Text color={colors.primary[500]}>{signupEmail ?? 'your email'}</Text>
-              . Please verify your email before signing in.
+              {t('registerVerificationSentTo', { email: emailDisplay })}
             </Text>
             <GoldenButton
-              title="Go to Sign In"
+              title={t('registerGoToSignIn')}
               onPress={handleGoToLogin}
               testID="go-to-login-button"
             />
@@ -178,21 +185,18 @@ export default function RegisterScreen(): React.JSX.Element {
       <Screen>
         <View style={styles.verificationContainer}>
           <Text variant="h2" align="center" color={colors.semantic.error}>
-            Account created, but…
+            {t('registerAccountCreatedButTitle')}
           </Text>
           <Text variant="body" color={colors.text.muted} align="center">
-            Your account was created, but we could not send the verification
-            email to{' '}
-            <Text color={colors.primary[500]}>{signupEmail ?? 'your email'}</Text>
-            .{'\n\n'}
-            Tap below to try sending the link again. If it still does not
-            arrive, please contact{' '}
-            <Text color={colors.primary[500]}>{SUPPORT_EMAIL}</Text>.
+            {t('registerAccountCreatedButBody', {
+              email: emailDisplay,
+              supportEmail: SUPPORT_EMAIL,
+            })}
           </Text>
 
           {resendSent ? (
             <Text variant="body" color={colors.primary[500]} align="center">
-              ✓ A fresh verification email is on its way.
+              {t('registerFreshEmailOnTheWay')}
             </Text>
           ) : null}
           {resendError ? (
@@ -202,13 +206,17 @@ export default function RegisterScreen(): React.JSX.Element {
           ) : null}
 
           <GoldenButton
-            title={resending ? 'Sending…' : 'Resend verification email'}
+            title={
+              resending
+                ? t('registerSending')
+                : t('registerResendVerificationEmail')
+            }
             onPress={handleResend}
             disabled={resending}
             testID="resend-verification-button"
           />
           <GoldenButton
-            title="Go to Sign In"
+            title={t('registerGoToSignIn')}
             variant="secondary"
             onPress={handleGoToLogin}
             testID="go-to-login-button"
@@ -226,10 +234,10 @@ export default function RegisterScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text variant="h1" align="center">
-            Create Account
+            {t('registerHeaderTitle')}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Begin your spiritual journey
+            {t('registerHeaderSubtitle')}
           </Text>
         </View>
 
@@ -240,7 +248,7 @@ export default function RegisterScreen(): React.JSX.Element {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label={t('name')}
-                placeholder="Your full name"
+                placeholder={t('registerNamePlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -258,7 +266,7 @@ export default function RegisterScreen(): React.JSX.Element {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label={t('email')}
-                placeholder="you@example.com"
+                placeholder={t('registerEmailPlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -277,7 +285,7 @@ export default function RegisterScreen(): React.JSX.Element {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label={t('password')}
-                placeholder="At least 8 characters"
+                placeholder={t('registerPasswordPlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -294,8 +302,8 @@ export default function RegisterScreen(): React.JSX.Element {
             name="confirmPassword"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                label="Confirm Password"
-                placeholder="Re-enter your password"
+                label={t('registerConfirmPasswordLabel')}
+                placeholder={t('registerConfirmPasswordPlaceholder')}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}

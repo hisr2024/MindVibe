@@ -9,13 +9,14 @@ import React, { useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const PURPOSES = [
-  { id: 'peace', label: 'Peace', icon: '🕊️' },
-  { id: 'wisdom', label: 'Wisdom', icon: '📖' },
-  { id: 'guidance', label: 'Guidance', icon: '🧭' },
-  { id: 'healing', label: 'Healing', icon: '💛' },
-  { id: 'purpose', label: 'Purpose', icon: '⭐' },
+  { id: 'peace', labelKey: 'onboarding.purposePeace', icon: '🕊️' },
+  { id: 'wisdom', labelKey: 'onboarding.purposeWisdom', icon: '📖' },
+  { id: 'guidance', labelKey: 'onboarding.purposeGuidance', icon: '🧭' },
+  { id: 'healing', labelKey: 'onboarding.purposeHealing', icon: '💛' },
+  { id: 'purpose', labelKey: 'onboarding.purposePurpose', icon: '⭐' },
 ] as const;
 
 interface PurposeStepProps {
@@ -31,6 +32,7 @@ export function PurposeStep({
   onNext,
   onSkip,
 }: PurposeStepProps): React.JSX.Element {
+  const { t } = useTranslation();
   const handleToggle = useCallback(
     (id: string) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -43,16 +45,17 @@ export function PurposeStep({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text variant="h1" align="center">
-          What Brings You Here?
+          {t('onboarding.purposeTitle')}
         </Text>
         <Text variant="bodySmall" color={colors.text.muted} align="center">
-          Select all that resonate with you
+          {t('onboarding.purposeSubtitle')}
         </Text>
       </View>
 
       <View style={styles.grid}>
         {PURPOSES.map((item) => {
           const isSelected = selected.includes(item.id);
+          const label = t(item.labelKey);
           return (
             <Pressable
               key={item.id}
@@ -60,7 +63,7 @@ export function PurposeStep({
               style={[styles.chip, isSelected && styles.chipSelected]}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: isSelected }}
-              accessibilityLabel={item.label}
+              accessibilityLabel={label}
             >
               <Text variant="h3" align="center">
                 {item.icon}
@@ -70,7 +73,7 @@ export function PurposeStep({
                 align="center"
                 color={isSelected ? colors.primary[300] : colors.text.secondary}
               >
-                {item.label}
+                {label}
               </Text>
             </Pressable>
           );
@@ -79,13 +82,13 @@ export function PurposeStep({
 
       <View style={styles.actions}>
         <GoldenButton
-          title="Continue"
+          title={t('onboarding.continueButton')}
           onPress={onNext}
           disabled={selected.length === 0}
           testID="purpose-next"
         />
         <GoldenButton
-          title="Skip"
+          title={t('common.skip')}
           variant="ghost"
           onPress={onSkip}
           testID="purpose-skip"

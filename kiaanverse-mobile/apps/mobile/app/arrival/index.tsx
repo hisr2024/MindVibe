@@ -47,6 +47,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { DivineBackground, type Palette, useTheme } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 import { useArrivalStatus } from '../../hooks/useArrivalStatus';
 import {
   ChariotChakraVisual,
@@ -92,68 +93,78 @@ interface PageData {
 /** Page narrative is fixed; only the per-page accent color changes per palette.
  *  Each page maps to one slot of the active palette so the six screens flow
  *  through the palette's full range (primary → warm → cool → deep → life →
- *  divine), giving each scheme a coherent journey. */
+ *  divine), giving each scheme a coherent journey.
+ *
+ *  `titleKey` / `subtitleKey` resolve at render via `t()` from the `arrival`
+ *  namespace. `skt` stays literal Devanagari across all locales (brand-fixed
+ *  Sanskrit invocations). */
 const PAGE_TEMPLATES: ReadonlyArray<
-  Omit<PageData, 'accent'> & { readonly accentSlot: keyof Palette['accent'] }
+  Omit<PageData, 'accent' | 'title' | 'subtitle'> & {
+    readonly titleKey: string;
+    readonly subtitleKey: string;
+    readonly accentSlot: keyof Palette['accent'];
+  }
 > = [
   {
     id: 'arjuna',
-    title: '"In the middle of the battlefield,\nArjuna fell silent."',
-    subtitle: 'There is a question in you\nthat no human can answer.',
+    titleKey: 'page1Title',
+    subtitleKey: 'page1Subtitle',
     skt: 'तमुवाच हृषीकेशः',
     visual: 'chariot',
     accentSlot: 'primary',
   },
   {
     id: 'sakha',
-    title: 'Sakha means Friend.',
-    subtitle: 'Your divine friend is here.\nReady to listen. Ready to guide.',
+    titleKey: 'page2Title',
+    subtitleKey: 'page2Subtitle',
     skt: 'सखा प्रिय',
     visual: 'mandala',
     accentSlot: 'warm',
   },
   {
     id: 'gita',
-    title: 'The Bhagavad Gita is not a text.\nIt is a conversation.',
-    subtitle: 'Ask what you have always\nbeen afraid to ask.',
+    titleKey: 'page3Title',
+    subtitleKey: 'page3Subtitle',
     skt: 'श्रीमद्भगवद्गीता',
     visual: 'akshara',
     accentSlot: 'cool',
   },
   {
     id: 'journey',
-    title: 'Your inner enemies are known.\nYour dharma is waiting.',
-    subtitle: '6 Shadripu. 13 sacred journeys.\nOne path.',
+    titleKey: 'page4Title',
+    subtitleKey: 'page4Subtitle',
     skt: 'षड्रिपु विजय',
     visual: 'shadripu',
     accentSlot: 'deep',
   },
   {
     id: 'sacred',
-    title: 'This is your sacred space.',
-    subtitle:
-      'Encrypted. Private. Yours alone.\nKiaanverse never reads your journal.',
+    titleKey: 'page5Title',
+    subtitleKey: 'page5Subtitle',
     skt: 'पवित्र क्षेत्र',
     visual: 'lock',
     accentSlot: 'life',
   },
   {
     id: 'welcome',
-    title: 'Welcome, Dear Friend',
-    subtitle: 'KIAAN — YOUR DIVINE FRIEND',
+    titleKey: 'page6Title',
+    subtitleKey: 'page6Subtitle',
     skt: 'ॐ सर्वे भवन्तु सुखिनः',
     visual: 'welcome',
     accentSlot: 'divine',
   },
 ] as const;
 
-/** Resolve the six pages with concrete accents drawn from the active palette.
- *  Memoised by the caller so we don't rebuild on every render. */
-function buildPages(palette: Palette): readonly PageData[] {
+/** Resolve the six pages with concrete accents drawn from the active palette,
+ *  plus locale-resolved title + subtitle from the `arrival` namespace. */
+function buildPages(
+  palette: Palette,
+  t: (key: string) => string
+): readonly PageData[] {
   return PAGE_TEMPLATES.map((p) => ({
     id: p.id,
-    title: p.title,
-    subtitle: p.subtitle,
+    title: t(p.titleKey),
+    subtitle: t(p.subtitleKey),
     skt: p.skt,
     visual: p.visual,
     accent: palette.accent[p.accentSlot],
@@ -172,6 +183,7 @@ const GOLD_SOFT = 'rgba(212, 164, 76, 0.7)';
 // ---------------------------------------------------------------------------
 
 export default function ArrivalCeremonyScreen(): React.JSX.Element {
+  const { t } = useTranslation('arrival');
   const [page, setPage] = useState(0);
   // Native FlatList paging — replaces the previous `Animated.View` +
   // `withTiming(-page * W)` approach. Math.round + withTiming were both
@@ -190,7 +202,7 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
   // `pages` and the inline styles below are derived from `palette`.
   const { theme } = useTheme();
   const palette = theme.colorScheme;
-  const pages = useMemo(() => buildPages(palette), [palette]);
+  const pages = useMemo(() => buildPages(palette, t), [palette, t]);
 
   const sheet = usePaletteSheet();
 
@@ -347,7 +359,7 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel={
-              isWelcome ? 'Enter the sacred space' : 'Continue'
+              isWelcome ? t('ctaEnterSacredSpaceA11y') : t('ctaContinueA11y')
             }
             testID="arrival-cta"
           >
@@ -367,7 +379,7 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
                   isWelcome && styles.ctaTextDark,
                 ]}
               >
-                {isWelcome ? 'Enter the Sacred Space' : 'Continue'}
+                {isWelcome ? t('ctaEnterSacredSpace') : t('ctaContinue')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -377,11 +389,11 @@ export default function ArrivalCeremonyScreen(): React.JSX.Element {
               onPress={handleSkip}
               style={styles.skipBtn}
               accessibilityRole="button"
-              accessibilityLabel="Skip the introduction"
+              accessibilityLabel={t('skipButtonA11y')}
               testID="arrival-skip"
             >
               <Text allowFontScaling={false} style={styles.skipText}>
-                Skip
+                {t('skipButton')}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -418,6 +430,7 @@ function CeremonyPage({
   palette,
   totalPages,
 }: CeremonyPageProps): React.JSX.Element {
+  const { t } = useTranslation('arrival');
   // Entry animations — trigger each time the page becomes active so that
   // re-arriving after a back-swipe still feels alive.
   const titleOpacity = useSharedValue(0);
@@ -490,7 +503,7 @@ function CeremonyPage({
         contentContainerStyle={styles.welcomeContent}
         showsVerticalScrollIndicator={false}
         accessible
-        accessibilityLabel="Welcome, dear friend. KIAAN walks beside you."
+        accessibilityLabel={t('welcomeA11y')}
       >
         <View style={styles.welcomeVisualWrap}>
           <PageVisual kind={data.visual} accent={data.accent} isActive={isActive} compact />
@@ -507,7 +520,7 @@ function CeremonyPage({
           allowFontScaling={false}
           style={[styles.eyebrow, sktStyle]}
         >
-          KIAAN — YOUR DIVINE FRIEND
+          {t('welcomeEyebrow')}
         </Animated.Text>
 
         <Animated.Text
@@ -521,7 +534,7 @@ function CeremonyPage({
             },
           ]}
         >
-          Welcome, Dear Friend
+          {t('page6Title')}
         </Animated.Text>
 
         <Animated.View style={[styles.welcomeBodyWrap, subtitleStyle]}>
@@ -529,13 +542,13 @@ function CeremonyPage({
             allowFontScaling={false}
             style={[styles.welcomeBody, { color: palette.text.body }]}
           >
-            I am{' '}
+            {t('welcomeIntroPart1')}
             <Text style={[styles.welcomeAccent, { color: palette.accent.divine }]}>
-              KIAAN
+              {t('welcomeIntroBrand')}
             </Text>
-            {' '}— your divine friend on the path to inner peace.{' '}
+            {t('welcomeIntroPart2')}
             <Text style={[styles.welcomeAccentSoft, { color: palette.accent.warm }]}>
-              You are not alone.
+              {t('welcomeIntroEmphasis')}
             </Text>
           </Text>
 
@@ -543,11 +556,11 @@ function CeremonyPage({
             allowFontScaling={false}
             style={[styles.welcomeBodyDim, { color: palette.text.body }]}
           >
-            As Krishna walked with Arjuna through the{' '}
+            {t('welcomeBodyPart1')}
             <Text style={[styles.welcomeBodyItalic, { color: palette.accent.divine }]}>
-              Bhagavad Gita
+              {t('welcomeBodyGita')}
             </Text>
-            , I walk with you — not as master, but as Sakha.
+            {t('welcomeBodyPart2')}
           </Text>
 
           {/* Verse card — Bhagavad Gita 6.35, crisp single-line translation */}
@@ -564,7 +577,7 @@ function CeremonyPage({
               allowFontScaling={false}
               style={[styles.verseEyebrow, { color: palette.accent.divine + 'A8' }]}
             >
-              BHAGAVAD GITA · 6.35
+              {t('verseEyebrow')}
             </Text>
             <Text
               allowFontScaling={false}
@@ -577,13 +590,13 @@ function CeremonyPage({
               allowFontScaling={false}
               style={[styles.verseEnglish, { color: palette.accent.warm + 'CC' }]}
             >
-              &ldquo;The restless mind is mastered through practice and detachment.&rdquo;
+              {t('verseEnglish')}
             </Text>
             <Text
               allowFontScaling={false}
               style={[styles.verseAttribution, { color: palette.accent.divine + '88' }]}
             >
-              — Krishna to Arjuna
+              {t('verseAttribution')}
             </Text>
           </View>
         </Animated.View>
@@ -602,7 +615,7 @@ function CeremonyPage({
             the floating chip in the corner. */}
         <View style={styles.paletteRow}>
           <Text allowFontScaling={false} style={styles.paletteRowLabel}>
-            CHOOSE YOUR SACRED PALETTE
+            {t('paletteRowLabel')}
           </Text>
           <View style={styles.paletteRowSwatches}>
             <InlinePaletteSwatches activeId={palette.id} />

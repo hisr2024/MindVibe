@@ -1,0 +1,20 @@
+{
+  "backA11y": "ಹಿಂದೆ",
+  "sectionTag": "ನಿತ್ಯ ಸಾಧನಾ",
+  "title": "ದೈನಂದಿನ ಪವಿತ್ರ ಸಾಧನೆ",
+
+  "completedTitle": "ಸಾಧನೆ ಪೂರ್ಣಗೊಂಡಿದೆ",
+  "completedBody": "ಪ್ರತಿ ಹಂತವೂ ಸಮರ್ಪಿತವಾಗಿದೆ. ನಾಳೆ ಮತ್ತೆ ಆರಂಭಿಸಲು ಹಿಂದಿರುಗಿ.",
+  "returnHomeButton": "ಹೋಮ್‌ಗೆ ಹಿಂದಿರುಗಿ",
+  "completionWithStreak": "ನಿತ್ಯ ಸಾಧನೆ ಪೂರ್ಣ. ಸರಣಿ: {{streak}} ದಿನಗಳು.",
+  "completionFirstDay": "ನಿತ್ಯ ಸಾಧನೆ ಪೂರ್ಣ. ನಿಮ್ಮ ಸರಣಿ ಇಂದಿನಿಂದ ಆರಂಭವಾಗಿದೆ.",
+
+  "historyTitle": "ಸಾಧನಾ ಇತಿಹಾಸ",
+  "statCurrent": "ಪ್ರಸ್ತುತ",
+  "statLongest": "ಅತಿ ದೀರ್ಘ",
+  "statTotalDays": "ಒಟ್ಟು ದಿನಗಳು",
+  "previousMonthA11y": "ಹಿಂದಿನ ತಿಂಗಳು",
+  "nextMonthA11y": "ಮುಂದಿನ ತಿಂಗಳು",
+  "recentPracticesHeader": "ಇತ್ತೀಚಿನ ಸಾಧನೆಗಳು",
+  "verseLabel": "ಶ್ಲೋಕ: {{verseId}}"
+}

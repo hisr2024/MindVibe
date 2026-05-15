@@ -16,12 +16,14 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 interface ReadyStepProps {
   readonly onComplete: (notificationsEnabled: boolean) => void;
 }
 
 export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
+  const { t } = useTranslation();
   const [requesting, setRequesting] = useState(false);
 
   const handleEnable = useCallback(async () => {
@@ -46,7 +48,7 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
       <View style={styles.container}>
         <LoadingMandala size={120} />
         <Text variant="bodySmall" color={colors.text.muted} align="center">
-          Requesting permission...
+          {t('onboarding.readyRequesting')}
         </Text>
       </View>
     );
@@ -59,11 +61,10 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
         style={styles.content}
       >
         <Text variant="sacred" color={colors.divine.aura} align="center">
-          {'"'}You have the right to perform your prescribed duties, but you are
-          not entitled to the fruits of your actions.{'"'}
+          {t('onboarding.readyVerse')}
         </Text>
         <Text variant="caption" color={colors.text.muted} align="center">
-          — Bhagavad Gita 2.47
+          {t('onboarding.readyVerseAttribution')}
         </Text>
       </Animated.View>
 
@@ -72,11 +73,10 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
         style={styles.textWrap}
       >
         <Text variant="h1" align="center">
-          You{"'"}re Ready
+          {t('onboarding.readyTitle')}
         </Text>
         <Text variant="body" color={colors.text.secondary} align="center">
-          Enable daily reminders to stay on your spiritual path, or begin
-          exploring now.
+          {t('onboarding.readyBody')}
         </Text>
       </Animated.View>
 
@@ -85,13 +85,13 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
         style={styles.actions}
       >
         <GoldenButton
-          title="Enable Notifications & Begin"
+          title={t('onboarding.readyCtaEnable')}
           variant="divine"
           onPress={handleEnable}
           testID="ready-enable"
         />
         <GoldenButton
-          title="Begin Without Notifications"
+          title={t('onboarding.readyCtaSkip')}
           variant="ghost"
           onPress={handleSkip}
           testID="ready-skip"

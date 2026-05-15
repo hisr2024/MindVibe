@@ -1,0 +1,26 @@
+{
+  "screenTitle": "சமூகம்",
+  "tabFeed": "ஊட்டம்",
+  "tabCircles": "வட்டங்கள்",
+  "feedEmpty": "சமூகம் உங்கள் முதல் ஞான வார்த்தைகளுக்காக காத்திருக்கிறது.",
+  "circlesEmpty": "இன்னும் எந்த ஞான வட்டமும் இல்லை.\nவிரைவில் மீண்டும் பார்க்கவும்.",
+  "composeFabA11y": "புதிய இடுகை எழுது",
+
+  "composeTitle": "ஞானத்தைப் பகிர்",
+  "composePromptLabel": "எந்த ஞானத்தை பகிர விரும்புகிறீர்கள்?",
+  "composePromptPlaceholder": "உங்கள் எண்ணங்கள், உள்ளுணர்வுகள் அல்லது கேள்வியைப் பகிரவும்...",
+  "composeCharsRemainingFmt": "{{count}} எழுத்துகள் மீதம்",
+  "composeCircleLabel": "வட்டத்தில் இடவும் (விருப்பம்)",
+  "composeTagsLabel": "குறிச்சொற்கள் (காற்புள்ளியால் பிரிக்கப்பட்டவை)",
+  "composeTagsPlaceholder": "ஞானம், தியானம், நன்றியுணர்வு...",
+  "composeSubmitButton": "ஞானத்தைப் பகிர்",
+  "composeErrorTitle": "இடம்பெற முடியவில்லை",
+  "composeErrorBody": "உங்கள் ஞானத்தை இப்போது பகிர முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+
+  "circleFallbackTitle": "வட்டம்",
+  "circleMembersFmt": "{{count}} உறுப்பினர்கள்",
+  "circleJoinButton": "வட்டத்தில் சேர்",
+  "circleJoinedBadge": "✓ சேர்ந்தது",
+  "circlePostsLabel": "இடுகைகள்",
+  "circlePostsEmpty": "இந்த வட்டத்தில் இன்னும் இடுகைகள் இல்லை.\nஞானத்தைப் பகிர்வதில் முதலாமவராக இருங்கள்."
+}

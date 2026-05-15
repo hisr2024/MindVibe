@@ -1,0 +1,26 @@
+{
+  "screenTitle": "Communauté",
+  "tabFeed": "Fil",
+  "tabCircles": "Cercles",
+  "feedEmpty": "La communauté attend tes premiers mots de sagesse.",
+  "circlesEmpty": "Aucun cercle de sagesse disponible pour le moment.\nReviens bientôt.",
+  "composeFabA11y": "Composer un nouveau post",
+
+  "composeTitle": "Partager la sagesse",
+  "composePromptLabel": "Quelle sagesse souhaites-tu partager ?",
+  "composePromptPlaceholder": "Partage tes pensées, intuitions ou une question...",
+  "composeCharsRemainingFmt": "{{count}} caractères restants",
+  "composeCircleLabel": "Publier dans un cercle (facultatif)",
+  "composeTagsLabel": "Étiquettes (séparées par des virgules)",
+  "composeTagsPlaceholder": "sagesse, méditation, gratitude...",
+  "composeSubmitButton": "Partager la sagesse",
+  "composeErrorTitle": "Impossible de publier",
+  "composeErrorBody": "Ta sagesse n'a pas pu être partagée maintenant. Veuillez réessayer.",
+
+  "circleFallbackTitle": "Cercle",
+  "circleMembersFmt": "{{count}} membres",
+  "circleJoinButton": "Rejoindre le cercle",
+  "circleJoinedBadge": "✓ Rejoint",
+  "circlePostsLabel": "Publications",
+  "circlePostsEmpty": "Aucune publication dans ce cercle pour l'instant.\nSois le premier à partager ta sagesse."
+}

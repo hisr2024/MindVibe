@@ -1,0 +1,35 @@
+{
+  "greeting": "नमस्ते",
+  "dailyVerse": "आज का श्लोक",
+  "moodCheckIn": "आप कैसा अनुभव कर रहे हैं?",
+  "activeJourney": "आपकी सक्रिय यात्रा",
+  "noJourneys": "अपने रूपांतरण की शुरुआत किसी यात्रा से करें",
+  "startJourney": "यात्रा आरम्भ करें",
+
+  "wordmarkA11yLabel": "Kiaanverse — सखा, आपका आध्यात्मिक साथी",
+  "wordmarkSubtitle": "सखा · आपका आध्यात्मिक साथी",
+  "openProfileA11y": "प्रोफ़ाइल खोलें",
+  "defaultUserName": "पावन साधक",
+
+  "openTodaysWisdomA11y": "आज की बुद्धि खोलें",
+  "verseRef": "श्रीमद्भगवद्गीता — अध्याय {{chapter}} · श्लोक {{verse}}",
+  "askSakha": "सखा से पूछें →",
+  "askSakhaA11y": "इस श्लोक के बारे में सखा से पूछें",
+  "listenToVerseA11y": "आज का श्लोक सुनें",
+  "stopVerseA11y": "श्लोक रोकें",
+  "bookmarkVerseA11y": "इस श्लोक को सहेजें",
+  "removeBookmarkA11y": "सहेजी गई पट्टिका हटाएँ",
+
+  "sacredToolsHeader": "पवित्र साधन",
+  "toolEmotionalReset": "भावनात्मक पुनः-स्थापन",
+  "toolArdha": "अर्थ",
+  "toolKarmaReset": "कर्म पुनः-स्थापन",
+  "toolViyoga": "वियोग",
+  "toolAllTools": "सभी साधन",
+  "toolNameA11y": "{{name}} साधन",
+
+  "daysOfSacredPractice": "पवित्र साधना\nके दिन",
+  "phasesLabel": "चरण",
+  "continueArrow": "जारी रखें →",
+  "continueSadhanaA11y": "साधना जारी रखें"
+}

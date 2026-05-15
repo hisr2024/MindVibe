@@ -1,0 +1,26 @@
+{
+  "screenTitle": "સમુદાય",
+  "tabFeed": "ફીડ",
+  "tabCircles": "વર્તુળો",
+  "feedEmpty": "સમુદાય તમારા પ્રથમ જ્ઞાનના શબ્દોની રાહ જુએ છે.",
+  "circlesEmpty": "હજુ સુધી કોઈ જ્ઞાન વર્તુળ ઉપલબ્ધ નથી.\nટૂંક સમયમાં ફરી તપાસો.",
+  "composeFabA11y": "નવી પોસ્ટ લખો",
+
+  "composeTitle": "જ્ઞાન શેર કરો",
+  "composePromptLabel": "તમે કયું જ્ઞાન શેર કરવા માંગો છો?",
+  "composePromptPlaceholder": "તમારા વિચારો, અંતર્દૃષ્ટિ, અથવા પ્રશ્ન શેર કરો...",
+  "composeCharsRemainingFmt": "{{count}} અક્ષરો બાકી",
+  "composeCircleLabel": "વર્તુળમાં પોસ્ટ કરો (વૈકલ્પિક)",
+  "composeTagsLabel": "ટૅગ્સ (અલ્પવિરામથી અલગ)",
+  "composeTagsPlaceholder": "જ્ઞાન, ધ્યાન, કૃતજ્ઞતા...",
+  "composeSubmitButton": "જ્ઞાન શેર કરો",
+  "composeErrorTitle": "પોસ્ટ થઈ શકી નહીં",
+  "composeErrorBody": "તમારું જ્ઞાન અત્યારે શેર થઈ શકતું નથી. કૃપા કરી ફરી પ્રયાસ કરો.",
+
+  "circleFallbackTitle": "વર્તુળ",
+  "circleMembersFmt": "{{count}} સદસ્યો",
+  "circleJoinButton": "વર્તુળમાં જોડાઓ",
+  "circleJoinedBadge": "✓ જોડાયા",
+  "circlePostsLabel": "પોસ્ટ્સ",
+  "circlePostsEmpty": "આ વર્તુળમાં હજુ સુધી કોઈ પોસ્ટ નથી.\nજ્ઞાન શેર કરનાર પ્રથમ બનો."
+}

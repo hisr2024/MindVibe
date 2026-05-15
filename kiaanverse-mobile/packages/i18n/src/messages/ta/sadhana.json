@@ -1,0 +1,20 @@
+{
+  "backA11y": "திரும்பு",
+  "sectionTag": "நித்ய சாதனா",
+  "title": "தினசரி புனிதப் பயிற்சி",
+
+  "completedTitle": "சாதனா நிறைவடைந்தது",
+  "completedBody": "ஒவ்வொரு கட்டமும் சமர்ப்பிக்கப்பட்டது. நாளை மீண்டும் தொடங்க வாருங்கள்.",
+  "returnHomeButton": "முகப்புக்குத் திரும்பு",
+  "completionWithStreak": "நித்ய சாதனா நிறைவு. தொடர்: {{streak}} நாட்கள்.",
+  "completionFirstDay": "நித்ய சாதனா நிறைவு. உங்கள் தொடர் இன்று தொடங்குகிறது.",
+
+  "historyTitle": "சாதனா வரலாறு",
+  "statCurrent": "தற்போதைய",
+  "statLongest": "மிக நீளமான",
+  "statTotalDays": "மொத்த நாட்கள்",
+  "previousMonthA11y": "முந்தைய மாதம்",
+  "nextMonthA11y": "அடுத்த மாதம்",
+  "recentPracticesHeader": "சமீபத்திய சாதனை",
+  "verseLabel": "ஸ்லோகம்: {{verseId}}"
+}

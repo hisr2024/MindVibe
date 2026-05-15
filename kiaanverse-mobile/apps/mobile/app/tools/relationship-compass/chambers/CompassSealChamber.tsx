@@ -21,6 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { GoldenButton } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { CompassRose } from '../components/CompassRose';
 import type { GunaName } from '../hooks/useGunaCalculation';
@@ -50,7 +51,7 @@ export interface CompassSealChamberProps {
   readonly onTalkToSakha?: () => void;
 }
 
-const TITLE_WORDS = ['Your', 'Compass', 'is', 'Set'] as const;
+const TITLE_WORD_KEYS = ['rcSealTitleWord1', 'rcSealTitleWord2', 'rcSealTitleWord3', 'rcSealTitleWord4'] as const;
 
 export function CompassSealChamber({
   partnerName,
@@ -62,6 +63,7 @@ export function CompassSealChamber({
   onJournal,
   onTalkToSakha,
 }: CompassSealChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const router = useRouter();
   const gunaColor = GUNA_COLORS[dominantGuna] ?? GUNA_COLORS.balanced;
   const dominantLabel =
@@ -92,13 +94,13 @@ export function CompassSealChamber({
       </Animated.View>
 
       <View style={styles.titleRow}>
-        {TITLE_WORDS.map((word, i) => (
+        {TITLE_WORD_KEYS.map((key, i) => (
           <Animated.Text
-            key={`${word}-${i}`}
+            key={`${key}-${i}`}
             entering={FadeInUp.delay(700 + i * 150).duration(440)}
             style={styles.titleWord}
           >
-            {word}
+            {t(key)}
           </Animated.Text>
         ))}
       </View>
@@ -108,42 +110,42 @@ export function CompassSealChamber({
         style={styles.summaryCard}
       >
         <Text style={styles.summaryLine}>
-          Relationship:{' '}
+          {t('rcSealRelationshipLabel')}{' '}
           <Text style={styles.summaryStrong}>
-            {partnerName.trim() || 'Unnamed'} ({relationshipTypeLabel})
+            {partnerName.trim() || t('rcSealUnnamed')} ({relationshipTypeLabel})
           </Text>
         </Text>
         <Text style={[styles.summaryLine, { color: gunaColor }]}>
-          Dominant Energy:{' '}
+          {t('rcSealDominantLabel')}{' '}
           <Text style={[styles.summaryStrong, { color: gunaColor }]}>
             {dominantLabel}
           </Text>
         </Text>
         {selectedQualityLabel ? (
           <Text style={styles.summaryLine}>
-            Quality:{' '}
+            {t('rcSealQualityLabel')}{' '}
             <Text style={styles.summaryStrong}>{selectedQualityLabel}</Text>
           </Text>
         ) : null}
         {intentionText ? (
           <Text style={styles.intentionLine}>
-            <Text style={styles.intentionLabel}>Intention: </Text>
+            <Text style={styles.intentionLabel}>{t('rcSealIntentionLabel')}</Text>
             {intentionText}
           </Text>
         ) : null}
-        <Text style={styles.dateLine}>Date: {formattedDate}</Text>
+        <Text style={styles.dateLine}>{t('rcSealDateLabel')} {formattedDate}</Text>
       </Animated.View>
 
       <Animated.View
         entering={FadeInDown.delay(1800).duration(380)}
         style={styles.actions}
       >
-        <GoldenButton title="Return to Home" onPress={goHome} variant="ghost" />
+        <GoldenButton title={t('rcSealReturnHome')} onPress={goHome} variant="ghost" />
         <Pressable onPress={goJournal} style={styles.ghostButton}>
-          <Text style={styles.ghostButtonLabel}>Journal This</Text>
+          <Text style={styles.ghostButtonLabel}>{t('rcSealJournal')}</Text>
         </Pressable>
         <Pressable onPress={goSakha} style={styles.ghostButton}>
-          <Text style={styles.ghostButtonLabel}>Talk to Sakha</Text>
+          <Text style={styles.ghostButtonLabel}>{t('rcSealTalkSakha')}</Text>
         </Pressable>
       </Animated.View>
     </View>

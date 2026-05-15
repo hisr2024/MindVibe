@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "Step {{current}} of {{total}}",
+  "progressDotA11yCurrent": "Step {{current}} of {{total}}, current",
+  "continueButton": "Continue",
+
+  "welcomeTitle": "Meet Sakha",
+  "welcomeBody": "Your divine companion on the path to inner peace, guided by the timeless wisdom of the Bhagavad Gita.",
+  "welcomeCta": "Begin Your Journey",
+
+  "purposeTitle": "What Brings You Here?",
+  "purposeSubtitle": "Select all that resonate with you",
+  "purposePeace": "Peace",
+  "purposeWisdom": "Wisdom",
+  "purposeGuidance": "Guidance",
+  "purposeHealing": "Healing",
+  "purposePurpose": "Purpose",
+
+  "gitaTitle": "Know the Gita?",
+  "gitaSubtitle": "This helps Sakha tailor wisdom to your level",
+  "gitaLevelNever": "Never read",
+  "gitaLevelCurious": "Curious",
+  "gitaLevelBeginner": "Beginner",
+  "gitaLevelPractitioner": "Practitioner",
+  "gitaLevelScholar": "Scholar",
+
+  "practiceTitle": "Daily Practice Time",
+  "practiceSubtitle": "When would you like your daily spiritual reminder?",
+  "practiceAm": "AM",
+  "practicePm": "PM",
+  "practiceHourA11y": "{{hour}} o'clock",
+
+  "readyVerse": "\"You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions.\"",
+  "readyVerseAttribution": "— Bhagavad Gita 2.47",
+  "readyTitle": "You're Ready",
+  "readyBody": "Enable daily reminders to stay on your spiritual path, or begin exploring now.",
+  "readyCtaEnable": "Enable Notifications & Begin",
+  "readyCtaSkip": "Begin Without Notifications",
+  "readyRequesting": "Requesting permission..."
+}

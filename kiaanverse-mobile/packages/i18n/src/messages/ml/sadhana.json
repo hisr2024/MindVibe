@@ -1,0 +1,20 @@
+{
+  "backA11y": "തിരികെ",
+  "sectionTag": "നിത്യ സാധന",
+  "title": "ദൈനംദിന പവിത്ര സാധന",
+
+  "completedTitle": "സാധന പൂർത്തിയായി",
+  "completedBody": "ഓരോ ഘട്ടവും അർപ്പിക്കപ്പെട്ടു. നാളെ വീണ്ടും തുടങ്ങാൻ മടങ്ങിവരുക.",
+  "returnHomeButton": "ഹോമിലേക്ക് മടങ്ങുക",
+  "completionWithStreak": "നിത്യ സാധന പൂർത്തി. ശ്രേണി: {{streak}} ദിനങ്ങൾ.",
+  "completionFirstDay": "നിത്യ സാധന പൂർത്തി. നിങ്ങളുടെ ശ്രേണി ഇന്ന് തുടങ്ങുന്നു.",
+
+  "historyTitle": "സാധനയുടെ ചരിത്രം",
+  "statCurrent": "ഇപ്പോൾ",
+  "statLongest": "ഏറ്റവും നീണ്ടത്",
+  "statTotalDays": "ആകെ ദിനങ്ങൾ",
+  "previousMonthA11y": "മുമ്പത്തെ മാസം",
+  "nextMonthA11y": "അടുത്ത മാസം",
+  "recentPracticesHeader": "സമീപകാല സാധനകൾ",
+  "verseLabel": "ശ്ലോകം: {{verseId}}"
+}

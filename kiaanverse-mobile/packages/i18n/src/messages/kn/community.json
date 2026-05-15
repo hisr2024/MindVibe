@@ -1,0 +1,26 @@
+{
+  "screenTitle": "ಸಮುದಾಯ",
+  "tabFeed": "ಫೀಡ್",
+  "tabCircles": "ವಲಯಗಳು",
+  "feedEmpty": "ಸಮುದಾಯವು ನಿಮ್ಮ ಮೊದಲ ಜ್ಞಾನದ ಪದಗಳಿಗಾಗಿ ಕಾಯುತ್ತಿದೆ.",
+  "circlesEmpty": "ಇನ್ನೂ ಯಾವುದೇ ಜ್ಞಾನ ವಲಯಗಳು ಲಭ್ಯವಿಲ್ಲ.\nಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ.",
+  "composeFabA11y": "ಹೊಸ ಪೋಸ್ಟ್ ಬರೆಯಿರಿ",
+
+  "composeTitle": "ಜ್ಞಾನ ಹಂಚಿಕೊಳ್ಳಿ",
+  "composePromptLabel": "ಯಾವ ಜ್ಞಾನ ಹಂಚಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೀರಿ?",
+  "composePromptPlaceholder": "ನಿಮ್ಮ ಆಲೋಚನೆಗಳು, ಒಳನೋಟಗಳು ಅಥವಾ ಪ್ರಶ್ನೆ ಹಂಚಿಕೊಳ್ಳಿ...",
+  "composeCharsRemainingFmt": "{{count}} ಅಕ್ಷರಗಳು ಉಳಿದಿವೆ",
+  "composeCircleLabel": "ವಲಯದಲ್ಲಿ ಪೋಸ್ಟ್ ಮಾಡಿ (ಐಚ್ಛಿಕ)",
+  "composeTagsLabel": "ಟ್ಯಾಗ್‌ಗಳು (ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ)",
+  "composeTagsPlaceholder": "ಜ್ಞಾನ, ಧ್ಯಾನ, ಕೃತಜ್ಞತೆ...",
+  "composeSubmitButton": "ಜ್ಞಾನ ಹಂಚಿಕೊಳ್ಳಿ",
+  "composeErrorTitle": "ಪೋಸ್ಟ್ ಮಾಡಲಾಗಲಿಲ್ಲ",
+  "composeErrorBody": "ನಿಮ್ಮ ಜ್ಞಾನವನ್ನು ಈಗ ಹಂಚಿಕೊಳ್ಳಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+
+  "circleFallbackTitle": "ವಲಯ",
+  "circleMembersFmt": "{{count}} ಸದಸ್ಯರು",
+  "circleJoinButton": "ವಲಯಕ್ಕೆ ಸೇರಿ",
+  "circleJoinedBadge": "✓ ಸೇರಿದ್ದೀರಿ",
+  "circlePostsLabel": "ಪೋಸ್ಟ್‌ಗಳು",
+  "circlePostsEmpty": "ಈ ವಲಯದಲ್ಲಿ ಇನ್ನೂ ಪೋಸ್ಟ್‌ಗಳಿಲ್ಲ.\nಜ್ಞಾನ ಹಂಚಿಕೊಳ್ಳುವ ಮೊದಲಿಗರಾಗಿ."
+}

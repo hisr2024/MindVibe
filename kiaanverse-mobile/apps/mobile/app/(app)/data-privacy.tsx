@@ -14,100 +14,17 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen, GoldenHeader, SacredCard } from '@kiaanverse/ui';
 import { Text } from 'react-native';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const GOLD = '#D4A017';
 const SACRED_WHITE = '#F0EBE1';
 const TEXT_MUTED = 'rgba(240,235,225,0.62)';
 
-interface Section {
-  readonly heading: string;
-  readonly body: string;
-}
-
-const SECTIONS: readonly Section[] = [
-  {
-    heading: 'On-Device Encryption',
-    body:
-      'Every Sacred Reflection is sealed with AES-256-GCM on your device ' +
-      'using a key derived from your account secret. The server only ever ' +
-      'stores the ciphertext plus plaintext metadata you choose (mood, ' +
-      'tags, timestamp). Even our engineers cannot read your reflections.',
-  },
-  {
-    heading: 'What We Store on Our Servers',
-    body:
-      '• Encrypted journal blobs (ciphertext only)\n' +
-      '• Mood + tag metadata you select\n' +
-      '• Journey progress (which step, how far)\n' +
-      '• Verse bookmarks (chapter + verse only)\n' +
-      '• Account metadata (email, name, language)\n' +
-      '• Anonymized analytics (feature usage)',
-  },
-  {
-    heading: 'What We Never Store',
-    body:
-      '• Your raw journal content\n' +
-      '• Audio of your Sakha conversations (transcripts may be retained ' +
-      'briefly for safety review and then deleted)\n' +
-      '• Payment card details (handled by Google Play / App Store / Stripe)\n' +
-      '• Any data we don’t explicitly need to operate the Service',
-  },
-  {
-    heading: 'Where Your Data Lives',
-    body:
-      'Production data is stored in EU-region infrastructure (Frankfurt) ' +
-      'with daily encrypted backups. We use Sentry for crash analytics ' +
-      '(no PII), Cloudflare for content delivery, and Stripe / Google Play ' +
-      '/ App Store for billing. None of these processors can read your ' +
-      'encrypted reflections.',
-  },
-  {
-    heading: 'Voice Companion Privacy',
-    body:
-      'When you speak with Sakha (KIAAN Voice Companion):\n' +
-      '• Audio is streamed to our servers, transcribed, and discarded.\n' +
-      '• Transcripts are PII-scrubbed before any logging.\n' +
-      '• You can disable conversation history in Settings → Voice.\n' +
-      '• Crisis-trigger conversations are reviewed by safety humans only.',
-  },
-  {
-    heading: 'Retention',
-    body:
-      'Encrypted journals: kept until you delete them.\n' +
-      'Account: kept until you delete your account.\n' +
-      'Voice transcripts: 24 hours, then deleted.\n' +
-      'Audit + safety logs: 90 days.\n' +
-      'Backups: rolling 30-day window, then purged.',
-  },
-  {
-    heading: 'Your Rights',
-    body:
-      'You can, at any time:\n' +
-      '• Export every byte we hold for you (JSON + ciphertext bundle).\n' +
-      '• Delete a single entry (irreversible after 7 days).\n' +
-      '• Delete your account (permanent removal within 30 days).\n' +
-      '• Withdraw consent for analytics.\n' +
-      'Use Settings → Account → Data Controls, or email ' +
-      'sacredquest2@gmail.com.',
-  },
-  {
-    heading: 'Children',
-    body:
-      'Kiaanverse is intended for seekers aged 13 and above. We do not ' +
-      'knowingly collect data from children under 13. If you believe a ' +
-      'child has registered, please contact sacredquest2@gmail.com and ' +
-      'we will remove the account.',
-  },
-  {
-    heading: 'Updates',
-    body:
-      'We will tell you in-app at least 14 days before any material ' +
-      'change to how your data is handled. The full legal Privacy Policy ' +
-      'is also linked from the Profile tab → Legal section.',
-  },
-];
+/** 9 sections — heading + body pairs keyed support.dpN{Heading,Body}. */
+const DATA_PRIVACY_SECTION_INDICES = Array.from({ length: 9 }, (_, i) => i + 1);
 
 export default function DataAndPrivacyScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const openMail = (): void => {
@@ -116,30 +33,28 @@ export default function DataAndPrivacyScreen(): React.JSX.Element {
 
   return (
     <Screen scroll gradient gradientVariant="cosmic">
-      <GoldenHeader title="Data & Privacy" onBack={() => router.back()} />
+      <GoldenHeader title={t('support.dataPrivacyTitle')} onBack={() => router.back()} />
 
       <SacredCard style={styles.card}>
-        <Text style={styles.eyebrow}>HOW YOUR DATA IS HANDLED</Text>
-        <Text style={styles.lastUpdated}>Last Updated: May 2026</Text>
+        <Text style={styles.eyebrow}>{t('support.dataPrivacyEyebrow')}</Text>
+        <Text style={styles.lastUpdated}>{t('support.lastUpdated')}</Text>
 
         <View style={styles.sections}>
-          {SECTIONS.map((s) => (
-            <View key={s.heading} style={styles.section}>
-              <Text style={styles.heading}>{s.heading}</Text>
-              <Text style={styles.body}>{s.body}</Text>
+          {DATA_PRIVACY_SECTION_INDICES.map((n) => (
+            <View key={n} style={styles.section}>
+              <Text style={styles.heading}>{t(`support.dp${n}Heading`)}</Text>
+              <Text style={styles.body}>{t(`support.dp${n}Body`)}</Text>
             </View>
           ))}
 
           <Pressable
             onPress={openMail}
             accessibilityRole="link"
-            accessibilityLabel="Email sacredquest2@gmail.com"
+            accessibilityLabel={t('support.helpEmailA11y')}
             style={styles.contactRow}
           >
-            <Text style={styles.contactLabel}>
-              Questions? Write to us at
-            </Text>
-            <Text style={styles.contactEmail}>sacredquest2@gmail.com</Text>
+            <Text style={styles.contactLabel}>{t('support.dataPrivacyQuestions')}</Text>
+            <Text style={styles.contactEmail}>{t('support.contactEmail')}</Text>
           </Pressable>
         </View>
       </SacredCard>

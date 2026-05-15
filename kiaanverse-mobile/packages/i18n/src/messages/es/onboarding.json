@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "Paso {{current}} de {{total}}",
+  "progressDotA11yCurrent": "Paso {{current}} de {{total}}, actual",
+  "continueButton": "Continuar",
+
+  "welcomeTitle": "Conoce a Sakha",
+  "welcomeBody": "Tu compañero divino en el camino a la paz interior, guiado por la sabiduría atemporal del Bhagavad Gita.",
+  "welcomeCta": "Comienza tu viaje",
+
+  "purposeTitle": "¿Qué te trae aquí?",
+  "purposeSubtitle": "Elige todo lo que resuene contigo",
+  "purposePeace": "Paz",
+  "purposeWisdom": "Sabiduría",
+  "purposeGuidance": "Guía",
+  "purposeHealing": "Sanación",
+  "purposePurpose": "Propósito",
+
+  "gitaTitle": "¿Conoces el Gita?",
+  "gitaSubtitle": "Esto ayuda a Sakha a ajustar la sabiduría a tu nivel",
+  "gitaLevelNever": "Nunca leí",
+  "gitaLevelCurious": "Curioso",
+  "gitaLevelBeginner": "Principiante",
+  "gitaLevelPractitioner": "Practicante",
+  "gitaLevelScholar": "Erudito",
+
+  "practiceTitle": "Hora de práctica diaria",
+  "practiceSubtitle": "¿Cuándo quieres tu recordatorio espiritual diario?",
+  "practiceAm": "AM",
+  "practicePm": "PM",
+  "practiceHourA11y": "{{hour}} en punto",
+
+  "readyVerse": "«Tienes derecho a cumplir tus deberes prescritos, pero no a los frutos de tus acciones.»",
+  "readyVerseAttribution": "— Bhagavad Gita 2.47",
+  "readyTitle": "Estás listo",
+  "readyBody": "Activa los recordatorios diarios para mantenerte en tu camino espiritual, o comienza a explorar ahora.",
+  "readyCtaEnable": "Activar notificaciones y comenzar",
+  "readyCtaSkip": "Comenzar sin notificaciones",
+  "readyRequesting": "Solicitando permiso..."
+}

@@ -37,6 +37,7 @@ import {
   TIER_CONFIGS,
 } from '@kiaanverse/api';
 import type { SubscriptionTier } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 // Matches the backend `UserSubscriptionOut` shape — only the fields we use.
 interface UserSubscriptionResponse {
@@ -56,6 +57,7 @@ interface UserSubscriptionResponse {
 }
 
 export default function MySubscriptionScreen(): React.JSX.Element {
+  const { t, locale } = useTranslation();
   const [subscription, setSubscription] =
     useState<UserSubscriptionResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,13 +95,13 @@ export default function MySubscriptionScreen(): React.JSX.Element {
     const sku = subscription?.plan?.product_id;
     openManageSubscription(sku).catch(() => {
       Alert.alert(
-        'Unable to open store',
+        t('subscription.alertUnableToOpenTitle'),
         Platform.OS === 'ios'
-          ? 'Please open Settings → Apple ID → Subscriptions.'
-          : 'Please open the Google Play Store → Menu → Subscriptions.'
+          ? t('subscription.alertUnableToOpenIos')
+          : t('subscription.alertUnableToOpenAndroid'),
       );
     });
-  }, [subscription?.plan?.product_id]);
+  }, [subscription?.plan?.product_id, t]);
 
   const handleRestore = useCallback(async () => {
     setRestoring(true);
@@ -110,25 +112,27 @@ export default function MySubscriptionScreen(): React.JSX.Element {
           Haptics.NotificationFeedbackType.Success
         );
         Alert.alert(
-          'Purchases restored',
-          `Your ${TIER_CONFIGS[result.tier].name} subscription is active.`
+          t('subscription.alertRestoredTitle'),
+          t('subscription.alertRestoredBody', {
+            tierName: TIER_CONFIGS[result.tier].name,
+          }),
         );
       } else {
         Alert.alert(
-          'Nothing to restore',
-          result.error ?? 'No active subscription was found for this account.'
+          t('subscription.alertNothingTitle'),
+          result.error ?? t('subscription.alertNothingBody'),
         );
       }
     } finally {
       setRestoring(false);
     }
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
       <DivineScreenWrapper>
         <View style={styles.center}>
-          <OmLoader size={48} label="Loading your subscription…" />
+          <OmLoader size={48} label={t('subscription.loadingMine')} />
         </View>
       </DivineScreenWrapper>
     );
@@ -140,11 +144,13 @@ export default function MySubscriptionScreen(): React.JSX.Element {
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: 80, paddingHorizontal: 16 }}
       >
-        <Text style={styles.title}>My Subscription</Text>
+        <Text style={styles.title}>{t('subscription.myTitle')}</Text>
 
         <SacredCard style={styles.statusCard}>
           <Text style={styles.tierLabel}>
-            {isFree ? 'Free Seeker' : `✦ ${TIER_CONFIGS[tier].name}`}
+            {isFree
+              ? t('subscription.freeSeekerLabel')
+              : `${t('subscription.tierLabelPrefix')} ${TIER_CONFIGS[tier].name}`}
           </Text>
           <Text style={styles.tierSubtitle}>
             {TIER_CONFIGS[tier].description}
@@ -155,21 +161,33 @@ export default function MySubscriptionScreen(): React.JSX.Element {
               <GoldenDivider style={{ marginVertical: 14 }} />
 
               <DetailRow
-                label={willCancel ? 'Access until' : 'Next renewal'}
-                value={renewsAt ? formatDate(renewsAt) : '—'}
+                label={
+                  willCancel
+                    ? t('subscription.detailAccessUntil')
+                    : t('subscription.detailNextRenewal')
+                }
+                value={
+                  renewsAt
+                    ? formatDate(renewsAt, locale)
+                    : t('subscription.detailEmptyValue')
+                }
               />
               <DetailRow
-                label="Status"
-                value={willCancel ? 'Cancels at period end' : 'Active'}
+                label={t('subscription.detailStatus')}
+                value={
+                  willCancel
+                    ? t('subscription.statusCancels')
+                    : t('subscription.statusActive')
+                }
                 valueColor={willCancel ? '#EF4444' : '#10B981'}
               />
               {subscription?.plan?.billing_period && (
                 <DetailRow
-                  label="Billing"
+                  label={t('subscription.detailBilling')}
                   value={
                     subscription.plan.billing_period === 'yearly'
-                      ? 'Annual'
-                      : 'Monthly'
+                      ? t('subscription.billingAnnual')
+                      : t('subscription.billingMonthly')
                   }
                 />
               )}
@@ -180,22 +198,22 @@ export default function MySubscriptionScreen(): React.JSX.Element {
         <View style={styles.actions}>
           {isFree ? (
             <DivineButton
-              title="Upgrade to Bhakta / Sadhak / Siddha"
+              title={t('subscription.ctaUpgrade')}
               onPress={() => router.push('/(app)/subscription/plans')}
               variant="primary"
             />
           ) : (
             <>
               <DivineButton
-                title="Change Plan"
+                title={t('subscription.ctaChangePlan')}
                 onPress={() => router.push('/(app)/subscription/plans')}
                 variant="secondary"
               />
               <DivineButton
                 title={
                   Platform.OS === 'ios'
-                    ? 'Manage on App Store'
-                    : 'Manage on Google Play'
+                    ? t('subscription.ctaManageAppStore')
+                    : t('subscription.ctaManageGooglePlay')
                 }
                 onPress={handleManage}
                 variant="ghost"
@@ -204,7 +222,11 @@ export default function MySubscriptionScreen(): React.JSX.Element {
           )}
 
           <DivineButton
-            title={restoring ? 'Restoring…' : 'Restore Purchases'}
+            title={
+              restoring
+                ? t('subscription.ctaRestoring')
+                : t('subscription.ctaRestorePurchases')
+            }
             onPress={handleRestore}
             variant="ghost"
             loading={restoring}
@@ -213,10 +235,9 @@ export default function MySubscriptionScreen(): React.JSX.Element {
         </View>
 
         <Text style={styles.footnote}>
-          Subscriptions are billed and managed by{' '}
-          {Platform.OS === 'ios' ? 'the App Store' : 'Google Play'}. Cancel
-          anytime in your store account — access continues until the end of the
-          current billing period.
+          {Platform.OS === 'ios'
+            ? t('subscription.footnoteAppStore')
+            : t('subscription.footnoteGooglePlay')}
         </Text>
       </ScrollView>
     </DivineScreenWrapper>
@@ -244,8 +265,20 @@ function DetailRow({
   );
 }
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString(undefined, {
+/**
+ * Format a date for the renewal/access row using the active i18n locale.
+ * Falls back to en-US when the active code isn't a valid Intl tag (e.g.
+ * 'sa' has no full Intl support on most engines).
+ */
+function formatDate(d: Date, locale: string): string {
+  let intlLocale = 'en-US';
+  try {
+    const supported = Intl.DateTimeFormat.supportedLocalesOf([locale]);
+    if (supported.length > 0) intlLocale = supported[0]!;
+  } catch {
+    // keep en-US
+  }
+  return d.toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

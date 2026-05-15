@@ -1,0 +1,26 @@
+{
+  "screenTitle": "സമൂഹം",
+  "tabFeed": "ഫീഡ്",
+  "tabCircles": "വൃത്തങ്ങൾ",
+  "feedEmpty": "നിങ്ങളുടെ ആദ്യ ജ്ഞാന-വാക്കുകൾക്കായി സമൂഹം കാത്തിരിക്കുന്നു.",
+  "circlesEmpty": "ഇതുവരെ ജ്ഞാന വൃത്തങ്ങളൊന്നും ലഭ്യമല്ല.\nഉടൻ വീണ്ടും പരിശോധിക്കുക.",
+  "composeFabA11y": "പുതിയ പോസ്റ്റ് എഴുതുക",
+
+  "composeTitle": "ജ്ഞാനം പങ്കിടുക",
+  "composePromptLabel": "ഏത് ജ്ഞാനം പങ്കിടാൻ ആഗ്രഹിക്കുന്നു?",
+  "composePromptPlaceholder": "നിങ്ങളുടെ ചിന്തകൾ, ഉൾക്കാഴ്ചകൾ, അല്ലെങ്കിൽ ചോദ്യം പങ്കിടുക...",
+  "composeCharsRemainingFmt": "{{count}} അക്ഷരങ്ങൾ ബാക്കി",
+  "composeCircleLabel": "വൃത്തത്തിൽ പോസ്റ്റ് ചെയ്യുക (ഐച്ഛികം)",
+  "composeTagsLabel": "ടാഗുകൾ (കോമ കൊണ്ട് വേർതിരിച്ചത്)",
+  "composeTagsPlaceholder": "ജ്ഞാനം, ധ്യാനം, കൃതജ്ഞത...",
+  "composeSubmitButton": "ജ്ഞാനം പങ്കിടുക",
+  "composeErrorTitle": "പോസ്റ്റ് ചെയ്യാനായില്ല",
+  "composeErrorBody": "നിങ്ങളുടെ ജ്ഞാനം ഇപ്പോൾ പങ്കിടാനായില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+
+  "circleFallbackTitle": "വൃത്തം",
+  "circleMembersFmt": "{{count}} അംഗങ്ങൾ",
+  "circleJoinButton": "വൃത്തത്തിൽ ചേരുക",
+  "circleJoinedBadge": "✓ ചേർന്നു",
+  "circlePostsLabel": "പോസ്റ്റുകൾ",
+  "circlePostsEmpty": "ഈ വൃത്തത്തിൽ ഇതുവരെ പോസ്റ്റുകളില്ല.\nജ്ഞാനം പങ്കിടുന്ന ആദ്യത്തെയാളാകുക."
+}

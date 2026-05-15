@@ -23,6 +23,7 @@ import Svg, {
   RadialGradient,
   Stop,
 } from 'react-native-svg';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export interface LotusGlyphProps {
   /** Pixel size of the rendered glyph. Defaults to 56 (matches the
@@ -42,13 +43,15 @@ function LotusGlyphComponent({
   color = DEFAULT_COLOR,
   haloColor = DEFAULT_HALO,
 }: LotusGlyphProps): React.JSX.Element {
+  const { t } = useTranslation('sacred-reflections');
+  const a11yLabel = t('lotusGlyphA11y');
   return (
     <Svg
       width={size}
       height={size}
       viewBox="0 0 100 100"
       accessibilityRole="image"
-      accessibilityLabel="Lotus"
+      accessibilityLabel={a11yLabel}
     >
       <Defs>
         <RadialGradient id="lotusHalo" cx="50%" cy="55%" r="55%">

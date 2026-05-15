@@ -22,55 +22,58 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
+import { useTranslation } from '@kiaanverse/i18n';
 
-// 6 separation types — exact from kiaanverse.com screenshots
+// 6 separation types — exact from kiaanverse.com screenshots.
+// labelKey/descKey resolve via t() at render time.
 const SEPARATION_TYPES = [
   {
     id: 'death',
     skt: 'मृत्यु-विच्छेद',
-    label: 'Departure Through Death',
-    desc: 'A soul has crossed the threshold',
+    labelKey: 'viyogaSepDeath',
+    descKey: 'viyogaSepDeathDesc',
     color: '#9CA3AF',
   },
   {
     id: 'estrangement',
     skt: 'सम्बन्ध-विच्छेद',
-    label: 'Estrangement & Silence',
-    desc: 'Distance that was chosen or imposed',
+    labelKey: 'viyogaSepEstrangement',
+    descKey: 'viyogaSepEstrangementDesc',
     color: '#8B5CF6',
   },
   {
     id: 'heartbreak',
     skt: 'प्रेम-वेदना',
-    label: 'Heartbreak & Romantic Loss',
-    desc: 'Love that transformed or ended',
+    labelKey: 'viyogaSepHeartbreak',
+    descKey: 'viyogaSepHeartbreakDesc',
     color: '#EC4899',
   },
   {
     id: 'self',
     skt: 'आत्म-विच्छेद',
-    label: 'Separation from Self',
-    desc: 'Lost, numb, no longer yourself',
+    labelKey: 'viyogaSepSelf',
+    descKey: 'viyogaSepSelfDesc',
     color: '#60A5FA',
   },
   {
     id: 'home',
     skt: 'देश-विरह',
-    label: 'Longing for Home',
-    desc: 'Exile, displacement, rootlessness',
+    labelKey: 'viyogaSepHome',
+    descKey: 'viyogaSepHomeDesc',
     color: '#F59E0B',
   },
   {
     id: 'divine',
     skt: 'विरह-भक्ति',
-    label: 'Longing for the Divine',
-    desc: 'Spiritual separation, the dark night',
+    labelKey: 'viyogaSepDivine',
+    descKey: 'viyogaSepDivineDesc',
     color: '#D4A017',
   },
 ] as const;
 
 export default function ViyogaStep1(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const [selected, setSelected] = useState<string | null>(null);
   const { updateAnswer } = useSacredFlow('viyoga');
 
@@ -96,10 +99,12 @@ export default function ViyogaStep1(): React.JSX.Element {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={s.question}>What form does your separation take?</Text>
+        <Text style={s.question}>{t('viyogaStep1Question')}</Text>
 
         {SEPARATION_TYPES.map((type) => {
           const isSelected = selected === type.id;
+          const label = t(type.labelKey);
+          const desc = t(type.descKey);
           return (
             <TouchableOpacity
               key={type.id}
@@ -114,7 +119,7 @@ export default function ViyogaStep1(): React.JSX.Element {
               activeOpacity={0.75}
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={type.label}
+              accessibilityLabel={label}
             >
               <View
                 style={[
@@ -133,9 +138,9 @@ export default function ViyogaStep1(): React.JSX.Element {
                   {type.skt}
                 </Text>
                 <Text style={[s.cardLabel, isSelected && { color: '#F0EBE1' }]}>
-                  {type.label}
+                  {label}
                 </Text>
-                <Text style={s.cardDesc}>{type.desc}</Text>
+                <Text style={s.cardDesc}>{desc}</Text>
               </View>
             </TouchableOpacity>
           );
@@ -148,7 +153,7 @@ export default function ViyogaStep1(): React.JSX.Element {
           onPress={handleContinue}
           disabled={!selected}
           accessibilityRole="button"
-          accessibilityLabel="Continue"
+          accessibilityLabel={t('viyogaContinue')}
           accessibilityState={{ disabled: !selected }}
         >
           <LinearGradient
@@ -157,7 +162,7 @@ export default function ViyogaStep1(): React.JSX.Element {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={s.continueBtnText}>Continue</Text>
+            <Text style={s.continueBtnText}>{t('viyogaContinue')}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>

@@ -43,24 +43,25 @@ import {
   isOfflineError,
   useArdhaStructuredReframe,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
-/** Starter chips — exact from kiaanverse.com/m/ardha, in visible order. */
-const STARTER_CHIPS: readonly string[] = [
-  'I always fail at...',
-  'Nobody cares about...',
-  "I'm not good enough...",
-  'Everything goes wrong...',
-  'I always mess up...',
-  'Nobody understands me...',
+/** Starter chip keys (resolved at render via t()) — order preserved from web. */
+const STARTER_CHIP_KEYS: readonly string[] = [
+  'ardhaChip1',
+  'ardhaChip2',
+  'ardhaChip3',
+  'ardhaChip4',
+  'ardhaChip5',
+  'ardhaChip6',
 ];
 
-/** Rotating loader lines shown under the spinning mandala. */
-const LOADING_LINES: readonly string[] = [
-  'Distinguishing Atman from Prakriti...',
-  'Scanning Raga-Dvesha patterns...',
-  'Aligning with Dharma...',
-  'Balancing Hrdaya Samatvam...',
-  'Preparing Arpana...',
+/** Rotating loader-line keys (resolved at render via t()). */
+const LOADING_LINE_KEYS: readonly string[] = [
+  'ardhaLoading1',
+  'ardhaLoading2',
+  'ardhaLoading3',
+  'ardhaLoading4',
+  'ardhaLoading5',
 ];
 
 /** ARDHA pillars shown in the reference accordion under the CTA. */
@@ -70,6 +71,7 @@ const PILLAR_SUMMARY = ARDHA_SECTIONS.filter(
 
 export default function ArdhaInputScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const reframe = useArdhaStructuredReframe();
 
   const [thought, setThought] = useState('');
@@ -107,7 +109,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
     let idx = 0;
     setLoadingIdx(0);
     loadingTimer.current = setInterval(() => {
-      idx = (idx + 1) % LOADING_LINES.length;
+      idx = (idx + 1) % LOADING_LINE_KEYS.length;
       setLoadingIdx(idx);
     }, 1800);
 
@@ -128,11 +130,11 @@ export default function ArdhaInputScreen(): React.JSX.Element {
     }
   }, [thought, reframe, router]);
 
-  const errorMessage = reframe.error ? formatError(reframe.error) : null;
+  const errorMessage = reframe.error ? formatError(reframe.error, t) : null;
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
-      <GoldenHeader title="Ardha" onBack={() => router.back()} />
+      <GoldenHeader title={t('ardhaTitle')} onBack={() => router.back()} />
 
       {voice.isVoicePrefilled && voice.prefill?.split_theme && (
         <VoicePrefillBanner
@@ -147,18 +149,14 @@ export default function ArdhaInputScreen(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(500)} style={styles.crown}>
-          <Text style={styles.sanskrit} accessibilityLabel="Ardha">
+          <Text style={styles.sanskrit} accessibilityLabel={t('ardhaTitle')}>
             अर्ध
           </Text>
-          <Text style={styles.english}>Ardha</Text>
-          <Text style={styles.tagline}>
-            Atma-Reframing through Dharma &amp; Higher Awareness
-          </Text>
+          <Text style={styles.english}>{t('ardhaTitle')}</Text>
+          <Text style={styles.tagline}>{t('ardhaTagline')}</Text>
           <View style={styles.divider} />
-          <Text style={styles.quote}>
-            “The unreal has no existence, and the real never ceases to be.”
-          </Text>
-          <Text style={styles.quoteRef}>Bhagavad Gita 2.16</Text>
+          <Text style={styles.quote}>{t('ardhaQuote')}</Text>
+          <Text style={styles.quoteRef}>{t('ardhaQuoteRef')}</Text>
         </Animated.View>
 
         <Animated.View
@@ -167,7 +165,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
         >
           <View style={styles.cardHeader}>
             <Text style={styles.cardHeaderLabel}>
-              Share the thought to reframe
+              {t('ardhaShareThoughtLabel')}
             </Text>
             <View style={styles.bulbBadge}>
               <Text style={styles.bulb}>💡</Text>
@@ -178,9 +176,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
             style={styles.input}
             value={thought}
             onChangeText={setThought}
-            placeholder={
-              'Type a thought that troubles you... ARDHA will\nsee through the distortion to the truth beneath.\n\nOr tap the conch to speak.'
-            }
+            placeholder={t('ardhaInputPlaceholder')}
             multiline
             editable={!reframe.isPending}
             maxLength={2000}
@@ -193,20 +189,23 @@ export default function ArdhaInputScreen(): React.JSX.Element {
             contentContainerStyle={styles.chipsRow}
             style={styles.chipsScroll}
           >
-            {STARTER_CHIPS.map((chip) => (
-              <Pressable
-                key={chip}
-                onPress={() => handleChip(chip)}
-                style={({ pressed }) => [
-                  styles.chip,
-                  pressed && styles.chipPressed,
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel={`Use starter phrase: ${chip}`}
-              >
-                <Text style={styles.chipText}>{chip}</Text>
-              </Pressable>
-            ))}
+            {STARTER_CHIP_KEYS.map((chipKey) => {
+              const chip = t(chipKey);
+              return (
+                <Pressable
+                  key={chipKey}
+                  onPress={() => handleChip(chip)}
+                  style={({ pressed }) => [
+                    styles.chip,
+                    pressed && styles.chipPressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('ardhaUseStarterA11y', { chip })}
+                >
+                  <Text style={styles.chipText}>{chip}</Text>
+                </Pressable>
+              );
+            })}
           </ScrollView>
 
           <Pressable
@@ -218,7 +217,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
               pressed && canSubmit && styles.ctaPressed,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Reframe with Ardha"
+            accessibilityLabel={t('ardhaReframeWithA11y')}
           >
             <LinearGradient
               colors={['#1B4FBB', '#0E7490']}
@@ -229,10 +228,10 @@ export default function ArdhaInputScreen(): React.JSX.Element {
               {reframe.isPending ? (
                 <View style={styles.ctaLoadingRow}>
                   <ActivityIndicator color={colors.raw.white} size="small" />
-                  <Text style={styles.ctaText}>ARDHA is reflecting...</Text>
+                  <Text style={styles.ctaText}>{t('ardhaReflecting')}</Text>
                 </View>
               ) : (
-                <Text style={styles.ctaText}>Reframe with ARDHA</Text>
+                <Text style={styles.ctaText}>{t('ardhaReframeCta')}</Text>
               )}
             </LinearGradient>
           </Pressable>
@@ -246,7 +245,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
                 opacity={0.35}
               />
               <Text style={styles.loadingLine}>
-                {LOADING_LINES[loadingIdx]}
+                {t(LOADING_LINE_KEYS[loadingIdx] ?? 'ardhaLoading1')}
               </Text>
             </View>
           ) : null}
@@ -264,7 +263,7 @@ export default function ArdhaInputScreen(): React.JSX.Element {
         >
           <View style={styles.pillarsHeaderRow}>
             <View style={styles.pillarsDot} />
-            <Text style={styles.pillarsHeader}>ARDHA's 5 Pillars</Text>
+            <Text style={styles.pillarsHeader}>{t('ardhaPillarsHeader')}</Text>
           </View>
           <View style={styles.pillarsCard}>
             {PILLAR_SUMMARY.map((pillar, index) => (
@@ -289,18 +288,10 @@ export default function ArdhaInputScreen(): React.JSX.Element {
           entering={FadeInUp.duration(500).delay(200)}
           style={styles.cbtBlock}
         >
-          <Text style={styles.cbtTitle}>ARDHA vs CBT</Text>
-          <Text style={styles.cbtBody}>
-            CBT corrects <Text style={styles.italic}>distorted thinking</Text>.
-            ARDHA corrects <Text style={styles.italic}>mistaken identity</Text>.
-            Where CBT strengthens the functional ego, ARDHA loosens
-            ego-identification toward inner freedom through right action.
-          </Text>
+          <Text style={styles.cbtTitle}>{t('ardhaCbtTitle')}</Text>
+          <Text style={styles.cbtBody}>{t('ardhaCbtBody')}</Text>
           <View style={styles.cbtFlow}>
-            <Text style={styles.cbtFlowText}>
-              Atma Distinction → Raga-Dvesha Scan → Dharma Alignment → Hrdaya
-              Samatvam → Arpana
-            </Text>
+            <Text style={styles.cbtFlowText}>{t('ardhaCbtFlow')}</Text>
           </View>
         </Animated.View>
       </ScrollView>
@@ -308,16 +299,16 @@ export default function ArdhaInputScreen(): React.JSX.Element {
   );
 }
 
-function formatError(err: unknown): string {
-  if (isAuthError(err))
-    return 'Your session has expired. Please sign in again.';
-  if (isOfflineError(err))
-    return 'The network is unreachable. Check your connection and try once more.';
-  if (isApiError(err) && err.statusCode >= 500)
-    return 'ARDHA is waking from deep meditation. Please try again in a moment.';
+function formatError(
+  err: unknown,
+  t: (key: string, params?: Record<string, string>) => string,
+): string {
+  if (isAuthError(err)) return t('ardhaErrSession');
+  if (isOfflineError(err)) return t('ardhaErrOffline');
+  if (isApiError(err) && err.statusCode >= 500) return t('ardhaErrServer');
   if (err instanceof Error && err.message)
-    return `ARDHA could not reframe: ${err.message}`;
-  return 'ARDHA could not reframe right now. Please try again.';
+    return t('ardhaErrPrefix', { message: err.message });
+  return t('ardhaErrGeneric');
 }
 
 const styles = StyleSheet.create({

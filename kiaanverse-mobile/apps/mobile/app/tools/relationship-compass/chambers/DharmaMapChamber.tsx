@@ -15,6 +15,7 @@ import { GoldenButton } from '@kiaanverse/ui';
 import { DHARMA_AXES } from '../data/dharmaAxes';
 import { DharmaRadar } from '../components/DharmaRadar';
 import type { GunaName } from '../hooks/useGunaCalculation';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -32,6 +33,7 @@ export function DharmaMapChamber({
   partnerName,
   onProceed,
 }: DharmaMapChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const interpretation = useMemo(() => {
     const ranked = DHARMA_AXES.map((axis) => ({
       axis,
@@ -42,9 +44,17 @@ export function DharmaMapChamber({
     const lowestAxis =
       ranked[ranked.length - 1]?.axis ?? DHARMA_AXES[DHARMA_AXES.length - 1];
     if (!highestAxis || !lowestAxis) return '';
-    const nameLabel = partnerName.trim() ? `with ${partnerName.trim()} ` : '';
-    return `Your relationship ${nameLabel}shows strong ${highestAxis.label.toLowerCase()} (${highestAxis.sanskrit}) but diminished ${lowestAxis.label.toLowerCase()} (${lowestAxis.sanskrit}).`;
-  }, [dharmaValues, partnerName]);
+    const nameClause = partnerName.trim()
+      ? t('rcDharmaMapNameClauseFmt', { name: partnerName.trim() })
+      : '';
+    return t('rcDharmaMapInterpretFmt', {
+      nameClause,
+      high: highestAxis.label.toLowerCase(),
+      highSkt: highestAxis.sanskrit,
+      low: lowestAxis.label.toLowerCase(),
+      lowSkt: lowestAxis.sanskrit,
+    });
+  }, [dharmaValues, partnerName, t]);
 
   const screenWidth = Dimensions.get('window').width;
   const radarSize = Math.min(360, screenWidth - 16);
@@ -68,7 +78,7 @@ export function DharmaMapChamber({
 
       <View style={styles.cta}>
         <GoldenButton
-          title="Receive the Gita's Wisdom"
+          title={t('rcDharmaMapCta')}
           onPress={onProceed}
           variant="divine"
         />

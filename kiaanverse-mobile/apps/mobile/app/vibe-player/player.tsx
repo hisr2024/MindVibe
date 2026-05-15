@@ -42,6 +42,7 @@ import {
 import { useRouter } from 'expo-router';
 import { DivineBackground } from '@kiaanverse/ui';
 import { useVibePlayerStore, type RepeatMode } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 import { useProgress } from 'react-native-track-player';
 
 import {
@@ -78,13 +79,29 @@ function toSacredCategory(raw?: string): SacredCategory {
   }
 }
 
-/** Best-effort mapping from arbitrary category → human-readable label. */
-function categoryLabel(raw: string): string {
+/** Map a raw category string to a localized display label. Known
+ *  categories route through the vibe-player namespace; anything unknown
+ *  falls back to the localized default ("Meditation" in English). */
+function categoryLabel(raw: string, t: (key: string) => string): string {
   if (!raw) return '';
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
+  switch (raw) {
+    case 'mantra':
+      return t('vibe-player.categoryMantra');
+    case 'meditation':
+      return t('vibe-player.categoryMeditation');
+    case 'chanting':
+      return t('vibe-player.categoryChanting');
+    case 'ambient':
+      return t('vibe-player.categoryAmbient');
+    case 'binaural':
+      return t('vibe-player.categoryBinaural');
+    default:
+      return t('vibe-player.categoryDefault');
+  }
 }
 
 export default function VibePlayerScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const { height } = useWindowDimensions();
 
@@ -153,7 +170,8 @@ export default function VibePlayerScreen(): React.JSX.Element {
 
   const categoryDisplay = currentTrack
     ? categoryLabel(
-        (currentTrack as { category?: string }).category ?? 'Meditation'
+        (currentTrack as { category?: string }).category ?? '',
+        t,
       )
     : '';
 
@@ -161,16 +179,16 @@ export default function VibePlayerScreen(): React.JSX.Element {
     return (
       <DivineBackground variant="sacred" style={styles.root}>
         <View style={styles.emptyWrap}>
-          <Text style={styles.emptyText}>
-            No track loaded. Choose one from the library to begin.
-          </Text>
+          <Text style={styles.emptyText}>{t('vibe-player.playerEmptyText')}</Text>
           <Pressable
             onPress={() => router.back()}
             style={styles.backLink}
             accessibilityRole="button"
-            accessibilityLabel="Back to library"
+            accessibilityLabel={t('vibe-player.playerBackToLibraryA11y')}
           >
-            <Text style={styles.backLinkText}>← Go to library</Text>
+            <Text style={styles.backLinkText}>
+              {t('vibe-player.playerBackToLibrary')}
+            </Text>
           </Pressable>
         </View>
       </DivineBackground>
@@ -185,7 +203,7 @@ export default function VibePlayerScreen(): React.JSX.Element {
           <Pressable
             onPress={() => router.back()}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('vibe-player.playerBackA11y')}
             hitSlop={12}
             style={styles.backBtn}
           >
@@ -243,13 +261,17 @@ export default function VibePlayerScreen(): React.JSX.Element {
           />
         </View>
 
-        {/* Shloka companion — expands while playing, collapses while paused */}
+        {/* Shloka companion — expands while playing, collapses while
+            paused. Sanskrit text and IAST transliteration stay fixed
+            across every locale (they ARE Sanskrit); only the English
+            "meaning" line localizes. The Śrīmad-Bhāgavatam citation is
+            a universal scripture reference. */}
         <View style={styles.companionWrap}>
           <ShlokaCompanion
             expanded={isPlaying}
             sanskrit="ॐ नमो भगवते वासुदेवाय"
             transliteration="oṁ namo bhagavate vāsudevāya"
-            meaning="Salutations to the Supreme Lord Vāsudeva — the one who dwells in all beings."
+            meaning={t('vibe-player.companionMeaning')}
             reference="Śrīmad-Bhāgavatam 1.1.1"
           />
         </View>

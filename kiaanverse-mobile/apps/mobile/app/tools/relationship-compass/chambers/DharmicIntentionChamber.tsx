@@ -22,6 +22,7 @@ import {
   DHARMIC_QUALITIES,
   type DharmicQuality,
 } from '../data/dharmicQualities';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -45,14 +46,18 @@ export function DharmicIntentionChamber({
   onIntentionTextChange,
   onSeal,
 }: DharmicIntentionChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   // Pre-fill the sankalpa once the user picks a quality (only if they
   // haven't already typed something). This matches the screenshot.
   useEffect(() => {
     if (!selectedQuality) return;
     if (intentionText.trim().length > 0) return;
-    const name = partnerName.trim() || 'them';
+    const name = partnerName.trim() || t('rcIntentionThemFallback');
     onIntentionTextChange(
-      `In my relationship with ${name}, I choose ${selectedQuality.label.toLowerCase()}.`
+      t('rcIntentionPrefillFmt', {
+        name,
+        quality: selectedQuality.label.toLowerCase(),
+      }),
     );
     // Intentionally only re-run when the selected quality changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,7 +79,7 @@ export function DharmicIntentionChamber({
   return (
     <View style={styles.root}>
       <Animated.Text entering={FadeIn.duration(380)} style={styles.title}>
-        Set your dharmic intention
+        {t('rcIntentionTitle')}
       </Animated.Text>
 
       <View style={styles.grid}>
@@ -84,7 +89,10 @@ export function DharmicIntentionChamber({
             <Pressable
               key={q.id}
               accessibilityRole="button"
-              accessibilityLabel={`${q.label} — ${q.description}`}
+              accessibilityLabel={t('rcIntentionQualityA11y', {
+                label: q.label,
+                description: q.description,
+              })}
               accessibilityState={{ selected }}
               onPress={() => handleSelect(q)}
               style={[
@@ -119,21 +127,24 @@ export function DharmicIntentionChamber({
           onChangeText={onIntentionTextChange}
           placeholder={
             selectedQuality
-              ? `In my relationship with ${partnerName.trim() || 'them'}, I choose ${selectedQuality.label.toLowerCase()}. (or tap the conch to speak)`
-              : 'Write your sankalpa here... (or tap the conch to speak)'
+              ? t('rcIntentionWithPartnerFmt', {
+                  name: partnerName.trim() || t('rcIntentionThemFallback'),
+                  quality: selectedQuality.label.toLowerCase(),
+                })
+              : t('rcIntentionPlaceholder')
           }
           style={styles.intentionInput}
           multiline
           numberOfLines={3}
           maxLength={280}
-          accessibilityLabel="Your intention"
+          accessibilityLabel={t('rcIntentionA11y')}
           dictationMode="append"
         />
       </Animated.View>
 
       <View style={styles.cta}>
         <GoldenButton
-          title="Seal My Compass"
+          title={t('rcIntentionCta')}
           onPress={handleSeal}
           disabled={!selectedQuality}
           variant="divine"

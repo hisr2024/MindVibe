@@ -1,0 +1,17 @@
+{
+  "loading": "Chargement…",
+  "error": "Une erreur est survenue",
+  "retry": "Réessayer",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "done": "Terminé",
+  "next": "Suivant",
+  "back": "Retour",
+  "skip": "Passer",
+  "ok": "OK",
+  "yes": "Oui",
+  "no": "Non",
+  "search": "Rechercher",
+  "noResults": "Aucun résultat trouvé",
+  "offline": "Vous êtes hors ligne"
+}

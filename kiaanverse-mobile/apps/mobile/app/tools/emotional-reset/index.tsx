@@ -17,8 +17,10 @@ import { View, StyleSheet } from 'react-native';
 import { EmotionalResetScreen } from '../../../components/emotional-reset/EmotionalResetScreen';
 import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
 import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function EmotionalResetRoute(): React.JSX.Element {
+  const { t } = useTranslation('tools');
   // Banner-only prefill: the 6-phase ritual has no single text input
   // to seed, so we surface the visible-confirmation ribbon and let
   // the ritual phases pick up `mood_label` / `trigger_summary` /
@@ -33,7 +35,7 @@ export default function EmotionalResetRoute(): React.JSX.Element {
   const label =
     voice.prefill?.trigger_summary ??
     voice.prefill?.mood_label ??
-    'your reflection';
+    t('emotionalResetReflectionFallback');
 
   return (
     <View style={styles.root}>

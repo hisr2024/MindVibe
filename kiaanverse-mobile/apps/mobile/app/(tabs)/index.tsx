@@ -66,6 +66,7 @@ import {
 // the Zustand sadhanaStore (which only holds the in-flight ritual phase). The
 // verse-of-the-day is resolved by useGitaStore + useGitaVerse(chapter, verse).
 import { useGitaVerse, useSadhanaStreak } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { ListenButton } from '../../voice/components/ListenButton';
 
@@ -226,6 +227,7 @@ function UserAvatar({
 
 // ── ZONE 1: DIVINE HEADER ─────────────────────────────────────────────────
 function DivineHeader(): React.JSX.Element {
+  const { t } = useTranslation();
   const user = useAuthStore((st) => st.user);
   const { data: streakData } = useSadhanaStreak();
   const streak = streakData?.current ?? 0;
@@ -246,16 +248,14 @@ function DivineHeader(): React.JSX.Element {
         <OmBreath />
 
         {/* Center: Wordmark — Sanskrit OM glyph + Cormorant italic wordmark,
-            stacked above a Sakha byline. The subtitle uses the same Cormorant
-            italic family as the wordmark (one weight lighter) so the two
-            lines read as a single calligraphic identity rather than a
-            heading + caption. Warm gold at 85% opacity keeps the byline
-            sacred but un-shouty under the white wordmark. */}
+            stacked above a Sakha byline. "Kiaanverse" itself is the brand
+            name and stays untranslated; the byline below it ("Sakha · your
+            spiritual companion") localizes per the active UI language. */}
         <View
           style={s.wordmark}
           pointerEvents="none"
           accessibilityRole="header"
-          accessibilityLabel="Kiaanverse — Sakha, your spiritual companion"
+          accessibilityLabel={t('home.wordmarkA11yLabel')}
         >
           <Text style={s.wordmarkText} numberOfLines={1}>
             <Text style={s.wordmarkOm}>ॐ </Text>
@@ -266,7 +266,7 @@ function DivineHeader(): React.JSX.Element {
             numberOfLines={1}
             allowFontScaling={false}
           >
-            Sakha · your spiritual companion
+            {t('home.wordmarkSubtitle')}
           </Text>
         </View>
 
@@ -274,7 +274,7 @@ function DivineHeader(): React.JSX.Element {
         <TouchableOpacity
           onPress={openProfile}
           accessibilityRole="button"
-          accessibilityLabel="Open profile"
+          accessibilityLabel={t('home.openProfileA11y')}
           hitSlop={8}
         >
           <UserAvatar initial={initial} streak={streak} />
@@ -333,7 +333,11 @@ function GoldShimmer({
 
 // ── ZONE 2: Greeting Hero ─────────────────────────────────────────────────
 function GreetingHero(): React.JSX.Element {
+  const { t } = useTranslation();
   const user = useAuthStore((st) => st.user);
+  // Muhurta greeting (line1) and its Devanagari subtitle (skt) are deliberately
+  // fixed Sanskrit across every UI locale — they're brand identity, not UI
+  // copy. See getGreeting()'s header comment for the rationale.
   const { line1, skt } = getGreeting();
 
   // Staggered entrance — Zone 2 enters 120ms after Zone 1.
@@ -363,7 +367,7 @@ function GreetingHero(): React.JSX.Element {
 
       {/* Line 2: User name with sweeping gold shimmer */}
       <GoldShimmer>
-        <Text style={s.greetingName}>{user?.name ?? 'Sacred Seeker'}</Text>
+        <Text style={s.greetingName}>{user?.name ?? t('home.defaultUserName')}</Text>
       </GoldShimmer>
 
       {/* Line 3: Sanskrit translation at 50% gold */}
@@ -377,6 +381,7 @@ function GreetingHero(): React.JSX.Element {
 const FALLBACK_VOD = { chapter: 2, verse: 47 } as const;
 
 function DailyVerseCard(): React.JSX.Element {
+  const { t } = useTranslation();
   // Verse-of-the-day reference lives in the persisted gitaStore. Derive the
   // chapter/verse eagerly with a fallback so the API hook always has real
   // inputs — avoids a conditional-hook trap on first launch.
@@ -468,7 +473,7 @@ function DailyVerseCard(): React.JSX.Element {
         activeOpacity={0.85}
         onPress={openWisdom}
         accessibilityRole="button"
-        accessibilityLabel="Open Today's Wisdom"
+        accessibilityLabel={t('home.openTodaysWisdomA11y')}
       >
         <View style={s.verseCardBody}>
         {/* Label — "Today's Shloka" in Devanagari */}
@@ -501,7 +506,10 @@ function DailyVerseCard(): React.JSX.Element {
             <Text style={s.verseTranslit}>{verse.transliteration}</Text>
             <Text style={s.verseMeaning}>{verse.translation}</Text>
             <Text style={s.verseRef}>
-              {`Bhagavad Gita — Ch. ${verse.chapter} · V. ${verse.verse}`}
+              {t('home.verseRef', {
+                chapter: String(verse.chapter),
+                verse: String(verse.verse),
+              })}
             </Text>
 
             <View style={s.verseActions}>
@@ -509,9 +517,9 @@ function DailyVerseCard(): React.JSX.Element {
                 style={s.verseAskBtn}
                 onPress={askSakha}
                 accessibilityRole="button"
-                accessibilityLabel="Ask Sakha about this verse"
+                accessibilityLabel={t('home.askSakhaA11y')}
               >
-                <Text style={s.verseAskBtnText}>Ask Sakha →</Text>
+                <Text style={s.verseAskBtnText}>{t('home.askSakha')}</Text>
               </TouchableOpacity>
               {/* TTS: speaks Sanskrit → English sequentially via the
                   same on-device Android TextToSpeech engine the verse
@@ -525,15 +533,17 @@ function DailyVerseCard(): React.JSX.Element {
                 variant="inline"
                 idleLabel=""
                 playingLabel=""
-                accessibilityLabelIdle="Listen to verse of the day"
-                accessibilityLabelPlaying="Stop verse playback"
+                accessibilityLabelIdle={t('home.listenToVerseA11y')}
+                accessibilityLabelPlaying={t('home.stopVerseA11y')}
               />
               <TouchableOpacity
                 style={s.verseBookmarkBtn}
                 onPress={bookmark}
                 accessibilityRole="button"
                 accessibilityLabel={
-                  isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'
+                  isBookmarked
+                    ? t('home.removeBookmarkA11y')
+                    : t('home.bookmarkVerseA11y')
                 }
                 accessibilityState={{ selected: isBookmarked }}
               >
@@ -552,11 +562,13 @@ function DailyVerseCard(): React.JSX.Element {
 
 // ── ZONE 4: Tools Quick Rail ──────────────────────────────────────────────
 /** Five sacred instruments + catalog exit. `as const` freezes the tuple so
- *  TypeScript narrows `tool.route` to a valid expo-router string literal. */
+ *  TypeScript narrows `tool.route` to a valid expo-router string literal.
+ *  Tool names route through i18n via `nameKey`; the Sanskrit subtitles
+ *  stay Devanagari across every locale (sacred brand identity). */
 const QUICK_TOOLS = [
   {
     id: 'emotional-reset',
-    name: 'Emotional Reset',
+    nameKey: 'home.toolEmotionalReset',
     skt: 'भावनात्मक',
     icon: '🔥',
     color: '#EF4444',
@@ -564,7 +576,7 @@ const QUICK_TOOLS = [
   },
   {
     id: 'ardha',
-    name: 'Ardha',
+    nameKey: 'home.toolArdha',
     skt: 'अर्थ',
     icon: '💡',
     color: '#F59E0B',
@@ -572,7 +584,7 @@ const QUICK_TOOLS = [
   },
   {
     id: 'karma-reset',
-    name: 'Karma Reset',
+    nameKey: 'home.toolKarmaReset',
     skt: 'कर्म',
     icon: '☸',
     color: '#8B5CF6',
@@ -580,7 +592,7 @@ const QUICK_TOOLS = [
   },
   {
     id: 'viyoga',
-    name: 'Viyoga',
+    nameKey: 'home.toolViyoga',
     skt: 'वियोग',
     icon: '🌊',
     color: '#0E7490',
@@ -588,7 +600,7 @@ const QUICK_TOOLS = [
   },
   {
     id: 'all',
-    name: 'All Tools',
+    nameKey: 'home.toolAllTools',
     skt: 'सर्व',
     icon: '✦',
     color: GOLD,
@@ -597,6 +609,7 @@ const QUICK_TOOLS = [
 ] as const;
 
 function ToolsRail(): React.JSX.Element {
+  const { t } = useTranslation();
   // Zone 4 entrance — 360ms stagger after Zone 1.
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(12);
@@ -628,36 +641,39 @@ function ToolsRail(): React.JSX.Element {
 
   return (
     <Reanimated.View style={[s.railSection, animStyle]}>
-      <Text style={s.railHeader}>Sacred Tools</Text>
+      <Text style={s.railHeader}>{t('home.sacredToolsHeader')}</Text>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={s.railScroll}
       >
-        {QUICK_TOOLS.map((tool) => (
-          <TouchableOpacity
-            key={tool.id}
-            style={s.toolChip}
-            onPress={() => openTool(tool.route)}
-            activeOpacity={0.75}
-            accessibilityRole="button"
-            accessibilityLabel={`${tool.name} tool`}
-          >
-            {/* Left color accent — 3px vertical semantic stripe */}
-            <View style={[s.toolChipAccent, { backgroundColor: tool.color }]} />
+        {QUICK_TOOLS.map((tool) => {
+          const name = t(tool.nameKey);
+          return (
+            <TouchableOpacity
+              key={tool.id}
+              style={s.toolChip}
+              onPress={() => openTool(tool.route)}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel={t('home.toolNameA11y', { name })}
+            >
+              {/* Left color accent — 3px vertical semantic stripe */}
+              <View style={[s.toolChipAccent, { backgroundColor: tool.color }]} />
 
-            <View style={s.toolChipContent}>
-              <Text style={s.toolChipIcon}>{tool.icon}</Text>
-              <View>
-                <Text style={s.toolChipName}>{tool.name}</Text>
-                <Text style={[s.toolChipSkt, { color: tool.color }]}>
-                  {tool.skt}
-                </Text>
+              <View style={s.toolChipContent}>
+                <Text style={s.toolChipIcon}>{tool.icon}</Text>
+                <View>
+                  <Text style={s.toolChipName}>{name}</Text>
+                  <Text style={[s.toolChipSkt, { color: tool.color }]}>
+                    {tool.skt}
+                  </Text>
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </Reanimated.View>
   );
@@ -679,6 +695,7 @@ const SADHANA_PHASE_ORDER: readonly SadhanaPhase[] = [
 ] as const;
 
 function SadhanaStreakCard(): React.JSX.Element {
+  const { t } = useTranslation();
   // Streak comes from the API (SadhanaStreak.current), not the Zustand
   // sadhanaStore — that store only tracks the in-flight ritual phase.
   const { data: streakData } = useSadhanaStreak();
@@ -762,7 +779,8 @@ function SadhanaStreakCard(): React.JSX.Element {
             <Text style={s.streakFlame}>🔥</Text>
           </Reanimated.View>
           <Text style={s.streakNumber}>{streak}</Text>
-          <Text style={s.streakLabel}>{'Days of Sacred\nPractice'}</Text>
+          <Text style={s.streakLabel}>{t('home.daysOfSacredPractice')}</Text>
+          {/* नित्य साधना — Sanskrit brand caption, fixed across UI locales. */}
           <Text style={s.streakSkt}>नित्य साधना</Text>
         </View>
 
@@ -775,16 +793,16 @@ function SadhanaStreakCard(): React.JSX.Element {
             progress={progress}
             size={88}
             label={`${completedPhases}/${totalPhases}`}
-            caption="Phases"
+            caption={t('home.phasesLabel')}
           />
           <TouchableOpacity
             style={s.sadhanaBtn}
             onPress={continueSadhana}
             activeOpacity={0.75}
             accessibilityRole="button"
-            accessibilityLabel="Continue sadhana"
+            accessibilityLabel={t('home.continueSadhanaA11y')}
           >
-            <Text style={s.sadhanaBtnText}>Continue →</Text>
+            <Text style={s.sadhanaBtnText}>{t('home.continueArrow')}</Text>
           </TouchableOpacity>
         </View>
       </View>

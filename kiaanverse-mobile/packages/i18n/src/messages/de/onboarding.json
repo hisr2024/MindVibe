@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "Schritt {{current}} von {{total}}",
+  "progressDotA11yCurrent": "Schritt {{current}} von {{total}}, aktuell",
+  "continueButton": "Weiter",
+
+  "welcomeTitle": "Triff Sakha",
+  "welcomeBody": "Dein göttlicher Begleiter auf dem Weg zum inneren Frieden, geleitet von der zeitlosen Weisheit der Bhagavad Gita.",
+  "welcomeCta": "Beginne deine Reise",
+
+  "purposeTitle": "Was führt dich hierher?",
+  "purposeSubtitle": "Wähle alles, was in dir resoniert",
+  "purposePeace": "Frieden",
+  "purposeWisdom": "Weisheit",
+  "purposeGuidance": "Führung",
+  "purposeHealing": "Heilung",
+  "purposePurpose": "Lebenssinn",
+
+  "gitaTitle": "Kennst du die Gita?",
+  "gitaSubtitle": "So kann Sakha die Weisheit auf dein Niveau abstimmen",
+  "gitaLevelNever": "Nie gelesen",
+  "gitaLevelCurious": "Neugierig",
+  "gitaLevelBeginner": "Anfänger",
+  "gitaLevelPractitioner": "Praktizierend",
+  "gitaLevelScholar": "Gelehrt",
+
+  "practiceTitle": "Zeit für tägliche Praxis",
+  "practiceSubtitle": "Wann möchtest du deine tägliche spirituelle Erinnerung?",
+  "practiceAm": "Vorm.",
+  "practicePm": "Nachm.",
+  "practiceHourA11y": "{{hour}} Uhr",
+
+  "readyVerse": "„Du hast das Recht, deine vorgeschriebenen Pflichten zu erfüllen, aber nicht das Recht auf die Früchte deines Handelns.\"",
+  "readyVerseAttribution": "— Bhagavad Gita 2.47",
+  "readyTitle": "Du bist bereit",
+  "readyBody": "Aktiviere tägliche Erinnerungen, um auf deinem spirituellen Weg zu bleiben — oder beginne jetzt zu erkunden.",
+  "readyCtaEnable": "Benachrichtigungen aktivieren & starten",
+  "readyCtaSkip": "Ohne Benachrichtigungen starten",
+  "readyRequesting": "Berechtigung wird angefragt..."
+}

@@ -52,19 +52,20 @@ import { WisdomStep } from '../../../components/emotional-reset/WisdomStep';
 import { AffirmationStep } from '../../../components/emotional-reset/AffirmationStep';
 import { ReflectionStep } from '../../../components/emotional-reset/ReflectionStep';
 import { SummaryStep } from '../../../components/emotional-reset/SummaryStep';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const TOTAL_STEPS = 6;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 
-/** Labels displayed below the step indicator for each phase. */
-const STEP_LABELS: Record<number, string> = {
-  1: 'Breathe',
-  2: 'Visualize',
-  3: 'Wisdom',
-  4: 'Affirm',
-  5: 'Reflect',
-  6: 'Complete',
+/** Per-step localization keys (resolved at render via t()). */
+const STEP_LABEL_KEYS: Record<number, string> = {
+  1: 'erStepBreathe',
+  2: 'erStepVisualize',
+  3: 'erStepWisdom',
+  4: 'erStepAffirm',
+  5: 'erStepReflect',
+  6: 'erStepComplete',
 };
 
 /**
@@ -93,6 +94,7 @@ export default function StepScreen(): React.JSX.Element {
   const c = theme.colors;
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const { step } = useLocalSearchParams<{ step: string }>();
   const currentStep = Math.max(1, Math.min(TOTAL_STEPS, Number(step) || 1));
 
@@ -213,7 +215,7 @@ export default function StepScreen(): React.JSX.Element {
             align="center"
             style={styles.stepLabel}
           >
-            {STEP_LABELS[currentStep]}
+            {t(STEP_LABEL_KEYS[currentStep] ?? 'erStepBreathe')}
           </Text>
         </Animated.View>
 
@@ -222,12 +224,12 @@ export default function StepScreen(): React.JSX.Element {
           <Pressable
             onPress={navigateBack}
             style={styles.backButton}
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('goBackA11y')}
             accessibilityRole="button"
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
             <Text variant="bodySmall" color={c.textSecondary}>
-              {'<'} Back
+              {t('backButton')}
             </Text>
           </Pressable>
         ) : null}

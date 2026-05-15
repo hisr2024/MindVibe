@@ -1,0 +1,20 @@
+{
+  "backA11y": "ਪਿੱਛੇ",
+  "sectionTag": "ਨਿਤਯ ਸਾਧਨਾ",
+  "title": "ਰੋਜ਼ਾਨਾ ਪਵਿੱਤਰ ਸਾਧਨਾ",
+
+  "completedTitle": "ਸਾਧਨਾ ਪੂਰੀ ਹੋਈ",
+  "completedBody": "ਹਰ ਪੜਾਅ ਅਰਪਣ ਹੋ ਗਿਆ। ਕੱਲ੍ਹ ਫਿਰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਵਾਪਸ ਆਓ।",
+  "returnHomeButton": "ਘਰ ਵਾਪਸ ਜਾਓ",
+  "completionWithStreak": "ਨਿਤਯ ਸਾਧਨਾ ਪੂਰੀ। ਲੜੀ: {{streak}} ਦਿਨ।",
+  "completionFirstDay": "ਨਿਤਯ ਸਾਧਨਾ ਪੂਰੀ। ਤੁਹਾਡੀ ਲੜੀ ਅੱਜ ਸ਼ੁਰੂ ਹੋਈ।",
+
+  "historyTitle": "ਸਾਧਨਾ ਇਤਿਹਾਸ",
+  "statCurrent": "ਮੌਜੂਦਾ",
+  "statLongest": "ਸਭ ਤੋਂ ਲੰਮੀ",
+  "statTotalDays": "ਕੁੱਲ ਦਿਨ",
+  "previousMonthA11y": "ਪਿਛਲਾ ਮਹੀਨਾ",
+  "nextMonthA11y": "ਅਗਲਾ ਮਹੀਨਾ",
+  "recentPracticesHeader": "ਹਾਲੀਆ ਸਾਧਨਾਵਾਂ",
+  "verseLabel": "ਸ਼ਲੋਕ: {{verseId}}"
+}

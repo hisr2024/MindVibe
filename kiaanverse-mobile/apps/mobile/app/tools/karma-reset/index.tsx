@@ -15,8 +15,10 @@ import { View, StyleSheet } from 'react-native';
 import { KarmaResetScreen } from '../../../components/karma-reset/KarmaResetScreen';
 import { VoicePrefillBanner } from '../../../voice/components/VoicePrefillBanner';
 import { useVoicePrefill } from '../../../voice/hooks/useVoicePrefill';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function KarmaResetRoute(): React.JSX.Element {
+  const { t } = useTranslation('tools');
   const voice = useVoicePrefill<{
     pattern_summary?: string;
     duration_label?: string;
@@ -26,7 +28,7 @@ export default function KarmaResetRoute(): React.JSX.Element {
   const label =
     voice.prefill?.pattern_summary ??
     voice.prefill?.mood_label ??
-    'the pattern you named';
+    t('karmaResetPatternFallback');
 
   return (
     <View style={styles.root}>

@@ -1,0 +1,20 @@
+{
+  "backA11y": "मागे",
+  "sectionTag": "नित्य साधना",
+  "title": "दैनंदिन पवित्र साधना",
+
+  "completedTitle": "साधना पूर्ण",
+  "completedBody": "प्रत्येक टप्पा अर्पण झाला. उद्या पुन्हा सुरू करण्यासाठी परत या.",
+  "returnHomeButton": "मुख्यपृष्ठावर परत जा",
+  "completionWithStreak": "नित्य साधना पूर्ण. मालिका: {{streak}} दिवस.",
+  "completionFirstDay": "नित्य साधना पूर्ण. तुमची मालिका आजपासून सुरू.",
+
+  "historyTitle": "साधनेचा इतिहास",
+  "statCurrent": "सध्याचे",
+  "statLongest": "सर्वात दीर्घ",
+  "statTotalDays": "एकूण दिवस",
+  "previousMonthA11y": "मागील महिना",
+  "nextMonthA11y": "पुढील महिना",
+  "recentPracticesHeader": "अलीकडील साधना",
+  "verseLabel": "श्लोक: {{verseId}}"
+}

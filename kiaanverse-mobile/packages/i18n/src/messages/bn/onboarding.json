@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}}-এর মধ্যে ধাপ {{current}}",
+  "progressDotA11yCurrent": "{{total}}-এর মধ্যে ধাপ {{current}}, বর্তমান",
+  "continueButton": "চালিয়ে যান",
+
+  "welcomeTitle": "সখার সাথে পরিচয়",
+  "welcomeBody": "অন্তঃশান্তির পথে আপনার দিব্য সঙ্গী — শ্রীমদ্‌ভগবদ্‌গীতার চিরন্তন জ্ঞানে পথ-প্রদর্শিত।",
+  "welcomeCta": "আপনার যাত্রা শুরু করুন",
+
+  "purposeTitle": "কী আপনাকে এখানে আনল?",
+  "purposeSubtitle": "আপনার ভেতরে যা অনুরণিত হয় তা সব বেছে নিন",
+  "purposePeace": "শান্তি",
+  "purposeWisdom": "জ্ঞান",
+  "purposeGuidance": "নির্দেশনা",
+  "purposeHealing": "নিরাময়",
+  "purposePurpose": "উদ্দেশ্য",
+
+  "gitaTitle": "গীতা জানেন?",
+  "gitaSubtitle": "এতে সখা আপনার স্তর অনুযায়ী জ্ঞান দিতে পারবে",
+  "gitaLevelNever": "কখনো পড়িনি",
+  "gitaLevelCurious": "কৌতূহলী",
+  "gitaLevelBeginner": "শিক্ষানবিশ",
+  "gitaLevelPractitioner": "অনুশীলনকারী",
+  "gitaLevelScholar": "পণ্ডিত",
+
+  "practiceTitle": "দৈনিক সাধনার সময়",
+  "practiceSubtitle": "আপনার দৈনিক আধ্যাত্মিক স্মরণ কখন চান?",
+  "practiceAm": "সকাল",
+  "practicePm": "সন্ধ্যা",
+  "practiceHourA11y": "{{hour}}টা",
+
+  "readyVerse": "\"আপনার নির্ধারিত কর্ম পালনের অধিকার আছে, কিন্তু সেই কর্মের ফলের ওপর অধিকার নেই।\"",
+  "readyVerseAttribution": "— শ্রীমদ্‌ভগবদ্‌গীতা ২.৪৭",
+  "readyTitle": "আপনি প্রস্তুত",
+  "readyBody": "আপনার আধ্যাত্মিক পথে থাকতে দৈনিক স্মরণ সক্রিয় করুন, অথবা এখনই অন্বেষণ শুরু করুন।",
+  "readyCtaEnable": "বিজ্ঞপ্তি সক্রিয় করে শুরু করুন",
+  "readyCtaSkip": "বিজ্ঞপ্তি ছাড়া শুরু করুন",
+  "readyRequesting": "অনুমতি চাওয়া হচ্ছে..."
+}

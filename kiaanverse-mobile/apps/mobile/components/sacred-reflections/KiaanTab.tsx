@@ -25,8 +25,9 @@ import {
   useKarmaLytixWeeklyReport,
 } from '@kiaanverse/api';
 import type { KarmaLytixWeeklyReport } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
-import { COPY } from './constants';
+import { COPY_KEYS } from './constants';
 import { LotusGlyph } from './LotusGlyph';
 
 interface KiaanTabProps {
@@ -61,6 +62,7 @@ function extractMirror(
 
 export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('sacred-reflections');
   const { data, isLoading, refetch } = useKarmaLytixWeeklyReport();
   const generate = useGenerateKarmaLytixReport();
 
@@ -87,8 +89,8 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
   if (!isLoading && (!data || insufficient || !mirror)) {
     const sub =
       insufficient && entriesNeeded > 0
-        ? `Write ${entriesNeeded} more reflection${entriesNeeded === 1 ? '' : 's'} this week to unlock your Sacred Mirror.`
-        : COPY.kiaanEmptySub;
+        ? t('kiaanInsufficientFmt', { count: entriesNeeded })
+        : t(COPY_KEYS.kiaanEmptySub);
 
     return (
       <ScrollView contentContainerStyle={styles.emptyWrap}>
@@ -102,7 +104,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
             color={colors.text.primary}
             style={styles.emptyTitle}
           >
-            {COPY.kiaanEmptyTitle}
+            {t(COPY_KEYS.kiaanEmptyTitle)}
           </Text>
           <Text
             variant="caption"
@@ -113,7 +115,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
           </Text>
           <Pressable onPress={onOpenEditor} style={styles.ctaSecondary}>
             <Text variant="label" color={colors.primary[500]}>
-              Begin a reflection →
+              {t('kiaanBeginReflectionCta')}
             </Text>
           </Pressable>
         </Animated.View>
@@ -130,7 +132,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
           color={colors.primary[500]}
           style={styles.sectionLabel}
         >
-          SAKHA'S WEEKLY MIRROR
+          {t('kiaanWeeklyMirrorSection')}
         </Text>
         {mirror?.mirror ? (
           <Text
@@ -149,7 +151,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
               color={colors.text.secondary}
               style={styles.cardLabel}
             >
-              PATTERN NOTICED
+              {t('kiaanPatternNotedCard')}
             </Text>
             <Text
               variant="body"
@@ -168,7 +170,10 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
               color={colors.primary[500]}
               style={styles.cardLabel}
             >
-              GITA ECHO · BG {mirror.gita_echo.chapter}.{mirror.gita_echo.verse}
+              {t('kiaanGitaEchoFmt', {
+                chapter: mirror.gita_echo.chapter ?? '',
+                verse: mirror.gita_echo.verse ?? '',
+              })}
             </Text>
             <Text
               variant="body"
@@ -196,7 +201,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
               color={colors.primary[500]}
               style={styles.cardLabel}
             >
-              BLESSING
+              {t('kiaanBlessingCard')}
             </Text>
             <Text
               variant="body"
@@ -209,7 +214,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
         ) : null}
 
         <GoldenButton
-          title="Open Full Sacred Mirror"
+          title={t('kiaanOpenFullButton')}
           onPress={handleOpenFull}
           style={styles.cta}
         />
@@ -219,7 +224,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
             color={colors.text.muted}
             style={styles.regenerate}
           >
-            {generate.isPending ? 'Refreshing…' : '↻ Ask for a fresh mirror'}
+            {generate.isPending ? t('kiaanRefreshingButton') : t('kiaanFreshMirrorLink')}
           </Text>
         </Pressable>
       </Animated.View>

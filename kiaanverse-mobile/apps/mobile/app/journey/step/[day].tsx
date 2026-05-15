@@ -51,6 +51,7 @@ import {
   type WisdomJourneyStep,
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 import { StepContent } from '../../../components/journey/StepContent';
 import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 
@@ -74,22 +75,24 @@ const ENEMY_COLORS: Record<string, string> = {
   matsarya: '#06b6d4',
 };
 
-/** Day meta themes for the 14-day journey arc. */
-const DAY_META: Record<number, { theme: string; focus: string }> = {
-  1: { theme: 'Awareness', focus: 'Recognizing Patterns' },
-  2: { theme: 'Understanding', focus: 'Root Causes' },
-  3: { theme: 'Acceptance', focus: 'Embracing Truth' },
-  4: { theme: 'Release', focus: 'Letting Go' },
-  5: { theme: 'Detachment', focus: 'Freedom from Attachment' },
-  6: { theme: 'Compassion', focus: 'Self-Kindness' },
-  7: { theme: 'Courage', focus: 'Building Inner Strength' },
-  8: { theme: 'Wisdom', focus: 'Gita Principles' },
-  9: { theme: 'Practice', focus: 'Daily Discipline' },
-  10: { theme: 'Patience', focus: 'Trust the Process' },
-  11: { theme: 'Transformation', focus: 'Inner Alchemy' },
-  12: { theme: 'Integration', focus: 'Living the Wisdom' },
-  13: { theme: 'Gratitude', focus: 'Celebrating Growth' },
-  14: { theme: 'Completion', focus: 'New Beginning' },
+/** Day meta themes for the 14-day journey arc. The (theme, focus) pair
+ *  for each day day-index routes through i18n at the call site so each
+ *  locale shows its own copy. */
+const DAY_META_KEYS: Record<number, { themeKey: string; focusKey: string }> = {
+  1: { themeKey: 'journeys.dayTheme1', focusKey: 'journeys.dayFocus1' },
+  2: { themeKey: 'journeys.dayTheme2', focusKey: 'journeys.dayFocus2' },
+  3: { themeKey: 'journeys.dayTheme3', focusKey: 'journeys.dayFocus3' },
+  4: { themeKey: 'journeys.dayTheme4', focusKey: 'journeys.dayFocus4' },
+  5: { themeKey: 'journeys.dayTheme5', focusKey: 'journeys.dayFocus5' },
+  6: { themeKey: 'journeys.dayTheme6', focusKey: 'journeys.dayFocus6' },
+  7: { themeKey: 'journeys.dayTheme7', focusKey: 'journeys.dayFocus7' },
+  8: { themeKey: 'journeys.dayTheme8', focusKey: 'journeys.dayFocus8' },
+  9: { themeKey: 'journeys.dayTheme9', focusKey: 'journeys.dayFocus9' },
+  10: { themeKey: 'journeys.dayTheme10', focusKey: 'journeys.dayFocus10' },
+  11: { themeKey: 'journeys.dayTheme11', focusKey: 'journeys.dayFocus11' },
+  12: { themeKey: 'journeys.dayTheme12', focusKey: 'journeys.dayFocus12' },
+  13: { themeKey: 'journeys.dayTheme13', focusKey: 'journeys.dayFocus13' },
+  14: { themeKey: 'journeys.dayTheme14', focusKey: 'journeys.dayFocus14' },
 };
 
 // ENEMY_GRADIENT_VARIANT was previously used to map each shadripu to one of
@@ -234,6 +237,8 @@ function CompletionArea({
   readonly showReflection: boolean;
   readonly onToggleReflection: () => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
+
   if (isCompleted) {
     return (
       <Animated.View
@@ -242,10 +247,10 @@ function CompletionArea({
       >
         <GlowCard variant="golden" style={styles.completedCard}>
           <Text variant="h3" color={colors.semantic.success} align="center">
-            {'\u2705'} Step Completed
+            {'\u2705'} {t('journeys.stepCompletedHeader')}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            You have completed this day&apos;s practice. Well done.
+            {t('journeys.stepCompletedBody')}
           </Text>
         </GlowCard>
       </Animated.View>
@@ -261,10 +266,10 @@ function CompletionArea({
         <View style={styles.lockedCard}>
           <MandalaSpin size={48} color={colors.alpha.goldLight} speed="slow" />
           <Text variant="body" color={colors.text.secondary} align="center">
-            This step will be available tomorrow
+            {t('journeys.stepLockedHeader')}
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
-            Rest now. Each day brings new wisdom.
+            {t('journeys.stepLockedBody')}
           </Text>
         </View>
       </Animated.View>
@@ -293,7 +298,9 @@ function CompletionArea({
         ]}
         accessibilityRole="button"
         accessibilityLabel={
-          showReflection ? 'Hide reflection input' : 'Add a reflection'
+          showReflection
+            ? t('journeys.reflectionHideA11y')
+            : t('journeys.reflectionAddA11y')
         }
         testID="add-reflection-toggle"
       >
@@ -302,7 +309,9 @@ function CompletionArea({
           color={showReflection ? accentColor : colors.text.secondary}
           align="center"
         >
-          {showReflection ? 'Hide Reflection' : 'Add Reflection (Optional)'}
+          {showReflection
+            ? t('journeys.reflectionHideToggle')
+            : t('journeys.reflectionAddToggle')}
         </Text>
       </Pressable>
 
@@ -320,10 +329,10 @@ function CompletionArea({
             ]}
             value={reflectionText}
             onChangeText={onReflectionChange}
-            placeholder="What stirs in you after this practice?"
+            placeholder={t('journeys.reflectionPlaceholder')}
             multiline
             maxLength={MAX_REFLECTION_LENGTH}
-            accessibilityLabel="Reflection textarea"
+            accessibilityLabel={t('journeys.reflectionTextareaA11y')}
             dictationMode="append"
             />
           <Text
@@ -338,7 +347,11 @@ function CompletionArea({
 
       {/* Complete button */}
       <GoldenButton
-        title={isCompleting ? 'Completing...' : "Complete Today's Step"}
+        title={
+          isCompleting
+            ? t('journeys.completingButton')
+            : t('journeys.completeTodaysStep')
+        }
         variant="divine"
         onPress={onComplete}
         loading={isCompleting}
@@ -367,6 +380,7 @@ function CompletionArea({
 // ---------------------------------------------------------------------------
 
 export default function StepPlayerScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const { day, journeyId } = useLocalSearchParams<{
     day: string;
     journeyId: string;
@@ -415,7 +429,10 @@ export default function StepPlayerScreen(): React.JSX.Element {
     return data.steps.filter((s) => s.isCompleted).map((s) => s.dayIndex - 1); // SacredStepIndicator uses 0-indexed
   }, [data]);
 
-  const dayMeta = DAY_META[dayIndex];
+  const dayMetaKeys = DAY_META_KEYS[dayIndex];
+  const dayMeta = dayMetaKeys
+    ? { theme: t(dayMetaKeys.themeKey), focus: t(dayMetaKeys.focusKey) }
+    : null;
 
   const parsedSections = useMemo(() => {
     if (!currentStep) return null;
@@ -438,8 +455,8 @@ export default function StepPlayerScreen(): React.JSX.Element {
             xp: result.xp,
             karmaPoints: result.karmaPoints,
             message: result.journeyCompleted
-              ? 'Journey Complete! Namaste.'
-              : `Day ${dayIndex} Complete!`,
+              ? t('journeys.stepJourneyComplete')
+              : t('journeys.stepDayComplete', { day: String(dayIndex) }),
           });
 
           // Update local progress
@@ -462,6 +479,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
     completeStep,
     data,
     updateJourneyProgress,
+    t,
   ]);
 
   // Loading state
@@ -471,7 +489,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
         <View style={styles.centerState}>
           <LoadingMandala size={80} />
           <Text variant="bodySmall" color={colors.text.muted}>
-            Preparing your practice...
+            {t('journeys.stepLoadingPractice')}
           </Text>
         </View>
       </DivineBackground>
@@ -485,14 +503,14 @@ export default function StepPlayerScreen(): React.JSX.Element {
         <View style={styles.centerState}>
           <Text variant="body" color={colors.semantic.error}>
             {currentStep === null
-              ? 'Step not found for this day'
-              : 'Unable to load step'}
+              ? t('journeys.stepErrorNotFound')
+              : t('journeys.stepErrorLoadFailed')}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted}>
-            Please go back and try again
+            {t('journeys.stepErrorRetryHint')}
           </Text>
           <GoldenButton
-            title="Go Back"
+            title={t('journeys.goBack')}
             variant="secondary"
             onPress={() => router.back()}
           />
@@ -542,7 +560,7 @@ export default function StepPlayerScreen(): React.JSX.Element {
               }}
               style={styles.navBackButton}
               accessibilityRole="button"
-              accessibilityLabel="Go back to journey"
+              accessibilityLabel={t('journeys.stepBackToJourneyA11y')}
             >
               <Text variant="label" color={colors.text.secondary}>
                 {'\u2190'}
@@ -551,7 +569,10 @@ export default function StepPlayerScreen(): React.JSX.Element {
 
             <View style={styles.dayIndicator}>
               <Text variant="label" color={colors.divine.aura}>
-                Day {dayIndex} of {data.durationDays}
+                {t('journeys.stepDayOf', {
+                  day: String(dayIndex),
+                  total: String(data.durationDays),
+                })}
               </Text>
               {dayMeta ? (
                 <Text variant="caption" color={colors.text.muted}>

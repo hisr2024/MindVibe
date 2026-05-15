@@ -54,6 +54,7 @@ import {
 import { DivineScreenWrapper, OmLoader } from '@kiaanverse/ui';
 import { useGitaVerse } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 /**
  * Optional clipboard support — `expo-clipboard` may not be linked in every
@@ -84,22 +85,22 @@ const SURFACE_BORDER = 'rgba(255,255,255,0.06)';
 
 // Web parity fallback verse — matches FALLBACK_VERSE in
 // app/(mobile)/m/wisdom/page.tsx so the screen never renders empty during
-// the brief moment between mount and gitaStore hydration.
+// the brief moment between mount and gitaStore hydration. The Sanskrit
+// stays Devanagari across every locale (it IS Sanskrit); the translation
+// and commentary route through i18n at the call site so the fallback
+// renders in the active UI language.
 const FALLBACK = {
   chapter: 4,
   verse: 7,
   sanskrit:
     'यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥',
-  translation:
-    'When injustice rises, so does the force that corrects it. Be part of that force.',
-  commentary:
-    'Whenever there is a decline of Dharma, O Arjuna, and an uprising of Adharma, then I incarnate myself. Let this courage live in you today.',
 } as const;
 
 // ── Wisdom themes (mirrors WISDOM_THEMES on the web) ──────────────────────
 interface ThemeTile {
   readonly id: string;
-  readonly label: string;
+  /** i18n key for the tile label. */
+  readonly labelKey: string;
   readonly emoji: string;
   /** From / to colours for the linear background gradient. */
   readonly gradient: readonly string[];
@@ -109,42 +110,42 @@ interface ThemeTile {
 const WISDOM_THEMES: readonly ThemeTile[] = [
   {
     id: 'peace',
-    label: 'Inner Peace',
+    labelKey: 'wisdom.themeInnerPeace',
     emoji: '🕊️',
     gradient: ['rgba(20,184,166,0.18)', 'rgba(8,145,178,0.18)'],
     border: 'rgba(20,184,166,0.28)',
   },
   {
     id: 'courage',
-    label: 'Courage',
+    labelKey: 'wisdom.themeCourage',
     emoji: '🦁',
     gradient: ['rgba(212,164,76,0.18)', 'rgba(239,68,68,0.18)'],
     border: 'rgba(212,164,76,0.28)',
   },
   {
     id: 'wisdom',
-    label: 'Wisdom',
+    labelKey: 'wisdom.themeWisdom',
     emoji: '🧘',
     gradient: ['rgba(168,85,247,0.18)', 'rgba(99,102,241,0.18)'],
     border: 'rgba(168,85,247,0.28)',
   },
   {
     id: 'devotion',
-    label: 'Devotion',
+    labelKey: 'wisdom.themeDevotion',
     emoji: '🙏',
     gradient: ['rgba(236,72,153,0.18)', 'rgba(244,63,94,0.18)'],
     border: 'rgba(236,72,153,0.28)',
   },
   {
     id: 'action',
-    label: 'Right Action',
+    labelKey: 'wisdom.themeRightAction',
     emoji: '⚡',
     gradient: ['rgba(212,164,76,0.18)', 'rgba(234,179,8,0.18)'],
     border: 'rgba(212,164,76,0.28)',
   },
   {
     id: 'detachment',
-    label: 'Letting Go',
+    labelKey: 'wisdom.themeLettingGo',
     emoji: '🍃',
     gradient: ['rgba(34,197,94,0.18)', 'rgba(16,185,129,0.18)'],
     border: 'rgba(34,197,94,0.28)',
@@ -152,6 +153,7 @@ const WISDOM_THEMES: readonly ThemeTile[] = [
 ];
 
 export default function WisdomLandingScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -172,11 +174,11 @@ export default function WisdomLandingScreen(): React.JSX.Element {
   const { data: verse, isLoading } = useGitaVerse(chapter, verseNum);
 
   const sanskrit = verse?.sanskrit ?? FALLBACK.sanskrit;
-  const translation = verse?.translation ?? FALLBACK.translation;
+  const translation = verse?.translation ?? t('wisdom.fallbackTranslation');
   // The local corpus does not ship per-verse commentary; show the
   // translation in both slots when no commentary is available, matching the
   // web page's fallback when the API omits the `commentary` field.
-  const commentary = verse?.translation ?? FALLBACK.commentary;
+  const commentary = verse?.translation ?? t('wisdom.fallbackCommentary');
   const verseId = verse?.id ?? `${chapter}.${verseNum}`;
   const isFavorited = bookmarkedVerseIds.includes(verseId);
 
@@ -195,32 +197,40 @@ export default function WisdomLandingScreen(): React.JSX.Element {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
       () => undefined,
     );
-    const text = `"${translation}"\n\n— Bhagavad Gita ${chapter}.${verseNum}`;
+    const ref = t('wisdom.verseRefBgFormat', {
+      chapter: String(chapter),
+      verse: String(verseNum),
+    });
+    const text = `"${translation}"\n\n— ${ref}`;
     if (Clipboard) {
       await Clipboard.setStringAsync(text).catch(() => undefined);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  }, [chapter, translation, verseNum]);
+  }, [chapter, translation, verseNum, t]);
 
   const handleShare = useCallback(async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
       () => undefined,
     );
+    const ref = t('wisdom.verseRefBgFormat', {
+      chapter: String(chapter),
+      verse: String(verseNum),
+    });
     const message = [
       sanskrit,
       '',
       `"${translation}"`,
       '',
-      `— Bhagavad Gita ${chapter}.${verseNum}`,
-      '— Shared from Kiaanverse',
+      `— ${ref}`,
+      t('wisdom.shareFooter'),
     ].join('\n');
     try {
-      await Share.share({ message, title: 'Today’s Wisdom' });
+      await Share.share({ message, title: t('wisdom.shareTitle') });
     } catch {
       // User cancelled or share sheet failed.
     }
-  }, [chapter, sanskrit, translation, verseNum]);
+  }, [chapter, sanskrit, translation, verseNum, t]);
 
   const handleReadMore = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
@@ -230,27 +240,33 @@ export default function WisdomLandingScreen(): React.JSX.Element {
   }, [chapter, router, verseNum]);
 
   const handleThemePress = useCallback(
-    (themeId: string) => {
+    (themeLabel: string) => {
       void Haptics.selectionAsync().catch(() => undefined);
       // Themes don't yet have dedicated curated lists — surface a polite
       // teaser and route into the chapter browser so the journey continues.
+      // The {{theme}} placeholder receives the already-localized label so
+      // the alert reads naturally in the active UI language.
       Alert.alert(
-        'Coming soon',
-        `Curated ${themeId.replace(/^./, (c) => c.toUpperCase())} verses will arrive in the next release. Opening the Bhagavad Gita browser instead.`,
+        t('wisdom.comingSoonTitle'),
+        t('wisdom.comingSoonMessage', { theme: themeLabel }),
         [
           {
-            text: 'Continue',
+            text: t('wisdom.continueButton'),
             onPress: () => router.push('/(tabs)/shlokas/gita' as never),
           },
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
         ],
       );
     },
-    [router],
+    [router, t],
   );
 
   const handleAskKiaan = useCallback(() => {
     void Haptics.selectionAsync().catch(() => undefined);
+    // The chat preload + context strings are intentionally English-only —
+    // they're sent verbatim to the LLM, which is prompt-engineered against
+    // English instructions. Localizing them would degrade KIAAN's response
+    // quality. (The user-visible UI on chat.tsx still localizes.)
     router.push({
       pathname: '/(tabs)/chat',
       params: {
@@ -294,7 +310,7 @@ export default function WisdomLandingScreen(): React.JSX.Element {
         <Pressable
           onPress={handleNotifications}
           accessibilityRole="button"
-          accessibilityLabel="Open notifications"
+          accessibilityLabel={t('wisdom.openNotificationsA11y')}
           hitSlop={12}
           style={styles.bellButton}
         >
@@ -311,7 +327,7 @@ export default function WisdomLandingScreen(): React.JSX.Element {
       >
         {/* Large title (drawn into the scroll so it scrolls away gracefully). */}
         <Text style={styles.title} accessibilityRole="header">
-          Wisdom
+          {t('wisdom.title')}
         </Text>
 
         {/* ── 1. Today's Wisdom card ─────────────────────────────────── */}
@@ -334,10 +350,13 @@ export default function WisdomLandingScreen(): React.JSX.Element {
           <View style={styles.todayHeader}>
             <View style={styles.todayLabelRow}>
               <Star size={14} color={GOLD} />
-              <Text style={styles.todayLabel}>TODAY&apos;S WISDOM</Text>
+              <Text style={styles.todayLabel}>{t('wisdom.todaysWisdomLabel')}</Text>
             </View>
             <Text style={styles.todayRef}>
-              {`Chapter ${chapter}, Verse ${verseNum}`}
+              {t('wisdom.chapterVerseRef', {
+                chapter: String(chapter),
+                verse: String(verseNum),
+              })}
             </Text>
           </View>
 
@@ -373,7 +392,9 @@ export default function WisdomLandingScreen(): React.JSX.Element {
                   active={isFavorited}
                   activeBg="rgba(236,72,153,0.20)"
                   accessibilityLabel={
-                    isFavorited ? 'Remove from favorites' : 'Add to favorites'
+                    isFavorited
+                      ? t('wisdom.removeFromFavoritesA11y')
+                      : t('wisdom.addToFavoritesA11y')
                   }
                 >
                   <Heart
@@ -385,7 +406,7 @@ export default function WisdomLandingScreen(): React.JSX.Element {
 
                 <ActionButton
                   onPress={handleCopy}
-                  accessibilityLabel="Copy verse"
+                  accessibilityLabel={t('wisdom.copyVerseA11y')}
                 >
                   {copied ? (
                     <Check size={16} color="#34D399" />
@@ -396,7 +417,7 @@ export default function WisdomLandingScreen(): React.JSX.Element {
 
                 <ActionButton
                   onPress={handleShare}
-                  accessibilityLabel="Share verse"
+                  accessibilityLabel={t('wisdom.shareVerseA11y')}
                 >
                   <Share2 size={16} color={TEXT_SECONDARY} />
                 </ActionButton>
@@ -407,10 +428,10 @@ export default function WisdomLandingScreen(): React.JSX.Element {
                   onPress={handleReadMore}
                   style={styles.readMoreBtn}
                   accessibilityRole="button"
-                  accessibilityLabel="Open the full verse reader"
+                  accessibilityLabel={t('wisdom.readMoreA11y')}
                 >
                   <BookOpen size={14} color={GOLD} />
-                  <Text style={styles.readMoreText}>Read More</Text>
+                  <Text style={styles.readMoreText}>{t('wisdom.readMoreButton')}</Text>
                 </Pressable>
               </View>
             </>
@@ -419,35 +440,40 @@ export default function WisdomLandingScreen(): React.JSX.Element {
 
         {/* ── 2. Explore by Theme ─────────────────────────────────────── */}
         <Animated.View entering={FadeIn.delay(120).duration(380)}>
-          <Text style={styles.sectionLabel}>Explore by Theme</Text>
+          <Text style={styles.sectionLabel}>{t('wisdom.exploreByTheme')}</Text>
           <View style={styles.themeGrid}>
-            {WISDOM_THEMES.map((theme, idx) => (
-              <Animated.View
-                key={theme.id}
-                entering={FadeInDown.delay(180 + idx * 40).duration(360)}
-                style={styles.themeCell}
-              >
-                <Pressable
-                  onPress={() => handleThemePress(theme.id)}
-                  style={({ pressed }) => [
-                    styles.themeTile,
-                    { borderColor: theme.border },
-                    pressed && { opacity: 0.7 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${theme.label} verses`}
+            {WISDOM_THEMES.map((theme, idx) => {
+              const label = t(theme.labelKey);
+              return (
+                <Animated.View
+                  key={theme.id}
+                  entering={FadeInDown.delay(180 + idx * 40).duration(360)}
+                  style={styles.themeCell}
                 >
-                  <LinearGradient
-                    colors={[...theme.gradient]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={StyleSheet.absoluteFill}
-                  />
-                  <Text style={styles.themeEmoji}>{theme.emoji}</Text>
-                  <Text style={styles.themeLabel}>{theme.label}</Text>
-                </Pressable>
-              </Animated.View>
-            ))}
+                  <Pressable
+                    onPress={() => handleThemePress(label)}
+                    style={({ pressed }) => [
+                      styles.themeTile,
+                      { borderColor: theme.border },
+                      pressed && { opacity: 0.7 },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('wisdom.themeVersesA11y', {
+                      theme: label,
+                    })}
+                  >
+                    <LinearGradient
+                      colors={[...theme.gradient]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                    <Text style={styles.themeEmoji}>{theme.emoji}</Text>
+                    <Text style={styles.themeLabel}>{label}</Text>
+                  </Pressable>
+                </Animated.View>
+              );
+            })}
           </View>
         </Animated.View>
 
@@ -460,8 +486,8 @@ export default function WisdomLandingScreen(): React.JSX.Element {
             tint="rgba(168,85,247,0.10)"
             border="rgba(168,85,247,0.28)"
             icon={<Sparkles size={20} color="#C084FC" />}
-            title="Ask KIAAN"
-            subtitle="Get personalized wisdom for your situation"
+            title={t('wisdom.askKiaanTitle')}
+            subtitle={t('wisdom.askKiaanSubtitle')}
           />
         </Animated.View>
 
@@ -474,8 +500,8 @@ export default function WisdomLandingScreen(): React.JSX.Element {
             tint="rgba(212,164,76,0.10)"
             border="rgba(212,164,76,0.28)"
             icon={<Users size={20} color={GOLD} />}
-            title="Wisdom Chat Rooms"
-            subtitle="Join live community conversations"
+            title={t('wisdom.chatRoomsTitle')}
+            subtitle={t('wisdom.chatRoomsSubtitle')}
           />
         </Animated.View>
 
@@ -488,8 +514,8 @@ export default function WisdomLandingScreen(): React.JSX.Element {
             tint={SURFACE_VOID}
             border={SURFACE_BORDER}
             icon={<BookOpen size={20} color="#2DD4BF" />}
-            title="Explore the Bhagavad Gita"
-            subtitle="700+ verses across 18 chapters"
+            title={t('wisdom.exploreGitaTitle')}
+            subtitle={t('wisdom.exploreGitaSubtitle')}
           />
         </Animated.View>
       </ScrollView>

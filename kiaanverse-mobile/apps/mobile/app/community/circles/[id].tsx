@@ -33,10 +33,12 @@ import {
   useJoinCircle,
 } from '@kiaanverse/api';
 import type { CommunityPost } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { PostCard } from '../../../components/community/PostCard';
 
 export default function CircleDetailScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('community');
   const { id } = useLocalSearchParams<{ id: string }>();
   const circleId = id ?? '';
 
@@ -83,17 +85,17 @@ export default function CircleDetailScreen(): React.JSX.Element {
       !postsLoading ? (
         <View style={styles.emptyContainer}>
           <Text variant="body" color={colors.text.muted} align="center">
-            No posts in this circle yet.{'\n'}Be the first to share wisdom.
+            {t('circlePostsEmpty')}
           </Text>
         </View>
       ) : null,
-    [postsLoading]
+    [postsLoading, t]
   );
 
   if (!circle) {
     return (
       <Screen>
-        <GoldenHeader title="Circle" onBack={() => router.back()} />
+        <GoldenHeader title={t('circleFallbackTitle')} onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator color={colors.primary[500]} size="large" />
         </View>
@@ -119,7 +121,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
       </Text>
 
       <View style={styles.metaRow}>
-        <Badge label={`${circle.memberCount} members`} />
+        <Badge label={t('circleMembersFmt', { count: circle.memberCount })} />
         <Badge label={circle.category} />
       </View>
 
@@ -127,7 +129,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
       {!circle.isJoined ? (
         <View style={styles.joinContainer}>
           <GoldenButton
-            title="Join Circle"
+            title={t('circleJoinButton')}
             onPress={handleJoin}
             loading={joinCircle.isPending}
             variant="divine"
@@ -136,7 +138,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
       ) : (
         <View style={styles.joinedBadge}>
           <Text variant="caption" color={colors.semantic.success}>
-            {'✓ Joined'}
+            {t('circleJoinedBadge')}
           </Text>
         </View>
       )}
@@ -148,7 +150,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
         color={colors.text.secondary}
         style={styles.postsLabel}
       >
-        Posts
+        {t('circlePostsLabel')}
       </Text>
     </Animated.View>
   );

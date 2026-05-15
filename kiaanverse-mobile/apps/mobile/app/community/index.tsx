@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Screen, Text, GoldenHeader, colors, spacing } from '@kiaanverse/ui';
 import { useCommunityPosts, useCommunityCircles } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import type { CommunityPost, CommunityCircle } from '@kiaanverse/api';
 import { PostCard } from '../../components/community/PostCard';
 import { WisdomCircleCard } from '../../components/community/WisdomCircleCard';
@@ -33,6 +34,7 @@ const CARD_WIDTH = (SCREEN_WIDTH - spacing.lg * 2 - CARD_GAP) / GRID_COLUMNS;
 
 export default function CommunityScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('community');
   const [activeTab, setActiveTab] = useState<Tab>('feed');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -99,11 +101,11 @@ export default function CommunityScreen(): React.JSX.Element {
           {'🕊️'}
         </Text>
         <Text variant="body" color={colors.text.muted} align="center">
-          The community awaits your first words of wisdom.
+          {t('feedEmpty')}
         </Text>
       </Animated.View>
     ),
-    []
+    [t]
   );
 
   const renderCirclesEmpty = useCallback(
@@ -116,11 +118,11 @@ export default function CommunityScreen(): React.JSX.Element {
           {'🔮'}
         </Text>
         <Text variant="body" color={colors.text.muted} align="center">
-          No wisdom circles available yet.{'\n'}Check back soon.
+          {t('circlesEmpty')}
         </Text>
       </Animated.View>
     ),
-    []
+    [t]
   );
 
   const refreshControl = useMemo(
@@ -137,7 +139,7 @@ export default function CommunityScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Community" onBack={() => router.back()} />
+      <GoldenHeader title={t('screenTitle')} onBack={() => router.back()} />
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
@@ -153,7 +155,7 @@ export default function CommunityScreen(): React.JSX.Element {
               activeTab === 'feed' ? colors.primary[500] : colors.text.muted
             }
           >
-            Feed
+            {t('tabFeed')}
           </Text>
         </Pressable>
         <Pressable
@@ -168,7 +170,7 @@ export default function CommunityScreen(): React.JSX.Element {
               activeTab === 'circles' ? colors.primary[500] : colors.text.muted
             }
           >
-            Circles
+            {t('tabCircles')}
           </Text>
         </Pressable>
       </View>
@@ -203,7 +205,7 @@ export default function CommunityScreen(): React.JSX.Element {
         onPress={handleFabPress}
         style={styles.fab}
         accessibilityRole="button"
-        accessibilityLabel="Compose new post"
+        accessibilityLabel={t('composeFabA11y')}
       >
         <Text variant="h2" color={colors.background.dark} align="center">
           +

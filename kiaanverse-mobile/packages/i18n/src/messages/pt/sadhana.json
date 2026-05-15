@@ -1,0 +1,20 @@
+{
+  "backA11y": "Voltar",
+  "sectionTag": "NITYA SADHANA",
+  "title": "Prática sagrada diária",
+
+  "completedTitle": "A sadhana está selada",
+  "completedBody": "Cada fase foi oferecida. Volta amanhã para recomeçar.",
+  "returnHomeButton": "Voltar ao início",
+  "completionWithStreak": "Nitya Sadhana completa. Sequência: {{streak}} dias.",
+  "completionFirstDay": "Nitya Sadhana completa. A tua sequência começa hoje.",
+
+  "historyTitle": "Histórico da sadhana",
+  "statCurrent": "Actual",
+  "statLongest": "A mais longa",
+  "statTotalDays": "Dias totais",
+  "previousMonthA11y": "Mês anterior",
+  "nextMonthA11y": "Mês seguinte",
+  "recentPracticesHeader": "Práticas recentes",
+  "verseLabel": "Verso: {{verseId}}"
+}

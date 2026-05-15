@@ -73,6 +73,14 @@ export function I18nProvider({
     return () => { cancelled = true; };
   }, [locale, loadAllNamespaces]);
 
+  // Allow the host (e.g. the user-preferences store) to drive locale by
+  // changing the `initialLocale` prop. Without this, picker selections
+  // wouldn't propagate because the provider would stay frozen on its
+  // mount-time value.
+  useEffect(() => {
+    setLocaleState((prev: Locale) => (prev === initialLocale ? prev : initialLocale));
+  }, [initialLocale]);
+
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     onLocaleChange?.(newLocale);

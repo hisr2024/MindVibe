@@ -40,6 +40,7 @@ import {
   type PaletteId,
 } from '@kiaanverse/ui';
 import { useThemeStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 import { KiaanWelcomeVisual } from './visuals';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -61,6 +62,7 @@ export function PalettePickerChip({
   onPress,
   style,
 }: PalettePickerChipProps): React.JSX.Element {
+  const { t } = useTranslation('arrival');
   const paletteId = useThemeStore((s) => s.palette);
   const palette = PALETTES[paletteId];
 
@@ -79,8 +81,8 @@ export function PalettePickerChip({
       activeOpacity={0.75}
       style={[styles.chip, style]}
       accessibilityRole="button"
-      accessibilityLabel={`Change color palette. Current: ${palette.label}`}
-      accessibilityHint="Opens the sacred color-scheme picker"
+      accessibilityLabel={t('palettePickerChipA11yFmt', { label: palette.label })}
+      accessibilityHint={t('palettePickerChipA11yHint')}
       testID="arrival-palette-chip"
     >
       <View style={styles.chipInner}>
@@ -110,6 +112,7 @@ export function PaletteSheet({
   visible,
   onClose,
 }: PaletteSheetProps): React.JSX.Element | null {
+  const { t } = useTranslation('arrival');
   const activeId = useThemeStore((s) => s.palette);
   const setPalette = useThemeStore((s) => s.setPalette);
 
@@ -174,20 +177,20 @@ export function PaletteSheet({
           style={StyleSheet.absoluteFill}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="Close palette picker"
+          accessibilityLabel={t('palettePickerCloseA11y')}
         />
       </Animated.View>
 
       <Animated.View style={[styles.sheet, sheetStyle]}>
         <View style={styles.handleBar} />
         <Text allowFontScaling={false} style={styles.sheetEyebrow}>
-          SACRED COLOR SCHEME
+          {t('palettePickerEyebrow')}
         </Text>
         <Text allowFontScaling={false} style={styles.sheetTitle}>
-          Choose your palette
+          {t('palettePickerTitle')}
         </Text>
         <Text allowFontScaling={false} style={styles.sheetSubtitle}>
-          Each scheme dresses the whole app.
+          {t('palettePickerSubtitle')}
         </Text>
 
         <View style={styles.cardGrid}>
@@ -220,6 +223,7 @@ function PaletteCard({
   isActive,
   onSelect,
 }: PaletteCardProps): React.JSX.Element {
+  const { t } = useTranslation('arrival');
   return (
     <TouchableOpacity
       onPress={() => onSelect(palette.id)}
@@ -236,7 +240,11 @@ function PaletteCard({
       ]}
       accessibilityRole="button"
       accessibilityState={{ selected: isActive }}
-      accessibilityLabel={`${palette.label}${isActive ? ', currently selected' : ''}`}
+      accessibilityLabel={
+        isActive
+          ? t('palettePickerCardA11ySelectedFmt', { label: palette.label })
+          : t('palettePickerCardA11yFmt', { label: palette.label })
+      }
       testID={`arrival-palette-card-${palette.id}`}
     >
       <View style={styles.cardVisual}>
@@ -324,6 +332,7 @@ export interface InlinePaletteSwatchesProps {
 export function InlinePaletteSwatches({
   activeId,
 }: InlinePaletteSwatchesProps): React.JSX.Element {
+  const { t } = useTranslation('arrival');
   const setPalette = useThemeStore((s) => s.setPalette);
 
   const handle = useCallback(
@@ -351,7 +360,7 @@ export function InlinePaletteSwatches({
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
-            accessibilityLabel={`Select ${p.label} palette`}
+            accessibilityLabel={t('palettePickerInlineA11yFmt', { label: p.label })}
             testID={`arrival-palette-inline-${id}`}
             style={[
               styles.inlinePill,

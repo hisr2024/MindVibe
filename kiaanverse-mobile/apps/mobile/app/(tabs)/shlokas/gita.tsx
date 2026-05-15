@@ -60,6 +60,7 @@ import {
   type GitaSearchResult,
 } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { ShankhaVoiceInput } from '../../../voice/components/ShankhaVoiceInput';
 
@@ -119,6 +120,7 @@ const lotusBloom = Easing.bezier(0.22, 1, 0.36, 1);
  * trigger `refreshVerseOfTheDay()` inside a useEffect (never during render).
  */
 function DailyVerse(): React.JSX.Element {
+  const { t } = useTranslation('wisdom');
   const refreshVerseOfTheDay = useGitaStore((s) => s.refreshVerseOfTheDay);
   useEffect(() => {
     refreshVerseOfTheDay();
@@ -141,7 +143,7 @@ function DailyVerse(): React.JSX.Element {
         style={styles.dailyLoading}
       >
         {error ? (
-          <OmLoader size={56} label="The daily verse will return soon…" />
+          <OmLoader size={56} label={t('gitaDailyReturnSoon')} />
         ) : (
           <OmLoader size={56} />
         )}
@@ -150,17 +152,20 @@ function DailyVerse(): React.JSX.Element {
   }
 
   const v = data.verse;
-  const reference = `Bhagavad Gita ${v.chapter}.${v.verse}`;
+  const reference = t('verseRefBgFormat', {
+    chapter: String(v.chapter),
+    verse: String(v.verse),
+  });
 
   return (
     <Animated.View entering={FadeInDown.duration(500).springify()}>
       <Pressable
         onPress={() => router.push(`/(tabs)/shlokas/${v.chapter}/${v.verse}`)}
         accessibilityRole="button"
-        accessibilityLabel={`Daily verse: ${reference}`}
+        accessibilityLabel={t('gitaDailyVerseA11y', { reference })}
       >
         <View style={styles.dailyWrap}>
-          <Text style={styles.dailyLabel}>✦ Verse of the Day</Text>
+          <Text style={styles.dailyLabel}>{t('gitaVerseOfTheDayLabel')}</Text>
           <ShlokaCard
             sanskrit={v.sanskrit}
             meaning={v.english}
@@ -181,12 +186,14 @@ interface ChapterRowProps {
   readonly chapter: GitaChapter;
   readonly index: number;
   readonly onPress: (chapterId: number) => void;
+  readonly chapterRowA11y: string;
 }
 
 function ChapterRow({
   chapter,
   index,
   onPress,
+  chapterRowA11y,
 }: ChapterRowProps): React.JSX.Element {
   const handlePress = useCallback(
     () => onPress(chapter.id),
@@ -202,7 +209,7 @@ function ChapterRow({
     >
       <SacredCard
         onPress={handlePress}
-        accessibilityLabel={`Chapter ${chapter.id}: ${chapter.title}, ${chapter.versesCount} verses`}
+        accessibilityLabel={chapterRowA11y}
         contentStyle={styles.chapterBody}
       >
         <View style={styles.chapterRow}>
@@ -254,6 +261,7 @@ function SearchOverlay({
   onClose,
   onSelectVerse,
 }: SearchOverlayProps): React.JSX.Element {
+  const { t } = useTranslation('wisdom');
   const insets = useSafeAreaInsets();
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -315,19 +323,25 @@ function SearchOverlay({
             onClose();
           }}
           accessibilityRole="button"
-          accessibilityLabel={`Open verse ${v.chapter}.${v.verse}`}
+          accessibilityLabel={t('gitaOpenVerseA11y', {
+            chapter: String(v.chapter),
+            verse: String(v.verse),
+          })}
           style={styles.resultItem}
         >
           <ShlokaCard
             sanskrit={v.sanskrit}
             meaning={v.english}
-            reference={`Bhagavad Gita ${v.chapter}.${v.verse}`}
+            reference={t('verseRefBgFormat', {
+              chapter: String(v.chapter),
+              verse: String(v.verse),
+            })}
             revealDelay={0}
           />
         </Pressable>
       );
     },
-    [onClose, onSelectVerse]
+    [onClose, onSelectVerse, t]
   );
 
   return (
@@ -345,20 +359,20 @@ function SearchOverlay({
             <ShankhaVoiceInput
               value={input}
               onChangeText={handleChange}
-              placeholder="Search verses, themes, words…"
+              placeholder={t('gitaSearchPlaceholder')}
               autoFocus
               autoCorrect={false}
               autoCapitalize="none"
               returnKeyType="search"
               style={styles.overlayInput}
-              accessibilityLabel="Search the Bhagavad Gita"
+              accessibilityLabel={t('gitaSearchA11y')}
               dictationMode="append"
               />
           </View>
           <Pressable
             onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel="Close search"
+            accessibilityLabel={t('gitaCloseSearchA11y')}
             hitSlop={12}
             style={styles.overlayClose}
           >
@@ -370,31 +384,24 @@ function SearchOverlay({
           {!isSearching ? (
             <View style={styles.emptyState}>
               <OmLoader size={48} />
-              <Text style={styles.emptyTitle}>Searching the sacred texts…</Text>
+              <Text style={styles.emptyTitle}>{t('gitaSearchingSacredTexts')}</Text>
               <Text style={styles.emptyHint}>
-                Type at least {SEARCH_MIN_CHARS} characters to find verses by
-                theme, Sanskrit keyword, or English translation.
+                {t('gitaSearchTypeMoreHint', { n: String(SEARCH_MIN_CHARS) })}
               </Text>
             </View>
           ) : isLoading ? (
             <View style={styles.emptyState}>
-              <OmLoader size={56} label="Reflecting on 700 verses…" />
+              <OmLoader size={56} label={t('gitaReflecting700Verses')} />
             </View>
           ) : isError ? (
             <View style={styles.emptyState}>
-              <Text style={styles.errorTitle}>Unable to search right now</Text>
-              <Text style={styles.emptyHint}>
-                Please check your connection and try again. Your previously
-                viewed verses remain available offline.
-              </Text>
+              <Text style={styles.errorTitle}>{t('gitaUnableToSearch')}</Text>
+              <Text style={styles.emptyHint}>{t('gitaConnectionRetryHint')}</Text>
             </View>
           ) : results.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No verses found</Text>
-              <Text style={styles.emptyHint}>
-                Try another keyword — e.g. &ldquo;dharma&rdquo;,
-                &ldquo;karma&rdquo;, or &ldquo;surrender&rdquo;.
-              </Text>
+              <Text style={styles.emptyTitle}>{t('gitaNoVersesFound')}</Text>
+              <Text style={styles.emptyHint}>{t('gitaTryAnotherKeyword')}</Text>
             </View>
           ) : (
             <FlatList
@@ -423,6 +430,7 @@ function SearchOverlay({
 export default function ShlokasScreen(): React.JSX.Element {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('wisdom');
   const [searchOpen, setSearchOpen] = useState(false);
 
   const { data: chapters, isLoading, error, refetch } = useGitaChapters();
@@ -447,36 +455,41 @@ export default function ShlokasScreen(): React.JSX.Element {
         <DailyVerse />
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>18 Chapters</Text>
-          <Text style={styles.sectionSub}>700 verses · the whole Gita</Text>
+          <Text style={styles.sectionTitle}>{t('gitaChaptersHeading')}</Text>
+          <Text style={styles.sectionSub}>{t('gitaChaptersSubheading')}</Text>
         </View>
         <GoldenDivider withGlyph style={styles.sectionDivider} />
       </View>
     ),
-    []
+    [t]
   );
 
   const renderChapter = useCallback<ListRenderItem<GitaChapter>>(
     ({ item, index }) => (
-      <ChapterRow chapter={item} index={index} onPress={openChapter} />
+      <ChapterRow
+        chapter={item}
+        index={index}
+        onPress={openChapter}
+        chapterRowA11y={t('gitaChapterRowA11y', {
+          id: String(item.id),
+          title: item.title,
+          count: String(item.versesCount),
+        })}
+      />
     ),
-    [openChapter]
+    [openChapter, t]
   );
 
   const listEmpty = (
     <View style={styles.emptyState}>
       {isLoading ? (
-        <OmLoader size={64} label="Opening the sacred text…" />
+        <OmLoader size={64} label={t('gitaOpeningSacredText')} />
       ) : error ? (
         <>
-          <Text style={styles.errorTitle}>
-            Chapters are temporarily unavailable
-          </Text>
-          <Text style={styles.emptyHint}>
-            Pull down to try again — your bookmarks remain safe offline.
-          </Text>
+          <Text style={styles.errorTitle}>{t('gitaChaptersUnavailable')}</Text>
+          <Text style={styles.emptyHint}>{t('gitaChaptersOfflineHint')}</Text>
           <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-            <Text style={styles.retryText}>Retry</Text>
+            <Text style={styles.retryText}>{t('gitaRetryButton')}</Text>
           </Pressable>
         </>
       ) : null}
@@ -495,12 +508,12 @@ export default function ShlokasScreen(): React.JSX.Element {
           >
             भगवद गीता
           </Text>
-          <Text style={styles.headerEnglish}>Bhagavad Gita</Text>
+          <Text style={styles.headerEnglish}>{t('gitaHeaderEnglish')}</Text>
         </View>
         <Pressable
           onPress={() => setSearchOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel="Search verses"
+          accessibilityLabel={t('gitaSearchVersesA11y')}
           hitSlop={10}
           style={styles.searchIconButton}
         >

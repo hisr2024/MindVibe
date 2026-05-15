@@ -1,0 +1,26 @@
+{
+  "screenTitle": "समुदाय",
+  "tabFeed": "फीड",
+  "tabCircles": "मंडळे",
+  "feedEmpty": "तुमच्या पहिल्या ज्ञान-शब्दांची समुदाय वाट पाहत आहे.",
+  "circlesEmpty": "अद्याप कोणतेही ज्ञान मंडळ उपलब्ध नाही.\nलवकरच पुन्हा पहा.",
+  "composeFabA11y": "नवीन पोस्ट लिहा",
+
+  "composeTitle": "ज्ञान सामायिक करा",
+  "composePromptLabel": "तुम्ही कोणते ज्ञान सामायिक करू इच्छिता?",
+  "composePromptPlaceholder": "तुमचे विचार, अंतर्दृष्टी, किंवा प्रश्न सामायिक करा...",
+  "composeCharsRemainingFmt": "{{count}} अक्षरे शिल्लक",
+  "composeCircleLabel": "मंडळात पोस्ट करा (पर्यायी)",
+  "composeTagsLabel": "टॅग (स्वल्पविरामाने वेगळे)",
+  "composeTagsPlaceholder": "ज्ञान, ध्यान, कृतज्ञता...",
+  "composeSubmitButton": "ज्ञान सामायिक करा",
+  "composeErrorTitle": "पोस्ट होऊ शकले नाही",
+  "composeErrorBody": "तुमचे ज्ञान आत्ता सामायिक होऊ शकले नाही. कृपया पुन्हा प्रयत्न करा.",
+
+  "circleFallbackTitle": "मंडळ",
+  "circleMembersFmt": "{{count}} सदस्य",
+  "circleJoinButton": "मंडळात सामील व्हा",
+  "circleJoinedBadge": "✓ सामील",
+  "circlePostsLabel": "पोस्ट",
+  "circlePostsEmpty": "या मंडळात अद्याप पोस्ट नाहीत.\nज्ञान सामायिक करणारे पहिले व्हा."
+}

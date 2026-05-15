@@ -31,6 +31,7 @@ import {
   useSpeechOutput,
 } from '@kiaanverse/ui';
 import type { ArdhaStructuredResponse } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 /** Which section is open by default on first render. Matches the web. */
 const DEFAULT_OPEN_SECTION = 'dharma_alignment';
@@ -49,6 +50,7 @@ function formatTimestamp(now: Date): string {
 
 export default function ArdhaResultScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const params = useLocalSearchParams<{ payload?: string }>();
   const { speak, stop, isSpeaking } = useSpeechOutput();
 
@@ -106,12 +108,12 @@ export default function ArdhaResultScreen(): React.JSX.Element {
       // as one of its share targets, and we avoid adding a clipboard dep.
       await Share.share({
         message: payload.fullText,
-        title: "Ardha's Reframe",
+        title: t('ardhaShareTitle'),
       });
     } catch {
       // User dismissed the sheet; nothing to do.
     }
-  }, [payload]);
+  }, [payload, t]);
 
   const handleSpeak = useCallback(() => {
     if (!payload) return;
@@ -163,7 +165,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
-      <GoldenHeader title="Ardha" onBack={() => router.back()} />
+      <GoldenHeader title={t('ardhaTitle')} onBack={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -176,9 +178,9 @@ export default function ArdhaResultScreen(): React.JSX.Element {
               <Text style={styles.cardIcon}>🔄</Text>
             </View>
             <View style={styles.cardTitleBlock}>
-              <Text style={styles.cardTitle}>Ardha's{'\n'}Reframe</Text>
+              <Text style={styles.cardTitle}>{t('ardhaResultCardTitle')}</Text>
               <View style={styles.quickBadge}>
-                <Text style={styles.quickBadgeText}>⚡ Quick Reframe</Text>
+                <Text style={styles.quickBadgeText}>{t('ardhaQuickBadge')}</Text>
               </View>
               <Text style={styles.timestamp}>{timestamp}</Text>
             </View>
@@ -190,9 +192,9 @@ export default function ArdhaResultScreen(): React.JSX.Element {
                   pressed && styles.pressedFade,
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Copy reframe text"
+                accessibilityLabel={t('ardhaCopyA11y')}
               >
-                <Text style={styles.copyButtonText}>Copy</Text>
+                <Text style={styles.copyButtonText}>{t('ardhaCopyLabel')}</Text>
               </Pressable>
               <Pressable
                 onPress={handleSpeak}
@@ -202,7 +204,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel={
-                  isSpeaking ? 'Stop audio playback' : 'Listen to reframe'
+                  isSpeaking ? t('ardhaStopA11y') : t('ardhaListenA11y')
                 }
               >
                 {isSpeaking ? (
@@ -216,13 +218,13 @@ export default function ArdhaResultScreen(): React.JSX.Element {
 
           <View style={[styles.controlsRow, isCrisis && styles.hidden]}>
             {[
-              { key: 'expand', label: 'Expand All', onPress: handleExpandAll },
+              { key: 'expand', label: t('ardhaExpandAll'), onPress: handleExpandAll },
               {
                 key: 'collapse',
-                label: 'Collapse All',
+                label: t('ardhaCollapseAll'),
                 onPress: handleCollapseAll,
               },
-              { key: 'full', label: 'Full Text', onPress: handleFullText },
+              { key: 'full', label: t('ardhaFullText'), onPress: handleFullText },
             ].map((c) => (
               <Pressable
                 key={c.key}
@@ -255,9 +257,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             <View>
               {sections.length === 0 ? (
                 <View style={styles.emptyBlock}>
-                  <Text style={styles.emptyText}>
-                    ARDHA returned an empty reframe. Please try again.
-                  </Text>
+                  <Text style={styles.emptyText}>{t('ardhaEmptyReframe')}</Text>
                 </View>
               ) : (
                 sections.map((section) => {
@@ -274,7 +274,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
                         ]}
                         accessibilityRole="button"
                         accessibilityState={{ expanded: isOpen }}
-                        accessibilityLabel={`${section.label} section`}
+                        accessibilityLabel={t('ardhaSectionA11y', { label: section.label })}
                       >
                         <Text style={styles.sectionIcon}>{section.icon}</Text>
                         <Text style={styles.sectionLabel}>{section.label}</Text>
@@ -299,9 +299,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             </View>
           )}
 
-          <Text style={styles.cardFooter}>
-            💙 Here to help you navigate this with clarity and compassion
-          </Text>
+          <Text style={styles.cardFooter}>{t('ardhaFooter')}</Text>
         </Animated.View>
 
         {/* ── ARDHA Analysis block ─────────────────────────────── */}
@@ -311,22 +309,18 @@ export default function ArdhaResultScreen(): React.JSX.Element {
         >
           <View style={styles.analysisHeaderRow}>
             <View style={styles.analysisDot} />
-            <Text style={styles.analysisHeader}>ARDHA Analysis</Text>
+            <Text style={styles.analysisHeader}>{t('ardhaAnalysisHeader')}</Text>
           </View>
 
           {analysis.detected && !isCrisis ? (
             <View style={styles.detectedRow}>
-              <Text style={styles.detectedLabel}>Detected: </Text>
+              <Text style={styles.detectedLabel}>{t('ardhaDetectedLabel')} </Text>
               <Text style={styles.detectedValue}>{analysis.detected}</Text>
             </View>
           ) : null}
 
           {isCrisis ? (
-            <Text style={styles.crisisCareLine}>
-              ARDHA has paused reframing. What you are feeling deserves direct,
-              compassionate support — please reach out to the people and
-              helplines listed above.
-            </Text>
+            <Text style={styles.crisisCareLine}>{t('ardhaCrisisCareLine')}</Text>
           ) : analysis.pillars.length > 0 ? (
             analysis.pillars.map((pillar, i) => (
               <View
@@ -357,16 +351,16 @@ export default function ArdhaResultScreen(): React.JSX.Element {
               </View>
             ))
           ) : (
-            <Text style={styles.analysisEmpty}>
-              No pillars were flagged — ARDHA read this as a neutral inquiry.
-            </Text>
+            <Text style={styles.analysisEmpty}>{t('ardhaAnalysisEmpty')}</Text>
           )}
 
           {!isCrisis && payload.compliance.maxScore > 0 ? (
             <Text style={styles.complianceLine}>
-              Compliance {payload.compliance.score}/
-              {payload.compliance.maxScore}
-              {payload.fallback ? ' · template fallback' : ''}
+              {t('ardhaComplianceLine', {
+                score: String(payload.compliance.score),
+                max: String(payload.compliance.maxScore),
+              })}
+              {payload.fallback ? t('ardhaComplianceFallback') : ''}
             </Text>
           ) : null}
         </Animated.View>
@@ -384,7 +378,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             ]}
             accessibilityRole="button"
           >
-            <Text style={styles.actionButtonText}>Return to Home</Text>
+            <Text style={styles.actionButtonText}>{t('ardhaReturnHome')}</Text>
           </Pressable>
           <Pressable
             onPress={handleJournal}
@@ -394,7 +388,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             ]}
             accessibilityRole="button"
           >
-            <Text style={styles.actionButtonText}>Journal This</Text>
+            <Text style={styles.actionButtonText}>{t('ardhaJournalThis')}</Text>
           </Pressable>
           <Pressable
             onPress={handleReframeAgain}
@@ -404,7 +398,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             ]}
             accessibilityRole="button"
           >
-            <Text style={styles.actionButtonText}>Reframe Again</Text>
+            <Text style={styles.actionButtonText}>{t('ardhaReframeAgain')}</Text>
           </Pressable>
         </Animated.View>
       </ScrollView>
