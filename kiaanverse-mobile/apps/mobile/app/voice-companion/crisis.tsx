@@ -17,9 +17,11 @@ import { useRouter } from 'expo-router';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { selectCrisis, useVoiceStore } from '../../voice/stores/voiceStore';
 import { useCrisisHandler } from '../../voice/hooks/useCrisisHandler';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function CrisisOverlay() {
   const router = useRouter();
+  const { t } = useTranslation('voice');
   const crisis = useVoiceStore(selectCrisis);
   const { acknowledge } = useCrisisHandler();
 
@@ -44,43 +46,40 @@ export default function CrisisOverlay() {
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.headline}>You are not alone</Text>
-        <Text style={styles.body}>
-          Your feelings are real, and there is help — right now, on this phone.
-          Please reach out to one of these lines.
-        </Text>
+        <Text style={styles.headline}>{t('vcCrisisHeadline')}</Text>
+        <Text style={styles.body}>{t('vcCrisisBody')}</Text>
 
         <View style={styles.helplineList}>
           {crisis.helpline.map((h) => (
             <Pressable
               key={h.name + h.number}
               accessibilityRole="button"
-              accessibilityLabel={`Call ${h.name} at ${h.number}`}
+              accessibilityLabel={t('vcCrisisCallA11yFmt', { name: h.name, number: h.number })}
               style={styles.helplineRow}
               onPress={() => handleCall(h.number)}
             >
               <View style={styles.helplineMeta}>
                 <Text style={styles.helplineName}>{h.name}</Text>
-                {h.is_24x7 ? <Text style={styles.helplineHours}>24×7</Text> : null}
+                {h.is_24x7 ? <Text style={styles.helplineHours}>{t('vcCrisisHours24x7')}</Text> : null}
               </View>
               <Text style={styles.helplineNumber}>{h.number}</Text>
             </Pressable>
           ))}
         </View>
 
-        <Text style={styles.regionNote}>Region: {crisis.region} · {crisis.language.toUpperCase()}</Text>
+        <Text style={styles.regionNote}>{t('vcCrisisRegionFmt', { region: crisis.region, lang: crisis.language.toUpperCase() })}</Text>
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="I am safe — dismiss this overlay"
+          accessibilityLabel={t('vcCrisisSafeA11y')}
           style={styles.safeBtn}
           onPress={handleAcknowledge}
         >
-          <Text style={styles.safeBtnText}>I am safe</Text>
+          <Text style={styles.safeBtnText}>{t('vcCrisisSafeBtn')}</Text>
         </Pressable>
-        <Text style={styles.incidentId}>Incident · {crisis.incidentId.slice(0, 8)}</Text>
+        <Text style={styles.incidentId}>{t('vcCrisisIncidentFmt', { id: crisis.incidentId.slice(0, 8) })}</Text>
       </View>
     </SafeAreaView>
   );

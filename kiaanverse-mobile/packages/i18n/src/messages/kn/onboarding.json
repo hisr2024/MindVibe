@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}}ರಲ್ಲಿ ಹಂತ {{current}}",
+  "progressDotA11yCurrent": "{{total}}ರಲ್ಲಿ ಹಂತ {{current}}, ಪ್ರಸ್ತುತ",
+  "continueButton": "ಮುಂದುವರಿಸಿ",
+
+  "welcomeTitle": "ಸಖಾನನ್ನು ಭೇಟಿಯಾಗಿ",
+  "welcomeBody": "ಆಂತರಿಕ ಶಾಂತಿಯ ಮಾರ್ಗದಲ್ಲಿ ನಿಮ್ಮ ದಿವ್ಯ ಸಂಗಾತಿ — ಭಗವದ್ಗೀತೆಯ ಕಾಲಾತೀತ ಜ್ಞಾನದಿಂದ ಮಾರ್ಗದರ್ಶಿಸಲಾಗಿದೆ.",
+  "welcomeCta": "ನಿಮ್ಮ ಪ್ರಯಾಣವನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+
+  "purposeTitle": "ನಿಮ್ಮನ್ನು ಇಲ್ಲಿಗೆ ಯಾವುದು ಕರೆತಂದಿತು?",
+  "purposeSubtitle": "ನಿಮ್ಮಲ್ಲಿ ಪ್ರತಿಧ್ವನಿಸುವ ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ",
+  "purposePeace": "ಶಾಂತಿ",
+  "purposeWisdom": "ಜ್ಞಾನ",
+  "purposeGuidance": "ಮಾರ್ಗದರ್ಶನ",
+  "purposeHealing": "ಗುಣಪಡಿಸುವಿಕೆ",
+  "purposePurpose": "ಉದ್ದೇಶ",
+
+  "gitaTitle": "ಗೀತೆ ಗೊತ್ತಾ?",
+  "gitaSubtitle": "ಇದು ನಿಮ್ಮ ಮಟ್ಟಕ್ಕೆ ತಕ್ಕಂತೆ ಜ್ಞಾನ ನೀಡಲು ಸಖಾಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ",
+  "gitaLevelNever": "ಎಂದೂ ಓದಿಲ್ಲ",
+  "gitaLevelCurious": "ಆಸಕ್ತ",
+  "gitaLevelBeginner": "ಆರಂಭಿಕ",
+  "gitaLevelPractitioner": "ಸಾಧಕ",
+  "gitaLevelScholar": "ವಿದ್ವಾಂಸ",
+
+  "practiceTitle": "ದೈನಂದಿನ ಸಾಧನೆ ಸಮಯ",
+  "practiceSubtitle": "ನಿಮ್ಮ ದೈನಂದಿನ ಆಧ್ಯಾತ್ಮಿಕ ನೆನಪು ಯಾವಾಗ ಬೇಕು?",
+  "practiceAm": "ಬೆಳಗ್ಗೆ",
+  "practicePm": "ಸಂಜೆ",
+  "practiceHourA11y": "{{hour}} ಗಂಟೆಗೆ",
+
+  "readyVerse": "\"ನಿಮ್ಮ ನಿಗದಿತ ಕರ್ತವ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸುವ ಹಕ್ಕು ನಿಮಗಿದೆ, ಆದರೆ ಆ ಕ್ರಿಯೆಗಳ ಫಲಗಳ ಮೇಲೆ ಹಕ್ಕು ಇಲ್ಲ.\"",
+  "readyVerseAttribution": "— ಭಗವದ್ಗೀತೆ 2.47",
+  "readyTitle": "ನೀವು ಸಿದ್ಧರಿದ್ದೀರಿ",
+  "readyBody": "ನಿಮ್ಮ ಆಧ್ಯಾತ್ಮಿಕ ಮಾರ್ಗದಲ್ಲಿ ಉಳಿಯಲು ದೈನಂದಿನ ನೆನಪುಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ, ಅಥವಾ ಈಗಲೇ ಅನ್ವೇಷಣೆ ಆರಂಭಿಸಿ.",
+  "readyCtaEnable": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ ಪ್ರಾರಂಭಿಸಿ",
+  "readyCtaSkip": "ಅಧಿಸೂಚನೆಗಳಿಲ್ಲದೆ ಪ್ರಾರಂಭಿಸಿ",
+  "readyRequesting": "ಅನುಮತಿ ಕೇಳಲಾಗುತ್ತಿದೆ..."
+}

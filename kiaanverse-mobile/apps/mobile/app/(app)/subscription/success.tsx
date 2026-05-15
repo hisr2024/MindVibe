@@ -29,6 +29,7 @@ import {
 } from '@kiaanverse/ui';
 import { TIER_CONFIGS } from '@kiaanverse/api';
 import type { SubscriptionTier } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(240,235,225,0.6)';
@@ -53,32 +54,21 @@ const TIER_SANSKRIT: Record<SubscriptionTier, string> = {
  * XP / karma badges on the CompletionCelebration are symbolic here —
  * a subscription is not a literal karmic reward. The numbers below
  * were chosen to read as meaningful without implying a specific
- * in-app economy effect. They can be wired to the backend later if
- * the subscription → karma bonus ever becomes a real mechanic.
+ * in-app economy effect. The celebratory message routes through i18n
+ * via `messageKey` so it speaks the active UI language.
  */
 const CELEBRATION_REWARDS: Record<
   SubscriptionTier,
-  { xp: number; karma: number; message: string }
+  { xp: number; karma: number; messageKey: string }
 > = {
-  free: { xp: 0, karma: 0, message: 'Your journey begins anew.' },
-  bhakta: {
-    xp: 108,
-    karma: 21,
-    message: 'The devotee’s path opens before you.',
-  },
-  sadhak: {
-    xp: 216,
-    karma: 54,
-    message: 'The sacred discipline is yours.',
-  },
-  siddha: {
-    xp: 432,
-    karma: 108,
-    message: 'All sacred gates are open.',
-  },
+  free: { xp: 0, karma: 0, messageKey: 'subscription.rewardMessageFree' },
+  bhakta: { xp: 108, karma: 21, messageKey: 'subscription.rewardMessageBhakta' },
+  sadhak: { xp: 216, karma: 54, messageKey: 'subscription.rewardMessageSadhak' },
+  siddha: { xp: 432, karma: 108, messageKey: 'subscription.rewardMessageSiddha' },
 };
 
 export default function SubscriptionSuccessScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ tier?: string }>();
   const tier: SubscriptionTier =
     params.tier && VALID_TIERS.has(params.tier as SubscriptionTier)
@@ -120,26 +110,25 @@ export default function SubscriptionSuccessScreen(): React.JSX.Element {
         visible={celebrating}
         xp={rewards.xp}
         karmaPoints={rewards.karma}
-        message={rewards.message}
+        message={t(rewards.messageKey)}
         duration={4200}
       />
 
       <View style={styles.center}>
-        <Text style={styles.om} accessibilityLabel="Om">
+        <Text style={styles.om} accessibilityLabel={t('subscription.successOmA11y')}>
           ॐ
         </Text>
         <Text style={styles.title} accessibilityRole="header">
-          Your Sankalpa Is Made
+          {t('subscription.successTitle')}
         </Text>
         {sanskrit ? <Text style={styles.sanskrit}>{sanskrit}</Text> : null}
         <Text style={styles.subtitle}>
-          The sacred path opens before you.{'\n'}
-          Welcome, {tierName}.
+          {t('subscription.successWelcome', { tierName })}
         </Text>
 
         <View style={styles.cta}>
           <DivineButton
-            title="Begin Your Sacred Journey"
+            title={t('subscription.successCta')}
             onPress={() => router.replace('/(tabs)')}
             variant="primary"
           />

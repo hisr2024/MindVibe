@@ -1,0 +1,26 @@
+{
+  "screenTitle": "Community",
+  "tabFeed": "Feed",
+  "tabCircles": "Kreise",
+  "feedEmpty": "Die Community erwartet deine ersten Worte der Weisheit.",
+  "circlesEmpty": "Noch keine Weisheitskreise verfügbar.\nSchau bald wieder rein.",
+  "composeFabA11y": "Neuen Beitrag verfassen",
+
+  "composeTitle": "Weisheit teilen",
+  "composePromptLabel": "Welche Weisheit möchtest du teilen?",
+  "composePromptPlaceholder": "Teile deine Gedanken, Einsichten oder eine Frage...",
+  "composeCharsRemainingFmt": "{{count}} Zeichen übrig",
+  "composeCircleLabel": "In Kreis posten (optional)",
+  "composeTagsLabel": "Tags (durch Komma getrennt)",
+  "composeTagsPlaceholder": "Weisheit, Meditation, Dankbarkeit...",
+  "composeSubmitButton": "Weisheit teilen",
+  "composeErrorTitle": "Konnte nicht gepostet werden",
+  "composeErrorBody": "Deine Weisheit konnte gerade nicht geteilt werden. Bitte erneut versuchen.",
+
+  "circleFallbackTitle": "Kreis",
+  "circleMembersFmt": "{{count}} Mitglieder",
+  "circleJoinButton": "Kreis beitreten",
+  "circleJoinedBadge": "✓ Beigetreten",
+  "circlePostsLabel": "Beiträge",
+  "circlePostsEmpty": "Noch keine Beiträge in diesem Kreis.\nSei die Erste, die Weisheit teilt."
+}

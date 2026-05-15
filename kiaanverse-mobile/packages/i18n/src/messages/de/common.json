@@ -1,0 +1,17 @@
+{
+  "loading": "Wird geladen…",
+  "error": "Etwas ist schiefgelaufen",
+  "retry": "Erneut versuchen",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "done": "Fertig",
+  "next": "Weiter",
+  "back": "Zurück",
+  "skip": "Überspringen",
+  "ok": "OK",
+  "yes": "Ja",
+  "no": "Nein",
+  "search": "Suchen",
+  "noResults": "Keine Ergebnisse gefunden",
+  "offline": "Du bist offline"
+}

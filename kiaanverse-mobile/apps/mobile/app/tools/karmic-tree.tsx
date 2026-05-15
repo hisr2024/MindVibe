@@ -26,40 +26,37 @@ import {
 } from '@kiaanverse/ui';
 import { VoicePrefillBanner } from '../../voice/components/VoicePrefillBanner';
 import { useVoicePrefill } from '../../voice/hooks/useVoicePrefill';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function KarmicTreeStub(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const voice = useVoicePrefill<{ focus_area?: string }>('KARMIC_TREE');
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
-      <GoldenHeader title="Karmic Tree" onBack={() => router.back()} />
+      <GoldenHeader title={t('karmicTreeTitle')} onBack={() => router.back()} />
 
       {voice.isVoicePrefilled && (
         <VoicePrefillBanner
-          label={voice.prefill?.focus_area ?? 'your roots'}
+          label={voice.prefill?.focus_area ?? t('karmicTreeRootsFallback')}
           onDismiss={voice.acknowledge}
         />
       )}
 
       <View style={styles.body}>
         <Text style={styles.sanskrit}>कर्म वृक्ष</Text>
-        <Text style={styles.title}>Karmic Tree</Text>
-        <Text style={styles.tagline}>
-          The branches of your patterns are still being mapped.
-        </Text>
-        <Text style={styles.tagline}>
-          This sacred tool is in cultivation — Sakha will let you know
-          when it blossoms.
-        </Text>
+        <Text style={styles.title}>{t('karmicTreeTitle')}</Text>
+        <Text style={styles.tagline}>{t('karmicTreeTagline1')}</Text>
+        <Text style={styles.tagline}>{t('karmicTreeTagline2')}</Text>
 
         <Pressable
           onPress={() => router.replace('/tools')}
           accessibilityRole="button"
-          accessibilityLabel="Return to the Tools dashboard"
+          accessibilityLabel={t('karmicTreeBackToArmoryA11y')}
           style={styles.cta}
         >
-          <Text style={styles.ctaText}>Return to the Armory</Text>
+          <Text style={styles.ctaText}>{t('karmicTreeBackToArmoryCta')}</Text>
         </Pressable>
       </View>
     </DivineBackground>

@@ -19,9 +19,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useVoiceStore } from '../../voice/stores/voiceStore';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function VoiceTranscriptOverlay() {
   const router = useRouter();
+  const { t } = useTranslation('voice');
   const verse = useVoiceStore((s) => s.currentVerse);
   const responseText = useVoiceStore((s) => s.responseText);
   const finalTranscript = useVoiceStore((s) => s.finalTranscript);
@@ -48,19 +50,19 @@ export default function VoiceTranscriptOverlay() {
     <SafeAreaView style={styles.root}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close transcript"
+        accessibilityLabel={t('vcTxCloseA11y')}
         style={styles.dismissArea}
         onPress={() => router.back()}
       />
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.label}>You said</Text>
-          <Text style={styles.userText}>{finalTranscript || '—'}</Text>
+          <Text style={styles.label}>{t('vcTxYouSaid')}</Text>
+          <Text style={styles.userText}>{finalTranscript || t('vcTxEmpty')}</Text>
 
           {verse ? (
             <>
-              <Text style={[styles.label, styles.labelSpaced]}>From the Bhagavad Gita</Text>
+              <Text style={[styles.label, styles.labelSpaced]}>{t('vcTxFromGita')}</Text>
               <Text style={styles.citation}>{verse.citation}</Text>
               <Text style={styles.sanskrit}>{verse.text_sa}</Text>
               <Text style={styles.translation}>{verse.text_en}</Text>
@@ -70,15 +72,15 @@ export default function VoiceTranscriptOverlay() {
             </>
           ) : null}
 
-          <Text style={[styles.label, styles.labelSpaced]}>Sakha said</Text>
-          <Text style={styles.responseText}>{cleanedResponseText || '—'}</Text>
+          <Text style={[styles.label, styles.labelSpaced]}>{t('vcTxSakhaSaid')}</Text>
+          <Text style={styles.responseText}>{cleanedResponseText || t('vcTxEmpty')}</Text>
 
           {(engine || mood) ? (
             <View style={styles.metaRow}>
-              {engine ? <Text style={styles.metaText}>engine · {engine}</Text> : null}
+              {engine ? <Text style={styles.metaText}>{t('vcTxEngineFmt', { engine })}</Text> : null}
               {mood ? (
                 <Text style={styles.metaText}>
-                  mood · {mood.label} ({Math.round(mood.intensity * 100)}%)
+                  {t('vcTxMoodFmt', { label: mood.label, percent: String(Math.round(mood.intensity * 100)) })}
                 </Text>
               ) : null}
             </View>
@@ -87,11 +89,11 @@ export default function VoiceTranscriptOverlay() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Save to Sacred Reflections journal"
+          accessibilityLabel={t('vcTxSaveA11y')}
           style={styles.cta}
           onPress={handleSaveToJournal}
         >
-          <Text style={styles.ctaText}>Save to journal</Text>
+          <Text style={styles.ctaText}>{t('vcTxSaveBtn')}</Text>
         </Pressable>
       </View>
     </SafeAreaView>

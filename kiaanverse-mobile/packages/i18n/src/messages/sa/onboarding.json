@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}}-मध्ये चरणं {{current}}",
+  "progressDotA11yCurrent": "{{total}}-मध्ये चरणं {{current}}, वर्तमानम्",
+  "continueButton": "अनुवर्तयतु",
+
+  "welcomeTitle": "सखां मिलतु",
+  "welcomeBody": "अन्तःशान्ति-मार्गे भवतः दिव्यः साथी — श्रीमद्भगवद्गीतायाः कालातीत-ज्ञानेन निर्देशितः।",
+  "welcomeCta": "स्व-यात्रां आरभध्वम्",
+
+  "purposeTitle": "किं भवन्तं अत्र आनयत्?",
+  "purposeSubtitle": "यद् भवतः हृदये अनुनादति, तत् सर्वं चिनुत",
+  "purposePeace": "शान्तिः",
+  "purposeWisdom": "प्रज्ञा",
+  "purposeGuidance": "मार्गदर्शनम्",
+  "purposeHealing": "उपचारः",
+  "purposePurpose": "जीवन-प्रयोजनम्",
+
+  "gitaTitle": "गीतायाः परिचयः?",
+  "gitaSubtitle": "एतत् सखायाः कृते भवतः स्तराय अनुरूपं ज्ञानं प्रदातुं सहायकं भविष्यति",
+  "gitaLevelNever": "न पठिता",
+  "gitaLevelCurious": "जिज्ञासुः",
+  "gitaLevelBeginner": "नव-साधकः",
+  "gitaLevelPractitioner": "साधकः",
+  "gitaLevelScholar": "विद्वान्",
+
+  "practiceTitle": "दैनिक-साधनायाः समयः",
+  "practiceSubtitle": "स्व-दैनिक-आध्यात्मिक-स्मरणं कदा इच्छति?",
+  "practiceAm": "पूर्वाह्णे",
+  "practicePm": "अपराह्णे",
+  "practiceHourA11y": "{{hour}}-वादने",
+
+  "readyVerse": "\"भवतः अधिकारः केवलं नियत-कर्मणि, न तु कर्म-फलेषु।\"",
+  "readyVerseAttribution": "— श्रीमद्भगवद्गीता २.४७",
+  "readyTitle": "भवान् सज्जः",
+  "readyBody": "स्व-आध्यात्मिक-मार्गे स्थातुं दैनिक-स्मरणं सक्रियं कुरु, अद्यैव अन्वेषणं आरभस्व वा।",
+  "readyCtaEnable": "सूचनाः सक्रियाः कुरु, आरभस्व च",
+  "readyCtaSkip": "सूचनाभिः विना आरभस्व",
+  "readyRequesting": "अनुमतिः याच्यते..."
+}

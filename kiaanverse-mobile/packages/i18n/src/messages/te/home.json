@@ -1,0 +1,35 @@
+{
+  "greeting": "నమస్తే",
+  "dailyVerse": "నేటి శ్లోకం",
+  "moodCheckIn": "మీరు ఎలా అనుభూతి చెందుతున్నారు?",
+  "activeJourney": "మీ ప్రస్తుత ప్రయాణం",
+  "noJourneys": "మీ పరివర్తనను ప్రారంభించడానికి ఒక ప్రయాణాన్ని ప్రారంభించండి",
+  "startJourney": "ప్రయాణాన్ని ప్రారంభించు",
+
+  "wordmarkA11yLabel": "Kiaanverse — సఖా, మీ ఆధ్యాత్మిక సహచరుడు",
+  "wordmarkSubtitle": "సఖా · మీ ఆధ్యాత్మిక సహచరుడు",
+  "openProfileA11y": "ప్రొఫైల్ తెరువు",
+  "defaultUserName": "పవిత్ర అన్వేషి",
+
+  "openTodaysWisdomA11y": "నేటి జ్ఞానం తెరువు",
+  "verseRef": "భగవద్గీత — అధ్యా. {{chapter}} · శ్లో. {{verse}}",
+  "askSakha": "సఖాను అడుగు →",
+  "askSakhaA11y": "ఈ శ్లోకం గురించి సఖాను అడుగు",
+  "listenToVerseA11y": "నేటి శ్లోకాన్ని వినండి",
+  "stopVerseA11y": "శ్లోకం ఆపండి",
+  "bookmarkVerseA11y": "ఈ శ్లోకాన్ని భద్రపరచు",
+  "removeBookmarkA11y": "భద్రపరచిన శ్లోకాన్ని తీసివేయి",
+
+  "sacredToolsHeader": "పవిత్ర సాధనాలు",
+  "toolEmotionalReset": "భావోద్వేగ రీసెట్",
+  "toolArdha": "అర్థ",
+  "toolKarmaReset": "కర్మ రీసెట్",
+  "toolViyoga": "వియోగ",
+  "toolAllTools": "అన్ని సాధనాలు",
+  "toolNameA11y": "{{name}} సాధనం",
+
+  "daysOfSacredPractice": "పవిత్ర సాధన\nదినాలు",
+  "phasesLabel": "దశలు",
+  "continueArrow": "కొనసాగించు →",
+  "continueSadhanaA11y": "సాధనను కొనసాగించు"
+}

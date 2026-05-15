@@ -1,0 +1,39 @@
+{
+  "progressDotA11y": "{{total}}-లో దశ {{current}}",
+  "progressDotA11yCurrent": "{{total}}-లో దశ {{current}}, ప్రస్తుత",
+  "continueButton": "కొనసాగించండి",
+
+  "welcomeTitle": "సఖాను కలవండి",
+  "welcomeBody": "అంతరంగ శాంతి మార్గంలో మీ దివ్య సహచరుడు — భగవద్గీత యొక్క కాలాతీత జ్ఞానంతో మార్గనిర్దేశం.",
+  "welcomeCta": "మీ ప్రయాణాన్ని ప్రారంభించండి",
+
+  "purposeTitle": "మిమ్మల్ని ఇక్కడకు ఏది తీసుకువచ్చింది?",
+  "purposeSubtitle": "మీలో ప్రతిధ్వనించే అన్నింటినీ ఎంచుకోండి",
+  "purposePeace": "శాంతి",
+  "purposeWisdom": "జ్ఞానం",
+  "purposeGuidance": "మార్గనిర్దేశం",
+  "purposeHealing": "ఆరోగ్యం",
+  "purposePurpose": "ఉద్దేశ్యం",
+
+  "gitaTitle": "గీత తెలుసా?",
+  "gitaSubtitle": "ఇది మీ స్థాయికి తగిన జ్ఞానం అందించడంలో సఖాకి సహాయపడుతుంది",
+  "gitaLevelNever": "ఎప్పుడూ చదవలేదు",
+  "gitaLevelCurious": "ఉత్సుకంగా",
+  "gitaLevelBeginner": "ప్రారంభకుడు",
+  "gitaLevelPractitioner": "సాధకుడు",
+  "gitaLevelScholar": "విద్వాంసుడు",
+
+  "practiceTitle": "నిత్య సాధన సమయం",
+  "practiceSubtitle": "మీ నిత్య ఆధ్యాత్మిక గుర్తుపునర మీకు ఎప్పుడు కావాలి?",
+  "practiceAm": "ఉదయం",
+  "practicePm": "సాయంత్రం",
+  "practiceHourA11y": "{{hour}} గంటలు",
+
+  "readyVerse": "\"మీకు మీ నిర్దేశించబడిన కర్తవ్యాలను నిర్వహించే హక్కు ఉంది, కానీ ఆ చర్యల ఫలాలపై హక్కు లేదు.\"",
+  "readyVerseAttribution": "— భగవద్గీత 2.47",
+  "readyTitle": "మీరు సిద్ధం",
+  "readyBody": "మీ ఆధ్యాత్మిక మార్గంలో నిలవడానికి నిత్య గుర్తుపునర్లను ప్రారంభించండి, లేదా ఇప్పుడే అన్వేషించడం ప్రారంభించండి.",
+  "readyCtaEnable": "నోటిఫికేషన్‌లను ప్రారంభించి మొదలుపెట్టు",
+  "readyCtaSkip": "నోటిఫికేషన్‌లు లేకుండా మొదలుపెట్టు",
+  "readyRequesting": "అనుమతి అడుగుతోంది..."
+}

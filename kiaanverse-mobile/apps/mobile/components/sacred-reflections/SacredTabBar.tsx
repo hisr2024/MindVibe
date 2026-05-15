@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text, colors, spacing } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { SACRED_TABS, type SacredTab } from './constants';
 
@@ -22,6 +23,7 @@ export function SacredTabBar({
   active,
   onChange,
 }: SacredTabBarProps): React.JSX.Element {
+  const { t } = useTranslation('sacred-reflections');
   const handlePress = useCallback(
     (tab: SacredTab) => {
       if (tab === active) return;
@@ -35,6 +37,7 @@ export function SacredTabBar({
     <View style={styles.container} accessibilityRole="tablist">
       {SACRED_TABS.map((tab) => {
         const isActive = tab.id === active;
+        const localizedLabel = t(tab.labelKey);
         return (
           <Pressable
             key={tab.id}
@@ -42,7 +45,7 @@ export function SacredTabBar({
             style={[styles.tab, isActive && styles.tabActive]}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
-            accessibilityLabel={`${tab.label} tab`}
+            accessibilityLabel={t('tabA11yFmt', { label: localizedLabel })}
           >
             <Text
               variant="caption"
@@ -56,7 +59,7 @@ export function SacredTabBar({
               color={isActive ? colors.primary[500] : colors.text.muted}
               style={styles.label}
             >
-              {tab.label}
+              {localizedLabel}
             </Text>
           </Pressable>
         );

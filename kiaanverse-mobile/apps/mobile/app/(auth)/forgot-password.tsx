@@ -20,7 +20,7 @@ import {
 import { useTranslation } from '@kiaanverse/i18n';
 
 export default function ForgotPasswordScreen(): React.JSX.Element {
-  const { t: _t } = useTranslation('auth');
+  const { t } = useTranslation('auth');
 
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -48,27 +48,25 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text variant="h1" align="center">
-            Reset Password
+            {t('forgotHeaderTitle')}
           </Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Enter your email and we{"'"}ll send you a link to reset your
-            password.
+            {t('forgotHeaderSubtitle')}
           </Text>
         </View>
 
         {submitted ? (
           <View style={styles.successCard}>
             <Text variant="h3" align="center" color={colors.primary[300]}>
-              Check your inbox
+              {t('forgotCheckInbox')}
             </Text>
             <Text variant="body" color={colors.text.secondary} align="center">
-              If an account exists for {email}, you{"'"}ll receive a password
-              reset link shortly.
+              {t('forgotResetLinkBody', { email })}
             </Text>
             <View style={styles.backLink}>
               <Link href="/(auth)/login">
                 <Text variant="label" color={colors.primary[300]}>
-                  Back to Login
+                  {t('forgotBackToLogin')}
                 </Text>
               </Link>
             </View>
@@ -77,8 +75,8 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
           <>
             <View style={styles.form}>
               <Input
-                label="Email"
-                placeholder="you@example.com"
+                label={t('forgotEmailLabel')}
+                placeholder={t('forgotEmailPlaceholder')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -88,7 +86,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
               />
 
               <GoldenButton
-                title="Send Reset Link"
+                title={t('forgotSendResetLink')}
                 onPress={handleSubmit}
                 loading={loading}
                 disabled={!isValidEmail}
@@ -102,11 +100,11 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
                 color={colors.text.muted}
                 align="center"
               >
-                Remember your password?{' '}
+                {t('forgotRememberPassword')}{' '}
               </Text>
               <Link href="/(auth)/login">
                 <Text variant="label" color={colors.primary[300]}>
-                  Sign In
+                  {t('forgotSignIn')}
                 </Text>
               </Link>
             </View>

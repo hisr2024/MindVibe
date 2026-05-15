@@ -32,8 +32,15 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Text, colors, spacing } from '@kiaanverse/ui';
 import { useJournalEntries } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
-import { BROWSE_FILTER_IDS, COPY, MOOD_BY_ID, type MoodId } from './constants';
+import {
+  BROWSE_FILTER_IDS,
+  COPY_KEYS,
+  MOOD_BY_ID,
+  MOOD_LABEL_KEYS,
+  type MoodId,
+} from './constants';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 import { LotusGlyph } from './LotusGlyph';
 
@@ -89,15 +96,18 @@ function countThisMonth(entries: readonly JournalEntry[]): number {
 }
 
 // ---------------------------------------------------------------------------
-// Weekly dot strip (S M T W T F S, current week, today highlighted)
+// Weekly dot strip (locale-aware narrow weekday glyphs, current week, today
+// highlighted). Single-letter weekday glyphs come from
+// `toLocaleDateString(locale, { weekday: 'narrow' })` so they render as the
+// natural script for each locale (e.g. "स" for Hindi Sunday).
 // ---------------------------------------------------------------------------
-
-const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 function WeeklyStrip({
   entries,
+  locale,
 }: {
   readonly entries: readonly JournalEntry[];
+  readonly locale: string;
 }): React.JSX.Element {
   const today = new Date();
   const dow = today.getDay();
@@ -113,9 +123,17 @@ function WeeklyStrip({
     return s;
   }, [entries]);
 
+  const narrowWeekday = (d: Date): string => {
+    try {
+      return d.toLocaleDateString(locale, { weekday: 'narrow' });
+    } catch {
+      return d.toLocaleDateString('en-US', { weekday: 'narrow' });
+    }
+  };
+
   return (
     <View style={styles.weekRow}>
-      {WEEKDAY_LABELS.map((label, idx) => {
+      {Array.from({ length: 7 }, (_, idx) => idx).map((idx) => {
         const day = new Date(weekStart);
         day.setDate(weekStart.getDate() + idx);
         const isToday = isSameDayUtc(day, today);
@@ -129,7 +147,7 @@ function WeeklyStrip({
               color={colors.text.muted}
               style={styles.weekLabel}
             >
-              {label}
+              {narrowWeekday(day)}
             </Text>
             <View
               style={[
@@ -159,6 +177,7 @@ function WeeklyStrip({
 
 export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
   const router = useRouter();
+  const { t, locale } = useTranslation('sacred-reflections');
   const { data, isLoading, refetch } = useJournalEntries();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeFilter, setActiveFilter] = React.useState<MoodId | 'all'>('all');
@@ -227,7 +246,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         | undefined;
       const moodId = moodFromColumn ?? moodFromTags;
       const mood = moodId ? MOOD_BY_ID[moodId] : null;
-      const date = new Date(item.created_at).toLocaleDateString(undefined, {
+      const date = new Date(item.created_at).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
       });
@@ -237,7 +256,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
             onPress={() => handleEntryPress(item.id)}
             style={styles.entryCard}
             accessibilityRole="button"
-            accessibilityLabel={`Open reflection ${item.title ?? date}`}
+            accessibilityLabel={t('browseEntryA11yFmt', { name: item.title ?? date })}
           >
             <View style={styles.entryHeader}>
               {mood ? (
@@ -267,7 +286,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
               style={styles.entryPreview}
               numberOfLines={2}
             >
-              {item.content_preview || '(encrypted reflection)'}
+              {item.content_preview || t('browseEntryEncryptedFallback')}
             </Text>
           </Pressable>
         </Animated.View>
@@ -281,8 +300,8 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       <LotusGlyph size={72} />
       <Text variant="h3" color={colors.text.primary} style={styles.emptyTitle}>
         {searchQuery || activeFilter !== 'all'
-          ? 'No reflections match that filter'
-          : 'Your sacred library awaits your first offering'}
+          ? t('browseEmptyFiltered')
+          : t('browseEmptyUnfiltered')}
       </Text>
       <Pressable onPress={onOpenEditor}>
         <Text
@@ -290,7 +309,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
           color={colors.text.muted}
           style={styles.emptySub}
         >
-          {COPY.emptyLibrarySub}
+          {t(COPY_KEYS.emptyLibrarySub)}
         </Text>
       </Pressable>
     </Animated.View>
@@ -311,30 +330,30 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
       showsVerticalScrollIndicator={false}
     >
       <Text variant="h2" color={colors.text.primary} style={styles.heading}>
-        {COPY.browseHeading}
+        {t(COPY_KEYS.browseHeading)}
       </Text>
       <Text
         variant="caption"
         color={colors.primary[500]}
         style={styles.headingSanskrit}
       >
-        {COPY.browseSanskrit}
+        {t(COPY_KEYS.browseSanskrit)}
       </Text>
 
-      <WeeklyStrip entries={entries} />
+      <WeeklyStrip entries={entries} locale={locale} />
 
       {/* Stat cards */}
       <View style={styles.statsRow}>
-        <StatCard value={total} label="reflections" title="TOTAL" />
-        <StatCard value={monthCount} label="entries" title="THIS MONTH" />
-        <StatCard value={streak} label={`\u{1F525} days`} title="STREAK" />
+        <StatCard value={total} label={t('browseStatTotalLabel')} title={t('browseStatTotalTitle')} />
+        <StatCard value={monthCount} label={t('browseStatMonthLabel')} title={t('browseStatMonthTitle')} />
+        <StatCard value={streak} label={t('browseStatStreakLabel')} title={t('browseStatStreakTitle')} />
       </View>
 
       {/* Search */}
       <ShankhaVoiceInput
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholder={COPY.browseSearch}
+        placeholder={t(COPY_KEYS.browseSearch)}
         style={styles.searchInput}
         returnKeyType="search"
         dictationMode="append"
@@ -349,9 +368,13 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         {BROWSE_FILTER_IDS.map((id) => {
           const isActive = activeFilter === id;
           const mood = id === 'all' ? null : MOOD_BY_ID[id];
+          // Mood labels are upper-case in storage ("PEACEFUL"); for chip
+          // display we title-case the localized version so the chip reads
+          // naturally ("Peaceful"). The "All" fallback comes from i18n.
+          const rawLabel = mood ? t(MOOD_LABEL_KEYS[mood.id]) : t('browseFilterAll');
           const chipLabel = mood
-            ? `${mood.label.charAt(0)}${mood.label.slice(1).toLowerCase()}`
-            : 'All';
+            ? `${rawLabel.charAt(0)}${rawLabel.slice(1).toLowerCase()}`
+            : rawLabel;
           return (
             <Pressable
               key={id}
@@ -359,7 +382,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
               style={[styles.filterChip, isActive && styles.filterChipActive]}
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
-              accessibilityLabel={`Filter ${chipLabel}`}
+              accessibilityLabel={t('browseFilterA11yFmt', { label: chipLabel })}
             >
               <Text style={styles.filterEmoji}>
                 {mood ? mood.emoji : '\u{2728}'}

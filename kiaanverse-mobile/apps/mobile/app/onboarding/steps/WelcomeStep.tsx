@@ -16,12 +16,14 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 interface WelcomeStepProps {
   readonly onNext: () => void;
 }
 
 export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
+  const { t } = useTranslation();
   return (
     <DivineBackground variant="sacred">
       <View style={styles.container}>
@@ -29,7 +31,8 @@ export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
           entering={FadeInDown.duration(800).delay(200)}
           style={styles.avatarWrap}
         >
-          {/* Golden aura ring behind avatar */}
+          {/* Golden aura ring behind avatar. "Sakha" is the brand persona
+              name and stays as-is across every locale. */}
           <View style={styles.auraRing}>
             <SakhaAvatar size={140} state="idle" name="Sakha" />
           </View>
@@ -40,11 +43,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
           style={styles.textWrap}
         >
           <Text variant="h1" align="center">
-            Meet Sakha
+            {t('onboarding.welcomeTitle')}
           </Text>
           <Text variant="body" color={colors.text.secondary} align="center">
-            Your divine companion on the path to inner peace, guided by the
-            timeless wisdom of the Bhagavad Gita.
+            {t('onboarding.welcomeBody')}
           </Text>
         </Animated.View>
 
@@ -53,7 +55,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps): React.JSX.Element {
           style={styles.ctaWrap}
         >
           <GoldenButton
-            title="Begin Your Journey"
+            title={t('onboarding.welcomeCta')}
             variant="divine"
             onPress={onNext}
             testID="welcome-next"

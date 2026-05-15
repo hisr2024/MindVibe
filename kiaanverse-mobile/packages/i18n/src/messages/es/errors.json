@@ -1,0 +1,7 @@
+{
+  "network": "Error de red. Verifica tu conexión.",
+  "server": "Error del servidor. Inténtalo de nuevo más tarde.",
+  "notFound": "No encontrado",
+  "unauthorized": "Inicia sesión para continuar",
+  "timeout": "La solicitud expiró. Inténtalo de nuevo."
+}

@@ -85,6 +85,7 @@ import {
   pickCloudVoices,
 } from '../../voice/lib/cloudVoices';
 import { useSakhaStream } from '../../components/chat/useSakhaStream';
+import { useTranslation } from '@kiaanverse/i18n';
 
 /** Match authStore's SecureStore key — used by Voice Companion's cloud
  *  TTS path (when the user has picked an ElevenLabs / Sarvam / Bhashini
@@ -205,6 +206,7 @@ async function saveCompanionWakeWord(enabled: boolean): Promise<void> {
 type ScreenState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
 export default function VoiceCompanionScreen() {
+  const { t } = useTranslation('voice');
   const authUserId = useAuthStore((s) => s.user?.id ?? null);
   const userId = authUserId;
 
@@ -651,7 +653,7 @@ export default function VoiceCompanionScreen() {
   }, []);
 
   const isActive = state !== 'idle' && state !== 'error';
-  const stateLabel = useMemo(() => stateToLabel(state), [state]);
+  const stateLabel = useMemo(() => stateToLabel(state, t), [state, t]);
 
   // Reflect chat hook's own error state in the UI (e.g., network drop
   // while streaming). startError covers the dictation/permission side.
@@ -669,12 +671,12 @@ export default function VoiceCompanionScreen() {
           onPress={handleStop}
           style={styles.floatingStopBtn}
           accessibilityRole="button"
-          accessibilityLabel="Stop Sakha (silence the voice and end the session)"
+          accessibilityLabel={t('vcStopA11y')}
           testID="voice-companion-stop-floating"
           hitSlop={12}
         >
           <View style={styles.floatingStopGlyph} />
-          <Text style={styles.floatingStopLabel}>Stop</Text>
+          <Text style={styles.floatingStopLabel}>{t('vcStop')}</Text>
         </Pressable>
       ) : null}
 
@@ -707,7 +709,7 @@ export default function VoiceCompanionScreen() {
                 ))}
               </View>
             ) : null}
-            <Text style={styles.voicePickerLabel}>SAKHA VOICE</Text>
+            <Text style={styles.voicePickerLabel}>{t('vcVoicePickerLabel')}</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -725,8 +727,8 @@ export default function VoiceCompanionScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={
                       previewing
-                        ? `Stop ${opt.name} preview`
-                        : `Sakha voice: ${opt.name}, ${PROVIDER_LABELS[opt.provider]}`
+                        ? t('vcStopVoicePreviewFmt', { name: opt.name })
+                        : t('vcVoiceA11yFmt', { name: opt.name, provider: PROVIDER_LABELS[opt.provider] })
                     }
                     accessibilityState={{ selected, busy: previewing }}
                     style={[
@@ -760,7 +762,7 @@ export default function VoiceCompanionScreen() {
                       ]}
                     >
                       {previewing
-                        ? '◼ TAP TO STOP'
+                        ? t('vcTapToStop')
                         : PROVIDER_LABELS[opt.provider]}
                     </Text>
                   </Pressable>
@@ -849,11 +851,11 @@ export default function VoiceCompanionScreen() {
               <Pressable
                 onPress={handleStopPreview}
                 accessibilityRole="button"
-                accessibilityLabel="Stop voice preview"
+                accessibilityLabel={t('vcStopPreviewA11y')}
                 style={styles.stopPreviewBtn}
                 hitSlop={8}
               >
-                <Text style={styles.stopPreviewBtnText}>◼  Stop preview</Text>
+                <Text style={styles.stopPreviewBtnText}>{t('vcStopPreview')}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -866,13 +868,13 @@ export default function VoiceCompanionScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            isActive ? 'Stop voice session' : 'Start voice session'
+            isActive ? t('vcStopSessionA11y') : t('vcStartSessionA11y')
           }
           onPress={isActive ? handleStop : handleStart}
           style={[styles.primaryBtn, isActive ? styles.primaryBtnActive : null]}
         >
           <Text style={styles.primaryBtnText}>
-            {isActive ? 'End session' : 'Tap to begin'}
+            {isActive ? t('vcEndSession') : t('vcTapToBegin')}
           </Text>
         </Pressable>
       </View>
@@ -880,7 +882,10 @@ export default function VoiceCompanionScreen() {
   );
 }
 
-function stateToLabel(s: ScreenState): string {
+function stateToLabel(
+  s: ScreenState,
+  t: (key: string) => string,
+): string {
   // Streaming-flag was used by the prior implementation to distinguish
   // partial-LLM-arrived-but-still-streaming from done. The new state
   // machine collapses that into 'thinking' (LLM still streaming) →
@@ -888,15 +893,15 @@ function stateToLabel(s: ScreenState): string {
   // per state is enough.
   switch (s) {
     case 'idle':
-      return 'Tap to begin';
+      return t('vcStateIdle');
     case 'listening':
-      return 'I am here, listening';
+      return t('vcStateListening');
     case 'thinking':
-      return '…';
+      return t('vcStateThinking');
     case 'speaking':
-      return 'Sakha speaks';
+      return t('vcStateSpeaking');
     case 'error':
-      return 'Something went wrong';
+      return t('vcStateError');
     default:
       return '';
   }

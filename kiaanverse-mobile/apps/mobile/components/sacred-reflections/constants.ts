@@ -117,6 +117,23 @@ export const MOOD_BY_ID: Record<MoodId, MoodDef> = MOODS.reduce(
   {} as Record<MoodId, MoodDef>
 );
 
+/** Map mood ID → i18n key for the visible label. Resolves at render via
+ *  `t(MOOD_LABEL_KEYS[id])` so the canonical `id` stays the wire format
+ *  while the display label localizes. Sanskrit + emoji stay literal
+ *  (brand-fixed across locales). */
+export const MOOD_LABEL_KEYS: Record<MoodId, string> = {
+  peaceful: 'moodPeacefulLabel',
+  grateful: 'moodGratefulLabel',
+  seeking: 'moodSeekingLabel',
+  heavy: 'moodHeavyLabel',
+  radiant: 'moodRadiantLabel',
+  wounded: 'moodWoundedLabel',
+  hopeful: 'moodHopefulLabel',
+  anxious: 'moodAnxiousLabel',
+  angry: 'moodAngryLabel',
+  neutral: 'moodNeutralLabel',
+};
+
 // ---------------------------------------------------------------------------
 // Dharmic tag chips (mirrors the 12 chips on Kiaanverse.com EDITOR screen).
 // ---------------------------------------------------------------------------
@@ -138,6 +155,24 @@ export const SACRED_TAGS = [
 
 export type SacredTag = (typeof SACRED_TAGS)[number];
 
+/** Map sacred-tag canonical ID → i18n key. Canonical IDs travel with the
+ *  encrypted journal as plaintext tags[] so KarmaLytix sees stable English
+ *  tokens; the display label resolves via `t(TAG_LABEL_KEYS[tag])`. */
+export const TAG_LABEL_KEYS: Record<SacredTag, string> = {
+  gratitude: 'tagGratitude',
+  reflection: 'tagReflection',
+  growth: 'tagGrowth',
+  dharma: 'tagDharma',
+  shadow: 'tagShadow',
+  healing: 'tagHealing',
+  surrender: 'tagSurrender',
+  clarity: 'tagClarity',
+  forgiveness: 'tagForgiveness',
+  courage: 'tagCourage',
+  grief: 'tagGrief',
+  joy: 'tagJoy',
+};
+
 /** Hard cap on user-selected tags (mood is counted separately). */
 export const MAX_USER_TAGS = 5;
 
@@ -147,15 +182,18 @@ export const MAX_USER_TAGS = 5;
 
 export type SacredTab = 'editor' | 'browse' | 'kiaan' | 'calendar';
 
+/** Each tab carries a stable `id` (used in app state) plus an i18n `labelKey`
+ *  resolved via t() at render. `sanskrit` is brand-fixed Devanagari across all
+ *  locales — kept literal in the constant. */
 export const SACRED_TABS: readonly {
   readonly id: SacredTab;
-  readonly label: string;
+  readonly labelKey: string;
   readonly sanskrit: string;
 }[] = [
-  { id: 'editor', label: 'EDITOR', sanskrit: 'लेख' },
-  { id: 'browse', label: 'BROWSE', sanskrit: 'पठन' },
-  { id: 'kiaan', label: 'KIAAN', sanskrit: 'बोध' },
-  { id: 'calendar', label: 'CALENDAR', sanskrit: 'तिथि' },
+  { id: 'editor', labelKey: 'tabEditorLabel', sanskrit: 'लेख' },
+  { id: 'browse', labelKey: 'tabBrowseLabel', sanskrit: 'पठन' },
+  { id: 'kiaan', labelKey: 'tabKiaanLabel', sanskrit: 'बोध' },
+  { id: 'calendar', labelKey: 'tabCalendarLabel', sanskrit: 'तिथि' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -172,28 +210,27 @@ export const BROWSE_FILTER_IDS: readonly (MoodId | 'all')[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Copy strings (kept inline — not i18n'd yet; the web app uses English +
-// Devanagari pairings and i18n doesn't have sacred-reflections keys yet).
+// COPY_KEYS — i18n key constants for the sacred-reflections surface. Each
+// value is a translation key in the `sacred-reflections` namespace; consumers
+// resolve via `t(COPY_KEYS.heading)` etc. Sanskrit values resolve to the same
+// Devanagari literal across all locales (brand-fixed).
 // ---------------------------------------------------------------------------
 
-export const COPY = {
-  heading: 'Sacred Reflection',
-  headingSanskrit: 'आत्म-चिंतन',
-  moodPrompt: 'HOW DO YOU FEEL?',
-  titlePlaceholder: 'Give this reflection a title...',
-  bodyPlaceholder:
-    'What stirs in you today? Let the words come without judgment...',
-  encryptionNotice:
-    'Encrypted end-to-end · Only mood and tags are visible to KIAAN',
-  ctaOffer: 'Offer This Reflection',
-  browseHeading: 'Your Reflections',
-  browseSanskrit: 'आत्म-चिंतन',
-  browseSearch: 'Search your reflections...',
-  emptyLibraryTitle: 'Your sacred library awaits',
-  emptyLibrarySub: 'Return to the Editor tab to begin.',
-  kiaanEmptyTitle: 'Your sacred library awaits',
-  kiaanEmptySub:
-    "Journal for a few days — then return here for Sakha's weekly reflection.",
-  calendarCurrent: 'CURRENT STREAK',
-  calendarLongest: 'LONGEST STREAK',
+export const COPY_KEYS = {
+  heading: 'heading',
+  headingSanskrit: 'headingSanskrit',
+  moodPrompt: 'moodPrompt',
+  titlePlaceholder: 'titlePlaceholder',
+  bodyPlaceholder: 'bodyPlaceholder',
+  encryptionNotice: 'encryptionNotice',
+  ctaOffer: 'ctaOffer',
+  browseHeading: 'browseHeading',
+  browseSanskrit: 'browseSanskrit',
+  browseSearch: 'browseSearch',
+  emptyLibraryTitle: 'emptyLibraryTitle',
+  emptyLibrarySub: 'emptyLibrarySub',
+  kiaanEmptyTitle: 'kiaanEmptyTitle',
+  kiaanEmptySub: 'kiaanEmptySub',
+  calendarCurrent: 'calendarCurrent',
+  calendarLongest: 'calendarLongest',
 } as const;

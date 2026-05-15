@@ -61,6 +61,7 @@ import {
 } from '../../components/chat/index';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { useTheme } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 /** AsyncStorage key that keeps the last conversation so it survives cold kills. */
 const CONVERSATION_CACHE_KEY = 'sakha_chat_conversation_v1';
@@ -83,12 +84,8 @@ interface CachedConversation {
   readonly messages: SakhaStreamMessage[];
 }
 
-const HERO_PROMPT_EN = 'What weighs upon your heart?';
-
-const OFFLINE_BANNER_TEXT =
-  'You appear to be offline. I will listen as soon as the connection returns.';
-
 export default function ChatScreen(): React.JSX.Element {
+  const { t } = useTranslation('kiaan');
   const listRef = useRef<FlatList<SakhaStreamMessage>>(null);
   const headerRef = useRef<ChatHeaderHandle | null>(null);
   const { isOnline } = useNetworkStatus();
@@ -405,7 +402,7 @@ export default function ChatScreen(): React.JSX.Element {
             <View style={styles.empty}>
               <HeroMandala size={160} active={streaming} />
               <Text style={styles.heroPrompt} accessibilityRole="header">
-                {HERO_PROMPT_EN}
+                {t('chatHeroPrompt')}
               </Text>
               <View style={styles.startersWrap}>
                 <ConversationStarters onSelect={handleStarterSelect} />
@@ -418,9 +415,9 @@ export default function ChatScreen(): React.JSX.Element {
             <View
               style={[styles.offlineBanner, { bottom: 12 }]}
               accessibilityLiveRegion="polite"
-              accessibilityLabel={OFFLINE_BANNER_TEXT}
+              accessibilityLabel={t('chatOfflineBanner')}
             >
-              <Text style={styles.offlineText}>{OFFLINE_BANNER_TEXT}</Text>
+              <Text style={styles.offlineText}>{t('chatOfflineBanner')}</Text>
             </View>
           )}
 

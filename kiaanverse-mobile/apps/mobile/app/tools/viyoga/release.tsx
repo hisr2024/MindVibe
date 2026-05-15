@@ -28,12 +28,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
-
-const DEFAULT_SUBTITLE =
-  'Not the love. Not the memory. But the weight of the pain.';
+import { useTranslation } from '@kiaanverse/i18n';
 
 export default function ViyogaRelease(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('tools');
   const { flow, updateAnswer } = useSacredFlow('viyoga');
   const [release, setRelease] = useState('');
 
@@ -41,7 +40,7 @@ export default function ViyogaRelease(): React.JSX.Element {
     flow.aiResponse?.releaseSubtitle &&
     flow.aiResponse.releaseSubtitle.length > 0
       ? flow.aiResponse.releaseSubtitle
-      : DEFAULT_SUBTITLE;
+      : t('viyogaReleaseSubtitle');
 
   const canOffer = release.trim().length > 0;
 
@@ -73,14 +72,14 @@ export default function ViyogaRelease(): React.JSX.Element {
           <Text style={s.tear}>💧</Text>
         </View>
 
-        <Text style={s.question}>What do you wish to release?</Text>
+        <Text style={s.question}>{t('viyogaReleaseQuestion')}</Text>
         <Text style={s.subtitle}>{subtitle}</Text>
 
         <ShankhaVoiceInput
           style={s.input}
           value={release}
           onChangeText={setRelease}
-          placeholder="I release..."
+          placeholder={t('viyogaReleasePlaceholder')}
           multiline
           dictationMode="append"
           />
@@ -90,7 +89,7 @@ export default function ViyogaRelease(): React.JSX.Element {
           disabled={!canOffer}
           onPress={handleOffer}
           accessibilityRole="button"
-          accessibilityLabel="Offer to the Sacred Fire"
+          accessibilityLabel={t('viyogaReleaseOfferA11y')}
           accessibilityState={{ disabled: !canOffer }}
         >
           <LinearGradient
@@ -99,7 +98,7 @@ export default function ViyogaRelease(): React.JSX.Element {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={s.fireBtnText}>Offer to the Sacred Fire</Text>
+            <Text style={s.fireBtnText}>{t('viyogaReleaseOfferCta')}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>

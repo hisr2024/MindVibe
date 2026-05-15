@@ -1,0 +1,26 @@
+{
+  "screenTitle": "Community",
+  "tabFeed": "Feed",
+  "tabCircles": "Circles",
+  "feedEmpty": "The community awaits your first words of wisdom.",
+  "circlesEmpty": "No wisdom circles available yet.\nCheck back soon.",
+  "composeFabA11y": "Compose new post",
+
+  "composeTitle": "Share Wisdom",
+  "composePromptLabel": "What wisdom would you like to share?",
+  "composePromptPlaceholder": "Share your thoughts, insights, or a question...",
+  "composeCharsRemainingFmt": "{{count}} characters remaining",
+  "composeCircleLabel": "Post to Circle (optional)",
+  "composeTagsLabel": "Tags (comma-separated)",
+  "composeTagsPlaceholder": "wisdom, meditation, gratitude...",
+  "composeSubmitButton": "Share Wisdom",
+  "composeErrorTitle": "Could Not Post",
+  "composeErrorBody": "Your wisdom could not be shared right now. Please try again.",
+
+  "circleFallbackTitle": "Circle",
+  "circleMembersFmt": "{{count}} members",
+  "circleJoinButton": "Join Circle",
+  "circleJoinedBadge": "✓ Joined",
+  "circlePostsLabel": "Posts",
+  "circlePostsEmpty": "No posts in this circle yet.\nBe the first to share wisdom."
+}

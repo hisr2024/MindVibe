@@ -1,0 +1,35 @@
+{
+  "greeting": "നമസ്തേ",
+  "dailyVerse": "ഇന്നത്തെ ശ്ലോകം",
+  "moodCheckIn": "നിങ്ങൾക്ക് എങ്ങനെ തോന്നുന്നു?",
+  "activeJourney": "നിങ്ങളുടെ സജീവ യാത്ര",
+  "noJourneys": "നിങ്ങളുടെ പരിവർത്തനം ആരംഭിക്കാൻ ഒരു യാത്ര തുടങ്ങുക",
+  "startJourney": "യാത്ര ആരംഭിക്കുക",
+
+  "wordmarkA11yLabel": "Kiaanverse — സഖാ, നിങ്ങളുടെ ആത്മീയ കൂട്ടാളി",
+  "wordmarkSubtitle": "സഖാ · നിങ്ങളുടെ ആത്മീയ കൂട്ടാളി",
+  "openProfileA11y": "പ്രൊഫൈൽ തുറക്കുക",
+  "defaultUserName": "പവിത്ര അന്വേഷകൻ",
+
+  "openTodaysWisdomA11y": "ഇന്നത്തെ ജ്ഞാനം തുറക്കുക",
+  "verseRef": "ഭഗവദ്ഗീത — അദ്ധ്യാ. {{chapter}} · ശ്ലോ. {{verse}}",
+  "askSakha": "സഖായോട് ചോദിക്കുക →",
+  "askSakhaA11y": "ഈ ശ്ലോകത്തെക്കുറിച്ച് സഖായോട് ചോദിക്കുക",
+  "listenToVerseA11y": "ഇന്നത്തെ ശ്ലോകം കേൾക്കുക",
+  "stopVerseA11y": "ശ്ലോക പ്ലേബാക്ക് നിർത്തുക",
+  "bookmarkVerseA11y": "ഈ ശ്ലോകം ബുക്ക്മാർക്ക് ചെയ്യുക",
+  "removeBookmarkA11y": "ബുക്ക്മാർക്ക് നീക്കുക",
+
+  "sacredToolsHeader": "പവിത്ര ഉപകരണങ്ങൾ",
+  "toolEmotionalReset": "വൈകാരിക റീസെറ്റ്",
+  "toolArdha": "അർത്ഥ",
+  "toolKarmaReset": "കർമ്മ റീസെറ്റ്",
+  "toolViyoga": "വിയോഗ",
+  "toolAllTools": "എല്ലാ ഉപകരണങ്ങളും",
+  "toolNameA11y": "{{name}} ഉപകരണം",
+
+  "daysOfSacredPractice": "പവിത്ര സാധനയുടെ\nദിനങ്ങൾ",
+  "phasesLabel": "ഘട്ടങ്ങൾ",
+  "continueArrow": "തുടരുക →",
+  "continueSadhanaA11y": "സാധന തുടരുക"
+}

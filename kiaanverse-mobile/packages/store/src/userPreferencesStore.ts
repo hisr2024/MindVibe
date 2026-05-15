@@ -11,6 +11,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 // React Native/Expo global — always defined at runtime
 declare const __DEV__: boolean;
@@ -36,6 +37,13 @@ interface VoicePreferences {
 
 interface UserPreferencesState {
   locale: string;
+  /**
+   * False until the locale has been resolved at least once — either by the
+   * user picking it explicitly in Language Settings, or by the first-launch
+   * system-locale detection. Prevents `initLocaleFromSystem` from
+   * second-guessing an explicit user choice on subsequent boots.
+   */
+  localeInitialized: boolean;
   notifications: NotificationPreferences;
   voice: VoicePreferences;
   hapticsEnabled: boolean;
@@ -44,6 +52,12 @@ interface UserPreferencesState {
 
 interface UserPreferencesActions {
   setLocale: (locale: string) => void;
+  /**
+   * One-shot first-launch helper: if the user hasn't selected a locale yet,
+   * map the device locale onto a supported locale code and store it. Safe
+   * to call on every mount — it's a no-op once a locale has been resolved.
+   */
+  initLocaleFromSystem: (supported: readonly string[]) => void;
   setNotifications: (prefs: Partial<NotificationPreferences>) => void;
   setVoice: (prefs: Partial<VoicePreferences>) => void;
   setHapticsEnabled: (enabled: boolean) => void;
@@ -70,11 +84,52 @@ const defaultVoice: VoicePreferences = {
 
 const initialState: UserPreferencesState = {
   locale: 'en',
+  localeInitialized: false,
   notifications: defaultNotifications,
   voice: defaultVoice,
   hapticsEnabled: true,
   analyticsEnabled: true,
 };
+
+/**
+ * Map a BCP-47 device tag (e.g. "zh-Hans-CN", "pt-BR") onto a supported
+ * locale code from our catalog. Tries the full tag first, then the
+ * language-region prefix, then the bare language. Returns null if no match.
+ */
+function matchSupportedLocale(
+  deviceTags: readonly string[],
+  supported: readonly string[],
+): string | null {
+  const supportedSet = new Set(supported);
+  // Build a case-insensitive lookup that preserves the canonical casing
+  // (e.g. "zh-CN") used in our catalog, since BCP-47 is case-insensitive
+  // on the wire but our keys are deterministic.
+  const canonical = new Map<string, string>();
+  for (const code of supported) canonical.set(code.toLowerCase(), code);
+
+  for (const raw of deviceTags) {
+    if (!raw) continue;
+    const tag = raw.toLowerCase();
+    const direct = canonical.get(tag);
+    if (direct && supportedSet.has(direct)) return direct;
+
+    // Try language-region (drop script): "zh-hans-cn" → "zh-cn"
+    const parts = tag.split('-');
+    if (parts.length >= 3) {
+      const lr = `${parts[0]}-${parts[parts.length - 1]}`;
+      const langRegion = canonical.get(lr);
+      if (langRegion && supportedSet.has(langRegion)) return langRegion;
+    }
+
+    // Try bare language: "pt-br" → "pt"
+    const language = parts[0];
+    if (language) {
+      const bare = canonical.get(language);
+      if (bare && supportedSet.has(bare)) return bare;
+    }
+  }
+  return null;
+}
 
 export const useUserPreferencesStore = create<UserPreferencesState & UserPreferencesActions>()(
   devtools(
@@ -85,6 +140,25 @@ export const useUserPreferencesStore = create<UserPreferencesState & UserPrefere
         setLocale: (locale: string) => {
           set((state) => {
             state.locale = locale;
+            state.localeInitialized = true;
+          });
+        },
+
+        initLocaleFromSystem: (supported: readonly string[]) => {
+          set((state) => {
+            if (state.localeInitialized) return;
+            try {
+              const deviceLocales = Localization.getLocales();
+              const tags = deviceLocales
+                .map((l) => l.languageTag)
+                .filter((t): t is string => typeof t === 'string' && t.length > 0);
+              const matched = matchSupportedLocale(tags, supported);
+              if (matched) state.locale = matched;
+            } catch {
+              // expo-localization can throw on unusual platforms; keep the
+              // default English in that case.
+            }
+            state.localeInitialized = true;
           });
         },
 

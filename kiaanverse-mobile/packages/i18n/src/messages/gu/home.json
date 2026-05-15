@@ -1,0 +1,35 @@
+{
+  "greeting": "નમસ્તે",
+  "dailyVerse": "આજનો શ્લોક",
+  "moodCheckIn": "તમે કેવું અનુભવો છો?",
+  "activeJourney": "તમારી ચાલુ યાત્રા",
+  "noJourneys": "તમારા રૂપાંતરની શરૂઆત માટે એક યાત્રા શરૂ કરો",
+  "startJourney": "યાત્રા શરૂ કરો",
+
+  "wordmarkA11yLabel": "Kiaanverse — સખા, તમારો આધ્યાત્મિક સાથી",
+  "wordmarkSubtitle": "સખા · તમારો આધ્યાત્મિક સાથી",
+  "openProfileA11y": "પ્રોફાઇલ ખોલો",
+  "defaultUserName": "પવિત્ર શોધક",
+
+  "openTodaysWisdomA11y": "આજનું જ્ઞાન ખોલો",
+  "verseRef": "ભગવદ્ ગીતા — અધ્યાય {{chapter}} · શ્લોક {{verse}}",
+  "askSakha": "સખાને પૂછો →",
+  "askSakhaA11y": "આ શ્લોક વિશે સખાને પૂછો",
+  "listenToVerseA11y": "આજનો શ્લોક સાંભળો",
+  "stopVerseA11y": "શ્લોક પ્લેબેક રોકો",
+  "bookmarkVerseA11y": "આ શ્લોકને સાચવો",
+  "removeBookmarkA11y": "બુકમાર્ક દૂર કરો",
+
+  "sacredToolsHeader": "પવિત્ર સાધનો",
+  "toolEmotionalReset": "ભાવનાત્મક રીસેટ",
+  "toolArdha": "અર્થ",
+  "toolKarmaReset": "કર્મ રીસેટ",
+  "toolViyoga": "વિયોગ",
+  "toolAllTools": "બધાં સાધનો",
+  "toolNameA11y": "{{name}} સાધન",
+
+  "daysOfSacredPractice": "પવિત્ર સાધનાના\nદિવસો",
+  "phasesLabel": "તબક્કા",
+  "continueArrow": "ચાલુ રાખો →",
+  "continueSadhanaA11y": "સાધના ચાલુ રાખો"
+}

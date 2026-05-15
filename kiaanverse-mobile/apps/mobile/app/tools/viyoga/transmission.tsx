@@ -27,21 +27,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { GoldenDivider } from '@kiaanverse/ui';
 import { useSacredFlow } from '@/hooks/useSacredFlow';
+import { useTranslation } from '@kiaanverse/i18n';
 
-// ── Section definitions — exact labels from the screenshot ────────────────
+// ── Section definitions — labelKey resolves via t() at render. ────────────
 
 interface SectionDef {
   readonly icon: string;
-  readonly label: string;
+  readonly labelKey: string;
   readonly key: string;
 }
 
 const SECTIONS: readonly SectionDef[] = [
-  { icon: '💚', label: 'I Get It', key: 'i_get_it' },
-  { icon: '🔄', label: 'A Different Way to See This', key: 'different_way' },
-  { icon: '⏱', label: 'Try This Right Now', key: 'try_right_now' },
-  { icon: '✨', label: 'One Thing You Can Do', key: 'one_thing' },
-  { icon: '💭', label: 'Something to Consider', key: 'something_consider' },
+  { icon: '💚', labelKey: 'viyogaSec1Label', key: 'i_get_it' },
+  { icon: '🔄', labelKey: 'viyogaSec2Label', key: 'different_way' },
+  { icon: '⏱', labelKey: 'viyogaSec3Label', key: 'try_right_now' },
+  { icon: '✨', labelKey: 'viyogaSec4Label', key: 'one_thing' },
+  { icon: '💭', labelKey: 'viyogaSec5Label', key: 'something_consider' },
 ];
 
 // ── Accordion section — controlled so Expand/Collapse All can drive it ────
@@ -146,6 +147,8 @@ function formatDate(): string {
 }
 
 export default function ViyogaTransmission(): React.JSX.Element {
+  // Aliased to `tr` to avoid colliding with the `t` styles const below.
+  const { t: tr } = useTranslation('tools');
   const insets = useSafeAreaInsets();
   const { flow, error } = useSacredFlow('viyoga');
   const result = flow.aiResponse;
@@ -189,16 +192,16 @@ export default function ViyogaTransmission(): React.JSX.Element {
     return (
       <View style={em.screen}>
         <Text style={em.title}>
-          {isError ? 'Sakha could not respond.' : 'Loading transmission...'}
+          {isError ? tr('viyogaTxSakhaErr') : tr('viyogaTxLoading')}
         </Text>
         {isError && error ? <Text style={em.detail}>{error}</Text> : null}
         <TouchableOpacity
           style={em.backBtn}
           onPress={() => router.replace('/tools/viyoga/step1' as never)}
           accessibilityRole="button"
-          accessibilityLabel="Return to the beginning"
+          accessibilityLabel={tr('viyogaTxReturnBegin')}
         >
-          <Text style={em.backBtnText}>Return to the beginning</Text>
+          <Text style={em.backBtnText}>{tr('viyogaTxReturnBegin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -208,8 +211,8 @@ export default function ViyogaTransmission(): React.JSX.Element {
     result.header.length > 0
       ? result.header
       : separatedFrom.length > 0
-        ? `Sakha has witnessed your longing for ${separatedFrom}`
-        : 'Sakha has witnessed your longing';
+        ? tr('viyogaTxWitnessedFor', { name: separatedFrom })
+        : tr('viyogaTxWitnessed');
 
   return (
     <View style={{ flex: 1, backgroundColor: '#030510' }}>
@@ -224,7 +227,10 @@ export default function ViyogaTransmission(): React.JSX.Element {
         <View style={t.header}>
           <View
             style={t.flames}
-            accessibilityLabel={`Step ${PROGRESS_FLAMES_LIT} of ${PROGRESS_FLAMES_TOTAL}`}
+            accessibilityLabel={tr('viyogaTxStepOfA11y', {
+              n: String(PROGRESS_FLAMES_LIT),
+              total: String(PROGRESS_FLAMES_TOTAL),
+            })}
           >
             {Array.from({ length: PROGRESS_FLAMES_TOTAL }).map((_, i) => (
               <Text
@@ -244,7 +250,7 @@ export default function ViyogaTransmission(): React.JSX.Element {
           <View style={t.cardHeader}>
             <Text style={t.cardIcon}>🎯</Text>
             <View style={{ flex: 1 }}>
-              <Text style={t.cardTitle}>Viyoga&apos;s Transmission</Text>
+              <Text style={t.cardTitle}>{tr('viyogaTxCardTitle')}</Text>
               <Text style={t.cardDate}>{cardDate}</Text>
             </View>
           </View>
@@ -254,25 +260,25 @@ export default function ViyogaTransmission(): React.JSX.Element {
               style={t.controlBtn}
               onPress={expandAll}
               accessibilityRole="button"
-              accessibilityLabel="Expand all sections"
+              accessibilityLabel={tr('viyogaTxExpandAllA11y')}
             >
-              <Text style={t.controlText}>Expand All</Text>
+              <Text style={t.controlText}>{tr('viyogaTxExpandAll')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={t.controlBtn}
               onPress={collapseAll}
               accessibilityRole="button"
-              accessibilityLabel="Collapse all sections"
+              accessibilityLabel={tr('viyogaTxCollapseAllA11y')}
             >
-              <Text style={t.controlText}>Collapse All</Text>
+              <Text style={t.controlText}>{tr('viyogaTxCollapseAll')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={t.controlBtn}
               onPress={fullText}
               accessibilityRole="button"
-              accessibilityLabel="Show full text"
+              accessibilityLabel={tr('viyogaTxFullTextA11y')}
             >
-              <Text style={t.controlText}>Full Text</Text>
+              <Text style={t.controlText}>{tr('viyogaTxFullText')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -282,7 +288,7 @@ export default function ViyogaTransmission(): React.JSX.Element {
             <AccordionSection
               key={section.key}
               icon={section.icon}
-              label={section.label}
+              label={tr(section.labelKey)}
               content={result.sections[i]?.content ?? ''}
               open={openStates[i] ?? false}
               onToggle={() => toggleSection(i)}
@@ -298,9 +304,9 @@ export default function ViyogaTransmission(): React.JSX.Element {
           style={t.continueBtn}
           onPress={handleContinue}
           accessibilityRole="button"
-          accessibilityLabel="Continue to meditation"
+          accessibilityLabel={tr('viyogaTxContinueA11y')}
         >
-          <Text style={t.continueBtnText}>Continue to Meditation →</Text>
+          <Text style={t.continueBtnText}>{tr('viyogaTxContinue')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

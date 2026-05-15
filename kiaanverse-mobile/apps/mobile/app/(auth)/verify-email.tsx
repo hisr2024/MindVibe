@@ -31,12 +31,14 @@ import {
   spacing,
   useTheme,
 } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 type Phase = 'pending' | 'success' | 'error';
 
 const SUPPORT_EMAIL = 'thesacredquest2@gmail.com';
 
 export default function VerifyEmailScreen(): React.JSX.Element {
+  const { t } = useTranslation('auth');
   const params = useLocalSearchParams<{ token?: string; email?: string }>();
   const token = typeof params.token === 'string' ? params.token : '';
   const email = typeof params.email === 'string' ? params.email : '';
@@ -52,9 +54,7 @@ export default function VerifyEmailScreen(): React.JSX.Element {
     let cancelled = false;
     if (!token) {
       setPhase('error');
-      setErrorMessage(
-        'No verification token in the link. Please tap the link in your email exactly as it was sent.',
-      );
+      setErrorMessage(t('verifyNoToken'));
       return;
     }
     (async () => {
@@ -70,8 +70,7 @@ export default function VerifyEmailScreen(): React.JSX.Element {
       } catch (err) {
         if (cancelled) return;
         const message =
-          (err as { message?: string })?.message ??
-          'We could not verify this link. The link may have expired (24-hour limit) or already been used.';
+          (err as { message?: string })?.message ?? t('verifyCouldNotVerify');
         setPhase('error');
         setErrorMessage(message);
       }
@@ -79,13 +78,11 @@ export default function VerifyEmailScreen(): React.JSX.Element {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, t]);
 
   const handleResend = useCallback(async () => {
     if (!email) {
-      setErrorMessage(
-        'We need your email to resend the verification link. Please go back to sign in and tap "Resend verification email" from there.',
-      );
+      setErrorMessage(t('verifyNeedEmailToResend'));
       return;
     }
     setResending(true);
@@ -95,12 +92,12 @@ export default function VerifyEmailScreen(): React.JSX.Element {
     } catch (err) {
       setErrorMessage(
         (err as { message?: string })?.message ??
-          `Could not send a fresh email right now. Please try again or contact ${SUPPORT_EMAIL}.`,
+          t('verifyCouldNotSendNow', { supportEmail: SUPPORT_EMAIL }),
       );
     } finally {
       setResending(false);
     }
-  }, [email]);
+  }, [email, t]);
 
   return (
     <Screen
@@ -113,7 +110,7 @@ export default function VerifyEmailScreen(): React.JSX.Element {
           <>
             <OmLoader size={72} />
             <Text variant="h2" align="center" style={styles.title}>
-              Verifying your email…
+              {t('verifyVerifyingTitle')}
             </Text>
             <Text
               variant="caption"
@@ -121,14 +118,14 @@ export default function VerifyEmailScreen(): React.JSX.Element {
               align="center"
               style={styles.body}
             >
-              One sacred breath. We are confirming your link.
+              {t('verifyVerifyingBody')}
             </Text>
           </>
         ) : phase === 'success' ? (
           <>
             <Text style={styles.checkmark}>✓</Text>
             <Text variant="h2" color={colors.primary[500]} align="center" style={styles.title}>
-              Email verified
+              {t('verifySuccessTitle')}
             </Text>
             <Text
               variant="caption"
@@ -136,14 +133,14 @@ export default function VerifyEmailScreen(): React.JSX.Element {
               align="center"
               style={styles.body}
             >
-              You may now sign in. Redirecting…
+              {t('verifySuccessBody')}
             </Text>
           </>
         ) : (
           <>
             <Text style={styles.crossmark}>!</Text>
             <Text variant="h2" align="center" style={styles.title}>
-              Verification did not complete
+              {t('verifyErrorTitle')}
             </Text>
             <Text
               variant="caption"
@@ -151,8 +148,7 @@ export default function VerifyEmailScreen(): React.JSX.Element {
               align="center"
               style={styles.body}
             >
-              {errorMessage ??
-                'The verification link is invalid or expired. Request a fresh one below.'}
+              {errorMessage ?? t('verifyErrorBody')}
             </Text>
             {resendSent ? (
               <Text
@@ -161,17 +157,21 @@ export default function VerifyEmailScreen(): React.JSX.Element {
                 align="center"
                 style={styles.body}
               >
-                ✓ A fresh verification email is on its way to {email}.
+                {t('verifyFreshEmailOnTheWayTo', { email })}
               </Text>
             ) : null}
             <View style={styles.actions}>
               <GoldenButton
-                title={resending ? 'Sending…' : 'Resend verification email'}
+                title={
+                  resending
+                    ? t('verifySending')
+                    : t('verifyResendVerificationEmail')
+                }
                 onPress={handleResend}
                 disabled={resending || !email}
               />
               <GoldenButton
-                title="Back to sign in"
+                title={t('verifyBackToSignIn')}
                 variant="secondary"
                 onPress={() => router.replace('/(auth)/login')}
               />
@@ -182,7 +182,7 @@ export default function VerifyEmailScreen(): React.JSX.Element {
               align="center"
               style={styles.support}
             >
-              Still stuck? Email {SUPPORT_EMAIL}.
+              {t('verifyStillStuck', { supportEmail: SUPPORT_EMAIL })}
             </Text>
           </>
         )}

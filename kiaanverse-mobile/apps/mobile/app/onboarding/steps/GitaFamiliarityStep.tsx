@@ -15,13 +15,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Text, GoldenButton, colors, spacing } from '@kiaanverse/ui';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const LEVELS = [
-  { value: 0, label: 'Never read' },
-  { value: 1, label: 'Curious' },
-  { value: 2, label: 'Beginner' },
-  { value: 3, label: 'Practitioner' },
-  { value: 4, label: 'Scholar' },
+  { value: 0, labelKey: 'onboarding.gitaLevelNever' },
+  { value: 1, labelKey: 'onboarding.gitaLevelCurious' },
+  { value: 2, labelKey: 'onboarding.gitaLevelBeginner' },
+  { value: 3, labelKey: 'onboarding.gitaLevelPractitioner' },
+  { value: 4, labelKey: 'onboarding.gitaLevelScholar' },
 ] as const;
 
 interface GitaFamiliarityStepProps {
@@ -37,6 +38,7 @@ export function GitaFamiliarityStep({
   onNext,
   onSkip,
 }: GitaFamiliarityStepProps): React.JSX.Element {
+  const { t } = useTranslation();
   const { width: screenWidth } = useWindowDimensions();
   const trackWidth = screenWidth - spacing.xl * 2 - spacing.md * 2;
   const segmentWidth = trackWidth / (LEVELS.length - 1);
@@ -73,17 +75,17 @@ export function GitaFamiliarityStep({
     [onChange, segmentWidth, thumbX]
   );
 
-  const currentLabel =
-    LEVELS.find((l) => l.value === value)?.label ?? 'Never read';
+  const currentLevel = LEVELS.find((l) => l.value === value) ?? LEVELS[0];
+  const currentLabel = t(currentLevel.labelKey);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text variant="h1" align="center">
-          Know the Gita?
+          {t('onboarding.gitaTitle')}
         </Text>
         <Text variant="bodySmall" color={colors.text.muted} align="center">
-          This helps Sakha tailor wisdom to your level
+          {t('onboarding.gitaSubtitle')}
         </Text>
       </View>
 
@@ -102,40 +104,47 @@ export function GitaFamiliarityStep({
           <Animated.View style={[styles.thumb, thumbStyle]} />
 
           {/* Tick marks — pressable for accessibility */}
-          {LEVELS.map((level) => (
-            <Pressable
-              key={level.value}
-              onPress={() => handleSelect(level.value)}
-              style={[
-                styles.tickTarget,
-                { left: level.value * segmentWidth - 20 },
-              ]}
-              accessibilityRole="adjustable"
-              accessibilityLabel={level.label}
-              accessibilityValue={{ text: level.label }}
-            >
-              <View
-                style={[styles.tick, level.value <= value && styles.tickActive]}
-              />
-            </Pressable>
-          ))}
+          {LEVELS.map((level) => {
+            const label = t(level.labelKey);
+            return (
+              <Pressable
+                key={level.value}
+                onPress={() => handleSelect(level.value)}
+                style={[
+                  styles.tickTarget,
+                  { left: level.value * segmentWidth - 20 },
+                ]}
+                accessibilityRole="adjustable"
+                accessibilityLabel={label}
+                accessibilityValue={{ text: label }}
+              >
+                <View
+                  style={[styles.tick, level.value <= value && styles.tickActive]}
+                />
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* Labels below track */}
+        {/* Labels below track — endpoints only */}
         <View style={[styles.labelRow, { width: trackWidth }]}>
           <Text variant="caption" color={colors.text.muted}>
-            Never read
+            {t('onboarding.gitaLevelNever')}
           </Text>
           <Text variant="caption" color={colors.text.muted}>
-            Scholar
+            {t('onboarding.gitaLevelScholar')}
           </Text>
         </View>
       </View>
 
       <View style={styles.actions}>
-        <GoldenButton title="Continue" onPress={onNext} testID="gita-next" />
         <GoldenButton
-          title="Skip"
+          title={t('onboarding.continueButton')}
+          onPress={onNext}
+          testID="gita-next"
+        />
+        <GoldenButton
+          title={t('common.skip')}
           variant="ghost"
           onPress={onSkip}
           testID="gita-skip"

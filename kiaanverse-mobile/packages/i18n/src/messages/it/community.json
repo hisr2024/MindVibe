@@ -1,0 +1,26 @@
+{
+  "screenTitle": "Comunità",
+  "tabFeed": "Feed",
+  "tabCircles": "Cerchi",
+  "feedEmpty": "La comunità attende le tue prime parole di saggezza.",
+  "circlesEmpty": "Ancora nessun cerchio di saggezza disponibile.\nTorna presto.",
+  "composeFabA11y": "Componi nuovo post",
+
+  "composeTitle": "Condividi la saggezza",
+  "composePromptLabel": "Quale saggezza vorresti condividere?",
+  "composePromptPlaceholder": "Condividi i tuoi pensieri, intuizioni o una domanda...",
+  "composeCharsRemainingFmt": "{{count}} caratteri rimanenti",
+  "composeCircleLabel": "Pubblica nel cerchio (facoltativo)",
+  "composeTagsLabel": "Tag (separati da virgola)",
+  "composeTagsPlaceholder": "saggezza, meditazione, gratitudine...",
+  "composeSubmitButton": "Condividi la saggezza",
+  "composeErrorTitle": "Pubblicazione fallita",
+  "composeErrorBody": "La tua saggezza non può essere condivisa ora. Riprova per favore.",
+
+  "circleFallbackTitle": "Cerchio",
+  "circleMembersFmt": "{{count}} membri",
+  "circleJoinButton": "Unisciti al cerchio",
+  "circleJoinedBadge": "✓ Unito",
+  "circlePostsLabel": "Post",
+  "circlePostsEmpty": "Ancora nessun post in questo cerchio.\nSii il primo a condividere saggezza."
+}

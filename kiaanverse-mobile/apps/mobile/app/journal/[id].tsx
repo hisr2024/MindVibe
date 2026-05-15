@@ -51,14 +51,17 @@ import {
   useUpdateJournal,
   useDeleteJournal,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
+// `tag` is the canonical mood identifier stored server-side; the
+// visible label resolves at render via `t(MOOD_LABEL_KEYS[tag])`.
 const MOOD_OPTIONS = [
-  { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },
-  { emoji: '\u{1F615}', label: 'Unsettled', tag: 'unsettled' },
-  { emoji: '\u{1F610}', label: 'Neutral', tag: 'neutral' },
-  { emoji: '\u{1F642}', label: 'Peaceful', tag: 'peaceful' },
-  { emoji: '\u{1F60A}', label: 'Blissful', tag: 'blissful' },
+  { emoji: '\u{1F614}', labelKey: 'moodHeavy', tag: 'heavy' },
+  { emoji: '\u{1F615}', labelKey: 'moodUnsettled', tag: 'unsettled' },
+  { emoji: '\u{1F610}', labelKey: 'moodNeutral', tag: 'neutral' },
+  { emoji: '\u{1F642}', labelKey: 'moodPeaceful', tag: 'peaceful' },
+  { emoji: '\u{1F60A}', labelKey: 'moodBlissful', tag: 'blissful' },
 ] as const;
 
 /** Alias for the SecureStore key that holds the AES-256-GCM encryption key */
@@ -149,14 +152,26 @@ async function decryptContent(encryptedBase64: string): Promise<string> {
   return new TextDecoder().decode(decrypted);
 }
 
-function formatDate(iso: string): string {
+/** Localized long-date format. Falls back to en-US date format for any
+ *  locale Intl doesn't support (defensive — Hermes ships ICU data for
+ *  the common cases, but be conservative here). */
+function formatDate(iso: string, locale: string): string {
   const date = new Date(iso);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  try {
+    return date.toLocaleDateString(locale, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
 }
 
 function getMoodEmoji(tag: string | undefined): string | null {
@@ -165,14 +180,15 @@ function getMoodEmoji(tag: string | undefined): string | null {
   return found ? found.emoji : null;
 }
 
-function getMoodLabel(tag: string | undefined): string | null {
+function getMoodLabelKey(tag: string | undefined): string | null {
   if (!tag) return null;
   const found = MOOD_OPTIONS.find((m) => m.tag === tag);
-  return found ? found.label : null;
+  return found ? found.labelKey : null;
 }
 
 export default function JournalDetailScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t, locale } = useTranslation('journal');
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: entry, isLoading } = useJournalEntry(id ?? '');
@@ -226,7 +242,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
   const handleSaveEdit = useCallback(async () => {
     if (editContent.trim().length === 0) {
-      Alert.alert('Empty Reflection', 'Please write something before saving.');
+      Alert.alert(t('detailEmptyAlertTitle'), t('detailEmptyAlertBody'));
       return;
     }
 
@@ -258,22 +274,19 @@ export default function JournalDetailScreen(): React.JSX.Element {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setIsEditing(false);
     } catch {
-      Alert.alert(
-        'Could Not Save',
-        'Your changes could not be saved right now. Please try again.'
-      );
+      Alert.alert(t('saveErrorTitle'), t('detailSaveErrorBody'));
     }
-  }, [editContent, editTagsInput, editMood, updateJournal, id]);
+  }, [editContent, editTagsInput, editMood, updateJournal, id, t]);
 
   const handleDelete = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      'Delete Reflection',
-      'This reflection will be archived. You can recover it later.',
+      t('deleteTitle'),
+      t('deleteMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -281,16 +294,13 @@ export default function JournalDetailScreen(): React.JSX.Element {
               await deleteJournal.mutateAsync(id ?? '');
               router.back();
             } catch {
-              Alert.alert(
-                'Error',
-                'Could not delete this reflection. Please try again.'
-              );
+              Alert.alert(t('detailDeleteErrorTitle'), t('detailDeleteErrorBody'));
             }
           },
         },
       ]
     );
-  }, [router, deleteJournal, id]);
+  }, [router, deleteJournal, id, t]);
 
   const handleMoodSelect = useCallback((tag: string) => {
     void Haptics.selectionAsync();
@@ -307,7 +317,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
     return (
       <DivineBackground variant="sacred" style={styles.root}>
         <View style={[styles.loadingScreen, { paddingTop: insets.top }]}>
-          <GoldenHeader title="Reflection" onBack={() => router.back()} />
+          <GoldenHeader title={t('reflection')} onBack={() => router.back()} />
           <View style={styles.loadingContainer}>
             <ActivityIndicator color={colors.primary[500]} size="large" />
           </View>
@@ -317,7 +327,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
   }
 
   const moodEmoji = getMoodEmoji(entry.mood_tag);
-  const moodLabel = getMoodLabel(entry.mood_tag);
+  const moodLabelKey = getMoodLabelKey(entry.mood_tag);
   const nonMoodTags = entry.tags.filter(
     (t) => !MOOD_OPTIONS.some((m) => m.tag === t)
   );
@@ -334,16 +344,16 @@ export default function JournalDetailScreen(): React.JSX.Element {
         >
           <View style={[styles.editScreen, { paddingTop: insets.top }]}>
             <GoldenHeader
-              title="Edit Reflection"
+              title={t('detailEditScreenTitle')}
               onBack={handleCancelEdit}
               rightAction={
                 <Pressable
                   onPress={handleCancelEdit}
                   accessibilityRole="button"
-                  accessibilityLabel="Cancel editing"
+                  accessibilityLabel={t('detailCancelEditingA11y')}
                 >
                   <Text variant="body" color={colors.text.muted}>
-                    Cancel
+                    {t('cancel')}
                   </Text>
                 </Pressable>
               }
@@ -352,8 +362,8 @@ export default function JournalDetailScreen(): React.JSX.Element {
             {/* Title */}
             <View style={styles.editTitleContainer}>
               <Input
-                label="Title (optional)"
-                placeholder="Give your reflection a name..."
+                label={t('detailTitleLabel')}
+                placeholder={t('detailTitlePlaceholder')}
                 value={editTitle}
                 onChangeText={setEditTitle}
                 maxLength={120}
@@ -376,7 +386,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
                     styles.moodPill,
                     editMood === option.tag && styles.moodPillSelected,
                   ]}
-                  accessibilityLabel={option.label}
+                  accessibilityLabel={t(option.labelKey)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: editMood === option.tag }}
                 >
@@ -389,7 +399,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
                         : colors.text.muted
                     }
                   >
-                    {option.label}
+                    {t(option.labelKey)}
                   </Text>
                 </Pressable>
               ))}
@@ -399,12 +409,12 @@ export default function JournalDetailScreen(): React.JSX.Element {
             <View style={styles.editContentContainer}>
               <ShankhaVoiceInput
                 style={styles.editContentInput}
-                placeholder="Pour your heart onto this sacred page..."
+                placeholder={t('detailContentPlaceholder')}
                 value={editContent}
                 onChangeText={setEditContent}
                 multiline
                 selectionColor={colors.primary[500]}
-                accessibilityLabel="Edit journal content"
+                accessibilityLabel={t('detailContentA11y')}
                 dictationMode="append"
                 />
             </View>
@@ -412,8 +422,8 @@ export default function JournalDetailScreen(): React.JSX.Element {
             {/* Tags */}
             <View style={styles.editTagsContainer}>
               <Input
-                label="Tags"
-                placeholder="gratitude, morning, clarity..."
+                label={t('detailTagsLabel')}
+                placeholder={t('detailTagsPlaceholder')}
                 value={editTagsInput}
                 onChangeText={setEditTagsInput}
                 autoCapitalize="none"
@@ -429,7 +439,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
               ]}
             >
               <GoldenButton
-                title="Save Changes"
+                title={t('detailSaveButton')}
                 onPress={handleSaveEdit}
                 loading={updateJournal.isPending}
                 disabled={editContent.trim().length === 0}
@@ -449,13 +459,13 @@ export default function JournalDetailScreen(): React.JSX.Element {
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.viewScreen, { paddingTop: insets.top }]}>
         <GoldenHeader
-          title="Reflection"
+          title={t('reflection')}
           onBack={() => router.back()}
           rightAction={
             <Pressable
               onPress={handleActionsOpen}
               accessibilityRole="button"
-              accessibilityLabel="Show entry actions"
+              accessibilityLabel={t('detailShowActionsA11y')}
               hitSlop={12}
             >
               <Text variant="h2" color={colors.text.secondary}>
@@ -481,7 +491,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
               <View style={styles.moodBadgeLarge}>
                 <Text variant="h1">{moodEmoji}</Text>
                 <Text variant="label" color={colors.text.secondary}>
-                  {moodLabel}
+                  {moodLabelKey ? t(moodLabelKey) : ''}
                 </Text>
               </View>
             </Animated.View>
@@ -515,7 +525,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
               {/* Encrypted indicator */}
               <View style={styles.encryptedRow}>
                 <Text variant="caption" color={colors.text.muted}>
-                  {'\u{1F512} Encrypted at rest'}
+                  {t('detailEncryptedAtRest')}
                 </Text>
               </View>
             </GlowCard>
@@ -546,7 +556,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
             style={styles.viewDateRow}
           >
             <Text variant="caption" color={colors.text.muted} align="center">
-              {formatDate(entry.created_at)}
+              {formatDate(entry.created_at, locale)}
             </Text>
           </Animated.View>
         </ScrollView>
@@ -570,10 +580,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
               }}
               style={styles.bottomSheetAction}
               accessibilityRole="button"
-              accessibilityLabel="Edit entry"
+              accessibilityLabel={t('detailEditActionA11y')}
             >
               <Text variant="body" color={colors.primary[500]}>
-                Edit Reflection
+                {t('detailEditAction')}
               </Text>
             </Pressable>
             <SacredDivider />
@@ -584,10 +594,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
               }}
               style={styles.bottomSheetAction}
               accessibilityRole="button"
-              accessibilityLabel="Delete this reflection"
+              accessibilityLabel={t('detailDeleteActionA11y')}
             >
               <Text variant="body" color={colors.semantic.error}>
-                Delete Reflection
+                {t('deleteTitle')}
               </Text>
             </Pressable>
           </View>

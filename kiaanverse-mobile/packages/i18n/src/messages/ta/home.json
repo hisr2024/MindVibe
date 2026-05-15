@@ -1,0 +1,35 @@
+{
+  "greeting": "வணக்கம்",
+  "dailyVerse": "இன்றைய ஸ்லோகம்",
+  "moodCheckIn": "உங்கள் மனநிலை எப்படி உள்ளது?",
+  "activeJourney": "உங்கள் தற்போதைய பயணம்",
+  "noJourneys": "உங்கள் மாற்றத்தைத் தொடங்க ஒரு பயணத்தை ஆரம்பியுங்கள்",
+  "startJourney": "பயணத்தைத் தொடங்கு",
+
+  "wordmarkA11yLabel": "Kiaanverse — சகா, உங்கள் ஆன்மீகத் துணை",
+  "wordmarkSubtitle": "சகா · உங்கள் ஆன்மீகத் துணை",
+  "openProfileA11y": "சுயவிவரத்தைத் திற",
+  "defaultUserName": "புனிதத் தேடுபவர்",
+
+  "openTodaysWisdomA11y": "இன்றைய ஞானத்தைத் திற",
+  "verseRef": "பகவத் கீதை — அத். {{chapter}} · ச. {{verse}}",
+  "askSakha": "சகாவிடம் கேள் →",
+  "askSakhaA11y": "இந்த ஸ்லோகம் குறித்து சகாவிடம் கேள்",
+  "listenToVerseA11y": "இன்றைய ஸ்லோகத்தைக் கேள்",
+  "stopVerseA11y": "ஸ்லோக ஒலிப்பை நிறுத்து",
+  "bookmarkVerseA11y": "இந்த ஸ்லோகத்தை சேமி",
+  "removeBookmarkA11y": "சேமிப்பை அகற்று",
+
+  "sacredToolsHeader": "புனிதக் கருவிகள்",
+  "toolEmotionalReset": "உணர்வு மீட்டமைப்பு",
+  "toolArdha": "அர்த்தம்",
+  "toolKarmaReset": "கர்ம மீட்டமைப்பு",
+  "toolViyoga": "வியோகம்",
+  "toolAllTools": "அனைத்துக் கருவிகள்",
+  "toolNameA11y": "{{name}} கருவி",
+
+  "daysOfSacredPractice": "புனிதப் பயிற்சியின்\nநாட்கள்",
+  "phasesLabel": "கட்டங்கள்",
+  "continueArrow": "தொடர் →",
+  "continueSadhanaA11y": "சாதனாவைத் தொடர்"
+}

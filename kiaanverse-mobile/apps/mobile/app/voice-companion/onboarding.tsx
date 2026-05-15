@@ -20,11 +20,26 @@ import * as SecureStore from 'expo-secure-store';
 import { Audio } from 'expo-av';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useVoiceStore } from '../../voice/stores/voiceStore';
+import { useTranslation } from '@kiaanverse/i18n';
 
+// Canonical mood IDs — pinned to SecureStore + forwarded to the backend.
+// Visible labels resolve via MOOD_LABEL_KEYS at render so each locale
+// renders a localized chip.
 const MOOD_PRESETS = [
   'anxious', 'sad', 'lonely', 'angry',
   'overwhelmed', 'curious', 'grateful', 'other',
 ] as const;
+
+const MOOD_LABEL_KEYS: Record<(typeof MOOD_PRESETS)[number], string> = {
+  anxious: 'vcObMoodAnxious',
+  sad: 'vcObMoodSad',
+  lonely: 'vcObMoodLonely',
+  angry: 'vcObMoodAngry',
+  overwhelmed: 'vcObMoodOverwhelmed',
+  curious: 'vcObMoodCurious',
+  grateful: 'vcObMoodGrateful',
+  other: 'vcObMoodOther',
+};
 
 const PERSISTED_MOOD_KEY = 'sakha:onboarding_mood';
 
@@ -76,24 +91,20 @@ export default function VoiceOnboarding() {
 }
 
 function IntroPanel({ onNext }: { onNext: () => void }) {
+  const { t } = useTranslation('voice');
   return (
     <View style={styles.panel}>
       <Text style={styles.deva}>सखा</Text>
-      <Text style={styles.headline}>Sakha</Text>
-      <Text style={styles.body}>
-        Krishna's voice — as a companion. Speak. Be heard. Hear back.
-      </Text>
-      <Text style={styles.bodySmall}>
-        Audio leaves your phone only while you are speaking. Your reflections
-        are encrypted and yours alone.
-      </Text>
+      <Text style={styles.headline}>{t('vcObSakhaHeadline')}</Text>
+      <Text style={styles.body}>{t('vcObIntroBody')}</Text>
+      <Text style={styles.bodySmall}>{t('vcObIntroPrivacy')}</Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Begin"
+        accessibilityLabel={t('vcObBegin')}
         style={styles.primaryBtn}
         onPress={onNext}
       >
-        <Text style={styles.primaryBtnText}>Begin</Text>
+        <Text style={styles.primaryBtnText}>{t('vcObBegin')}</Text>
       </Pressable>
     </View>
   );
@@ -106,30 +117,28 @@ function PermissionPanel({
   permission: 'pending' | 'granted' | 'denied';
   onRetry: () => void;
 }) {
+  const { t } = useTranslation('voice');
   if (permission === 'pending') {
     return (
       <View style={styles.panel}>
-        <Text style={styles.headline}>Asking for the microphone…</Text>
-        <Text style={styles.body}>Sakha needs to hear you.</Text>
+        <Text style={styles.headline}>{t('vcObPermAsking')}</Text>
+        <Text style={styles.body}>{t('vcObPermAskingBody')}</Text>
       </View>
     );
   }
   if (permission === 'granted') {
     return (
       <View style={styles.panel}>
-        <Text style={styles.headline}>Thank you</Text>
+        <Text style={styles.headline}>{t('vcObPermGranted')}</Text>
       </View>
     );
   }
   return (
     <View style={styles.panel}>
-      <Text style={styles.headline}>Microphone is needed</Text>
-      <Text style={styles.body}>
-        Without microphone access, Sakha cannot hear you. You can change
-        this later in your phone's app settings.
-      </Text>
+      <Text style={styles.headline}>{t('vcObPermNeededTitle')}</Text>
+      <Text style={styles.body}>{t('vcObPermNeededBody')}</Text>
       <Pressable accessibilityRole="button" style={styles.primaryBtn} onPress={onRetry}>
-        <Text style={styles.primaryBtnText}>Try again</Text>
+        <Text style={styles.primaryBtnText}>{t('vcObPermTryAgain')}</Text>
       </Pressable>
     </View>
   );
@@ -146,25 +155,25 @@ function MoodPanel({
   onContinue: () => void;
   onSkip: () => void;
 }) {
+  const { t } = useTranslation('voice');
   return (
     <View style={styles.panel}>
-      <Text style={styles.headline}>How are you, right now?</Text>
-      <Text style={styles.body}>
-        Pick what's closest. Sakha will hear the rest.
-      </Text>
+      <Text style={styles.headline}>{t('vcObMoodTitle')}</Text>
+      <Text style={styles.body}>{t('vcObMoodBody')}</Text>
       <View style={styles.moodGrid}>
         {MOOD_PRESETS.map((m) => {
           const isChosen = chosen === m;
+          const label = t(MOOD_LABEL_KEYS[m]);
           return (
             <Pressable
               key={m}
               accessibilityRole="button"
-              accessibilityLabel={'Mood: ' + m}
+              accessibilityLabel={t('vcObMoodChipA11yFmt', { mood: label })}
               style={[styles.moodChip, isChosen ? styles.moodChipChosen : null]}
               onPress={() => onChoose(m)}
             >
               <Text style={[styles.moodText, isChosen ? styles.moodTextChosen : null]}>
-                {m}
+                {label}
               </Text>
             </Pressable>
           );
@@ -176,23 +185,21 @@ function MoodPanel({
         style={[styles.primaryBtn, !chosen ? styles.primaryBtnDisabled : null]}
         onPress={onContinue}
       >
-        <Text style={styles.primaryBtnText}>Continue</Text>
+        <Text style={styles.primaryBtnText}>{t('vcObContinue')}</Text>
       </Pressable>
       <Pressable accessibilityRole="button" onPress={onSkip}>
-        <Text style={styles.skipText}>Skip for now</Text>
+        <Text style={styles.skipText}>{t('vcObSkip')}</Text>
       </Pressable>
     </View>
   );
 }
 
 function PersonaMismatchPanel() {
+  const { t } = useTranslation('voice');
   return (
     <View style={styles.panel}>
-      <Text style={styles.headline}>An update is waiting</Text>
-      <Text style={styles.body}>
-        The Sakha you have on this phone is from an earlier moment.
-        Please update the app to hear today's voice.
-      </Text>
+      <Text style={styles.headline}>{t('vcObUpdateTitle')}</Text>
+      <Text style={styles.body}>{t('vcObUpdateBody')}</Text>
     </View>
   );
 }

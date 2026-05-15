@@ -28,7 +28,10 @@ import {
   useWeeklyInsights,
   useJourneyDashboard,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
+// Date-range tokens are terse + numeric and read cleanly across all
+// locales; keeping them literal avoids cluttering the namespace.
 type DateRange = '7d' | '30d' | '90d';
 const DATE_RANGES: { label: string; value: DateRange }[] = [
   { label: '7d', value: '7d' },
@@ -40,6 +43,7 @@ const DAYS_MAP: Record<DateRange, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
 export default function AnalyticsScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('analytics');
   const [dateRange, setDateRange] = useState<DateRange>('7d');
 
   const days = DAYS_MAP[dateRange];
@@ -66,7 +70,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
   return (
     <Screen>
       <GoldenHeader
-        title="Your Journey Insights"
+        title={t('jiScreenTitle')}
         onBack={() => router.back()}
       />
 
@@ -108,7 +112,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
         <Animated.View entering={FadeInDown.delay(100).duration(500)}>
           <Card style={styles.chartCard}>
             <Text variant="label" color={colors.primary[300]}>
-              Mood Trends
+              {t('jiMoodTrendsLabel')}
             </Text>
 
             {moodLoading ? (
@@ -122,7 +126,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
                 align="center"
                 style={styles.emptyChart}
               >
-                No mood data yet for this period.
+                {t('jiEmptyChartMessage')}
               </Text>
             ) : (
               <View style={styles.chartContainer}>
@@ -161,13 +165,13 @@ export default function AnalyticsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.delay(200).duration(500)}>
             <Card style={styles.summaryCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Weekly Summary
+                {t('jiWeeklySummaryLabel')}
               </Text>
               <Text variant="body" color={colors.text.primary}>
                 {weeklyData.summary}
               </Text>
               <Text variant="bodySmall" color={colors.text.secondary}>
-                Top insight: {weeklyData.top_insight}
+                {t('jiTopInsightFmt', { insight: weeklyData.top_insight })}
               </Text>
             </Card>
           </Animated.View>
@@ -178,7 +182,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
           <Animated.View entering={FadeInDown.delay(300).duration(500)}>
             <Card style={styles.statsCard}>
               <Text variant="label" color={colors.primary[300]}>
-                Journey Progress
+                {t('jiJourneyProgressLabel')}
               </Text>
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
@@ -190,7 +194,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
                     color={colors.text.muted}
                     align="center"
                   >
-                    Completed
+                    {t('jiCompletedLabel')}
                   </Text>
                 </View>
                 <View style={styles.statItem}>
@@ -202,7 +206,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
                     color={colors.text.muted}
                     align="center"
                   >
-                    Active
+                    {t('jiActiveLabel')}
                   </Text>
                 </View>
                 <View style={styles.statItem}>
@@ -214,7 +218,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
                     color={colors.text.muted}
                     align="center"
                   >
-                    Streak Days
+                    {t('jiStreakDaysLabel')}
                   </Text>
                 </View>
               </View>
@@ -225,7 +229,7 @@ export default function AnalyticsScreen(): React.JSX.Element {
         <Divider />
 
         <GoldenButton
-          title="View Deep Insights"
+          title={t('jiViewDeepInsightsButton')}
           onPress={() => router.push('/analytics/deep-insights')}
           variant="divine"
         />

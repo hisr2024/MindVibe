@@ -39,6 +39,7 @@ import {
   useSadhanaDaily,
   useSadhanaStreak,
 } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { LotusProgressHeader } from '../../components/sadhana/LotusProgressHeader';
 import { PhaseCeremony } from '../../components/sadhana/PhaseCeremony';
@@ -73,6 +74,7 @@ const PHASE_ORDER: readonly PhaseKey[] = [
 ];
 
 export default function NityaSadhanaScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -193,8 +195,8 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
           karmaPoints={21}
           message={
             streak > 0
-              ? `Nitya Sadhana complete. Streak: ${streak + 1} days.`
-              : 'Nitya Sadhana complete. Your streak begins today.'
+              ? t('sadhana.completionWithStreak', { streak: String(streak + 1) })
+              : t('sadhana.completionFirstDay')
           }
           duration={4800}
         />
@@ -202,14 +204,13 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
           <Text style={styles.om} allowFontScaling={false}>
             ॐ
           </Text>
-          <Text style={styles.completedTitle}>The Sadhana Is Sealed</Text>
+          <Text style={styles.completedTitle}>{t('sadhana.completedTitle')}</Text>
+          {/* कार्य सिद्धम् — Sanskrit benediction, fixed across UI locales. */}
           <Text style={styles.completedSanskrit}>कार्य सिद्धम्</Text>
-          <Text style={styles.completedBody}>
-            Every phase has been offered. Return tomorrow to begin again.
-          </Text>
+          <Text style={styles.completedBody}>{t('sadhana.completedBody')}</Text>
           <View style={styles.completedCta}>
             <DivineButton
-              title="Return to Home"
+              title={t('sadhana.returnHomeButton')}
               variant="primary"
               onPress={() => router.replace('/(tabs)')}
             />
@@ -226,16 +227,16 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
           onPress={() => router.back()}
           style={styles.backBtn}
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={t('sadhana.backA11y')}
           hitSlop={12}
         >
           <Text style={styles.backBtnText}>←</Text>
         </Pressable>
         <View style={styles.titleCol}>
           <Text style={styles.sectionTag} allowFontScaling={false}>
-            NITYA SADHANA
+            {t('sadhana.sectionTag')}
           </Text>
-          <Text style={styles.title}>Daily Sacred Practice</Text>
+          <Text style={styles.title}>{t('sadhana.title')}</Text>
         </View>
         <View style={styles.streakPill}>
           <Text style={styles.streakFlame}>🔥</Text>

@@ -10,32 +10,24 @@ import React, { useState } from 'react';
 import { View, Text, Switch, ScrollView, StyleSheet } from 'react-native';
 import { DivineScreenWrapper, SacredCard, GoldenDivider } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 
-const SETTINGS = [
-  { key: 'daily_verse', label: 'Daily Verse', sub: 'Morning shloka reminder' },
-  {
-    key: 'sadhana_reminder',
-    label: 'Nitya Sadhana',
-    sub: 'Practice reminders',
-  },
-  {
-    key: 'journey_nudge',
-    label: 'Journey Nudges',
-    sub: 'Step completion reminders',
-  },
-  {
-    key: 'kiaan_insights',
-    label: 'KIAAN Insights',
-    sub: 'Weekly wisdom digest',
-  },
-  {
-    key: 'streak_alert',
-    label: 'Streak Alerts',
-    sub: "Don't break your streak",
-  },
-] as const;
+interface NotificationToggle {
+  readonly key: string;
+  readonly labelKey: string;
+  readonly subKey: string;
+}
+
+const SETTINGS: readonly NotificationToggle[] = [
+  { key: 'daily_verse', labelKey: 'settings.notifDailyVerseLabel', subKey: 'settings.notifDailyVerseSub' },
+  { key: 'sadhana_reminder', labelKey: 'settings.notifSadhanaLabel', subKey: 'settings.notifSadhanaSub' },
+  { key: 'journey_nudge', labelKey: 'settings.notifJourneyLabel', subKey: 'settings.notifJourneySub' },
+  { key: 'kiaan_insights', labelKey: 'settings.notifKiaanLabel', subKey: 'settings.notifKiaanSub' },
+  { key: 'streak_alert', labelKey: 'settings.notifStreakLabel', subKey: 'settings.notifStreakSub' },
+];
 
 export default function NotificationsScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const [prefs, setPrefs] = useState<Record<string, boolean>>({
     daily_verse: true,
     sadhana_reminder: true,
@@ -61,14 +53,14 @@ export default function NotificationsScreen(): React.JSX.Element {
         style={{ flex: 1, padding: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Notifications</Text>
+        <Text style={styles.title}>{t('settings.notificationsTitle')}</Text>
         <SacredCard style={{ padding: 0 }}>
           {SETTINGS.map((s, idx) => (
             <React.Fragment key={s.key}>
               <View style={styles.row}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{s.label}</Text>
-                  <Text style={styles.sub}>{s.sub}</Text>
+                  <Text style={styles.label}>{t(s.labelKey)}</Text>
+                  <Text style={styles.sub}>{t(s.subKey)}</Text>
                 </View>
                 <Switch
                   value={prefs[s.key]}

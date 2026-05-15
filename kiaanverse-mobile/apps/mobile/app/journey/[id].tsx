@@ -50,6 +50,7 @@ import {
   type WisdomJourneyStep,
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import {
   DayProgressRing,
@@ -63,6 +64,7 @@ const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200,191,168,0.7)';
 
 export default function JourneyDetailScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -119,21 +121,21 @@ export default function JourneyDetailScreen(): React.JSX.Element {
             xp: result.xp,
             karmaPoints: result.karmaPoints,
             message: result.journeyCompleted
-              ? 'Journey complete — victory over the enemy within'
-              : 'Reflection received. The ring grows.',
+              ? t('journeys.celebrationJourneyDone')
+              : t('journeys.celebrationStepDone'),
           });
           setReflection('');
         },
       }
     );
-  }, [activeStep, completeStep, journeyId]);
+  }, [activeStep, completeStep, journeyId, t]);
 
   if (isLoading) {
     return (
       <DivineBackground variant="sacred" style={styles.root}>
         <View style={[styles.stateCenter, { paddingTop: insets.top + 24 }]}>
           <LoadingMandala size={80} />
-          <Text style={styles.stateText}>Loading your journey…</Text>
+          <Text style={styles.stateText}>{t('journeys.loadingJourney')}</Text>
         </View>
       </DivineBackground>
     );
@@ -143,12 +145,10 @@ export default function JourneyDetailScreen(): React.JSX.Element {
     return (
       <DivineBackground variant="sacred" style={styles.root}>
         <View style={[styles.stateCenter, { paddingTop: insets.top + 24 }]}>
-          <Text style={styles.stateError}>Unable to load journey</Text>
-          <Text style={styles.stateText}>
-            Please check your connection and try again.
-          </Text>
+          <Text style={styles.stateError}>{t('journeys.errorUnableToLoad')}</Text>
+          <Text style={styles.stateText}>{t('journeys.errorRetryHint')}</Text>
           <DivineButton
-            title="Go Back"
+            title={t('journeys.goBack')}
             variant="secondary"
             onPress={() => router.back()}
           />
@@ -183,7 +183,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
               router.back();
             }}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('journeys.backA11y')}
             hitSlop={12}
             style={styles.backBtn}
           >
@@ -208,7 +208,10 @@ export default function JourneyDetailScreen(): React.JSX.Element {
             size={120}
           />
           <Text style={styles.xpCaption}>
-            {data.earnedXp} / {data.totalXp} XP earned
+            {t('journeys.xpEarnedCaption', {
+              earned: String(data.earnedXp),
+              total: String(data.totalXp),
+            })}
           </Text>
         </View>
 
@@ -233,7 +236,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
         {/* Remaining steps list */}
         {data.steps.length > 0 ? (
           <View style={styles.sectionWrap}>
-            <Text style={styles.sectionLabel}>ALL STEPS</Text>
+            <Text style={styles.sectionLabel}>{t('journeys.allStepsHeader')}</Text>
             <View style={styles.stepList}>
               {data.steps.map((step) => (
                 <StepRow
@@ -241,6 +244,10 @@ export default function JourneyDetailScreen(): React.JSX.Element {
                   step={step}
                   isCurrent={step.dayIndex === currentDay}
                   accent={ripu?.color ?? GOLD}
+                  metaLabel={t('journeys.stepMeta', {
+                    xp: String(step.xpReward),
+                    karma: String(step.karmaReward),
+                  })}
                 />
               ))}
             </View>
@@ -265,10 +272,12 @@ function StepRow({
   step,
   isCurrent,
   accent,
+  metaLabel,
 }: {
   readonly step: WisdomJourneyStep;
   readonly isCurrent: boolean;
   readonly accent: string;
+  readonly metaLabel: string;
 }): React.JSX.Element {
   const dot = step.isCompleted
     ? '#22c55e'
@@ -298,7 +307,7 @@ function StepRow({
           {step.title}
         </Text>
         <Text style={styles.stepMeta} numberOfLines={1}>
-          +{step.xpReward} XP · +{step.karmaReward} karma
+          {metaLabel}
         </Text>
       </View>
     </View>

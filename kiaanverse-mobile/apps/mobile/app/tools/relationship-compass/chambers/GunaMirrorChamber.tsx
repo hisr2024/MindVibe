@@ -30,6 +30,7 @@ import { GoldenButton } from '@kiaanverse/ui';
 import { GUNA_PANELS, GUNA_PATTERNS, type GunaKey } from '../data/gunaPatterns';
 import type { GunaScores, GunaSelections } from '../hooks/useGunaCalculation';
 import { ShankhaVoiceInput } from '../../../../voice/components/ShankhaVoiceInput';
+import { useTranslation } from '@kiaanverse/i18n';
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200, 191, 168, 0.65)';
@@ -65,6 +66,7 @@ export function GunaMirrorChamber({
   onCustomQueryChange,
   onProceed,
 }: GunaMirrorChamberProps): React.JSX.Element {
+  const { t } = useTranslation('tools');
   // Native FlatList paging — replaces the previous `ScrollView pagingEnabled`
   // approach. ScrollView+pagingEnabled on Android has a known issue where
   // pages 2+ drift right because the snap intervals don't always match the
@@ -108,26 +110,26 @@ export function GunaMirrorChamber({
 
   const dominantLabel =
     gunaScores.dominant === 'balanced'
-      ? 'Balanced energy'
-      : `Predominantly ${gunaScores.dominant}`;
+      ? t('rcGunaMirrorBalanced')
+      : t('rcGunaMirrorPredominantlyFmt', { guna: gunaScores.dominant });
 
   return (
     <View style={styles.root}>
       <Animated.View entering={FadeIn.duration(400)} style={styles.queryBlock}>
         <Text style={styles.queryLabel}>
-          Your situation <Text style={styles.queryLabelMuted}>(optional)</Text>
+          {t('rcGunaMirrorYourSituation')} <Text style={styles.queryLabelMuted}>{t('rcGunaMirrorOptional')}</Text>
         </Text>
         <ShankhaVoiceInput
           value={customQuery}
           onChangeText={(text) =>
             onCustomQueryChange(text.slice(0, MAX_QUERY_LEN))
           }
-          placeholder="Describe your situation in your own words..."
+          placeholder={t('rcGunaMirrorPlaceholder')}
           multiline
           numberOfLines={3}
           style={styles.queryInput}
           maxLength={MAX_QUERY_LEN}
-          accessibilityLabel="Describe your situation"
+          accessibilityLabel={t('rcGunaMirrorA11y')}
           dictationMode="append"
           />
         {customQuery.length > 0 ? (
@@ -137,7 +139,7 @@ export function GunaMirrorChamber({
         ) : null}
       </Animated.View>
 
-      <Text style={styles.divider}>Or select patterns you recognise</Text>
+      <Text style={styles.divider}>{t('rcGunaMirrorOrSelect')}</Text>
 
       <FlatList
         ref={listRef}
@@ -246,7 +248,7 @@ export function GunaMirrorChamber({
 
       <View style={styles.cta}>
         <GoldenButton
-          title="Get Your Dharma Map"
+          title={t('rcGunaMirrorCta')}
           onPress={onProceed}
           disabled={ctaDisabled}
           variant="divine"

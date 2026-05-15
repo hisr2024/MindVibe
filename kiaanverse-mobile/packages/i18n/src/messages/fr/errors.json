@@ -1,0 +1,7 @@
+{
+  "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+  "server": "Erreur serveur. Veuillez réessayer plus tard.",
+  "notFound": "Introuvable",
+  "unauthorized": "Veuillez vous connecter pour continuer",
+  "timeout": "Délai d'attente dépassé. Veuillez réessayer."
+}

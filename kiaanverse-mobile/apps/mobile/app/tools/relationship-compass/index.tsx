@@ -51,6 +51,7 @@ import {
   useRelationshipStore,
   type SealedCompassReading,
 } from '@kiaanverse/store';
+import { useTranslation } from '@kiaanverse/i18n';
 
 import { CompassAltarChamber } from './chambers/CompassAltarChamber';
 import { GunaMirrorChamber } from './chambers/GunaMirrorChamber';
@@ -107,6 +108,7 @@ const INITIAL_DRAFT: CompassDraft = {
 
 export default function RelationshipCompassScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('tools');
   const addSealedReading = useRelationshipStore((s) => s.addSealedReading);
 
   const voice = useVoicePrefill<{
@@ -117,7 +119,7 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
   const voiceLabel =
     voice.prefill?.tension_summary ??
     voice.prefill?.relationship_role ??
-    'the bond you named';
+    t('rcLongingFallback');
 
   const [chamber, setChamber] = useState<ChamberKey>('altar');
   const [draft, setDraft] = useState<CompassDraft>(INITIAL_DRAFT);
@@ -350,16 +352,16 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
         <Pressable
           onPress={onBack}
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={t('rcBackA11y')}
           hitSlop={12}
           style={styles.iconBtn}
         >
           <ChevronLeft size={28} color={SACRED_WHITE} />
         </Pressable>
-        <Text style={styles.headerTitle}>Relationship Compass</Text>
+        <Text style={styles.headerTitle}>{t('rcHeaderTitle')}</Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Notifications"
+          accessibilityLabel={t('rcNotificationsA11y')}
           hitSlop={12}
           style={styles.iconBtn}
           onPress={() => {}}

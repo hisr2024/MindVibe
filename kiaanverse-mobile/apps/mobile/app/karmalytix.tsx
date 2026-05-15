@@ -43,6 +43,7 @@ import {
   useKarmaLytixWeeklyReport,
 } from '@kiaanverse/api';
 import type { KarmaLytixWeeklyReport } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { LotusGlyph } from '../components/sacred-reflections/LotusGlyph';
 
 // ---------------------------------------------------------------------------
@@ -85,6 +86,7 @@ function formatDimensionName(key: string): string {
 
 export default function KarmalytixScreen(): React.JSX.Element {
   const router = useRouter();
+  const { t } = useTranslation('analytics');
   const insets = useSafeAreaInsets();
   const { data, isLoading, refetch } = useKarmaLytixWeeklyReport();
   const generate = useGenerateKarmaLytixReport();
@@ -118,13 +120,13 @@ export default function KarmalytixScreen(): React.JSX.Element {
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <GoldenHeader title="Karmalytix" onBack={() => router.back()} />
+        <GoldenHeader title={t('kxScreenTitle')} onBack={() => router.back()} />
         <Text
           variant="caption"
           color={colors.primary[500]}
           style={styles.sanskritSubtitle}
         >
-          कर्म-दर्पण · Dharmic Analysis via Kiaan AI
+          {t('kxSubtitle')}
         </Text>
 
         <ScrollView
@@ -151,7 +153,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.text.primary}
                 style={styles.insufficientTitle}
               >
-                Your mirror awaits
+                {t('kxInsufficientTitle')}
               </Text>
               <Text
                 variant="caption"
@@ -159,11 +161,11 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 style={styles.insufficientSub}
               >
                 {entriesNeeded > 0
-                  ? `Write ${entriesNeeded} more reflection${entriesNeeded === 1 ? '' : 's'} this week and KIAAN will craft your Sacred Mirror from the patterns.`
-                  : "Journal for a few days — then return for Sakha's weekly reflection."}
+                  ? t('kxInsufficientNeedFmt', { count: entriesNeeded })
+                  : t('kxInsufficientFallback')}
               </Text>
               <GoldenButton
-                title="Begin a reflection"
+                title={t('kxBeginReflectionCta')}
                 onPress={onOpenSacred}
                 style={styles.cta}
               />
@@ -181,7 +183,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.text.muted}
                 style={styles.scoreLabel}
               >
-                KARMIC ALIGNMENT
+                {t('kxKarmicAlignmentLabel')}
               </Text>
               <Text
                 variant="h1"
@@ -191,7 +193,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 {data.overall_karma_score}
                 <Text variant="h3" color={colors.text.secondary}>
                   {' '}
-                  / 100
+                  {t('outOf100')}
                 </Text>
               </Text>
               {data.period_start && data.period_end ? (
@@ -215,7 +217,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.sectionLabel}
               >
-                KARMA DIMENSIONS
+                {t('kxKarmaDimensionsLabel')}
               </Text>
               <View style={styles.dimensions}>
                 {Object.entries(data.karma_dimensions).map(([key, value]) => (
@@ -261,7 +263,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                THE MIRROR
+                {t('kxCardMirror')}
               </Text>
               <Text
                 variant="body"
@@ -283,7 +285,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                PATTERN NOTICED
+                {t('kxCardPattern')}
               </Text>
               <Text
                 variant="body"
@@ -305,8 +307,10 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                GITA ECHO · BG {mirror.gita_echo.chapter}.
-                {mirror.gita_echo.verse}
+                {t('kxCardGitaEchoFmt', {
+                  chapter: mirror.gita_echo.chapter ?? '',
+                  verse: mirror.gita_echo.verse ?? '',
+                })}
               </Text>
               <Text
                 variant="body"
@@ -337,7 +341,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                GROWTH EDGE
+                {t('kxCardGrowthEdge')}
               </Text>
               <Text
                 variant="body"
@@ -359,7 +363,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                BLESSING
+                {t('kxCardBlessing')}
               </Text>
               <Text
                 variant="body"
@@ -381,7 +385,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 color={colors.primary[500]}
                 style={styles.cardLabel}
               >
-                DYNAMIC WISDOM · WISDOM CORE
+                {t('kxCardDynamicWisdom')}
               </Text>
               <Text
                 variant="body"
@@ -399,8 +403,8 @@ export default function KarmalytixScreen(): React.JSX.Element {
               <GoldenButton
                 title={
                   generate.isPending
-                    ? 'Regenerating…'
-                    : 'Ask KIAAN for a fresh mirror'
+                    ? t('kxRegeneratingButton')
+                    : t('kxRegenerateButton')
                 }
                 onPress={onRegenerate}
                 disabled={generate.isPending}
@@ -409,14 +413,14 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 onPress={onOpenSacred}
                 style={styles.secondaryLink}
                 accessibilityRole="button"
-                accessibilityLabel="Back to Sacred Reflection"
+                accessibilityLabel={t('kxBackToSacredA11y')}
               >
                 <Text
                   variant="caption"
                   color={colors.text.muted}
                   style={styles.secondaryText}
                 >
-                  ← Back to Sacred Reflection
+                  {t('kxBackToSacredLink')}
                 </Text>
               </Pressable>
             </View>
@@ -427,8 +431,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
             color={colors.text.muted}
             style={styles.privacyNote}
           >
-            {'\u{1F512}'} Karmalytix only reads plaintext mood + tag metadata.
-            Your reflection bodies stay end-to-end encrypted on your device.
+            {t('kxPrivacyNote')}
           </Text>
         </ScrollView>
       </View>

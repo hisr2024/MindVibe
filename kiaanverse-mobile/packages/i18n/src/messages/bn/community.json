@@ -1,0 +1,26 @@
+{
+  "screenTitle": "সম্প্রদায়",
+  "tabFeed": "ফিড",
+  "tabCircles": "চক্র",
+  "feedEmpty": "সম্প্রদায় আপনার প্রথম জ্ঞানের শব্দের জন্য অপেক্ষা করছে।",
+  "circlesEmpty": "এখনও কোনও জ্ঞান চক্র উপলব্ধ নেই।\nশীঘ্রই আবার দেখুন।",
+  "composeFabA11y": "নতুন পোস্ট লিখুন",
+
+  "composeTitle": "জ্ঞান ভাগ করুন",
+  "composePromptLabel": "আপনি কোন জ্ঞান ভাগ করতে চান?",
+  "composePromptPlaceholder": "আপনার চিন্তা, অন্তর্দৃষ্টি, বা প্রশ্ন ভাগ করুন...",
+  "composeCharsRemainingFmt": "{{count}} অক্ষর বাকি",
+  "composeCircleLabel": "চক্রে পোস্ট করুন (ঐচ্ছিক)",
+  "composeTagsLabel": "ট্যাগ (কমা-পৃথক)",
+  "composeTagsPlaceholder": "জ্ঞান, ধ্যান, কৃতজ্ঞতা...",
+  "composeSubmitButton": "জ্ঞান ভাগ করুন",
+  "composeErrorTitle": "পোস্ট করা যায়নি",
+  "composeErrorBody": "আপনার জ্ঞান এখন ভাগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+
+  "circleFallbackTitle": "চক্র",
+  "circleMembersFmt": "{{count}} সদস্য",
+  "circleJoinButton": "চক্রে যোগ দিন",
+  "circleJoinedBadge": "✓ যোগ দিয়েছেন",
+  "circlePostsLabel": "পোস্ট",
+  "circlePostsEmpty": "এই চক্রে এখনও কোনও পোস্ট নেই।\nজ্ঞান ভাগ করার প্রথম জন হন।"
+}
