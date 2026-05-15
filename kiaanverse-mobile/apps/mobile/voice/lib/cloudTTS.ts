@@ -76,6 +76,12 @@ export interface CloudSpeakOptions {
     | 'chanting';
   /** Backend baseURL override. Defaults to ``API_CONFIG.baseURL``. */
   readonly baseUrl?: string;
+  /** Playback tempo multiplier — range 0.5 (half speed) to 1.5
+   *  (1.5× fast). Default 1.0 = natural speed. Sent to backend as
+   *  the ``speed`` field in SynthesizeRequest; the provider TTS
+   *  engines render audio at that tempo natively, so cache hits
+   *  for the same (text, voice, tempo) are perfect replays. */
+  readonly tempo?: number;
   /** Async getter for the JWT — re-resolved per call so token rotation
    *  doesn't strand a stale value. */
   readonly getAccessToken?: () => Promise<string | null> | string | null;
@@ -88,15 +94,39 @@ export interface CloudSpeakOptions {
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────────
-/** Stable cache key for a (text, voice_id, language) triple. */
-function cacheKey(text: string, voiceId: string, language: string): string {
-  // Lightweight hash: not cryptographic, just collision-resistant
-  // for the size of cache we keep (a few hundred entries max).
+
+/**
+ * Mobile-side cache version. Bumped whenever the backend's
+ * ``TTS_CACHE_VERSION`` changes — keeps the on-device file cache in
+ * step with the server's Redis cache so users don't replay stale
+ * audio rendered with an old speaker mapping. Without this,
+ * ``cacheDirectory`` would hold the OLD audio for the file's
+ * lifetime (potentially forever) even after the backend has
+ * re-synthesized correctly.
+ *
+ * Increment in lockstep with ``backend/services/tts_service.py``
+ * ``TTS_CACHE_VERSION``. v3 = direct-routing voice IDs
+ * (``sarvam-<speaker>`` / ``elevenlabs-<voice>``) shipped.
+ */
+const CLOUD_TTS_CACHE_VERSION = 4;
+
+/** Stable cache key for a (text, voice_id, language, tempo) tuple.
+ *  Tempo is in the key so different speeds produce different cache
+ *  files — otherwise a tempo change would replay stale audio at
+ *  whatever speed the original was rendered at. */
+function cacheKey(
+  text: string,
+  voiceId: string,
+  language: string,
+  tempo: number = 1.0,
+): string {
   let h = 5381;
   for (let i = 0; i < text.length; i++) {
     h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
   }
-  return `tts-${voiceId}-${language}-${h.toString(36)}-${text.length}`;
+  // Tempo rounded to 2 decimals so 1.00 / 1.0 hash to the same slot.
+  const t = Math.round(tempo * 100) / 100;
+  return `tts-v${CLOUD_TTS_CACHE_VERSION}-${voiceId}-${language}-t${t}-${h.toString(36)}-${text.length}`;
 }
 
 /** Map BCP-47 (``en-IN``) to ISO-639 (``en``) for the backend payload. */
@@ -189,7 +219,7 @@ async function fetchClip(
       `cloudTTS: text exceeds backend cap of ${MAX_TEXT_LENGTH} chars`,
     );
   }
-  const key = cacheKey(text, opts.voiceId, opts.language);
+  const key = cacheKey(text, opts.voiceId, opts.language, opts.tempo);
 
   // Memory / disk cache — instant replay.
   const cached = await readFromCache(key);
@@ -215,6 +245,11 @@ async function fetchClip(
       language: backendLanguageCode(opts.language),
       voice_type: opts.voiceType ?? 'calm',
       voice_id: opts.voiceId,
+      // Speed: pass only when user has changed from default 1.0.
+      // Omitting lets backend use voice-type-specific optimal default.
+      ...(typeof opts.tempo === 'number' && opts.tempo !== 1.0
+        ? { speed: Math.max(0.5, Math.min(2.0, opts.tempo)) }
+        : {}),
     });
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -459,9 +494,17 @@ export async function cloudPrefetch(
   text: string,
   options: CloudSpeakOptions,
 ): Promise<void> {
+  // Pre-fetch is fire-and-forget — give it a 30s ceiling via a local
+  // AbortController so a hung backend doesn't leak a request forever.
+  // The caller can't cancel a prefetch; that's by design (it's
+  // opportunistic warming, not a user-facing request).
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
-    await fetchClip(text, options);
+    await fetchClip(text, options, controller.signal);
   } catch {
     // Pre-fetch is opportunistic; failures are silently dropped.
+  } finally {
+    clearTimeout(timeout);
   }
 }

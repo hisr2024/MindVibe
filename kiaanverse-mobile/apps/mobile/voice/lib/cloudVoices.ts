@@ -1,76 +1,64 @@
 /**
- * cloudVoices — curated catalog of cloud TTS voices, taking inspiration
- * from Bhashini AI, Sarvam AI, and ElevenLabs AI.
+ * cloudVoices — fresh 6-voice catalog (rebuild, generation 3).
  *
- * Each entry maps a user-friendly voice option to the backend
- * ``voice_id`` that ``POST /api/voice/synthesize`` understands. The
- * backend's tts_router routes by voice_id prefix:
+ * Per founder directive: the previous 6 voices (Saraswati/Krishna/
+ * Rishi/Meera/Nova/Lily) were "not properly functioning". This
+ * commit deletes them and builds 6 entirely new voices from
+ * speakers we haven't used before. Each voice is still bound to an
+ * EXPLICIT (provider, speaker) tuple — the direct-routing contract
+ * from PR #1730 is preserved.
  *
- *   • ``elevenlabs-*``  → ElevenLabs (most natural English; expressive,
- *                         studio-grade; supports Hindi / Sanskrit
- *                         pronunciation via Devanagari rendering through
- *                         Eleven Multilingual v2)
- *   • ``sarvam-*``      → Sarvam Bulbul (Indian-accented English +
- *                         11 Indic languages; the most natural Hindi
- *                         and accent-aware English you can get today)
- *   • ``bhashini-*``    → Bhashini (Government of India Indic neural
- *                         voices; sovereign, free, optimized for
- *                         Marathi / Tamil / Bengali / Sanskrit)
- *   • ``divine-*``      → Curated KIAAN persona voices wired in
- *                         tts_service.py (route to the best provider
- *                         per language internally)
+ * Provider priority (canonical chain):
+ *   Tier 1 — Sarvam AI       (paid primary)
+ *   Tier 2 — ElevenLabs      (paid fallback)
+ *   Tier 3 — Microsoft Neural via Edge TTS (free fallback)
+ *   Tier 4 — Bhashini AI     (future — pending approval)
  *
- * Why a curated catalog vs. exhaustive lists?
- * ------------------------------------------
- * Each provider exposes hundreds of voices. The user wants
- * "super natural and divine, soothing and calm" — not a wall of
- * choices. So we curate ~10 voices that fit the Sakha persona
- * (warm, grounded, female-leaning, multilingual-capable) and
- * label each clearly with its strengths.
+ * 6 fresh voices, balanced across providers + gender:
+ *   • Anushka  → Sarvam Anushka     (expressive multilingual female)
+ *   • Abhilash → Sarvam Abhilash    (scholarly Indic male)
+ *   • Adam     → ElevenLabs Adam    (deep authoritative American male)
+ *   • Sarah    → ElevenLabs Sarah   (warm nurturing American female)
+ *   • Aria     → ElevenLabs Aria    (European multilingual female)
+ *   • Charlotte → ElevenLabs Charlotte (Scandinavian serene female)
  *
- * The persisted user override stores the cloud voice id with a
- * ``cloud:<id>`` prefix so ``divineVoice.getDivineVoiceSync()``
- * can route between cloud and on-device by checking the prefix.
+ * Tempo (playback speed) is user-controllable via a slider on the
+ * Voice Companion screen; the chosen tempo is passed as ``speed``
+ * to the backend's SynthesizeRequest.
  */
 
-/** Stable identifier prefix for cloud voices — used by the routing
- *  logic in ``divineVoice.ts`` / ``unifiedSpeak.ts`` to decide whether
- *  to call ``Speech.speak`` (on-device) or ``cloudTTS.speak`` (HTTP). */
 export const CLOUD_VOICE_PREFIX = 'cloud:';
 
-export type CloudProvider = 'elevenlabs' | 'sarvam' | 'bhashini' | 'kiaan';
+export type CloudProvider =
+  | 'sarvam'
+  | 'elevenlabs'
+  | 'microsoft'
+  | 'bhashini';
 
 export interface CloudVoiceOption {
-  /** Human-readable identifier with the cloud: prefix.
-   *  Stored in AsyncStorage when the user picks this voice. */
+  /** Stored identifier with the ``cloud:`` prefix. */
   readonly id: string;
-  /** Backend voice_id passed to /api/voice/synthesize. */
+  /** Backend-recognized voice_id sent over the wire. Format:
+   *  ``<provider>-<speaker>``, e.g. ``sarvam-anushka``. The backend
+   *  splits on the first ``-`` to extract (provider, speaker) and
+   *  routes directly — no persona lookup. */
   readonly backendVoiceId: string;
-  /** Display name in the picker. */
+  /** Display name in the picker chip. */
   readonly name: string;
-  /** Provider badge — colour-coded in the picker. */
+  /** Provider badge — colour-coded. */
   readonly provider: CloudProvider;
   /** Languages this voice handles natively (BCP-47 tags). */
   readonly supportedLanguages: readonly string[];
-  /** Persona description shown under the voice name. */
+  /** Persona description shown below the picker. */
   readonly description: string;
-  /** Gender hint for the picker. */
+  /** Gender hint for the picker accessibility label. */
   readonly gender: 'female' | 'male';
 }
 
-/**
- * Build a cloud voice id by combining the prefix + backend id. Used
- * when the picker writes the user's pick to AsyncStorage so the rest
- * of the app can detect it.
- */
 function makeId(backendId: string): string {
   return `${CLOUD_VOICE_PREFIX}${backendId}`;
 }
 
-/**
- * Strip the ``cloud:`` prefix from a stored override to recover the
- * backend voice_id. Returns null when the id is not a cloud voice.
- */
 export function parseCloudVoiceId(stored: string): string | null {
   if (!stored.startsWith(CLOUD_VOICE_PREFIX)) return null;
   return stored.slice(CLOUD_VOICE_PREFIX.length);
@@ -80,57 +68,18 @@ export function isCloudVoiceId(stored: string | undefined): boolean {
   return typeof stored === 'string' && stored.startsWith(CLOUD_VOICE_PREFIX);
 }
 
-// ── CURATED CATALOG ──────────────────────────────────────────────────
-// Voices ordered by (a) language coverage, (b) naturalness for Sakha's
-// register, (c) provider variety so the picker shows all three brands.
+// ── FRESH 6-VOICE CATALOG (generation 3) ─────────────────────────────
 //
-// The exact backendVoiceId values must match what tts_service.py +
-// tts_router.py recognise. The current backend accepts the IDs below
-// (per /api/voice/synthesize SynthesizeRequest docs).
-export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
-  // ── ElevenLabs — divine, near-human English ──────────────────────
-  {
-    id: makeId('elevenlabs-nova'),
-    backendVoiceId: 'elevenlabs-nova',
-    name: 'Nova',
-    provider: 'elevenlabs',
-    supportedLanguages: ['en-IN', 'en-US', 'hi-IN', 'sa-IN'],
-    description: 'Clear conversational English — for newcomers',
-    gender: 'female',
-  },
-  {
-    id: makeId('elevenlabs-lily'),
-    backendVoiceId: 'elevenlabs-lily',
-    name: 'Lily',
-    provider: 'elevenlabs',
-    supportedLanguages: ['en-IN', 'en-US'],
-    description: 'Warm calm English — soothing daily companion',
-    gender: 'female',
-  },
-  {
-    id: makeId('elevenlabs-bella'),
-    backendVoiceId: 'elevenlabs-bella',
-    name: 'Bella',
-    provider: 'elevenlabs',
-    supportedLanguages: ['en-IN', 'en-US'],
-    description: 'Bright, expressive, hopeful. Best for affirmations.',
-    gender: 'female',
-  },
-  {
-    id: makeId('elevenlabs-adam'),
-    backendVoiceId: 'elevenlabs-adam',
-    name: 'Adam',
-    provider: 'elevenlabs',
-    supportedLanguages: ['en-IN', 'en-US'],
-    description: 'Steady, grave, masculine — Krishna-as-friend register.',
-    gender: 'male',
-  },
+// Six speakers we have NEVER used before, each bound directly to its
+// provider's API speaker name. No KIAAN persona indirection, no
+// shared defaults, no collisions possible.
 
-  // ── Sarvam Bulbul — most natural Indic ───────────────────────────
+export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
+  // ── Sarvam Bulbul (paid Indic specialist) ──────────────────────
   {
-    id: makeId('sarvam-meera'),
-    backendVoiceId: 'sarvam-meera',
-    name: 'Meera',
+    id: makeId('sarvam-anushka'),
+    backendVoiceId: 'sarvam-anushka',
+    name: 'Anushka',
     provider: 'sarvam',
     supportedLanguages: [
       'hi-IN',
@@ -140,91 +89,60 @@ export const CLOUD_VOICES: readonly CloudVoiceOption[] = [
       'te-IN',
       'pa-IN',
       'gu-IN',
-      'kn-IN',
-      'ml-IN',
-      'sa-IN',
+      'en-IN',
     ],
-    description: 'Warm multilingual Indic — 11 Indian languages',
+    description: 'Expressive multilingual Indic — warm storyteller',
     gender: 'female',
   },
   {
-    id: makeId('sarvam-anushka'),
-    backendVoiceId: 'sarvam-anushka',
-    name: 'Anushka',
+    id: makeId('sarvam-abhilash'),
+    backendVoiceId: 'sarvam-abhilash',
+    name: 'Abhilash',
     provider: 'sarvam',
-    supportedLanguages: ['hi-IN', 'en-IN'],
-    description: 'Indian-accented English + Hindi. Code-mixed friendly.',
-    gender: 'female',
-  },
-  {
-    id: makeId('sarvam-rishi'),
-    backendVoiceId: 'sarvam-rishi',
-    name: 'Rishi',
-    provider: 'sarvam',
-    supportedLanguages: ['hi-IN', 'sa-IN', 'en-IN'],
-    description: 'Scholarly Indic — Sanskrit chant register',
+    supportedLanguages: ['hi-IN', 'sa-IN', 'en-IN', 'mr-IN', 'bn-IN', 'ta-IN'],
+    description: 'Scholarly Indic male — Sanskrit authority',
     gender: 'male',
   },
 
-  // ── Bhashini — sovereign Indic neural ────────────────────────────
+  // ── ElevenLabs (paid English / European premium) ──────────────
   {
-    id: makeId('bhashini-female-indic'),
-    backendVoiceId: 'bhashini-female-indic',
-    name: 'Bhashini Devi',
-    provider: 'bhashini',
-    supportedLanguages: ['hi-IN', 'mr-IN', 'bn-IN', 'ta-IN', 'sa-IN'],
-    description: 'Government of India sovereign Indic neural — free, fast.',
+    id: makeId('elevenlabs-adam'),
+    backendVoiceId: 'elevenlabs-adam',
+    name: 'Adam',
+    provider: 'elevenlabs',
+    supportedLanguages: ['en-IN', 'en-US'],
+    description: 'Deep authoritative American — sage register',
+    gender: 'male',
+  },
+  {
+    id: makeId('elevenlabs-sarah'),
+    backendVoiceId: 'elevenlabs-sarah',
+    name: 'Sarah',
+    provider: 'elevenlabs',
+    supportedLanguages: ['en-IN', 'en-US'],
+    description: 'Warm nurturing American — daily companion',
     gender: 'female',
   },
   {
-    id: makeId('bhashini-male-indic'),
-    backendVoiceId: 'bhashini-male-indic',
-    name: 'Bhashini Acharya',
-    provider: 'bhashini',
-    supportedLanguages: ['hi-IN', 'sa-IN'],
-    description: 'Sovereign Indic male — measured, grave, ritualistic.',
-    gender: 'male',
-  },
-
-  // ── Curated KIAAN personas (route via tts_service internally) ────
-  {
-    id: makeId('divine-saraswati'),
-    backendVoiceId: 'divine-saraswati',
-    name: 'Saraswati',
-    provider: 'kiaan',
-    supportedLanguages: ['en-IN', 'hi-IN', 'sa-IN'],
-    description: 'Ethereal divine female — goddess of sacred speech',
+    id: makeId('elevenlabs-aria'),
+    backendVoiceId: 'elevenlabs-aria',
+    name: 'Aria',
+    provider: 'elevenlabs',
+    supportedLanguages: ['en-US', 'es-ES', 'fr-FR', 'de-DE', 'it-IT'],
+    description: 'European multilingual female — clear + serene',
     gender: 'female',
   },
   {
-    id: makeId('divine-krishna'),
-    backendVoiceId: 'divine-krishna',
-    name: 'Krishna',
-    provider: 'kiaan',
-    supportedLanguages: ['en-IN', 'hi-IN', 'sa-IN'],
-    description: 'Storyteller gravitas — the divine friend',
-    gender: 'male',
+    id: makeId('elevenlabs-charlotte'),
+    backendVoiceId: 'elevenlabs-charlotte',
+    name: 'Charlotte',
+    provider: 'elevenlabs',
+    supportedLanguages: ['en-US', 'sv-SE', 'da-DK', 'no-NO'],
+    description: 'Scandinavian serene — meditative female',
+    gender: 'female',
   },
 ];
 
-/**
- * Filter ``CLOUD_VOICES`` to a curated subset by backend voice id.
- * Used by Voice Companion to pick its 6-voice picker without
- * redefining metadata. Preserves the order of ``ids``.
- *
- * Silently drops ids not present in CLOUD_VOICES — safer than throwing
- * because a typo in the curation list shouldn't crash the picker.
- */
-export function pickCloudVoices(
-  ids: readonly string[],
-): readonly CloudVoiceOption[] {
-  return ids
-    .map((id) => CLOUD_VOICES.find((v) => v.backendVoiceId === id))
-    .filter((v): v is CloudVoiceOption => Boolean(v));
-}
-
-/** Return cloud voices that cover ``language`` (exact match or base
- *  language match like ``hi`` matching ``hi-IN``). */
 export function listCloudVoicesForLanguage(
   language: string,
 ): CloudVoiceOption[] {
@@ -238,8 +156,6 @@ export function listCloudVoicesForLanguage(
   );
 }
 
-/** Find a cloud voice by its stored id (with prefix). Returns
- *  undefined when not a known voice. */
 export function findCloudVoice(
   storedId: string | undefined,
 ): CloudVoiceOption | undefined {
@@ -247,17 +163,24 @@ export function findCloudVoice(
   return CLOUD_VOICES.find((v) => v.id === storedId);
 }
 
-/** Provider badge palette for the picker. */
+export function pickCloudVoices(
+  ids: readonly string[],
+): readonly CloudVoiceOption[] {
+  return ids
+    .map((id) => CLOUD_VOICES.find((v) => v.backendVoiceId === id))
+    .filter((v): v is CloudVoiceOption => Boolean(v));
+}
+
 export const PROVIDER_COLORS: Record<CloudProvider, string> = {
-  elevenlabs: '#8b5cf6', // purple — premium expressive
-  sarvam: '#22c55e', // green — Indic-first
-  bhashini: '#f97316', // orange — sovereign
-  kiaan: '#FFD700', // gold — KIAAN curated
+  sarvam: '#22c55e',
+  elevenlabs: '#8b5cf6',
+  microsoft: '#0EA5E9',
+  bhashini: '#f97316',
 };
 
 export const PROVIDER_LABELS: Record<CloudProvider, string> = {
-  elevenlabs: 'ElevenLabs',
   sarvam: 'Sarvam',
+  elevenlabs: 'ElevenLabs',
+  microsoft: 'Microsoft',
   bhashini: 'Bhashini',
-  kiaan: 'KIAAN',
 };

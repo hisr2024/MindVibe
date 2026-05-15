@@ -327,10 +327,21 @@ SARVAM_EMOTION_PROFILES: dict[str, dict[str, Any]] = {
 # Maps KIAAN companion voice personas to the best Sarvam speaker for that persona.
 
 COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
-    # Canonical companion IDs
+    # Canonical companion IDs (Voice Companion picker — must all map
+    # to DISTINCT Sarvam speakers so the 6 voices sound truly different;
+    # missing entries here fall to the "meera" default and produce the
+    # "Meera and Lily sound the same" bug.)
     "sarvam-aura": "meera",
-    "sarvam-rishi": "arvind",
-    "elevenlabs-nova": "pavithra",
+    "sarvam-rishi": "arvind",         # Deep male Indic — Karun
+    "sarvam-meera": "meera",          # Warm Indic mother — Manisha
+    "sarvam-anushka": "anushka",      # Expressive Indic female
+    "elevenlabs-nova": "pavithra",    # Clear multilingual female — Vidya
+    "elevenlabs-lily": "anushka",     # Lily falls back to expressive
+                                       #   female (distinct from Meera +
+                                       #   Pavithra) when Sarvam is the
+                                       #   tier serving English content.
+    "elevenlabs-bella": "anushka",
+    "elevenlabs-adam": "arvind",      # Deep male English fallback
     "elevenlabs-orion": "arvind",
 
     # Legacy persona IDs (backward compatibility)
@@ -392,6 +403,26 @@ def get_sarvam_language_code(language: str) -> Optional[str]:
 
 
 def get_sarvam_speaker_for_companion(voice_id: str) -> str:
+    # Direct-route format: ``sarvam-<speaker_id>`` bypasses the
+    # legacy persona lookup table and goes straight to that API
+    # speaker. e.g. ``sarvam-karun`` → API speaker ``karun``.
+    # Validates against the SARVAM_SPEAKERS catalog so a typo doesn't
+    # silently fall through to default ``meera``.
+    if voice_id.startswith("sarvam-"):
+        candidate = voice_id[len("sarvam-"):]
+        for persona, info in SARVAM_SPEAKERS.items():
+            if info.get("speaker_id") == candidate:
+                # The catalog's persona is keyed on the persona name;
+                # return the persona key so downstream
+                # ``SARVAM_SPEAKERS.get(speaker_id, …)`` resolves
+                # correctly.
+                return persona
+        # Direct API speaker — caller will use this raw value
+        return candidate
+    return _legacy_get_sarvam_speaker_for_companion(voice_id)
+
+
+def _legacy_get_sarvam_speaker_for_companion(voice_id: str) -> str:
     """Get the best Sarvam speaker for a given companion voice persona."""
     return COMPANION_TO_SARVAM_SPEAKER.get(voice_id, "meera")
 

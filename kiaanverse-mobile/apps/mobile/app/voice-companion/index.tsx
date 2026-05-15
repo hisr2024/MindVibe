@@ -69,9 +69,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@kiaanverse/store';
 
 import { Shankha } from '../../voice/components/Shankha';
-import { SacredGeometry } from '../../voice/components/SacredGeometry';
 import { Color, Spacing, Type } from '../../voice/lib/theme';
 import { useDictation } from '../../voice/hooks/useDictation';
+import { useWakeWord } from '../../voice/hooks/useWakeWord';
 import {
   previewVoice,
   speakDivinely,
@@ -114,19 +114,19 @@ async function readAccessToken(): Promise<string | null> {
  * the per-language ``divineVoice:override:*`` keys).
  */
 const COMPANION_VOICE_IDS = [
-  'divine-saraswati',
-  'divine-krishna',
-  'sarvam-rishi',
-  'sarvam-meera',
-  'elevenlabs-nova',
-  'elevenlabs-lily',
+  'sarvam-anushka',         // Anushka (Sarvam expressive female)
+  'sarvam-abhilash',        // Abhilash (Sarvam Indic male)
+  'elevenlabs-adam',        // Adam (ElevenLabs deep male)
+  'elevenlabs-sarah',       // Sarah (ElevenLabs warm female)
+  'elevenlabs-aria',        // Aria (ElevenLabs multilingual female)
+  'elevenlabs-charlotte',   // Charlotte (ElevenLabs serene female)
 ] as const;
 
 const COMPANION_VOICES: readonly CloudVoiceOption[] = pickCloudVoices(
   COMPANION_VOICE_IDS,
 );
 
-const DEFAULT_COMPANION_VOICE = 'divine-saraswati';
+const DEFAULT_COMPANION_VOICE = 'sarvam-anushka';
 const COMPANION_VOICE_KEY = 'voiceCompanion:cloudVoiceId';
 
 async function loadCompanionVoice(): Promise<string> {
@@ -146,6 +146,46 @@ async function saveCompanionVoice(backendVoiceId: string): Promise<void> {
     await AsyncStorage.setItem(COMPANION_VOICE_KEY, backendVoiceId);
   } catch {
     // best-effort; in-memory state still updates
+  }
+}
+
+const COMPANION_TEMPO_KEY = 'voiceCompanion:tempo';
+const COMPANION_WAKE_KEY = 'voiceCompanion:wakeWord';
+
+async function loadCompanionTempo(): Promise<number> {
+  try {
+    const v = await AsyncStorage.getItem(COMPANION_TEMPO_KEY);
+    if (!v) return 1.0;
+    const n = Number(v);
+    if (Number.isFinite(n) && n >= 0.5 && n <= 1.5) return n;
+  } catch {
+    // fall through
+  }
+  return 1.0;
+}
+
+async function saveCompanionTempo(tempo: number): Promise<void> {
+  try {
+    await AsyncStorage.setItem(COMPANION_TEMPO_KEY, String(tempo));
+  } catch {
+    // best-effort
+  }
+}
+
+async function loadCompanionWakeWord(): Promise<boolean> {
+  try {
+    const v = await AsyncStorage.getItem(COMPANION_WAKE_KEY);
+    return v === '1';
+  } catch {
+    return false;
+  }
+}
+
+async function saveCompanionWakeWord(enabled: boolean): Promise<void> {
+  try {
+    await AsyncStorage.setItem(COMPANION_WAKE_KEY, enabled ? '1' : '0');
+  } catch {
+    // best-effort
   }
 }
 
@@ -197,11 +237,32 @@ export default function VoiceCompanionScreen() {
   const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(
     null,
   );
+
+  // ── Tempo (user-controllable playback speed) ──────────────────────
+  // Range: 0.5 (half-speed) to 1.5 (1.5× fast). Default 1.0.
+  // Persisted in AsyncStorage. Read live by speakDivinely calls.
+  const [tempo, setTempo] = useState<number>(1.0);
+  const tempoRef = useRef<number>(1.0);
+
+  // ── Wake-word toggle ──────────────────────────────────────────────
+  // OFF by default — wake-word listening means the mic is always
+  // live, which has battery + privacy implications. User explicitly
+  // turns it on for hands-free activation via "Hey Sakha".
+  const [wakeWordEnabled, setWakeWordEnabled] = useState<boolean>(false);
   // Auto-clear the preview-state after the voice finishes. Each
   // greeting is < 3s; this is a UX guard in case the playback's onDone
   // doesn't fire (e.g. cloud failure → fallthrough to on-device which
   // doesn't go through cloudSpeak's status update).
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Provider-status diagnostic. Pinged from /api/voice/providers/status
+  // on screen mount. Surfaces "Sarvam not configured" warnings so the
+  // user can see WHY their paid voice isn't being used — without this,
+  // a misconfigured Render env var produces silent on-device-fallback
+  // playback that's indistinguishable from "voices sound weird".
+  const [providerWarnings, setProviderWarnings] = useState<readonly string[]>(
+    [],
+  );
 
   // Hydrate the persisted pick on mount. Idempotent.
   useEffect(() => {
@@ -211,6 +272,35 @@ export default function VoiceCompanionScreen() {
       if (!mounted) return;
       setSelectedVoiceId(id);
       selectedVoiceRef.current = id;
+    })();
+    // Hydrate tempo + wake-word preferences. Both are best-effort.
+    void (async () => {
+      const t = await loadCompanionTempo();
+      if (!mounted) return;
+      setTempo(t);
+      tempoRef.current = t;
+    })();
+    void (async () => {
+      const w = await loadCompanionWakeWord();
+      if (!mounted) return;
+      setWakeWordEnabled(w);
+    })();
+    // Best-effort fetch of provider status. Don't gate the screen on it.
+    void (async () => {
+      try {
+        const { API_CONFIG } = await import('@kiaanverse/api');
+        const r = await fetch(
+          `${API_CONFIG.baseURL}/api/voice/providers/status`,
+        );
+        if (!r.ok) return;
+        const data: { warnings?: readonly string[] } = await r.json();
+        if (!mounted) return;
+        if (Array.isArray(data.warnings)) {
+          setProviderWarnings(data.warnings);
+        }
+      } catch {
+        // Best-effort; absence of warnings is the silent-OK case.
+      }
     })();
     return () => {
       mounted = false;
@@ -277,6 +367,22 @@ export default function VoiceCompanionScreen() {
     },
     [previewingVoiceId, handleStopPreview],
   );
+
+  // Tempo slider handler — persists + updates ref so the next
+  // speakDivinely call picks up the new value immediately.
+  const handleTempoChange = useCallback((next: number) => {
+    const clamped = Math.max(0.5, Math.min(1.5, next));
+    setTempo(clamped);
+    tempoRef.current = clamped;
+    void saveCompanionTempo(clamped);
+  }, []);
+
+  // Wake-word toggle handler — persists the preference and switches
+  // the useWakeWord listener on/off via state.
+  const handleWakeWordToggle = useCallback((next: boolean) => {
+    setWakeWordEnabled(next);
+    void saveCompanionWakeWord(next);
+  }, []);
 
   // Session-active flag — tracks whether the user has tapped "Tap to
   // begin" without yet tapping "End session". Determines whether we
@@ -419,6 +525,10 @@ export default function VoiceCompanionScreen() {
         // in-flight clip is cancelled before this cloudVoiceId would
         // route the next one.
         cloudVoiceId: selectedVoiceRef.current,
+        // User-controlled tempo. Read live from ref so slider changes
+        // take effect on the very next utterance without re-rendering
+        // the callback.
+        tempo: tempoRef.current,
         getAccessToken: readAccessToken,
         onDone: onSpeechFinished,
         // A transient TTS hiccup (cloud fetch failure, decode error,
@@ -466,6 +576,24 @@ export default function VoiceCompanionScreen() {
     sessionActiveRef.current = true;
     void dictation.start();
   }, [userId, dictation, ensureMicPermission]);
+
+  // Wake-word listener — fires handleStart when "Hey Sakha" is heard.
+  // Only active while the toggle is on AND session is idle (no point
+  // listening for wake during an active session — they're already
+  // talking to Sakha).
+  useWakeWord({
+    enabled: wakeWordEnabled && state === 'idle',
+    onWake: handleStart,
+    onError: (code, message) => {
+      // Surface hard wake-word errors (e.g. permission denied) so
+      // the user knows the toggle silently failed.
+      if (code === 'PERMISSION_DENIED') {
+        setStartError(message);
+        setWakeWordEnabled(false);
+        void saveCompanionWakeWord(false);
+      }
+    },
+  });
 
   const handleStop = useCallback(() => {
     // Universal "end session" button: stops whatever's currently
@@ -553,8 +681,11 @@ export default function VoiceCompanionScreen() {
       ) : null}
 
       <View style={styles.canvas}>
-        <SacredGeometry size={360} />
-        <Shankha size={170} />
+        {/* The Shankha PNG asset includes its own mandala backdrop
+            (see ``assets/shankha/shankha-mandala.png``), so we no
+            longer need a separate SacredGeometry layer. One Image
+            component renders the complete divine composition. */}
+        <Shankha size={200} />
       </View>
 
       <View style={styles.bottomBar}>
@@ -565,6 +696,19 @@ export default function VoiceCompanionScreen() {
             picked voice persists across launches. */}
         {!isActive ? (
           <View style={styles.voicePickerWrap}>
+            {/* Provider-status warnings — surface backend
+                misconfiguration so the user knows WHY a paid voice
+                might be falling through to on-device fallback.
+                Otherwise "voices sound weird" is opaque. */}
+            {providerWarnings.length > 0 ? (
+              <View style={styles.providerWarningWrap}>
+                {providerWarnings.map((w, i) => (
+                  <Text key={i} style={styles.providerWarningText}>
+                    ⚠  {w}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
             <Text style={styles.voicePickerLabel}>{t('vcVoicePickerLabel')}</Text>
             <ScrollView
               horizontal
@@ -630,6 +774,76 @@ export default function VoiceCompanionScreen() {
                 (v) => v.backendVoiceId === selectedVoiceId,
               )?.description ?? ''}
             </Text>
+
+            {/* Tempo control — 5-step slider 0.5× / 0.75× / 1.0× /
+                1.25× / 1.5×. Discrete steps instead of continuous
+                because (a) the cache key includes tempo so each step
+                is a separate cached clip — fewer steps = better cache
+                hit rate, (b) on-device + cloud TTS rate semantics
+                cluster naturally around these values. */}
+            <View style={styles.tempoWrap}>
+              <Text style={styles.tempoLabel}>TEMPO</Text>
+              <View style={styles.tempoRow}>
+                {[0.5, 0.75, 1.0, 1.25, 1.5].map((t) => {
+                  const selected = Math.abs(tempo - t) < 0.01;
+                  return (
+                    <Pressable
+                      key={t}
+                      onPress={() => handleTempoChange(t)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Tempo ${t}x`}
+                      accessibilityState={{ selected }}
+                      style={[
+                        styles.tempoPill,
+                        selected ? styles.tempoPillActive : null,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tempoPillText,
+                          selected ? styles.tempoPillTextActive : null,
+                        ]}
+                      >
+                        {t === 1.0 ? '1×' : `${t}×`}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Wake-word toggle — opt-in hands-free activation.
+                When on, the mic listens for "Hey Sakha" / "Sakha" and
+                auto-starts the session on match. OFF by default
+                because always-on mic has battery + privacy cost. */}
+            <View style={styles.wakeRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.wakeLabel}>HEY SAKHA — WAKE WORD</Text>
+                <Text style={styles.wakeHint}>
+                  {wakeWordEnabled
+                    ? 'Listening. Say "Hey Sakha" to begin.'
+                    : 'Tap to enable hands-free activation.'}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => handleWakeWordToggle(!wakeWordEnabled)}
+                accessibilityRole="switch"
+                accessibilityLabel="Wake word listening"
+                accessibilityState={{ checked: wakeWordEnabled }}
+                style={[
+                  styles.wakeSwitch,
+                  wakeWordEnabled ? styles.wakeSwitchOn : null,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.wakeKnob,
+                    wakeWordEnabled ? styles.wakeKnobOn : null,
+                  ]}
+                />
+              </Pressable>
+            </View>
+
             {/* Universal stop affordance — visible whenever ANY voice
                 is previewing. Cancels both the in-flight fetch and
                 the playing audio (cloudStop now actually aborts). */}
@@ -816,6 +1030,91 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     fontSize: 12,
   },
+  tempoWrap: {
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.sm,
+    alignItems: 'center',
+  },
+  tempoLabel: {
+    ...Type.caption,
+    color: Color.textTertiary,
+    fontSize: 10,
+    letterSpacing: 1.6,
+    marginBottom: 6,
+  },
+  tempoRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  tempoPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(212,160,23,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.30)',
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  tempoPillActive: {
+    backgroundColor: 'rgba(212,160,23,0.30)',
+    borderColor: 'rgba(212,160,23,0.85)',
+  },
+  tempoPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#D4A017',
+  },
+  tempoPillTextActive: {
+    color: '#FCD34D',
+  },
+  wakeRow: {
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  wakeLabel: {
+    ...Type.caption,
+    color: Color.textSecondary,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    fontWeight: '600',
+  },
+  wakeHint: {
+    ...Type.caption,
+    color: Color.textTertiary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  wakeSwitch: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.20)',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  wakeSwitchOn: {
+    backgroundColor: 'rgba(34,197,94,0.35)',
+    borderColor: 'rgba(34,197,94,0.85)',
+  },
+  wakeKnob: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#9CA3AF',
+    transform: [{ translateX: 0 }],
+  },
+  wakeKnobOn: {
+    backgroundColor: '#22c55e',
+    transform: [{ translateX: 20 }],
+  },
   stopPreviewBtn: {
     marginTop: Spacing.sm,
     paddingVertical: 6,
@@ -831,5 +1130,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.4,
+  },
+  // Provider-status warnings — amber/orange to read as "actionable
+  // diagnostic", not as a hard error. One row per warning string.
+  providerWarningWrap: {
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    gap: 4,
+  },
+  providerWarningText: {
+    ...Type.caption,
+    color: '#E8A547',
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
   },
 });
