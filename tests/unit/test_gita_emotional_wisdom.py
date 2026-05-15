@@ -99,7 +99,7 @@ class TestGetEmotionalWisdom:
         """Should return WisdomResult objects for a valid mapped emotion."""
         mock_db = AsyncMock()
         domain_results = [
-            _make_wisdom_result("2.47", 5.0, "You have a right to perform your prescribed duties"),
+            _make_wisdom_result("2.47", 5.0, "Thy business is with the action only"),
             _make_wisdom_result("2.48", 4.0, "Perform your duty equipoised"),
         ]
         enemy_results = [

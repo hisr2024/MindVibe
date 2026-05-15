@@ -777,7 +777,7 @@ The implementation exceeds the quantum coherence standards:
 
 ---
 
-*"You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions." - Bhagavad Gita 2.47*
+*"Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached." — Bhagavad Gita 2.47 (Besant 1905, PD)*
 
 *This code was written with nishkama karma (detached action) for the well-being of all.*
 

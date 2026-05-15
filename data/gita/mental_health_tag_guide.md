@@ -51,7 +51,7 @@ Application: Validates the difficulty of managing anxiety while offering hope th
 ```
 सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज
 ```
-Translation: "Abandon all varieties of dharmas and just surrender unto Me alone."
+Translation: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins." (Besant 1905, PD)
 Application: Letting go of all worries through spiritual surrender.
 
 **Clinical Context:**

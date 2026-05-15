@@ -282,9 +282,9 @@ class OfflineWisdomEngine:
             "theme": "moha",
             "wisdom": (
                 "When Arjuna was overwhelmed by confusion, Krishna gave him the "
-                "supreme instruction: 'Abandon all varieties of dharma and simply "
-                "surrender unto Me. I shall deliver you from all sinful reactions. "
-                "Do not fear' (18.66). In moments of deep confusion, seek the "
+                "supreme instruction: 'Abandoning all duties, come unto Me alone "
+                "for shelter; sorrow not, I will liberate thee from all sins' "
+                "(18.66). In moments of deep confusion, seek the "
                 "guidance of one who has realized the Truth (4.34). The light of "
                 "knowledge destroys the darkness of ignorance."
             ),

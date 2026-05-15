@@ -310,7 +310,7 @@ def generate_viyoga_fallback(
     if not teachings:
         teachings = [{
             "ref": "BG 2.47",
-            "text": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action.",
+            "text": "Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached.",
             "principle": "Nishkama Karma",
         }]
 

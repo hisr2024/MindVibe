@@ -398,8 +398,8 @@ carry. One concrete step: choose the single most important thing to
 practice today. Give it everything. Then walk away clean."
 
 Gita Verse:
-BG 2.47 — "You have a right to perform your prescribed duty, but you are
-not entitled to the fruits of action."
+BG 2.47 — "Thy business is with the action only, never with its fruits;
+so let not the fruit of action be thy motive, nor be thou to inaction attached."
 
 Compliance Check:
 1. Identity detached from role? YES — Awareness separated from the performance review.

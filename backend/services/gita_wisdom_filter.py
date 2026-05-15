@@ -149,7 +149,7 @@ TOOL_CORE_TEACHINGS = {
     },
     WisdomTool.VIYOGA: {
         "primary_verse": "BG 2.47",
-        "teaching": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action.",
+        "teaching": "Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached.",
         "concepts": [
             "karma", "nishkama", "phala", "samatva", "vairagya", "karma yoga",
             "atman", "prakriti", "sakshi bhava", "ahamkara", "phala tyaga",
@@ -175,7 +175,7 @@ TOOL_CORE_TEACHINGS = {
     },
     WisdomTool.KARMA_RESET: {
         "primary_verse": "BG 18.66",
-        "teaching": "Abandon all varieties of dharmas and surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear.",
+        "teaching": "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins.",
         "concepts": ["karma", "kshama", "pratyavekshanam", "dharma", "prayaschitta"],
         "keywords": ["repair", "forgive", "amend", "intention", "action", "heal", "restore"],
     },
