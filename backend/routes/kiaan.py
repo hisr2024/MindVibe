@@ -29,9 +29,8 @@ from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.services.ai_provider import (
     AIProviderError,
     AIProviderNotConfigured,
-    call_kiaan_ai,
 )
-from backend.services.kiaan_wisdom_helper import compose_kiaan_system_prompt
+from backend.services.kiaan_grounded_ai import call_kiaan_ai_grounded
 
 logger = logging.getLogger(__name__)
 
@@ -125,15 +124,26 @@ async def _run_ai(
     gita_verse: dict[str, Any] | None = None,
     system_override: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Call the AI provider grounded in Wisdom Core, modern-secular framing.
+    """Call the AI provider through the Wisdom-Core-gated pipeline.
 
-    When ``db`` is provided and the caller has *not* shipped its own
-    ``system_override``, this composes a system prompt = persona-version
-    1.2.0 (modern-secular text persona) + retrieved verses block from
-    :class:`backend.services.wisdom_core.WisdomCore` (static + dynamic
-    corpus, effectiveness-weighted). That replaces the legacy Krishna-
-    flavoured constant in :mod:`backend.services.ai_provider` for every
-    chat + tool request routed here.
+    Delegates to :func:`backend.services.kiaan_grounded_ai.call_kiaan_ai_grounded`,
+    which enforces the three-stage invariant the codebase commits to for
+    every user-facing KIAAN response:
+
+      * **Pre-LLM:** when ``db`` is provided and the caller has *not*
+        shipped its own ``system_override``, the system prompt is composed
+        by Wisdom Core — persona-version 1.2.0 (modern-secular text
+        persona) + retrieved verses block from
+        :class:`backend.services.wisdom_core.WisdomCore` (static + dynamic
+        corpus, effectiveness-weighted) + ``gita_practical_wisdom`` modern
+        implementation. That replaces the legacy Krishna-flavoured
+        constant in :mod:`backend.services.ai_provider`.
+      * **LLM:** routed by the configured ``AI_PROVIDER`` via
+        :func:`call_kiaan_ai`.
+      * **Post-LLM:** the response passes through
+        :class:`backend.services.gita_wisdom_filter.GitaWisdomFilter`,
+        which validates Gita grounding and enhances when the wisdom
+        score is low.
 
     Returns ``(response_text, verses)`` so the caller can echo verse
     refs back to the client (Android already parses them from the
@@ -145,26 +155,17 @@ async def _run_ai(
     upstream failures surface as 502 (bad gateway). Validation errors from
     the provider layer become 400.
     """
-    verses: list[dict[str, Any]] = []
-    if db is not None and not (system_override and system_override.strip()):
-        composed, verses = await compose_kiaan_system_prompt(
-            db=db,
-            query=message,
-            tool_name=tool_name,
-            user_id=user_id,
-        )
-        if composed:
-            system_override = composed
-
     try:
-        text = await call_kiaan_ai(
+        grounded = await call_kiaan_ai_grounded(
             message=message,
+            db=db,
+            user_id=user_id,
+            tool_name=tool_name,
             conversation_history=history or [],
             gita_verse=gita_verse,
-            tool_name=tool_name,
             system_override=system_override,
         )
-        return text, verses
+        return grounded.text, grounded.verses
     except AIProviderNotConfigured as exc:
         logger.error("KIAAN AI not configured: %s", exc)
         raise HTTPException(

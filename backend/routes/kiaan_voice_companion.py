@@ -1314,6 +1314,46 @@ async def send_voice_companion_message(
             )
             ai_tier = "fallback"
 
+    # ── POST-LLM Gita Wisdom Filter (per IMPROVEMENT_ROADMAP.md P0 §1) ──
+    # Closes the WisdomCore-bypass that AUDIT_CACHE_FRAMEWORK.md Part 3
+    # flagged on this REST voice route. The curated Divine-Friend system
+    # prompt remains untouched (it already injects Wisdom Core verses via
+    # `wisdom_text`); this is a defence-in-depth post-LLM gate that
+    # validates Gita grounding and enhances the response when the wisdom
+    # score is low. Skipped on cache hits and on the canned fallback (the
+    # last-resort string is already Gita-grounded and routing it through
+    # the filter just adds latency).
+    if response_text and ai_tier not in ("cache", "fallback"):
+        try:
+            from backend.services.kiaan_grounded_ai import filter_voice_response
+
+            filtered_text, filter_telemetry = await filter_voice_response(
+                raw_text=response_text,
+                user_message=body.message,
+                tool_name=None,  # voice companion is "general" in filter terms
+            )
+            if filter_telemetry.get("filter_applied"):
+                response_text = filtered_text
+                # Surface filter telemetry for the existing wisdom-delivery
+                # learning loop. Treat enhancement as a signal that the
+                # curated wisdom anchor we shipped above was sufficient
+                # (low_wisdom_score => filter had to add anchors).
+                wisdom_used = wisdom_used or {}
+                wisdom_used.setdefault("filter", {
+                    "wisdom_score": filter_telemetry.get("wisdom_score", 0.0),
+                    "is_gita_grounded": filter_telemetry.get(
+                        "is_gita_grounded", False
+                    ),
+                    "enhancement_applied": filter_telemetry.get(
+                        "enhancement_applied", False
+                    ),
+                })
+        except Exception as filter_err:
+            # Filter failure must never block a voice response.
+            logger.warning(
+                "VoiceCompanion: post-LLM Gita filter skipped: %s", filter_err
+            )
+
     # Save companion response
     response_time_ms = (time.monotonic() - start_time) * 1000
     companion_msg = CompanionMessage(
