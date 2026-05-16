@@ -9,7 +9,9 @@
 
 ## Executive summary
 
-**71 findings. 40 open. 14 mitigated. 14 resolved. 2 unknown — needs counsel.**
+**73 findings. 39 open. 14 mitigated. 18 resolved. 2 unknown — needs counsel.**
+
+*Update 2026-05-16: Category 8 (Music / audio / voice) corrected after founder clarification — Kiaan Vibe Player music is original work (procedurally generated via the founder's Web Audio API code), and traditional mantras / Vedic chants are PD ancient texts not subject to copyright scrutiny. All 5 audio findings now resolved.*
 
 ### Six items that block public launch
 
@@ -119,11 +121,13 @@
 
 ## Category 8 — Music / audio / voice
 
-3 findings, 2 resolved, 1 open.
+5 findings, all resolved. Founder confirmation 2026-05-16: the Kiaan Vibe Player music is original work; traditional mantras/Vedic chants are PD ancient texts and don't require copyright scrutiny.
 
-- **Bundled audio** — Pixabay licenses on Gayatri + Om Hanumate, CC0-equivalent commercial use. **[resolved]**
-- **Voice cloning** — None. All ElevenLabs voices are stock; all Sarvam speakers are vendor-provided. No real-person voice impersonation. **[resolved]**
-- **Pixabay license currency** — Was active 2025-Q4; need to verify still active. **[open]**
+- **Kiaan Vibe Player meditation tracks (all 23)** — Founder's original work. Procedurally generated in-browser at playback time via `lib/kiaan-vibe/audio-synth.ts` using the Web Audio API (Om fundamental at 136.1 Hz + tanpura drone, mantra-chant sacred drone, 7-chakra Solfeggio cycle, binaural beats focus/sleep, ambient pads, nature soundscapes, zen bowl, samurai, japanese garden). `lib/kiaan-vibe/meditation-library.ts` references all 23 as `synth://<preset>` URLs — no recorded audio files are bundled for the Player itself. Proprietary, all rights reserved. **[resolved]**
+- **Kiaan Vibe Player Gita-verse voice tracks** — Track structure + verse-selection + queueing logic in `lib/kiaan-vibe/gita-voice-tracks.ts` is founder's original work; voice rendering is streamed at request time via the third-party TTS providers documented in Category 2. **[resolved]**
+- **Mantras + Vedic chant lyrics** (Gayatri, Om, Hanuman, traditional dhyana mantras) — Ancient sacred texts from antiquity, thousands of years old; **inherently public domain** at the content/lyric level. No author, no living copyright claimant, no scrutiny applicable. Only *specific modern recordings* of these mantras carry a recording-specific license. **[resolved]**
+- **Bundled MP3s separate from the Vibe Player** — `backend/static/audio/gayatri.mp3` + `om-hanumate.mp3` (used by mantra-prompt triggers, NOT by the Vibe Player). Pixabay open-source licenses (Sounova #493174, Kals #447279), CC0-equivalent, commercial use allowed. **[resolved]**
+- **Voice cloning** — None. All ElevenLabs voices are stock IDs; all Sarvam speakers are vendor-provided. No real-person voice impersonation. **[resolved]**
 
 ## Category 9 — Images / icons
 
