@@ -161,7 +161,7 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 style={styles.insufficientSub}
               >
                 {entriesNeeded > 0
-                  ? t('kxInsufficientNeedFmt', { count: entriesNeeded })
+                  ? t('kxInsufficientNeedFmt', { count: String(entriesNeeded) })
                   : t('kxInsufficientFallback')}
               </Text>
               <GoldenButton
@@ -308,8 +308,8 @@ export default function KarmalytixScreen(): React.JSX.Element {
                 style={styles.cardLabel}
               >
                 {t('kxCardGitaEchoFmt', {
-                  chapter: mirror.gita_echo.chapter ?? '',
-                  verse: mirror.gita_echo.verse ?? '',
+                  chapter: String(mirror.gita_echo.chapter ?? ''),
+                  verse: String(mirror.gita_echo.verse ?? ''),
                 })}
               </Text>
               <Text

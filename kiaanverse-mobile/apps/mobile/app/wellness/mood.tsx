@@ -311,11 +311,11 @@ function InsightsSection(): React.JSX.Element | null {
           ]}
         >
           <Text variant="bodySmall" color={c.textPrimary}>
-            {t('moodDominantFmt', { mood: dominant[0], count: dominant[1] })}
+            {t('moodDominantFmt', { mood: String(dominant[0]), count: String(dominant[1]) })}
           </Text>
           {streak > 1 ? (
             <Text variant="caption" color={c.textSecondary}>
-              {t('moodStreakFmt', { count: streak })}
+              {t('moodStreakFmt', { count: String(streak) })}
             </Text>
           ) : null}
         </View>

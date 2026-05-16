@@ -46,14 +46,34 @@ export const PRIDE_PINK = '#EC4899'; // Mada
 // ---------------------------------------------------------------------------
 
 export const colors = {
-  /** Primary gold scale — brand accent, CTAs, highlights. Use sparingly. */
+  /** Primary gold scale — brand accent, CTAs, highlights. Use sparingly.
+   *  400/600 interpolated between adjacent shades for consumers that
+   *  expect the full 100→900 ladder. */
   primary: {
     900: '#3D2B00',
     700: '#8B6914',
+    600: '#A88216',  // between 500 and 700
     500: DIVINE_GOLD,
+    400: '#E2AE2C',  // between 300 and 500
     300: GOLD_BRIGHT,
     200: GOLD_SOFT,
     100: '#FFF8DC',
+  },
+
+  /** Neutral grayscale ladder — for body text, borders, dividers on the
+   *  cosmic-void backdrop. Maps to the text/background hierarchy above
+   *  so screens that ask for `neutral[50..900]` get sensible values. */
+  neutral: {
+    50: SACRED_WHITE,         // brightest text
+    100: '#E3DCC9',
+    200: '#C8BFA8',
+    300: TEXT_SECONDARY,
+    400: '#8C7E63',
+    500: TEXT_MUTED,
+    600: '#54493D',
+    700: '#3A3228',
+    800: '#241F1A',
+    900: COSMIC_VOID,
   },
 
   /** Background layers — darkest cosmic void to highest temple shadow */

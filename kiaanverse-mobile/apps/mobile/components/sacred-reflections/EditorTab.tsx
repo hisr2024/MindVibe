@@ -361,12 +361,12 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           style={styles.wordCount}
         >
           {isRecording
-            ? t('editorWordRecordingFmt', { seconds: durationSeconds })
+            ? t('editorWordRecordingFmt', { seconds: String(durationSeconds) })
             : voiceStatus === 'transcribing'
               ? t('editorWordTranscribing')
               : wordCount === 0
                 ? t('editorWordBegin')
-                : t('editorWordCountFmt', { count: wordCount })}
+                : t('editorWordCountFmt', { count: String(wordCount) })}
         </Text>
 
         {/* ---- Tag chips ---- */}

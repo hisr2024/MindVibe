@@ -21,6 +21,7 @@ import {
   StyleSheet,
   View,
   type GestureResponderEvent,
+  type StyleProp,
   type ViewStyle,
 } from 'react-native';
 import Animated, {
@@ -57,10 +58,11 @@ export interface SacredCardProps {
   readonly onPress?: ((event: GestureResponderEvent) => void) | undefined;
   /** Disable the Pressable variant's interaction. @default false */
   readonly disabled?: boolean;
-  /** Optional style override for the outer card surface. */
-  readonly style?: ViewStyle;
+  /** Optional style override for the outer card surface. Accepts either
+   *  a single ViewStyle or an array of ViewStyles (RN flatten semantics). */
+  readonly style?: StyleProp<ViewStyle>;
   /** Optional style override for the inner content wrapper. */
-  readonly contentStyle?: ViewStyle;
+  readonly contentStyle?: StyleProp<ViewStyle>;
   /** Test identifier for E2E testing. */
   readonly testID?: string;
   /** Accessibility label (Pressable variant). */

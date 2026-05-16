@@ -75,23 +75,23 @@ export type ListenButtonVariant = 'inline' | 'secondary' | 'primary';
 
 export interface ListenButtonProps {
   /** Single text to speak. Use this OR `segments`, not both. */
-  readonly text?: string;
+  readonly text?: string | undefined;
   /** Multiple segments played back-to-back. Use this for verses. */
-  readonly segments?: readonly ListenSegment[];
+  readonly segments?: readonly ListenSegment[] | undefined;
   /** Default language for the single-text path. Defaults to 'en-IN'. */
-  readonly language?: string;
+  readonly language?: string | undefined;
   /** Default rate for the single-text path. Defaults to 0.95. */
-  readonly rate?: number;
+  readonly rate?: number | undefined;
   /** Visual variant. Defaults to 'inline' (compact). */
-  readonly variant?: ListenButtonVariant;
+  readonly variant?: ListenButtonVariant | undefined;
   /** Override the idle label. Defaults to 'Listen'. */
-  readonly idleLabel?: string;
+  readonly idleLabel?: string | undefined;
   /** Override the playing label. Defaults to 'Stop'. */
-  readonly playingLabel?: string;
+  readonly playingLabel?: string | undefined;
   /** Accessibility label for the idle state. Computed if absent. */
-  readonly accessibilityLabelIdle?: string;
+  readonly accessibilityLabelIdle?: string | undefined;
   /** Accessibility label for the playing state. Computed if absent. */
-  readonly accessibilityLabelPlaying?: string;
+  readonly accessibilityLabelPlaying?: string | undefined;
 }
 
 export function ListenButton({
@@ -160,6 +160,10 @@ export function ListenButton({
         return;
       }
       const seg = playList[index];
+      if (!seg) {
+        setIsSpeaking(false);
+        return;
+      }
       const lang = seg.language ?? 'en-IN';
       void speakDivinely(seg.text, lang, {
         getAccessToken: readAccessToken,

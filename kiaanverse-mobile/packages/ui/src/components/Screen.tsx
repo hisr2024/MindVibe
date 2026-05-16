@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { View, ScrollView, StyleSheet, type ViewStyle } from 'react-native';
+import { View, ScrollView, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/useTheme';
 import { spacing } from '../tokens/spacing';
@@ -17,8 +17,8 @@ interface ScreenProps {
   children: React.ReactNode;
   scroll?: boolean;
   edges?: Edge[];
-  style?: ViewStyle;
-  contentContainerStyle?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
   /** Enable cosmic gradient background. @default false */
   gradient?: boolean;
   /** Gradient variant when `gradient` is true. @default 'cosmic' */

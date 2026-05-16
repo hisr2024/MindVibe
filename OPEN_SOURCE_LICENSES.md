@@ -87,8 +87,33 @@ npm ls --all --json | jq -r '
 ' | sort -u | grep -i lgpl
 ```
 
-If the output is empty, no action is required. Current status:
-**TODO: run the audit and record results in the next PR.**
+**Audit result (run on commit `6a43b1f`, Node 22, npm 10):**
+
+| Package | License | Provenance |
+|---|---|---|
+| `@img/sharp-libvips-linux-x64@1.2.4` | LGPL-3.0-or-later | Sharp's pre-built libvips native binary for glibc Linux. Upstream: https://github.com/libvips/libvips |
+| `@img/sharp-libvips-linuxmusl-x64@1.2.4` | LGPL-3.0-or-later | Same for musl libc (Alpine). Upstream: https://github.com/libvips/libvips |
+
+Both are transitive deps of `sharp@*`, which Next.js's `next/image`
+pulls in for server-side image optimization. The libvips binary is
+**dynamically loaded** by Sharp at runtime (not statically linked into
+our application code), so LGPL §6 is satisfied without us re-licensing
+any of our own code. We comply with LGPL by:
+
+1. Listing both packages here with their upstream source URL.
+2. Not modifying the bundled libvips binary — we ship the upstream
+   `@img/sharp-libvips-*` package unchanged.
+3. Pointing users to https://github.com/libvips/libvips for the
+   underlying library source (this is the LGPL "source code
+   availability" obligation; we are not redistributing libvips itself,
+   only depending on it through Sharp).
+
+If we ever statically compile libvips into a single binary (e.g. for a
+self-contained executable), we'd need to follow LGPL §4: ship object
+code or relinkable form of our app alongside the modified libvips, OR
+switch to a more permissive image library (Sharp's `vips-cpp` API is
+optional; alternatives are `imagemagick-native` (Apache-2.0) or
+`@squoosh/lib` (Apache-2.0)).
 
 ## Major Python dependencies
 
