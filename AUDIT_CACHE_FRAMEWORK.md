@@ -2,9 +2,10 @@
 
 **Audit date:** 2026-05-16
 **Branch:** `claude/audit-cache-framework-CpSVN`
-**Scope:** Two targeted questions
+**Scope:** Three targeted questions
 1. Is a response cache present and serving identical-question replies across **all** sacred tools, KIAAN Chat, Sakha Chat, and Voice Companion?
 2. As an *Independent AI Framework*, how much of KIAAN is present and functional?
+3. Do OpenAI / Sarvam / Anthropic answer **only** through WisdomCore (Static + Dynamic wisdom)?
 
 Method: full-tree scan (server `backend/`, web `app/` + `lib/` + `components/`, mobile `kiaanverse-mobile/`, service workers in `public/`, tests, prompts, data).
 
@@ -170,10 +171,104 @@ What breaks:
 
 ---
 
-## Summary for the two questions
+---
+
+## PART 3 — DO OPENAI / SARVAM / ANTHROPIC ANSWER ONLY THROUGH WISDOMCORE?
+
+### Claim
+
+> "OpenAI, Sarvam, Anthropic — they answer only through WisdomCore, which contains Dynamic wisdom and Static wisdom."
+
+### Verdict
+
+**PARTIALLY TRUE — architecturally real, route-by-route enforced, not globally gated.** WisdomCore exists as actual code (not marketing). Static and Dynamic wisdom are named, distinct, persisted modules. The Gita Wisdom Filter is wired into several routes as a post-LLM gate. **However**, the two highest-traffic surfaces — `/api/kiaan/chat` and `/api/sakha/chat` — go through `backend/services/ai_provider.py` which calls the providers **raw**, with no WisdomCore composition and no post-filter. So the claim holds for the *engineered sacred tools* (Ardha, Viyoga, Karma Reset, Sambandh Dharma, Emotional Reset) but **not for the main KIAAN/Sakha chat path** nor for KarmaLytix's direct Anthropic call.
+
+### WisdomCore is real — the modules
+
+| File | Role |
+|---|---|
+| `backend/services/wisdom_core.py` | `WisdomCore` class — composes **Static** (gita_verses table, 700+ verses) **+ Dynamic** (`learned_wisdom` table, populated by the 24/7 daemon). Provides `.search()`, `.get_by_domain()`, `.get_by_theme()`. |
+| `backend/services/dynamic_wisdom_corpus.py` | Dynamic wisdom orchestrator — the runtime/learned layer. |
+| `backend/services/relationship_wisdom_core.py:1173` | Domain-specific wrapper (relationship); lazy-loads `WisdomCore`. |
+| `backend/services/gita_wisdom_filter.py:418` | `filter_response()` — **post-LLM gate** that validates Gita grounding and enhances if missing. |
+| `backend/services/karmalytix_reflection.py:32` | `STATIC_WISDOM_CORE` dict — 16 curated verses (static fallback). |
+| `backend/services/emotional_reset_service.py:173` | Explicit doc: "Tier 0: WisdomCore (full 700-verse Gita corpus + dynamic learned wisdom)". |
+
+So **Static and Dynamic are not marketing terms** — they correspond to:
+- **Static** → `gita_verses` table (immutable corpus) + `STATIC_WISDOM_CORE` constants.
+- **Dynamic** → `learned_wisdom` table + `dynamic_wisdom_corpus.py` (daemon-populated, runtime-evolving).
+
+### Per-provider gating (verified by grep)
+
+| Provider | Static-wisdom inject pre-LLM | Dynamic-wisdom inject pre-LLM | `filter_response()` post-LLM | Production status |
+|---|---|---|---|---|
+| **OpenAI** | ✅ on engineered tools | ✅ on engineered tools | ✅ wired in `provider_manager.py:279`, `openai_optimizer.py:489`, `emotional_reset_service.py:392`, `routes/ardha.py:591`, `routes/viyoga.py:799`, `routes/karma_reset.py:244`, `routes/sambandh_dharma_engine.py:547` | **Gated on those routes** |
+| **Sarvam** | ✅ via `RelationshipWisdomCore` on Sambandh Dharma | ✅ same | ✅ same routes when Sarvam selected | **Gated on Sambandh Dharma**, untested elsewhere |
+| **Anthropic** | ❌ none in `ai_provider._call_anthropic()` (`ai_provider.py:301–340`) | ❌ none | ❌ no `filter_response()` on this path | **Not gated**. KarmaLytix calls Anthropic directly (`karmalytix_reflection.py:164` → POST to `api.anthropic.com`) with **only** the `STATIC_WISDOM_CORE` constant — **no dynamic layer**. |
+
+Confirmed by `grep -n "filter_response" backend/services/ai_provider.py` → **zero matches**. The main provider router does not gate at all.
+
+### Routes that DO honour the claim (WisdomCore + filter applied)
+
+- `routes/ardha.py:591` — `gita_filter.filter_response(...)` after LLM.
+- `routes/viyoga.py:799` — same.
+- `routes/karma_reset.py:244` — same.
+- `routes/sambandh_dharma_engine.py:547` — `wisdom_filter.filter_response(...)` after LLM; pre-LLM uses `RelationshipWisdomCore`.
+- `services/emotional_reset_service.py:392` — same.
+- `services/provider_manager.py:279` — newer abstract pipeline applies it for every provider that routes through it.
+
+### Routes that BYPASS the claim (raw LLM, no WisdomCore)
+
+| Route | File:line | Evidence |
+|---|---|---|
+| `/api/kiaan/chat` (KIAAN Chat) | `backend/routes/kiaan.py:215` → `ai_provider.call_kiaan_ai` | No `wisdom_core` / `filter_response` reference anywhere in `ai_provider.py` |
+| `/api/sakha/chat` (Sakha Chat) | `backend/routes/kiaan.py:227` | Same path |
+| `/api/kiaan/voice-companion/message` | `backend/routes/kiaan_voice_companion.py` | Streams provider response, no post-filter |
+| `/api/guidance/*` | `backend/routes/guidance.py` | Direct OpenAI, no filter |
+| `/api/chat/messages` (legacy) | `backend/routes/chat.py` | Raw provider |
+| `/api/karmalytix/reflect` (Anthropic) | `backend/services/karmalytix_reflection.py:164` | Direct POST to `api.anthropic.com/v1/messages` with only `STATIC_WISDOM_CORE` (no dynamic layer, no filter) |
+
+### Anthropic specifically
+
+- Wiring exists (`ai_provider.py:301–340`, `karmalytix_reflection.py`), but:
+  - `ai_provider._call_anthropic` is only reached when `AI_PROVIDER=anthropic` env is set — described in code comment as "(future)" (`ai_provider.py:11`).
+  - When invoked, it is **un-gated**: no WisdomCore pre-compose, no `filter_response()` post.
+  - `karmalytix_reflection.py` calls Anthropic directly with **static-only** wisdom; no dynamic learned-wisdom lookup on that path.
+- Net: of the three providers, Anthropic is the **least** WisdomCore-gated — closer to **0–10 % compliance** with the claim.
+
+### Static vs Dynamic — real or marketing?
+
+**Real.** Both layers are named, persisted, and code-referenced:
+
+- Static: `gita_verses` (SQL table), `STATIC_WISDOM_CORE` constant (`karmalytix_reflection.py:32`), `GitaWisdomCore` (`gita_ai_analyzer.py:210`).
+- Dynamic: `learned_wisdom` (SQL table), `dynamic_wisdom_corpus.py`, the 24/7 daemon referenced in `wisdom_core.py:20`.
+
+The composition step lives in `WisdomCore.search()` (`backend/services/wisdom_core.py`), which is the de-facto router between the two layers.
+
+### Compliance summary
+
+| Provider | Routes that obey "only through WisdomCore" | Routes that bypass | Approximate compliance |
+|---|---|---|---|
+| OpenAI | Ardha, Viyoga, Karma Reset, Sambandh Dharma, Emotional Reset, anything via `provider_manager` | KIAAN Chat, Sakha Chat, Voice Companion, Guidance, legacy Chat | **~60–70 %** |
+| Sarvam | Sambandh Dharma (full), provider_manager-routed calls | Voice TTS pipeline does not filter text either way | **~50–60 %** (limited surface area, but compliant where used) |
+| Anthropic | ~none in production | KarmaLytix (static-only), `AI_PROVIDER=anthropic` future path | **~5–10 %** |
+
+### To make the claim fully true
+
+1. Move the `filter_response()` + WisdomCore-compose step **inside** `ai_provider.call_kiaan_ai()` (`backend/services/ai_provider.py:135`) so every consumer inherits gating — not per-route.
+2. Add the same wrapper to `_call_anthropic` and to `karmalytix_reflection.py` (Anthropic's direct call).
+3. Wire `dynamic_wisdom_corpus` into the Anthropic path; today only `STATIC_WISDOM_CORE` flows into it.
+4. Add a CI test that asserts every provider call site is preceded by a WisdomCore lookup and followed by `filter_response()` — currently this contract is enforced by convention, not by code.
+
+---
+
+## Summary for the three questions
 
 1. **Cache for identical questions across all sacred tools, KIAAN Chat, Sakha Chat, Voice Companion?**
    Only Voice Companion. KIAAN Chat, Sakha Chat, and the six sacred-tool routes do **not** consult any cache. The Redis layer is defined but not invoked on those paths. Matching is exact-text (lower + strip + SHA-256), not semantic. Cache is global, not per-user. Coverage of the claim: **~11 % of the named surfaces.**
 
 2. **KIAAN as an Independent AI Framework — how present, how functional?**
    Present: provider router, prompt library, Gita corpus + retrieval, memory, safety/Gita-grounding filter, voice pipeline, caching, metrics, unit tests, health endpoints. Functional in production: chat (via OpenAI), tools (via OpenAI), voice (STT local-capable, TTS remote), memory, safety. Functional **without external LLMs**: ~40 % — verses, templates, memory, local STT. The "Independent AI" label is **aspirational**; today KIAAN is a richly opinionated, spiritually-grounded wrapper around commercial LLMs.
+
+3. **Do OpenAI / Sarvam / Anthropic answer only through WisdomCore (Static + Dynamic)?**
+   WisdomCore exists as real, named code (`backend/services/wisdom_core.py`), and Static (`gita_verses` table) vs Dynamic (`learned_wisdom` table + `dynamic_wisdom_corpus.py`) is a genuine architectural separation, not marketing. The `gita_wisdom_filter.filter_response()` post-LLM gate is wired into Ardha, Viyoga, Karma Reset, Sambandh Dharma, Emotional Reset, and the new `provider_manager` pipeline — so on those routes the claim holds. **But** the main KIAAN Chat / Sakha Chat path (`backend/services/ai_provider.py:135`) calls OpenAI/Sarvam/Anthropic **raw** with no WisdomCore compose and no post-filter. KarmaLytix calls Anthropic directly with **static-only** wisdom (no dynamic layer). Estimated compliance: **OpenAI ~60–70 %, Sarvam ~50–60 %, Anthropic ~5–10 %**. To make the claim universally true, the WisdomCore gating must move from per-route convention into `ai_provider.call_kiaan_ai()` itself so every provider call inherits it.
