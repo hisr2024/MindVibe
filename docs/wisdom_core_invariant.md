@@ -55,6 +55,34 @@ Every provider call goes through this pipeline:
                 └──────────────────────────────────────┘
 ```
 
+## The unified Wisdom Core retriever
+
+`backend/services/wisdom/retrieve.py::retrieve_wisdom` is the **single
+data path** for Wisdom Core retrieval. Both the chat / sacred-tool
+stack and the voice companion stack delegate here. Three-tier pipeline:
+
+1. **Dynamic effectiveness pick** — when `user_id` + `mood` present and
+   `include_dynamic=True`, the `DynamicWisdomCorpus` picks the Gita
+   verse historically most effective for this user/mood.
+2. **Static Gita search** — `WisdomCore.search` with
+   `include_learned=False` (strict-Gita guarantee).
+3. **Practical wisdom enrichment** — `gita_practical_wisdom` table
+   rows per verse (modern scenario, micro-practice, action steps).
+   Chat opts in; voice opts out (its TTS shape doesn't render this).
+
+Returns a `WisdomBundle(verses, mood, sources, is_mock)` — never
+raises, never blocks the caller. Voice opts into a mock catalogue
+fallback (`allow_mock_catalogue=True`) so the orchestrator always has
+something to seed the prompt with; chat leaves it False and falls back
+to persona-only when retrieval is empty.
+
+Adapters around it:
+
+* `kiaan_wisdom_helper.compose_kiaan_system_prompt` — projects the
+  bundle into the persona's `RETRIEVED VERSES` block (chat / tools).
+* `voice/retrieval_and_fallback.retrieve_verses_for_turn` — projects
+  into `RetrievedVerse` for the orchestrator (voice).
+
 ## The single entry point
 
 `backend/services/kiaan_grounded_ai.call_kiaan_ai_grounded` is the
