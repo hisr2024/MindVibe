@@ -407,8 +407,11 @@ async def verify_seeding() -> dict[str, Any]:
         # Check each chapter
         for chapter in range(1, 19):
             expected_count = int(CHAPTER_INFO[chapter]["verses"])
+            # Parameterized to avoid SQL-injection patterns even though
+            # `chapter` is a controlled integer from `range(1, 19)`.
             result = await session.execute(
-                text(f"SELECT COUNT(*) FROM gita_verses WHERE chapter = {chapter}")
+                text("SELECT COUNT(*) FROM gita_verses WHERE chapter = :chapter"),
+                {"chapter": chapter},
             )
             actual_count = result.scalar() or 0
 

@@ -17,6 +17,7 @@
 
 import React, { useCallback } from 'react';
 import {
+  type ColorValue,
   Pressable,
   StyleSheet,
   View,
@@ -126,7 +127,7 @@ function SacredCardInner({
     <>
       {/* Gold top shimmer — sibling of body to avoid clipping. */}
       <LinearGradient
-        colors={SACRED_TOP_SHIMMER as unknown as string[]}
+        colors={SACRED_TOP_SHIMMER as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         style={styles.topShimmer}
@@ -134,7 +135,7 @@ function SacredCardInner({
       />
       {/* Palette-tinted body gradient (was hardcoded indigo). */}
       <LinearGradient
-        colors={cardBody as unknown as string[]}
+        colors={cardBody as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[styles.body, contentStyle]}

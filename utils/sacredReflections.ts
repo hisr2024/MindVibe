@@ -1,10 +1,29 @@
 /**
- * Sacred Reflections utility - Store KIAAN's wisdom messages
- * Uses same encryption approach as journal entries
+ * Sacred Reflections utility — store KIAAN's wisdom messages encrypted at rest in localStorage.
+ *
+ * SECURITY POSTURE
+ * ----------------
+ * This is **local-device** encryption, NOT end-to-end encryption. The
+ * AES-GCM key is generated on the device and stored in localStorage on
+ * the same device. The goal is "obscured on-disk storage" — a thief or
+ * other process reading the browser's localStorage file sees ciphertext,
+ * not plaintext. It is NOT a defence against:
+ *   - XSS in this app (script can call getEncryptionKey() and decrypt)
+ *   - Physical device access with running browser (open DevTools, read key)
+ *   - Cross-device sync (reflections written on device A cannot be read on B)
+ *
+ * Marketing/UX must therefore describe this as "encrypted at rest on
+ * your device" — never as "end-to-end encrypted". The TERMS.md privacy
+ * section reflects this. True E2E would require a user-derived key
+ * (passphrase) which we deliberately don't ask for (UX cost too high
+ * for the value).
+ *
+ * The two constants below are localStorage KEY NAMES, not the
+ * encryption key itself. Renaming for clarity.
  */
 
-const SACRED_REFLECTIONS_KEY = 'kiaan_sacred_reflections'
-const SACRED_REFLECTIONS_ENCRYPTION_KEY = 'kiaan_sacred_reflections_key'
+const SACRED_REFLECTIONS_STORAGE_KEY = 'kiaan_sacred_reflections'
+const SACRED_REFLECTIONS_AES_KEY_STORAGE_KEY = 'kiaan_sacred_reflections_key'
 
 // Encryption helpers (same as journal encryption in page.tsx)
 function toBase64(buffer: ArrayBuffer | Uint8Array) {
@@ -18,11 +37,11 @@ function fromBase64(value: string) {
 }
 
 async function getEncryptionKey() {
-  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(SACRED_REFLECTIONS_ENCRYPTION_KEY) : null
+  const cached = typeof window !== 'undefined' ? window.localStorage.getItem(SACRED_REFLECTIONS_AES_KEY_STORAGE_KEY) : null
   const rawKey = cached ? fromBase64(cached) : crypto.getRandomValues(new Uint8Array(32))
 
   if (!cached && typeof window !== 'undefined') {
-    window.localStorage.setItem(SACRED_REFLECTIONS_ENCRYPTION_KEY, toBase64(rawKey))
+    window.localStorage.setItem(SACRED_REFLECTIONS_AES_KEY_STORAGE_KEY, toBase64(rawKey))
   }
 
   return crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt', 'decrypt'])
@@ -78,7 +97,7 @@ export async function saveSacredReflection(
     const trimmed = reflections.slice(0, 100)
     
     const encrypted = await encryptText(JSON.stringify(trimmed))
-    localStorage.setItem(SACRED_REFLECTIONS_KEY, encrypted)
+    localStorage.setItem(SACRED_REFLECTIONS_STORAGE_KEY, encrypted)
     
     return true
   } catch (error) {
@@ -94,7 +113,7 @@ export async function getSacredReflections(): Promise<SacredReflection[]> {
   try {
     if (typeof window === 'undefined') return []
     
-    const stored = localStorage.getItem(SACRED_REFLECTIONS_KEY)
+    const stored = localStorage.getItem(SACRED_REFLECTIONS_STORAGE_KEY)
     if (!stored) return []
     
     const decrypted = await decryptText(stored)
@@ -118,7 +137,7 @@ export async function deleteSacredReflection(id: string): Promise<boolean> {
     const filtered = reflections.filter(r => r.id !== id)
     
     const encrypted = await encryptText(JSON.stringify(filtered))
-    localStorage.setItem(SACRED_REFLECTIONS_KEY, encrypted)
+    localStorage.setItem(SACRED_REFLECTIONS_STORAGE_KEY, encrypted)
     
     return true
   } catch (error) {
@@ -132,6 +151,6 @@ export async function deleteSacredReflection(id: string): Promise<boolean> {
  */
 export function clearSacredReflections(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(SACRED_REFLECTIONS_KEY)
+    localStorage.removeItem(SACRED_REFLECTIONS_STORAGE_KEY)
   }
 }

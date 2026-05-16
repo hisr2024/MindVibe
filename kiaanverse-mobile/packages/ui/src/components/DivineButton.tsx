@@ -12,6 +12,7 @@
 
 import React, { useCallback } from 'react';
 import {
+  type ColorValue,
   ActivityIndicator,
   Pressable,
   StyleSheet,
@@ -144,7 +145,7 @@ function DivineButtonInner({
     >
       {variant === 'primary' ? (
         <LinearGradient
-          colors={KRISHNA_AURA_GRADIENT as unknown as string[]}
+          colors={KRISHNA_AURA_GRADIENT as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={styles.fill}
