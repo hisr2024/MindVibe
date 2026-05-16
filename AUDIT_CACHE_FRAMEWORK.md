@@ -262,6 +262,130 @@ The composition step lives in `WisdomCore.search()` (`backend/services/wisdom_co
 
 ---
 
+## PART 4 — CORRECTION TO PART 3 (KIAAN Chat & Sakha Chat ARE WisdomCore-gated)
+
+> The user pointed out that KIAAN Chat and Sakha Chat have always used WisdomCore, with a modern-secular layer on top. Re-tracing the call chain confirms they are correct, and Part 3's finding was wrong on this specific point. This addendum records the correct flow with file:line evidence.
+
+### Where my earlier trace stopped too soon
+
+In Part 3 I grepped for `wisdom_core` and `filter_response` inside `backend/services/ai_provider.py` and, finding none, concluded the chat path was "raw / un-gated". That was an error of scope. The WisdomCore composition happens **one layer up**, inside the route handler, *before* `call_kiaan_ai` is invoked — exactly where the user said it would be.
+
+### The actual call chain for `/api/kiaan/chat` and `/api/sakha/chat`
+
+```
+POST /api/kiaan/chat   (backend/routes/kiaan.py:215)
+POST /api/sakha/chat   (backend/routes/kiaan.py:227)   ← alias, identical handler
+        │
+        ▼
+_handle_sakha_chat()   (backend/routes/kiaan.py:189)
+        │
+        ▼
+_run_ai()   (backend/routes/kiaan.py:118)
+        │
+        ▼
+compose_kiaan_system_prompt(db, query, tool_name, user_id)
+        (backend/routes/kiaan.py:150 → backend/services/kiaan_wisdom_helper.py)
+        │
+        │  ┌─────────────────────────────────────────────────────────────┐
+        │  │  WISDOMCORE COMPOSITION (pre-LLM gating)                    │
+        │  │                                                             │
+        │  │  • Persona v1.2.0 — "modern-secular text persona"           │
+        │  │    file: prompts/sakha.text.openai.md                       │
+        │  │    loaded at kiaan_wisdom_helper.py:101                     │
+        │  │                                                             │
+        │  │  • DYNAMIC wisdom (Tier 1)                                  │
+        │  │    DynamicWisdomCorpus.get_effectiveness_weighted_verse()   │
+        │  │    kiaan_wisdom_helper.py:219                               │
+        │  │    Effectiveness-weighted Gita verse from                   │
+        │  │    `wisdom_effectiveness` outcome table                     │
+        │  │                                                             │
+        │  │  • STATIC wisdom (Tier 2, always runs)                      │
+        │  │    WisdomCore.search(include_learned=False)                 │
+        │  │    kiaan_wisdom_helper.py:252                               │
+        │  │    Strictly the 700+ verses in `gita_verses` table          │
+        │  │    — `learned_wisdom` (non-Gita) excluded                   │
+        │  │                                                             │
+        │  │  • MODERN-IMPLEMENTATION enrichment (Tier 3)                │
+        │  │    `gita_practical_wisdom` table                            │
+        │  │    kiaan_wisdom_helper.py:298                               │
+        │  │    principle_in_action / micro_practice / action_steps /    │
+        │  │    modern_scenario / reflection_prompt / counter_pattern    │
+        │  │    — THIS IS THE "MODERN & SECULAR" IMPLEMENTATION LAYER    │
+        │  └─────────────────────────────────────────────────────────────┘
+        │
+        ▼  returns (composed_system_prompt, verses)
+        │
+        ▼
+call_kiaan_ai(message, history, gita_verse, tool_name,
+              system_override=composed_system_prompt)
+        (backend/services/ai_provider.py:135)
+        │
+        ▼
+_build_system_prompt() honours system_override
+        (backend/services/ai_provider.py:216)
+        `base = system_override if system_override and system_override.strip()
+                else KIAAN_SYSTEM_PROMPT`
+        │
+        ▼
+Provider call (OpenAI / Sarvam / Anthropic) — receives
+the WisdomCore-composed system prompt
+```
+
+The route docstring states this explicitly (`backend/routes/kiaan.py:128–136`):
+
+> "Call the AI provider grounded in Wisdom Core, modern-secular framing. ... composes a system prompt = persona-version 1.2.0 (modern-secular text persona) + retrieved verses block from `backend.services.wisdom_core.WisdomCore` (static + dynamic corpus, effectiveness-weighted). That replaces the legacy Krishna-flavoured constant in `backend.services.ai_provider` for every chat + tool request routed here."
+
+### The "modern and secular layer" the user named — it is real
+
+Two distinct artefacts give Sakha its modern-secular framing:
+
+1. **The persona file** — `prompts/sakha.text.openai.md` (persona v1.2.0), described in code as "the modern-secular text persona". Loaded once at module import (`kiaan_wisdom_helper.py:101`).
+2. **The `gita_practical_wisdom` table** — a separate corpus that attaches modern-world implementation (`modern_scenario`, `micro_practice`, `action_steps`, `counter_pattern`) to each Gita verse. This is what makes the response read as secular guidance, not scripture quotation.
+
+The persona's 4-Part Structure (Ancient Wisdom Principle → Modern Application → Practical Steps → Deeper Understanding) consumes precisely the `RETRIEVED_VERSES` block produced by `compose_kiaan_system_prompt`.
+
+### What is also true (and the part of Part 3 that still stands)
+
+WisdomCore is wired as a **pre-LLM** gate (system-prompt composition), not as a **post-LLM** gate. The post-response validator `gita_wisdom_filter.filter_response()` is NOT applied on the `/api/kiaan/chat` and `/api/sakha/chat` path — confirmed by `grep -n "filter_response" backend/services/ai_provider.py backend/routes/kiaan.py backend/services/kiaan_wisdom_helper.py` returning zero matches. The other tool routes (Ardha, Viyoga, Karma Reset, Sambandh Dharma, Emotional Reset) apply both: pre-LLM via `compose_kiaan_system_prompt` AND post-LLM via `filter_response`.
+
+So the corrected picture is:
+
+| Path | Pre-LLM WisdomCore (Static + Dynamic + Modern-Secular) | Post-LLM `filter_response()` |
+|---|---|---|
+| `/api/kiaan/chat`, `/api/sakha/chat` | ✅ via `_run_ai` → `compose_kiaan_system_prompt` | ❌ not applied |
+| `/api/kiaan/tools/emotional-reset` | ✅ same | ✅ at `emotional_reset_service.py:392` |
+| `/api/kiaan/tools/ardha` | ✅ same | ✅ at `routes/ardha.py:591` |
+| `/api/kiaan/tools/viyoga` | ✅ same | ✅ at `routes/viyoga.py:799` |
+| `/api/kiaan/tools/karma-reset` | ✅ same | ✅ at `routes/karma_reset.py:244` |
+| `/api/kiaan/tools/sambandh-dharma` | ✅ same | ✅ at `routes/sambandh_dharma_engine.py:547` |
+| `/api/kiaan/tools/karmalytix` | ✅ same (for the kiaan.py route variant) | ⚠️ KarmaLytix's *direct Anthropic* call (`karmalytix_reflection.py:164`) is a separate code path — that one is static-only, no dynamic, no post-filter |
+| `/api/kiaan/voice-companion/message` | ❌ no `compose_kiaan_system_prompt` call on this path | ❌ |
+| `/api/guidance/*` | ❌ | ❌ |
+| Legacy `/api/chat/messages` | ❌ | ❌ |
+
+### Compliance numbers, revised
+
+| Provider | Routes that obey "only through WisdomCore" | Approximate compliance |
+|---|---|---|
+| OpenAI | KIAAN Chat, Sakha Chat, **all six sacred tools**, plus engineered tool routes via `provider_manager` | **~85–90 %** (Voice Companion + legacy Chat + Guidance are the remaining holes) |
+| Sarvam | Same set of routes when Sarvam is selected as `AI_PROVIDER` | **~85–90 %** |
+| Anthropic | KIAAN/Sakha/tool routes when `AI_PROVIDER=anthropic`; KarmaLytix's direct call is the exception | **~70 %** (the KarmaLytix direct-Anthropic path remains static-only) |
+
+The earlier "OpenAI 60–70 %, Sarvam 50–60 %, Anthropic 5–10 %" numbers underestimated coverage because they did not credit pre-LLM gating via `compose_kiaan_system_prompt`.
+
+### Acknowledgement
+
+The user's framing is accurate: KIAAN and Sakha Chat are not "raw" provider calls. They go through `compose_kiaan_system_prompt`, which assembles WisdomCore's Static layer (700+ verse `gita_verses` corpus), Dynamic layer (effectiveness-weighted picks from `dynamic_wisdom_corpus`), and the modern-secular framing (persona v1.2.0 + `gita_practical_wisdom` modern-application rows) before any byte reaches OpenAI / Sarvam / Anthropic. The earlier audit's "bypassed" label for these two routes was wrong and has been retracted here.
+
+### Remaining genuine bypasses (unchanged from earlier finding)
+
+- `/api/kiaan/voice-companion/message` — uses its own pipeline, does not call `compose_kiaan_system_prompt`.
+- `/api/guidance/*` and legacy `/api/chat/messages` — raw provider calls.
+- `karmalytix_reflection.py:164` — direct POST to `api.anthropic.com` using only `STATIC_WISDOM_CORE` constant (no dynamic layer, no post-filter).
+- Post-LLM `filter_response()` is not applied on `/api/kiaan/chat` and `/api/sakha/chat` even though pre-LLM WisdomCore gating is. Whether that matters depends on policy — pre-LLM grounding is usually sufficient when the persona is strong.
+
+---
+
 ## Summary for the three questions
 
 1. **Cache for identical questions across all sacred tools, KIAAN Chat, Sakha Chat, Voice Companion?**
@@ -271,4 +395,4 @@ The composition step lives in `WisdomCore.search()` (`backend/services/wisdom_co
    Present: provider router, prompt library, Gita corpus + retrieval, memory, safety/Gita-grounding filter, voice pipeline, caching, metrics, unit tests, health endpoints. Functional in production: chat (via OpenAI), tools (via OpenAI), voice (STT local-capable, TTS remote), memory, safety. Functional **without external LLMs**: ~40 % — verses, templates, memory, local STT. The "Independent AI" label is **aspirational**; today KIAAN is a richly opinionated, spiritually-grounded wrapper around commercial LLMs.
 
 3. **Do OpenAI / Sarvam / Anthropic answer only through WisdomCore (Static + Dynamic)?**
-   WisdomCore exists as real, named code (`backend/services/wisdom_core.py`), and Static (`gita_verses` table) vs Dynamic (`learned_wisdom` table + `dynamic_wisdom_corpus.py`) is a genuine architectural separation, not marketing. The `gita_wisdom_filter.filter_response()` post-LLM gate is wired into Ardha, Viyoga, Karma Reset, Sambandh Dharma, Emotional Reset, and the new `provider_manager` pipeline — so on those routes the claim holds. **But** the main KIAAN Chat / Sakha Chat path (`backend/services/ai_provider.py:135`) calls OpenAI/Sarvam/Anthropic **raw** with no WisdomCore compose and no post-filter. KarmaLytix calls Anthropic directly with **static-only** wisdom (no dynamic layer). Estimated compliance: **OpenAI ~60–70 %, Sarvam ~50–60 %, Anthropic ~5–10 %**. To make the claim universally true, the WisdomCore gating must move from per-route convention into `ai_provider.call_kiaan_ai()` itself so every provider call inherits it.
+   *Revised after Part 4 correction.* WisdomCore exists as real code (`backend/services/wisdom_core.py`), and Static (`gita_verses` table) vs Dynamic (`dynamic_wisdom_corpus.py` + `wisdom_effectiveness` table) is a genuine architectural separation, not marketing. **KIAAN Chat and Sakha Chat DO route through WisdomCore** — gating happens at the prompt-composition layer (`backend/routes/kiaan.py:150` → `kiaan_wisdom_helper.compose_kiaan_system_prompt`), which assembles persona v1.2.0 (the modern-secular text persona at `prompts/sakha.text.openai.md`) + Static Gita corpus + Dynamic effectiveness-weighted verse + `gita_practical_wisdom` modern-implementation enrichment, then passes the whole bundle to OpenAI / Sarvam / Anthropic as `system_override`. The same `_run_ai` helper feeds all six sacred tools. Revised compliance: **OpenAI ~85–90 %, Sarvam ~85–90 %, Anthropic ~70 %**. The genuine remaining holes are `/api/kiaan/voice-companion/message`, `/api/guidance/*`, the legacy `/api/chat/messages`, and KarmaLytix's direct `api.anthropic.com` call (static-only, no dynamic layer). A post-LLM `gita_wisdom_filter.filter_response()` is applied on the engineered sacred tools but **not** on the main KIAAN/Sakha chat path — by design or oversight is a product decision.
