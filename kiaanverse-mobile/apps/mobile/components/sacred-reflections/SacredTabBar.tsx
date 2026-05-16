@@ -96,6 +96,13 @@ const styles = StyleSheet.create({
   sanskrit: {
     fontSize: 15,
     marginBottom: 2,
+    // Devanagari (लेख / पठन / बोध / तिथि) must use a font with proper
+    // Indic shaping tables. Falling back from a Latin-only display font
+    // (Outfit / Cormorant) onto the system fallback drops OpenType GSUB/GPOS
+    // rules — Android then renders combining matras in the wrong positions
+    // (े drops, ो becomes ा, तिथि shuffles to तिाथ). NotoSansDevanagari is
+    // bundled in useSacredFonts.ts; using it directly fixes the shaping.
+    fontFamily: 'NotoSansDevanagari-Regular',
   },
   label: {
     fontSize: 10,
