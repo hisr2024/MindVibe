@@ -89,3 +89,7 @@ data/sambandh_dharma/store.json
 # Allow Sambandh Dharma (Relationship Compass) index (required for production)
 !data/sambandh_dharma/gita_index.sqlite
 *.egg-info/
+
+# Playwright test artifacts
+playwright-report/
+test-results/
