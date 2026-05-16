@@ -5,7 +5,7 @@ This module provides the complete ARDHA reframing framework, mapping each of the
 
 ARDHA Pillars:
   A - Atma Distinction (Right Identity) — BG 2.16, 2.20, 2.13, 13.33, etc.
-  R - Raga-Dvesha Diagnosis (Attachment Scan) — BG 2.62-63, 3.37, 5.3, etc.
+  R - Raga-Dvesha Reflection (Attachment Scan) — BG 2.62-63, 3.37, 5.3, etc.
   D - Dharma Alignment (Right Action) — BG 2.47, 3.35, 18.47, etc.
   H - Hrdaya Samatvam (Equanimity of Heart) — BG 2.38, 2.48, 6.7, etc.
   A - Arpana (Offering & Surrender) — BG 18.66, 9.27, 12.6-7, etc.
@@ -171,12 +171,12 @@ ATMA_DISTINCTION = ArdhaPillar(
 
 
 # ---------------------------------------------------------------------------
-# PILLAR R: Raga-Dvesha Diagnosis — Attachment Scan
+# PILLAR R: Raga-Dvesha Reflection — Attachment Scan
 # ---------------------------------------------------------------------------
 
 RAGA_DVESHA_DIAGNOSIS = ArdhaPillar(
     code="R",
-    name="Raga-Dvesha Diagnosis",
+    name="Raga-Dvesha Reflection",
     sanskrit_name="Raga-Dvesha Pariksha",
     core_teaching=(
         "Disturbance arises from attachment (raga) and aversion (dvesha). "
@@ -741,7 +741,7 @@ ARDHA_COMPLIANCE_TESTS: list[dict[str, str]] = [
         "test": "Is action performed without craving?",
         "pillar": "R",
         "fail_indicator": "User is still driven by raga (desire) or dvesha (aversion).",
-        "correction": "Apply Raga-Dvesha Diagnosis: name the attachment.",
+        "correction": "Apply Raga-Dvesha Reflection: name the attachment.",
     },
     {
         "test": "Is outcome mentally released?",
@@ -772,7 +772,7 @@ ARDHA_COMPLIANCE_TESTS: list[dict[str, str]] = [
 ARDHA_KEY_VERSE_REFS: list[tuple[int, int]] = [
     # Atma Distinction
     (2, 16), (2, 20), (2, 13), (13, 33), (5, 8),
-    # Raga-Dvesha Diagnosis
+    # Raga-Dvesha Reflection
     (2, 62), (2, 63), (3, 37), (5, 3), (3, 34),
     # Dharma Alignment
     (2, 47), (3, 35), (18, 47), (3, 8), (3, 19),
