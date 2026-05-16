@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Duruma göre rehberlik"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "İlişki Pusulası",
       "description": "İlişki rehberliği"
     },
@@ -106,7 +106,7 @@
     "viyog": "Anlık tepkiyi yatıştır",
     "ardha": "Algıyı yeniden çerçevele",
     "kiaan": "Konuşarak çöz",
-    "relationship-compass": "İlişkisel netlikte yol al",
+    "sambandh-dharma": "İlişkisel netlikte yol al",
     "journey": "Uzun vadeli iç sükûneti eğit"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Duraklama Modu",
     "ardha": "Netlik Modu",
     "kiaan": "Yol Arkadaşı Modu",
-    "relationship-compass": "İlişki Modu",
+    "sambandh-dharma": "İlişki Modu",
     "journey": "Eğitim Modu"
   }
 }

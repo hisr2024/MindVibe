@@ -17,7 +17,7 @@ cards / hero sections pick them up automatically.
 
 ## Enemy hero images (`enemies/`)
 
-Referenced by `ENEMY_INFO[*].heroImage` in `types/journeyEngine.types.ts`.
+Referenced by `ENEMY_INFO[*].heroImage` in `types/karmaMarg.types.ts`.
 
 | File             | Enemy   | Colour    | Prompt                                                                                                                                                                                                                                                                              |
 |------------------|---------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -33,7 +33,7 @@ Referenced by `ENEMY_INFO[*].heroImage` in `types/journeyEngine.types.ts`.
 Referenced by the mobile `JourneyTemplateCard` as
 `/images/journeys/templates/journey-${template.id}.webp`.
 
-Provide one WebP per template ID (the backend `/api/journey-engine/templates`
+Provide one WebP per template ID (the backend `/api/karma-marg/templates`
 response returns the canonical `id`). If a file is missing the card shows
 the enemy gradient + `EnemySVGFallback` symbol instead — no broken image.
 

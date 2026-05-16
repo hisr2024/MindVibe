@@ -1,4 +1,4 @@
-"""Relationship Wisdom Core - Full 700+ Verse Corpus + Dynamic Wisdom for Relationship Compass.
+"""Relationship Wisdom Core - Full 700+ Verse Corpus + Dynamic Wisdom for Sambandh Dharma (Relationship Compass).
 
 This module is the relationship-specific wisdom layer that sits on top of
 the general WisdomCore. It provides:

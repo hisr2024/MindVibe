@@ -88,11 +88,11 @@ For every additional language file under `data/gita/` (and any future addition),
 
 ---
 
-## 3. Relationship Compass Corpus
+## 3. Sambandh Dharma (Relationship Compass) Corpus
 
 | Artifact | Source | License | Acquired | Transformation | Owner |
 |---|---|---|---|---|---|
-| `data/relationship_compass/gita_index.sqlite` | Derived from §1 corpus | Inherits §1 + © MindVibe (index structure) | TBD | SQLite FTS index over relationship-relevant verses | engine-team |
+| `data/sambandh_dharma/gita_index.sqlite` | Derived from §1 corpus | Inherits §1 + © MindVibe (index structure) | TBD | SQLite FTS index over relationship-relevant verses | engine-team |
 
 ---
 

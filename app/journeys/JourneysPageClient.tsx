@@ -17,16 +17,16 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useLanguage } from '@/hooks/useLanguage'
 import useAuth from '@/hooks/useAuth'
 import {
-  journeyEngineService,
-  JourneyEngineError,
-} from '@/services/journeyEngineService'
+  karmaMargService,
+  KarmaMargError,
+} from '@/services/karmaMargService'
 import type {
   JourneyTemplate,
   JourneyResponse,
   EnemyProgressResponse,
   EnemyType,
   DashboardResponse,
-} from '@/types/journeyEngine.types'
+} from '@/types/karmaMarg.types'
 import {
   ENEMY_INFO,
   ENEMY_ORDER,
@@ -35,7 +35,7 @@ import {
   getJourneyStatusLabel,
   getJourneyStatusColor,
   getMasteryDescription,
-} from '@/types/journeyEngine.types'
+} from '@/types/karmaMarg.types'
 
 // =============================================================================
 // HELPER: ICON NAME to EMOJI
@@ -543,15 +543,15 @@ export default function JourneysPageClient() {
       setError(null)
       setIsAuthError(false)
 
-      const templatesPromise = journeyEngineService.listTemplates({
+      const templatesPromise = karmaMargService.listTemplates({
         enemy: selectedEnemy || undefined,
         limit: showAllTemplates ? 50 : 6,
       })
 
       let dashboardPromise: Promise<DashboardResponse | null>
       if (isAuthenticated) {
-        dashboardPromise = journeyEngineService.getDashboard().catch((err) => {
-          if (err instanceof JourneyEngineError && err.isAuthError()) {
+        dashboardPromise = karmaMargService.getDashboard().catch((err) => {
+          if (err instanceof KarmaMargError && err.isAuthError()) {
             setIsAuthError(true)
           }
           return null
@@ -573,7 +573,7 @@ export default function JourneysPageClient() {
         setDashboard(dashboardData)
       }
     } catch (err) {
-      if (err instanceof JourneyEngineError) {
+      if (err instanceof KarmaMargError) {
         if (err.isAuthError()) {
           setIsAuthError(true)
           setError('Please sign in to access your journeys.')
@@ -604,11 +604,11 @@ export default function JourneysPageClient() {
     }
     try {
       setStartingJourney(templateId)
-      const journey = await journeyEngineService.startJourney({ template_id: templateId })
+      const journey = await karmaMargService.startJourney({ template_id: templateId })
       triggerHaptic('success')
       router.push(`/journeys/guided/${journey.journey_id}`)
     } catch (err) {
-      const message = err instanceof JourneyEngineError ? err.message : 'Failed to start journey.'
+      const message = err instanceof KarmaMargError ? err.message : 'Failed to start journey.'
       setError(message)
       if (message.toLowerCase().includes('active journeys') && (!dashboard || dashboard.active_journeys.length === 0)) {
         setIsStuckError(true)
@@ -624,14 +624,14 @@ export default function JourneysPageClient() {
     try {
       setIsFixing(true)
       setError(null)
-      const result = await journeyEngineService.fixStuckJourneys()
+      const result = await karmaMargService.fixStuckJourneys()
       triggerHaptic('success')
       setIsStuckError(false)
       await loadData()
       setError(`Fixed! Cleared ${result.orphaned_cleaned || 0} orphaned journeys. You can now start a new journey.`)
       setTimeout(() => setError(null), 5000)
     } catch (err) {
-      setError(err instanceof JourneyEngineError ? err.message : 'Failed to fix stuck journeys.')
+      setError(err instanceof KarmaMargError ? err.message : 'Failed to fix stuck journeys.')
       triggerHaptic('error')
     } finally {
       setIsFixing(false)

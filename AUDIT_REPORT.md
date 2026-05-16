@@ -52,7 +52,7 @@ The MindVibe codebase has a solid architectural foundation with excellent securi
 - **Fix:** Add `samesite="strict"` to all `set_cookie()` calls for `refresh_token` and `access_token`
 
 #### S-05: dangerouslySetInnerHTML in UI Components
-- **Files:** `components/mobile/MobileKiaanChat.tsx:339`, `app/companion/page.tsx:886`, `components/companion/CompanionMoodRing.tsx:276`, `components/seo/BreadcrumbSchema.tsx:70`
+- **Files:** `components/mobile/MobileKiaanChat.tsx:339`, `app/companion/page.tsx:886`, `components/companion/CompanionBhavaMirror.tsx:276`, `components/seo/BreadcrumbSchema.tsx:70`
 - **Impact:** Currently uses hardcoded HTML entities (safe), but pattern is dangerous if data source changes
 - **Fix:** Use Unicode emoji directly or DOMPurify
 
@@ -160,7 +160,7 @@ The MindVibe codebase has a solid architectural foundation with excellent securi
 - **Fix:** Add `selectinload()` to SQLAlchemy queries for relationships
 
 #### B-04: Missing Input Validation on Endpoints
-- **Files:** `backend/routes/journey_engine.py:105` (no `min_length` on reflection), `backend/routes/moods.py:50-82` (no range on score, no max on tags)
+- **Files:** `backend/routes/karma_marg.py:105` (no `min_length` on reflection), `backend/routes/moods.py:50-82` (no range on score, no max on tags)
 - **Impact:** Empty strings saved to DB, invalid scores accepted
 - **Fix:** Add Pydantic field constraints
 
@@ -170,7 +170,7 @@ The MindVibe codebase has a solid architectural foundation with excellent securi
 - **Fix:** Add `logger.error(f"...: {e}", exc_info=True)` before re-raising
 
 #### B-06: Inconsistent Error Response Formats
-- **Files:** `backend/routes/journal.py:77-85` (structured), `backend/routes/voice.py:148` (string), `backend/routes/journey_engine.py:480,555,780` (mixed)
+- **Files:** `backend/routes/journal.py:77-85` (structured), `backend/routes/voice.py:148` (string), `backend/routes/karma_marg.py:480,555,780` (mixed)
 - **Impact:** Frontend error handling is fragile and inconsistent
 - **Fix:** Standardize to `{"error": "code", "message": "description"}`
 

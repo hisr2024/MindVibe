@@ -1,11 +1,80 @@
 # Brand Rename — Decision Brief
 
-**Status:** Awaiting founder decision. No code changes have been made
-based on this brief.
+**Status:** **DECIDED (2026-05-16).** Items #1, #2, #3 executed in
+Phase 1P-Brand (mass-rename PR on branch `claude/check-agent-model-fnkul`).
+Item #4 (MindVibe vs Kiaanverse parent/product split) is deferred —
+operational, not legal, and needs founder-side App Store + TM-counsel work.
 
-The Phase 1N IP audit flagged four brand/naming risks. This brief
-quantifies the blast radius for each rename and recommends an option,
-so you can make all four calls in one sitting.
+## Final names chosen
+
+| # | Risk | OLD name | NEW name (Sanskrit-primary, bracketed English) |
+|---|------|----------|------------------------------------------------|
+| 1 | "Mood Ring" → ? | Mood Ring | **Bhava Mirror (Mood Ring)** — *bhāva* = emotional state |
+| 2 | "Relationship Compass" → ? | Relationship Compass | **Sambandh Dharma (Relationship Compass)** — promotes the existing internal Sanskrit name; spelling unified from `sambandha_dharma` → `sambandh_dharma` |
+| 3 | "Journey Engine" → ? | Journey Engine | **Karma Marg (Karma Journey)** — *karma mārga* = the path of action |
+| 4 | MindVibe vs Kiaanverse | both used today | **Deferred** — see brief item #4 for rationale |
+
+Why bracketed English: the Sanskrit term is the brand identity (distinctive,
+unlikely to TM-collide); the English parenthetical preserves accessibility
+for users who don't yet know the Sanskrit. After ~30 days of in-app
+exposure the English parenthetical can be dropped or moved to tooltips —
+that's a follow-on PR, not this one.
+
+## What changed in this PR
+
+- **Identifiers** (snake_case / camelCase / PascalCase / kebab-case /
+  CONSTANT_CASE) renamed across every TS / TSX / Python / JSON / MD /
+  YAML / TOML file — code references all moved in lockstep.
+- **File and directory paths** moved via `git mv` (history preserved):
+  11 directories + 20 files. Backend services, routes, scripts,
+  components, type files, app routes, API routes, mobile routes.
+- **Display strings** in user-facing surfaces (locale JSONs, README,
+  store-listing copy, dashboard UI, component labels) replaced with
+  the bracketed Sanskrit-primary form.
+- **URL backward-compat** — `next.config.js` adds 308 redirects from
+  every old user-facing route (`/relationship-compass`,
+  `/tools/relationship-compass`, `/m/relationship-compass`,
+  `/journey-engine`, etc.) to the new path. Existing bookmarks and
+  shared links continue to work.
+- **API backward-compat** — `next.config.js` adds `beforeFiles`
+  rewrites that silently proxy `/api/relationship-compass*`,
+  `/api/relationship-compass-engine*`, and `/api/journey-engine*` to
+  the new backend prefixes. Stale mobile clients shipped before this
+  rename continue to function until the minimum-supported build
+  catches up.
+- **Mood Ring** was the smallest surface (13 files, 0 routes, 0 i18n
+  keys). Component file renames: `MoodRing.tsx` →
+  `BhavaMirror.tsx`, `CompanionMoodRing.tsx` →
+  `CompanionBhavaMirror.tsx`. Store-listing copy updated
+  ("Divine Mood Ring" → "Bhava Mirror (Mood Ring)").
+
+## What's deferred to follow-on PRs
+
+- **Non-English locale value translation.** Locale KEYS are renamed
+  in all 47 languages, but the VALUES are still the pre-rename
+  translated copy. Translators need to update each locale's display
+  string to either the bracketed Sanskrit-primary form or a
+  language-appropriate equivalent. Tracked as a single follow-on
+  ticket; not blocking this PR.
+- **Marketing site + App Store listings**: store-listing markdown is
+  updated here, but the actual App Store / Google Play console submissions
+  need founder-side update.
+- **Analytics event names**: events still emit under old names. Renaming
+  events forks historical analytics, so doing it in a separate PR after
+  the analytics team confirms cut-over strategy.
+- **Brand TM filing** (USPTO): file Sambandh Dharma, Karma Marg, Bhava
+  Mirror in NICE classes 9 + 41 + 42. Need counsel, ~$1.5k attorney +
+  $250-500 USPTO fee per mark.
+- **Item #4 (MindVibe vs Kiaanverse)**: requires App Store / Google Play
+  console updates and TM filing decisions; not in scope for this PR.
+
+---
+
+The original analysis (preserved below for audit trail) shows the
+options considered and the alternates the founder did **not** pick.
+Recommendation labels in the tables below reflect the brief author's
+recommendation at decision time, not the final choice — see "Final
+names chosen" table above for the actual picks.
 
 ---
 

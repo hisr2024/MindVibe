@@ -7,7 +7,7 @@
  * with slow ascent, an optional progress indicator slot at top, and
  * AnimatePresence-wrapped content area for smooth transitions.
  *
- * Used by: Viyoga movements, Ardha chambers, Relationship Compass stages
+ * Used by: Viyoga movements, Ardha chambers, Sambandh Dharma (Relationship Compass) stages
  */
 
 import { type ReactNode } from 'react'

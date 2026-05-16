@@ -20,7 +20,7 @@ import { TodayTab } from './tabs/TodayTab'
 import { JourneysTab } from './tabs/JourneysTab'
 import { BattlegroundTab } from './tabs/BattlegroundTab'
 import { WisdomTab } from './tabs/WisdomTab'
-import type { EnemyType } from '@/types/journeyEngine.types'
+import type { EnemyType } from '@/types/karmaMarg.types'
 
 // =============================================================================
 // TYPES

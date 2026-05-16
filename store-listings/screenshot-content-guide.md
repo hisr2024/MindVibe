@@ -42,7 +42,7 @@ This guide defines exactly what UI screens to capture for each screenshot slot a
 **Caption**: "Track Your Inner Journey"
 **Screen to capture**: Divine Mood Check-In component (`DivineMoodCheckIn`)
 - Show the mood selection interface with emoji/mood options
-- Visible: Mood Ring visual or mood selection grid
+- Visible: Bhava Mirror (Mood Ring) visual or mood selection grid
 - Visible: Current streak or last check-in info
 - Visible: Warm, inviting design encouraging check-in
 - **Alternative**: Show mood analytics/trends view with chart over time

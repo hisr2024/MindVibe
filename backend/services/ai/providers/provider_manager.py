@@ -349,7 +349,7 @@ class ProviderManager:
 
         Args:
             messages: Chat messages
-            tool_type: Type of tool (ardha, viyoga, relationship_compass, etc.)
+            tool_type: Type of tool (ardha, viyoga, sambandh_dharma, etc.)
             user_context: Original user input for relevant verse matching
             temperature: Sampling temperature
             max_tokens: Maximum tokens in response

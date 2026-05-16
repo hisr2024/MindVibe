@@ -62,7 +62,7 @@ async def get_db_session():
 
 
 from backend.models import JourneyTemplate, JourneyTemplateStep
-from backend.services.journey_engine.template_generator import (
+from backend.services.karma_marg.template_generator import (
     JourneyTemplateGenerator,
     TemplateGenerationConfig,
     EnemyType,

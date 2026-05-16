@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed — brand rename (Phase 1P-Brand)
+
+Executes the three TM-flagged feature renames from the Phase 1N IP audit
+(see `legal/BRAND_RENAME_DECISION_BRIEF.md` for the full decision record):
+
+- **"Relationship Compass" → "Sambandh Dharma (Relationship Compass)".**
+  Promotes the existing internal Sanskrit name to the public-facing
+  brand. Spelling unified from `sambandha_dharma` (partial pre-rename)
+  to `sambandh_dharma` everywhere. 319 files touched; 11 directories +
+  13 source files moved via `git mv`; 47 locale-language key sets
+  renamed (values still pre-rename copy — translators follow-on).
+- **"Journey Engine" → "Karma Marg (Karma Journey)".**
+  68 files; 2 directories + 5 source files moved.
+- **"Mood Ring" → "Bhava Mirror (Mood Ring)".**
+  13 files; 2 component files renamed (`MoodRing.tsx`,
+  `CompanionMoodRing.tsx`).
+
+### Compatibility
+
+- **Old user-facing URLs continue to work.** `next.config.js` adds 308
+  redirects from every pre-rename route (`/relationship-compass`,
+  `/tools/relationship-compass`, `/m/relationship-compass`,
+  `/journey-engine`, plus their `:path*` variants).
+- **Old API endpoints continue to work for stale mobile clients.**
+  `next.config.js` `beforeFiles` silently proxies
+  `/api/relationship-compass*`, `/api/relationship-compass-engine*`,
+  and `/api/journey-engine*` to the new backend prefixes. Remove these
+  rewrites once the minimum-supported mobile build no longer ships the
+  old endpoints.
+
+### Deferred (tracked, not in this PR)
+
+- Non-English locale display values (translator review needed)
+- App Store / Google Play console listing updates (founder-side)
+- Analytics event renames (separate PR after cut-over strategy)
+- USPTO TM filings for the three new marks
+- Item #4 from the brief (MindVibe vs Kiaanverse parent/product split)
+
 ## [voice-1.0.0] — 2026-04-27
 
 The first release of the **Sakha Voice Companion** — Krishna's voice as

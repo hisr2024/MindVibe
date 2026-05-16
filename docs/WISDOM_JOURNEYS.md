@@ -33,7 +33,7 @@ Wisdom Journeys is MindVibe's AI-powered feature for personalized spiritual grow
 │  └──────────────────────────┬──────────────────────────────────┘│
 │                              │                                   │
 │  ┌──────────────────────────┴───────────────────────────────┐  │
-│  │            Enhanced Journey Engine                        │  │
+│  │            Enhanced Karma Marg (Karma Journey)                        │  │
 │  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐  │  │
 │  │  │ Scheduler    │ │ VersePicker  │ │ StepGenerator    │  │  │
 │  │  └──────────────┘ └──────────────┘ └────────┬─────────┘  │  │

@@ -30,7 +30,7 @@ SANSKRIT VERSE BROWSER
 Explore Bhagavad Gita Sanskrit verses with IAST transliteration and AI-powered contextual reflections. Each verse comes with insights that connect the ancient principle to your present moment. Bookmark favorites and receive daily verse suggestions matched to your mood.
 
 MOOD TRACKING & EMOTIONAL WELLNESS
-Check in with the Divine Mood Ring. Track patterns over time. Kiaanverse suggests Gita-grounded practices and guides emotional resets with breathing exercises, sacred reflections, and guided meditations. All emotional data is fully encrypted.
+Check in with the Bhava Mirror (Bhava Mirror (Mood Ring)). Track patterns over time. Kiaanverse suggests Gita-grounded practices and guides emotional resets with breathing exercises, sacred reflections, and guided meditations. All emotional data is fully encrypted.
 
 SPIRITUAL JOURNEYS
 Embark on structured multi-day growth paths. Master anger, build stillness, discover dharma. Each journey includes daily practices, reflection prompts, and progress tracking — guided by Sakha.
@@ -44,7 +44,7 @@ Heart-to-Heart journaling with end-to-end encryption. Your reflections are fully
 MORE FEATURES:
 - Karma Footprint — visualize spiritual growth
 - Karmic Tree — watch your tree of conscious actions flourish
-- Relationship Compass — navigate bonds with Gita-grounded principles
+- Sambandh Dharma (Relationship Compass) — navigate bonds with Gita-grounded principles
 - Community Circles — connect with fellow seekers
 - Sacred Breathing — guided pranayama
 - Deep Insights — AI spiritual pattern analysis
@@ -66,7 +66,7 @@ Welcome to Kiaanverse — your divine spiritual companion.
 - Sakha AI: Chat with your spiritual guide in 17 languages
 - Bhagavad Gita Sanskrit verse browser with AI-powered contextual reflections
 - Daily Sadhana practice with immersive sacred visuals
-- Mood tracking with the Divine Mood Ring
+- Mood tracking with the Bhava Mirror (Bhava Mirror (Mood Ring))
 - Multi-day spiritual growth journeys
 - End-to-end encrypted Heart-to-Heart journal
 - Karma Footprint & Karmic Tree visualizations

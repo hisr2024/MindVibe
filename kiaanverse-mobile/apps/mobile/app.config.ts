@@ -49,7 +49,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // is handled automatically by EAS (autoIncrement: true in
   // eas.json's production profile).
   //
-  // 1.3.1 shipped the Relationship Compass Android-release crash fix
+  // 1.3.1 shipped the Sambandh Dharma (Relationship Compass) Android-release crash fix
   // (R8 keep rules, Hermes-safe date formatting, numeric SVG props,
   // Hermes-safe regex). 1.3.0 bundled native additions
   // (expo-document-picker, Sakha chat).
@@ -236,7 +236,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           // a fail-safe in case this property is ignored by an older
           // expo-build-properties version. Stripping any of these classes
           // breaks audio output silently in release builds — and, as of
-          // 1.3.1, breaks Relationship Compass on Play Store (the SVG +
+          // 1.3.1, breaks Sambandh Dharma (Relationship Compass) on Play Store (the SVG +
           // Reanimated chambers crash the JNI bridge when their native
           // classes are stripped, which manifests as instant app shutdown
           // the moment the user taps the tool).
@@ -315,7 +315,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             '-keep class kotlinx.coroutines.** { volatile <fields>; }',
             '-dontwarn kotlinx.coroutines.**',
             '',
-            '# react-native-svg (Relationship Compass radar + compass-rose). R8',
+            '# react-native-svg (Sambandh Dharma (Relationship Compass) radar + compass-rose). R8',
             '# strips the Fabric/JSI ViewManager classes because they are loaded',
             '# reflectively from JS — the JS bridge instantiates a native view',
             '# whose class is gone, and the resulting NoClassDefFoundError on',

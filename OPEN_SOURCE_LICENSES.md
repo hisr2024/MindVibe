@@ -140,8 +140,8 @@ in our source).
 - **Kiaanverse**, **KIAAN**, **Sakha**, **Sadhana** as used in this
   product — distinctive Sanskrit-derived neologisms used by Kiaanverse
   / MindVibe.
-- Other product names referenced in our marketing ("Mood Ring",
-  "Relationship Compass", "Journey Engine", "Karma Reset") are
+- Other product names referenced in our marketing ("Bhava Mirror (Mood Ring)",
+  "Sambandh Dharma (Relationship Compass)", "Karma Marg (Karma Journey)", "Karma Reset") are
   descriptive terms. We acknowledge these terms have been used by
   other parties in unrelated wellness products and do not claim
   exclusive rights.

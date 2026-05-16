@@ -2,7 +2,7 @@
 
 ENHANCED v5.0: Deep Gita Compliance with 5 Non-Negotiable Pillars.
 Viyoga now receives deep AI-powered concern analysis BEFORE generating responses,
-enabling truly personalized, situation-specific guidance like Ardha and Relationship Compass.
+enabling truly personalized, situation-specific guidance like Ardha and Sambandh Dharma (Relationship Compass).
 
 v5.0 adds the Five Pillars of True Gita Compliance:
 1. Atman-Prakriti Viveka (Self vs Mind distinction)
@@ -646,7 +646,7 @@ def build_enhanced_viyoga_prompt(
     """Build enhanced message array for Viyoga with deep concern analysis.
 
     This is the key function that makes Viyoga responses personalized like
-    Ardha and Relationship Compass - by injecting the AI analysis of the
+    Ardha and Sambandh Dharma (Relationship Compass) - by injecting the AI analysis of the
     user's specific concern into the prompt.
 
     Args:

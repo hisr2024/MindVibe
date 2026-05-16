@@ -17,7 +17,7 @@ Talk to Sakha, your always-available AI companion inspired by the spirit of the 
 Explore Bhagavad Gita Sanskrit verses with IAST transliteration and contextual AI-powered reflections. Each verse comes with insights that connect the ancient principle to your present moment. Bookmark favorites, track your reading progress, and receive daily verse suggestions matched to your emotional state. (English and Hindi prose reflections written by our editorial team are rolling out across editions — Sanskrit is the canonical anchor.)
 
 𝗠𝗼𝗼𝗱 𝗧𝗿𝗮𝗰𝗸𝗶𝗻𝗴 & 𝗘𝗺𝗼𝘁𝗶𝗼𝗻𝗮𝗹 𝗪𝗲𝗹𝗹𝗻𝗲𝘀𝘀
-Check in daily with the Divine Mood Ring. Track emotional patterns over weeks and months. Kiaanverse identifies trends, suggests Gita-grounded practices, and gently guides you through emotional resets with breathing exercises, sacred reflections, and guided meditations. Your emotional data stays fully encrypted and private.
+Check in daily with the Bhava Mirror (Bhava Mirror (Mood Ring)). Track emotional patterns over weeks and months. Kiaanverse identifies trends, suggests Gita-grounded practices, and gently guides you through emotional resets with breathing exercises, sacred reflections, and guided meditations. Your emotional data stays fully encrypted and private.
 
 𝗦𝗽𝗶𝗿𝗶𝘁𝘂𝗮𝗹 𝗝𝗼𝘂𝗿𝗻𝗲𝘆𝘀
 Embark on structured multi-day spiritual growth paths. Transform anger through Krodha mastery. Build inner stillness with meditation journeys. Discover your dharma with purpose-finding paths. Each journey includes daily practices, reflection prompts, and progress tracking — guided by Sakha every step of the way.
@@ -31,7 +31,7 @@ Write your heart out in a fully encrypted private journal. Heart-to-Heart journa
 𝗠𝗼𝗿𝗲 𝗙𝗲𝗮𝘁𝘂𝗿𝗲𝘀
 • Karma Footprint — visualize your spiritual growth over time
 • Karmic Tree — watch your tree of conscious actions flourish
-• Relationship Compass — navigate relationships with Gita-grounded principles
+• Sambandh Dharma (Relationship Compass) — navigate relationships with Gita-grounded principles
 • Community Circles — connect with fellow seekers
 • Sacred Breathing — guided pranayama exercises
 • Deep Insights — AI-powered analysis of your spiritual patterns

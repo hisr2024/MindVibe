@@ -1,5 +1,5 @@
 """
-Tests for ReflectionEncryption class in journey_engine_enhanced.py
+Tests for ReflectionEncryption class in karma_marg_enhanced.py
 
 This tests the encryption/decryption of spiritual wellness reflections,
 which is critical for GDPR/HIPAA compliance.
@@ -14,17 +14,17 @@ TEST_REFLECTION = "I feel anxious about my meditation practice. Sometimes I wond
 TEST_KEY = "dGVzdC1rZXktZm9yLWVuY3J5cHRpb24tc2hvdWxkLWJlLTMyYnl0ZXM="  # Base64 encoded test key
 
 # Module not yet implemented — skip dependent tests rather than fail on import
-_has_journey_engine_enhanced = False
+_has_karma_marg_enhanced = False
 try:
-    from backend.services.journey_engine_enhanced import ReflectionEncryption  # noqa: F401
-    _has_journey_engine_enhanced = True
+    from backend.services.karma_marg_enhanced import ReflectionEncryption  # noqa: F401
+    _has_karma_marg_enhanced = True
 except ImportError:
     pass
 
-_skip_reason = "backend.services.journey_engine_enhanced not yet implemented"
+_skip_reason = "backend.services.karma_marg_enhanced not yet implemented"
 
 
-@pytest.mark.skipif(not _has_journey_engine_enhanced, reason=_skip_reason)
+@pytest.mark.skipif(not _has_karma_marg_enhanced, reason=_skip_reason)
 class TestReflectionEncryptionInitialization:
     """Tests for ReflectionEncryption initialization."""
 
@@ -33,7 +33,7 @@ class TestReflectionEncryptionInitialization:
         with patch.dict(os.environ, {"ENVIRONMENT": "development", "MINDVIBE_REFLECTION_KEY": ""}, clear=False):
             with patch.dict(os.environ, {"MINDVIBE_REQUIRE_ENCRYPTION": "false"}, clear=False):
                 # Force reimport to reset singleton
-                from backend.services.journey_engine_enhanced import ReflectionEncryption
+                from backend.services.karma_marg_enhanced import ReflectionEncryption
                 ReflectionEncryption._instance = None
 
                 # Should not raise in dev mode
@@ -47,14 +47,14 @@ class TestReflectionEncryptionInitialization:
             "MINDVIBE_REFLECTION_KEY": "",
             "MINDVIBE_REQUIRE_ENCRYPTION": "true"
         }, clear=False):
-            from backend.services.journey_engine_enhanced import ReflectionEncryption
+            from backend.services.karma_marg_enhanced import ReflectionEncryption
             ReflectionEncryption._instance = None
 
             with pytest.raises(RuntimeError, match="Cannot start in production without encryption"):
                 ReflectionEncryption()
 
 
-@pytest.mark.skipif(not _has_journey_engine_enhanced, reason=_skip_reason)
+@pytest.mark.skipif(not _has_karma_marg_enhanced, reason=_skip_reason)
 class TestReflectionEncryptionOperations:
     """Tests for encryption/decryption operations."""
 
@@ -70,7 +70,7 @@ class TestReflectionEncryptionOperations:
             "MINDVIBE_REFLECTION_KEY": key,
             "MINDVIBE_REQUIRE_ENCRYPTION": "false"
         }, clear=False):
-            from backend.services.journey_engine_enhanced import ReflectionEncryption
+            from backend.services.karma_marg_enhanced import ReflectionEncryption
             ReflectionEncryption._instance = None
             return ReflectionEncryption()
 
@@ -125,7 +125,7 @@ class TestReflectionEncryptionOperations:
             "MINDVIBE_REFLECTION_KEY": different_key,
             "MINDVIBE_REQUIRE_ENCRYPTION": "false"
         }, clear=False):
-            from backend.services.journey_engine_enhanced import ReflectionEncryption
+            from backend.services.karma_marg_enhanced import ReflectionEncryption
             ReflectionEncryption._instance = None
             wrong_encryptor = ReflectionEncryption()
 
@@ -133,7 +133,7 @@ class TestReflectionEncryptionOperations:
                 wrong_encryptor.decrypt(encrypted)
 
 
-@pytest.mark.skipif(not _has_journey_engine_enhanced, reason=_skip_reason)
+@pytest.mark.skipif(not _has_karma_marg_enhanced, reason=_skip_reason)
 class TestReflectionEncryptionFallback:
     """Tests for fallback behavior when encryption is not available."""
 
@@ -144,7 +144,7 @@ class TestReflectionEncryptionFallback:
             "MINDVIBE_REFLECTION_KEY": "",
             "MINDVIBE_REQUIRE_ENCRYPTION": "false"
         }, clear=False):
-            from backend.services.journey_engine_enhanced import ReflectionEncryption
+            from backend.services.karma_marg_enhanced import ReflectionEncryption
             ReflectionEncryption._instance = None
             encryptor = ReflectionEncryption()
 
@@ -159,7 +159,7 @@ class TestReflectionEncryptionFallback:
             "MINDVIBE_REFLECTION_KEY": "",
             "MINDVIBE_REQUIRE_ENCRYPTION": "false"
         }, clear=False):
-            from backend.services.journey_engine_enhanced import ReflectionEncryption
+            from backend.services.karma_marg_enhanced import ReflectionEncryption
             ReflectionEncryption._instance = None
             encryptor = ReflectionEncryption()
 

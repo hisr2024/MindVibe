@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Mwongozo wa hali"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "Dira ya Mahusiano",
       "description": "Mwongozo wa mahusiano"
     },
@@ -106,7 +106,7 @@
     "viyog": "Tuliza mwitikio wa papo hapo",
     "ardha": "Badilisha mtazamo",
     "kiaan": "Zungumza kuhusu jambo",
-    "relationship-compass": "Tembea katika uwazi wa mahusiano",
+    "sambandh-dharma": "Tembea katika uwazi wa mahusiano",
     "journey": "Jizoeze utulivu wa ndani wa muda mrefu"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Hali ya Kupumzika",
     "ardha": "Hali ya Uwazi",
     "kiaan": "Hali ya Mwandani",
-    "relationship-compass": "Hali ya Mahusiano",
+    "sambandh-dharma": "Hali ya Mahusiano",
     "journey": "Hali ya Mazoezi"
   }
 }

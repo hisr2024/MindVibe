@@ -381,7 +381,7 @@ All original functionality should work unchanged:
 
 ### Ecosystem Expansion
 
-- Integrate other tools (Relationship Compass, etc.)
+- Integrate other tools (Sambandh Dharma (Relationship Compass), etc.)
 - Create cross-tool wisdom threads
 - Build verse recommendation engine
 - Add personalized wisdom journeys

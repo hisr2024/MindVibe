@@ -28,7 +28,7 @@
       "title": "Ardha",
       "description": "Alte Weisheit neu formuliert"
     },
-    "relationshipCompass": {
+    "sambandhDharma": {
       "title": "Beziehungskompass",
       "description": "Ruhige Konfliktführung"
     },
@@ -104,9 +104,9 @@
       "description": "Daily journaling",
       "title": "Sacred Reflections"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "description": "Relationship guidance",
-      "title": "Relationship Compass"
+      "title": "Sambandh Dharma (Relationship Compass)"
     },
     "viyog": {
       "description": "Outcome anxiety reducer",
@@ -154,7 +154,7 @@
     "viyog": "Die unmittelbare Reaktion beruhigen",
     "ardha": "Die Wahrnehmung neu rahmen",
     "kiaan": "Darüber sprechen",
-    "relationship-compass": "Beziehungsklarheit finden",
+    "sambandh-dharma": "Beziehungsklarheit finden",
     "journey": "Langfristige innere Ruhe trainieren"
   },
   "mode_label": {
@@ -162,7 +162,7 @@
     "viyog": "Pause-Modus",
     "ardha": "Klarheits-Modus",
     "kiaan": "Begleiter-Modus",
-    "relationship-compass": "Beziehungs-Modus",
+    "sambandh-dharma": "Beziehungs-Modus",
     "journey": "Trainings-Modus"
   }
 }

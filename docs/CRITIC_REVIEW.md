@@ -53,7 +53,7 @@ The landing page at `/` is **one of the most emotionally evocative spiritual app
 The authenticated dashboard (`/dashboard`) is a **"Sacred Sanctuary"** with:
 - Time-based greeting ("Good morning, beautiful soul")
 - Living Chakra Heartbeat hero (pulsing soul check-in CTA)
-- 11 spiritual tools in a grid (KIAAN Chat, Viyoga, Ardha, Relationship Compass, Emotional Reset, Karma Reset, Karmic Tree, Journey Engine, Sacred Reflections, Voice Companion, Vibe Player)
+- 11 spiritual tools in a grid (KIAAN Chat, Viyoga, Ardha, Sambandh Dharma (Relationship Compass), Emotional Reset, Karma Reset, Karmic Tree, Karma Marg (Karma Journey), Sacred Reflections, Voice Companion, Vibe Player)
 - Quick access links and a Pathway Map
 - Subscription banner for free users (non-intrusive)
 
@@ -61,10 +61,10 @@ The authenticated dashboard (`/dashboard`) is a **"Sacred Sanctuary"** with:
 - **KIAAN Chat** -- AI wisdom engine grounded in 701 Gita verses
 - **Viyoga** -- Detachment coaching using Karma Yoga (BG 2.47)
 - **Ardha** -- Cognitive reframing through Gita principles
-- **Relationship Compass** -- 6 modes (Conflict, Boundary, Repair, Decision, Pattern, Courage)
+- **Sambandh Dharma (Relationship Compass)** -- 6 modes (Conflict, Boundary, Repair, Decision, Pattern, Courage)
 - **Sacred Reflections** -- AES-GCM encrypted journal (browser-side encryption!)
 - **Voice Companion** -- Best friend mode with emotional tracking and memory
-- **Journey Engine** -- 14-42 day transformation programs based on Sad-Ripu (6 inner enemies)
+- **Karma Marg (Karma Journey)** -- 14-42 day transformation programs based on Sad-Ripu (6 inner enemies)
 
 ### Where the Web App Shines
 

@@ -1,6 +1,6 @@
 /**
- * Relationship Compass Store — manages relationship guidance sessions
- * and completed Sacred Compass readings (Sambandha Dharma flow).
+ * Sambandh Dharma (Relationship Compass) Store — manages relationship guidance sessions
+ * and completed Sacred Compass readings (Sambandh Dharma flow).
  *
  * Handles:
  * - Legacy Q&A session history (question + guidance + verse reference)
@@ -39,7 +39,7 @@ interface RelationshipSession {
   createdAt: string;
 }
 
-/** A sealed Sambandha-Dharma compass reading (Sacred Movement output). */
+/** A sealed Sambandh-Dharma compass reading (Sacred Movement output). */
 export interface SealedCompassReading {
   /** Unique reading identifier */
   id: string;
@@ -85,7 +85,7 @@ export interface SealedCompassReading {
 interface RelationshipState {
   /** History of relationship guidance sessions (newest first) */
   sessions: RelationshipSession[];
-  /** History of sealed Sambandha-Dharma compass readings (newest first) */
+  /** History of sealed Sambandh-Dharma compass readings (newest first) */
   sealedReadings: SealedCompassReading[];
   /** The question currently being composed */
   activeQuestion: string;

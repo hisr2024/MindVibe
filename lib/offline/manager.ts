@@ -16,7 +16,7 @@ const ALLOWED_ENDPOINT_PREFIXES = [
   '/api/journeys/',
   '/api/moods',
   '/api/sync/',
-  '/api/journey-engine/',
+  '/api/karma-marg/',
   '/api/companion/',
   '/api/voice-companion/',
   '/api/feedback',

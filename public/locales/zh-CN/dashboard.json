@@ -33,7 +33,7 @@
     "viyog": "Calm the immediate reaction",
     "ardha": "Reframe the perception",
     "kiaan": "Talk it through",
-    "relationship-compass": "Navigate relational clarity",
+    "sambandh-dharma": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
   },
   "mode_label": {
@@ -41,7 +41,7 @@
     "viyog": "暂停模式",
     "ardha": "清晰模式",
     "kiaan": "伙伴模式",
-    "relationship-compass": "关系模式",
+    "sambandh-dharma": "关系模式",
     "journey": "训练模式"
   },
   "allTools": "All tools in one place",
@@ -103,9 +103,9 @@
       "description": "Daily journaling",
       "title": "Sacred Reflections"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "description": "Relationship guidance",
-      "title": "Relationship Compass"
+      "title": "Sambandh Dharma (Relationship Compass)"
     },
     "viyog": {
       "description": "Outcome anxiety reducer",

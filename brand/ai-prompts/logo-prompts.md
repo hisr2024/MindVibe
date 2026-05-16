@@ -34,6 +34,6 @@ Use these text prompts with Stable Diffusion or Midjourney. Keep outputs vector-
 1. "Logo: two curved ribbons forming a 'V' inside a partial circle, hot magenta and cobalt with neon lime accent, bold geometric sans 'vyoga', energetic and modern"
 2. "Animate two ribbons unfurling into a circle then folding into a 'V'; neon lime sweep highlight; looped, fast-cut motion graphics, magenta+cobalt palette"
 
-## Relationship Compass Logo (Static & Animated)
+## Sambandh Dharma (Relationship Compass) Logo (Static & Animated)
 1. "Logo of a compass dial with a heart-shaped needle, concentric signal rings, gradient coral→amber→violet, friendly humanist sans text 'relationship compass', clean white backdrop"
 2. "Animate a heart-shaped compass needle softly pivoting as concentric rings pulse outward; sunset gradient coral→amber→violet; smooth loop; minimal, modern"

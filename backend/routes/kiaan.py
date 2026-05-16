@@ -7,7 +7,7 @@ Exposes one coherent surface for the mobile client:
     POST /api/kiaan/tools/ardha                  → Cognitive reframing
     POST /api/kiaan/tools/viyoga                 → Sacred detachment
     POST /api/kiaan/tools/karma-reset            → Karmic pattern reset
-    POST /api/kiaan/tools/relationship-compass   → Relationship dharma
+    POST /api/kiaan/tools/sambandh-dharma   → Relationship dharma
     POST /api/kiaan/tools/karmalytix             → Weekly Sacred Mirror
 
 Every endpoint authenticates with the project's JWT dependency, delegates
@@ -368,10 +368,10 @@ async def karma_reset(
     )
 
 
-# ── ENDPOINT 6: Relationship Compass ─────────────────────────────────────
-@router.post("/tools/relationship-compass", response_model=ChatResponse)
+# ── ENDPOINT 6: Sambandh Dharma (Relationship Compass) ─────────────────────────────────────
+@router.post("/tools/sambandh-dharma", response_model=ChatResponse)
 @limiter.limit(CHAT_RATE_LIMIT)
-async def relationship_compass(
+async def sambandh_dharma(
     request: Request,
     payload: ToolRequest,
     current_user_id: str = Depends(get_current_user),
@@ -385,13 +385,13 @@ async def relationship_compass(
         f"I have a relationship challenge: {challenge}. "
         f"This is with: {relationship_type}. "
         f"The core difficulty is: {difficulty}. "
-        "Please guide me through the Relationship Compass."
+        "Please guide me through the Sambandh Dharma (Relationship Compass)."
     )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
         user_id=current_user_id,
-        tool_name="Relationship Compass",
+        tool_name="Sambandh Dharma (Relationship Compass)",
         gita_verse=payload.gita_verse,
     )
     return ChatResponse(

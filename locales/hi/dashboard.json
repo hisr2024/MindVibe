@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "स्थितिगत मार्गदर्शन"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "संबंध दिशा-सूचक",
       "description": "संबंध मार्गदर्शन"
     },
@@ -106,7 +106,7 @@
     "viyog": "तत्काल प्रतिक्रिया को शांत करें",
     "ardha": "दृष्टिकोण को पुनः परिभाषित करें",
     "kiaan": "बात करके समझें",
-    "relationship-compass": "संबंधों में स्पष्टता पाएं",
+    "sambandh-dharma": "संबंधों में स्पष्टता पाएं",
     "journey": "दीर्घकालिक आंतरिक स्थिरता का अभ्यास करें"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "विराम मोड",
     "ardha": "स्पष्टता मोड",
     "kiaan": "साथी मोड",
-    "relationship-compass": "संबंध मोड",
+    "sambandh-dharma": "संबंध मोड",
     "journey": "प्रशिक्षण मोड"
   }
 }

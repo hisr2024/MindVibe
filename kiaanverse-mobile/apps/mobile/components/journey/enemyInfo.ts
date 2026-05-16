@@ -1,6 +1,6 @@
 /**
  * enemyInfo — Canonical six-enemies (षड्रिपु) registry, mirrored 1:1
- * from the web mobile experience (`/types/journeyEngine.types.ts`).
+ * from the web mobile experience (`/types/karmaMarg.types.ts`).
  *
  * Single source of truth for every Journey surface: Today's Practice
  * cards, Active Battles cards, Begin a New Journey grid, Battleground

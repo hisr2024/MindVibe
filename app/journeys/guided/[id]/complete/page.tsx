@@ -17,15 +17,15 @@ import { useParams, useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
-  journeyEngineService,
-  JourneyEngineError,
-} from '@/services/journeyEngineService'
+  karmaMargService,
+  KarmaMargError,
+} from '@/services/karmaMargService'
 import type {
   JourneyResponse,
   JourneyTemplate,
   EnemyType,
-} from '@/types/journeyEngine.types'
-import { ENEMY_INFO } from '@/types/journeyEngine.types'
+} from '@/types/karmaMarg.types'
+import { ENEMY_INFO } from '@/types/karmaMarg.types'
 
 // Confetti particles - pre-compute random values to avoid hydration mismatches
 function Confetti() {
@@ -94,12 +94,12 @@ export default function JourneyCompletePage() {
         setLoading(true)
 
         // Load journey details
-        const journeyData = await journeyEngineService.getJourney(journeyId)
+        const journeyData = await karmaMargService.getJourney(journeyId)
         setJourney(journeyData)
 
         // Load recommendations (non-critical, failure shouldn't block celebration)
         try {
-          const templatesData = await journeyEngineService.listTemplates({ limit: 3 })
+          const templatesData = await karmaMargService.listTemplates({ limit: 3 })
           if (templatesData?.templates) {
             setRecommendations(templatesData.templates.filter(t => t.id !== journeyData.template_slug))
           }
@@ -110,7 +110,7 @@ export default function JourneyCompletePage() {
         // Trigger celebration haptic
         triggerHaptic('success')
       } catch (err) {
-        if (err instanceof JourneyEngineError && err.isAuthError()) {
+        if (err instanceof KarmaMargError && err.isAuthError()) {
           router.push('/onboarding')
           return
         }

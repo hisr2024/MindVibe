@@ -36,7 +36,7 @@ interface SourceRef {
 }
 
 interface WisdomResponseCardProps {
-  tool: 'viyoga' | 'ardha' | 'relationship_compass'
+  tool: 'viyoga' | 'ardha' | 'sambandh_dharma'
   sections: Record<string, string>
   fullResponse: string
   gitaVersesUsed?: number
@@ -118,9 +118,9 @@ const SECTION_CONFIG = {
     },
     accentColor: 'purple',
   },
-  relationship_compass: {
+  sambandh_dharma: {
     icon: '🧭',
-    name: 'Relationship Compass',
+    name: 'Sambandh Dharma (Relationship Compass)',
     sectionMeta: {
       // ═══ 5-Step Gita Framework (PRIMARY — strict adherence) ═══
       'Step 1: Pause Before Reacting': { title: 'Step 1: Pause Before Reacting', icon: '🌿', order: 1 },
@@ -537,7 +537,7 @@ export default function WisdomResponseCard({
 }
 
 // Loading Animation Component
-export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga' | 'ardha' | 'relationship_compass'; secularMode?: boolean }) {
+export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga' | 'ardha' | 'sambandh_dharma'; secularMode?: boolean }) {
   const loadingMessages = {
     viyoga: [
       'Taking a moment to understand...',
@@ -551,7 +551,7 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
       'Aligning Gita principles...',
       'Preparing reframe...',
     ],
-    relationship_compass: [
+    sambandh_dharma: [
       'Understanding your situation through Gita wisdom...',
       'Analyzing the root attachment...',
       'Crafting your 5-step Gita guidance...',
@@ -570,8 +570,8 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
     return () => clearInterval(interval)
   }, [messages.length])
 
-  // Use secular styling for viyoga and relationship_compass
-  const useSecularStyle = secularMode && (tool === 'viyoga' || tool === 'relationship_compass')
+  // Use secular styling for viyoga and sambandh_dharma
+  const useSecularStyle = secularMode && (tool === 'viyoga' || tool === 'sambandh_dharma')
   const symbol = useSecularStyle ? '💚' : '🕉️'
   const subtitleText = useSecularStyle
     ? 'Finding the right words for your situation...'

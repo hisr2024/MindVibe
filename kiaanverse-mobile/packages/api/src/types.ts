@@ -674,10 +674,10 @@ export interface SadhanaStreak {
 }
 
 // ---------------------------------------------------------------------------
-// Relationship Compass
+// Sambandh Dharma (Relationship Compass)
 // ---------------------------------------------------------------------------
 
-export interface RelationshipCompassResult {
+export interface SambandhDharmaResult {
   guidance: string;
   gita_verse: { chapter: number; verse: number; text: string };
   dharma_principle: string;
@@ -810,7 +810,7 @@ export interface KarmaResetCompletion {
 }
 
 // ---------------------------------------------------------------------------
-// Relationship Compass (extended guidance type)
+// Sambandh Dharma (Relationship Compass) (extended guidance type)
 // ---------------------------------------------------------------------------
 
 export interface RelationshipGuidance {

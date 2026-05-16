@@ -22,12 +22,12 @@ const insightTools = [
     logo: <ViyogaLogo />,
   },
   {
-    href: '/relationship-compass',
-    title: 'Relationship Compass',
-    purposeDescKey: 'relationship-compass',
+    href: '/sambandh-dharma',
+    title: 'Sambandh Dharma (Relationship Compass)',
+    purposeDescKey: 'sambandh-dharma',
     description: 'Navigate tense conversations with clear, ego-light next steps.',
     accent: 'from-rose-400/20 via-[#d4a44c]/15 to-yellow-300/10',
-    logo: <RelationshipCompassLogo />,
+    logo: <SambandhDharmaLogo />,
   },
 ]
 
@@ -59,7 +59,7 @@ function ViyogaLogo() {
   )
 }
 
-function RelationshipCompassLogo() {
+function SambandhDharmaLogo() {
   return (
     <div className="relative h-14 w-14" aria-hidden>
       <div className="absolute inset-0 animate-[spin_7s_linear_infinite] rounded-3xl bg-[conic-gradient(at_50%_50%,#fb7185_0deg,#d4a44c_120deg,#fde047_240deg,#fb7185_360deg)] opacity-60 blur" />
@@ -86,7 +86,7 @@ export default function DeepInsightsPage() {
       <div className="relative mx-auto flex max-w-5xl flex-col gap-8">
         <SubscriptionBanner
           feature="advanced_analytics"
-          message="Unlock Relationship Compass, Soul Reading, and all deep insight tools with Premium"
+          message="Unlock Sambandh Dharma (Relationship Compass), Soul Reading, and all deep insight tools with Premium"
           ctaText="Go Premium"
         />
         <header className="space-y-3 rounded-3xl border border-white/5 bg-[var(--brand-surface)]/80 p-6 md:p-10 shadow-[0_25px_120px_rgba(212,164,76,0.18)] backdrop-blur">

@@ -29,7 +29,7 @@ const ROUTE_LABELS: Record<string, string> = {
   'karmic-tree': 'Karmic Tree',
   'emotional-reset': 'Emotional Reset',
   'karma-footprint': 'Karma Footprint',
-  'relationship-compass': 'Relationship Compass',
+  'sambandh-dharma': 'Sambandh Dharma (Relationship Compass)',
   'karma-reset': 'Karma Reset',
 }
 

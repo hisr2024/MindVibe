@@ -10,8 +10,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { EnemyType } from '@/types/journeyEngine.types'
-import { ENEMY_INFO, getMasteryDescription } from '@/types/journeyEngine.types'
+import type { EnemyType } from '@/types/karmaMarg.types'
+import { ENEMY_INFO, getMasteryDescription } from '@/types/karmaMarg.types'
 import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
 
 interface EnemyCardProps {

@@ -111,7 +111,7 @@ _TOOL_CONTEXTS: dict[str, str] = {
         "Guide the seeker in examining their karmic patterns and realigning "
         "with dharmic purpose."
     ),
-    "Relationship Compass": (
+    "Sambandh Dharma (Relationship Compass)": (
         "Guide the seeker in navigating their relationship challenge through "
         "dharmic wisdom."
     ),
@@ -150,7 +150,7 @@ async def call_kiaan_ai(
         gita_verse: Optional verse dict with ``chapter``, ``verse``, ``sanskrit``,
             ``meaning``. Used to anchor the response in scripture.
         tool_name: One of ``Emotional Reset``, ``Ardha``, ``Viyoga``,
-            ``Karma Reset``, ``Relationship Compass``, ``KarmaLytix``. Optional.
+            ``Karma Reset``, ``Sambandh Dharma (Relationship Compass)``, ``KarmaLytix``. Optional.
         system_override: Optional full replacement for the default KIAAN system
             prompt. When provided, it is used as the base and ``tool_name`` /
             ``gita_verse`` are still appended. Lets callers ship their own

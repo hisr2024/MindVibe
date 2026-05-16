@@ -210,7 +210,7 @@ const TOOL_WISDOM_MAP: Record<string, {
     verseIndices: [4, 2, 16], // 3.19, 2.48, 18.66
     actionPrompt: 'Which branch of your karma tree needs nurturing today?',
   },
-  'relationship-compass': {
+  'sambandh-dharma': {
     greeting: 'Krishna was the perfect friend, guide, and companion. The Gita shows us that true love serves without conditions.',
     verseIndices: [7, 13, 10], // 5.29, 12.13-14, 9.22
     actionPrompt: 'Which relationship in your life could use a little more of this divine love?',
