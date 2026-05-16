@@ -458,17 +458,12 @@ async def _get_or_create_profile(
 async def _get_user_memories(
     db: AsyncSession, user_id: str, limit: int = 10
 ) -> list[str]:
-    result = await db.execute(
-        select(CompanionMemory)
-        .where(
-            CompanionMemory.user_id == user_id,
-            CompanionMemory.deleted_at.is_(None),
-        )
-        .order_by(desc(CompanionMemory.importance))
-        .limit(limit)
-    )
-    memories = result.scalars().all()
-    return [f"{m.memory_type}: {m.value}" for m in memories]
+    # Thin wrapper over the shared helper so the WSS voice path and the
+    # REST voice route stay behaviour-identical. See
+    # backend/services/companion_context.py for the canonical impl and
+    # IMPROVEMENT_ROADMAP.md P0 §3 for the consolidation rationale.
+    from backend.services.companion_context import get_user_memories
+    return await get_user_memories(db, user_id, limit=limit)
 
 
 async def _save_memories(
@@ -520,18 +515,12 @@ async def _save_memories(
 async def _get_recent_session_summaries(
     db: AsyncSession, user_id: str, limit: int = 3
 ) -> list[dict]:
-    result = await db.execute(
-        select(CompanionSession)
-        .where(
-            CompanionSession.user_id == user_id,
-            CompanionSession.is_active.is_(False),
-            CompanionSession.topics_discussed.isnot(None),
-        )
-        .order_by(desc(CompanionSession.ended_at))
-        .limit(limit)
+    # Thin wrapper. See ``backend.services.companion_context`` for the
+    # canonical implementation reused by the WSS voice path.
+    from backend.services.companion_context import (
+        get_recent_session_summaries,
     )
-    sessions = result.scalars().all()
-    return [s.topics_discussed for s in sessions if s.topics_discussed]
+    return await get_recent_session_summaries(db, user_id, limit=limit)
 
 
 def _update_streak(profile: CompanionProfile) -> None:

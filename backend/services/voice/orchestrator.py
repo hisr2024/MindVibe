@@ -266,6 +266,16 @@ class VoiceCompanionOrchestrator:
                     audio_chunks_emitted += 1
             else:
                 # ── Cache miss: LLM stream → filter → TTS sentence by sentence ──
+                # ``memories`` and ``session_summaries`` are the per-user
+                # long-term context the WSS handler fetches from
+                # ``backend.services.companion_context`` and hands us via
+                # the VoiceTurnContext. Including them in the user_payload
+                # closes the personalisation gap AUDIT_VOICE_COMPANION.md
+                # flagged on the Android voice surface — Sakha now
+                # remembers across sessions the same way the REST voice
+                # companion already does. Empty lists for cold-start
+                # users render to ``[]`` in the JSON, which the persona
+                # prompt knows to skip without complaint.
                 user_payload = json.dumps({
                     "persona_version": ctx.persona_version,
                     "render_mode": ctx.render_mode,
@@ -273,6 +283,8 @@ class VoiceCompanionOrchestrator:
                     "lang_hint": ctx.lang_hint,
                     "user_latest": ctx.user_latest,
                     "history": ctx.history,
+                    "memories": ctx.memories,
+                    "session_summaries": ctx.session_summaries,
                     "mood": {
                         "label": mood_label,
                         "intensity": mood_intensity,

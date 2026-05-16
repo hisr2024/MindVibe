@@ -92,7 +92,7 @@ result = await call_kiaan_ai_grounded(
 | Sambandh Dharma | `POST /api/kiaan/tools/sambandh-dharma` | ✅ | same |
 | KarmaLytix | `POST /api/kiaan/tools/karmalytix` | ✅ | same |
 | REST Voice Companion | `POST /api/voice-companion/message` | ✅ post-filter | `routes/kiaan_voice_companion.py` calls `filter_voice_response` after each tier; pre-LLM prompt still curated by `_build_divine_friend_system_prompt` |
-| WSS Voice Companion | `WS /voice-companion/converse` | ✅ both | Streaming `StreamingGitaFilter` + `voice/retrieval_and_fallback` already in place; tracked separately for streaming semantics |
+| WSS Voice Companion | `WS /voice-companion/converse` | ✅ both | Streaming `StreamingGitaFilter` + `voice/retrieval_and_fallback` already in place; tracked separately for streaming semantics. **Memory + recent-session summaries wired in P0 §3** via `backend.services.companion_context.{get_user_memories, get_recent_session_summaries}` — both surfaced through `VoiceTurnContext.memories` / `.session_summaries` and included in the LLM `user_payload` JSON. |
 
 ## Why pre-LLM + post-LLM, not just one
 

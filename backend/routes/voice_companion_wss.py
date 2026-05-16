@@ -367,6 +367,36 @@ async def _run_orchestrator_turn(
     Returns the VoiceTurnResult yielded at the end (None if the orchestrator
     failed catastrophically before producing one)."""
     session.turn_index += 1
+
+    # ── Long-term memory + recent session summaries ───────────────────
+    # Per-user context the persona consumes via the LLM user_payload.
+    # Wired here (rather than in the orchestrator) so the same DB
+    # session the WSS already has is reused — no extra connections,
+    # no concurrent-AsyncSession hazards. Failures degrade to empty
+    # lists; a memory-DB hiccup must never block a voice turn.
+    # IMPROVEMENT_ROADMAP.md P0 §3.
+    memories: list[str] = []
+    session_summaries: list[dict] = []
+    if db is not None and session.user_id:
+        try:
+            from backend.services.companion_context import (
+                get_recent_session_summaries,
+                get_user_memories,
+            )
+
+            memories = await get_user_memories(
+                db, session.user_id, limit=8
+            )
+            session_summaries = await get_recent_session_summaries(
+                db, session.user_id, limit=3
+            )
+        except Exception as ctx_exc:  # noqa: BLE001
+            logger.warning(
+                "voice_wss: companion-context fetch failed (user=%s): %s",
+                session.user_id,
+                ctx_exc,
+            )
+
     ctx = VoiceTurnContext(
         session_id=session.session_id,
         user_id=session.user_id,
@@ -377,6 +407,8 @@ async def _run_orchestrator_turn(
         delivery_channel=session.delivery_channel,
         user_region=session.region,
         persona_version=session.persona_version,
+        memories=memories,
+        session_summaries=session_summaries,
     )
     try:
         sys_prompt = get_prompt_text(session.render_mode)
