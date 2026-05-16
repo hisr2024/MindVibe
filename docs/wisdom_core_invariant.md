@@ -6,12 +6,21 @@ Sambandh Dharma, KarmaLytix), and the voice companions — must answer
 **only through Wisdom Core**. This document records how that invariant
 is enforced in code so it can be audited and extended without spelunking.
 
-## The three-stage contract
+## The four-stage contract
 
 Every provider call goes through this pipeline:
 
 ```
                 ┌──────────────────────────────────────┐
+                │  ⓪ RESPONSE CACHE                     │
+                │     kiaan_response_cache              │
+                │       key = sha256(user_id|tool|      │
+                │         locale|nfkc_normalized_msg)   │
+                │       HIT → return cached payload     │
+                │       MISS → continue                 │
+                └────────────────┬─────────────────────┘
+                                 │ miss
+                ┌────────────────▼─────────────────────┐
                 │  ① PRE-LLM compose                    │
                 │     kiaan_wisdom_helper               │
                 │       compose_kiaan_system_prompt()   │
@@ -37,6 +46,12 @@ Every provider call goes through this pipeline:
                 │       ├─ wisdom-score validation     │
                 │       ├─ enhancement when low score   │
                 │       └─ citation verification        │
+                └────────────────┬─────────────────────┘
+                                 │
+                ┌────────────────▼─────────────────────┐
+                │  ④ CACHE WRITE (happy path only)      │
+                │     stores GroundedResponse payload   │
+                │     under the same key as ⓪           │
                 └──────────────────────────────────────┘
 ```
 
@@ -184,9 +199,77 @@ In priority order:
    variants (formal / conversational / brief). Same IP-safe pattern as
    the seeder, but anchored on already-validated content.
 
+## Response cache
+
+`backend/services/kiaan_response_cache.KiaanResponseCache` wraps every
+`call_kiaan_ai_grounded` invocation with an exact-match cache. Three
+guarantees:
+
+1. **User-scoped.** The cache key always includes `user_id`. User A's
+   response never reaches user B even on byte-identical text. This
+   fixes the privacy bug `AUDIT_CACHE_FRAMEWORK.md` Part 1 flagged
+   against the legacy `redis_cache.cache_kiaan_response`.
+2. **Two-tier backend.** Redis (when the
+   `backend.cache.redis_cache.get_redis_cache()` singleton is connected)
+   sharing its connection pool, with an in-memory LRU+TTL fallback for
+   CI / single-process. Both honour
+   `KIAAN_RESPONSE_CACHE_TTL` (default 3600s) and
+   `KIAAN_RESPONSE_CACHE_MAX_ENTRIES` (default 5000 for in-memory).
+3. **Bypass conditions** — any of:
+   - `KIAAN_RESPONSE_CACHE_ENABLED=false` (kill switch)
+   - `user_id is None` (privacy floor)
+   - `system_override` provided (the cache key would not capture the
+     prompt variance)
+   - `apply_filter=False` (streaming paths cache through their own
+     streaming filter, not this final-text cache)
+   - `gita_verse` pin supplied (one-off response)
+
+Cache HIT short-circuits both the pre-LLM Wisdom Core composer AND the
+LLM call — saves ~100ms compose + ~800-1500ms LLM on hot keys.
+
+Cache WRITE happens only on the happy path (filter ran successfully).
+Degraded responses (filter failure) are never cached, so a transient
+filter bug cannot poison the cache.
+
+### Key normalisation
+
+`KiaanResponseCache.normalize_message` collapses:
+- Unicode NFKC (ligatures, full-width digits): `"ﬁ"` ≡ `"fi"`
+- Case: `"I FEEL"` ≡ `"i feel"`
+- Whitespace: leading/trailing + runs of whitespace collapse
+
+Punctuation is NOT collapsed — left for the future semantic-similarity
+layer (the `find_semantic_match` hook in the cache module). Phase 2
+will add `text-embedding-3-small` + cosine ≥ 0.92 for near-duplicate
+hits.
+
+### Telemetry
+
+```python
+from backend.services.kiaan_response_cache import get_response_cache
+get_response_cache().stats()
+# {"hits": int, "misses": int, "errors": int, "sets": int,
+#  "invalidations": int, "memory_size": int,
+#  "enabled": bool, "ttl_seconds": int}
+```
+
+### Invalidation
+
+```python
+cache = get_response_cache()
+# Targeted (one entry):
+await cache.invalidate(user_id="u", tool_name="Ardha", message="...")
+# User-wide (call when user reports "this didn't help"):
+await cache.invalidate(user_id="u")
+```
+
 ## Invariant tests
 
-`tests/test_kiaan_grounded_ai.py` pins these behaviours:
+`tests/test_kiaan_grounded_ai.py` pins the three-stage Wisdom Core
+behaviours. `tests/test_kiaan_response_cache.py` pins these cache
+behaviours:
+
+Wisdom Core invariants (`tests/test_kiaan_grounded_ai.py`, 9 tests):
 
 * When `db` is provided and no `system_override`, the pre-LLM composer
   runs and its output is passed to the provider.
@@ -198,4 +281,18 @@ In priority order:
 * Empty `message` raises `ValueError` before any provider is called.
 * `tool_name="Ardha"` routes the post-filter to `WisdomTool.ARDHA`.
 
-Run with: `pytest tests/test_kiaan_grounded_ai.py`.
+Cache invariants (`tests/test_kiaan_response_cache.py`, 25 tests):
+
+* Normalisation: case, whitespace, Unicode NFKC all hit the same key.
+* Per-user isolation: user A's response never serves user B.
+* `user_id=None` bypasses both read and write.
+* `system_override`, `apply_filter=False`, and `gita_verse` pin all
+  bypass the cache end-to-end.
+* `KIAAN_RESPONSE_CACHE_ENABLED=false` kills the cache entirely.
+* In-memory LRU eviction kicks in at the configured capacity.
+* Filter failures are NOT cached.
+* Redis errors degrade gracefully to the in-memory tier.
+* Locale shards the cache (en/hi/sa do not collide).
+* Rehydration round-trip preserves all `GroundedResponse` fields.
+
+Run with: `pytest tests/test_kiaan_grounded_ai.py tests/test_kiaan_response_cache.py`.

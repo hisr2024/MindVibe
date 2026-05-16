@@ -109,6 +109,7 @@ async def call_kiaan_ai_grounded(
     gita_verse: dict[str, Any] | None = None,
     system_override: str | None = None,
     apply_filter: bool = True,
+    locale: str = "en",
 ) -> GroundedResponse:
     """Single Wisdom-Core-gated entry point.
 
@@ -120,24 +121,37 @@ async def call_kiaan_ai_grounded(
             useful for unit tests and back-office scripts but **not** a
             path that should reach a real user response. Routes that
             serve users must pass ``db``.
-        user_id: Required for the Dynamic Wisdom effectiveness pick. When
-            omitted, retrieval degrades to Static-only and the user still
-            gets a Gita-grounded response.
+        user_id: Required for the Dynamic Wisdom effectiveness pick AND
+            for the response cache scope (privacy floor). When omitted,
+            retrieval degrades to Static-only AND the response cache is
+            bypassed entirely — same-message asks always hit the LLM.
         tool_name: One of the six sacred tool names. Routes the
-            post-filter to the right rubric and keeps telemetry sharp.
+            post-filter to the right rubric, keeps telemetry sharp, and
+            shards the response cache so the same message under different
+            tools does not collide.
         conversation_history: Forwarded to ``call_kiaan_ai``. Trimmed to
-            ``AI_HISTORY_WINDOW`` upstream.
+            ``AI_HISTORY_WINDOW`` upstream. **Not** part of the cache
+            key — caching is intentionally per-message, not per-thread,
+            so a user asking the same question twice in two different
+            conversations still gets the cached answer.
         gita_verse: Optional pre-selected verse from the client (e.g. the
             mobile app surfacing the verse of the day). Combined with —
-            not replaced by — Wisdom Core retrieval.
-        system_override: Escape hatch. When provided, skips Wisdom Core
-            composition. Still applies the post-LLM filter unless
-            ``apply_filter=False``. Used by surfaces that already
-            curate their own prompt (REST Voice Companion's
-            ``_build_divine_friend_system_prompt``).
+            not replaced by — Wisdom Core retrieval. Bypasses the cache
+            on writes (the verse changes the response semantics enough
+            that a cached reply would feel stale).
+        system_override: Escape hatch. When provided, skips both Wisdom
+            Core composition AND the response cache. Still applies the
+            post-LLM filter unless ``apply_filter=False``. Used by
+            surfaces that already curate their own prompt (REST Voice
+            Companion's ``_build_divine_friend_system_prompt``).
         apply_filter: Default True. Set False only when the caller is
             wrapping a streamed response that applies its own
-            :class:`StreamingGitaFilter` (the WSS voice path).
+            :class:`StreamingGitaFilter` (the WSS voice path). When
+            False the cache is bypassed too — streaming responses
+            should not be served from a cache that was built from
+            final-text snapshots.
+        locale: ``en`` / ``hi`` / ``sa`` — shards the cache so a Hindi
+            ask and an English ask do not collide on the same key.
 
     Returns:
         :class:`GroundedResponse`.
@@ -149,6 +163,48 @@ async def call_kiaan_ai_grounded(
     """
     if not message or not message.strip():
         raise ValueError("message must be a non-empty string")
+
+    # ── 0. RESPONSE CACHE LOOKUP ──────────────────────────────────────
+    # See IMPROVEMENT_ROADMAP.md P0 §2. The cache is bypassed when:
+    #   * the caller supplied their own system_override (the cache key
+    #     does not capture that variance);
+    #   * streaming (apply_filter=False) — final-text cache is wrong
+    #     shape for streamed deliveries;
+    #   * a per-call gita_verse was supplied — pinning the response to
+    #     a specific verse changes the semantics enough that we treat
+    #     it as a one-off, not cacheable;
+    #   * user_id is None — privacy floor.
+    cache_eligible = (
+        user_id is not None
+        and apply_filter
+        and not (system_override and system_override.strip())
+        and gita_verse is None
+    )
+    response_cache = None
+    if cache_eligible:
+        try:
+            from backend.services.kiaan_response_cache import (
+                get_response_cache,
+                rehydrate,
+            )
+
+            response_cache = get_response_cache()
+            cached_payload = await response_cache.get(
+                user_id=user_id,
+                tool_name=tool_name,
+                message=message,
+                locale=locale,
+            )
+            if cached_payload is not None:
+                return rehydrate(cached_payload)
+        except Exception as exc:
+            # Cache failures must never block the user. Continue to LLM.
+            logger.warning(
+                "kiaan_grounded_ai: response cache GET failed (tool=%s): %s",
+                tool_name,
+                exc,
+            )
+            response_cache = None  # disable WRITE too if READ broke
 
     # ── 1. PRE-LLM: compose via Wisdom Core unless override provided ──
     verses: list[dict[str, Any]] = []
@@ -225,7 +281,7 @@ async def call_kiaan_ai_grounded(
             enhance_if_needed=True,
         )
 
-        return GroundedResponse(
+        result = GroundedResponse(
             text=filter_result.content or raw_text,
             verses=verses,
             is_gita_grounded=filter_result.is_gita_grounded,
@@ -233,6 +289,27 @@ async def call_kiaan_ai_grounded(
             enhancement_applied=filter_result.enhancement_applied,
             filter_applied=True,
         )
+
+        # ── 4. RESPONSE CACHE WRITE (happy path only) ─────────────────
+        # Skipped for degraded responses (filter exception below) so a
+        # broken filter cannot poison the cache with un-grounded text.
+        if response_cache is not None:
+            try:
+                await response_cache.set(
+                    user_id=user_id,
+                    tool_name=tool_name,
+                    message=message,
+                    response=result,
+                    locale=locale,
+                )
+            except Exception as cache_exc:
+                logger.warning(
+                    "kiaan_grounded_ai: response cache SET failed (tool=%s): %s",
+                    tool_name,
+                    cache_exc,
+                )
+
+        return result
     except Exception as exc:
         # Filter failure must NOT block the user response. The pre-LLM
         # Wisdom Core composition has already grounded the prompt; the

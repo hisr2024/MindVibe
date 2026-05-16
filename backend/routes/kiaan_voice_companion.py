@@ -98,24 +98,37 @@ _response_cache_lock = threading.Lock()
 
 
 def _response_cache_key(
-    mood: str, phase: str, message: str, language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    language: str = "en",
 ) -> str:
-    """Cache key = hash of (mood, phase, language, normalized message).
+    """Cache key = hash of (user_id, mood, phase, language, normalized message).
 
-    We normalize the message to lowercase and strip whitespace so that
+    **user_id is part of the key** to fix the privacy bug
+    ``AUDIT_CACHE_FRAMEWORK.md`` Part 1 flagged: cache entries must never
+    be served across users. Same-user, same-message hits the cache;
+    different users get fresh responses even on identical text.
+
+    We normalise the message to lowercase + strip whitespace so that
     "I feel anxious" and "i feel anxious " hit the same entry.
     Language is included to prevent cross-language cache collisions.
     """
     normalized = message.strip().lower()
-    raw = f"{mood}:{phase}:{language}:{normalized}"
+    raw = f"{user_id}:{mood}:{phase}:{language}:{normalized}"
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
 
 def _get_cached_response(
-    mood: str, phase: str, message: str, language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    language: str = "en",
 ) -> str | None:
     """Check for a cached text response. Returns None on miss."""
-    key = _response_cache_key(mood, phase, message, language)
+    key = _response_cache_key(user_id, mood, phase, message, language)
     cached = _response_cache.get(key)
     if cached and (time.monotonic() - cached[1]) < _RESPONSE_CACHE_TTL:
         logger.debug("VoiceCompanion: Response cache HIT for key=%s", key[:8])
@@ -126,10 +139,21 @@ def _get_cached_response(
 
 
 def _set_cached_response(
-    mood: str, phase: str, message: str, response: str,
-    memories: list[str], language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    response: str,
+    memories: list[str],
+    language: str = "en",
 ) -> None:
-    """Store a response in cache. Skip if user has personalized memories."""
+    """Store a response in cache. Skip if user has personalised memories.
+
+    With ``user_id`` now in the key, the per-user isolation is enforced
+    structurally; the ``memories`` guard remains as belt-and-braces — a
+    response shaped by long-term memory recall is rarely worth caching
+    even within the same user, because the memory set changes over time.
+    """
     if memories:
         return  # Don't cache personalized responses
     with _response_cache_lock:
@@ -138,7 +162,7 @@ def _set_cached_response(
             entries = sorted(_response_cache.items(), key=lambda x: x[1][1])
             for k, _ in entries[: _RESPONSE_CACHE_MAX_SIZE // 5]:
                 _response_cache.pop(k, None)
-        key = _response_cache_key(mood, phase, message, language)
+        key = _response_cache_key(user_id, mood, phase, message, language)
         _response_cache[key] = (response, time.monotonic())
 
 
@@ -1195,7 +1219,7 @@ async def send_voice_companion_message(
     # RESPONSE CACHE: Check before calling OpenAI (~1-3s saved on hit)
     # Only cache non-personalized responses (no memories).
     # ══════════════════════════════════════════════════════════════════════
-    _cached = _get_cached_response(mood, phase, body.message, body.language)
+    _cached = _get_cached_response(current_user, mood, phase, body.message, body.language)
     if _cached:
         response_text = _cached
         ai_tier = "cache"
@@ -1244,7 +1268,7 @@ async def send_voice_companion_message(
             wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
         logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user}")
         # Store in cache for future similar requests
-        _set_cached_response(mood, phase, body.message, response_text, memories, body.language)
+        _set_cached_response(current_user, mood, phase, body.message, response_text, memories, body.language)
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
