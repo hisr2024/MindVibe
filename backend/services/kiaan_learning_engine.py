@@ -1622,5 +1622,15 @@ def initialize_learning_system():
     return engine
 
 
-# Initialize on module load
-kiaan_learning_engine = get_kiaan_learning_engine()
+# Initialize on module load — but only when the external-ingestion gate
+# is open. With the gate closed (default in dev / test / CI), eager init
+# would raise the same RuntimeError that gates get_kiaan_learning_engine
+# and break any module that imports from this file. Production deploys
+# that flip MINDVIBE_EXTERNAL_INGESTION_ENABLED=1 still get the eager
+# scheduler boot. Callers needing the engine should call
+# get_kiaan_learning_engine() directly rather than reading this name.
+kiaan_learning_engine = (
+    get_kiaan_learning_engine()
+    if os.getenv(_INGESTION_ENV_FLAG, "0") == "1"
+    else None
+)
