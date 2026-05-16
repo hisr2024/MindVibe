@@ -2,7 +2,7 @@
 
 This engine processes user thoughts through the ARDHA framework:
   A — Atma Distinction (correct identity before thought)
-  R — Raga-Dvesha Diagnosis (scan for attachment/aversion)
+  R — Raga-Dvesha Reflection (scan for attachment/aversion)
   D — Dharma Alignment (clarify right action)
   H — Hrdaya Samatvam (establish equanimity)
   A — Arpana (offer action and surrender result)

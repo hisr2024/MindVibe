@@ -471,7 +471,7 @@ function featureListFor(
   if (f.offlineAccess) lines.push(t('subscription.featureOffline'));
   if (f.arthaReframing) lines.push(t('subscription.featureArdha'));
   if (f.viyogaDetachment) lines.push(t('subscription.featureViyoga'));
-  if (f.relationshipCompass) lines.push(t('subscription.featureRelationship'));
+  if (f.sambandhDharma) lines.push(t('subscription.featureRelationship'));
   if (f.dedicatedSupport) lines.push(t('subscription.featureDedicatedSupport'));
   else if (f.prioritySupport) lines.push(t('subscription.featurePrioritySupport'));
   // 8 max to match the spec's "8 listed" Sadhak ask.

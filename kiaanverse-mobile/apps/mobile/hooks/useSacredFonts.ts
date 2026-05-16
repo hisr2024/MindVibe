@@ -111,7 +111,11 @@ export interface SacredFontsResult {
 }
 
 export function useSacredFonts(): SacredFontsResult {
-  const [loaded, error] = useFonts(FONT_MAP);
+  // FONT_MAP is built dynamically via `safeRequire` so its values are
+  // typed `unknown`. Metro's actual return type is `number` (an asset
+  // id), which expo-font's `useFonts` accepts as a `FontSource`. Cast
+  // at the boundary rather than parameterising every register() call.
+  const [loaded, error] = useFonts(FONT_MAP as Parameters<typeof useFonts>[0]);
   return {
     ready: loaded || !!error,
     loadedCount: Object.keys(FONT_MAP).length,

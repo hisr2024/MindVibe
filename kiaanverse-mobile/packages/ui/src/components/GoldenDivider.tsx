@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import {
+  type ColorValue, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const DIVIDER_GRADIENT = [
@@ -39,7 +40,7 @@ function GoldenDividerInner({
   return (
     <View style={[styles.wrap, style]} testID={testID}>
       <LinearGradient
-        colors={DIVIDER_GRADIENT as unknown as string[]}
+        colors={DIVIDER_GRADIENT as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         style={styles.line}

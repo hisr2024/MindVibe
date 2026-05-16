@@ -1527,7 +1527,7 @@ They are sharing where they are emotionally. Meet them there without rushing to 
 CONTEXT — WEEKLY REFLECTION:
 They are looking back on their week. Honor their path with warmth. Draw from svadharma — each person's unique journey. Acknowledge both growth and struggle. Growth is not linear but spiral."""
 
-        elif context == "relationship_compass":
+        elif context == "sambandh_dharma":
             base_prompt += """
 
 CONTEXT — RELATIONSHIP NAVIGATION:

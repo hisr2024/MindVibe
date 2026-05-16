@@ -265,7 +265,7 @@ export default function WisdomThemeScreen(): React.JSX.Element {
               <Text style={styles.emoji}>{presentation.emoji}</Text>
               <View style={styles.countBadge}>
                 <Text style={styles.countBadgeText}>
-                  {t('wisdom.themeVerseCount', { count: verses.length })}
+                  {t('wisdom.themeVerseCount', { count: String(verses.length) })}
                 </Text>
               </View>
             </View>

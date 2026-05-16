@@ -53,7 +53,7 @@ class TestArdhaKnowledgeBase:
         """Pillars have correct names matching ARDHA framework."""
         names = [p.name for p in ARDHA_PILLARS]
         assert "Atma Distinction" in names
-        assert "Raga-Dvesha Diagnosis" in names
+        assert "Raga-Dvesha Reflection" in names
         assert "Dharma Alignment" in names
         assert "Hrdaya Samatvam" in names
         assert "Arpana" in names

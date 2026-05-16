@@ -5,7 +5,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { DashboardResponse } from '@/types/journeyEngine.types'
+import type { DashboardResponse } from '@/types/karmaMarg.types'
 import { StatsBarSkeleton } from '../skeletons/StatsBarSkeleton'
 
 interface MobileStatsBarProps {

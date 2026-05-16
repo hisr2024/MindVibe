@@ -40,8 +40,12 @@ export function QuotaExceededModal({
         </div>
 
         <p className="text-sm text-[#f5f0e8]/80 mb-4">
-          You&apos;ve used all {quota} of your monthly KIAAN questions. Your quota will reset in{' '}
+          You&apos;ve reached this month&apos;s fair-use limit of {quota} Sakha conversations.
+          Your access resets in{' '}
           <span className="font-semibold text-[#f5f0e8]">{daysUntilReset} days</span>.
+        </p>
+        <p className="text-xs text-[#f5f0e8]/60 mb-4 italic">
+          This limit exists to keep the service sustainable and prevent abuse — not to meter each message.
         </p>
 
         <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6">
@@ -73,12 +77,12 @@ export function QuotaExceededModal({
         <div className="flex flex-col gap-3">
           {onUpgrade ? (
             <Button onClick={onUpgrade} variant="primary" size="lg" className="w-full">
-              Upgrade for More Questions
+              Upgrade for Expanded Access
             </Button>
           ) : (
             <Link href="/pricing" className="w-full">
               <Button variant="primary" size="lg" className="w-full">
-                Upgrade for More Questions
+                Upgrade for Expanded Access
               </Button>
             </Link>
           )}

@@ -1,5 +1,5 @@
 """
-Tests for backend.services.journey_engine.sakha_wisdom_generator.
+Tests for backend.services.karma_marg.sakha_wisdom_generator.
 
 These exercise the AI-grounded Sakha path that runs when
 ENABLE_AI_SAKHA_RESPONSE=1. The contract this module guarantees is:
@@ -51,7 +51,7 @@ def _settings(**overrides):
 
 
 def _ctx(**overrides):
-    from backend.services.journey_engine.sakha_wisdom_generator import SakhaContext
+    from backend.services.karma_marg.sakha_wisdom_generator import SakhaContext
 
     base = dict(
         enemy_tag="krodha",
@@ -172,7 +172,7 @@ def _stub_wisdom_sources(monkeypatch):
     unit test never pulls in redis / sqlalchemy / prometheus_client via
     the real GitaWisdomCore import chain. Tests that want to assert on
     grounding contents can override these seams further."""
-    from backend.services.journey_engine import sakha_wisdom_generator as gen
+    from backend.services.karma_marg import sakha_wisdom_generator as gen
 
     monkeypatch.setattr(gen, "_get_wisdom_core", lambda: _FakeWisdomCore())
     monkeypatch.setattr(gen, "_get_examples_db", lambda: _FakeExamplesDB())
@@ -197,7 +197,7 @@ def _patch_provider(monkeypatch, content: str | None):
 async def test_generates_body_and_deterministic_mastery(monkeypatch):
     """When the provider returns valid JSON, we return its body and the
     mastery delta computed deterministically from total_days."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     expected_body = (
         "Anger has begun to soften under your gaze, friend. "
@@ -224,7 +224,7 @@ async def test_passes_only_wisdom_core_grounding_to_provider(monkeypatch):
     """The provider must never see anything beyond the Wisdom Core
     grounding we explicitly pass in. We assert by inspecting the
     captured `messages` argument to .chat()."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     manager = _patch_provider(monkeypatch, json.dumps({"body": "ok"}))
 
@@ -253,7 +253,7 @@ async def test_passes_only_wisdom_core_grounding_to_provider(monkeypatch):
 @pytest.mark.asyncio
 async def test_strips_code_fence_around_json(monkeypatch):
     """Some providers wrap JSON in ```json fences. We strip + reparse."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     fenced = "```json\n" + json.dumps({"body": "Even silent practice is heard."}) + "\n```"
     _patch_provider(monkeypatch, fenced)
@@ -267,7 +267,7 @@ async def test_strips_code_fence_around_json(monkeypatch):
 async def test_rejects_oversized_body(monkeypatch):
     """An overly long body is treated as a failure so the deterministic
     fallback runs. We rely on the caller-supplied char budget."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     big = "x" * 5000
     _patch_provider(monkeypatch, json.dumps({"body": big}))
@@ -282,7 +282,7 @@ async def test_rejects_oversized_body(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_rejects_empty_body(monkeypatch):
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     _patch_provider(monkeypatch, json.dumps({"body": "   "}))
 
@@ -294,7 +294,7 @@ async def test_rejects_empty_body(monkeypatch):
 async def test_rejects_model_refusal_text(monkeypatch):
     """Providers sometimes echo their refusal as the body. We treat that
     as a failure so the user sees the deterministic Sakha instead."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     _patch_provider(monkeypatch, json.dumps({"body": "I cannot fulfil this request."}))
 
@@ -304,7 +304,7 @@ async def test_rejects_model_refusal_text(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_rejects_non_string_body(monkeypatch):
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     _patch_provider(monkeypatch, json.dumps({"body": {"oops": True}}))
 
@@ -314,7 +314,7 @@ async def test_rejects_non_string_body(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_rejects_invalid_json(monkeypatch):
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     _patch_provider(monkeypatch, "definitely not json {")
 
@@ -329,7 +329,7 @@ async def test_rejects_invalid_json(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_provider_exception_returns_none(monkeypatch):
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     manager = SimpleNamespace(chat=AsyncMock(side_effect=RuntimeError("boom")))
     _install_fake_provider(monkeypatch, manager)
@@ -343,7 +343,7 @@ async def test_provider_timeout_returns_none(monkeypatch):
     """Slow providers must not block complete_step. We bound the call."""
     import asyncio
 
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     async def _slow(*_args, **_kwargs):
         await asyncio.sleep(2)  # exceeds AI_SAKHA_TIMEOUT_SECS=0.05
@@ -365,7 +365,7 @@ async def test_no_grounding_returns_none(monkeypatch):
     """If we have no enemy tag and no sacred entry we cannot ground the
     model and must refuse. Caller will fall back to the deterministic
     "you have completed your journey" body."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     # Provider should never be reached when grounding is empty, but
     # patch it anyway so an accidental call would surface obvious noise.
@@ -392,7 +392,7 @@ async def test_no_grounding_returns_none(monkeypatch):
 async def test_mastery_delta_is_deterministic(monkeypatch, total_days, expected):
     """The mastery delta must NOT come from the model — drift would
     erode trust in the +N pill. It is computed from total_days."""
-    from backend.services.journey_engine.sakha_wisdom_generator import generate_ai_sakha
+    from backend.services.karma_marg.sakha_wisdom_generator import generate_ai_sakha
 
     _patch_provider(monkeypatch, json.dumps({"body": "grounded reflection"}))
 

@@ -166,7 +166,10 @@ export function getLocalVersesByTheme(themeId: string): ReadonlyArray<LocalGitaV
   const refs = getLocalThemeVerseRefs(themeId);
   const verses: LocalGitaVerse[] = [];
   for (const ref of refs) {
-    const [c, v] = ref.split('.').map((n) => Number(n));
+    const parts = ref.split('.');
+    if (parts.length !== 2) continue;
+    const c = Number(parts[0]);
+    const v = Number(parts[1]);
     if (!Number.isInteger(c) || !Number.isInteger(v)) continue;
     const resolved = getLocalVerse(c, v);
     if (resolved) verses.push(resolved);

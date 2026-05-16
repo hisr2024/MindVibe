@@ -216,24 +216,24 @@ export const api = {
 
   /** Journey engine */
   journeys: {
-    templates: () => apiClient.get('/api/journey-engine/templates'),
+    templates: () => apiClient.get('/api/karma-marg/templates'),
     template: (templateId: string) =>
-      apiClient.get(`/api/journey-engine/templates/${templateId}`),
+      apiClient.get(`/api/karma-marg/templates/${templateId}`),
     list: (status?: string) =>
-      apiClient.get('/api/journey-engine/journeys', {
-        // Backend (routes/journey_engine.py) expects `status_filter`, not
+      apiClient.get('/api/karma-marg/journeys', {
+        // Backend (routes/karma_marg.py) expects `status_filter`, not
         // `status`. Sending the wrong key silently disables the filter.
         ...(status !== undefined ? { params: { status_filter: status } } : {}),
       }),
     get: (journeyId: string) =>
-      apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
+      apiClient.get(`/api/karma-marg/journeys/${journeyId}`),
     start: (templateId: string) =>
-      apiClient.post('/api/journey-engine/journeys', {
+      apiClient.post('/api/karma-marg/journeys', {
         template_id: templateId,
       }),
     completeStep: (journeyId: string, dayIndex: number) =>
       apiClient.post(
-        `/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}/complete`,
+        `/api/karma-marg/journeys/${journeyId}/steps/${dayIndex}/complete`,
         // Backend declares `request: CompleteStepRequest` as a required
         // body parameter (even though all its fields are optional). An
         // empty object keeps FastAPI happy without sending a reflection.
@@ -241,26 +241,26 @@ export const api = {
       ),
     currentStep: (journeyId: string) =>
       apiClient.get(
-        `/api/journey-engine/journeys/${journeyId}/steps/current`,
+        `/api/karma-marg/journeys/${journeyId}/steps/current`,
       ),
     step: (journeyId: string, dayIndex: number) =>
       apiClient.get(
-        `/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}`,
+        `/api/karma-marg/journeys/${journeyId}/steps/${dayIndex}`,
       ),
     pause: (journeyId: string) =>
-      apiClient.post(`/api/journey-engine/journeys/${journeyId}/pause`),
+      apiClient.post(`/api/karma-marg/journeys/${journeyId}/pause`),
     resume: (journeyId: string) =>
-      apiClient.post(`/api/journey-engine/journeys/${journeyId}/resume`),
+      apiClient.post(`/api/karma-marg/journeys/${journeyId}/resume`),
     /** Close / abandon a journey (DELETE on the backend, soft-deletes only). */
     abandon: (journeyId: string) =>
-      apiClient.delete(`/api/journey-engine/journeys/${journeyId}`),
+      apiClient.delete(`/api/karma-marg/journeys/${journeyId}`),
     /** Full journey detail with steps */
     detail: (journeyId: string) =>
-      apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
-    dashboard: () => apiClient.get('/api/journey-engine/dashboard'),
-    enemies: () => apiClient.get('/api/journey-engine/enemies'),
+      apiClient.get(`/api/karma-marg/journeys/${journeyId}`),
+    dashboard: () => apiClient.get('/api/karma-marg/dashboard'),
+    enemies: () => apiClient.get('/api/karma-marg/enemies'),
     enemyProgress: (enemy: string) =>
-      apiClient.get(`/api/journey-engine/enemies/${enemy}`),
+      apiClient.get(`/api/karma-marg/enemies/${enemy}`),
   },
 
   /** Audio / TTS */
@@ -435,14 +435,14 @@ export const api = {
     streak: () => apiClient.get('/api/sadhana/streak'),
   },
 
-  /** Relationship Compass — Dharma-guided relationship clarity */
+  /** Sambandh Dharma (Relationship Compass) — Dharma-guided relationship clarity */
   relationship: {
-    // Backend (routes/relationship_compass.py) reads `conflict` (not
+    // Backend (routes/sambandh_dharma.py) reads `conflict` (not
     // `question`) and accepts an optional `relationship_type` /
     // `analysis_mode`. Sending the wrong key triggers a 400 because the
     // backend rejects empty conflict text.
     guide: (question: string, context?: string) =>
-      apiClient.post('/api/relationship-compass/guide', {
+      apiClient.post('/api/sambandh-dharma/guide', {
         conflict: question,
         context: context ?? '',
         relationship_type: 'romantic',

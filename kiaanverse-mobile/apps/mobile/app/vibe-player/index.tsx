@@ -97,7 +97,7 @@ interface BuiltinTrackSeed {
   readonly titleKey: string;
   readonly artist: string;
   readonly duration: number;
-  readonly category: string;
+  readonly category: 'meditation' | 'chanting' | 'ambient' | 'mantra';
   readonly audioUrl: string;
   readonly descriptionKey: string;
 }

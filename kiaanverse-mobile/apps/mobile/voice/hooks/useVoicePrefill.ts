@@ -50,10 +50,14 @@ export interface VoicePrefillResult<T extends Record<string, unknown>> {
   acknowledge: () => void;
 }
 
-interface RawVoiceParams {
-  prefill?: string | string[];
-  source?: string | string[];
-  carry_id?: string | string[];
+// Fields are declared as required (not optional) to satisfy expo-router's
+// `SearchParams extends Record<string, string | string[]>` generic
+// constraint, which forbids `| undefined` in the value type. At runtime
+// every field can still be missing — `asScalar` below handles that.
+interface RawVoiceParams extends Record<string, string | string[]> {
+  prefill: string | string[];
+  source: string | string[];
+  carry_id: string | string[];
 }
 
 function asScalar(v: string | string[] | undefined): string | null {

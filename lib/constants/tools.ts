@@ -147,13 +147,13 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     purposeDescKey: 'ardha',
   },
   {
-    id: 'relationship-compass',
+    id: 'sambandh-dharma',
     icon: '🧭',
-    title: 'Relationship Compass',
+    title: 'Sambandh Dharma (Relationship Compass)',
     description: 'Gita-grounded relationship guidance',
     gradient: 'from-rose-400/30 to-[#d4a44c]/30',
-    href: '/tools/relationship-compass',
-    purposeDescKey: 'relationship-compass',
+    href: '/tools/sambandh-dharma',
+    purposeDescKey: 'sambandh-dharma',
   },
 ]
 

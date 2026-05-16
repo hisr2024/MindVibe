@@ -76,7 +76,7 @@ class EcosystemTool(str, Enum):
     COMPANION = "companion"
     VIYOGA = "viyoga"
     ARDHA = "ardha"
-    RELATIONSHIP_COMPASS = "relationship-compass"
+    SAMBANDH_DHARMA = "sambandh-dharma"
     EMOTIONAL_RESET = "emotional-reset"
     KARMA_RESET = "karma-reset"
     KARMA_FOOTPRINT = "karma-footprint"
@@ -128,7 +128,7 @@ TOOL_ROUTES: Dict[EcosystemTool, str] = {
     EcosystemTool.COMPANION: "/companion",
     EcosystemTool.VIYOGA: "/tools/viyog",
     EcosystemTool.ARDHA: "/tools/ardha",
-    EcosystemTool.RELATIONSHIP_COMPASS: "/tools/relationship-compass",
+    EcosystemTool.SAMBANDH_DHARMA: "/tools/sambandh-dharma",
     EcosystemTool.EMOTIONAL_RESET: "/tools/emotional-reset",
     EcosystemTool.KARMA_RESET: "/tools/karma-reset",
     EcosystemTool.KARMA_FOOTPRINT: "/tools/karma-footprint",
@@ -156,8 +156,8 @@ TOOL_ALIASES: Dict[str, EcosystemTool] = {
     "reframe": EcosystemTool.ARDHA,
     "reframing": EcosystemTool.ARDHA,
     "thought": EcosystemTool.ARDHA,
-    "relationship": EcosystemTool.RELATIONSHIP_COMPASS,
-    "compass": EcosystemTool.RELATIONSHIP_COMPASS,
+    "relationship": EcosystemTool.SAMBANDH_DHARMA,
+    "compass": EcosystemTool.SAMBANDH_DHARMA,
     "emotional reset": EcosystemTool.EMOTIONAL_RESET,
     "reset emotions": EcosystemTool.EMOTIONAL_RESET,
     "calm down": EcosystemTool.EMOTIONAL_RESET,
@@ -193,7 +193,7 @@ TOOL_DESCRIPTIONS: Dict[EcosystemTool, str] = {
     EcosystemTool.COMPANION: "KIAAN Companion - your divine best friend with voice",
     EcosystemTool.VIYOGA: "Viyoga - release attachment to outcomes with Gita wisdom",
     EcosystemTool.ARDHA: "Ardha - reframe thoughts using Gita-aligned cognitive techniques",
-    EcosystemTool.RELATIONSHIP_COMPASS: "Relationship Compass - Gita-grounded relationship guidance",
+    EcosystemTool.SAMBANDH_DHARMA: "Sambandh Dharma (Relationship Compass) - Gita-grounded relationship guidance",
     EcosystemTool.EMOTIONAL_RESET: "Emotional Reset - 7-step guided inner peace flow",
     EcosystemTool.KARMA_RESET: "Karma Reset - heal relational harm with compassion",
     EcosystemTool.KARMA_FOOTPRINT: "Karma Footprint - daily action reflection",

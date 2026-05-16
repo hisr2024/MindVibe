@@ -82,14 +82,14 @@ export interface SakhaMessageProps {
    * grounded in. Hidden when empty/undefined — no UI clutter on
    * conversational replies that don't need a citation.
    */
-  readonly verseRefs?: readonly string[];
+  readonly verseRefs?: readonly string[] | undefined;
   /**
    * Called when the user taps "Go deeper" — starts a follow-up turn
    * to take the conversation further on this topic. Chat tab wires
    * this to send() with a "please explain further" prompt seeded
    * with the current message context.
    */
-  readonly onAskFollowUp?: (followUpPrompt: string) => void;
+  readonly onAskFollowUp?: ((followUpPrompt: string) => void) | undefined;
 }
 
 /** Regex that splits text into whitespace vs. non-whitespace runs. */

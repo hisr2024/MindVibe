@@ -130,7 +130,7 @@ export const ARDHA_PILLARS: ArdhaPillar[] = [
   },
   {
     code: 'R',
-    name: 'Raga-Dvesha Diagnosis',
+    name: 'Raga-Dvesha Reflection',
     sanskritName: 'Raga-Dvesha Pariksha',
     icon: 'R',
     coreTeaching:
@@ -347,7 +347,7 @@ export const ARDHA_COMPLIANCE_TESTS: ArdhaComplianceTest[] = [
     test: 'Is action performed without craving?',
     pillar: 'R',
     failIndicator: 'User is still driven by raga or dvesha.',
-    correction: 'Apply Raga-Dvesha Diagnosis: name the attachment.',
+    correction: 'Apply Raga-Dvesha Reflection: name the attachment.',
   },
   {
     test: 'Is outcome mentally released?',

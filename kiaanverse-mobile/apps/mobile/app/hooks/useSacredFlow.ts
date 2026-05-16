@@ -1,7 +1,7 @@
 /**
  * useSacredFlow — lightweight state container for multi-step sacred tool flows.
  *
- * Each flow (viyoga, ardha, karma-reset, emotional-reset, relationship-compass)
+ * Each flow (viyoga, ardha, karma-reset, emotional-reset, sambandh-dharma)
  * owns a bucket of string answers collected across its input screens plus a
  * response payload the submission screen fills after calling KIAAN.
  * Storage is in-memory only — these flows are transient by design (a user
@@ -49,7 +49,7 @@ export type FlowName =
   | 'ardha'
   | 'karma-reset'
   | 'emotional-reset'
-  | 'relationship-compass';
+  | 'sambandh-dharma';
 
 export type FlowStatus = 'idle' | 'calling' | 'done' | 'error';
 
@@ -91,7 +91,7 @@ export interface FlowBucket {
   /** Viyoga-only structured transmission. Null for other flows. */
   readonly aiResponse: FlowAIResponse;
   /** Raw KIAAN response text for ardha / karma-reset / emotional-reset /
-   *  relationship-compass. Null for Viyoga (which uses `aiResponse`). */
+   *  sambandh-dharma. Null for Viyoga (which uses `aiResponse`). */
   readonly plainText: string | null;
   /** Verse the user surfaced from WisdomCore before submitting; echoed to
    *  the backend so its grounding matches what the user saw. */
@@ -317,7 +317,7 @@ function shapeTransmission(
 
 // ---------------------------------------------------------------------------
 // Unified KIAAN submission — ardha / karma-reset / emotional-reset /
-// relationship-compass. Returns the raw `response` string or throws.
+// sambandh-dharma. Returns the raw `response` string or throws.
 // ---------------------------------------------------------------------------
 
 /** Pick a string answer, trim, and fall back to `fallback` if empty. */
@@ -369,8 +369,8 @@ async function submitKiaanTool(
       );
       return res.response;
     }
-    case 'relationship-compass': {
-      const res = await kiaan.tools.relationshipCompass(
+    case 'sambandh-dharma': {
+      const res = await kiaan.tools.sambandhDharma(
         {
           challenge: pickAnswer(answers, 'challenge'),
           relationship_type: pickAnswer(

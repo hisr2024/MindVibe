@@ -1,7 +1,7 @@
 /**
  * useMobileJourneys — Mobile journey state orchestration hook.
  *
- * Wraps journeyEngineService calls and manages loading / error states
+ * Wraps karmaMargService calls and manages loading / error states
  * so the JourneysScreen orchestrator stays lean.
  *
  * Fixed: silent template loading failures, dashboard fallback detection
@@ -11,14 +11,14 @@
 
 import { useState, useCallback, useRef } from 'react'
 import {
-  journeyEngineService,
-  JourneyEngineError,
-} from '@/services/journeyEngineService'
+  karmaMargService,
+  KarmaMargError,
+} from '@/services/karmaMargService'
 import type {
   DashboardResponse,
   JourneyTemplate,
   JourneyResponse,
-} from '@/types/journeyEngine.types'
+} from '@/types/karmaMarg.types'
 
 // BUG-07: Offline catalog used when /templates fails AND we have no cached
 // templates. IDs/slugs MUST match backend/scripts/seed_journey_templates.py
@@ -78,7 +78,7 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
       return
     }
     try {
-      const data = await journeyEngineService.getDashboard()
+      const data = await karmaMargService.getDashboard()
 
       // FIX BUG 4: Detect fallback response from proxy (backend unreachable)
       if (data && '_fallback' in data && (data as { _fallback?: boolean })._fallback) {
@@ -93,17 +93,17 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
       setIsAuthError(false)
       setError(null)
     } catch (err) {
-      if (err instanceof JourneyEngineError && err.isAuthError()) {
+      if (err instanceof KarmaMargError && err.isAuthError()) {
         setIsAuthError(true)
       } else {
-        setError(err instanceof JourneyEngineError ? err.message : 'Failed to load dashboard')
+        setError(err instanceof KarmaMargError ? err.message : 'Failed to load dashboard')
       }
     }
   }, [isAuthenticated, dashboard])
 
   const loadTemplates = useCallback(async () => {
     try {
-      const result = await journeyEngineService.listTemplates({ limit: 50 })
+      const result = await karmaMargService.listTemplates({ limit: 50 })
 
       // FIX BUG 3: Detect fallback response from proxy
       if (result && '_fallback' in result && (result as { _fallback?: boolean })._fallback) {
@@ -154,12 +154,12 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
     setError(null)
 
     try {
-      const journey = await journeyEngineService.startJourney({ template_id: templateId })
+      const journey = await karmaMargService.startJourney({ template_id: templateId })
       // Refresh dashboard to reflect new journey
       loadDashboard()
       return journey
     } catch (err) {
-      if (err instanceof JourneyEngineError) {
+      if (err instanceof KarmaMargError) {
         setError(err.message)
       } else {
         setError('Failed to start journey')

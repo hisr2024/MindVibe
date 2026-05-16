@@ -1,7 +1,7 @@
 """Seed script for the six core Sad-Ripu journey templates.
 
-Without these rows, GET /api/journey-engine/templates returns an empty list
-and POST /api/journey-engine/journeys 404s with TEMPLATE_NOT_FOUND. The
+Without these rows, GET /api/karma-marg/templates returns an empty list
+and POST /api/karma-marg/journeys 404s with TEMPLATE_NOT_FOUND. The
 mobile catalog therefore looks broken even when the backend is healthy.
 
 Run: python -m backend.scripts.seed_journey_templates

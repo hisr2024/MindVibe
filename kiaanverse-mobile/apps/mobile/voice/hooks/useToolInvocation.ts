@@ -56,7 +56,7 @@ export const TOOL_ROUTES: Record<string, string> = {
   KARMA_RESET: '/tools/karma-reset',
   ARDHA: '/tools/ardha',
   VIYOGA: '/tools/viyoga',
-  RELATIONSHIP_COMPASS: '/tools/relationship-compass',
+  SAMBANDH_DHARMA: '/tools/sambandh-dharma',
 
   // Top-level routes (the screens predate the /tools/ namespace).
   SACRED_REFLECTIONS: '/sacred-reflections',

@@ -67,7 +67,7 @@ export default function WisdomRoomsListScreen(): React.JSX.Element {
                 {item.topic}
               </Text>
             </View>
-            <Badge label={t('roomsParticipantsFmt', { count: item.participantCount })} />
+            <Badge label={t('roomsParticipantsFmt', { count: String(item.participantCount) })} />
           </View>
 
           {item.description ? (

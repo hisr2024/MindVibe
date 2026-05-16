@@ -89,7 +89,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
   if (!isLoading && (!data || insufficient || !mirror)) {
     const sub =
       insufficient && entriesNeeded > 0
-        ? t('kiaanInsufficientFmt', { count: entriesNeeded })
+        ? t('kiaanInsufficientFmt', { count: String(entriesNeeded) })
         : t(COPY_KEYS.kiaanEmptySub);
 
     return (
@@ -171,8 +171,8 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
               style={styles.cardLabel}
             >
               {t('kiaanGitaEchoFmt', {
-                chapter: mirror.gita_echo.chapter ?? '',
-                verse: mirror.gita_echo.verse ?? '',
+                chapter: String(mirror.gita_echo.chapter ?? ''),
+                verse: String(mirror.gita_echo.verse ?? ''),
               })}
             </Text>
             <Text

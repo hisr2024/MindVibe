@@ -24,7 +24,7 @@ A comprehensive security and code quality audit of the Wisdom Journeys feature i
 
 ### 1. SECURITY: Unencrypted User Reflections
 
-**Location:** `backend/services/journey_engine_enhanced.py:776-781`
+**Location:** `backend/services/karma_marg_enhanced.py:776-781`
 
 ```python
 if reflection_response:
@@ -55,13 +55,13 @@ if reflection_response:
 | System | API Routes | Service | Models |
 |--------|------------|---------|--------|
 | Legacy | `/api/wisdom-journey/*` | `wisdom_journey_service.py` | `WisdomJourney`, `JourneyStep` |
-| Enhanced | `/api/journeys/*` | `journey_engine_enhanced.py` | `UserJourney`, `UserJourneyStepState` |
+| Enhanced | `/api/journeys/*` | `karma_marg_enhanced.py` | `UserJourney`, `UserJourneyStepState` |
 
 **Files Affected:**
 - `backend/routes/wisdom_journey.py` (legacy)
 - `backend/routes/journeys_enhanced.py` (enhanced)
 - `backend/services/wisdom_journey_service.py` (legacy)
-- `backend/services/journey_engine_enhanced.py` (enhanced)
+- `backend/services/karma_marg_enhanced.py` (enhanced)
 - `services/wisdomJourneyService.ts` (legacy frontend)
 - `services/journeysEnhancedService.ts` (enhanced frontend)
 
@@ -81,7 +81,7 @@ if reflection_response:
 
 ### 3. BUG: Incorrect Progress Calculation
 
-**Location:** `backend/services/journey_engine_enhanced.py:664`
+**Location:** `backend/services/karma_marg_enhanced.py:664`
 
 ```python
 "progress_percentage": int((j.current_day_index / total_days) * 100),
@@ -165,7 +165,7 @@ function getAuthToken(): string | null {
 
 ### 6. RACE CONDITION: Step Completion
 
-**Location:** `backend/services/journey_engine_enhanced.py:726-804`
+**Location:** `backend/services/karma_marg_enhanced.py:726-804`
 
 **Issue:** No database-level locking when completing steps. Two concurrent requests could both succeed, causing double-completion.
 
@@ -175,7 +175,7 @@ function getAuthToken(): string | null {
 
 ### 7. SECURITY: Missing Authorization in TodayAgenda
 
-**Location:** `backend/services/journey_engine_enhanced.py:443-536`
+**Location:** `backend/services/karma_marg_enhanced.py:443-536`
 
 **Issue:** The service layer trusts the `user_id` parameter without verification. If API layer passes incorrect user_id, unauthorized access occurs.
 
@@ -205,7 +205,7 @@ function getAuthToken(): string | null {
 
 ### 10. N+1 QUERY: Verse Text Resolution
 
-**Location:** `backend/services/journey_engine_enhanced.py:511-521`
+**Location:** `backend/services/karma_marg_enhanced.py:511-521`
 
 ```python
 for ref in step_state.verse_refs:
@@ -221,7 +221,7 @@ for ref in step_state.verse_refs:
 
 ### 11. TIMEZONE BUG: Inconsistent UTC Handling
 
-**Location:** `backend/services/journey_engine_enhanced.py:74`
+**Location:** `backend/services/karma_marg_enhanced.py:74`
 
 ```python
 now = datetime.datetime.now(datetime.UTC)
@@ -292,7 +292,7 @@ for attempt in range(max_retries + 1):
 
 ### 17. NO RATE LIMITING: AI Step Generation
 
-**Location:** `backend/services/journey_engine_enhanced.py:254-357`
+**Location:** `backend/services/karma_marg_enhanced.py:254-357`
 
 **Issue:** AI calls in `StepGenerator` lack internal rate limiting. Relies on API layer only.
 
@@ -361,7 +361,7 @@ self._cache: dict[str, VerseText] = {}  # ← No size limit
 
 ### 23. NO AUDIT LOGGING: Journey Data Changes
 
-**Location:** `backend/services/journey_engine_enhanced.py`
+**Location:** `backend/services/karma_marg_enhanced.py`
 
 **Issue:** Journey completion, reflection storage, and status changes lack audit trail. Only `updated_at` timestamp exists but not who/what triggered the change.
 
@@ -441,7 +441,7 @@ This field exists but is never used - `reflection_encrypted` is used instead.
 
 ### 31. NO GRACEFUL DEGRADATION: AI Provider Failure
 
-**Location:** `backend/services/journey_engine_enhanced.py:327-331`
+**Location:** `backend/services/karma_marg_enhanced.py:327-331`
 
 When all AI providers fail, fallback step is generic. Could pre-generate higher-quality fallback content per template.
 
@@ -471,7 +471,7 @@ When all AI providers fail, fallback step is generic. Could pre-generate higher-
 │   /api/wisdom-journey/* → wisdom_journey.py    ← LEGACY         │
 ├─────────────────────────────────────────────────────────────────┤
 │ Services:                                                       │
-│   journey_engine_enhanced.py  ← PREFERRED                       │
+│   karma_marg_enhanced.py  ← PREFERRED                       │
 │   │  ├─ JourneyScheduler                                        │
 │   │  ├─ VersePicker                                             │
 │   │  ├─ StepGenerator                                           │
@@ -633,7 +633,7 @@ The Wisdom Journeys feature has a well-designed architecture with proper separat
 Backend (Python):
   routes/journeys_enhanced.py (844 lines)
   routes/wisdom_journey.py (legacy)
-  services/journey_engine_enhanced.py (899 lines)
+  services/karma_marg_enhanced.py (899 lines)
   services/journey_coach.py (496 lines)
   services/gita_corpus_adapter.py (621 lines)
   services/subscription_service.py

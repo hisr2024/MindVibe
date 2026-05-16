@@ -12,8 +12,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { EnemyType, EnemyProgressResponse } from '@/types/journeyEngine.types'
-import { ENEMY_INFO, ENEMY_ORDER } from '@/types/journeyEngine.types'
+import type { EnemyType, EnemyProgressResponse } from '@/types/karmaMarg.types'
+import { ENEMY_INFO, ENEMY_ORDER } from '@/types/karmaMarg.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 interface EnemyRadarMobileProps {

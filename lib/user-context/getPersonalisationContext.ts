@@ -11,7 +11,7 @@ import type { UserPersonalisationContext, ActiveJourneyContext } from './types'
 
 export async function getPersonalisationContext(): Promise<UserPersonalisationContext> {
   const [journeys, moods, bookmarks] = await Promise.allSettled([
-    apiFetch('/api/journey-engine/dashboard').then(r =>
+    apiFetch('/api/karma-marg/dashboard').then(r =>
       r.ok ? r.json() : null,
     ),
     apiFetch('/api/analytics/mood-trends?days=7').then(r =>

@@ -7,7 +7,7 @@
  *   POST /api/kiaan/tools/ardha                  → Cognitive reframing
  *   POST /api/kiaan/tools/viyoga                 → Sacred detachment
  *   POST /api/kiaan/tools/karma-reset            → Karmic pattern reset
- *   POST /api/kiaan/tools/relationship-compass   → Relationship dharma
+ *   POST /api/kiaan/tools/sambandh-dharma   → Relationship dharma
  *   POST /api/kiaan/tools/karmalytix             → Weekly Sacred Mirror
  *
  * All endpoints return the tight `ChatResponse` envelope the backend's
@@ -117,7 +117,7 @@ export interface KarmaResetInputs {
   readonly dharmic_action: string;
 }
 
-export interface RelationshipCompassInputs {
+export interface SambandhDharmaInputs {
   readonly challenge: string;
   readonly relationship_type: string;  // "partner" | "parent" | "child" | "friend" | "colleague" | "self"
   readonly core_difficulty: string;
@@ -249,12 +249,12 @@ export const kiaan = {
       return data;
     },
 
-    async relationshipCompass(
-      inputs: RelationshipCompassInputs,
+    async sambandhDharma(
+      inputs: SambandhDharmaInputs,
       gitaVerse?: KiaanGitaVerse | null,
     ): Promise<KiaanChatResponse> {
       const { data } = await apiClient.post<KiaanChatResponse>(
-        '/api/kiaan/tools/relationship-compass',
+        '/api/kiaan/tools/sambandh-dharma',
         { inputs, gita_verse: gitaVerse ?? null },
       );
       return data;

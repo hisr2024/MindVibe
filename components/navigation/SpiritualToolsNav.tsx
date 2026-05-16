@@ -4,7 +4,7 @@
  * SpiritualToolsNav – Cross-feature navigation for MindVibe's spiritual toolkit.
  *
  * Renders a compact grid of links connecting the core spiritual tools:
- * Ardha, Viyoga, Relationship Compass, Emotional Reset, Karma Reset,
+ * Ardha, Viyoga, Sambandh Dharma (Relationship Compass), Emotional Reset, Karma Reset,
  * and KIAAN Chat.
  *
  * Highlights the active tool and dims it so the user sees related tools.
@@ -17,7 +17,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 export type SpiritualToolId =
   | 'ardha'
   | 'viyoga'
-  | 'relationship-compass'
+  | 'sambandh-dharma'
   | 'emotional-reset'
   | 'karma-reset'
   | 'karma-footprint'
@@ -54,10 +54,10 @@ const SPIRITUAL_TOOLS: ToolLink[] = [
     description: 'Converse with your spiritual companion',
   },
   {
-    id: 'relationship-compass',
+    id: 'sambandh-dharma',
     icon: '🧭',
-    label: 'Relationship Compass',
-    href: '/tools/relationship-compass',
+    label: 'Sambandh Dharma (Relationship Compass)',
+    href: '/tools/sambandh-dharma',
     description: 'Gita-grounded relationship guidance',
   },
   {

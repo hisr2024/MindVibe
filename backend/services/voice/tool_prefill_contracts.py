@@ -138,9 +138,9 @@ CONTRACTS: dict[str, ToolVoicePrefillContract] = {
         pii_scrub_fields=("split_theme",),
         display_template="Sakha brought your split to Ardha — {split_theme}.",
     ),
-    "RELATIONSHIP_COMPASS": ToolVoicePrefillContract(
-        tool="RELATIONSHIP_COMPASS",
-        route="/tools/relationship-compass",
+    "SAMBANDH_DHARMA": ToolVoicePrefillContract(
+        tool="SAMBANDH_DHARMA",
+        route="/tools/sambandh-dharma",
         allowed_fields=("relationship_role", "tension_summary", "mood_label"),
         required_fields=("relationship_role",),
         pii_scrub_fields=("tension_summary",),

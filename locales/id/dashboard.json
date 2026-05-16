@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Panduan situasional"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "Kompas Hubungan",
       "description": "Panduan hubungan"
     },
@@ -106,7 +106,7 @@
     "viyog": "Tenangkan reaksi langsung",
     "ardha": "Ubah kerangka persepsi",
     "kiaan": "Bicarakan bersama",
-    "relationship-compass": "Navigasi kejelasan relasional",
+    "sambandh-dharma": "Navigasi kejelasan relasional",
     "journey": "Latih keteguhan batin jangka panjang"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Mode Jeda",
     "ardha": "Mode Kejernihan",
     "kiaan": "Mode Pendamping",
-    "relationship-compass": "Mode Hubungan",
+    "sambandh-dharma": "Mode Hubungan",
     "journey": "Mode Latihan"
   }
 }

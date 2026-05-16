@@ -31,8 +31,8 @@ import type {
   JourneyResponse,
   JourneyTemplate,
   EnemyType,
-} from '@/types/journeyEngine.types'
-import { ENEMY_INFO, getDifficultyLabel } from '@/types/journeyEngine.types'
+} from '@/types/karmaMarg.types'
+import { ENEMY_INFO, getDifficultyLabel } from '@/types/karmaMarg.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { EnemySVGFallback } from '@/components/mobile/journeys/EnemySVGFallback'
 

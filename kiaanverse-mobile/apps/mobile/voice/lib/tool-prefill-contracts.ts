@@ -107,9 +107,9 @@ export const CONTRACTS: Record<string, ToolVoicePrefillContract> = {
     displayTemplate: 'Sakha brought your split to Ardha — {split_theme}.',
     voiceGuideMinConfidence: 0.75,
   },
-  RELATIONSHIP_COMPASS: {
-    tool: 'RELATIONSHIP_COMPASS',
-    route: '/tools/relationship-compass',
+  SAMBANDH_DHARMA: {
+    tool: 'SAMBANDH_DHARMA',
+    route: '/tools/sambandh-dharma',
     allowedFields: ['relationship_role', 'tension_summary', 'mood_label'],
     requiredFields: ['relationship_role'],
     piiScrubFields: ['tension_summary'],
