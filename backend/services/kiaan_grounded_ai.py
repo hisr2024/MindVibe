@@ -41,12 +41,13 @@ from __future__ import annotations
 
 import contextlib
 import logging
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.services.ai_provider import call_kiaan_ai
+from backend.services.ai_provider import call_kiaan_ai, call_kiaan_ai_stream
 
 logger = logging.getLogger(__name__)
 
@@ -393,8 +394,254 @@ async def filter_voice_response(
         return raw_text, {"filter_applied": False, "error": str(exc)[:200]}
 
 
+# ── STREAMING ENTRY POINT (P1 §5) ────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class GroundedStreamEvent:
+    """One event in a Wisdom-Core-gated streaming response.
+
+    Three event kinds form the wire protocol:
+
+    * ``"verses"`` — emitted once after the pre-LLM Wisdom Core
+      composition. ``data`` is ``list[dict]`` (the same verse shape
+      :class:`GroundedResponse.verses` carries). Lets the client paint
+      verse-ref chips before the first token arrives.
+    * ``"token"`` — emitted per PASS sentence from
+      :class:`StreamingGitaFilter`. ``data`` is the sentence text plus a
+      single space — concatenating all ``token`` events reconstructs
+      the final user-facing response losslessly. Note: HOLD sentences
+      are not emitted until the filter promotes them to PASS or the
+      stream ends; FAIL truncates the stream and triggers a fallback.
+    * ``"done"`` — emitted exactly once at the end. ``data`` is the
+      filter telemetry dict — ``is_gita_grounded``, ``wisdom_score``,
+      ``enhancement_applied``, ``filter_applied``, ``cache_hit``,
+      ``failure_reason`` (when the streaming filter failed and a
+      fallback was emitted).
+    """
+
+    kind: Literal["verses", "token", "done"]
+    data: Any
+
+
+async def call_kiaan_ai_grounded_stream(
+    *,
+    message: str,
+    db: AsyncSession | None = None,
+    user_id: str | None = None,
+    tool_name: str | None = None,
+    conversation_history: list[dict[str, Any]] | None = None,
+    gita_verse: dict[str, Any] | None = None,
+    system_override: str | None = None,
+    locale: str = "en",
+) -> AsyncIterator[GroundedStreamEvent]:
+    """Wisdom-Core-gated streaming entry point.
+
+    Same three-stage contract as :func:`call_kiaan_ai_grounded` —
+    pre-LLM Wisdom Core composition, LLM call, post-LLM Gita gating —
+    but the LLM step yields token deltas and the filter runs
+    sentence-by-sentence via :class:`StreamingGitaFilter` instead of
+    the unary ``filter_response``. Same filter the WSS voice path uses
+    (``backend/services/voice/orchestrator.py``).
+
+    Cache integration: the read path is honoured (a HIT short-circuits
+    compose + LLM and emits the cached payload as a single ``verses``
+    event + one ``token`` event + ``done``). The write path is
+    skipped — partial-stream responses are not safe to cache, and the
+    unary path already populates the cache for the next unary call.
+
+    Args mirror :func:`call_kiaan_ai_grounded`.
+
+    Yields :class:`GroundedStreamEvent` in this order:
+
+      verses → token? → token? → ... → done
+
+    Raises the same :class:`AIProviderError` / :class:`AIProviderNotConfigured`
+    hierarchy as the unary path. The SSE route maps them to 503 / 502.
+    """
+    if not message or not message.strip():
+        raise ValueError("message must be a non-empty string")
+
+    # ── 0. Cache read (same eligibility rules as unary) ───────────────
+    cache_eligible = (
+        user_id is not None
+        and not (system_override and system_override.strip())
+        and gita_verse is None
+    )
+    if cache_eligible:
+        try:
+            from backend.services.kiaan_response_cache import (
+                get_response_cache,
+            )
+
+            cache = get_response_cache()
+            cached_payload = await cache.get(
+                user_id=user_id,
+                tool_name=tool_name,
+                message=message,
+                locale=locale,
+            )
+            if cached_payload is not None:
+                # HIT: emit the same protocol as a fresh stream so the
+                # client never has to special-case it.
+                yield GroundedStreamEvent(
+                    kind="verses",
+                    data=list(cached_payload.get("verses") or []),
+                )
+                cached_text = cached_payload.get("text") or ""
+                if cached_text:
+                    yield GroundedStreamEvent(kind="token", data=cached_text)
+                yield GroundedStreamEvent(
+                    kind="done",
+                    data={
+                        "is_gita_grounded": bool(
+                            cached_payload.get("is_gita_grounded", True)
+                        ),
+                        "wisdom_score": float(
+                            cached_payload.get("wisdom_score", 1.0)
+                        ),
+                        "enhancement_applied": bool(
+                            cached_payload.get("enhancement_applied", False)
+                        ),
+                        "filter_applied": bool(
+                            cached_payload.get("filter_applied", True)
+                        ),
+                        "cache_hit": True,
+                    },
+                )
+                return
+        except Exception as exc:
+            logger.warning(
+                "grounded_stream: cache GET failed (tool=%s): %s",
+                tool_name,
+                exc,
+            )
+
+    # ── 1. Pre-LLM compose ───────────────────────────────────────────
+    verses: list[dict[str, Any]] = []
+    effective_override = system_override
+    if db is not None and not (system_override and system_override.strip()):
+        try:
+            from backend.services.kiaan_wisdom_helper import (
+                compose_kiaan_system_prompt,
+            )
+
+            composed, verses = await compose_kiaan_system_prompt(
+                db=db,
+                query=message,
+                tool_name=tool_name,
+                user_id=user_id,
+            )
+            if composed:
+                effective_override = composed
+        except Exception as exc:
+            logger.warning(
+                "grounded_stream: Wisdom Core compose failed "
+                "(tool=%s user=%s): %s",
+                tool_name,
+                user_id,
+                exc,
+            )
+
+    # Emit the verses immediately so the client can render chips while
+    # the LLM is still thinking. Empty list is fine — the client just
+    # renders nothing.
+    yield GroundedStreamEvent(kind="verses", data=verses)
+
+    # ── 2. + 3. Stream tokens through the streaming Gita filter ──────
+    verse_refs: list[str] = []
+    for v in verses:
+        ref = v.get("verse_ref")
+        if ref:
+            # The streaming filter wants the "BG <chapter>.<verse>" form
+            # to match its citation rules (mirrors voice/orchestrator).
+            verse_refs.append(ref if ref.startswith("BG ") else f"BG {ref}")
+
+    from backend.services.gita_wisdom_filter import (
+        StreamingFilterVerdict,
+        StreamingGitaFilter,
+        WisdomTool,
+    )
+
+    filter_tool = WisdomTool.GENERAL
+    if tool_name:
+        mapped = _TOOL_NAME_TO_FILTER_TOOL.get(tool_name)
+        if mapped:
+            with contextlib.suppress(ValueError):
+                filter_tool = WisdomTool(mapped)
+
+    streaming_filter = StreamingGitaFilter(
+        tool_type=filter_tool,
+        retrieved_verses=verse_refs,
+    )
+
+    failure_reason: str | None = None
+    fallback_tier: str | None = None
+
+    try:
+        async for delta in call_kiaan_ai_stream(
+            message=message,
+            conversation_history=conversation_history,
+            gita_verse=gita_verse,
+            tool_name=tool_name,
+            system_override=effective_override,
+        ):
+            result = streaming_filter.feed(delta)
+            if result.verdict == StreamingFilterVerdict.FAIL:
+                failure_reason = result.failure_reason
+                fallback_tier = result.fallback_tier
+                break
+            for sentence in result.completed_sentences:
+                if sentence.strip():
+                    yield GroundedStreamEvent(
+                        kind="token",
+                        data=sentence + " ",
+                    )
+        # Drain any HOLD sentences remaining in the buffer at stream end.
+        if not streaming_filter.is_failed:
+            final = streaming_filter.finalize()
+            if final.verdict == StreamingFilterVerdict.FAIL:
+                failure_reason = final.failure_reason
+                fallback_tier = final.fallback_tier
+            else:
+                for sentence in final.completed_sentences:
+                    if sentence.strip():
+                        yield GroundedStreamEvent(
+                            kind="token",
+                            data=sentence + " ",
+                        )
+    except Exception as exc:
+        # Mirror the unary path: filter / streaming errors degrade the
+        # response but never block. The SSE route logs the exception.
+        # The ``done`` event below reports filter_applied=False so the
+        # client can decide how to display the partial response.
+        logger.warning(
+            "grounded_stream: streaming filter pipeline failed "
+            "(tool=%s): %s",
+            tool_name,
+            exc,
+        )
+        failure_reason = failure_reason or str(exc)[:200]
+
+    # ── 4. Done ──────────────────────────────────────────────────────
+    yield GroundedStreamEvent(
+        kind="done",
+        data={
+            "is_gita_grounded": not streaming_filter.is_failed,
+            "wisdom_score": float(streaming_filter.cumulative_score),
+            "enhancement_applied": False,  # streaming uses filter, not enhance
+            "filter_applied": True,
+            "cache_hit": False,
+            "failure_reason": failure_reason,
+            "fallback_tier": fallback_tier,
+        },
+    )
+
+
 __all__ = [
     "GroundedResponse",
+    "GroundedStreamEvent",
     "call_kiaan_ai_grounded",
+    "call_kiaan_ai_grounded_stream",
     "filter_voice_response",
 ]

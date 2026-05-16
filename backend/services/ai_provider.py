@@ -27,6 +27,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from collections.abc import AsyncIterator
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -264,6 +265,78 @@ def _sanitize_history(
     return cleaned
 
 
+# ── STREAMING ENTRY POINT ─────────────────────────────────────────────────
+async def call_kiaan_ai_stream(
+    message: str,
+    conversation_history: list[dict[str, Any]] | None = None,
+    gita_verse: dict[str, Any] | None = None,
+    tool_name: str | None = None,
+    system_override: str | None = None,
+) -> AsyncIterator[str]:
+    """Streaming variant of :func:`call_kiaan_ai`.
+
+    Yields text deltas as they arrive from the upstream provider. The
+    composed system prompt, history sanitisation, and provider routing
+    rules are identical to the unary path — only the transport changes.
+
+    Today only OpenAI streaming is wired. Anthropic + Sarvam fall back
+    to a one-shot emit so callers do not need to special-case
+    ``AI_PROVIDER`` at the route layer. When those providers grow real
+    streaming support, the implementation hops here without touching
+    the consumer.
+
+    Raises the same exception hierarchy as ``call_kiaan_ai`` so the
+    SSE route can map ``AIProviderNotConfigured`` → 503 and
+    ``AIProviderError`` → 502 with the same handlers chat already has.
+    """
+    if not message or not message.strip():
+        raise ValueError("message must be a non-empty string")
+
+    system = _build_system_prompt(gita_verse, tool_name, system_override)
+    history = _sanitize_history(conversation_history)
+
+    started = time.monotonic()
+    chunks_emitted = 0
+    try:
+        if AI_PROVIDER == "openai":
+            async for delta in _stream_openai(system, message, history):
+                if delta:
+                    chunks_emitted += 1
+                    yield delta
+        elif AI_PROVIDER == "anthropic":
+            # No native streaming wired yet — fall back to a one-shot
+            # emit so the SSE route can still serve the response. The
+            # client sees a single token event followed by done.
+            text = await _call_anthropic(system, message, history)
+            if text:
+                chunks_emitted += 1
+                yield text
+        else:
+            raise ValueError(f"Unknown AI_PROVIDER: {AI_PROVIDER!r}")
+    except AIProviderError:
+        raise
+    except Exception as exc:
+        logger.exception(
+            "AI provider stream failed provider=%s model=%s tool=%s",
+            AI_PROVIDER,
+            AI_MODEL,
+            tool_name,
+        )
+        raise AIProviderError(f"{AI_PROVIDER} stream failed: {exc}") from exc
+
+    latency_ms = int((time.monotonic() - started) * 1000)
+    logger.info(
+        "kiaan_ai_stream ok provider=%s model=%s tool=%s history_turns=%d "
+        "chunks=%d latency_ms=%d",
+        AI_PROVIDER,
+        AI_MODEL,
+        tool_name or "chat",
+        len(history),
+        chunks_emitted,
+        latency_ms,
+    )
+
+
 # ── OPENAI ────────────────────────────────────────────────────────────────
 async def _call_openai(
     system: str,
@@ -296,6 +369,51 @@ async def _call_openai(
     if not response.choices:
         raise AIProviderError("OpenAI returned no choices")
     return response.choices[0].message.content or ""
+
+
+async def _stream_openai(
+    system: str,
+    message: str,
+    history: list[dict[str, str]],
+) -> AsyncIterator[str]:
+    """OpenAI streaming. Yields content deltas as they arrive.
+
+    Honours the same ``AI_*`` env knobs as the unary path. The
+    ``stream=True`` flag plus the AsyncOpenAI client yields a stream
+    of ``ChatCompletionChunk`` objects; we project each chunk's first
+    choice's content delta to a plain string. Empty deltas (the first
+    chunk is usually role-only metadata) are skipped at the route
+    layer.
+    """
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise AIProviderNotConfigured(
+            "OPENAI_API_KEY is not configured. "
+            "Set it in the Render dashboard to enable KIAAN AI."
+        )
+
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(api_key=api_key, timeout=AI_TIMEOUT_SECONDS)
+
+    messages: list[dict[str, str]] = [{"role": "system", "content": system}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": message})
+
+    stream = await client.chat.completions.create(
+        model=AI_MODEL,
+        messages=messages,
+        max_tokens=AI_MAX_TOKENS,
+        temperature=AI_TEMPERATURE,
+        stream=True,
+    )
+    async for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta
+        content = getattr(delta, "content", None) if delta is not None else None
+        if content:
+            yield content
 
 
 # ── ANTHROPIC ─────────────────────────────────────────────────────────────

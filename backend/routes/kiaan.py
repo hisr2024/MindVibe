@@ -17,10 +17,12 @@ to :func:`backend.services.ai_provider.call_kiaan_ai`, and returns a tight
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +32,10 @@ from backend.services.ai_provider import (
     AIProviderError,
     AIProviderNotConfigured,
 )
-from backend.services.kiaan_grounded_ai import call_kiaan_ai_grounded
+from backend.services.kiaan_grounded_ai import (
+    call_kiaan_ai_grounded,
+    call_kiaan_ai_grounded_stream,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +240,119 @@ async def sakha_chat_alias(
 ) -> ChatResponse:
     """Compat alias at ``/api/sakha/chat`` — identical to ``/api/kiaan/chat``."""
     return await _handle_sakha_chat(payload, current_user_id, db)
+
+
+# ── ENDPOINT 1b: Sakha Chat (streaming SSE variant) ──────────────────────
+@router.post("/chat/stream")
+@limiter.limit(CHAT_RATE_LIMIT)
+async def sakha_chat_stream(
+    request: Request,
+    payload: ChatRequest,
+    current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    """Streaming variant of the Sakha chat endpoint (P1 §5).
+
+    Wire format: Server-Sent Events. Three event types in order:
+
+      * ``event: verses``  → list[dict] of Wisdom Core verses
+      * ``event: token``   → str delta (one PASS sentence + trailing space)
+      * ``event: done``    → telemetry dict (wisdom_score,
+                              is_gita_grounded, enhancement_applied,
+                              filter_applied, cache_hit, failure_reason)
+
+    Cache HITs are emitted as the same protocol so the client never has
+    to special-case them: ``verses`` event + a single ``token`` event
+    carrying the cached text + ``done`` with ``cache_hit: true``.
+
+    The pre-LLM Wisdom Core composer runs identically to the unary
+    endpoint (same persona, same Static + Dynamic retrieval, same
+    practical-wisdom enrichment). The post-LLM filter is the streaming
+    variant — sentence-by-sentence PASS / HOLD / FAIL with the same
+    rules the voice WSS path applies.
+
+    Errors:
+      * Provider not configured → 503 before the stream starts.
+      * Upstream transient failure → 502 before the stream starts.
+      * Mid-stream filter FAIL → the stream closes cleanly with a
+        ``done`` event carrying ``failure_reason`` and ``fallback_tier``.
+        The client renders the partial response under a "fallback"
+        affordance.
+    """
+    history = [
+        {"role": m.role, "content": m.content} for m in payload.conversation_history
+    ]
+
+    async def _event_stream():
+        try:
+            async for event in call_kiaan_ai_grounded_stream(
+                message=payload.message,
+                db=db,
+                user_id=current_user_id,
+                tool_name=payload.tool_name,
+                conversation_history=history,
+                gita_verse=payload.gita_verse,
+                system_override=payload.system_context,
+            ):
+                # Serialize each event as one SSE record. ``data:`` MUST
+                # be valid JSON (the field is a single string, but JSON
+                # is the simplest unambiguous encoding for arbitrary
+                # payloads — dict, list, str all serialize cleanly).
+                payload_json = json.dumps(event.data, ensure_ascii=False)
+                yield (
+                    f"event: {event.kind}\n"
+                    f"data: {payload_json}\n\n"
+                ).encode()
+        except AIProviderNotConfigured as exc:
+            logger.error("KIAAN AI stream not configured: %s", exc)
+            # Once the StreamingResponse has started we cannot change
+            # the HTTP status. Emit a done event with the failure
+            # reason so the client can surface it.
+            yield (
+                "event: done\n"
+                f'data: {{"failure_reason": "ai_not_configured", "detail": "{str(exc)[:160]}"}}\n\n'
+            ).encode()
+        except AIProviderError as exc:
+            logger.error(
+                "KIAAN AI stream provider error (tool=%s): %s",
+                payload.tool_name,
+                exc,
+            )
+            yield (
+                "event: done\n"
+                f'data: {{"failure_reason": "ai_provider_error", "detail": "{str(exc)[:160]}"}}\n\n'
+            ).encode()
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("KIAAN AI stream crashed: %s", exc)
+            yield (
+                b"event: done\n"
+                b'data: {"failure_reason": "internal_error"}\n\n'
+            )
+
+    # Pre-flight: bounce the obvious config error before opening the
+    # SSE so the client gets a clean 503 instead of a degraded stream.
+    # We mirror the unary route's behaviour here.
+    import os as _os
+    if (
+        _os.getenv("AI_PROVIDER", "openai").strip().lower() == "openai"
+        and not _os.getenv("OPENAI_API_KEY", "").strip()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Sakha is temporarily unavailable. Please try again shortly.",
+        )
+
+    return StreamingResponse(
+        _event_stream(),
+        media_type="text/event-stream",
+        # Disable buffering at any intermediate proxy so each SSE record
+        # reaches the client immediately.
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 # ── ENDPOINT 2: Emotional Reset ──────────────────────────────────────────

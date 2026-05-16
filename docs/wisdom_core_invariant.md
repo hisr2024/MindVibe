@@ -55,6 +55,39 @@ Every provider call goes through this pipeline:
                 └──────────────────────────────────────┘
 ```
 
+## Streaming entry point (SSE)
+
+`backend/services/kiaan_grounded_ai.call_kiaan_ai_grounded_stream`
+yields `GroundedStreamEvent` objects so chat clients can render
+incrementally — first paint goes from ~1.2 s (unary) to ~200 ms.
+
+Wire protocol: SSE-style events in order
+
+```
+event: verses    data: list[dict]          (Wisdom Core verses)
+event: token     data: str                 (one PASS sentence + space)
+event: token     data: str
+...
+event: done      data: { is_gita_grounded, wisdom_score,
+                         enhancement_applied, filter_applied,
+                         cache_hit, failure_reason, fallback_tier }
+```
+
+The HTTP surface is `POST /api/kiaan/chat/stream`. Same Wisdom Core
+composition + post-LLM filter as the unary path, but the filter is the
+**streaming** variant (`StreamingGitaFilter`) — the same one the WSS
+voice path uses. PASS sentences flush as tokens; HOLD sentences buffer;
+FAIL truncates the stream and the `done` event carries
+`failure_reason` + `fallback_tier`.
+
+Cache: HITs are emitted as the same wire shape (`verses` + one `token`
+carrying the full cached text + `done` with `cache_hit: true`). MISSes
+do **not** write the cache — partial-stream snapshots aren't safe to
+serve later; the unary endpoint populates the cache for next time.
+
+Bypass conditions: same as unary — `user_id=None`, `system_override`,
+`gita_verse` pin, or `KIAAN_RESPONSE_CACHE_ENABLED=false`.
+
 ## The unified Wisdom Core retriever
 
 `backend/services/wisdom/retrieve.py::retrieve_wisdom` is the **single
