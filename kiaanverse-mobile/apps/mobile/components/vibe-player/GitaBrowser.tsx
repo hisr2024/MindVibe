@@ -43,7 +43,7 @@ const CHAPTERS: readonly ChapterRow[] = [
   { num: 3, english: 'Karma Yoga', sanskrit: 'कर्म योग', verses: 43 },
   {
     num: 4,
-    english: 'Jnana Karma Sanyasa Yoga',
+    english: '',
     sanskrit: 'ज्ञान कर्म संन्यास योग',
     verses: 42,
   },
@@ -75,20 +75,20 @@ const CHAPTERS: readonly ChapterRow[] = [
   { num: 10, english: 'Vibhuti Yoga', sanskrit: 'विभूति योग', verses: 42 },
   {
     num: 11,
-    english: 'Vishvarupa Darshana Yoga',
+    english: '',
     sanskrit: 'विश्वरूप दर्शन योग',
     verses: 55,
   },
   { num: 12, english: 'Bhakti Yoga', sanskrit: 'भक्ति योग', verses: 20 },
   {
     num: 13,
-    english: 'Kshetra Kshetrajna Yoga',
+    english: '',
     sanskrit: 'क्षेत्र क्षेत्रज्ञ विभाग योग',
     verses: 35,
   },
   {
     num: 14,
-    english: 'Gunatraya Vibhaga Yoga',
+    english: '',
     sanskrit: 'गुणत्रय विभाग योग',
     verses: 27,
   },

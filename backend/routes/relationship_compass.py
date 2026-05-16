@@ -1166,7 +1166,7 @@ Essential Bhagavad Gita teachings for relationships:
   Principle: Priya vachana - pleasant truth, beneficial speech.
   Application: Before speaking, ask: Is it true? Is it kind? Is it necessary?
 
-- BG 18.66: "Abandon all varieties of dharmas and surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear."
+- BG 18.66: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins."
   Principle: Sharanagati (surrender) - release anxiety to a larger order.
   Application: When overwhelmed, surrender the outcome while doing your best.
 [/GITA_CORE_WISDOM_CONTEXT]"""

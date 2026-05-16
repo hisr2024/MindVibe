@@ -44,7 +44,7 @@ const CHAPTER_VERSES: Record<number, StaticVerse[]> = {
   ],
   18: [
     { chapter: 18, verse: 47, sanskrit: '\u0936\u094D\u0930\u0947\u092F\u093E\u0928\u094D\u0938\u094D\u0935\u0927\u0930\u094D\u092E\u094B \u0935\u093F\u0917\u0941\u0923\u0903', transliteration: 'sreyan sva-dharmo vigunah', preview: 'Better to follow your own dharma imperfectly than another\'s dharma perfectly.', theme: 'Your unique path' },
-    { chapter: 18, verse: 66, sanskrit: '\u0938\u0930\u094D\u0935\u0927\u0930\u094D\u092E\u093E\u0928\u094D\u092A\u0930\u093F\u0924\u094D\u092F\u091C\u094D\u092F', transliteration: 'sarva-dharman parityajya', preview: 'Abandon all varieties of dharmas and surrender unto Me. I shall deliver you. Do not fear.', theme: 'Surrender & freedom' },
+    { chapter: 18, verse: 66, sanskrit: '\u0938\u0930\u094D\u0935\u0927\u0930\u094D\u092E\u093E\u0928\u094D\u092A\u0930\u093F\u0924\u094D\u092F\u091C\u094D\u092F', transliteration: 'sarva-dharman parityajya', preview: 'Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins.', theme: 'Surrender & freedom' },
     { chapter: 18, verse: 78, sanskrit: '\u092F\u0924\u094D\u0930 \u092F\u094B\u0917\u0947\u0936\u094D\u0935\u0930\u0903 \u0915\u0943\u0937\u094D\u0923\u094B', transliteration: 'yatra yogeshvarah krishno', preview: 'Where there is wisdom and action together, there will be prosperity, victory, and firm justice.', theme: 'Wisdom + Action' },
   ],
 }

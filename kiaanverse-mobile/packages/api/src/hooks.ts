@@ -214,7 +214,7 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
 /**
  * A verse is considered "placeholder" when the seed corpus has not yet been
  * populated with real content. The seed generator wrote `sanskrit: "॥ X.Y ॥"`
- * and `english: "Bhagavad Gita Chapter X, Verse Y teaches wisdom on <theme>."`
+ * and `english: ""`
  * for most verses; the backend returns that text verbatim. Treat those rows
  * as missing so the UI can show a real fallback instead of the generated
  * copy — otherwise the home screen literally reads
@@ -248,7 +248,7 @@ const BG_2_47_FALLBACK: GitaVerse = {
   transliteration:
     "karmaṇy-evādhikāras te mā phaleṣhu kadāchana\nmā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
   translation:
-    'You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results, nor be attached to inaction.',
+    '',
 };
 
 export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {

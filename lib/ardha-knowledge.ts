@@ -198,7 +198,7 @@ export const ARDHA_PILLARS: ArdhaPillar[] = [
       {
         reference: 'BG 2.47',
         english:
-          'You have a right to perform your prescribed duty, but you are not entitled to the fruits of action.',
+          'Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached.',
         principle: 'You control action alone, never its fruits. This is Karma Yoga.',
         reframeGuidance:
           'Focus on what you can control: quality of effort. Release what you cannot: the specific outcome.',
@@ -216,7 +216,7 @@ export const ARDHA_PILLARS: ArdhaPillar[] = [
       {
         reference: 'BG 3.8',
         english:
-          'Perform your prescribed duty, for action is better than inaction.',
+          'Do thou perform right action, for action is better than inaction.',
         principle: 'Action is always superior to inaction.',
         reframeGuidance:
           'Even imperfect action is better than paralysis. Move forward with whatever capacity you have.',
@@ -294,7 +294,7 @@ export const ARDHA_PILLARS: ArdhaPillar[] = [
       {
         reference: 'BG 18.66',
         english:
-          'Abandon all varieties of dharma and just surrender unto Me. I shall deliver you from all sinful reactions. Do not fear.',
+          'Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins.',
         principle: 'Ultimate surrender: let go of all anxiety. Trust in the larger order.',
         reframeGuidance:
           'Complete surrender. You have done everything you can. Now release. Trust the larger order.',

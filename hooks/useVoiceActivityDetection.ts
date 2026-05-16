@@ -180,6 +180,9 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
       const supportsWebNN = typeof navigator !== 'undefined' && 'ml' in navigator
 
       const instance = await MicVAD.new({
+        // Use the MIT-licensed Silero v3 ("legacy") model. Silero v4+ is
+        // under a more restrictive commercial license.
+        model: 'legacy',
         positiveSpeechThreshold: 0.8,
         minSpeechMs: 480,
         redemptionMs: 1500,

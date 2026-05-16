@@ -179,7 +179,7 @@ class TestGitaServiceVerses:
             verse=47,
             sanskrit="कर्मण्येवाधिकारस्ते",
             hindi="तुम्हें केवल कर्म करने का अधिकार है",
-            english="You have the right to perform your duty",
+            english="<placeholder pending PD-baseline rebuild>",
             principle="Karma Yoga",
             theme="Action",
         )
@@ -302,7 +302,7 @@ class TestGitaServiceSearch:
             verse=1,
             sanskrit="योगस्थः कुरु कर्माणि",
             hindi="योग में स्थित होकर कर्म करो",
-            english="Perform action being steadfast in yoga",
+            english="<placeholder pending PD-baseline rebuild>",
             principle="Balanced Action",
             theme="Yoga",
         )
@@ -562,7 +562,7 @@ class TestGitaServiceFormatting:
             sanskrit="कर्मण्येवाधिकारस्ते",
             transliteration="karmaṇy evādhikāras te",
             hindi="तुम्हें केवल कर्म का अधिकार है",
-            english="You have the right to perform your duty",
+            english="<placeholder pending PD-baseline rebuild>",
             word_meanings={"कर्म": "action", "अधिकार": "right"},
             principle="Karma Yoga",
             theme="Action",

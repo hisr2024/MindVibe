@@ -173,7 +173,7 @@ def compare_before_after():
         "verse_number": 47,
         "verse_id": "2.47",
         "theme": "action_without_attachment",
-        "english": "You have the right to perform your duties, but you are not entitled to the fruits of your actions.",
+        "english": "<placeholder pending PD-baseline rebuild>",
         "hindi": "तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं।",
         "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन॥",
         "context": "Lord Krishna teaches Arjuna about performing duty without attachment to outcomes.",

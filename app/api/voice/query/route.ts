@@ -17,7 +17,7 @@ const FALLBACK_RESPONSES = [
   },
   {
     response: "Remember, you have the right to your actions, but not to the fruits of your actions. Focus on what you can control, and release what you cannot.",
-    verse: { chapter: 2, verse: 47, text: "You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions." },
+    verse: { chapter: 2, verse: 47, text: "Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached." },
   },
   {
     response: "In moments of challenge, the wise remain undisturbed. Your inner peace is your greatest strength. KIAAN is here with you.",
@@ -29,7 +29,7 @@ const FALLBACK_RESPONSES = [
   },
   {
     response: "Krishna says: Whenever you feel lost, remember that I am always with you. You are never alone on this journey.",
-    verse: { chapter: 18, verse: 66, text: "Abandon all varieties of dharmas and simply surrender unto Me. I shall deliver you from all sinful reactions. Do not fear." },
+    verse: { chapter: 18, verse: 66, text: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins." },
   },
 ]
 

@@ -269,9 +269,14 @@ export {
   getLocalChapterHeaders,
   getLocalVerse,
   isLocalGitaAvailable,
+  getLocalVersesByTheme,
+  getLocalThemeVerseRefs,
+  getLocalThemeVerseCount,
+  LOCAL_GITA_THEME_IDS,
 } from './localGita';
 export type {
   LocalGitaChapter,
   LocalGitaChapterHeader,
   LocalGitaVerse,
+  LocalGitaThemeId,
 } from './localGita';

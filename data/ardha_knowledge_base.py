@@ -326,10 +326,9 @@ DHARMA_ALIGNMENT = ArdhaPillar(
             chapter=2, verse=47,
             sanskrit_key="karmany evadhikaras te",
             english=(
-                "You have a right to perform your prescribed duty, but you "
-                "are not entitled to the fruits of action. Never consider "
-                "yourself the cause of the results, and never be attached "
-                "to not doing your duty."
+                "Thy business is with the action only, never with its fruits; "
+                "so let not the fruit of action be thy motive, nor be thou to "
+                "inaction attached."
             ),
             principle=(
                 "You control action alone, never its fruits. "
@@ -382,9 +381,9 @@ DHARMA_ALIGNMENT = ArdhaPillar(
             chapter=3, verse=8,
             sanskrit_key="niyatam kuru karma tvam",
             english=(
-                "Perform your prescribed duty, for action is better than "
-                "inaction. Even the maintenance of your body would not be "
-                "possible by inaction."
+                "Do thou perform right action, for action is better than "
+                "inaction; the body's journey cannot be accomplished by "
+                "inaction."
             ),
             principle="Action is always superior to inaction.",
             pillar="dharma_alignment",
@@ -575,8 +574,8 @@ ARPANA_SURRENDER = ArdhaPillar(
             chapter=18, verse=66,
             sanskrit_key="sarva-dharman parityajya",
             english=(
-                "Abandon all varieties of dharma and just surrender unto Me. "
-                "I shall deliver you from all sinful reactions. Do not fear."
+                "Abandoning all duties, come unto Me alone for shelter; "
+                "sorrow not, I will liberate thee from all sins."
             ),
             principle=(
                 "Ultimate surrender: let go of all anxiety. "

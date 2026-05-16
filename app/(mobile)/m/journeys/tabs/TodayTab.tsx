@@ -35,7 +35,7 @@ function getGreeting(): GreetingData {
   if (hour >= 5 && hour < 12) return { sanskrit: '\u0938\u0941\u092A\u094D\u0930\u092D\u093E\u0924\u092E\u094D', english: 'Good Morning, Warrior' }
   if (hour >= 12 && hour < 18) return { sanskrit: '\u0928\u092E\u0938\u094D\u0915\u093E\u0930', english: 'Your practice awaits' }
   if (hour >= 18 && hour < 22) return { sanskrit: '\u0938\u0902\u0927\u094D\u092F\u093E \u0935\u0902\u0926\u0928\u093E', english: 'Evening reflection' }
-  return { sanskrit: '\u0930\u093E\u0924\u094D\u0930\u0940 \u0915\u0947 \u0938\u093E\u0927\u0915', english: 'The night belongs to the seeker' }
+  return { sanskrit: '\u0930\u093E\u0924\u094D\u0930\u0940 \u0915\u0947 \u0938\u093E\u0927\u0915', english: '' }
 }
 
 function formatDate(): string {

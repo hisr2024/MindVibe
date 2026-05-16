@@ -119,7 +119,7 @@ Core teachings from the Bhagavad Gita for ARDHA reframing:
 - BG 2.38: "Treating alike pleasure and pain, gain and loss, victory and defeat, engage in battle."
   ARDHA Pillar: Hrdaya Samatvam — Equal vision in all dualities.
 
-- BG 18.66: "Abandon all varieties of dharma and surrender unto Me. Do not fear."
+- BG 18.66: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins."
   ARDHA Pillar: Arpana — Complete surrender completes Karma Yoga.
 
 - BG 9.27: "Whatever you do, whatever you eat, whatever you offer — do it as an offering to Me."

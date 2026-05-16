@@ -1088,7 +1088,7 @@ RESPOND WITH THIS ULTRA-DEEP, TRANSFORMATIVE STRUCTURE:
    - Powerful metaphor: Like gripping water - the tighter we hold, the faster it escapes. Open hands receive everything.
 
 3. THE COMPLETE TEACHING OF KARMA YOGA (Multi-layered transmission)
-   - The sacred verse: "Karmanye vadhikaraste, ma phaleshu kadachana"
+   - The sacred verse: "<placeholder pending PD-baseline rebuild>"
    - MEANING LAYER 1 (Literal): You have the right to action alone, never to its fruits
    - MEANING LAYER 2 (Practical): Your domain is EFFORT; results belong to forces beyond you
    - MEANING LAYER 3 (Psychological): When we release outcome-grip, we perform at our HIGHEST capacity

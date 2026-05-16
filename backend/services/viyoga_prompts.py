@@ -280,7 +280,7 @@ Essential Bhagavad Gita teachings for the Five Pillars of deep detachment:
 
 === PILLAR 2: PHALA-TYAGA (Complete Fruit Renunciation) ===
 
-- BG 2.47: "Karmanye vadhikaraste ma phaleshu kadachana — You have the right to perform your prescribed duty, but you are not entitled to the fruits of your actions."
+- BG 2.47: "Karmanye vadhikaraste ma phaleshu kadachana — Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached."
   Pillar: Phala-tyaga. Not merely "focus on effort." RENOUNCE the claim. You never owned the outcome.
   Application: "Your right was to the preparation. The result was never yours to hold."
 
