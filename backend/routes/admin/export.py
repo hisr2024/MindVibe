@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from backend.deps import get_db
 from backend.middleware.rbac import (
@@ -86,7 +87,24 @@ async def export_users(
     stmt = select(User).where(User.deleted_at.is_(None)).order_by(User.created_at.desc())
     result = await db.execute(stmt)
     users = result.scalars().all()
-    
+
+    # If exporting subscription info, prefetch ALL subs in one query and
+    # join with the plan eagerly. Replaces a per-user N+1 (one query per
+    # user) — at 10k users that was 10k sequential round-trips.
+    subs_by_user: dict[str, UserSubscription] = {}
+    if include_subscription and users:
+        sub_stmt = (
+            select(UserSubscription)
+            .options(selectinload(UserSubscription.plan))
+            .where(
+                UserSubscription.user_id.in_([u.id for u in users]),
+                UserSubscription.deleted_at.is_(None),
+            )
+        )
+        sub_result = await db.execute(sub_stmt)
+        for sub in sub_result.scalars().all():
+            subs_by_user.setdefault(sub.user_id, sub)
+
     # Build export data
     export_data = []
     for user in users:
@@ -97,23 +115,16 @@ async def export_users(
             "locale": user.locale,
             "created_at": user.created_at.isoformat() if user.created_at else None,
         }
-        
+
         if include_subscription:
-            # Get subscription
-            sub_stmt = select(UserSubscription).where(
-                UserSubscription.user_id == user.id,
-                UserSubscription.deleted_at.is_(None),
-            )
-            sub_result = await db.execute(sub_stmt)
-            subscription = sub_result.scalars().first()
-            
+            subscription = subs_by_user.get(user.id)
             if subscription and subscription.plan:
                 user_data["subscription_tier"] = subscription.plan.tier.value
                 user_data["subscription_status"] = subscription.status.value
             else:
                 user_data["subscription_tier"] = None
                 user_data["subscription_status"] = None
-        
+
         export_data.append(user_data)
     
     # Log export

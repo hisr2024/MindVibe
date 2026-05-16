@@ -361,13 +361,18 @@ async def batch_download_verses(
     tts_service = get_tts_service()
     results = []
 
+    # Performance: fetch all verses in a single query, not one-per-verse.
+    # Previously this loop did `len(verse_ids)` round-trips to the DB
+    # before any TTS work — at 20 verses that's 20 sequential queries
+    # adding ~100-400ms tail latency before audio synthesis can start.
+    verses_result = await db.execute(
+        select(WisdomVerse).where(WisdomVerse.id.in_(payload.verse_ids))
+    )
+    verses_by_id = {v.id: v for v in verses_result.scalars().all()}
+
     for verse_id in payload.verse_ids:
         try:
-            # Fetch verse
-            result = await db.execute(
-                select(WisdomVerse).where(WisdomVerse.id == verse_id)
-            )
-            verse = result.scalar_one_or_none()
+            verse = verses_by_id.get(verse_id)
 
             if not verse:
                 results.append({

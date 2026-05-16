@@ -236,33 +236,32 @@ async def get_subscription_analytics(
     active_result = await db.execute(active_count_stmt)
     total_active = active_result.scalar() or 0
     
-    # Count by tier
-    tier_counts = {}
-    for tier in SubscriptionTier:
-        plan_stmt = select(SubscriptionPlan.id).where(SubscriptionPlan.tier == tier)
-        plan_result = await db.execute(plan_stmt)
-        plan_ids = [r for r in plan_result.scalars().all()]
-        
-        if plan_ids:
-            count_stmt = select(func.count(UserSubscription.id)).where(
-                UserSubscription.plan_id.in_(plan_ids),
-                UserSubscription.status == SubscriptionStatus.ACTIVE,
-                UserSubscription.deleted_at.is_(None),
-            )
-            count_result = await db.execute(count_stmt)
-            tier_counts[tier.value] = count_result.scalar() or 0
-        else:
-            tier_counts[tier.value] = 0
-    
-    # Count by status
-    status_counts = {}
-    for status_enum in SubscriptionStatus:
-        count_stmt = select(func.count(UserSubscription.id)).where(
-            UserSubscription.status == status_enum,
+    # Count by tier — single grouped query instead of (N_tiers × 2) queries.
+    # Joins UserSubscription→SubscriptionPlan and groups by plan.tier.
+    tier_count_stmt = (
+        select(SubscriptionPlan.tier, func.count(UserSubscription.id))
+        .join(SubscriptionPlan, UserSubscription.plan_id == SubscriptionPlan.id)
+        .where(
+            UserSubscription.status == SubscriptionStatus.ACTIVE,
             UserSubscription.deleted_at.is_(None),
         )
-        count_result = await db.execute(count_stmt)
-        status_counts[status_enum.value] = count_result.scalar() or 0
+        .group_by(SubscriptionPlan.tier)
+    )
+    tier_count_rows = (await db.execute(tier_count_stmt)).all()
+    tier_counts = {tier.value: 0 for tier in SubscriptionTier}
+    for tier, count in tier_count_rows:
+        tier_counts[tier.value if hasattr(tier, "value") else tier] = count
+
+    # Count by status — single grouped query instead of N_statuses queries.
+    status_count_stmt = (
+        select(UserSubscription.status, func.count(UserSubscription.id))
+        .where(UserSubscription.deleted_at.is_(None))
+        .group_by(UserSubscription.status)
+    )
+    status_count_rows = (await db.execute(status_count_stmt)).all()
+    status_counts = {se.value: 0 for se in SubscriptionStatus}
+    for st, count in status_count_rows:
+        status_counts[st.value if hasattr(st, "value") else st] = count
     
     # New subscriptions this month (simplified)
     month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
