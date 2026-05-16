@@ -1,8 +1,674 @@
-{
-  "_status": "placeholder_pending_pd_baseline_replacement",
-  "_remediation_doc": "see internal IP-drafts/W_quantum_scan_findings_and_tier1_plan.md",
-  "chapterNumber": 10,
-  "nameEnglish": "Vibhuti Yoga",
-  "verseCount": 42,
-  "verses": []
-}
+[
+  {
+    "chapter": 10,
+    "verse": 1,
+    "sanskrit": "॥ 10.1 ॥",
+    "transliteration": "Verse 10.1",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 2,
+    "sanskrit": "॥ 10.2 ॥",
+    "transliteration": "Verse 10.2",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 3,
+    "sanskrit": "॥ 10.3 ॥",
+    "transliteration": "Verse 10.3",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 4,
+    "sanskrit": "॥ 10.4 ॥",
+    "transliteration": "Verse 10.4",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 5,
+    "sanskrit": "॥ 10.5 ॥",
+    "transliteration": "Verse 10.5",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 6,
+    "sanskrit": "॥ 10.6 ॥",
+    "transliteration": "Verse 10.6",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 7,
+    "sanskrit": "॥ 10.7 ॥",
+    "transliteration": "Verse 10.7",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 8,
+    "sanskrit": "॥ 10.8 ॥",
+    "transliteration": "Verse 10.8",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 9,
+    "sanskrit": "॥ 10.9 ॥",
+    "transliteration": "Verse 10.9",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 10,
+    "sanskrit": "॥ 10.10 ॥",
+    "transliteration": "Verse 10.10",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 11,
+    "sanskrit": "॥ 10.11 ॥",
+    "transliteration": "Verse 10.11",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 12,
+    "sanskrit": "॥ 10.12 ॥",
+    "transliteration": "Verse 10.12",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 13,
+    "sanskrit": "॥ 10.13 ॥",
+    "transliteration": "Verse 10.13",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 14,
+    "sanskrit": "॥ 10.14 ॥",
+    "transliteration": "Verse 10.14",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 15,
+    "sanskrit": "॥ 10.15 ॥",
+    "transliteration": "Verse 10.15",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 16,
+    "sanskrit": "॥ 10.16 ॥",
+    "transliteration": "Verse 10.16",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 17,
+    "sanskrit": "॥ 10.17 ॥",
+    "transliteration": "Verse 10.17",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 18,
+    "sanskrit": "॥ 10.18 ॥",
+    "transliteration": "Verse 10.18",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 19,
+    "sanskrit": "॥ 10.19 ॥",
+    "transliteration": "Verse 10.19",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 20,
+    "sanskrit": "॥ 10.20 ॥",
+    "transliteration": "Verse 10.20",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 21,
+    "sanskrit": "॥ 10.21 ॥",
+    "transliteration": "Verse 10.21",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 22,
+    "sanskrit": "॥ 10.22 ॥",
+    "transliteration": "Verse 10.22",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 23,
+    "sanskrit": "॥ 10.23 ॥",
+    "transliteration": "Verse 10.23",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 24,
+    "sanskrit": "॥ 10.24 ॥",
+    "transliteration": "Verse 10.24",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 25,
+    "sanskrit": "॥ 10.25 ॥",
+    "transliteration": "Verse 10.25",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 26,
+    "sanskrit": "॥ 10.26 ॥",
+    "transliteration": "Verse 10.26",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 27,
+    "sanskrit": "॥ 10.27 ॥",
+    "transliteration": "Verse 10.27",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 28,
+    "sanskrit": "॥ 10.28 ॥",
+    "transliteration": "Verse 10.28",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 29,
+    "sanskrit": "॥ 10.29 ॥",
+    "transliteration": "Verse 10.29",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 30,
+    "sanskrit": "॥ 10.30 ॥",
+    "transliteration": "Verse 10.30",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 31,
+    "sanskrit": "॥ 10.31 ॥",
+    "transliteration": "Verse 10.31",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 32,
+    "sanskrit": "॥ 10.32 ॥",
+    "transliteration": "Verse 10.32",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 33,
+    "sanskrit": "॥ 10.33 ॥",
+    "transliteration": "Verse 10.33",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 34,
+    "sanskrit": "॥ 10.34 ॥",
+    "transliteration": "Verse 10.34",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 35,
+    "sanskrit": "॥ 10.35 ॥",
+    "transliteration": "Verse 10.35",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 36,
+    "sanskrit": "॥ 10.36 ॥",
+    "transliteration": "Verse 10.36",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 37,
+    "sanskrit": "॥ 10.37 ॥",
+    "transliteration": "Verse 10.37",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 38,
+    "sanskrit": "॥ 10.38 ॥",
+    "transliteration": "Verse 10.38",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 39,
+    "sanskrit": "॥ 10.39 ॥",
+    "transliteration": "Verse 10.39",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 40,
+    "sanskrit": "॥ 10.40 ॥",
+    "transliteration": "Verse 10.40",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 41,
+    "sanskrit": "॥ 10.41 ॥",
+    "transliteration": "Verse 10.41",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 10,
+    "verse": 42,
+    "sanskrit": "॥ 10.42 ॥",
+    "transliteration": "Verse 10.42",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Vibhuti Yoga",
+    "theme": "divine_manifestations",
+    "principle": "Core teaching from Chapter 10 - Vibhuti Yoga",
+    "mental_health_applications": [
+      "gratitude",
+      "positive_thinking"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  }
+]

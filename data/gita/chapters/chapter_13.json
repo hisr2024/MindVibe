@@ -1,8 +1,546 @@
-{
-  "_status": "placeholder_pending_pd_baseline_replacement",
-  "_remediation_doc": "see internal IP-drafts/W_quantum_scan_findings_and_tier1_plan.md",
-  "chapterNumber": 13,
-  "nameEnglish": "Kshetra Kshetrajna Vibhaga Yoga",
-  "verseCount": 34,
-  "verses": []
-}
+[
+  {
+    "chapter": 13,
+    "verse": 1,
+    "sanskrit": "॥ 13.1 ॥",
+    "transliteration": "Verse 13.1",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 2,
+    "sanskrit": "॥ 13.2 ॥",
+    "transliteration": "Verse 13.2",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 3,
+    "sanskrit": "॥ 13.3 ॥",
+    "transliteration": "Verse 13.3",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 4,
+    "sanskrit": "॥ 13.4 ॥",
+    "transliteration": "Verse 13.4",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 5,
+    "sanskrit": "॥ 13.5 ॥",
+    "transliteration": "Verse 13.5",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 6,
+    "sanskrit": "॥ 13.6 ॥",
+    "transliteration": "Verse 13.6",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 7,
+    "sanskrit": "॥ 13.7 ॥",
+    "transliteration": "Verse 13.7",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 8,
+    "sanskrit": "॥ 13.8 ॥",
+    "transliteration": "Verse 13.8",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 9,
+    "sanskrit": "॥ 13.9 ॥",
+    "transliteration": "Verse 13.9",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 10,
+    "sanskrit": "॥ 13.10 ॥",
+    "transliteration": "Verse 13.10",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 11,
+    "sanskrit": "॥ 13.11 ॥",
+    "transliteration": "Verse 13.11",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 12,
+    "sanskrit": "॥ 13.12 ॥",
+    "transliteration": "Verse 13.12",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 13,
+    "sanskrit": "॥ 13.13 ॥",
+    "transliteration": "Verse 13.13",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 14,
+    "sanskrit": "॥ 13.14 ॥",
+    "transliteration": "Verse 13.14",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 15,
+    "sanskrit": "॥ 13.15 ॥",
+    "transliteration": "Verse 13.15",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 16,
+    "sanskrit": "॥ 13.16 ॥",
+    "transliteration": "Verse 13.16",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 17,
+    "sanskrit": "॥ 13.17 ॥",
+    "transliteration": "Verse 13.17",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 18,
+    "sanskrit": "॥ 13.18 ॥",
+    "transliteration": "Verse 13.18",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 19,
+    "sanskrit": "॥ 13.19 ॥",
+    "transliteration": "Verse 13.19",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 20,
+    "sanskrit": "॥ 13.20 ॥",
+    "transliteration": "Verse 13.20",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 21,
+    "sanskrit": "॥ 13.21 ॥",
+    "transliteration": "Verse 13.21",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 22,
+    "sanskrit": "॥ 13.22 ॥",
+    "transliteration": "Verse 13.22",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 23,
+    "sanskrit": "॥ 13.23 ॥",
+    "transliteration": "Verse 13.23",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 24,
+    "sanskrit": "॥ 13.24 ॥",
+    "transliteration": "Verse 13.24",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 25,
+    "sanskrit": "॥ 13.25 ॥",
+    "transliteration": "Verse 13.25",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 26,
+    "sanskrit": "॥ 13.26 ॥",
+    "transliteration": "Verse 13.26",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 27,
+    "sanskrit": "॥ 13.27 ॥",
+    "transliteration": "Verse 13.27",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 28,
+    "sanskrit": "॥ 13.28 ॥",
+    "transliteration": "Verse 13.28",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 29,
+    "sanskrit": "॥ 13.29 ॥",
+    "transliteration": "Verse 13.29",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 30,
+    "sanskrit": "॥ 13.30 ॥",
+    "transliteration": "Verse 13.30",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 31,
+    "sanskrit": "॥ 13.31 ॥",
+    "transliteration": "Verse 13.31",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 32,
+    "sanskrit": "॥ 13.32 ॥",
+    "transliteration": "Verse 13.32",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 33,
+    "sanskrit": "॥ 13.33 ॥",
+    "transliteration": "Verse 13.33",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 13,
+    "verse": 34,
+    "sanskrit": "॥ 13.34 ॥",
+    "transliteration": "Verse 13.34",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Ksetra Ksetrajna Vibhaga Yoga",
+    "theme": "matter_spirit",
+    "principle": "Core teaching from Chapter 13 - Ksetra Ksetrajna Vibhaga Yoga",
+    "mental_health_applications": [
+      "self_awareness",
+      "cognitive_awareness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  }
+]

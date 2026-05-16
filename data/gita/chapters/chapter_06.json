@@ -1,8 +1,759 @@
-{
-  "_status": "placeholder_pending_pd_baseline_replacement",
-  "_remediation_doc": "see internal IP-drafts/W_quantum_scan_findings_and_tier1_plan.md",
-  "chapterNumber": 6,
-  "nameEnglish": "Dhyana Yoga",
-  "verseCount": 47,
-  "verses": []
-}
+[
+  {
+    "chapter": 6,
+    "verse": 1,
+    "sanskrit": "॥ 6.1 ॥",
+    "transliteration": "Verse 6.1",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 2,
+    "sanskrit": "॥ 6.2 ॥",
+    "transliteration": "Verse 6.2",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 3,
+    "sanskrit": "॥ 6.3 ॥",
+    "transliteration": "Verse 6.3",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 4,
+    "sanskrit": "॥ 6.4 ॥",
+    "transliteration": "Verse 6.4",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 5,
+    "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+    "transliteration": "uddhared ātmanātmānaṃ nātmānam avasādayet | ātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Self-empowerment: You are your own best ally or worst enemy.",
+    "mental_health_applications": [
+      "self_empowerment",
+      "personal_growth",
+      "depression_recovery"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 6,
+    "sanskrit": "॥ 6.6 ॥",
+    "transliteration": "Verse 6.6",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 7,
+    "sanskrit": "॥ 6.7 ॥",
+    "transliteration": "Verse 6.7",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 8,
+    "sanskrit": "॥ 6.8 ॥",
+    "transliteration": "Verse 6.8",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 9,
+    "sanskrit": "॥ 6.9 ॥",
+    "transliteration": "Verse 6.9",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 10,
+    "sanskrit": "॥ 6.10 ॥",
+    "transliteration": "Verse 6.10",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 11,
+    "sanskrit": "॥ 6.11 ॥",
+    "transliteration": "Verse 6.11",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 12,
+    "sanskrit": "॥ 6.12 ॥",
+    "transliteration": "Verse 6.12",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 13,
+    "sanskrit": "॥ 6.13 ॥",
+    "transliteration": "Verse 6.13",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 14,
+    "sanskrit": "॥ 6.14 ॥",
+    "transliteration": "Verse 6.14",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 15,
+    "sanskrit": "॥ 6.15 ॥",
+    "transliteration": "Verse 6.15",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 16,
+    "sanskrit": "॥ 6.16 ॥",
+    "transliteration": "Verse 6.16",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 17,
+    "sanskrit": "युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु। युक्तस्वप्नावबोधस्य योगो भवति दुःखहा॥",
+    "transliteration": "yuktāhāra-vihārasya yukta-ceṣṭasya karmasu | yukta-svapnāvabodhasya yogo bhavati duḥkha-hā ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Balance in all aspects of life is key to mental well-being.",
+    "mental_health_applications": [
+      "stress_reduction",
+      "self_care",
+      "balance",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 18,
+    "sanskrit": "॥ 6.18 ॥",
+    "transliteration": "Verse 6.18",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 19,
+    "sanskrit": "॥ 6.19 ॥",
+    "transliteration": "Verse 6.19",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 20,
+    "sanskrit": "॥ 6.20 ॥",
+    "transliteration": "Verse 6.20",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 21,
+    "sanskrit": "॥ 6.21 ॥",
+    "transliteration": "Verse 6.21",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 22,
+    "sanskrit": "॥ 6.22 ॥",
+    "transliteration": "Verse 6.22",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 23,
+    "sanskrit": "॥ 6.23 ॥",
+    "transliteration": "Verse 6.23",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 24,
+    "sanskrit": "॥ 6.24 ॥",
+    "transliteration": "Verse 6.24",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 25,
+    "sanskrit": "॥ 6.25 ॥",
+    "transliteration": "Verse 6.25",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 26,
+    "sanskrit": "॥ 6.26 ॥",
+    "transliteration": "Verse 6.26",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 27,
+    "sanskrit": "॥ 6.27 ॥",
+    "transliteration": "Verse 6.27",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 28,
+    "sanskrit": "॥ 6.28 ॥",
+    "transliteration": "Verse 6.28",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 29,
+    "sanskrit": "॥ 6.29 ॥",
+    "transliteration": "Verse 6.29",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 30,
+    "sanskrit": "॥ 6.30 ॥",
+    "transliteration": "Verse 6.30",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 31,
+    "sanskrit": "॥ 6.31 ॥",
+    "transliteration": "Verse 6.31",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 32,
+    "sanskrit": "॥ 6.32 ॥",
+    "transliteration": "Verse 6.32",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 33,
+    "sanskrit": "॥ 6.33 ॥",
+    "transliteration": "Verse 6.33",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 34,
+    "sanskrit": "॥ 6.34 ॥",
+    "transliteration": "Verse 6.34",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 35,
+    "sanskrit": "असंशयं महाबाहो मनो दुर्निग्रहं चलम्। अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते॥",
+    "transliteration": "asaṃśayaṃ mahā-bāho mano durnigrahaṃ calam | abhyāsena tu kaunteya vairāgyeṇa ca gṛhyate ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "The restless mind can be tamed through consistent practice.",
+    "mental_health_applications": [
+      "anxiety_management",
+      "mindfulness",
+      "meditation_support",
+      "focus"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 36,
+    "sanskrit": "॥ 6.36 ॥",
+    "transliteration": "Verse 6.36",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 37,
+    "sanskrit": "॥ 6.37 ॥",
+    "transliteration": "Verse 6.37",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 38,
+    "sanskrit": "॥ 6.38 ॥",
+    "transliteration": "Verse 6.38",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 39,
+    "sanskrit": "॥ 6.39 ॥",
+    "transliteration": "Verse 6.39",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 40,
+    "sanskrit": "॥ 6.40 ॥",
+    "transliteration": "Verse 6.40",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 41,
+    "sanskrit": "॥ 6.41 ॥",
+    "transliteration": "Verse 6.41",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 42,
+    "sanskrit": "॥ 6.42 ॥",
+    "transliteration": "Verse 6.42",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 43,
+    "sanskrit": "॥ 6.43 ॥",
+    "transliteration": "Verse 6.43",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 44,
+    "sanskrit": "॥ 6.44 ॥",
+    "transliteration": "Verse 6.44",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 45,
+    "sanskrit": "॥ 6.45 ॥",
+    "transliteration": "Verse 6.45",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 46,
+    "sanskrit": "॥ 6.46 ॥",
+    "transliteration": "Verse 6.46",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 6,
+    "verse": 47,
+    "sanskrit": "॥ 6.47 ॥",
+    "transliteration": "Verse 6.47",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Dhyana Yoga",
+    "theme": "meditation_mindfulness",
+    "principle": "Core teaching from Chapter 6 - Dhyana Yoga",
+    "mental_health_applications": [
+      "meditation_support",
+      "mindfulness"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  }
+]

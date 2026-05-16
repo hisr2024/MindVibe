@@ -1,8 +1,692 @@
-{
-  "_status": "placeholder_pending_pd_baseline_replacement",
-  "_remediation_doc": "see internal IP-drafts/W_quantum_scan_findings_and_tier1_plan.md",
-  "chapterNumber": 3,
-  "nameEnglish": "Karma Yoga",
-  "verseCount": 43,
-  "verses": []
-}
+[
+  {
+    "chapter": 3,
+    "verse": 1,
+    "sanskrit": "॥ 3.1 ॥",
+    "transliteration": "Verse 3.1",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 2,
+    "sanskrit": "॥ 3.2 ॥",
+    "transliteration": "Verse 3.2",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 3,
+    "sanskrit": "॥ 3.3 ॥",
+    "transliteration": "Verse 3.3",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 4,
+    "sanskrit": "॥ 3.4 ॥",
+    "transliteration": "Verse 3.4",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 5,
+    "sanskrit": "॥ 3.5 ॥",
+    "transliteration": "Verse 3.5",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 6,
+    "sanskrit": "॥ 3.6 ॥",
+    "transliteration": "Verse 3.6",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 7,
+    "sanskrit": "॥ 3.7 ॥",
+    "transliteration": "Verse 3.7",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 8,
+    "sanskrit": "॥ 3.8 ॥",
+    "transliteration": "Verse 3.8",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 9,
+    "sanskrit": "॥ 3.9 ॥",
+    "transliteration": "Verse 3.9",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 10,
+    "sanskrit": "॥ 3.10 ॥",
+    "transliteration": "Verse 3.10",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 11,
+    "sanskrit": "॥ 3.11 ॥",
+    "transliteration": "Verse 3.11",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 12,
+    "sanskrit": "॥ 3.12 ॥",
+    "transliteration": "Verse 3.12",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 13,
+    "sanskrit": "॥ 3.13 ॥",
+    "transliteration": "Verse 3.13",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 14,
+    "sanskrit": "॥ 3.14 ॥",
+    "transliteration": "Verse 3.14",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 15,
+    "sanskrit": "॥ 3.15 ॥",
+    "transliteration": "Verse 3.15",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 16,
+    "sanskrit": "॥ 3.16 ॥",
+    "transliteration": "Verse 3.16",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 17,
+    "sanskrit": "॥ 3.17 ॥",
+    "transliteration": "Verse 3.17",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 18,
+    "sanskrit": "॥ 3.18 ॥",
+    "transliteration": "Verse 3.18",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 19,
+    "sanskrit": "तस्मादसक्तः सततं कार्यं कर्म समाचर। असक्तो ह्याचरन्कर्म परमाप्नोति पूरुषः॥",
+    "transliteration": "tasmād asaktaḥ satataṃ kāryaṃ karma samācara | asakto hy ācaran karma param āpnoti pūruṣaḥ ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Purposeful action without attachment leads to fulfillment.",
+    "mental_health_applications": [
+      "work_stress",
+      "purpose_and_meaning",
+      "letting_go"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 20,
+    "sanskrit": "॥ 3.20 ॥",
+    "transliteration": "Verse 3.20",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 21,
+    "sanskrit": "॥ 3.21 ॥",
+    "transliteration": "Verse 3.21",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 22,
+    "sanskrit": "॥ 3.22 ॥",
+    "transliteration": "Verse 3.22",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 23,
+    "sanskrit": "॥ 3.23 ॥",
+    "transliteration": "Verse 3.23",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 24,
+    "sanskrit": "॥ 3.24 ॥",
+    "transliteration": "Verse 3.24",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 25,
+    "sanskrit": "॥ 3.25 ॥",
+    "transliteration": "Verse 3.25",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 26,
+    "sanskrit": "॥ 3.26 ॥",
+    "transliteration": "Verse 3.26",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 27,
+    "sanskrit": "॥ 3.27 ॥",
+    "transliteration": "Verse 3.27",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 28,
+    "sanskrit": "॥ 3.28 ॥",
+    "transliteration": "Verse 3.28",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 29,
+    "sanskrit": "॥ 3.29 ॥",
+    "transliteration": "Verse 3.29",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 30,
+    "sanskrit": "॥ 3.30 ॥",
+    "transliteration": "Verse 3.30",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 31,
+    "sanskrit": "॥ 3.31 ॥",
+    "transliteration": "Verse 3.31",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 32,
+    "sanskrit": "॥ 3.32 ॥",
+    "transliteration": "Verse 3.32",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 33,
+    "sanskrit": "॥ 3.33 ॥",
+    "transliteration": "Verse 3.33",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 34,
+    "sanskrit": "॥ 3.34 ॥",
+    "transliteration": "Verse 3.34",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 35,
+    "sanskrit": "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्। स्वधर्मे निधनं श्रेयः परधर्मो भयावहः॥",
+    "transliteration": "śreyān sva-dharmo viguṇaḥ para-dharmāt sv-anuṣṭhitāt | sva-dharme nidhanaṃ śreyaḥ para-dharmo bhayāvahaḥ ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Authenticity and self-acceptance lead to inner peace.",
+    "mental_health_applications": [
+      "self_acceptance",
+      "self_empowerment",
+      "self_doubt"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 36,
+    "sanskrit": "॥ 3.36 ॥",
+    "transliteration": "Verse 3.36",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 37,
+    "sanskrit": "॥ 3.37 ॥",
+    "transliteration": "Verse 3.37",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 38,
+    "sanskrit": "॥ 3.38 ॥",
+    "transliteration": "Verse 3.38",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 39,
+    "sanskrit": "॥ 3.39 ॥",
+    "transliteration": "Verse 3.39",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 40,
+    "sanskrit": "॥ 3.40 ॥",
+    "transliteration": "Verse 3.40",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 41,
+    "sanskrit": "॥ 3.41 ॥",
+    "transliteration": "Verse 3.41",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 42,
+    "sanskrit": "॥ 3.42 ॥",
+    "transliteration": "Verse 3.42",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 3,
+    "verse": 43,
+    "sanskrit": "॥ 3.43 ॥",
+    "transliteration": "Verse 3.43",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Karma Yoga",
+    "theme": "selfless_action",
+    "principle": "Core teaching from Chapter 3 - Karma Yoga",
+    "mental_health_applications": [
+      "stress_reduction",
+      "purpose_and_meaning"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  }
+]

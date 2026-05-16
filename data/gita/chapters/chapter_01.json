@@ -1,8 +1,756 @@
-{
-  "_status": "placeholder_pending_pd_baseline_replacement",
-  "_remediation_doc": "see internal IP-drafts/W_quantum_scan_findings_and_tier1_plan.md",
-  "chapterNumber": 1,
-  "nameEnglish": "Arjuna Vishada Yoga",
-  "verseCount": 47,
-  "verses": []
-}
+[
+  {
+    "chapter": 1,
+    "verse": 1,
+    "sanskrit": "धृतराष्ट्र उवाच। धर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः। मामकाः पाण्डवाश्चैव किमकुर्वत सञ्जय॥",
+    "transliteration": "dhṛtarāṣṭra uvāca | dharma-kṣetre kuru-kṣetre samavetā yuyutsavaḥ | māmakāḥ pāṇḍavāś caiva kim akurvata sañjaya ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Recognition of inner conflict as the beginning of spiritual growth.",
+    "mental_health_applications": [
+      "self_awareness",
+      "emotional_recognition",
+      "conflict_resolution"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 2,
+    "sanskrit": "॥ 1.2 ॥",
+    "transliteration": "Verse 1.2",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 3,
+    "sanskrit": "॥ 1.3 ॥",
+    "transliteration": "Verse 1.3",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 4,
+    "sanskrit": "॥ 1.4 ॥",
+    "transliteration": "Verse 1.4",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 5,
+    "sanskrit": "॥ 1.5 ॥",
+    "transliteration": "Verse 1.5",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 6,
+    "sanskrit": "॥ 1.6 ॥",
+    "transliteration": "Verse 1.6",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 7,
+    "sanskrit": "॥ 1.7 ॥",
+    "transliteration": "Verse 1.7",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 8,
+    "sanskrit": "॥ 1.8 ॥",
+    "transliteration": "Verse 1.8",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 9,
+    "sanskrit": "॥ 1.9 ॥",
+    "transliteration": "Verse 1.9",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 10,
+    "sanskrit": "॥ 1.10 ॥",
+    "transliteration": "Verse 1.10",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 11,
+    "sanskrit": "॥ 1.11 ॥",
+    "transliteration": "Verse 1.11",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 12,
+    "sanskrit": "॥ 1.12 ॥",
+    "transliteration": "Verse 1.12",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 13,
+    "sanskrit": "॥ 1.13 ॥",
+    "transliteration": "Verse 1.13",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 14,
+    "sanskrit": "॥ 1.14 ॥",
+    "transliteration": "Verse 1.14",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 15,
+    "sanskrit": "॥ 1.15 ॥",
+    "transliteration": "Verse 1.15",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 16,
+    "sanskrit": "॥ 1.16 ॥",
+    "transliteration": "Verse 1.16",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 17,
+    "sanskrit": "॥ 1.17 ॥",
+    "transliteration": "Verse 1.17",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 18,
+    "sanskrit": "॥ 1.18 ॥",
+    "transliteration": "Verse 1.18",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 19,
+    "sanskrit": "॥ 1.19 ॥",
+    "transliteration": "Verse 1.19",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 20,
+    "sanskrit": "॥ 1.20 ॥",
+    "transliteration": "Verse 1.20",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 21,
+    "sanskrit": "॥ 1.21 ॥",
+    "transliteration": "Verse 1.21",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 22,
+    "sanskrit": "॥ 1.22 ॥",
+    "transliteration": "Verse 1.22",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 23,
+    "sanskrit": "॥ 1.23 ॥",
+    "transliteration": "Verse 1.23",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 24,
+    "sanskrit": "॥ 1.24 ॥",
+    "transliteration": "Verse 1.24",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 25,
+    "sanskrit": "॥ 1.25 ॥",
+    "transliteration": "Verse 1.25",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 26,
+    "sanskrit": "॥ 1.26 ॥",
+    "transliteration": "Verse 1.26",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 27,
+    "sanskrit": "॥ 1.27 ॥",
+    "transliteration": "Verse 1.27",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 28,
+    "sanskrit": "॥ 1.28 ॥",
+    "transliteration": "Verse 1.28",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 29,
+    "sanskrit": "॥ 1.29 ॥",
+    "transliteration": "Verse 1.29",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 30,
+    "sanskrit": "॥ 1.30 ॥",
+    "transliteration": "Verse 1.30",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 31,
+    "sanskrit": "॥ 1.31 ॥",
+    "transliteration": "Verse 1.31",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 32,
+    "sanskrit": "॥ 1.32 ॥",
+    "transliteration": "Verse 1.32",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 33,
+    "sanskrit": "॥ 1.33 ॥",
+    "transliteration": "Verse 1.33",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 34,
+    "sanskrit": "॥ 1.34 ॥",
+    "transliteration": "Verse 1.34",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 35,
+    "sanskrit": "॥ 1.35 ॥",
+    "transliteration": "Verse 1.35",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 36,
+    "sanskrit": "॥ 1.36 ॥",
+    "transliteration": "Verse 1.36",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 37,
+    "sanskrit": "॥ 1.37 ॥",
+    "transliteration": "Verse 1.37",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 38,
+    "sanskrit": "॥ 1.38 ॥",
+    "transliteration": "Verse 1.38",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 39,
+    "sanskrit": "॥ 1.39 ॥",
+    "transliteration": "Verse 1.39",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 40,
+    "sanskrit": "॥ 1.40 ॥",
+    "transliteration": "Verse 1.40",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 41,
+    "sanskrit": "॥ 1.41 ॥",
+    "transliteration": "Verse 1.41",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 42,
+    "sanskrit": "॥ 1.42 ॥",
+    "transliteration": "Verse 1.42",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 43,
+    "sanskrit": "॥ 1.43 ॥",
+    "transliteration": "Verse 1.43",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 44,
+    "sanskrit": "॥ 1.44 ॥",
+    "transliteration": "Verse 1.44",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 45,
+    "sanskrit": "॥ 1.45 ॥",
+    "transliteration": "Verse 1.45",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 46,
+    "sanskrit": "॥ 1.46 ॥",
+    "transliteration": "Verse 1.46",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Core teaching from Chapter 1 - Arjuna Vishada Yoga",
+    "mental_health_applications": [
+      "emotional_regulation",
+      "anxiety_management"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  },
+  {
+    "chapter": 1,
+    "verse": 47,
+    "sanskrit": "एवमुक्त्वार्जुनः सङ्ख्ये रथोपस्थ उपाविशत्। विसृज्य सशरं चापं शोकसंविग्नमानसः॥",
+    "transliteration": "evam uktvārjunaḥ saṅkhye rathopastha upāviśat | visṛjya sa-śaraṃ cāpaṃ śoka-saṃvigna-mānasaḥ ||",
+    "english": "",
+    "hindi": "",
+    "chapter_name": "Arjuna Vishada Yoga",
+    "theme": "emotional_crisis_moral_conflict",
+    "principle": "Acknowledging overwhelm is the first step toward seeking wisdom.",
+    "mental_health_applications": [
+      "emotional_overwhelm",
+      "grief_processing",
+      "seeking_help"
+    ],
+    "_translation_pending": "besant_1905_pd_backfill"
+  }
+]
