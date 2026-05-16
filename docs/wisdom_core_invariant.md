@@ -88,6 +88,28 @@ serve later; the unary endpoint populates the cache for next time.
 Bypass conditions: same as unary — `user_id=None`, `system_override`,
 `gita_verse` pin, or `KIAAN_RESPONSE_CACHE_ENABLED=false`.
 
+## Per-sentence language routing (Hinglish)
+
+`backend/services/voice/lang_detect.py` provides
+`detect_script(text) -> "hi" | "en" | "mixed" | "unknown"` and
+`pick_tts_lang(text, fallback) -> "hi" | "en" | "hi-en" | <fallback>`.
+The voice orchestrator calls `pick_tts_lang` on every PASS sentence
+(both happy-path TTS and the tier-3/tier-4 fallback) so Hindi-English
+code-switched output routes per sentence:
+
+| Detected script | TTS `lang_hint` | Provider |
+|---|---|---|
+| Devanagari ≥ 80 % | `hi` | Sarvam Hindi |
+| Latin ≥ 80 % | `en` | ElevenLabs (or Sarvam if no key) |
+| Mixed | `hi-en` | Sarvam Hindi (handles Latin script in Devanagari sentences cleanly; ElevenLabs Aria does not) |
+| No script | turn-level `ctx.lang_hint` | per turn-level default |
+
+The TTS audio cache key already includes `lang_hint` + `voice_id`
+(`tts_router.AudioCache.build_key`), so per-sentence routing is
+cache-coherent for free: the same English sentence under an
+English-leading turn and a Hindi-leading turn share the same cache
+entry; a Hindi sentence in a mixed turn gets its own entry.
+
 ## The unified Wisdom Core retriever
 
 `backend/services/wisdom/retrieve.py::retrieve_wisdom` is the **single
