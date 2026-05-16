@@ -129,13 +129,16 @@ export const STEP_TITLES: Record<EmotionalResetStep, string> = {
   7: 'Session Complete',
 }
 
-/** Step descriptions mapping */
+/** Step descriptions mapping. Phrasing avoids patent-claim language
+ *  ("AI-generated affirmations" / "mood-based recommendations") that
+ *  appears in active wellness-AI patents; keeps the user-facing copy
+ *  in terms of the practice itself rather than the underlying technology. */
 export const STEP_DESCRIPTIONS: Record<EmotionalResetStep, string> = {
   1: 'Share what\'s weighing on your heart',
-  2: 'AI reflects back detected emotions',
+  2: 'Mirror back the emotions you\'ve named',
   3: 'Guided breathing (4-4-4-4 pattern)',
   4: 'Visualization exercise',
   5: 'Gita wisdom verses',
-  6: 'AI-generated affirmations',
+  6: 'Personalized dharmic affirmations',
   7: 'Summary with insights and journal prompt',
 }

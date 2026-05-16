@@ -39,7 +39,7 @@ class ConflictAnalysis:
     secondary_emotions: list[str] = field(default_factory=list)
     emotional_intensity: str = "moderate"  # low, moderate, high, overwhelming
 
-    # Shad Ripu (Six Inner Enemies) diagnosis
+    # Shad Ripu (Six Inner Enemies) reflective marker (not clinical dx)
     active_shad_ripu: str = ""  # kama, krodha, lobha, moha, mada, matsarya
 
     # Guna analysis
@@ -83,7 +83,7 @@ STRICT RULE: ALL analysis MUST use Gita psychology exclusively.
 Do NOT use Western psychology terms as primary identifiers.
 Every emotional state MUST be mapped to its Gita equivalent with specific verse citations.
 
-SHAD RIPU (SIX INNER ENEMIES) - Primary Diagnostic Framework:
+SHAD RIPU (SIX INNER ENEMIES) - Primary Reflective Framework:
 These six enemies of the mind are the ROOT CAUSES of all relationship suffering.
 Always identify which Shad Ripu is active:
 1. Kama (desire/lust) - BG 3.37, 3.39-41: "It is desire, it is anger, born of Rajo-guna"

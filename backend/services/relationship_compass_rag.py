@@ -717,7 +717,8 @@ def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str
     """Generate a strictly Gita-grounded response from retrieved verse wisdom.
 
     Every section traces to specific Gita verses, uses Sanskrit terminology
-    with translations, and follows the Shad Ripu diagnostic framework.
+    with translations, and follows the Shad Ripu reflective framework
+    (self-recognition of the six inner enemies — not clinical assessment).
     No generic psychology - only Gita wisdom from the 701-verse repository.
     """
     if not chunks:
@@ -728,7 +729,7 @@ def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str
     teachings = [w for w in wisdom_items if w["english"]]
     verse_refs = [w["verse_ref"] for w in wisdom_items if w["verse_ref"]]
 
-    # Collect themes and tags for Gita psychology diagnosis
+    # Collect themes and tags for Gita psychology reflection (not clinical dx)
     all_tags = set()
     for w in wisdom_items:
         all_tags.update(tag.lower().replace("_", " ") for tag in w["tags"])
@@ -777,7 +778,7 @@ def generate_gita_based_response(chunks: list[GitaChunk], relationship_type: str
         sections.append(f"I bow to the Atman (eternal self) within you that seeks clarity. The Gita ({ack_ref}) teaches: '{ack_teaching[:150]}...' The very act of seeking understanding rather than reacting from Ahamkara (ego) is dharmic. Every Sthitaprajna (person of steady wisdom) has faced such moments (BG 2.55-56).")
     sections.append("")
 
-    # Inner Conflict Mirror - Shad Ripu and Raga-Dvesha diagnosis
+    # Inner Conflict Mirror - Shad Ripu and Raga-Dvesha reflection
     sections.append("# Inner Conflict Mirror")
     mirror_ref = verse_refs[1] if len(verse_refs) > 1 else "2:62-63"
     mirror_teaching = teachings[1]["english"][:200] if len(teachings) > 1 else "From dwelling on sense objects, attachment arises; from attachment, desire; from desire, anger"
