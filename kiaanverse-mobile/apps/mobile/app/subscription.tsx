@@ -40,12 +40,17 @@ import { useSubscriptionStore, type SubscriptionTier } from '@kiaanverse/store';
 import {
   initializeIAP,
   getProducts,
+  getTierPriceAmount,
+  getTierPriceDisplay,
   isSubscriptionUnavailableError,
   purchaseSubscription,
+  resolveCurrencyFromLocale,
   restorePurchases,
+  type CurrencyCode,
   type IAPProduct,
   TIER_CONFIGS,
 } from '@kiaanverse/api';
+import * as Localization from 'expo-localization';
 import { useTranslation } from '@kiaanverse/i18n';
 
 // ---------------------------------------------------------------------------
@@ -366,6 +371,21 @@ export default function SubscriptionScreen(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
 
+  // Device currency drives the FALLBACK pricing when IAP catalog hasn't
+  // loaded yet (skeleton state). Once products[] is hydrated by getProducts(),
+  // each product's `price` is already Play-localized (e.g. "₹599.00") and
+  // takes precedence over this fallback.
+  const deviceCurrency = React.useMemo<CurrencyCode>(() => {
+    try {
+      const locales = Localization.getLocales();
+      const primary = locales[0];
+      return resolveCurrencyFromLocale(primary?.regionCode, primary?.languageTag);
+    } catch {
+      return 'usd';
+    }
+  }, []);
+  const currencySymbol = deviceCurrency === 'inr' ? '₹' : deviceCurrency === 'eur' ? '€' : '$';
+
   // Load IAP products on mount
   useEffect(() => {
     let mounted = true;
@@ -392,33 +412,40 @@ export default function SubscriptionScreen(): React.JSX.Element {
     };
   }, []);
 
-  // Get localized price from store products, fallback to config
+  // Get localized price from store products, fallback to device-currency config
   const getPrice = useCallback(
     (targetTier: SubscriptionTier): string => {
       if (targetTier === 'free') return t('subscription.priceFree');
 
+      // Play Store / App Store localized price wins — this is what the
+      // user will actually be charged at the OS payment sheet.
       const product = products.find(
         (p) => p.tier === targetTier && p.billingPeriod === billingPeriod
       );
       if (product) return product.price;
 
-      const config = TIER_CONFIGS[targetTier];
-      return config.priceDisplay[billingPeriod].usd;
+      // Skeleton fallback in device currency. Must match Play Console
+      // regional pricing so the catalog-loading state doesn't flash USD
+      // to a user who will eventually see ₹ / €.
+      return getTierPriceDisplay(targetTier, billingPeriod, deviceCurrency);
     },
-    [products, billingPeriod, t]
+    [products, billingPeriod, t, deviceCurrency]
   );
 
-  // Get monthly equivalent for yearly pricing
+  // Get monthly equivalent for yearly pricing — rendered in device currency
   const getMonthlyEquivalent = useCallback(
     (targetTier: SubscriptionTier): string | undefined => {
       if (targetTier === 'free' || billingPeriod !== 'yearly') return undefined;
 
-      const config = TIER_CONFIGS[targetTier];
-      const yearlyUsd = config.prices.yearly.usd;
-      const monthlyEq = (yearlyUsd / 12).toFixed(2);
-      return `$${monthlyEq}`;
+      const yearlyAmount = getTierPriceAmount(targetTier, 'yearly', deviceCurrency);
+      const perMonth = yearlyAmount / 12;
+      // INR is whole-rupee per Play Console pricing; USD/EUR keep two decimals.
+      if (deviceCurrency === 'inr') {
+        return `${currencySymbol}${Math.round(perMonth).toLocaleString('en-IN')}`;
+      }
+      return `${currencySymbol}${perMonth.toFixed(2)}`;
     },
-    [billingPeriod]
+    [billingPeriod, deviceCurrency, currencySymbol]
   );
 
   // Handle purchase
