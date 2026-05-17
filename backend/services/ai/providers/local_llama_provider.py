@@ -200,9 +200,7 @@ class LocalLlamaProvider(AIProvider):
             return False
         if not os.path.isfile(self._model_path):
             return False
-        if _llama_class() is None:
-            return False
-        return True
+        return _llama_class() is not None
 
     def configuration_status(self) -> dict[str, Any]:
         """Surface why ``is_configured`` is what it is — useful for
