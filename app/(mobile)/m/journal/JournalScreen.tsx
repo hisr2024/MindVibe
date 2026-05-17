@@ -77,8 +77,13 @@ export default function JournalScreen() {
               onClick={() => handleTabChange(t.id)}
               style={{
                 flex: 1,
-                padding: '8px 4px',
-                minHeight: 48,
+                // Devanagari matras (ी, े, ो, ि, ै, ौ …) extend above the
+                // consonant baseline. Tight vertical padding clips them at
+                // the top — exactly what the user saw on the लेख / बोध /
+                // तिथि tabs. Extra top padding + a generous line-height
+                // gives the matras room to render.
+                padding: '14px 4px 10px',
+                minHeight: 60,
                 borderRadius: 10,
                 border: active
                   ? '1px solid rgba(212,160,23,0.3)'
@@ -88,16 +93,20 @@ export default function JournalScreen() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 2,
+                gap: 4,
                 touchAction: 'manipulation',
+                overflow: 'visible',
               }}
             >
               <span
                 style={{
                   fontFamily: '"Noto Sans Devanagari", sans-serif',
-                  fontSize: 11,
+                  fontSize: 13,
                   color: active ? '#F0C040' : '#6B6355',
-                  lineHeight: 1.5,
+                  lineHeight: 1.9,
+                  // Render-time hint: do not clip Devanagari ascenders.
+                  display: 'inline-block',
+                  paddingTop: 2,
                 }}
               >
                 {t.sa}
