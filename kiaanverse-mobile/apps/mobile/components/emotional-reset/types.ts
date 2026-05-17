@@ -6,7 +6,6 @@
  */
 
 export type EmotionalResetPhase =
-  | 'arrival'
   | 'mandala'
   | 'witness'
   | 'breath'
