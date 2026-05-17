@@ -117,6 +117,43 @@ diffs in PR are the audit trail for prompt / model changes.
 - `filter_applied` rate may drop ≤ 2 pp
 - recorded `verse_refs` must still appear in the new response
 
+## Mobile: native Android STT + shared voice hook package
+
+`kiaanverse-mobile/packages/voice-react/` is the new shared package
+that consolidates the voice contracts both web and mobile consume.
+Implements `IMPROVEMENT_ROADMAP.md` P2 §12 + §13.
+
+Ships:
+
+* **Type contracts** — `DictationResult`, `SpeechRecognizerBridge`,
+  `VoiceLifecycleEvent`, `DictationErrorCode`. Single source of
+  truth that the Kotlin `KiaanVoiceManager.kt`, the TypeScript
+  hooks, and the server's `/api/kiaan/transcribe` endpoint all
+  speak.
+* **`detectSpeechRecognizerBridge`** — pure-function feature detect
+  for `NativeModules.SakhaVoice`. Replaces the per-hook ad-hoc
+  `Platform.OS + module-exists` probes.
+* **`useNativeOrFallbackDictation`** — unified STT hook. Routes
+  through the native Android bridge when registered, falls back to
+  a caller-supplied REST transport otherwise. Lifecycle events
+  surfaced via `onEvent` callback for telemetry.
+* **`HOOK_INVENTORY`** — typed list of every voice hook in the
+  repo with status (`canonical` / `dormant_deprecated` /
+  `platform_specific` / `replaced_by_shared`).
+
+15 jest tests cover the bridge detection and the unified hook's
+routing — all in plain jest with no React Native shim.
+
+The package does **not** yet hold the platform-specific hook
+bodies (`useRecorder`, `useStreamingPlayer`, etc.) — those need a
+build-system migration validated against EAS Build. See
+`kiaanverse-mobile/packages/voice-react/MIGRATION.md` for the
+sequencing.
+
+Ops runbook for enabling the native bridge (~150–250 ms first-byte
+vs ~600–900 ms via Expo Audio + REST today):
+`docs/native_android_stt_runbook.md`.
+
 ## Cost-aware spend governor
 
 `backend/services/kiaan_cost_governor.CostGovernor` bounds per-user-tier
