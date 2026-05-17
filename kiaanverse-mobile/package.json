@@ -22,7 +22,6 @@
       "expo-modules-core@1.12.26": "patches/expo-modules-core@1.12.26.patch"
     },
     "overrides": {
-      "react-native-svg": "15.2.0",
       "tar": "^7.4.3",
       "@xmldom/xmldom": "^0.9.4",
       "brace-expansion": "^2.0.3",
