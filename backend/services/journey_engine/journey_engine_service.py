@@ -1229,19 +1229,36 @@ class JourneyEngineService:
             verse_refs = template_step.static_verse_refs or []
             verse_selector = template_step.verse_selector or {}
 
+            # The seed script formats reflection_prompt / practice_prompt as
+            # double-newline-separated items (see backend/scripts/
+            # seed_journey_templates.ITEM_DELIM) so the StepResponse contract
+            # — guided_reflection: string[] and practice.instructions:
+            # string[] — surfaces each item as its own bullet in the mobile
+            # renderer's numbered list. Split here, trim empties, and fall
+            # back to a single-item list when the template stored only one.
+            raw_reflection = (template_step.reflection_prompt or "").strip()
+            reflection_items = [
+                line.strip()
+                for line in raw_reflection.split("\n\n")
+                if line.strip()
+            ] or ["Reflect on today's teaching."]
+
+            raw_practice = (template_step.practice_prompt or "").strip()
+            practice_items = [
+                line.strip()
+                for line in raw_practice.split("\n\n")
+                if line.strip()
+            ] or ["Take 5 minutes for mindful reflection."]
+
             return {
                 "step_title": template_step.step_title or f"Day {day_index}",
                 "today_focus": (template.primary_enemy_tags or ["general"])[0],
                 "verse_refs": verse_refs,
                 "teaching": template_step.teaching_hint or "",
-                "guided_reflection": [
-                    template_step.reflection_prompt or "Reflect on today's teaching."
-                ],
+                "guided_reflection": reflection_items,
                 "practice": {
                     "name": "Daily Practice",
-                    "instructions": [
-                        template_step.practice_prompt or "Take 5 minutes for mindful reflection."
-                    ],
+                    "instructions": practice_items,
                     "duration_minutes": personalization.get("time_budget_minutes", 10),
                 },
                 "micro_commitment": "I commit to being mindful of this teaching today.",

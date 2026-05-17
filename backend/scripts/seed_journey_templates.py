@@ -1028,17 +1028,30 @@ def _format_teaching(
     examples: list[Any],
     day_verse_ref: dict[str, int] | None = None,
 ) -> str:
-    """Compose the day's teaching as a Gurukool stage rendering.
+    """Compose the day's teaching prose.
 
-    The composition order mirrors the ancient curriculum:
-      1. Gurukool stage opener         — what this stage is for.
-      2. Sanskrit virtue + value       — the dharmic anchor.
-      3. Moral principle from the Gita — the binding teaching.
-      4. Today's śloka (Static Wisdom Core) — the actual verse text the
-         student receives at the teacher's feet.
-      5. Today's deepening             — the phase teaching for this day.
-      6. Modern mirrors (Dynamic Wisdom Core) — two real-world scenarios
-         with their own Gita-anchored verse text.
+    Critical scope note — what NOT to put here
+    ------------------------------------------
+    The mobile renderer (app/(mobile)/m/journeys/[id]/page.tsx) already
+    surfaces three things in their own dedicated UI cards:
+
+      * The verse card — rendered from the flattened sacred fields
+        (verse_sanskrit / verse_transliteration / verse_translation),
+        which the runtime hydrates from the Static Wisdom Core via
+        ``_step_to_response`` in routes/journey_engine.py.
+      * The modern-example card — rendered from ``step.modern_example``,
+        populated by ``_pick_modern_example`` in the same route.
+      * The reflection list and practice list — rendered from
+        ``step.guided_reflection`` and ``step.practice.instructions``.
+
+    Embedding the Sanskrit verse or modern-mirror scenarios inside the
+    teaching text would therefore duplicate content the user already sees
+    in dedicated cards. We keep this field focused on the *teaching prose*
+    — the Gurukool stage opener, the Sanskrit virtue + dharmic value, the
+    moral principle, the phase deepening, and the witness call.
+
+    Paragraphs are separated by a blank line; the mobile <p> renders them
+    with ``whiteSpace: 'pre-line'`` so blank-line breaks survive.
     """
     stage_key = _PHASE_TO_GURUKOOL.get(phase, "shravana")
     stage = _GURUKOOL_STAGES[stage_key]
@@ -1054,93 +1067,78 @@ def _format_teaching(
     parts.append("")
     parts.append("Moral principle (from the Gita):")
     parts.append(dharma["moral_principle"])
-
-    # The day's śloka — Static Wisdom Core. Always render if available;
-    # gracefully omit if the corpus or this particular ref isn't loaded.
-    verse_block = _format_verse_block(day_verse_ref, label="Today's śloka")
-    if verse_block:
-        parts.append("")
-        parts.append(verse_block)
-
     parts.append("")
     parts.append("Today's deepening:")
     parts.append(phase_teaching)
     parts.append("")
     parts.append(dharma["deepening_call"])
 
-    # Two modern mirrors — Dynamic Wisdom Core. Each one also pulls its
-    # anchoring verse from the Static Wisdom Core so the user sees the
-    # actual Gita śloka, not just a citation.
-    if examples:
-        parts.append("")
-        parts.append("Modern mirrors (where this enemy lives today):")
-        for idx, ex in enumerate(examples, start=1):
-            label = "Gen Z mirror" if getattr(ex, "generation", "general") == "gen_z" else "Timeless mirror"
-            verse_ref = ex.gita_verse_ref or {}
-            parts.append(f"  {idx}. {label} — {ex.scenario}")
-            parts.append(f"     How it shows up: {ex.how_enemy_manifests}")
-            parts.append(
-                f"     Gita anchor (BG {verse_ref.get('chapter')}."
-                f"{verse_ref.get('verse')}): {ex.gita_wisdom}"
-            )
-            mirror_verse = _hydrate_verse(verse_ref)
-            if mirror_verse:
-                english = (mirror_verse.get("english") or "").strip()
-                if english:
-                    parts.append(f"     Verse (English): {english}")
-                principle = (mirror_verse.get("principle") or "").strip()
-                if principle:
-                    parts.append(f"     Verse principle: {principle}")
-
     return "\n".join(parts)
+
+
+# PRACTICE_DELIM / REFLECTION_DELIM are exported so the runtime path in
+# journey_engine_service._generate_step_content can split these multi-item
+# fields back into the LIST shape the StepResponse contract requires.
+# The double newline never appears inside a single instruction or question
+# (those use single newlines if needed), so the split is unambiguous.
+ITEM_DELIM = "\n\n"
 
 
 def _format_practice(
     day: int, enemy_tag: str, phase: str, content: dict, examples: list[Any]
 ) -> str:
-    """Compose secular + Sanatan practices."""
-    base_practice = content["practice"]
-    lines: list[str] = []
-    lines.append("Anuṣṭhāna — the day's twin practice:")
-    lines.append("")
-    lines.append(f"• Secular path: {base_practice}")
-    if examples:
-        for ex in examples:
-            if ex.practical_antidote:
-                gen = "Gen Z" if getattr(ex, "generation", "general") == "gen_z" else "Timeless"
-                lines.append(f"  ↳ {gen} antidote: {ex.practical_antidote}")
-        sanatan_practices = [
-            getattr(ex, "sanatan_practice", "") for ex in examples
-            if getattr(ex, "sanatan_practice", "")
-        ]
-        if sanatan_practices:
-            lines.append("")
-            lines.append("• Sanatan path:")
-            for sp in sanatan_practices:
-                lines.append(f"  ↳ {sp}")
+    """Compose secular + Sanatan practices as ITEM_DELIM-separated entries.
 
-    return "\n".join(lines)
+    Each entry becomes one bullet in the mobile renderer's practice list
+    (``step.practice.instructions``). The runtime path
+    ``_generate_step_content`` splits this field on ITEM_DELIM.
+    """
+    items: list[str] = []
+    # The base phase practice is always the first instruction.
+    items.append(f"Secular path — {content['practice']}")
+
+    if examples:
+        # One bullet per modern-example antidote so the list reads cleanly.
+        for ex in examples:
+            antidote = (ex.practical_antidote or "").strip()
+            if not antidote:
+                continue
+            label = "Gen Z antidote" if getattr(ex, "generation", "general") == "gen_z" else "Timeless antidote"
+            items.append(f"{label} — {antidote}")
+
+        # Each Sanatan practice gets its own bullet too — distinct from the
+        # secular ones so the user can choose by inclination, not have to
+        # parse a paragraph.
+        for ex in examples:
+            sanatan = (getattr(ex, "sanatan_practice", "") or "").strip()
+            if sanatan:
+                items.append(f"Sanatan path — {sanatan}")
+
+    return ITEM_DELIM.join(items)
 
 
 def _format_reflection(
     day: int, enemy_tag: str, phase: str, content: dict, examples: list[Any]
 ) -> str:
-    """Compose the day's reflection as Manana — honest interrogation."""
-    base_reflection = content["reflection"]
-    lines: list[str] = []
-    lines.append("Manana — questions to sit with (no answer is required tonight):")
-    lines.append(f"  1. {base_reflection}")
-    for idx, ex in enumerate(examples, start=2):
-        if ex.reflection_question:
-            lines.append(f"  {idx}. {ex.reflection_question}")
-    # Sākṣi-bhāva closer — appears at every step regardless of phase, because
-    # the witness is always available, not only at journey's end.
-    lines.append("")
-    lines.append(
-        "Sākṣi-bhāva (the witness): who was the one asking these questions? "
+    """Compose the day's reflection as ITEM_DELIM-separated questions.
+
+    The runtime path splits this on ITEM_DELIM into the
+    ``guided_reflection`` string list so the mobile renderer can show
+    each question as its own numbered bullet. The Sākṣi-bhāva witness
+    closer always comes last so the day ends in silence, not in another
+    question.
+    """
+    items: list[str] = []
+    items.append((content["reflection"] or "").strip())
+    for ex in examples:
+        q = (ex.reflection_question or "").strip()
+        if q:
+            items.append(q)
+    items.append(
+        "Sākṣi-bhāva — who was the one asking these questions? "
         "Notice that One, and let the noticing be tonight's silence."
     )
-    return "\n".join(lines)
+    return ITEM_DELIM.join([it for it in items if it])
 
 
 def _select_static_verse_ref(

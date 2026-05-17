@@ -584,7 +584,10 @@ export default function MobileJourneyDetailPage() {
                     {'\u23F3'} Full teaching content is being prepared for this day.
                   </div>
                 )}
-                <p className="text-white/90 leading-relaxed">{step.teaching}</p>
+                {/* Preserve paragraph breaks from the seeded Gurukool
+                    teaching prose (Śravaṇa intro / virtue / principle /
+                    deepening / witness call are blank-line-separated). */}
+                <p className="text-white/90 leading-relaxed" style={{ whiteSpace: 'pre-line' }}>{step.teaching}</p>
               </div>
             </section>
 
