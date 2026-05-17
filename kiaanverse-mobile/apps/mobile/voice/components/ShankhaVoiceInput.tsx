@@ -3,7 +3,7 @@
  * button on the right.
  *
  * Drop-in replacement for plain <TextInput /> on every tool screen
- * (Ardha, Viyoga, Relationship Compass, Karma Reset, Emotional Reset,
+ * (Ardha, Viyoga, Sambandh Dharma (Relationship Compass), Karma Reset, Emotional Reset,
  * Sakha Chat). User taps the conch → Android SpeechRecognizer captures
  * one utterance → transcript appends to (or replaces, configurable)
  * the current value.

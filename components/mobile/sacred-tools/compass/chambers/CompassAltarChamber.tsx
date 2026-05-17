@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * CompassAltarChamber — Entry chamber for the Relationship Compass
+ * CompassAltarChamber — Entry chamber for the Sambandh Dharma (Relationship Compass)
  *
  * Presents a sacred compass rose animation, relationship type selector,
  * optional partner name input, guna meter slider, and proceed CTA.
@@ -117,7 +117,7 @@ export function CompassAltarChamber({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        Relationship Compass
+        Sambandh Dharma (Relationship Compass)
       </motion.p>
 
       {/* Relationship type prompt */}

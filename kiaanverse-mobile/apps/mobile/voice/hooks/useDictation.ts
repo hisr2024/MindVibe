@@ -96,7 +96,7 @@ export interface UseDictationOptions {
    * to "en-IN" because the KIAANverse audience is primarily Indian
    * English; Hindi-leading users can pass "hi-IN" to match.
    */
-  language?: string;
+  language?: string | undefined;
   /**
    * Called when dictation succeeds, with the captured transcript.
    * The screen typically appends/replaces the current TextInput
@@ -104,7 +104,7 @@ export interface UseDictationOptions {
    */
   onTranscript: (transcript: string) => void;
   /** Optional error sink. */
-  onError?: (code: string, message: string) => void;
+  onError?: ((code: string, message: string) => void) | undefined;
 }
 
 export function useDictation(opts: UseDictationOptions): {

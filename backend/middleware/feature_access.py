@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 #   - Unlimited KIAAN questions (no quota)
 #   - Full journal access (encrypted journal)
 #   - Unlimited Wisdom Journeys
-#   - All premium features (Voice Companion, Relationship Compass, Ardha, Viyoga, etc.)
+#   - All premium features (Voice Companion, Sambandh Dharma (Relationship Compass), Ardha, Viyoga, etc.)
 #   - No subscription required
 #   - Effective tier shown as SIDDHA (highest tier)
 #

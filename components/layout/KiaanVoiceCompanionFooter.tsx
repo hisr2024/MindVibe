@@ -52,7 +52,7 @@ const TOOL_LINKS = [
   { id: 'viyoga', icon: '\u{1F549}\uFE0F', label: 'Viyoga', href: '/tools/viyog' },
   { id: 'ardha', icon: '\u{1F4FF}', label: 'Ardha', href: '/tools/ardha' },
   { id: 'kiaan-chat', icon: '\u{1F9D8}', label: 'KIAAN Chat', href: '/kiaan/chat' },
-  { id: 'compass', icon: '\u{1F54A}\uFE0F', label: 'Compass', href: '/tools/relationship-compass' },
+  { id: 'compass', icon: '\u{1F54A}\uFE0F', label: 'Compass', href: '/tools/sambandh-dharma' },
 ] as const
 
 // ─── Animation Variants ─────────────────────────────────────────────────────

@@ -121,7 +121,7 @@ export default function CircleDetailScreen(): React.JSX.Element {
       </Text>
 
       <View style={styles.metaRow}>
-        <Badge label={t('circleMembersFmt', { count: circle.memberCount })} />
+        <Badge label={t('circleMembersFmt', { count: String(circle.memberCount) })} />
         <Badge label={circle.category} />
       </View>
 

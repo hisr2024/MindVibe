@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Wskazówki sytuacyjne"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "Kompas Relacji",
       "description": "Wskazówki relacyjne"
     },
@@ -106,7 +106,7 @@
     "viyog": "Uspokój natychmiastową reakcję",
     "ardha": "Przeramuj postrzeganie",
     "kiaan": "Porozmawiaj o tym",
-    "relationship-compass": "Nawiguj jasność relacji",
+    "sambandh-dharma": "Nawiguj jasność relacji",
     "journey": "Trenuj długoterminową wewnętrzną stabilność"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Tryb Pauzy",
     "ardha": "Tryb Jasności",
     "kiaan": "Tryb Towarzysza",
-    "relationship-compass": "Tryb Relacji",
+    "sambandh-dharma": "Tryb Relacji",
     "journey": "Tryb Treningu"
   }
 }

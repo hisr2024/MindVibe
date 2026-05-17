@@ -3,10 +3,34 @@
 Defines which features are available for each subscription tier.
 
 Four-tier structure (March 2026):
-- FREE (Seeker): Minimal AI access to drive conversion
-- BHAKTA ($6.99/mo): 50 questions + encrypted journal for devoted seekers
-- SADHAK ($12.99/mo): Full feature access with 300 questions
-- SIDDHA ($22.99/mo): Unlimited everything with dedicated support
+- FREE (Seeker):   Minimal access for evaluation
+- BHAKTA  ($6.99/mo): Encrypted journal, mood tracking, basic chat
+- SADHAK  ($12.99/mo): Voice companion, agent, soul reading, full Sacred Tools
+- SIDDHA  ($22.99/mo): Unlimited journeys + dedicated support
+
+LEGAL POSTURE — UPSTREAM LLM TERMS COMPLIANCE
+---------------------------------------------
+``kiaan_questions_monthly`` is a FAIR-USE / ABUSE-PREVENTION CAP, not a
+metered resale of any third-party AI API. The subscription pays for the
+*feature bundle* — the Sakha spiritual-companion experience, Wisdom
+Journeys, voice options, encrypted journal, analytics — not for raw
+LLM calls. The cap exists to:
+
+  1. Prevent abuse (scraping the Sakha persona, harvesting LLM output
+     en masse, automated load that would harm the experience).
+  2. Manage operational cost predictability across all upstream
+     providers (Anthropic, OpenAI, ElevenLabs, Sarvam) so we can keep
+     prices stable.
+  3. Encourage qualitative engagement over volume — a high cap doesn't
+     improve the user's spiritual practice.
+
+A user who hits the cap is shown a banner inviting them to upgrade OR
+return when the cap resets — they are NEVER charged per question.
+
+Each upstream provider's commercial terms govern our own API usage; we
+do not act as a reseller / API gateway for any of them. See
+TERMS.md → "AI Providers and Generated Content" for the user-facing
+disclosure.
 """
 
 from typing import Any

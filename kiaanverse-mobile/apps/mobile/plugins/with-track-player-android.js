@@ -3,7 +3,7 @@
  *
  * Expo Config Plugin — fixes audio playback for `react-native-track-player`
  * AND prevents R8/Proguard from stripping the native classes used by the
- * Relationship Compass screen (react-native-svg + react-native-reanimated +
+ * Sambandh Dharma (Relationship Compass) screen (react-native-svg + react-native-reanimated +
  * lottie + Hermes Intl) in production AAB / signed-APK builds on Android
  * 14+ (targetSdk 34/35).
  *
@@ -92,7 +92,7 @@ const PROGUARD_RULES = [
   '-keep class * extends androidx.media.session.MediaButtonReceiver { *; }',
   '# === end react-native-track-player ===',
   '',
-  '# === Relationship Compass + Sacred animations (added by with-track-player-android.js) ===',
+  '# === Sambandh Dharma (Relationship Compass) + Sacred animations (added by with-track-player-android.js) ===',
   '# react-native-svg — radar chart + compass-rose chambers crash with',
   '# NoClassDefFoundError when these ViewManager classes are stripped.',
   '-keep class com.horcrux.svg.** { *; }',
@@ -119,7 +119,7 @@ const PROGUARD_RULES = [
   '-keep class * implements com.facebook.react.bridge.ReactPackage { *; }',
   '-keep class * extends com.facebook.react.uimanager.ViewManager { *; }',
   '-keepclassmembers,includedescriptorclasses class * { native <methods>; }',
-  '# === end Relationship Compass + Sacred animations ===',
+  '# === end Sambandh Dharma (Relationship Compass) + Sacred animations ===',
 ].join('\n');
 
 /**

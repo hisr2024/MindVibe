@@ -98,7 +98,7 @@ const STATIC_VERSES: Record<number, StaticVerse[]> = {
   18: [
     { chapter: 18, verse: 47, sanskrit: 'श्रेयान्स्वधर्मो विगुणः', transliteration: 'śreyān sva-dharmo viguṇaḥ', meaning: 'Better to follow your own dharma imperfectly than another\'s dharma perfectly.' },
     { chapter: 18, verse: 63, sanskrit: 'इति ते ज्ञानमाख्यातम्', transliteration: 'iti te jñānam ākhyātam', meaning: 'Thus I have explained to you the most confidential of all knowledge. Deliberate on it fully, and then do as you wish.' },
-    { chapter: 18, verse: 66, sanskrit: 'सर्वधर्मान्परित्यज्य', transliteration: 'sarva-dharmān parityajya', meaning: 'Abandon all varieties of dharmas and surrender unto Me. I shall deliver you from all sin. Do not fear.' },
+    { chapter: 18, verse: 66, sanskrit: 'सर्वधर्मान्परित्यज्य', transliteration: 'sarva-dharmān parityajya', meaning: 'Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins.' },
     { chapter: 18, verse: 78, sanskrit: 'यत्र योगेश्वरः कृष्णो', transliteration: 'yatra yogeśvaraḥ kṛṣṇo', meaning: 'Where there is Krishna, the master of yoga, and Arjuna the archer — there will be prosperity, victory, and firm justice.' },
   ],
 }

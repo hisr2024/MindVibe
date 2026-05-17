@@ -7,8 +7,8 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import type { StepResponse, EnemyType } from '@/types/journeyEngine.types'
-import { ENEMY_INFO } from '@/types/journeyEngine.types'
+import type { StepResponse, EnemyType } from '@/types/karmaMarg.types'
+import { ENEMY_INFO } from '@/types/karmaMarg.types'
 
 interface TodayPracticeCardProps {
   step: StepResponse

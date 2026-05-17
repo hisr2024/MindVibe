@@ -253,6 +253,10 @@ Return ONLY valid JSON, no markdown fences or extra text."""
         Tries manually-created captions first, then falls back to
         auto-generated captions. Returns None if no transcript available.
 
+        Gated by ``MINDVIBE_EXTERNAL_INGESTION_ENABLED=1``. YouTube transcript
+        fetching is disabled by default pending licensing review of
+        third-party content sources.
+
         Args:
             video_id: 11-character YouTube video ID.
             languages: Preferred language codes (default: from env config).
@@ -261,6 +265,14 @@ Return ONLY valid JSON, no markdown fences or extra text."""
             Joined transcript text (timestamps stripped), or None on failure.
             Truncated to YOUTUBE_MAX_TRANSCRIPT_LENGTH if too long.
         """
+        if os.getenv("MINDVIBE_EXTERNAL_INGESTION_ENABLED", "0") != "1":
+            logger.warning(
+                "YouTube transcript fetching is disabled pending external-source "
+                "licensing review. Set MINDVIBE_EXTERNAL_INGESTION_ENABLED=1 "
+                "only after legal sign-off."
+            )
+            return None
+
         if not self._transcript_api_available:
             logger.warning("Cannot fetch transcript: youtube-transcript-api not installed")
             return None

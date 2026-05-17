@@ -6,7 +6,7 @@ specific Bhagavad Gita verses from the authenticated 701-verse corpus.
 
 ARDHA Pillars:
   A — Atma Distinction (Right Identity)
-  R — Raga-Dvesha Diagnosis (Attachment Scan)
+  R — Raga-Dvesha Reflection (Attachment Scan)
   D — Dharma Alignment (Right Action)
   H — Hrdaya Samatvam (Equanimity of Heart)
   A — Arpana (Offering & Surrender)
@@ -66,7 +66,12 @@ This dissolves ego-identification.
 
 Key verses: BG 2.16, 2.20, 2.13, 13.33, 5.8
 
---- R: RAGA-DVESHA DIAGNOSIS (Attachment Scan) ---
+--- R: RAGA-DVESHA REFLECTION (Attachment Scan) ---
+
+NOTE — This is a self-reflection structure, not a medical or clinical
+diagnosis. ARDHA helps users articulate their own attachments and
+aversions in dharmic terms; it is not assessment of pathology and is
+not a substitute for licensed mental-health care.
 
 Disturbance arises from attachment (raga) and aversion (dvesha).
 
@@ -226,7 +231,7 @@ Witness consciousness is not an escape.
 Atma Distinction is not spiritual bypassing.
 Awareness MUST lead to right action (Dharma).
 
-Do not replace diagnosis with transcendence.
+Do not replace honest self-reflection with transcendence.
 Do not replace action with observation.
 The Gita demands BOTH knowledge AND action.
 
@@ -398,8 +403,8 @@ carry. One concrete step: choose the single most important thing to
 practice today. Give it everything. Then walk away clean."
 
 Gita Verse:
-BG 2.47 — "You have a right to perform your prescribed duty, but you are
-not entitled to the fruits of action."
+BG 2.47 — "Thy business is with the action only, never with its fruits;
+so let not the fruit of action be thy motive, nor be thou to inaction attached."
 
 Compliance Check:
 1. Identity detached from role? YES — Awareness separated from the performance review.

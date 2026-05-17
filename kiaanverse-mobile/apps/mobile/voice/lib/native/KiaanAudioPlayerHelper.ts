@@ -36,7 +36,9 @@ export async function playOnce(
   const buf = await resp.arrayBuffer();
   const base64 = arrayBufferToBase64(buf);
 
-  await KiaanAudioPlayer.appendChunk(base64, 0);
+  // appendChunk signature is (seq: number, base64Opus: string) — keep
+  // seq first to match the streaming protocol used elsewhere.
+  await KiaanAudioPlayer.appendChunk(0, base64);
   await KiaanAudioPlayer.play();
 
   // Subscribe to the playback-state event and resolve on 'ended'.

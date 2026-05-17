@@ -44,7 +44,7 @@ MindVibe now supports native mobile applications for both Android and iOS platfo
 - ✅ Full KIAAN integration with multi-language support
 - ✅ Offline-first mood tracking
 - ✅ End-to-end encrypted journal
-- ✅ Native Bhagavad Gita reader
+- ✅ Native Sanskrit verse reader (Bhagavad Gita anchors)
 - ✅ Push notifications for wellness reminders
 - ✅ Biometric authentication (Face ID/Touch ID)
 
@@ -293,21 +293,20 @@ MindVibe integrates all **700 authentic verses** of the Bhagavad Gita from autho
 
 We maintain the highest standards of authenticity and quality:
 
-- **Sanskrit**: Gita Press, Gorakhpur (gold standard Devanagari text)
-- **Validation**: IIT Kanpur Gita Supersite (gitasupersite.iitk.ac.in)
-- **Hindi**: Gita Press translations (authentic Hindi rendering)
-- **English**: Swami Sivananda (Divine Life Society) / Swami Chinmayananda (Chinmaya Mission)
-- **Transliteration**: IAST (International Alphabet of Sanskrit Transliteration) standard only
-- **Spiritual Wellness Tags**: Evidence-based applications aligned with modern psychology
+- **Sanskrit**: Unicode Devanagari rendering of the canonical 700-verse Bhagavad Gita text (public domain)
+- **Transliteration**: IAST (International Alphabet of Sanskrit Transliteration), mechanically generated from the Sanskrit Unicode
+- **English & Hindi reflections**: Original modern renderings produced by the MindVibe editorial team, anchored to the Sanskrit source with public-domain references consulted for accuracy (Telang 1882; Tilak 1915). No third-party copyrighted translations are reproduced.
+- **Spiritual Wellness Tags**: Evidence-based applications aligned with modern psychology (compilation of our editorial team)
+- **Chain of title**: Each verse carries provenance metadata identifying the editor, draft date, reviewer, and consulted public-domain references (see internal `/legal/translation_chain_of_title.md`)
 
 ### **Quality Requirements**
 
 ✅ **Sanskrit in Devanagari** (UTF-8 Unicode U+0900 to U+097F)  
 ✅ **IAST transliteration** with proper diacritics (ā ī ū ṛ ṃ ḥ etc.)  
-✅ **Authentic translations** from recognized spiritual authorities  
+✅ **Original modern English/Hindi reflections** written from Sanskrit understanding (clean-room protocol)  
 ✅ **All 700 verses** matching canonical chapter distribution  
 ✅ **Evidence-based tagging** for spiritual wellness applications  
-❌ **NO Western substitutions** or non-traditional sources  
+❌ **NO reproduction** of any third-party copyrighted translation or commentary  
 ❌ **NO modifications** to original Sanskrit text  
 ❌ **NO non-standard** transliteration systems (ITRANS, Harvard-Kyoto)
 
@@ -415,7 +414,7 @@ All wellness tools in the KIAAN ecosystem draw from the complete 700-verse datab
 - **KIAAN (General Wellness)**: Searches all 700 verses for relevant wisdom
 - **Ardha (Cognitive Reframing)**: Focuses on sthitaprajna verses (2.54-72) for steady wisdom
 - **Viyoga (Detachment Coach)**: Uses karma yoga verses for healthy detachment
-- **Relationship Compass**: Draws from bhakti verses (Chapter 12) for compassion
+- **Sambandh Dharma (Relationship Compass)**: Draws from bhakti verses (Chapter 12) for compassion
 
 **Example Flow:**
 ```

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully transformed Ardha (Cognitive Reframing) and Viyoga (Detachment Coach) to use the complete 700-verse Bhagavad Gita database, following the same wisdom integration pattern as KIAAN and Relationship Compass.
+Successfully transformed Ardha (Cognitive Reframing) and Viyoga (Detachment Coach) to use the complete 700-verse Bhagavad Gita database, following the same wisdom integration pattern as KIAAN and Sambandh Dharma (Relationship Compass).
 
 ## Changes Implemented
 
@@ -160,7 +160,7 @@ Added comprehensive section "Integration with Ardha and Viyoga" covering:
   | KIAAN | General wellness | ✅ 700 verses | All chapters |
   | Ardha | Cognitive reframing | ✅ 700 verses | Ch 2, 3, 6 |
   | Viyoga | Outcome anxiety | ✅ 700 verses | Ch 2-5 |
-  | Relationship Compass | Conflict resolution | ✅ 700 verses | Ch 2, 12 |
+  | Sambandh Dharma (Relationship Compass) | Conflict resolution | ✅ 700 verses | Ch 2, 12 |
 
 ## Technical Design Patterns
 
@@ -277,7 +277,7 @@ Analysis Result: 0 alerts
 
 ### User Experience ✅
 - [x] Response format shows "🕉️ Gita Wisdom (N verses)" badge
-- [x] Visual consistency with KIAAN and Relationship Compass
+- [x] Visual consistency with KIAAN and Sambandh Dharma (Relationship Compass)
 - [x] Clear separation from generic psychology
 - [x] Warm, compassionate tone maintained
 
@@ -327,7 +327,7 @@ fetch('/api/ardha/reframe', {
 - Structured responses for better frontend integration
 
 ### System-Level
-- All 4 guidance tools (KIAAN, Ardha, Viyoga, Relationship Compass) now unified
+- All 4 guidance tools (KIAAN, Ardha, Viyoga, Sambandh Dharma (Relationship Compass)) now unified
 - Single source of truth for Gita wisdom (700-verse database)
 - Scalable pattern for future guidance tools
 
@@ -353,4 +353,4 @@ fetch('/api/ardha/reframe', {
 - Documentation: Comprehensive and up-to-date
 - Testing: Routes verified and functional
 
-The Ardha and Viyoga tools are now fully integrated with the complete Bhagavad Gita wisdom system, matching the quality and authenticity of KIAAN and Relationship Compass.
+The Ardha and Viyoga tools are now fully integrated with the complete Bhagavad Gita wisdom system, matching the quality and authenticity of KIAAN and Sambandh Dharma (Relationship Compass).

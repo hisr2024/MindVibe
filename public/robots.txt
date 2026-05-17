@@ -15,4 +15,5 @@ Disallow: /karmic-tree
 Disallow: /emotional-reset
 Disallow: /karma-footprint
 Disallow: /relationship-compass
+Disallow: /sambandh-dharma
 Disallow: /viyog

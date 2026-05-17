@@ -128,7 +128,7 @@ export default function KarmaFootprintScreen(): React.JSX.Element {
                 color={colors.primary[300]}
                 align="center"
               >
-                {t('kfpPositiveActionsFmt', { count: data?.positive_actions ?? 0 })}
+                {t('kfpPositiveActionsFmt', { count: String(data?.positive_actions ?? 0) })}
               </Text>
             </Animated.View>
 

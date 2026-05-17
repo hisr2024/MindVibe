@@ -47,9 +47,9 @@ const MOODS: (MoodOption & { sanskrit: string; gradient: string; auraColor: stri
 /** Sanskrit time greetings */
 function getSacredGreeting(): { sanskrit: string; english: string } {
   const hour = new Date().getHours()
-  if (hour < 12) return { sanskrit: 'शुभ प्रभात, प्रिय आत्मा', english: 'Good morning, dear soul' }
-  if (hour < 17) return { sanskrit: 'शुभ अपराह्न, प्रिय आत्मा', english: 'Good afternoon, dear soul' }
-  return { sanskrit: 'शुभ संध्या, प्रिय आत्मा', english: 'Good evening, dear soul' }
+  if (hour < 12) return { sanskrit: 'शुभ प्रभात, प्रिय आत्मा', english: '' }
+  if (hour < 17) return { sanskrit: 'शुभ अपराह्न, प्रिय आत्मा', english: '' }
+  return { sanskrit: 'शुभ संध्या, प्रिय आत्मा', english: '' }
 }
 
 /** Opening invocation */

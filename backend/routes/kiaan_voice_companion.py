@@ -453,17 +453,30 @@ async def _save_memories(
     session_id: str,
     memory_entries: list[dict],
 ) -> None:
-    for entry in memory_entries:
-        result = await db.execute(
-            select(CompanionMemory).where(
-                CompanionMemory.user_id == user_id,
-                CompanionMemory.memory_type == entry["type"],
-                CompanionMemory.key == entry["key"],
-                CompanionMemory.deleted_at.is_(None),
-            )
-        )
-        existing = result.scalar_one_or_none()
+    if not memory_entries:
+        return
 
+    # Performance: pre-fetch ALL matching memory rows in one query so we
+    # can branch update-vs-insert in memory instead of doing a SELECT per
+    # entry. With voice sessions that can produce 5-30 memory entries
+    # per turn, this drops latency from O(N) sequential round-trips to
+    # one round-trip on the read path.
+    from sqlalchemy import and_, or_, tuple_
+
+    pairs = [(e["type"], e["key"]) for e in memory_entries]
+    existing_rows = await db.execute(
+        select(CompanionMemory).where(
+            CompanionMemory.user_id == user_id,
+            CompanionMemory.deleted_at.is_(None),
+            tuple_(CompanionMemory.memory_type, CompanionMemory.key).in_(pairs),
+        )
+    )
+    existing_by_key: dict[tuple[str, str], CompanionMemory] = {
+        (m.memory_type, m.key): m for m in existing_rows.scalars().all()
+    }
+
+    for entry in memory_entries:
+        existing = existing_by_key.get((entry["type"], entry["key"]))
         if existing:
             existing.value = entry["value"]
             existing.times_referenced += 1

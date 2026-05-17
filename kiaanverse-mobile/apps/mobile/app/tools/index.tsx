@@ -135,13 +135,13 @@ const WISDOM_TOOLS: readonly ToolDescriptor[] = [
     route: '/tools/viyoga',
   },
   {
-    id: 'relationship-compass',
-    nameKey: 'relationshipCompassName',
+    id: 'sambandh-dharma',
+    nameKey: 'sambandhDharmaName',
     sanskrit: 'संबंध सूत्र',
-    descriptionKey: 'relationshipCompassDescription',
+    descriptionKey: 'sambandhDharmaDescription',
     color: GREED_GREEN,
     icon: '🧭',
-    route: '/tools/relationship-compass',
+    route: '/tools/sambandh-dharma',
   },
 ];
 

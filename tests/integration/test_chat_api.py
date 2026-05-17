@@ -20,7 +20,7 @@ def sample_verse_data():
         "chapter": 2,
         "verse_number": 47,
         "theme": "action_without_attachment",
-        "english": "You have the right to perform your duties, but you are not entitled to the fruits of your actions.",
+        "english": "<placeholder pending PD-baseline rebuild>",
         "hindi": "तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं।",
         "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।",
         "context": "This verse teaches the principle of performing one's duties without attachment to outcomes.",

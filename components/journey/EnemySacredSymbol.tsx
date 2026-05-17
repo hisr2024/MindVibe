@@ -8,7 +8,7 @@
 
 'use client'
 
-import type { EnemyType } from '@/types/journeyEngine.types'
+import type { EnemyType } from '@/types/karmaMarg.types'
 
 interface EnemySacredSymbolProps {
   enemy: EnemyType

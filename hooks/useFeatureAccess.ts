@@ -41,7 +41,7 @@ const FEATURE_MAP: Record<string, FeatureDef> = {
   soul_reading: { minTier: 'sadhak', label: 'Soul Reading' },
   quantum_dive: { minTier: 'sadhak', label: 'Quantum Dive' },
   kiaan_agent: { minTier: 'sadhak', label: 'KIAAN Agent' },
-  relationship_compass: { minTier: 'sadhak', label: 'Relationship Compass' },
+  sambandh_dharma: { minTier: 'sadhak', label: 'Sambandh Dharma (Relationship Compass)' },
   advanced_analytics: { minTier: 'sadhak', label: 'Advanced Analytics' },
   priority_support: { minTier: 'sadhak', label: 'Priority Support' },
   offline_access: { minTier: 'sadhak', label: 'Offline Access' },

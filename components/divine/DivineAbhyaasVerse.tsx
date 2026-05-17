@@ -1,14 +1,12 @@
 'use client'
 
 /**
- * DivineAbhyaasVerse - The sacred teaching of Abhyaas (Practice) from Bhagavad Gita
+ * DivineAbhyaasVerse — the teaching of Abhyaas (practice) from the Bhagavad Gita.
  *
- * Krishna's emphasis on practice (abhyaas) as the path to mastering the mind.
- * Primary verse: Chapter 6, Verse 35
- * Supporting verse: Chapter 12, Verse 9
- *
- * "The mind is restless and difficult to control. But through practice
- * and detachment, it can be mastered." — Shri Krishna
+ * Anchored to Chapter 6, Verse 35 (primary) and Chapter 12, Verse 9 (supporting).
+ * Renders the Sanskrit + a non-translation reflection on the principle of
+ * abhyaas — the disciplined return of attention. The actual verse translations
+ * are sourced from the canonical PD-baseline corpus via i18n keys.
  */
 
 import { motion, useReducedMotion } from 'framer-motion'
@@ -109,7 +107,7 @@ export function DivineAbhyaasVerse() {
           <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-200/85 sm:text-lg md:text-xl">
             {t(
               'home.abhyaas.translation',
-              '"The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered."'
+              'Through steady practice and gentle detachment, even the most restless mind can be brought home.'
             )}
           </p>
           <footer className="mt-4">
@@ -152,7 +150,7 @@ export function DivineAbhyaasVerse() {
           <p className="text-center font-sacred text-base italic leading-relaxed text-slate-300/70 sm:text-lg">
             {t(
               'home.abhyaas.verse2',
-              '"If you cannot fix your mind steadily upon Me, then seek to reach Me by the yoga of constant practice."'
+              'When stillness feels far away, the path of constant practice itself becomes the way.'
             )}
           </p>
           <p className="mt-2 text-center text-xs text-[#6ad7ff]/40">

@@ -104,8 +104,22 @@ const nextConfig = {
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com';
     return {
-      // No beforeFiles - let Next.js API routes handle requests first
-      beforeFiles: [],
+      // Old API paths from stale mobile clients (pre-rename) silently route to new backend paths.
+      // Remove these once the minimum supported mobile build no longer ships the old endpoints.
+      beforeFiles: [
+        {
+          source: '/api/relationship-compass-engine/:path*',
+          destination: `${apiUrl}/api/sambandh-dharma-engine/:path*`,
+        },
+        {
+          source: '/api/relationship-compass/:path*',
+          destination: `${apiUrl}/api/sambandh-dharma/:path*`,
+        },
+        {
+          source: '/api/journey-engine/:path*',
+          destination: `${apiUrl}/api/karma-marg/:path*`,
+        },
+      ],
       // afterFiles runs after checking filesystem (including API routes)
       afterFiles: [],
       // Fallback rewrites to backend for routes not handled by local API routes
@@ -143,13 +157,59 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: '/relationship-compass',
-        destination: '/tools/relationship-compass',
+        source: '/sambandh-dharma',
+        destination: '/tools/sambandh-dharma',
         permanent: true,
       },
       {
         source: '/viyog',
         destination: '/tools/viyog',
+        permanent: true,
+      },
+      // Backward-compat for pre-rename URLs (external links, bookmarks, mobile app shares)
+      {
+        source: '/relationship-compass',
+        destination: '/tools/sambandh-dharma',
+        permanent: true,
+      },
+      {
+        source: '/relationship-compass-engine',
+        destination: '/sambandh-dharma-engine',
+        permanent: true,
+      },
+      {
+        source: '/relationship-compass-unified',
+        destination: '/sambandh-dharma-unified',
+        permanent: true,
+      },
+      {
+        source: '/tools/relationship-compass',
+        destination: '/tools/sambandh-dharma',
+        permanent: true,
+      },
+      {
+        source: '/tools/relationship-compass/:path*',
+        destination: '/tools/sambandh-dharma/:path*',
+        permanent: true,
+      },
+      {
+        source: '/m/relationship-compass',
+        destination: '/m/sambandh-dharma',
+        permanent: true,
+      },
+      {
+        source: '/m/relationship-compass/:path*',
+        destination: '/m/sambandh-dharma/:path*',
+        permanent: true,
+      },
+      {
+        source: '/journey-engine',
+        destination: '/karma-marg',
+        permanent: true,
+      },
+      {
+        source: '/journey-engine/:path*',
+        destination: '/karma-marg/:path*',
         permanent: true,
       },
     ];

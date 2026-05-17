@@ -26,21 +26,21 @@ def sample_verses():
     return [
         {
             "verse_id": "2.47",
-            "english": "Your right is to perform your duties only, but you are not entitled to the fruits of action. Never consider yourself to be the cause of the results of your activities, and never be attached to not doing your duty.",
+            "english": "<placeholder pending PD-baseline rebuild>",
             "principle": "Karma Yoga",
             "theme": "action_without_attachment",
             "score": 0.9
         },
         {
             "verse_id": "2.48",
-            "english": "Be steadfast in yoga, O Arjuna. Perform your duty and abandon all attachment to success or failure. Such evenness of mind is called yoga.",
+            "english": "<placeholder pending PD-baseline rebuild>",
             "principle": "Equanimity",
             "theme": "equanimity",
             "score": 0.85
         },
         {
             "verse_id": "6.5",
-            "english": "Elevate yourself through the power of your mind, and not degrade yourself, for the mind can be the friend and also the enemy of the self.",
+            "english": "<placeholder pending PD-baseline rebuild>",
             "principle": "Self-mastery",
             "theme": "self_control",
             "score": 0.80

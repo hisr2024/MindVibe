@@ -461,7 +461,7 @@ class OpenAIOptimizer:
             "viyoga_detachment": "Remember, as BG 2.48 teaches, samatva (equanimity) is the foundation of peace. True peace comes from within. Let's reconnect in a moment. 💙",
             "emotional_reset": "Your feelings are valid. As the Gita teaches, the mind can be both friend and foe. Take a moment to breathe, and we'll continue when you're ready. 💙",
             "karma_reset": "Healing takes time. As BG 18.66 reminds us, release the burden of past actions while committing to dharmic action going forward. Let's try again soon. 💙",
-            "relationship_compass": "Relationships can be challenging. Remember the Gita's teaching on sama-darshana - seeing with equal vision. Let's try again in a moment. 💙"
+            "sambandh_dharma": "Relationships can be challenging. Remember the Gita's teaching on sama-darshana - seeing with equal vision. Let's try again in a moment. 💙"
         }
 
         return fallbacks.get(context, fallbacks["general"])

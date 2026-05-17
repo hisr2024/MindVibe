@@ -135,7 +135,7 @@
 | Test infrastructure | Async fixtures, proper mocking, Vitest + pytest well-configured | A |
 
 **115 untested backend services include critical business logic:**
-- `relationship_compass_engine` — complex AI analysis
+- `sambandh_dharma_engine` — complex AI analysis
 - `kiaan_consciousness` — core AI personality
 - `response_engine` — primary response generation
 - `journey_service` — core business workflow

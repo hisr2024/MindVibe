@@ -334,7 +334,7 @@ export default function ViyogClient() {
       subtitle="The Sacred Art of Detachment"
       modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.viyog', 'Pause Mode')}`}
       verse={{
-        english: 'You have the right to perform your actions, but you are not entitled to the fruits of your actions.',
+        english: '',
         reference: 'Bhagavad Gita 2.47',
       }}
       leftContent={leftContent}

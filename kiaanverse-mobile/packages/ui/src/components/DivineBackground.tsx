@@ -14,7 +14,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  type ColorValue, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -89,7 +90,7 @@ function DivineBackgroundInner({
     <View style={[styles.container, style]}>
       {/* Base cosmic gradient */}
       <LinearGradient
-        colors={bgColors as unknown as string[]}
+        colors={bgColors as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -98,7 +99,7 @@ function DivineBackgroundInner({
       {!disableAura && (
         <Animated.View style={[styles.auraContainer, auraStyle]}>
           <LinearGradient
-            colors={auraColors as unknown as string[]}
+            colors={auraColors as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
             locations={variant === 'sacred' ? [0, 0.4, 1] : [0, 0.3, 1]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}

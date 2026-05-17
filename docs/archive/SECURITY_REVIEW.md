@@ -106,7 +106,7 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/chat/message",          # State-changing!
     "/api/journeys/access",       # State-changing!
     "/api/journeys/start",        # State-changing!
-    "/api/journey-engine/journeys", # State-changing!
+    "/api/karma-marg/journeys", # State-changing!
     "/kiaan/divine-chat",         # State-changing!
     "/kiaan/synthesize",          # State-changing!
     "/kiaan/soul-reading",        # State-changing!
@@ -141,7 +141,7 @@ Since the frontend sends `Authorization: Bearer` on every request (from localSto
 **Issue:** The global exception handler returns HTTP 200 for journey endpoints when a server error occurs:
 
 ```python
-if "/journeys/" in request.url.path or "/journey-engine/" in request.url.path:
+if "/journeys/" in request.url.path or "/karma-marg/" in request.url.path:
     return JSONResponse(
         status_code=200,  # Return 200 to allow frontend fallback
         content={"error": "server_error", ...},
@@ -178,11 +178,11 @@ if "/journeys/" in request.url.path or "/journey-engine/" in request.url.path:
 
 ### H2. Debug Endpoints in Production
 
-**File:** `backend/routes/journey_engine.py:868-955`
+**File:** `backend/routes/karma_marg.py:868-955`
 
 **Issue:** Two debug endpoints are accessible in production:
-- `GET /api/journey-engine/debug/my-journeys` - Exposes raw database records including soft-deleted data
-- `DELETE /api/journey-engine/debug/clear-all-journeys` - Allows mass data deletion
+- `GET /api/karma-marg/debug/my-journeys` - Exposes raw database records including soft-deleted data
+- `DELETE /api/karma-marg/debug/clear-all-journeys` - Allows mass data deletion
 
 While these require authentication, they expose internal database structure and allow destructive operations.
 
@@ -601,7 +601,7 @@ startup_logger.info(f"   Length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}"
 | # | Action | File(s) | Effort |
 |---|--------|---------|--------|
 | 6 | Add auth to monitoring endpoints | `monitoring/health.py` | Small |
-| 7 | Remove or gate debug endpoints | `journey_engine.py` | Small |
+| 7 | Remove or gate debug endpoints | `karma_marg.py` | Small |
 | 8 | Strengthen CSP (remove unsafe-inline) | `security.py`, `next.config.js` | Medium |
 | 9 | Genericize auth error messages | `auth.py` | Small |
 | 10 | Enable DB SSL certificate verification | `deps.py` | Small |

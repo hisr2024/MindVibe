@@ -2,7 +2,10 @@
   "placeholder": "Ask Sakha anything...",
   "thinking": "Sakha is reflecting...",
   "error": "Sakha is unavailable right now",
-  "welcome": "I am Sakha, your spiritual companion. How may I guide you today?",
+  "welcome": "Sakha here — your AI spiritual companion, grounded in the Bhagavad Gita. How may I walk with you today?",
   "chatHeroPrompt": "What weighs upon your heart?",
-  "chatOfflineBanner": "You appear to be offline. I will listen as soon as the connection returns."
+  "chatOfflineBanner": "You appear to be offline. I will listen as soon as the connection returns.",
+  "aiDisclosureHeader": "AI companion · Bhagavad Gita wisdom",
+  "aiDisclosureFooter": "Responses are AI-generated, drawing on the Bhagavad Gita. Not medical, legal, or crisis advice.",
+  "aiDisclosureA11y": "AI assistant disclosure"
 }

@@ -45,7 +45,7 @@ const VERSE_BY_MOOD: Record<
   seeking: {
     reference: 'BG 4.34',
     sanskrit: 'तद्विद्धि प्रणिपातेन परिप्रश्नेन सेवया',
-    translation: 'Know this by humble approach, by inquiry, and by service.',
+    translation: '',
     theme: 'jñāna',
   },
   heavy: {
@@ -58,13 +58,13 @@ const VERSE_BY_MOOD: Record<
   radiant: {
     reference: 'BG 14.11',
     sanskrit: 'सर्वद्वारेषु देहेऽस्मिन्प्रकाश उपजायते',
-    translation: 'When light arises in every gate of the body, know that sattva is increasing.',
+    translation: '',
     theme: 'sattva',
   },
   wounded: {
     reference: 'BG 18.66',
     sanskrit: 'सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज',
-    translation: 'Abandon all concerns and take refuge in me alone. I will free you from every sorrow.',
+    translation: '',
     theme: 'śaraṇāgati',
   },
 }

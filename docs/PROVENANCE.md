@@ -88,11 +88,11 @@ For every additional language file under `data/gita/` (and any future addition),
 
 ---
 
-## 3. Relationship Compass Corpus
+## 3. Sambandh Dharma (Relationship Compass) Corpus
 
 | Artifact | Source | License | Acquired | Transformation | Owner |
 |---|---|---|---|---|---|
-| `data/relationship_compass/gita_index.sqlite` | Derived from §1 corpus | Inherits §1 + © MindVibe (index structure) | TBD | SQLite FTS index over relationship-relevant verses | engine-team |
+| `data/sambandh_dharma/gita_index.sqlite` | Derived from §1 corpus | Inherits §1 + © MindVibe (index structure) | TBD | SQLite FTS index over relationship-relevant verses | engine-team |
 
 ---
 
@@ -145,8 +145,12 @@ These are *consumed* services, not redistributed. Each appears in `.env.example`
 |---|---|---|---|---|
 | `brand/` (logos, marks, motion) | Designed by / commissioned by MindVibe | Proprietary, all rights reserved | TBD | brand-team |
 | Iconography (`app/icon.tsx`, `apple-icon.tsx`, OG images) | Original or licensed stock — record per file | TBD per asset | TBD | brand-team |
-| Fonts | TBD | TBD (verify SIL OFL / commercial license) | TBD | brand-team |
-| Stock imagery / illustration | TBD | TBD per asset | TBD | brand-team |
+| `kiaanverse-mobile/apps/mobile/assets/shankha-mandala.png` | Founder-provided original design (replaced inline SVG in commit `9b05275`) | Proprietary, all rights reserved | 2025-Q4 (commit `9b05275`) | founder |
+| Fonts | Google Fonts — Outfit, CrimsonText, CormorantGaramond, NotoSansDevanagari | SIL Open Font License 1.1 (see `FONT_LICENSES.md`) | bundled | brand-team |
+| Stock imagery / illustration | None currently bundled — verify before adding | TBD per asset | TBD | brand-team |
+| Audio — `gayatri.mp3` (mantra category) | Pixabay — Sounova Music Gayatri Mantra (Pixabay #493174) | Pixabay Content License (CC0-equivalent, commercial use allowed) | 2025-Q4 | voice-team |
+| Audio — `om-hanumate.mp3` (meditation category) | Pixabay — Kals "Om Hanumate Namaha" (Pixabay #447279) | Pixabay Content License | 2025-Q4 | voice-team |
+| Audio — Sakha voice TTS streams | Synthesized at request time via ElevenLabs / Sarvam / Edge / OpenAI TTS (see §5) | Per upstream provider terms | runtime | voice-team |
 | Audio (background, breath cues, safety audio) | `prompts/safety_audio_manifest.json` is *generated*; underlying voice models per §5 | Proprietary recordings | ongoing | voice-team |
 
 ---

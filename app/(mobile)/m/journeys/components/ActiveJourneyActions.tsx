@@ -11,11 +11,11 @@
 'use client'
 
 import { useState } from 'react'
-import type { JourneyResponse } from '@/types/journeyEngine.types'
+import type { JourneyResponse } from '@/types/karmaMarg.types'
 import {
-  journeyEngineService,
-  JourneyEngineError,
-} from '@/services/journeyEngineService'
+  karmaMargService,
+  KarmaMargError,
+} from '@/services/karmaMargService'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 interface ActiveJourneyActionsProps {
@@ -55,7 +55,7 @@ export function ActiveJourneyActions({
     } catch (err) {
       triggerHaptic('error')
       const message =
-        err instanceof JourneyEngineError ? err.message : fallbackError
+        err instanceof KarmaMargError ? err.message : fallbackError
       setError(message)
     } finally {
       setBusy(null)
@@ -65,21 +65,21 @@ export function ActiveJourneyActions({
   const handlePause = () =>
     runAction(
       'pause',
-      () => journeyEngineService.pauseJourney(journey.journey_id),
+      () => karmaMargService.pauseJourney(journey.journey_id),
       'Could not pause this journey. Please try again.',
     )
 
   const handleResume = () =>
     runAction(
       'resume',
-      () => journeyEngineService.resumeJourney(journey.journey_id),
+      () => karmaMargService.resumeJourney(journey.journey_id),
       'Could not resume this journey. Please try again.',
     )
 
   const handleAbandon = () =>
     runAction(
       'abandon',
-      () => journeyEngineService.abandonJourney(journey.journey_id),
+      () => karmaMargService.abandonJourney(journey.journey_id),
       'Could not close this journey. Please try again.',
     )
 

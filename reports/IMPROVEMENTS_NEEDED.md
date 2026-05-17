@@ -18,7 +18,7 @@
 
 **What's missing:**
 - **Zero E2E tests** — no Playwright, Cypress, or Puppeteer. No user flow is verified end-to-end.
-- **Backend service coverage is 22%** — only 32/147 services tested. 115 untested services include: `relationship_compass_engine`, `kiaan_consciousness`, `response_engine`, `journey_service`, `wisdom_core`, `multilingual_voice_engine`, `rag_service`, `whisper_transcription`, all "divine" services, and 100+ more.
+- **Backend service coverage is 22%** — only 32/147 services tested. 115 untested services include: `sambandh_dharma_engine`, `kiaan_consciousness`, `response_engine`, `journey_service`, `wisdom_core`, `multilingual_voice_engine`, `rag_service`, `whisper_transcription`, all "divine" services, and 100+ more.
 - **Backend route coverage is 100%** (all 66 routes referenced in tests — this is good).
 - **Frontend component coverage** — 670 source files, only 42 test files. Critical untested components: all chat components, all divine components, all navigation components, all mobile components, pricing page, onboarding wizard, journal encryption, profile page.
 - **CI threshold is only 49%** (`--cov-fail-under=49` in `ci.yml`). CLAUDE.md demands 80%.

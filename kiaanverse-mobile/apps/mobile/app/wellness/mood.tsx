@@ -2,7 +2,7 @@
  * Mood Tracking Screen
  *
  * Features:
- * - MoodRing selector with 8 spiritual states
+ * - BhavaMirror selector with 8 spiritual states
  * - Sanskrit name, suggested practice, linked Gita verses
  * - Daily log (one entry/day, update same day allowed)
  * - 30-day mood chart (inline SVG bars)
@@ -26,7 +26,7 @@ import {
   Screen,
   Text,
   GoldenHeader,
-  MoodRing,
+  BhavaMirror,
   colors,
   spacing,
   radii,
@@ -43,7 +43,7 @@ import { useTranslation } from '@kiaanverse/i18n';
 import { ShankhaVoiceInput } from '../../voice/components/ShankhaVoiceInput';
 
 // ---------------------------------------------------------------------------
-// Map MoodRing moods to SpiritualMood
+// Map BhavaMirror moods to SpiritualMood
 // ---------------------------------------------------------------------------
 
 const RING_TO_SPIRITUAL: Record<Mood, SpiritualMood> = {
@@ -311,11 +311,11 @@ function InsightsSection(): React.JSX.Element | null {
           ]}
         >
           <Text variant="bodySmall" color={c.textPrimary}>
-            {t('moodDominantFmt', { mood: dominant[0], count: dominant[1] })}
+            {t('moodDominantFmt', { mood: String(dominant[0]), count: String(dominant[1]) })}
           </Text>
           {streak > 1 ? (
             <Text variant="caption" color={c.textSecondary}>
-              {t('moodStreakFmt', { count: streak })}
+              {t('moodStreakFmt', { count: String(streak) })}
             </Text>
           ) : null}
         </View>
@@ -408,7 +408,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* MoodRing selector */}
+        {/* BhavaMirror selector */}
         <Animated.View entering={FadeInDown.duration(500).springify()}>
           <Text
             variant="label"
@@ -418,11 +418,11 @@ export default function MoodTrackingScreen(): React.JSX.Element {
           >
             {t('moodSectionLabel')}
           </Text>
-          <MoodRing
+          <BhavaMirror
             {...(ringMood !== undefined ? { selectedMood: ringMood } : {})}
             onMoodSelect={handleMoodSelect}
             size={280}
-            testID="mood-ring"
+            testID="bhava-mirror"
           />
         </Animated.View>
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides comprehensive guidance for the MindVibe platform redesign Phase 1, which establishes the foundational design system. The design system creates a clean, modern, multi-page experience while preserving all existing functionality including KIAAN, all guidance engines (Viyog, Ardha, Relationship Compass), Karma features (Tree, Footprint, Reset), and the complete MindVibe ecosystem.
+This document provides comprehensive guidance for the MindVibe platform redesign Phase 1, which establishes the foundational design system. The design system creates a clean, modern, multi-page experience while preserving all existing functionality including KIAAN, all guidance engines (Viyog, Ardha, Sambandh Dharma (Relationship Compass)), Karma features (Tree, Footprint, Reset), and the complete MindVibe ecosystem.
 
 ## Design Philosophy
 
@@ -62,7 +62,7 @@ brand: {
 Each guidance engine and tool has its own gradient:
 - **Viyog**: Cyan (#06B6D4) to Blue (#3B82F6)
 - **Ardha**: Purple (#8B5CF6) to Indigo (#6366F1)
-- **Relationship Compass**: Rose (#F43F5E) to Orange (#FB923C)
+- **Sambandh Dharma (Relationship Compass)**: Rose (#F43F5E) to Orange (#FB923C)
 - **Karmic Tree**: Green (#10B981) to Emerald (#34D399)
 
 ### Typography (`lib/design-tokens/typography.ts`)
@@ -412,7 +412,7 @@ All specialized tools are accessible via dedicated routes:
 |------|---------------|-------------|-------------|
 | Viyog | `/viyog` | `/tools/viyog` | Detachment Coach - Outcome anxiety reducer |
 | Ardha | `/ardha` | `/tools/ardha` | Cognitive Reframing - Gita-aligned CBT precision |
-| Relationship Compass | `/relationship-compass` | `/tools/relationship-compass` | Calm conflict guidance |
+| Sambandh Dharma (Relationship Compass) | `/sambandh-dharma` | `/tools/sambandh-dharma` | Calm conflict guidance |
 | Emotional Reset | `/emotional-reset` | `/tools/emotional-reset` | 7-step guided emotional processing |
 | Karma Reset | `/karma-reset` | `/tools/karma-reset` | 4-part emotional repair ritual |
 | Karma Footprint | `/karma-footprint` | `/tools/karma-footprint` | Daily action reflection analyzer |
@@ -584,7 +584,7 @@ app/
   tools/
     viyog/page.tsx          # Redirects to /viyog
     ardha/page.tsx          # Redirects to /ardha
-    relationship-compass/   # Redirects to /relationship-compass
+    sambandh-dharma/   # Redirects to /sambandh-dharma
     emotional-reset/        # Redirects to /emotional-reset
     karma-reset/           # Redirects to /karma-reset
     karma-footprint/       # Redirects to /karma-footprint
@@ -639,7 +639,7 @@ Phase 3 adds dedicated tool pages under `app/tools/` with reusable components, c
 |------|-------|-------------|
 | Viyog | `/tools/viyog` | Detachment Coach - outcome anxiety reducer |
 | Ardha | `/tools/ardha` | Cognitive Reframing - Gita-aligned CBT precision |
-| Relationship Compass | `/tools/relationship-compass` | Calm conflict guidance |
+| Sambandh Dharma (Relationship Compass) | `/tools/sambandh-dharma` | Calm conflict guidance |
 | Emotional Reset | `/tools/emotional-reset` | 7-step guided processing flow |
 | Karma Reset | `/tools/karma-reset` | 4-part reset ritual |
 | Karma Footprint | `/tools/karma-footprint` | Daily action reflection analyzer |

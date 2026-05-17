@@ -2,7 +2,7 @@
 
 Gita-compliant cognitive reframing through 5 pillars:
   A — Atma Distinction (Right Identity)
-  R — Raga-Dvesha Diagnosis (Attachment Scan)
+  R — Raga-Dvesha Reflection (Attachment Scan)
   D — Dharma Alignment (Right Action)
   H — Hrdaya Samatvam (Equanimity of Heart)
   A — Arpana (Offering & Surrender)
@@ -119,7 +119,7 @@ Core teachings from the Bhagavad Gita for ARDHA reframing:
 - BG 2.38: "Treating alike pleasure and pain, gain and loss, victory and defeat, engage in battle."
   ARDHA Pillar: Hrdaya Samatvam — Equal vision in all dualities.
 
-- BG 18.66: "Abandon all varieties of dharma and surrender unto Me. Do not fear."
+- BG 18.66: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins."
   ARDHA Pillar: Arpana — Complete surrender completes Karma Yoga.
 
 - BG 9.27: "Whatever you do, whatever you eat, whatever you offer — do it as an offering to Me."
@@ -183,7 +183,7 @@ async def reframe_thought(
 
     The ARDHA framework processes thoughts through:
     1. Atma Distinction — Correct identity before thought
-    2. Raga-Dvesha Diagnosis — Scan for attachment/aversion
+    2. Raga-Dvesha Reflection — Scan for attachment/aversion
     3. Dharma Alignment — Clarify right action
     4. Hrdaya Samatvam — Establish equanimity
     5. Arpana — Offer action and surrender result
@@ -779,7 +779,7 @@ async def ardha_health():
         "status": "ok" if openai_ready else "degraded",
         "service": "ardha",
         "framework": "ARDHA (Atma-Reframing through Dharma and Higher Awareness)",
-        "pillars": ["Atma Distinction", "Raga-Dvesha Diagnosis", "Dharma Alignment", "Hrdaya Samatvam", "Arpana"],
+        "pillars": ["Atma Distinction", "Raga-Dvesha Reflection", "Dharma Alignment", "Hrdaya Samatvam", "Arpana"],
         "openai_ready": openai_ready,
         "rag_ready": rag_ready,
         "ardha_kb_loaded": ardha_kb_loaded,

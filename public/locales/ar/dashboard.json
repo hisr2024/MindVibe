@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "إرشاد حسب الموقف"
     },
-    "relationship-compass": {
+    "sambandh-dharma": {
       "title": "بوصلة العلاقات",
       "description": "إرشاد العلاقات"
     },
@@ -106,7 +106,7 @@
     "viyog": "تهدئة ردة الفعل الفورية",
     "ardha": "إعادة صياغة الإدراك",
     "kiaan": "تحدث عن الأمر",
-    "relationship-compass": "تنقل في وضوح العلاقات",
+    "sambandh-dharma": "تنقل في وضوح العلاقات",
     "journey": "تدريب على الثبات الداخلي طويل المدى"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "وضع التوقف",
     "ardha": "وضع الوضوح",
     "kiaan": "وضع الرفيق",
-    "relationship-compass": "وضع العلاقات",
+    "sambandh-dharma": "وضع العلاقات",
     "journey": "وضع التدريب"
   }
 }
