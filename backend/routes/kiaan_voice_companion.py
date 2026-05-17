@@ -98,24 +98,37 @@ _response_cache_lock = threading.Lock()
 
 
 def _response_cache_key(
-    mood: str, phase: str, message: str, language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    language: str = "en",
 ) -> str:
-    """Cache key = hash of (mood, phase, language, normalized message).
+    """Cache key = hash of (user_id, mood, phase, language, normalized message).
 
-    We normalize the message to lowercase and strip whitespace so that
+    **user_id is part of the key** to fix the privacy bug
+    ``AUDIT_CACHE_FRAMEWORK.md`` Part 1 flagged: cache entries must never
+    be served across users. Same-user, same-message hits the cache;
+    different users get fresh responses even on identical text.
+
+    We normalise the message to lowercase + strip whitespace so that
     "I feel anxious" and "i feel anxious " hit the same entry.
     Language is included to prevent cross-language cache collisions.
     """
     normalized = message.strip().lower()
-    raw = f"{mood}:{phase}:{language}:{normalized}"
+    raw = f"{user_id}:{mood}:{phase}:{language}:{normalized}"
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
 
 def _get_cached_response(
-    mood: str, phase: str, message: str, language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    language: str = "en",
 ) -> str | None:
     """Check for a cached text response. Returns None on miss."""
-    key = _response_cache_key(mood, phase, message, language)
+    key = _response_cache_key(user_id, mood, phase, message, language)
     cached = _response_cache.get(key)
     if cached and (time.monotonic() - cached[1]) < _RESPONSE_CACHE_TTL:
         logger.debug("VoiceCompanion: Response cache HIT for key=%s", key[:8])
@@ -126,10 +139,21 @@ def _get_cached_response(
 
 
 def _set_cached_response(
-    mood: str, phase: str, message: str, response: str,
-    memories: list[str], language: str = "en",
+    user_id: str,
+    mood: str,
+    phase: str,
+    message: str,
+    response: str,
+    memories: list[str],
+    language: str = "en",
 ) -> None:
-    """Store a response in cache. Skip if user has personalized memories."""
+    """Store a response in cache. Skip if user has personalised memories.
+
+    With ``user_id`` now in the key, the per-user isolation is enforced
+    structurally; the ``memories`` guard remains as belt-and-braces — a
+    response shaped by long-term memory recall is rarely worth caching
+    even within the same user, because the memory set changes over time.
+    """
     if memories:
         return  # Don't cache personalized responses
     with _response_cache_lock:
@@ -138,7 +162,7 @@ def _set_cached_response(
             entries = sorted(_response_cache.items(), key=lambda x: x[1][1])
             for k, _ in entries[: _RESPONSE_CACHE_MAX_SIZE // 5]:
                 _response_cache.pop(k, None)
-        key = _response_cache_key(mood, phase, message, language)
+        key = _response_cache_key(user_id, mood, phase, message, language)
         _response_cache[key] = (response, time.monotonic())
 
 
@@ -434,17 +458,12 @@ async def _get_or_create_profile(
 async def _get_user_memories(
     db: AsyncSession, user_id: str, limit: int = 10
 ) -> list[str]:
-    result = await db.execute(
-        select(CompanionMemory)
-        .where(
-            CompanionMemory.user_id == user_id,
-            CompanionMemory.deleted_at.is_(None),
-        )
-        .order_by(desc(CompanionMemory.importance))
-        .limit(limit)
-    )
-    memories = result.scalars().all()
-    return [f"{m.memory_type}: {m.value}" for m in memories]
+    # Thin wrapper over the shared helper so the WSS voice path and the
+    # REST voice route stay behaviour-identical. See
+    # backend/services/companion_context.py for the canonical impl and
+    # IMPROVEMENT_ROADMAP.md P0 §3 for the consolidation rationale.
+    from backend.services.companion_context import get_user_memories
+    return await get_user_memories(db, user_id, limit=limit)
 
 
 async def _save_memories(
@@ -496,18 +515,12 @@ async def _save_memories(
 async def _get_recent_session_summaries(
     db: AsyncSession, user_id: str, limit: int = 3
 ) -> list[dict]:
-    result = await db.execute(
-        select(CompanionSession)
-        .where(
-            CompanionSession.user_id == user_id,
-            CompanionSession.is_active.is_(False),
-            CompanionSession.topics_discussed.isnot(None),
-        )
-        .order_by(desc(CompanionSession.ended_at))
-        .limit(limit)
+    # Thin wrapper. See ``backend.services.companion_context`` for the
+    # canonical implementation reused by the WSS voice path.
+    from backend.services.companion_context import (
+        get_recent_session_summaries,
     )
-    sessions = result.scalars().all()
-    return [s.topics_discussed for s in sessions if s.topics_discussed]
+    return await get_recent_session_summaries(db, user_id, limit=limit)
 
 
 def _update_streak(profile: CompanionProfile) -> None:
@@ -1195,7 +1208,7 @@ async def send_voice_companion_message(
     # RESPONSE CACHE: Check before calling OpenAI (~1-3s saved on hit)
     # Only cache non-personalized responses (no memories).
     # ══════════════════════════════════════════════════════════════════════
-    _cached = _get_cached_response(mood, phase, body.message, body.language)
+    _cached = _get_cached_response(current_user, mood, phase, body.message, body.language)
     if _cached:
         response_text = _cached
         ai_tier = "cache"
@@ -1244,7 +1257,7 @@ async def send_voice_companion_message(
             wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
         logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user}")
         # Store in cache for future similar requests
-        _set_cached_response(mood, phase, body.message, response_text, memories, body.language)
+        _set_cached_response(current_user, mood, phase, body.message, response_text, memories, body.language)
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
@@ -1313,6 +1326,46 @@ async def send_voice_companion_message(
                 "about what's going on?"
             )
             ai_tier = "fallback"
+
+    # ── POST-LLM Gita Wisdom Filter (per IMPROVEMENT_ROADMAP.md P0 §1) ──
+    # Closes the WisdomCore-bypass that AUDIT_CACHE_FRAMEWORK.md Part 3
+    # flagged on this REST voice route. The curated Divine-Friend system
+    # prompt remains untouched (it already injects Wisdom Core verses via
+    # `wisdom_text`); this is a defence-in-depth post-LLM gate that
+    # validates Gita grounding and enhances the response when the wisdom
+    # score is low. Skipped on cache hits and on the canned fallback (the
+    # last-resort string is already Gita-grounded and routing it through
+    # the filter just adds latency).
+    if response_text and ai_tier not in ("cache", "fallback"):
+        try:
+            from backend.services.kiaan_grounded_ai import filter_voice_response
+
+            filtered_text, filter_telemetry = await filter_voice_response(
+                raw_text=response_text,
+                user_message=body.message,
+                tool_name=None,  # voice companion is "general" in filter terms
+            )
+            if filter_telemetry.get("filter_applied"):
+                response_text = filtered_text
+                # Surface filter telemetry for the existing wisdom-delivery
+                # learning loop. Treat enhancement as a signal that the
+                # curated wisdom anchor we shipped above was sufficient
+                # (low_wisdom_score => filter had to add anchors).
+                wisdom_used = wisdom_used or {}
+                wisdom_used.setdefault("filter", {
+                    "wisdom_score": filter_telemetry.get("wisdom_score", 0.0),
+                    "is_gita_grounded": filter_telemetry.get(
+                        "is_gita_grounded", False
+                    ),
+                    "enhancement_applied": filter_telemetry.get(
+                        "enhancement_applied", False
+                    ),
+                })
+        except Exception as filter_err:
+            # Filter failure must never block a voice response.
+            logger.warning(
+                "VoiceCompanion: post-LLM Gita filter skipped: %s", filter_err
+            )
 
     # Save companion response
     response_time_ms = (time.monotonic() - start_time) * 1000

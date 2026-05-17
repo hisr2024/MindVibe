@@ -22,7 +22,6 @@ audio cache for the pre-rendered clip, or synthesizes fresh.
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -190,54 +189,62 @@ async def retrieve_verses_for_turn(
 ) -> list[RetrievedVerse]:
     """Retrieve top-N verses for a Sakha turn.
 
-    Live path: calls wisdom_core.search() with the spec scoring formula
-    (see CLAUDE.md). The DB session is required.
+    Delegates the entire data path to the unified retriever (see
+    ``IMPROVEMENT_ROADMAP.md`` P0 §4). The voice surface opts into
+    ``allow_mock_catalogue=True`` so the orchestrator always has at
+    least one verse to seed the prompt with when the live tiers
+    return nothing (DB unavailable, all-cold-start, or
+    ``KIAAN_VOICE_MOCK_PROVIDERS=1``).
 
-    Mock path (db is None OR KIAAN_VOICE_MOCK_PROVIDERS=1): returns the
-    canned catalogue for the mood. Always returns at least one verse
-    (falls back to "neutral" if mood unknown), so the orchestrator always
-    has something to seed retrieved_verses with.
+    Previously this function called ``WisdomCore.search(mood=..., user_id=...)``
+    with kwargs the method does not accept, so the live path raised
+    ``TypeError`` on every call and the mock catalogue was silently
+    served in production. The unified retriever fixes that bug: the
+    voice path now gets the *same* dynamic-effectiveness pick + static
+    Gita corpus search that chat uses.
     """
     limit = _engine_verse_count(engine)
-    mock_forced = os.environ.get("KIAAN_VOICE_MOCK_PROVIDERS") == "1"
 
-    if not mock_forced and db is not None:
-        try:
-            from backend.services.wisdom_core import get_wisdom_core
-            core = get_wisdom_core()
-            results = await core.search(
-                db=db, query=user_message, mood=mood_label,
-                limit=limit, user_id=user_id,
-            )
-            return [_wisdom_result_to_retrieved(r) for r in results]
-        except Exception as e:
-            logger.warning(
-                "retrieve_verses_for_turn: live wisdom_core failed (%s) — "
-                "falling back to mock catalogue",
-                e,
-            )
+    # Lazy import to keep voice module import light and dodge any
+    # transitive cycle through backend.models.
+    from backend.services.wisdom import retrieve_wisdom
 
-    # Mock path
-    catalogue = _MOCK_VERSE_CATALOGUE.get(
-        mood_label.lower(), _MOCK_VERSE_CATALOGUE["neutral"]
+    bundle = await retrieve_wisdom(
+        db=db,
+        query=user_message,
+        user_id=user_id,
+        mood=mood_label,
+        limit=limit,
+        include_dynamic=True,
+        # Voice TTS pipeline does not render the practical-wisdom
+        # block (the chat persona does). Skip the extra query.
+        include_practical=False,
+        include_learned=False,  # strict-Gita
+        allow_mock_catalogue=True,
     )
-    return list(catalogue[:limit])
+    return [_wisdom_verse_to_retrieved(v) for v in bundle.verses]
 
 
-def _wisdom_result_to_retrieved(result) -> RetrievedVerse:
-    """Adapter: wisdom_core.WisdomResult → RetrievedVerse."""
+def _wisdom_verse_to_retrieved(v) -> RetrievedVerse:
+    """Adapter: :class:`backend.services.wisdom.WisdomVerse` → :class:`RetrievedVerse`.
+
+    Voice's ``ref`` is the human "BG <chapter>.<verse>" form; the
+    unified retriever stores just "<chapter>.<verse>" so we re-prefix
+    here.
+    """
+    ref = v.verse_ref
+    if ref and not ref.startswith("BG "):
+        ref = f"BG {ref}"
     return RetrievedVerse(
-        ref=getattr(result, "reference", "") or getattr(result, "verse_ref", ""),
-        chapter=getattr(result, "chapter", 0),
-        verse=getattr(result, "verse", 0) or getattr(result, "verse_number", 0),
-        sanskrit=getattr(result, "sanskrit", ""),
-        english=getattr(result, "english", ""),
-        hindi=getattr(result, "hindi", None),
-        principle=getattr(result, "principle", None),
-        theme=getattr(result, "theme", None),
-        mood_application_match=float(
-            getattr(result, "mood_application_match", 0.0) or 0.0
-        ),
+        ref=ref or "",
+        chapter=int(v.chapter or 0),
+        verse=int(v.verse or 0),
+        sanskrit=v.sanskrit,
+        english=v.english,
+        hindi=v.hindi,
+        principle=v.principle or None,
+        theme=v.theme or None,
+        mood_application_match=float(v.mood_application_match or 0.0),
     )
 
 

@@ -27,6 +27,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from collections.abc import AsyncIterator
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -168,15 +169,63 @@ async def call_kiaan_ai(
     if not message or not message.strip():
         raise ValueError("message must be a non-empty string")
 
+    text, _usage = await _call_kiaan_ai_with_usage_inner(
+        message=message,
+        conversation_history=conversation_history,
+        gita_verse=gita_verse,
+        tool_name=tool_name,
+        system_override=system_override,
+    )
+    return text
+
+
+async def call_kiaan_ai_with_usage(
+    message: str,
+    conversation_history: list[dict[str, Any]] | None = None,
+    gita_verse: dict[str, Any] | None = None,
+    tool_name: str | None = None,
+    system_override: str | None = None,
+) -> tuple[str, dict[str, int]]:
+    """Same as :func:`call_kiaan_ai` but also returns provider usage.
+
+    Returns ``(text, usage)`` where ``usage`` is
+    ``{"prompt_tokens": int, "completion_tokens": int}``. Empty usage
+    keys default to ``0``. The grounded path uses this entry point so
+    the cost counter in ``backend.services.kiaan_telemetry`` and the
+    spend tracker in ``backend.services.kiaan_cost_governor`` see real
+    numbers instead of zeros.
+
+    Implements ``IMPROVEMENT_ROADMAP.md`` P2 §15 token-plumbing.
+    """
+    return await _call_kiaan_ai_with_usage_inner(
+        message=message,
+        conversation_history=conversation_history,
+        gita_verse=gita_verse,
+        tool_name=tool_name,
+        system_override=system_override,
+    )
+
+
+async def _call_kiaan_ai_with_usage_inner(
+    *,
+    message: str,
+    conversation_history: list[dict[str, Any]] | None,
+    gita_verse: dict[str, Any] | None,
+    tool_name: str | None,
+    system_override: str | None,
+) -> tuple[str, dict[str, int]]:
+    if not message or not message.strip():
+        raise ValueError("message must be a non-empty string")
+
     system = _build_system_prompt(gita_verse, tool_name, system_override)
     history = _sanitize_history(conversation_history)
 
     started = time.monotonic()
     try:
         if AI_PROVIDER == "openai":
-            text = await _call_openai(system, message, history)
+            text, usage = await _call_openai(system, message, history)
         elif AI_PROVIDER == "anthropic":
-            text = await _call_anthropic(system, message, history)
+            text, usage = await _call_anthropic(system, message, history)
         else:
             raise ValueError(f"Unknown AI_PROVIDER: {AI_PROVIDER!r}")
     except AIProviderError:
@@ -197,14 +246,17 @@ async def call_kiaan_ai(
 
     latency_ms = int((time.monotonic() - started) * 1000)
     logger.info(
-        "kiaan_ai ok provider=%s model=%s tool=%s history_turns=%d latency_ms=%d",
+        "kiaan_ai ok provider=%s model=%s tool=%s history_turns=%d "
+        "latency_ms=%d prompt_tokens=%d completion_tokens=%d",
         AI_PROVIDER,
         AI_MODEL,
         tool_name or "chat",
         len(history),
         latency_ms,
+        usage.get("prompt_tokens", 0),
+        usage.get("completion_tokens", 0),
     )
-    return text.strip()
+    return text.strip(), usage
 
 
 # ── PROMPT COMPOSITION ────────────────────────────────────────────────────
@@ -264,12 +316,91 @@ def _sanitize_history(
     return cleaned
 
 
+# ── STREAMING ENTRY POINT ─────────────────────────────────────────────────
+async def call_kiaan_ai_stream(
+    message: str,
+    conversation_history: list[dict[str, Any]] | None = None,
+    gita_verse: dict[str, Any] | None = None,
+    tool_name: str | None = None,
+    system_override: str | None = None,
+) -> AsyncIterator[str]:
+    """Streaming variant of :func:`call_kiaan_ai`.
+
+    Yields text deltas as they arrive from the upstream provider. The
+    composed system prompt, history sanitisation, and provider routing
+    rules are identical to the unary path — only the transport changes.
+
+    Today only OpenAI streaming is wired. Anthropic + Sarvam fall back
+    to a one-shot emit so callers do not need to special-case
+    ``AI_PROVIDER`` at the route layer. When those providers grow real
+    streaming support, the implementation hops here without touching
+    the consumer.
+
+    Raises the same exception hierarchy as ``call_kiaan_ai`` so the
+    SSE route can map ``AIProviderNotConfigured`` → 503 and
+    ``AIProviderError`` → 502 with the same handlers chat already has.
+    """
+    if not message or not message.strip():
+        raise ValueError("message must be a non-empty string")
+
+    system = _build_system_prompt(gita_verse, tool_name, system_override)
+    history = _sanitize_history(conversation_history)
+
+    started = time.monotonic()
+    chunks_emitted = 0
+    try:
+        if AI_PROVIDER == "openai":
+            async for delta in _stream_openai(system, message, history):
+                if delta:
+                    chunks_emitted += 1
+                    yield delta
+        elif AI_PROVIDER == "anthropic":
+            # No native streaming wired yet — fall back to a one-shot
+            # emit so the SSE route can still serve the response. The
+            # client sees a single token event followed by done.
+            text = await _call_anthropic(system, message, history)
+            if text:
+                chunks_emitted += 1
+                yield text
+        else:
+            raise ValueError(f"Unknown AI_PROVIDER: {AI_PROVIDER!r}")
+    except AIProviderError:
+        raise
+    except Exception as exc:
+        logger.exception(
+            "AI provider stream failed provider=%s model=%s tool=%s",
+            AI_PROVIDER,
+            AI_MODEL,
+            tool_name,
+        )
+        raise AIProviderError(f"{AI_PROVIDER} stream failed: {exc}") from exc
+
+    latency_ms = int((time.monotonic() - started) * 1000)
+    logger.info(
+        "kiaan_ai_stream ok provider=%s model=%s tool=%s history_turns=%d "
+        "chunks=%d latency_ms=%d",
+        AI_PROVIDER,
+        AI_MODEL,
+        tool_name or "chat",
+        len(history),
+        chunks_emitted,
+        latency_ms,
+    )
+
+
 # ── OPENAI ────────────────────────────────────────────────────────────────
 async def _call_openai(
     system: str,
     message: str,
     history: list[dict[str, str]],
-) -> str:
+) -> tuple[str, dict[str, int]]:
+    """Call OpenAI. Returns ``(content, usage_dict)``.
+
+    ``usage_dict`` carries ``prompt_tokens`` and ``completion_tokens``
+    (both 0 when the provider omitted usage). Plumbed up to the cost
+    counter in ``backend.services.kiaan_telemetry`` and to the cost
+    governor in ``backend.services.kiaan_cost_governor``.
+    """
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise AIProviderNotConfigured(
@@ -295,7 +426,60 @@ async def _call_openai(
 
     if not response.choices:
         raise AIProviderError("OpenAI returned no choices")
-    return response.choices[0].message.content or ""
+    content = response.choices[0].message.content or ""
+    usage_obj = getattr(response, "usage", None)
+    usage: dict[str, int] = {
+        "prompt_tokens": int(getattr(usage_obj, "prompt_tokens", 0) or 0),
+        "completion_tokens": int(
+            getattr(usage_obj, "completion_tokens", 0) or 0
+        ),
+    }
+    return content, usage
+
+
+async def _stream_openai(
+    system: str,
+    message: str,
+    history: list[dict[str, str]],
+) -> AsyncIterator[str]:
+    """OpenAI streaming. Yields content deltas as they arrive.
+
+    Honours the same ``AI_*`` env knobs as the unary path. The
+    ``stream=True`` flag plus the AsyncOpenAI client yields a stream
+    of ``ChatCompletionChunk`` objects; we project each chunk's first
+    choice's content delta to a plain string. Empty deltas (the first
+    chunk is usually role-only metadata) are skipped at the route
+    layer.
+    """
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise AIProviderNotConfigured(
+            "OPENAI_API_KEY is not configured. "
+            "Set it in the Render dashboard to enable KIAAN AI."
+        )
+
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(api_key=api_key, timeout=AI_TIMEOUT_SECONDS)
+
+    messages: list[dict[str, str]] = [{"role": "system", "content": system}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": message})
+
+    stream = await client.chat.completions.create(
+        model=AI_MODEL,
+        messages=messages,
+        max_tokens=AI_MAX_TOKENS,
+        temperature=AI_TEMPERATURE,
+        stream=True,
+    )
+    async for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta
+        content = getattr(delta, "content", None) if delta is not None else None
+        if content:
+            yield content
 
 
 # ── ANTHROPIC ─────────────────────────────────────────────────────────────
@@ -303,7 +487,10 @@ async def _call_anthropic(
     system: str,
     message: str,
     history: list[dict[str, str]],
-) -> str:
+) -> tuple[str, dict[str, int]]:
+    """Call Anthropic. Returns ``(content, usage_dict)`` — same shape as
+    :func:`_call_openai` so the upstream telemetry / cost code does not
+    need to branch on provider."""
     api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         raise AIProviderNotConfigured(
@@ -331,8 +518,15 @@ async def _call_anthropic(
         max_tokens=AI_MAX_TOKENS,
     )
 
+    usage_obj = getattr(response, "usage", None)
+    usage: dict[str, int] = {
+        # Anthropic exposes input_tokens / output_tokens. Map to the
+        # neutral keys our cost table uses.
+        "prompt_tokens": int(getattr(usage_obj, "input_tokens", 0) or 0),
+        "completion_tokens": int(getattr(usage_obj, "output_tokens", 0) or 0),
+    }
     for block in response.content or []:
         text = getattr(block, "text", None)
         if text:
-            return text
+            return text, usage
     raise AIProviderError("Anthropic response contained no text blocks")

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "attachment_to_role",
+    "inputs": {
+      "attachment": "My identity as a founder.",
+      "attachment_type": "identity",
+      "freedom_vision": "Being able to introduce myself without leading with the company name."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "attachment_to_ex",
+    "inputs": {
+      "attachment": "Memories of who my ex used to be in 2019.",
+      "attachment_type": "relationship",
+      "freedom_vision": "Walking past our old café without my chest tightening."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "attachment_to_outcome",
+    "inputs": {
+      "attachment": "The promotion I have been working toward for two years.",
+      "attachment_type": "outcome",
+      "freedom_vision": "Doing excellent work whether or not it lands a title change."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "attachment_to_parents_approval",
+    "inputs": {
+      "attachment": "My parents' approval of my career choices.",
+      "attachment_type": "approval",
+      "freedom_vision": "Choosing a path because it is mine, even if they never understand it."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "attachment_to_phone",
+    "inputs": {
+      "attachment": "Checking my phone the moment I wake up.",
+      "attachment_type": "habit",
+      "freedom_vision": "Twenty minutes of silence before the first input."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "hindi_attachment_grief",
+    "inputs": {
+      "attachment": "अपनी माँ की आवाज़ की रिकॉर्डिंग को बार-बार सुनना",
+      "attachment_type": "memory",
+      "freedom_vision": "उनकी याद के साथ शांति में जीना, दर्द में नहीं"
+    },
+    "expected": {"min_verses": 1, "locale": "hi"}
+  },
+  {
+    "id": "attachment_to_being_right",
+    "inputs": {
+      "attachment": "Being the smartest person in every conversation.",
+      "attachment_type": "ego",
+      "freedom_vision": "Listening for ten minutes before I speak."
+    },
+    "expected": {"min_verses": 1}
+  },
+  {
+    "id": "minimal_attachment_only",
+    "inputs": {
+      "attachment": "My old self.",
+      "attachment_type": "",
+      "freedom_vision": ""
+    },
+    "expected": {"min_verses": 1}
+  }
+]

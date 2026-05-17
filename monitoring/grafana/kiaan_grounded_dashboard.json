@@ -1,0 +1,205 @@
+{
+  "title": "KIAAN — Grounded Pipeline",
+  "description": "Per-stage telemetry for the Wisdom-Core-gated pipeline. Scrape `/api/monitoring/prometheus`. See IMPROVEMENT_ROADMAP.md P2 §14.",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {"text": "Prometheus", "value": "Prometheus"}
+      },
+      {
+        "name": "tool",
+        "type": "query",
+        "datasource": "$datasource",
+        "query": "label_values(kiaan_grounded_turn_latency_seconds_bucket, tool)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "End-to-end latency (p50 / p95 / p99)",
+      "type": "timeseries",
+      "datasource": "$datasource",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(kiaan_grounded_turn_latency_seconds_bucket{tool=~\"$tool\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(kiaan_grounded_turn_latency_seconds_bucket{tool=~\"$tool\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(kiaan_grounded_turn_latency_seconds_bucket{tool=~\"$tool\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1.5},
+              {"color": "red", "value": 3.0}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Per-stage p95 latency",
+      "type": "timeseries",
+      "datasource": "$datasource",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(kiaan_stage_latency_seconds_bucket[5m])) by (le, stage))",
+          "legendFormat": "{{stage}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 3,
+      "title": "Cache hit ratio",
+      "type": "stat",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(kiaan_response_cache_outcomes_total{outcome=\"hit\"}[5m])) / clamp_min(sum(rate(kiaan_response_cache_outcomes_total{outcome=~\"hit|miss\"}[5m])), 0.001)",
+          "legendFormat": "hit ratio",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 0.30},
+              {"color": "green", "value": 0.50}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Filter pass rate",
+      "type": "stat",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(kiaan_gita_filter_outcomes_total{outcome=\"pass\"}[5m])) / clamp_min(sum(rate(kiaan_gita_filter_outcomes_total{outcome=~\"pass|fail\"}[5m])), 0.001)",
+          "legendFormat": "pass rate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 0.85},
+              {"color": "green", "value": 0.90}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Cost per minute (USD)",
+      "type": "stat",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(kiaan_cost_micro_usd_total[5m])) * 60 / 1000000",
+          "legendFormat": "USD/min",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "currencyUSD"}
+      }
+    },
+    {
+      "id": 6,
+      "title": "Wisdom score distribution (p50 / p25 / p75)",
+      "type": "timeseries",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.25, sum(rate(kiaan_wisdom_score_bucket[5m])) by (le))",
+          "legendFormat": "p25",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(kiaan_wisdom_score_bucket[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.75, sum(rate(kiaan_wisdom_score_bucket[5m])) by (le))",
+          "legendFormat": "p75",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Cache memory size (entries)",
+      "type": "timeseries",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 14},
+      "targets": [
+        {
+          "expr": "kiaan_response_cache_memory_size",
+          "legendFormat": "in-memory tier",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Stage error rate (errors / min)",
+      "type": "timeseries",
+      "datasource": "$datasource",
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 14},
+      "targets": [
+        {
+          "expr": "sum(rate(kiaan_stage_calls_total{outcome=\"error\"}[5m])) by (stage) * 60",
+          "legendFormat": "{{stage}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
