@@ -117,6 +117,66 @@ diffs in PR are the audit trail for prompt / model changes.
 - `filter_applied` rate may drop ≤ 2 pp
 - recorded `verse_refs` must still appear in the new response
 
+## Cost-aware spend governor
+
+`backend/services/kiaan_cost_governor.CostGovernor` bounds per-user-tier
+daily LLM spend. Built on the token-usage plumbing shipped in P2 §15
+(`call_kiaan_ai_with_usage` returns `(text, {prompt_tokens, completion_tokens})`),
+which now also feeds the P2 §14 cost counter with real numbers.
+
+Tier caps (env-overrideable via `KIAAN_COST_CAP_USD_<TIER>`):
+
+| Tier | Default cap / day |
+|---|---|
+| FREE | $0.02 |
+| SADHAK | $0.15 |
+| SIDDHA | $0.50 |
+| DIVINE | $2.00 |
+
+Decisions: **ALLOW** (< 80 %) / **BUDGET_WARNING** (≥ 80 %) /
+**BUDGET_EXCEEDED** (≥ 100 %). When over cap, `BudgetExceededError`
+carries `retry_after_seconds = seconds-until-midnight-UTC` for the
+HTTP layer's `429` mapping.
+
+Storage mirrors the response cache: Redis preferred (shared
+connection pool, `INCRBY` for atomic adds, 48 h TTL), in-memory
+fallback bounded to 50 000 keys. User IDs are SHA-256 hashed before
+keying so neither Redis nor logs leak raw identifiers.
+
+Kill switch: `KIAAN_COST_GOVERNOR_ENABLED=false`.
+
+## Daemon-ingestion safety harness
+
+`backend/services/kiaan_daemon_safety.py` is the rail for the day the
+dormant 24/7 learning daemon flips on. Two-stage validator + two
+retention passes.
+
+**Stage 1 — license whitelist.** Every `IngestionCandidate` carries a
+`LicenseTag` (CC0, CC-BY, CC-BY-SA, PD-pre-1928, FIRST_PARTY,
+OPERATOR_REVIEWED). Untagged / non-whitelisted candidates reject at
+this stage, before any expensive Gita-compliance check. CC-BY /
+CC-BY-SA without attribution is a license breach and also rejects.
+
+**Stage 2 — copyright phrase scrubber.** A denylist seeded from
+`.github/workflows/ip-hygiene.yml::FORBIDDEN_PHRASES` (Prabhupada,
+Easwaran, ISKCON characteristic phrasings). Case-insensitive,
+whitespace-normalised so multi-line excerpts can't slip past. Catches
+accidental drift even when the upstream license tag looks clean.
+
+**Retention — `purge_low_value_learned_rows`.** Soft-deletes
+`learned_wisdom` rows that never proved useful (default:
+`usage_count < 3` AND `created_at < now - 90 days`). The audit
+projected unbounded ~250 MB–2 GB/year growth if the daemon runs
+without retention.
+
+**Auto-reject — `mark_low_effectiveness_rejected`.** Sets
+`validation_status=REJECTED` on rows with `quality_score < 0.40` over
+20+ deliveries. Row stays in the table for audit; retrieval stops
+serving it.
+
+Both retention passes default to `dry_run=True` — explicit opt-in to
+write.
+
 ## Telemetry & observability
 
 `backend/services/kiaan_telemetry.py` instruments the grounded
