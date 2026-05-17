@@ -169,6 +169,24 @@ async def call_kiaan_ai_grounded(
     if not message or not message.strip():
         raise ValueError("message must be a non-empty string")
 
+    # Per-turn telemetry envelope. Times the whole turn and emits the
+    # end-to-end metric in the ``finally`` block so even error paths
+    # land in Grafana. See IMPROVEMENT_ROADMAP.md P2 §14.
+    import time as _time
+
+    from backend.services.kiaan_telemetry import (
+        record_grounded_turn as _record_turn,
+    )
+    from backend.services.kiaan_telemetry import (
+        trace_stage as _trace_stage,
+    )
+
+    _turn_started = _time.monotonic()
+    _turn_outcome = "ok"
+    _turn_cache_hit = False
+    _turn_provider: str | None = None
+    _turn_model: str | None = None
+
     # ── 0. RESPONSE CACHE LOOKUP ──────────────────────────────────────
     # See IMPROVEMENT_ROADMAP.md P0 §2. The cache is bypassed when:
     #   * the caller supplied their own system_override (the cache key
@@ -201,7 +219,22 @@ async def call_kiaan_ai_grounded(
                 locale=locale,
             )
             if cached_payload is not None:
-                return rehydrate(cached_payload)
+                _turn_cache_hit = True
+                rehydrated = rehydrate(cached_payload)
+                _record_turn(
+                    tool_name=tool_name,
+                    elapsed_seconds=_time.monotonic() - _turn_started,
+                    cache_hit=True,
+                    outcome="ok",
+                    is_gita_grounded=rehydrated.is_gita_grounded,
+                    wisdom_score_value=rehydrated.wisdom_score,
+                    filter_applied=rehydrated.filter_applied,
+                    provider=None,
+                    model=None,
+                    prompt_tokens=0,
+                    completion_tokens=0,
+                )
+                return rehydrated
         except Exception as exc:
             # Cache failures must never block the user. Continue to LLM.
             logger.warning(
@@ -223,12 +256,13 @@ async def call_kiaan_ai_grounded(
                 compose_kiaan_system_prompt,
             )
 
-            composed, verses = await compose_kiaan_system_prompt(
-                db=db,
-                query=message,
-                tool_name=tool_name,
-                user_id=user_id,
-            )
+            async with _trace_stage("compose"):
+                composed, verses = await compose_kiaan_system_prompt(
+                    db=db,
+                    query=message,
+                    tool_name=tool_name,
+                    user_id=user_id,
+                )
             if composed:
                 effective_override = composed
         except Exception as exc:
@@ -244,16 +278,38 @@ async def call_kiaan_ai_grounded(
             )
 
     # ── 2. LLM call (provider routing handled by call_kiaan_ai) ───────
-    raw_text = await call_kiaan_ai(
-        message=message,
-        conversation_history=conversation_history,
-        gita_verse=gita_verse,
-        tool_name=tool_name,
-        system_override=effective_override,
-    )
+    # Stage timer: separates LLM latency from compose/filter on the
+    # Grafana dashboard.
+    async with _trace_stage("llm"):
+        raw_text = await call_kiaan_ai(
+            message=message,
+            conversation_history=conversation_history,
+            gita_verse=gita_verse,
+            tool_name=tool_name,
+            system_override=effective_override,
+        )
+    # call_kiaan_ai logs the provider/model itself; surface them here
+    # for the cost counter at end-of-turn.
+    from backend.services.ai_provider import AI_MODEL, AI_PROVIDER
+
+    _turn_provider = AI_PROVIDER
+    _turn_model = AI_MODEL
 
     # ── 3. POST-LLM: Gita wisdom filter ───────────────────────────────
     if not apply_filter:
+        _record_turn(
+            tool_name=tool_name,
+            elapsed_seconds=_time.monotonic() - _turn_started,
+            cache_hit=False,
+            outcome="ok",
+            is_gita_grounded=True,
+            wisdom_score_value=1.0,
+            filter_applied=False,
+            provider=_turn_provider,
+            model=_turn_model,
+            prompt_tokens=0,
+            completion_tokens=0,
+        )
         return GroundedResponse(
             text=raw_text,
             verses=verses,
@@ -279,12 +335,13 @@ async def call_kiaan_ai_grounded(
                     filter_tool = WisdomTool.GENERAL
 
         gita_filter = get_gita_wisdom_filter()
-        filter_result = await gita_filter.filter_response(
-            content=raw_text,
-            tool_type=filter_tool,
-            user_context=message,
-            enhance_if_needed=True,
-        )
+        async with _trace_stage("filter"):
+            filter_result = await gita_filter.filter_response(
+                content=raw_text,
+                tool_type=filter_tool,
+                user_context=message,
+                enhance_if_needed=True,
+            )
 
         result = GroundedResponse(
             text=filter_result.content or raw_text,
@@ -300,19 +357,40 @@ async def call_kiaan_ai_grounded(
         # broken filter cannot poison the cache with un-grounded text.
         if response_cache is not None:
             try:
-                await response_cache.set(
-                    user_id=user_id,
-                    tool_name=tool_name,
-                    message=message,
-                    response=result,
-                    locale=locale,
-                )
+                async with _trace_stage("cache_set"):
+                    await response_cache.set(
+                        user_id=user_id,
+                        tool_name=tool_name,
+                        message=message,
+                        response=result,
+                        locale=locale,
+                    )
             except Exception as cache_exc:
                 logger.warning(
                     "kiaan_grounded_ai: response cache SET failed (tool=%s): %s",
                     tool_name,
                     cache_exc,
                 )
+
+        _record_turn(
+            tool_name=tool_name,
+            elapsed_seconds=_time.monotonic() - _turn_started,
+            cache_hit=False,
+            outcome="ok",
+            is_gita_grounded=result.is_gita_grounded,
+            wisdom_score_value=result.wisdom_score,
+            filter_applied=True,
+            provider=_turn_provider,
+            model=_turn_model,
+            # OpenAI token counts are logged by call_kiaan_ai but not
+            # plumbed up to this layer yet. Cost counter will read 0
+            # for this turn — a follow-up wires usage through the
+            # provider response. Filed under P2 #15 (cost-aware
+            # routing); for now the dashboard's cost line is best-
+            # effort and uses provider/model labels for visibility.
+            prompt_tokens=0,
+            completion_tokens=0,
+        )
 
         return result
     except Exception as exc:
@@ -323,6 +401,19 @@ async def call_kiaan_ai_grounded(
             "kiaan_grounded_ai: Gita filter failed (tool=%s): %s",
             tool_name,
             exc,
+        )
+        _record_turn(
+            tool_name=tool_name,
+            elapsed_seconds=_time.monotonic() - _turn_started,
+            cache_hit=False,
+            outcome="filter_error",
+            is_gita_grounded=False,
+            wisdom_score_value=0.0,
+            filter_applied=False,
+            provider=_turn_provider,
+            model=_turn_model,
+            prompt_tokens=0,
+            completion_tokens=0,
         )
         return GroundedResponse(
             text=raw_text,

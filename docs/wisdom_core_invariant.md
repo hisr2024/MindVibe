@@ -117,6 +117,51 @@ diffs in PR are the audit trail for prompt / model changes.
 - `filter_applied` rate may drop ≤ 2 pp
 - recorded `verse_refs` must still appear in the new response
 
+## Telemetry & observability
+
+`backend/services/kiaan_telemetry.py` instruments the grounded
+pipeline with Prometheus histograms + counters. Every
+`call_kiaan_ai_grounded` invocation emits:
+
+* Per-stage latency: `kiaan_stage_latency_seconds{stage,outcome}` —
+  `compose`, `llm`, `filter`, `cache_set` (each timed by
+  `async with trace_stage("…")`).
+* End-to-end histogram: `kiaan_grounded_turn_latency_seconds{tool,
+  cache_hit,outcome}` — fires on every return path (cache hit, filter
+  applied, filter skipped, filter error).
+* Cache outcomes: `kiaan_response_cache_outcomes_total{outcome}` —
+  `hit` / `miss`.
+* Filter outcomes: `kiaan_gita_filter_outcomes_total{outcome}` —
+  `pass` / `fail` / `skipped` (the streaming path).
+* Wisdom score histogram: `kiaan_wisdom_score`.
+* Cost: `kiaan_cost_micro_usd_total{provider,model}` — micro-USD from
+  the per-1K-token rate table in `kiaan_telemetry._COST_PER_1K_TOKENS_USD`.
+* Cache size gauge: `kiaan_response_cache_memory_size` —
+  refreshed at scrape time from `get_response_cache().stats()`.
+
+Scrape endpoint: `GET /api/monitoring/prometheus` returns the default
+Prometheus registry in text format. Configure in `prometheus.yml`:
+
+```yaml
+- job_name: 'kiaan-grounded'
+  scrape_interval: 15s
+  metrics_path: /api/monitoring/prometheus
+  static_configs:
+    - targets: ['mindvibe-api:8000']
+```
+
+A Grafana dashboard ships at `monitoring/grafana/kiaan_grounded_dashboard.json`
+with 8 panels: end-to-end p50/p95/p99, per-stage p95, cache hit ratio,
+filter pass rate, cost-per-minute, wisdom score distribution, cache
+memory size, stage error rate. Thresholds match the roadmap alerts
+(cache hit ratio < 30 % red, filter pass < 90 % red, p95 > 1.5 s
+yellow / > 3 s red).
+
+Kill switch: `KIAAN_TELEMETRY_ENABLED=false` short-circuits emission.
+Failures inside the metric backend never propagate into the user
+request path — `record_grounded_turn` wraps every counter call in a
+defensive try/except.
+
 ## Assistant engine + routing introspection
 
 `POST /api/kiaan/assistant` exposes the fourth engine
