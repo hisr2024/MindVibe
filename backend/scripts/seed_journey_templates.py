@@ -835,8 +835,27 @@ _ENEMY_STEP_CONTENT: dict[str, dict] = {
 # ===========================================================================
 # Wisdom Core integration — Dynamic (ModernExamplesDB) + Static (verses)
 # ===========================================================================
+#
+# Two complementary Wisdom Core sources feed every day of every journey:
+#
+#   * Dynamic Wisdom Core — ModernExamplesDB: curated real-life scenarios
+#     with anchoring Gita verse refs, secular antidotes, and Sanatan
+#     practices. Provides the day's "modern mirror".
+#
+#   * Static Wisdom Core  — the 701-verse corpus shipped at
+#     data/gita/gita_verses_complete.json. Provides the actual śloka
+#     text (Sanskrit, transliteration, English, principle, theme) for
+#     every verse referenced by the day. We load it directly here
+#     (not via gita_ai_analyzer.GitaWisdomCore) so the seed has no
+#     dependency on the provider_manager / redis import chain — the
+#     seed must succeed even when no AI provider is configured.
+#
+# Together they let each seeded day carry the genuine śloka the user
+# reads on screen — not just a pointer — so the day stays meaningful
+# even if the runtime verse-hydration path is briefly unavailable.
 
 _EXAMPLES_DB_SINGLETON = None
+_STATIC_WISDOM_INDEX: dict[str, dict[str, Any]] | None = None
 
 
 def _get_modern_examples_db():
@@ -847,6 +866,113 @@ def _get_modern_examples_db():
 
         _EXAMPLES_DB_SINGLETON = ModernExamplesDB()
     return _EXAMPLES_DB_SINGLETON
+
+
+def _load_static_wisdom_core() -> dict[str, dict[str, Any]]:
+    """Load the 701-verse corpus and index it by 'C.V' for O(1) lookup.
+
+    The corpus is the same file consumed by ``GitaWisdomCore`` in
+    backend/services/gita_ai_analyzer.py — we read it directly to avoid
+    pulling in that module's heavyweight dependencies (the OpenAI
+    provider manager and the Redis cache layer) at seed time. Returns an
+    empty dict if the file is missing so the seed degrades gracefully.
+    """
+    global _STATIC_WISDOM_INDEX
+    if _STATIC_WISDOM_INDEX is not None:
+        return _STATIC_WISDOM_INDEX
+
+    import json
+    from pathlib import Path
+
+    index: dict[str, dict[str, Any]] = {}
+    gita_path = (
+        Path(__file__).resolve().parent.parent.parent
+        / "data" / "gita" / "gita_verses_complete.json"
+    )
+    try:
+        if gita_path.exists():
+            with open(gita_path, "r", encoding="utf-8") as f:
+                verses = json.load(f)
+            for verse in verses:
+                chapter = verse.get("chapter")
+                verse_num = verse.get("verse")
+                if chapter is not None and verse_num is not None:
+                    index[f"{chapter}.{verse_num}"] = verse
+            print(
+                f"📜 Static Wisdom Core loaded: {len(index)} verses from "
+                f"{gita_path.name}"
+            )
+        else:
+            print(
+                f"⚠️  Static Wisdom Core not found at {gita_path} — seed will "
+                "store verse refs only; runtime will hydrate text."
+            )
+    except Exception as exc:
+        print(f"⚠️  Static Wisdom Core load failed: {exc} — refs only.")
+
+    _STATIC_WISDOM_INDEX = index
+    return index
+
+
+def _hydrate_verse(verse_ref: dict[str, int] | None) -> dict[str, Any] | None:
+    """Look up a verse by ``{chapter, verse}`` ref in the Static Wisdom Core.
+
+    Returns the full verse dict (sanskrit, transliteration, english,
+    principle, theme, mental_health_applications) or ``None`` when the
+    ref isn't found / the corpus isn't loaded. Callers must handle the
+    None case so a missing verse never breaks the seed.
+    """
+    if not verse_ref:
+        return None
+    chapter = verse_ref.get("chapter")
+    verse_num = verse_ref.get("verse")
+    if chapter is None or verse_num is None:
+        return None
+    return _load_static_wisdom_core().get(f"{chapter}.{verse_num}")
+
+
+def _format_verse_block(verse_ref: dict[str, int] | None, label: str = "Today's śloka") -> str:
+    """Render a Static-Wisdom-Core verse as a block of teaching text.
+
+    Falls back to just the ref + label when the corpus isn't available,
+    so a missing verses file never prevents the day from rendering.
+    """
+    if not verse_ref:
+        return ""
+    chapter = verse_ref.get("chapter")
+    verse_num = verse_ref.get("verse")
+    ref_label = f"BG {chapter}.{verse_num}"
+
+    verse = _hydrate_verse(verse_ref)
+    if not verse:
+        return f"{label} ({ref_label}) — verse text will appear when you open the day."
+
+    lines: list[str] = [f"{label} — {ref_label}"]
+    sanskrit = (verse.get("sanskrit") or "").strip()
+    transliteration = (verse.get("transliteration") or "").strip()
+    english = (verse.get("english") or "").strip()
+    principle = (verse.get("principle") or "").strip()
+    theme = (verse.get("theme") or "").strip()
+
+    if sanskrit:
+        # Keep just the verse couplet — strip any speaker prefix bookkeeping.
+        lines.append("")
+        lines.append("Sanskrit:")
+        lines.append(sanskrit)
+    if transliteration:
+        lines.append("")
+        lines.append("Transliteration:")
+        lines.append(transliteration)
+    if english:
+        lines.append("")
+        lines.append("English:")
+        lines.append(english)
+    if principle:
+        lines.append("")
+        lines.append(f"Principle: {principle}")
+    if theme:
+        lines.append(f"Theme: {theme.replace('_', ' ').title()}")
+    return "\n".join(lines)
 
 
 def _pick_two_modern_examples(enemy_tag: str, day: int) -> list[Any]:
@@ -895,9 +1021,25 @@ def _format_step_title(day: int, enemy_tag: str, phase: str, content: dict) -> s
 
 
 def _format_teaching(
-    day: int, enemy_tag: str, phase: str, content: dict, examples: list[Any]
+    day: int,
+    enemy_tag: str,
+    phase: str,
+    content: dict,
+    examples: list[Any],
+    day_verse_ref: dict[str, int] | None = None,
 ) -> str:
-    """Compose the day's teaching as a Gurukool stage rendering."""
+    """Compose the day's teaching as a Gurukool stage rendering.
+
+    The composition order mirrors the ancient curriculum:
+      1. Gurukool stage opener         — what this stage is for.
+      2. Sanskrit virtue + value       — the dharmic anchor.
+      3. Moral principle from the Gita — the binding teaching.
+      4. Today's śloka (Static Wisdom Core) — the actual verse text the
+         student receives at the teacher's feet.
+      5. Today's deepening             — the phase teaching for this day.
+      6. Modern mirrors (Dynamic Wisdom Core) — two real-world scenarios
+         with their own Gita-anchored verse text.
+    """
     stage_key = _PHASE_TO_GURUKOOL.get(phase, "shravana")
     stage = _GURUKOOL_STAGES[stage_key]
     dharma = _ENEMY_DHARMA[enemy_tag]
@@ -912,27 +1054,43 @@ def _format_teaching(
     parts.append("")
     parts.append("Moral principle (from the Gita):")
     parts.append(dharma["moral_principle"])
+
+    # The day's śloka — Static Wisdom Core. Always render if available;
+    # gracefully omit if the corpus or this particular ref isn't loaded.
+    verse_block = _format_verse_block(day_verse_ref, label="Today's śloka")
+    if verse_block:
+        parts.append("")
+        parts.append(verse_block)
+
     parts.append("")
     parts.append("Today's deepening:")
     parts.append(phase_teaching)
     parts.append("")
     parts.append(dharma["deepening_call"])
 
-    # Two modern mirrors — Dynamic Wisdom Core.
+    # Two modern mirrors — Dynamic Wisdom Core. Each one also pulls its
+    # anchoring verse from the Static Wisdom Core so the user sees the
+    # actual Gita śloka, not just a citation.
     if examples:
         parts.append("")
         parts.append("Modern mirrors (where this enemy lives today):")
         for idx, ex in enumerate(examples, start=1):
             label = "Gen Z mirror" if getattr(ex, "generation", "general") == "gen_z" else "Timeless mirror"
             verse_ref = ex.gita_verse_ref or {}
-            parts.append(
-                f"  {idx}. {label} — {ex.scenario}"
-            )
+            parts.append(f"  {idx}. {label} — {ex.scenario}")
             parts.append(f"     How it shows up: {ex.how_enemy_manifests}")
             parts.append(
                 f"     Gita anchor (BG {verse_ref.get('chapter')}."
                 f"{verse_ref.get('verse')}): {ex.gita_wisdom}"
             )
+            mirror_verse = _hydrate_verse(verse_ref)
+            if mirror_verse:
+                english = (mirror_verse.get("english") or "").strip()
+                if english:
+                    parts.append(f"     Verse (English): {english}")
+                principle = (mirror_verse.get("principle") or "").strip()
+                if principle:
+                    parts.append(f"     Verse principle: {principle}")
 
     return "\n".join(parts)
 
@@ -988,20 +1146,38 @@ def _format_reflection(
 def _select_static_verse_ref(
     day: int, enemy_tag: str, content: dict, examples: list[Any]
 ) -> list[dict[str, int]] | None:
-    """Rotate the day's anchor verse across the journey.
+    """Anchor verses for the day, drawn from the Static Wisdom Core.
 
-    Day 1 anchors to the canonical enemy verse. Subsequent days rotate
-    through the verses paired with each modern example, so the journey
-    walks the user through several anchoring ślokas rather than re-showing
-    the same one.
+    On day 1, the canonical enemy verse always opens the journey. On every
+    day we also include every example's verse so a single day exposes the
+    student to multiple complementary ślokas — one for the timeless
+    mirror, one for the Gen-Z mirror. De-duplicated by (chapter, verse)
+    so the list never repeats itself.
     """
+    refs: list[dict[str, int]] = []
+    seen: set[tuple[int, int]] = set()
+
+    def _add(ref: dict[str, int] | None) -> None:
+        if not ref:
+            return
+        chapter = ref.get("chapter")
+        verse = ref.get("verse")
+        if chapter is None or verse is None:
+            return
+        key = (chapter, verse)
+        if key in seen:
+            return
+        refs.append({"chapter": chapter, "verse": verse})
+        seen.add(key)
+
     if day == 1:
-        return [content["day1_verse"]]
-    # Prefer the verse paired with the first chosen example.
+        _add(content.get("day1_verse"))
     for ex in examples:
-        if ex.gita_verse_ref:
-            return [ex.gita_verse_ref]
-    return [content["day1_verse"]]
+        _add(getattr(ex, "gita_verse_ref", None))
+    if not refs:
+        _add(content.get("day1_verse"))
+
+    return refs if refs else None
 
 
 def _get_journey_phase(day: int, total_days: int) -> str:
@@ -1040,12 +1216,22 @@ def _build_template_steps(
 
         examples = _pick_two_modern_examples(enemy_tag, day)
         static_verse_refs = _select_static_verse_ref(day, enemy_tag, content, examples)
+        # Pass the day's primary verse ref through to the teaching formatter
+        # so the Static Wisdom Core hydration can embed the actual śloka.
+        # The prominently rendered śloka rotates across the day's verse
+        # refs so a 60-day journey walks many ślokas instead of repeating
+        # the same opening one. Day 1 is anchored to the canonical verse
+        # (always at index 0); subsequent days walk the remaining refs.
+        if static_verse_refs:
+            day_verse_ref = static_verse_refs[(day - 1) % len(static_verse_refs)] if day != 1 else static_verse_refs[0]
+        else:
+            day_verse_ref = None
 
         steps.append({
             "journey_template_id": template_id,
             "day_index": day,
             "step_title": _format_step_title(day, enemy_tag, phase, content),
-            "teaching_hint":  _format_teaching(day, enemy_tag, phase, content, examples),
+            "teaching_hint":  _format_teaching(day, enemy_tag, phase, content, examples, day_verse_ref),
             "reflection_prompt": _format_reflection(day, enemy_tag, phase, content, examples),
             "practice_prompt":   _format_practice(day, enemy_tag, phase, content, examples),
             "verse_selector": {
@@ -1091,13 +1277,25 @@ def _build_combined_template_steps(
 
             examples = _pick_two_modern_examples(enemy_tag, offset + 1)
             static_verse_refs = _select_static_verse_ref(offset + 1, enemy_tag, content, examples)
+            # The prominently rendered śloka rotates across the day's verse
+            # refs so the within-enemy week walks several ślokas. Day 1 of
+            # the enemy-week anchors to the canonical verse (index 0);
+            # subsequent days rotate through the remaining refs.
+            if static_verse_refs:
+                within_enemy_day = offset + 1
+                if within_enemy_day == 1:
+                    day_verse_ref = static_verse_refs[0]
+                else:
+                    day_verse_ref = static_verse_refs[(within_enemy_day - 1) % len(static_verse_refs)]
+            else:
+                day_verse_ref = None
 
             title_phase = content["titles"].get(phase, "Walking the Path")
             steps.append({
                 "journey_template_id": template_id,
                 "day_index": day,
                 "step_title": f"Day {day} · {enemy_tag.title()} · {title_phase}",
-                "teaching_hint":     _format_teaching(offset + 1, enemy_tag, phase, content, examples),
+                "teaching_hint":     _format_teaching(offset + 1, enemy_tag, phase, content, examples, day_verse_ref),
                 "reflection_prompt": _format_reflection(offset + 1, enemy_tag, phase, content, examples),
                 "practice_prompt":   _format_practice(offset + 1, enemy_tag, phase, content, examples),
                 "verse_selector": {
