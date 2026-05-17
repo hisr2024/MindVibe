@@ -169,15 +169,63 @@ async def call_kiaan_ai(
     if not message or not message.strip():
         raise ValueError("message must be a non-empty string")
 
+    text, _usage = await _call_kiaan_ai_with_usage_inner(
+        message=message,
+        conversation_history=conversation_history,
+        gita_verse=gita_verse,
+        tool_name=tool_name,
+        system_override=system_override,
+    )
+    return text
+
+
+async def call_kiaan_ai_with_usage(
+    message: str,
+    conversation_history: list[dict[str, Any]] | None = None,
+    gita_verse: dict[str, Any] | None = None,
+    tool_name: str | None = None,
+    system_override: str | None = None,
+) -> tuple[str, dict[str, int]]:
+    """Same as :func:`call_kiaan_ai` but also returns provider usage.
+
+    Returns ``(text, usage)`` where ``usage`` is
+    ``{"prompt_tokens": int, "completion_tokens": int}``. Empty usage
+    keys default to ``0``. The grounded path uses this entry point so
+    the cost counter in ``backend.services.kiaan_telemetry`` and the
+    spend tracker in ``backend.services.kiaan_cost_governor`` see real
+    numbers instead of zeros.
+
+    Implements ``IMPROVEMENT_ROADMAP.md`` P2 §15 token-plumbing.
+    """
+    return await _call_kiaan_ai_with_usage_inner(
+        message=message,
+        conversation_history=conversation_history,
+        gita_verse=gita_verse,
+        tool_name=tool_name,
+        system_override=system_override,
+    )
+
+
+async def _call_kiaan_ai_with_usage_inner(
+    *,
+    message: str,
+    conversation_history: list[dict[str, Any]] | None,
+    gita_verse: dict[str, Any] | None,
+    tool_name: str | None,
+    system_override: str | None,
+) -> tuple[str, dict[str, int]]:
+    if not message or not message.strip():
+        raise ValueError("message must be a non-empty string")
+
     system = _build_system_prompt(gita_verse, tool_name, system_override)
     history = _sanitize_history(conversation_history)
 
     started = time.monotonic()
     try:
         if AI_PROVIDER == "openai":
-            text = await _call_openai(system, message, history)
+            text, usage = await _call_openai(system, message, history)
         elif AI_PROVIDER == "anthropic":
-            text = await _call_anthropic(system, message, history)
+            text, usage = await _call_anthropic(system, message, history)
         else:
             raise ValueError(f"Unknown AI_PROVIDER: {AI_PROVIDER!r}")
     except AIProviderError:
@@ -198,14 +246,17 @@ async def call_kiaan_ai(
 
     latency_ms = int((time.monotonic() - started) * 1000)
     logger.info(
-        "kiaan_ai ok provider=%s model=%s tool=%s history_turns=%d latency_ms=%d",
+        "kiaan_ai ok provider=%s model=%s tool=%s history_turns=%d "
+        "latency_ms=%d prompt_tokens=%d completion_tokens=%d",
         AI_PROVIDER,
         AI_MODEL,
         tool_name or "chat",
         len(history),
         latency_ms,
+        usage.get("prompt_tokens", 0),
+        usage.get("completion_tokens", 0),
     )
-    return text.strip()
+    return text.strip(), usage
 
 
 # ── PROMPT COMPOSITION ────────────────────────────────────────────────────
@@ -342,7 +393,14 @@ async def _call_openai(
     system: str,
     message: str,
     history: list[dict[str, str]],
-) -> str:
+) -> tuple[str, dict[str, int]]:
+    """Call OpenAI. Returns ``(content, usage_dict)``.
+
+    ``usage_dict`` carries ``prompt_tokens`` and ``completion_tokens``
+    (both 0 when the provider omitted usage). Plumbed up to the cost
+    counter in ``backend.services.kiaan_telemetry`` and to the cost
+    governor in ``backend.services.kiaan_cost_governor``.
+    """
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise AIProviderNotConfigured(
@@ -368,7 +426,15 @@ async def _call_openai(
 
     if not response.choices:
         raise AIProviderError("OpenAI returned no choices")
-    return response.choices[0].message.content or ""
+    content = response.choices[0].message.content or ""
+    usage_obj = getattr(response, "usage", None)
+    usage: dict[str, int] = {
+        "prompt_tokens": int(getattr(usage_obj, "prompt_tokens", 0) or 0),
+        "completion_tokens": int(
+            getattr(usage_obj, "completion_tokens", 0) or 0
+        ),
+    }
+    return content, usage
 
 
 async def _stream_openai(
@@ -421,7 +487,10 @@ async def _call_anthropic(
     system: str,
     message: str,
     history: list[dict[str, str]],
-) -> str:
+) -> tuple[str, dict[str, int]]:
+    """Call Anthropic. Returns ``(content, usage_dict)`` — same shape as
+    :func:`_call_openai` so the upstream telemetry / cost code does not
+    need to branch on provider."""
     api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
         raise AIProviderNotConfigured(
@@ -449,8 +518,15 @@ async def _call_anthropic(
         max_tokens=AI_MAX_TOKENS,
     )
 
+    usage_obj = getattr(response, "usage", None)
+    usage: dict[str, int] = {
+        # Anthropic exposes input_tokens / output_tokens. Map to the
+        # neutral keys our cost table uses.
+        "prompt_tokens": int(getattr(usage_obj, "input_tokens", 0) or 0),
+        "completion_tokens": int(getattr(usage_obj, "output_tokens", 0) or 0),
+    }
     for block in response.content or []:
         text = getattr(block, "text", None)
         if text:
-            return text
+            return text, usage
     raise AIProviderError("Anthropic response contained no text blocks")

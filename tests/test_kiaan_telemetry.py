@@ -373,7 +373,7 @@ async def test_grounded_call_emits_end_to_end_histogram() -> None:
             new=AsyncMock(return_value=("PROMPT", [])),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="reply text"),
         ),
         patch(
@@ -421,7 +421,7 @@ async def test_grounded_call_emits_stage_metrics_for_llm_and_filter() -> None:
             new=AsyncMock(return_value=("PROMPT", [])),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="reply"),
         ),
         patch(

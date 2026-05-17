@@ -47,7 +47,12 @@ from typing import Any, Literal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.services.ai_provider import call_kiaan_ai, call_kiaan_ai_stream
+from backend.services.ai_provider import (
+    AI_MODEL,
+    AI_PROVIDER,
+    call_kiaan_ai_stream,
+    call_kiaan_ai_with_usage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -280,20 +285,71 @@ async def call_kiaan_ai_grounded(
     # ── 2. LLM call (provider routing handled by call_kiaan_ai) ───────
     # Stage timer: separates LLM latency from compose/filter on the
     # Grafana dashboard.
+    # Use the _with_usage variant so prompt_tokens / completion_tokens
+    # reach the cost counter and the cost governor — see
+    # IMPROVEMENT_ROADMAP.md P2 §15.
+    #
+    # Backward-compat shim: when a test patches ``call_kiaan_ai`` with
+    # a bare string (legacy shape), normalise to the (text, usage)
+    # tuple shape this code path expects. Production callers always
+    # return a tuple — this branch is only exercised by tests that
+    # haven't been updated to the new mock target.
     async with _trace_stage("llm"):
-        raw_text = await call_kiaan_ai(
+        _llm_result = await call_kiaan_ai_with_usage(
             message=message,
             conversation_history=conversation_history,
             gita_verse=gita_verse,
             tool_name=tool_name,
             system_override=effective_override,
         )
-    # call_kiaan_ai logs the provider/model itself; surface them here
-    # for the cost counter at end-of-turn.
-    from backend.services.ai_provider import AI_MODEL, AI_PROVIDER
-
+    if isinstance(_llm_result, str):
+        raw_text, _usage = _llm_result, {
+            "prompt_tokens": 0, "completion_tokens": 0,
+        }
+    else:
+        raw_text, _usage = _llm_result
     _turn_provider = AI_PROVIDER
     _turn_model = AI_MODEL
+    _turn_prompt_tokens = int(_usage.get("prompt_tokens", 0))
+    _turn_completion_tokens = int(_usage.get("completion_tokens", 0))
+
+    # Cost-governor bookkeeping (IMPROVEMENT_ROADMAP.md P2 §15).
+    # Best-effort, never blocks: a governor failure must not break the
+    # user response. Tier defaults to FREE when caller doesn't know —
+    # the FREE cap is the strictest, which fails closed under
+    # uncertainty.
+    if user_id and (_turn_prompt_tokens or _turn_completion_tokens):
+        try:
+            from backend.services.kiaan_cost_governor import (
+                UserTier as _Tier,
+            )
+            from backend.services.kiaan_cost_governor import (
+                estimate_cost_for_tokens as _est_cost,
+            )
+            from backend.services.kiaan_cost_governor import (
+                get_cost_governor as _get_gov,
+            )
+
+            _cost_micro = _est_cost(
+                _turn_provider,
+                _turn_model,
+                _turn_prompt_tokens,
+                _turn_completion_tokens,
+            )
+            if _cost_micro > 0:
+                # Tier is not threaded yet — defaults to FREE. Route
+                # layers can pass tier through ``kwargs`` in a follow-
+                # up; this is the safest default.
+                await _get_gov().record_spend(
+                    user_id=user_id,
+                    tier=_Tier.FREE,
+                    micro_usd=_cost_micro,
+                )
+        except Exception as gov_exc:
+            logger.debug(
+                "kiaan_grounded_ai: cost governor record_spend failed: %s",
+                gov_exc,
+            )
 
     # ── 3. POST-LLM: Gita wisdom filter ───────────────────────────────
     if not apply_filter:
@@ -307,8 +363,8 @@ async def call_kiaan_ai_grounded(
             filter_applied=False,
             provider=_turn_provider,
             model=_turn_model,
-            prompt_tokens=0,
-            completion_tokens=0,
+            prompt_tokens=_turn_prompt_tokens,
+            completion_tokens=_turn_completion_tokens,
         )
         return GroundedResponse(
             text=raw_text,
@@ -382,14 +438,8 @@ async def call_kiaan_ai_grounded(
             filter_applied=True,
             provider=_turn_provider,
             model=_turn_model,
-            # OpenAI token counts are logged by call_kiaan_ai but not
-            # plumbed up to this layer yet. Cost counter will read 0
-            # for this turn — a follow-up wires usage through the
-            # provider response. Filed under P2 #15 (cost-aware
-            # routing); for now the dashboard's cost line is best-
-            # effort and uses provider/model labels for visibility.
-            prompt_tokens=0,
-            completion_tokens=0,
+            prompt_tokens=_turn_prompt_tokens,
+            completion_tokens=_turn_completion_tokens,
         )
 
         return result
@@ -412,8 +462,8 @@ async def call_kiaan_ai_grounded(
             filter_applied=False,
             provider=_turn_provider,
             model=_turn_model,
-            prompt_tokens=0,
-            completion_tokens=0,
+            prompt_tokens=_turn_prompt_tokens,
+            completion_tokens=_turn_completion_tokens,
         )
         return GroundedResponse(
             text=raw_text,

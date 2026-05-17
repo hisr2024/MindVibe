@@ -75,7 +75,7 @@ async def test_grounded_call_composes_wisdom_core_when_db_present() -> None:
             new=AsyncMock(return_value=(composed_prompt, retrieved_verses)),
         ) as mock_compose,
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="raw LLM response with karma and dharma"),
         ) as mock_llm,
         _patch_filter(
@@ -115,7 +115,7 @@ async def test_grounded_call_skips_composer_when_system_override_provided() -> N
             new=AsyncMock(return_value=("UNUSED", [])),
         ) as mock_compose,
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="raw response"),
         ) as mock_llm,
         _patch_filter(_FakeFilterResult(content="raw response")),
@@ -145,7 +145,7 @@ async def test_grounded_call_skips_filter_when_apply_filter_false() -> None:
             new=AsyncMock(return_value=("PROMPT", [])),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="unfiltered raw text"),
         ),
         _patch_filter(_FakeFilterResult(content="this should NOT be returned")),
@@ -173,7 +173,7 @@ async def test_filter_failure_does_not_break_response() -> None:
             new=AsyncMock(return_value=("PROMPT", [])),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="best-effort raw text"),
         ),
         patch(
@@ -252,7 +252,7 @@ async def test_tool_name_maps_to_filter_tool() -> None:
             new=AsyncMock(return_value=("PROMPT", [])),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(return_value="raw"),
         ),
         patch(

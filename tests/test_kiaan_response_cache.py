@@ -70,7 +70,7 @@ def _patch_compose(prompt: str, verses: list[dict[str, Any]]) -> Any:
 
 def _patch_llm(response_text: str) -> Any:
     return patch(
-        "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+        "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
         new=AsyncMock(return_value=response_text),
     )
 
@@ -354,7 +354,7 @@ async def test_grounded_cache_hit_skips_compose_and_llm(
             new=compose_mock,
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="grounded response")),
     ):
@@ -398,7 +398,7 @@ async def test_grounded_cache_isolates_by_user(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="filtered-fake")),
     ):
@@ -430,7 +430,7 @@ async def test_grounded_system_override_bypasses_cache(
     with (
         _patch_compose("UNUSED", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="filtered")),
     ):
@@ -465,7 +465,7 @@ async def test_grounded_apply_filter_false_bypasses_cache(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
     ):
         await call_kiaan_ai_grounded(
@@ -492,7 +492,7 @@ async def test_grounded_no_user_id_bypasses_cache(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="filtered")),
     ):
@@ -520,7 +520,7 @@ async def test_grounded_does_not_cache_filter_failures(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         patch(
             "backend.services.gita_wisdom_filter.get_gita_wisdom_filter",
@@ -551,7 +551,7 @@ async def test_grounded_gita_verse_pin_bypasses_cache(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="filtered")),
     ):
@@ -585,7 +585,7 @@ async def test_grounded_locale_shards_cache(
     with (
         _patch_compose("PROMPT", []),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai", new=llm_mock
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage", new=llm_mock
         ),
         _patch_filter(_FakeFilterResult(content="filtered")),
     ):

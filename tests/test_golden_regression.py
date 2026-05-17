@@ -347,7 +347,7 @@ async def test_recorder_pipeline_against_stubbed_llm() -> None:
             ),
         ),
         patch(
-            "backend.services.kiaan_grounded_ai.call_kiaan_ai",
+            "backend.services.kiaan_grounded_ai.call_kiaan_ai_with_usage",
             new=AsyncMock(
                 return_value=(
                     "Karma yoga teaches selfless action grounded in "
