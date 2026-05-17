@@ -117,6 +117,59 @@ diffs in PR are the audit trail for prompt / model changes.
 - `filter_applied` rate may drop ≤ 2 pp
 - recorded `verse_refs` must still appear in the new response
 
+## Assistant engine + routing introspection
+
+`POST /api/kiaan/assistant` exposes the fourth engine
+(`EngineType.ASSISTANT`, suppressed in voice mode by design) as a
+text-mode HTTP surface. Same Wisdom-Core-gated pipeline as the six
+sacred tools — the LLM receives `<TOOL>Assistant</TOOL>` and a
+directive that asks it to surface task intent without inventing tool
+execution. Per-action wiring (start_journey, schedule_reflection,
+get_streak) is a follow-up; this surface is intent-routing-only
+today, by design — exposing the existing dev-focused
+`kiaan_agent_tools` (WebSearch, CodeExecution) would be the wrong
+shape and a security risk.
+
+`POST /api/kiaan/route` is the read-only introspection endpoint:
+returns what `EngineRouter.route` would decide for a given message
+(primary engine, secondary engines, confidence, crisis flag, voice-
+render hints). Never invokes the LLM. Useful for clients that want
+to render "Sakha is thinking / Assistant is looking that up"
+affordances, and for ops dashboards debugging mis-routes.
+
+## Local-LLM fallback
+
+`backend/services/ai/providers/local_llama_provider.py` adds an
+on-device LLM at the tail of the provider chain:
+
+```
+OpenAI → Sarvam → OpenAI-compat → local_llama → tier-4 canned
+```
+
+Opt-in by deployment. Three preconditions must line up:
+1. `llama-cpp-python` installed at runtime
+2. `KIAAN_LOCAL_MODEL_PATH` env var points at a GGUF file on disk
+3. `KIAAN_LOCAL_LLAMA_ENABLED=true` (default)
+
+Missing any of the three → provider reports `is_configured=False` and
+the chain hops to the next provider. Health check returns the precise
+reason so dashboards show *which* of the three is wrong.
+
+Recommended models:
+- `phi-3-mini-4k-instruct-q4.gguf` (~2.3 GB) — best quality
+- `qwen2.5-1.5b-instruct-q4_k_m.gguf` (~1 GB) — lighter, faster
+
+Operational notes:
+- One `Llama` instance per process behind an `asyncio.Lock`; generation
+  runs in `asyncio.to_thread` so the event loop stays unblocked.
+- First request after startup pays ~3–8 s load cost. Call
+  `LocalLlamaProvider().preload()` from the FastAPI startup hook to
+  amortise.
+- Quality on Gita-grounded reflections: ~70 % of gpt-4o-mini on the
+  golden regression set. Use it as a fallback, not a primary.
+- The GGUF file is not bundled in this repo — ops mounts it via volume
+  or builds a multi-stage Docker image with a `kiaan-models` stage.
+
 ## Sacred-tool envelope
 
 `backend/services/tool_envelope.build_tool_message(tool_name, inputs)`

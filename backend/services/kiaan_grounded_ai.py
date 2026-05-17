@@ -63,6 +63,10 @@ _TOOL_NAME_TO_FILTER_TOOL: dict[str, str] = {
     "Karma Reset": "karma_reset",
     # KarmaLytix has no dedicated filter tool yet → falls through to
     # WisdomTool.GENERAL, which still applies the wisdom-score check.
+    # "Assistant" (the fourth engine, exposed by IMPROVEMENT_ROADMAP.md
+    # P1 §9) intentionally maps to GENERAL as well — practical/task
+    # responses still benefit from Gita grounding but have no rubric
+    # of their own yet.
 }
 
 

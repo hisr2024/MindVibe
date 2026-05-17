@@ -541,3 +541,135 @@ async def karmalytix(
         conversation_id=current_user_id,
         verses=verses,
     )
+
+
+# ── ENDPOINT 8: Assistant Engine ─────────────────────────────────────────
+# Implements IMPROVEMENT_ROADMAP.md P1 §9. Exposes the fourth engine
+# (``EngineType.ASSISTANT``, suppressed in voice mode by design) as a
+# text-mode HTTP surface. Same Wisdom-Core-gated pipeline as the other
+# tools — the LLM receives an envelope tagged ``<TOOL>Assistant</TOOL>``
+# and a directive that asks it to surface task intent without inventing
+# tool execution. Per-action wiring (start_journey, schedule_reflection,
+# get_streak) is a follow-up; this commit lands the addressable surface.
+
+
+class AssistantRequest(BaseModel):
+    """Text-mode task query for the Assistant engine."""
+
+    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    conversation_history: list[Message] = Field(default_factory=list)
+
+    @field_validator("conversation_history")
+    @classmethod
+    def _bound_history(cls, v: list[Message]) -> list[Message]:
+        if len(v) > MAX_HISTORY_MESSAGES:
+            raise ValueError(
+                f"conversation_history exceeds {MAX_HISTORY_MESSAGES} messages"
+            )
+        return v
+
+
+@router.post("/assistant", response_model=ChatResponse)
+@limiter.limit(CHAT_RATE_LIMIT)
+async def assistant(
+    request: Request,
+    payload: AssistantRequest,
+    current_user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> ChatResponse:
+    """KIAAN Assistant — text-mode task / lookup / navigation engine.
+
+    Routes the query through the same Wisdom-Core-gated pipeline the
+    six sacred tools use, tagged as ``Assistant`` so the LLM gets the
+    practical-task directive (from ``tool_envelope._TOOL_DIRECTIVES``).
+    The Assistant is intentionally text-mode only — the voice
+    orchestrator suppresses it because mid-conversation tool execution
+    breaks the divine-presence experience. Use ``/api/kiaan/chat`` for
+    voice and ``/api/kiaan/assistant`` for explicit task intents.
+    """
+    history = [
+        {"role": m.role, "content": m.content}
+        for m in payload.conversation_history
+    ]
+    message = build_tool_message("Assistant", {"query": payload.message})
+    response_text, verses = await _run_ai(
+        message=message,
+        db=db,
+        user_id=current_user_id,
+        history=history,
+        tool_name="Assistant",
+    )
+    return ChatResponse(
+        response=response_text,
+        conversation_id=current_user_id,
+        verses=verses,
+    )
+
+
+# ── ENDPOINT 9: Engine Routing Introspection ────────────────────────────
+# Lightweight read-only endpoint that exposes what
+# ``EngineRouter.route`` would decide for a given message. Used by the
+# client to render "which engine is responding" affordances and by ops
+# dashboards to debug misrouted queries. Auth required — message text
+# can contain sensitive content.
+
+
+class RouteRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
+    voice_mode: bool = Field(
+        default=False,
+        description=(
+            "When True, applies voice-mode routing biases (FRIEND for "
+            "casual queries, GUIDANCE for wisdom-direct, VOICE_GUIDE "
+            "for navigation, ASSISTANT suppressed unless intent score "
+            ">= 0.6)."
+        ),
+    )
+
+
+class RouteResponse(BaseModel):
+    primary_engine: str
+    secondary_engines: list[str] = Field(default_factory=list)
+    confidence: float
+    reasoning: str
+    detected_intent: str | None = None
+    detected_emotion: str | None = None
+    is_crisis: bool = False
+    voice_mode: bool = False
+    voice_render_mode: str | None = None
+    voice_target_duration_sec: int | None = None
+    voice_engine_bias: str | None = None
+
+
+@router.post("/route", response_model=RouteResponse)
+@limiter.limit(CHAT_RATE_LIMIT)
+async def route_query(
+    request: Request,
+    payload: RouteRequest,
+    current_user_id: str = Depends(get_current_user),
+) -> RouteResponse:
+    """Return what engine ``payload.message`` would route to.
+
+    Read-only — does not invoke any LLM, does not write anything.
+    Useful for clients that want to show "Sakha is thinking" vs
+    "Assistant is looking that up" affordances, and for ops dashboards
+    debugging engine mis-routes.
+    """
+    from backend.services.kiaan_engine_router import get_engine_router
+
+    decision = get_engine_router().route(
+        payload.message, voice_mode=payload.voice_mode
+    )
+    return RouteResponse(
+        primary_engine=decision.primary_engine.value,
+        secondary_engines=[e.value for e in decision.secondary_engines],
+        confidence=decision.confidence,
+        reasoning=decision.reasoning,
+        detected_intent=decision.detected_intent,
+        detected_emotion=decision.detected_emotion,
+        is_crisis=decision.is_crisis,
+        voice_mode=payload.voice_mode,
+        voice_render_mode=decision.voice_render_mode,
+        voice_target_duration_sec=decision.voice_target_duration_sec,
+        voice_engine_bias=decision.voice_engine_bias,
+    )
