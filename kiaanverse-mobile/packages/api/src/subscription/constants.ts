@@ -304,3 +304,122 @@ export const WISDOM_JOURNEY_LIMITS: Record<SubscriptionTier, number> = {
   sadhak: 10,
   siddha: -1,
 };
+
+// ===========================================================================
+// CURRENCY RESOLUTION
+// ===========================================================================
+//
+// The Play Store and App Store auto-localize prices on the purchase screen
+// (via `iap.localizedPrice` / `phase.formattedPrice`) — so a user in India
+// sees ₹ on the Google Play sheet without us doing anything. These helpers
+// are for our FALLBACK pricing displays (catalog skeletons, paywalls before
+// IAP fetch resolves, error paths) so an Indian user sees ₹ and a European
+// user sees € instead of $ in those moments.
+
+export type CurrencyCode = 'usd' | 'eur' | 'inr';
+
+/** Eurozone + EU member countries (ISO-3166 alpha-2) that bill in Euro. */
+const EUROZONE_REGIONS: ReadonlySet<string> = new Set([
+  'AT', 'BE', 'CY', 'DE', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'IE', 'IT',
+  'LT', 'LU', 'LV', 'MT', 'NL', 'PT', 'SI', 'SK',
+  // Non-Euro EU members that still display in EUR in our catalog
+  'BG', 'CZ', 'DK', 'HU', 'PL', 'RO', 'SE',
+]);
+
+/** India regions — Bharat + diaspora that prefer INR display. */
+const INR_REGIONS: ReadonlySet<string> = new Set(['IN']);
+
+/** Indic language codes — Indian users may have their OS set to English
+ *  but prefer INR pricing. Used as a soft fallback when no region tag
+ *  is available (e.g., `i18n` returned a language-only locale). */
+const INDIC_LANGUAGES: ReadonlySet<string> = new Set([
+  'hi', 'bn', 'ta', 'te', 'mr', 'gu', 'pa', 'kn', 'ml', 'or', 'as', 'ur', 'sa',
+]);
+
+/** European language codes for the same soft-fallback path. */
+const EUROPEAN_LANGUAGES: ReadonlySet<string> = new Set([
+  'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'cs', 'sv', 'da', 'fi', 'el',
+  'ro', 'hu', 'bg', 'hr', 'sk', 'sl', 'lt', 'lv', 'et', 'mt',
+]);
+
+/**
+ * Resolve a currency code from a region + locale tag pair.
+ *
+ * Priority:
+ *  1. Region tag (ISO-3166 country code) — most reliable. Comes from
+ *     ``expo-localization``'s ``Localization.getLocales()[0].regionCode``
+ *     on iOS/Android, or from the user's explicit setting.
+ *  2. Locale language fallback — when region is unknown, infer from
+ *     Indic / European language codes.
+ *  3. USD default.
+ *
+ * Returns the lowercased catalog key (`'usd' | 'eur' | 'inr'`) used by
+ * ``TierConfig.priceDisplay`` and ``TierConfig.prices``.
+ */
+export function resolveCurrencyFromLocale(
+  regionCode?: string | null,
+  localeTag?: string | null,
+): CurrencyCode {
+  // 1. Region wins — it tells us the actual country.
+  if (regionCode) {
+    const region = regionCode.toUpperCase();
+    if (INR_REGIONS.has(region)) return 'inr';
+    if (EUROZONE_REGIONS.has(region)) return 'eur';
+  }
+
+  // 2. Locale-language fallback — useful when only "hi" or "de" is set.
+  if (localeTag) {
+    const tag = localeTag.toLowerCase();
+    // BCP-47 may be "hi-IN" — split off the region segment first.
+    const language = tag.split('-')[0];
+    const region = tag.split('-')[1]?.toUpperCase();
+
+    if (region) {
+      if (INR_REGIONS.has(region)) return 'inr';
+      if (EUROZONE_REGIONS.has(region)) return 'eur';
+    }
+    if (language) {
+      if (INDIC_LANGUAGES.has(language)) return 'inr';
+      if (EUROPEAN_LANGUAGES.has(language)) return 'eur';
+    }
+  }
+
+  // 3. Default — USD covers en-US, en-GB-as-USD-fallback, and unknowns.
+  return 'usd';
+}
+
+/** ISO-4217 currency-code mapping for analytics / receipts. */
+export const CURRENCY_ISO_4217: Record<CurrencyCode, string> = {
+  usd: 'USD',
+  eur: 'EUR',
+  inr: 'INR',
+};
+
+/**
+ * Pick the right ``priceDisplay`` string for a tier + period + currency.
+ * Falls back to USD when the currency is missing from the tier config
+ * (defensive: TIER_CONFIGS always has all three today, but a future tier
+ * could omit one).
+ */
+export function getTierPriceDisplay(
+  tier: SubscriptionTier,
+  period: BillingPeriod,
+  currency: CurrencyCode,
+): string {
+  const display = TIER_CONFIGS[tier].priceDisplay[period];
+  return display[currency] || display.usd;
+}
+
+/**
+ * Pick the numeric price for a tier + period + currency. Used by IAP
+ * priceAmountMicros fallback when the store hasn't returned a real
+ * localized amount yet.
+ */
+export function getTierPriceAmount(
+  tier: SubscriptionTier,
+  period: BillingPeriod,
+  currency: CurrencyCode,
+): number {
+  const prices = TIER_CONFIGS[tier].prices[period];
+  return prices[currency] ?? prices.usd;
+}

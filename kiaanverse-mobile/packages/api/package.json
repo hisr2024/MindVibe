@@ -16,10 +16,18 @@
   },
   "peerDependencies": {
     "react": "18.2.0",
+    "react-native": "*",
+    "expo-localization": "*",
     "@react-native-async-storage/async-storage": ">=1.0.0",
     "@tanstack/query-async-storage-persister": "^5.60.0"
   },
   "peerDependenciesMeta": {
+    "react-native": {
+      "optional": false
+    },
+    "expo-localization": {
+      "optional": false
+    },
     "@react-native-async-storage/async-storage": {
       "optional": true
     },
