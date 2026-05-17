@@ -262,7 +262,7 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
               {mood ? (
                 <View style={styles.entryMood}>
                   <Text style={styles.entryMoodEmoji}>{mood.emoji}</Text>
-                  <Text variant="caption" color={mood.color}>
+                  <Text variant="devanagariSmall" color={mood.color}>
                     {mood.sanskrit}
                   </Text>
                 </View>

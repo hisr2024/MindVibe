@@ -48,7 +48,7 @@ export function SacredTabBar({
             accessibilityLabel={t('tabA11yFmt', { label: localizedLabel })}
           >
             <Text
-              variant="caption"
+              variant="devanagariSmall"
               color={isActive ? colors.primary[500] : colors.text.secondary}
               style={styles.sanskrit}
             >
@@ -94,8 +94,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.alpha.goldLight,
   },
   sanskrit: {
-    fontSize: 15,
+    // fontSize + lineHeight + Noto-Sans-Devanagari come from
+    // variant="devanagariSmall" (15pt / 30pt). Devanagari matras (ी, े,
+    // ो, ि, ौ) extend above the consonant baseline; with the old
+    // variant="caption" preset they were clipped to "लख / पठन / बाध /
+    // ताथ". The preset's 2.0 lineHeight gives the matras vertical room.
     marginBottom: 2,
+    textAlign: 'center',
   },
   label: {
     fontSize: 10,

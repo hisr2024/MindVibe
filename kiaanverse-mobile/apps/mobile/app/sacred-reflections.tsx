@@ -48,7 +48,7 @@ export default function SacredReflectionsScreen(): React.JSX.Element {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <GoldenHeader title={t(COPY_KEYS.heading)} />
         <Text
-          variant="caption"
+          variant="devanagariSmall"
           color={colors.primary[500]}
           style={styles.headerSanskrit}
         >

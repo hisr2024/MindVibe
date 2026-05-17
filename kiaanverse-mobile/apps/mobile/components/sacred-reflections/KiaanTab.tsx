@@ -176,7 +176,7 @@ export function KiaanTab({ onOpenEditor }: KiaanTabProps): React.JSX.Element {
               })}
             </Text>
             <Text
-              variant="body"
+              variant="devanagari"
               color={colors.text.primary}
               style={styles.sanskritText}
             >
@@ -290,8 +290,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.alpha.goldLight,
   },
   sanskritText: {
+    // Devanagari śloka — keep 1:2 ratio (18 × 2) so stacked matras and
+    // half-consonants in real Gītā lines (e.g. द्धात्मा, ज्ञेयोऽसौ)
+    // don't shear against the next line above.
     fontSize: 18,
-    lineHeight: 28,
+    lineHeight: 36,
   },
   verseConnection: {
     fontStyle: 'italic',

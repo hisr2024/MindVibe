@@ -286,7 +286,7 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
               >
                 <Text style={styles.moodEmoji}>{m.emoji}</Text>
                 <Text
-                  variant="caption"
+                  variant="devanagariSmall"
                   color={isActive ? m.color : colors.primary[500]}
                   style={styles.moodSanskrit}
                 >
@@ -453,7 +453,10 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   moodEmoji: { fontSize: 16 },
-  moodSanskrit: { fontSize: 13 },
+  // Override the devanagariSmall preset's 15pt down to 13pt to fit the
+  // narrow chip, but scale lineHeight in step (13 × 2.0) so ascending
+  // matras on labels like शान्त / जिज्ञासु / आशान्वित are not clipped.
+  moodSanskrit: { fontSize: 13, lineHeight: 26 },
   moodLabel: { letterSpacing: 1 },
   titleInput: {
     fontSize: 22,

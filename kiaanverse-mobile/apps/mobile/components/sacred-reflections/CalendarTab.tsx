@@ -326,6 +326,12 @@ const styles = StyleSheet.create({
   },
   streakValue: {
     fontSize: 48,
+    // variant="h1" sets lineHeight to 28.8 (24pt * 1.2). When we override
+    // fontSize to 48 the lineHeight stays at 28.8 and the italic glyph is
+    // sheared in half — "0" reads as a wide "U", "1" as a serif-less "I".
+    // 56pt gives Cormorant Garamond italic digits the vertical room they
+    // need at this display size.
+    lineHeight: 56,
     fontStyle: 'italic',
   },
   streakTitle: {
