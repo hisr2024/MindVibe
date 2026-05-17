@@ -63,9 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     url: 'https://u.expo.dev/1f72d91b-2336-4b58-a641-5589317cc36c',
   },
 
-  runtimeVersion: {
-    policy: 'appVersion' as const,
-  },
+  runtimeVersion: '1.3.2',
 
   // Pin Hermes explicitly. Expo SDK 51 + RN 0.74.5 both default to
   // Hermes for Android release builds, but defaults can drift across
