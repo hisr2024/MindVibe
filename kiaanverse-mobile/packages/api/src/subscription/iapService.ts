@@ -29,6 +29,52 @@
  */
 
 import { Platform, type EmitterSubscription } from 'react-native';
+import * as Localization from 'expo-localization';
+import {
+  resolveCurrencyFromLocale,
+  CURRENCY_ISO_4217,
+  getTierPriceDisplay,
+  getTierPriceAmount,
+  type CurrencyCode,
+} from './constants';
+
+// ---------------------------------------------------------------------------
+// Device-currency resolver — for FALLBACK pricing only.
+// ---------------------------------------------------------------------------
+//
+// Production pricing comes from Play Console / App Store Connect: react-native-iap
+// returns ``phase.formattedPrice`` (Android) or ``ios.localizedPrice`` (iOS)
+// which Google / Apple have already rendered in the user's billing currency.
+// Those values are ALWAYS preferred — see ``mapSubscriptionToIAPProduct``.
+//
+// The helpers below are the safety net for the small window between launch
+// and IAP initialization (catalog skeleton), and for offline / dev paths.
+// They MUST agree with the regional pricing tiers configured in Google Play
+// Console + App Store Connect so a user in India sees ~₹ pricing while the
+// catalog is loading, not a $ price that snaps to ₹ a moment later.
+
+/**
+ * Read the device's preferred currency from the OS locale tag.
+ * Caches the result for the process lifetime so we don't call into the
+ * native bridge for every render. Region detection falls back to the
+ * locale tag's language code if no explicit region is reported.
+ */
+let _cachedDeviceCurrency: CurrencyCode | null = null;
+function getDeviceCurrency(): CurrencyCode {
+  if (_cachedDeviceCurrency) return _cachedDeviceCurrency;
+  try {
+    const locales = Localization.getLocales();
+    const primary = locales[0];
+    _cachedDeviceCurrency = resolveCurrencyFromLocale(
+      primary?.regionCode,
+      primary?.languageTag,
+    );
+  } catch {
+    // Some test / RN-stripped builds throw when Localization is unavailable.
+    _cachedDeviceCurrency = 'usd';
+  }
+  return _cachedDeviceCurrency;
+}
 import {
   initConnection,
   endConnection,
@@ -749,8 +795,10 @@ function mapSubscriptionToIAPProduct(sub: Subscription): IAPProduct {
   const productId = sub.productId;
   const tier = productIdToTier(productId);
   const billingPeriod = productIdToBilling(productId);
+  // Used only when the store payload is missing the localized price.
+  const deviceCurrency = getDeviceCurrency();
 
-  // Android v5 subscription payload
+  // Android v5 subscription payload — Play Billing localized price wins.
   if ('subscriptionOfferDetails' in sub) {
     const android = sub as SubscriptionAndroid;
     const phase =
@@ -759,33 +807,45 @@ function mapSubscriptionToIAPProduct(sub: Subscription): IAPProduct {
       productId,
       title: android.title || TIER_CONFIGS[tier].name,
       description: android.description || TIER_CONFIGS[tier].description,
-      price: phase?.formattedPrice ?? TIER_CONFIGS[tier].priceDisplay[billingPeriod].usd,
-      priceAmountMicros: Number(phase?.priceAmountMicros ?? 0),
-      priceCurrencyCode: phase?.priceCurrencyCode ?? 'USD',
+      price:
+        phase?.formattedPrice ??
+        getTierPriceDisplay(tier, billingPeriod, deviceCurrency),
+      priceAmountMicros:
+        Number(phase?.priceAmountMicros ?? 0) ||
+        Math.round(getTierPriceAmount(tier, billingPeriod, deviceCurrency) * 1_000_000),
+      priceCurrencyCode:
+        phase?.priceCurrencyCode ?? CURRENCY_ISO_4217[deviceCurrency],
       tier,
       billingPeriod,
     };
   }
 
-  // iOS StoreKit payload
+  // iOS StoreKit payload — App Store localized price wins.
   const ios = sub as SubscriptionIOS;
   return {
     productId,
     title: ios.title || TIER_CONFIGS[tier].name,
     description: ios.description || TIER_CONFIGS[tier].description,
-    price: ios.localizedPrice ?? TIER_CONFIGS[tier].priceDisplay[billingPeriod].usd,
-    priceAmountMicros: Math.round(Number(ios.price ?? 0) * 1_000_000),
-    priceCurrencyCode: ios.currency ?? 'USD',
+    price:
+      ios.localizedPrice ?? getTierPriceDisplay(tier, billingPeriod, deviceCurrency),
+    priceAmountMicros:
+      Math.round(Number(ios.price ?? 0) * 1_000_000) ||
+      Math.round(getTierPriceAmount(tier, billingPeriod, deviceCurrency) * 1_000_000),
+    priceCurrencyCode: ios.currency ?? CURRENCY_ISO_4217[deviceCurrency],
     tier,
     billingPeriod,
   };
 }
 
-/** Used when the store is unavailable (dev environment, airplane mode). */
+/** Used when the store is unavailable (dev environment, airplane mode).
+ *  Renders the catalog in the user's device currency so a loading-state
+ *  flash to USD doesn't precede the real Play Store / App Store prices.
+ */
 function getFallbackProducts(): IAPProduct[] {
   const platform: 'ios' | 'android' = Platform.OS === 'ios' ? 'ios' : 'android';
   const tiers: SubscriptionTier[] = ['bhakta', 'sadhak', 'siddha'];
   const periods: BillingPeriod[] = ['monthly', 'yearly'];
+  const currency = getDeviceCurrency();
 
   return tiers.flatMap((tier) =>
     periods.map((period) => {
@@ -801,9 +861,9 @@ function getFallbackProducts(): IAPProduct[] {
         productId: IAP_PRODUCT_IDS[tierKey][platform],
         title: config.name,
         description: config.description,
-        price: config.priceDisplay[period].usd,
-        priceAmountMicros: Math.round(config.prices[period].usd * 1_000_000),
-        priceCurrencyCode: 'USD',
+        price: config.priceDisplay[period][currency],
+        priceAmountMicros: Math.round(config.prices[period][currency] * 1_000_000),
+        priceCurrencyCode: CURRENCY_ISO_4217[currency],
         tier,
         billingPeriod: period,
       };

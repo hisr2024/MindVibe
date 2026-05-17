@@ -36,14 +36,19 @@ import { DivineScreenWrapper, OmLoader } from '@kiaanverse/ui';
 import {
   apiClient,
   getProducts,
+  getTierPriceDisplay,
+  getTierPriceAmount,
   isSubscriptionUnavailableError,
   purchaseSubscription,
+  resolveCurrencyFromLocale,
   restorePurchases,
   TIER_CONFIGS,
   TIER_RANK,
   type BillingPeriod,
+  type CurrencyCode,
   type IAPProduct,
 } from '@kiaanverse/api';
+import * as Localization from 'expo-localization';
 import type { SubscriptionTier } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
 
@@ -88,6 +93,24 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
+  // Device currency for the FALLBACK pricing path — used when the IAP
+  // catalog hasn't yet returned localized prices from Play Console. Once
+  // ``products`` arrives from getProducts(), each product's ``price`` is
+  // already a Play-localized string (e.g. "₹599.00") and the resolver is
+  // bypassed. Memoised so render-time price strings are stable.
+  const deviceCurrency = useMemo<CurrencyCode>(() => {
+    try {
+      const locales = Localization.getLocales();
+      const primary = locales[0];
+      return resolveCurrencyFromLocale(primary?.regionCode, primary?.languageTag);
+    } catch {
+      return 'usd';
+    }
+  }, []);
+  const currencySymbol = useMemo<string>(() => {
+    return deviceCurrency === 'inr' ? '₹' : deviceCurrency === 'eur' ? '€' : '$';
+  }, [deviceCurrency]);
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -130,13 +153,18 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
 
   const priceFor = useCallback(
     (tier: PaidTier, period: BillingPeriod): string => {
+      // Play Store / App Store localized price wins when the IAP catalog
+      // has loaded — that is the price the user will actually be charged.
       const match = products.find(
         (p) => p.tier === tier && p.billingPeriod === period
       );
       if (match) return match.price;
-      return TIER_CONFIGS[tier].priceDisplay[period].usd;
+      // Skeleton state: render in the device currency so an Indian user
+      // sees ₹ instead of $ during the brief moment before getProducts()
+      // resolves. The static catalog must match Play Console regional pricing.
+      return getTierPriceDisplay(tier, period, deviceCurrency);
     },
-    [products]
+    [products, deviceCurrency]
   );
 
   const handleSelect = useCallback((tier: SubscriptionTier) => {
@@ -293,22 +321,29 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
 
             // For annual plans on paid tiers, surface a per-month
             // equivalent label so users feel the saving viscerally.
-            // The price is rendered in USD because the underlying
-            // TIER_CONFIGS prices are USD; only the surrounding "/mo"
-            // text localizes, via subscription.perMonthEquivalent.
+            // Rendered in the device currency (₹ in India, € in EU, else $)
+            // so the saving badge matches the tier-card price next to it.
             let perMonthEquivalent: string | undefined;
             let originalPrice: string | undefined;
             if (!isFree && billing === 'yearly') {
-              const yearly = TIER_CONFIGS[tier].prices.yearly.usd;
-              const monthly = TIER_CONFIGS[tier].prices.monthly.usd;
+              const yearly = getTierPriceAmount(tier, 'yearly', deviceCurrency);
+              const monthly = getTierPriceAmount(tier, 'monthly', deviceCurrency);
               if (yearly > 0 && monthly > 0) {
                 const perMonth = yearly / 12;
+                // INR is whole-rupee; USD/EUR keep two decimals.
+                const formatPerMonth =
+                  deviceCurrency === 'inr'
+                    ? `${currencySymbol}${Math.round(perMonth).toLocaleString('en-IN')}`
+                    : `${currencySymbol}${perMonth.toFixed(2)}`;
                 perMonthEquivalent = t('subscription.perMonthEquivalent', {
-                  price: `$${perMonth.toFixed(2)}`,
+                  price: formatPerMonth,
                 });
                 const annualIfMonthly = monthly * 12;
                 if (annualIfMonthly > yearly) {
-                  originalPrice = `$${annualIfMonthly.toFixed(0)}`;
+                  originalPrice =
+                    deviceCurrency === 'inr'
+                      ? `${currencySymbol}${Math.round(annualIfMonthly).toLocaleString('en-IN')}`
+                      : `${currencySymbol}${annualIfMonthly.toFixed(0)}`;
                 }
               }
             }
