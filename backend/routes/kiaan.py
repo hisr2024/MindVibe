@@ -36,6 +36,7 @@ from backend.services.kiaan_grounded_ai import (
     call_kiaan_ai_grounded,
     call_kiaan_ai_grounded_stream,
 )
+from backend.services.tool_envelope import build_tool_message
 
 logger = logging.getLogger(__name__)
 
@@ -364,15 +365,15 @@ async def emotional_reset(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    emotion = _tool_input(payload.inputs, "emotion", "overwhelmed")
-    intensity = _tool_input(payload.inputs, "intensity", "5")
-    situation = _tool_input(payload.inputs, "situation")
-
-    message = (
-        f"I am experiencing {emotion} with an intensity of {intensity}/10. "
-        f"Here is what happened: {situation}. "
-        "Please guide me through an emotional reset."
-    )
+    # Structured envelope (IMPROVEMENT_ROADMAP.md P1.5 §10) replaces
+    # the hand-rolled English narrative. Same fields the Android client
+    # already sends; the LLM gets a parse-stable JSON shape inside
+    # <TOOL>/<INPUTS>/<REQUEST> tags.
+    message = build_tool_message("Emotional Reset", {
+        "emotion": _tool_input(payload.inputs, "emotion", "overwhelmed"),
+        "intensity": _tool_input(payload.inputs, "intensity", "5"),
+        "situation": _tool_input(payload.inputs, "situation"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -396,17 +397,11 @@ async def ardha(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    situation = _tool_input(payload.inputs, "situation")
-    belief = _tool_input(payload.inputs, "limiting_belief")
-    fear = _tool_input(payload.inputs, "fear")
-
-    message = (
-        "I need cognitive reframing. "
-        f"My situation: {situation}. "
-        f"The limiting belief holding me: {belief}. "
-        f"What I fear most: {fear}. "
-        "Please help me reframe this."
-    )
+    message = build_tool_message("Ardha", {
+        "situation": _tool_input(payload.inputs, "situation"),
+        "limiting_belief": _tool_input(payload.inputs, "limiting_belief"),
+        "fear": _tool_input(payload.inputs, "fear"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -430,16 +425,11 @@ async def viyoga(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    attachment = _tool_input(payload.inputs, "attachment")
-    attachment_type = _tool_input(payload.inputs, "attachment_type")
-    freedom_vision = _tool_input(payload.inputs, "freedom_vision")
-
-    message = (
-        f"I am struggling to let go of: {attachment}. "
-        f"This is an attachment to: {attachment_type}. "
-        f"What freedom would feel like: {freedom_vision}. "
-        "Please guide me through Viyoga — the practice of non-attachment."
-    )
+    message = build_tool_message("Viyoga", {
+        "attachment": _tool_input(payload.inputs, "attachment"),
+        "attachment_type": _tool_input(payload.inputs, "attachment_type"),
+        "freedom_vision": _tool_input(payload.inputs, "freedom_vision"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -463,16 +453,11 @@ async def karma_reset(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    pattern = _tool_input(payload.inputs, "pattern")
-    dimension = _tool_input(payload.inputs, "dimension")
-    dharmic_action = _tool_input(payload.inputs, "dharmic_action")
-
-    message = (
-        f"I want to examine this recurring pattern: {pattern}. "
-        f"This pattern shows up as: {dimension}. "
-        f"The action I feel called to: {dharmic_action}. "
-        "Please guide me through a Karma Reset."
-    )
+    message = build_tool_message("Karma Reset", {
+        "pattern": _tool_input(payload.inputs, "pattern"),
+        "dimension": _tool_input(payload.inputs, "dimension"),
+        "dharmic_action": _tool_input(payload.inputs, "dharmic_action"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -496,16 +481,11 @@ async def sambandh_dharma(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    challenge = _tool_input(payload.inputs, "challenge")
-    relationship_type = _tool_input(payload.inputs, "relationship_type")
-    difficulty = _tool_input(payload.inputs, "core_difficulty")
-
-    message = (
-        f"I have a relationship challenge: {challenge}. "
-        f"This is with: {relationship_type}. "
-        f"The core difficulty is: {difficulty}. "
-        "Please guide me through the Sambandh Dharma (Relationship Compass)."
-    )
+    message = build_tool_message("Sambandh Dharma (Relationship Compass)", {
+        "challenge": _tool_input(payload.inputs, "challenge"),
+        "relationship_type": _tool_input(payload.inputs, "relationship_type"),
+        "core_difficulty": _tool_input(payload.inputs, "core_difficulty"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -536,29 +516,19 @@ async def karmalytix(
     Journal entries remain encrypted on the client. Do not add journal text
     to this prompt under any circumstances.
     """
-    mood_pattern = _tool_input(payload.inputs, "mood_pattern")
-    tags = _tool_input(payload.inputs, "tags")
-    journaling_days = _tool_input(payload.inputs, "journaling_days", "0")
-    challenge = _tool_input(payload.inputs, "dharmic_challenge")
-    pattern = _tool_input(payload.inputs, "pattern_noticed")
-    sankalpa = _tool_input(payload.inputs, "sankalpa")
-    dimensions = _tool_input(payload.inputs, "karma_dimensions")
-
-    message = (
-        "Generate a weekly Sacred Mirror for this devotee. "
-        "METADATA ONLY — journal content is encrypted and never shared. "
-        f"Mood pattern this week: {mood_pattern}. "
-        f"Sacred themes they tagged: {tags}. "
-        f"Days journaled: {journaling_days}/7. "
-        f"Dharmic challenge they identified: {challenge}. "
-        f"Pattern they noticed in themselves: {pattern}. "
-        f"Sankalpa for next week: {sankalpa}. "
-        f"Karma dimension scores: {dimensions}. "
-        "Generate a warm, specific Sacred Mirror with: "
-        "Mirror (what the data reveals), Pattern (recurring theme), "
-        "Gita Echo (most relevant verse), Growth Edge (invitation to deepen), "
-        "Blessing (acknowledgment of where they are)."
-    )
+    # The KarmaLytix tool envelope carries the PRIVACY directive in
+    # its <REQUEST> tag (see backend/services/tool_envelope.py).
+    # Journal content is encrypted client-side and never reaches the
+    # LLM; only the metadata fields below do.
+    message = build_tool_message("KarmaLytix", {
+        "mood_pattern": _tool_input(payload.inputs, "mood_pattern"),
+        "tags": _tool_input(payload.inputs, "tags"),
+        "journaling_days": _tool_input(payload.inputs, "journaling_days", "0"),
+        "dharmic_challenge": _tool_input(payload.inputs, "dharmic_challenge"),
+        "pattern_noticed": _tool_input(payload.inputs, "pattern_noticed"),
+        "sankalpa": _tool_input(payload.inputs, "sankalpa"),
+        "karma_dimensions": _tool_input(payload.inputs, "karma_dimensions"),
+    })
     response_text, verses = await _run_ai(
         message=message,
         db=db,

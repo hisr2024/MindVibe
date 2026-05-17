@@ -88,6 +88,40 @@ serve later; the unary endpoint populates the cache for next time.
 Bypass conditions: same as unary — `user_id=None`, `system_override`,
 `gita_verse` pin, or `KIAAN_RESPONSE_CACHE_ENABLED=false`.
 
+## Sacred-tool envelope
+
+`backend/services/tool_envelope.build_tool_message(tool_name, inputs)`
+is the single way the six sacred-tool routes hand user input to the
+LLM. It returns a three-tag envelope:
+
+```
+<TOOL>Ardha</TOOL>
+<INPUTS>{"situation":"...","limiting_belief":"...","fear":"..."}</INPUTS>
+<REQUEST>Help me reframe this.</REQUEST>
+```
+
+Why this shape:
+
+* **Parse stability** — the persona prompt looks for the three tags;
+  the LLM cannot confuse user-provided values with hand-rolled English
+  glue.
+* **i18n trivialness** — keys are stable English identifiers, values
+  can be any language. The same envelope shape works for Hindi,
+  English, Sanskrit, or mixed input without per-locale f-strings.
+* **Privacy on KarmaLytix** — that one tool's `<REQUEST>` directive
+  carries the PRIVACY clause (`metadata only — journal content is
+  encrypted and never shared`) and the output skeleton (Mirror,
+  Pattern, Gita Echo, Growth Edge, Blessing). The constraint has no
+  other home in the prompt stack.
+* **Honest audit logs** — every tool call logs the exact field dict
+  the model saw, not a hand-rolled English paraphrase that drifts.
+
+Empty / None / `[]` / `{}` values are stripped before JSON-encoding so
+the LLM never sees clutter from fields the user skipped. Token cost
+vs the old f-string narrative is roughly neutral for typical inputs
+(the tags add ~30 chars; the eliminated filler subtracts roughly the
+same). The win is structure, not compression.
+
 ## Per-sentence language routing (Hinglish)
 
 `backend/services/voice/lang_detect.py` provides
