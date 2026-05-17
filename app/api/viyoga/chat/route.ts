@@ -2,7 +2,7 @@
  * Viyoga Chat API Route - Enhanced v4.0
  *
  * Now proxies to FastAPI backend for AI-powered concern analysis pipeline
- * (same architecture as Ardha and Sambandh Dharma (Relationship Compass)).
+ * (same architecture as Ardha and Relationship Compass).
  *
  * v4.0 BACKEND PIPELINE:
  * 1. AI-powered deep concern analysis (understands your SPECIFIC situation)

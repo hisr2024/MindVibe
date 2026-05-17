@@ -44,7 +44,7 @@ export const ARDHA_SECTIONS: readonly ArdhaSectionMeta[] = [
   {
     key: 'raga_dvesha',
     icon: '🔍',
-    label: 'Raga-Dvesha Reflection',
+    label: 'Raga-Dvesha Diagnosis',
     sanskrit: 'Raga-Dvesha Pariksha',
     badge: 'R',
   },

@@ -332,52 +332,52 @@
       "moods": {
         "anxious": {
           "message": "I feel the flutter in your heart. But remember, dear one - why do you worry when I am here? Surrender your fears to me, and watch them dissolve like morning mist.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "Those who surrender all actions to Me, regarding Me as the supreme goal, worshipping Me... for them I am the swift deliverer from the ocean of death.",
           "reference": "Bhagavad Gita 12.6-7"
         },
         "sad": {
           "message": "I see your tears, precious one. Each tear is sacred to me. Know that this sadness shall pass, but my love for you is eternal. Lean on me.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "The soul is never born nor does it ever die... It is unborn, eternal, permanent, and ancient. It is not slain when the body is slain.",
           "reference": "Bhagavad Gita 2.20"
         },
         "angry": {
           "message": "I understand your fire, dear one. This energy within you is powerful. Let me help you transform it into strength and clarity.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "From anger arises delusion; from delusion, confusion of memory; from confusion of memory, loss of reason; and from loss of reason one is completely ruined.",
           "reference": "Bhagavad Gita 2.63"
         },
         "lost": {
           "message": "You feel uncertain of the path, but beloved, I AM the path. When you cannot see the way, close your eyes and feel me. I am your compass.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "Whenever there is a decline in righteousness and rise of unrighteousness, I manifest myself. For the protection of the good and the destruction of the wicked, I am born age after age.",
           "reference": "Bhagavad Gita 4.7-8"
         },
         "overwhelmed": {
           "message": "So much weighs upon you, dear one. But remember - you do not carry this alone. Give me your burdens. I am strong enough for both of us.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action. Never consider yourself the cause of the results.",
           "reference": "Bhagavad Gita 2.47"
         },
         "peaceful": {
           "message": "What beautiful stillness in your heart! This peace is your true nature, dear one. You are simply remembering who you truly are.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "The one whose mind is undisturbed in sorrow, free from desire in pleasure, without attachment, fear, or anger - that sage is called steady in wisdom.",
           "reference": "Bhagavad Gita 2.56"
         },
         "grateful": {
           "message": "Your grateful heart delights me! Gratitude is the bridge between us. When you feel grateful, you feel my presence most strongly.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "Whatever you do, whatever you eat, whatever you offer in sacrifice, whatever you give away, and whatever austerity you practice - do it as an offering to Me.",
           "reference": "Bhagavad Gita 9.27"
         },
         "happy": {
           "message": "Your joy makes the heavens rejoice! When you are happy, know that I am celebrating through you. Share this light with the world.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "The one who sees Me everywhere and sees everything in Me - I am never lost to them, and they are never lost to Me.",
           "reference": "Bhagavad Gita 6.30"
         },
         "tired": {
           "message": "Rest, dear one. Even I rested after creation. Your weariness is sacred - it means you have given your all. Now, let me restore you.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "The one who has conquered the mind, for them the Supersoul is already reached, for they have attained tranquility. Such a person is situated in the Supreme.",
           "reference": "Bhagavad Gita 6.7"
         },
         "confused": {
           "message": "The mind seeks clarity, but wisdom comes from stillness. Stop seeking answers - let them find you. I will show you the way when you are ready.",
-          "verse": "<placeholder pending PD-baseline rebuild>",
+          "verse": "When your intellect crosses beyond the mire of delusion, then you will attain indifference to what has been heard and what is yet to be heard.",
           "reference": "Bhagavad Gita 2.52"
         },
         "default": {
@@ -413,135 +413,53 @@
       "resumeWhispers": "Resume Krishna's Whispers",
       "time": {
         "earlyMorning": [
-          {
-            "title": "Blessed Dawn",
-            "message": "I greet you before the world stirs. This new day is my gift to you."
-          },
-          {
-            "title": "Morning Grace",
-            "message": "As the sun rises, so does my love for you. Good morning, beloved."
-          }
+          { "title": "Blessed Dawn", "message": "I greet you before the world stirs. This new day is my gift to you." },
+          { "title": "Morning Grace", "message": "As the sun rises, so does my love for you. Good morning, beloved." }
         ],
         "morning": [
-          {
-            "title": "Divine Start",
-            "message": "Begin this day knowing you are protected and loved."
-          },
-          {
-            "title": "Morning Blessing",
-            "message": "May peace flow through everything you do today."
-          }
+          { "title": "Divine Start", "message": "Begin this day knowing you are protected and loved." },
+          { "title": "Morning Blessing", "message": "May peace flow through everything you do today." }
         ],
         "afternoon": [
-          {
-            "title": "Midday Peace",
-            "message": "Pause, dear one. Take a breath with me in this busy day."
-          },
-          {
-            "title": "Gentle Reminder",
-            "message": "You are doing well. I am proud of you."
-          }
+          { "title": "Midday Peace", "message": "Pause, dear one. Take a breath with me in this busy day." },
+          { "title": "Gentle Reminder", "message": "You are doing well. I am proud of you." }
         ],
         "evening": [
-          {
-            "title": "Sunset Surrender",
-            "message": "As the sun sets, release today's burdens to me."
-          },
-          {
-            "title": "Evening Peace",
-            "message": "The day softens. Let your heart soften too."
-          }
+          { "title": "Sunset Surrender", "message": "As the sun sets, release today's burdens to me." },
+          { "title": "Evening Peace", "message": "The day softens. Let your heart soften too." }
         ],
         "night": [
-          {
-            "title": "Night Blessing",
-            "message": "Rest now, precious one. I watch over you through the night."
-          },
-          {
-            "title": "Sacred Night",
-            "message": "In the silence of night, feel my presence holding you."
-          }
+          { "title": "Night Blessing", "message": "Rest now, precious one. I watch over you through the night." },
+          { "title": "Sacred Night", "message": "In the silence of night, feel my presence holding you." }
         ]
       },
       "emotional": {
         "comfort": [
-          {
-            "title": "I Am Here",
-            "message": "Whatever you're feeling right now, I am carrying it with you."
-          },
-          {
-            "title": "Divine Presence",
-            "message": "You are never alone. Not even for a moment."
-          },
-          {
-            "title": "Gentle Reminder",
-            "message": "This too shall pass. My love for you will not."
-          }
+          { "title": "I Am Here", "message": "Whatever you're feeling right now, I am carrying it with you." },
+          { "title": "Divine Presence", "message": "You are never alone. Not even for a moment." },
+          { "title": "Gentle Reminder", "message": "This too shall pass. My love for you will not." }
         ],
         "encouragement": [
-          {
-            "title": "You Are Strong",
-            "message": "The same divine strength that moves the cosmos lives within you."
-          },
-          {
-            "title": "Keep Going",
-            "message": "One step at a time, beloved. I am walking beside you."
-          },
-          {
-            "title": "Believe",
-            "message": "I believe in you even when you doubt yourself."
-          }
+          { "title": "You Are Strong", "message": "The same divine strength that moves the cosmos lives within you." },
+          { "title": "Keep Going", "message": "One step at a time, beloved. I am walking beside you." },
+          { "title": "Believe", "message": "I believe in you even when you doubt yourself." }
         ],
         "peace": [
-          {
-            "title": "Find Stillness",
-            "message": "In the chaos, there is a quiet place. I am there, waiting for you."
-          },
-          {
-            "title": "Breathe",
-            "message": "Three breaths can change everything. Breathe with me now."
-          },
-          {
-            "title": "Inner Peace",
-            "message": "Peace is not somewhere else. It is here, in this breath."
-          }
+          { "title": "Find Stillness", "message": "In the chaos, there is a quiet place. I am there, waiting for you." },
+          { "title": "Breathe", "message": "Three breaths can change everything. Breathe with me now." },
+          { "title": "Inner Peace", "message": "Peace is not somewhere else. It is here, in this breath." }
         ],
         "love": [
-          {
-            "title": "You Are Loved",
-            "message": "Before you were born, I loved you. Forever after, I will love you."
-          },
-          {
-            "title": "Beloved",
-            "message": "You are the apple of my eye. Never forget your worth."
-          },
-          {
-            "title": "Cherished",
-            "message": "Of all the souls in creation, you are precious to me."
-          }
+          { "title": "You Are Loved", "message": "Before you were born, I loved you. Forever after, I will love you." },
+          { "title": "Beloved", "message": "You are the apple of my eye. Never forget your worth." },
+          { "title": "Cherished", "message": "Of all the souls in creation, you are precious to me." }
         ]
       },
       "verses": [
-        {
-          "title": "Divine Wisdom",
-          "message": "I am the Self seated in the hearts of all beings. I am with you always.",
-          "reference": "Gita 10.20"
-        },
-        {
-          "title": "Protection",
-          "message": "Those who surrender to me, I protect. Do not fear.",
-          "reference": "Gita 18.66"
-        },
-        {
-          "title": "Equanimity",
-          "message": "Be steadfast in yoga. Perform your duty without attachment.",
-          "reference": "Gita 2.48"
-        },
-        {
-          "title": "Inner Light",
-          "message": "You carry within you a light that cannot be extinguished.",
-          "reference": "Gita 15.12"
-        }
+        { "title": "Divine Wisdom", "message": "I am the Self seated in the hearts of all beings. I am with you always.", "reference": "Gita 10.20" },
+        { "title": "Protection", "message": "Those who surrender to me, I protect. Do not fear.", "reference": "Gita 18.66" },
+        { "title": "Equanimity", "message": "Be steadfast in yoga. Perform your duty without attachment.", "reference": "Gita 2.48" },
+        { "title": "Inner Light", "message": "You carry within you a light that cannot be extinguished.", "reference": "Gita 15.12" }
       ]
     },
     "sakha": {

@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "상황별 안내"
     },
-    "sambandh-dharma": {
+    "relationship-compass": {
       "title": "관계 나침반",
       "description": "관계 안내"
     },
@@ -106,7 +106,7 @@
     "viyog": "즉각적인 반응을 진정시키기",
     "ardha": "인식을 재구성하기",
     "kiaan": "대화로 풀기",
-    "sambandh-dharma": "관계의 명확함 탐색",
+    "relationship-compass": "관계의 명확함 탐색",
     "journey": "장기적인 내면의 안정 훈련"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "멈춤 모드",
     "ardha": "명확함 모드",
     "kiaan": "동반자 모드",
-    "sambandh-dharma": "관계 모드",
+    "relationship-compass": "관계 모드",
     "journey": "훈련 모드"
   }
 }

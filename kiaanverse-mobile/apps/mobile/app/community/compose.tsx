@@ -130,7 +130,7 @@ export default function ComposeScreen(): React.JSX.Element {
               color={charCountColor}
               style={styles.charCount}
             >
-              {t('composeCharsRemainingFmt', { count: String(charsRemaining) })}
+              {t('composeCharsRemainingFmt', { count: charsRemaining })}
             </Text>
           </View>
 

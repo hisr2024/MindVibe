@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Hướng dẫn theo tình huống"
     },
-    "sambandh-dharma": {
+    "relationship-compass": {
       "title": "La bàn Mối quan hệ",
       "description": "Hướng dẫn mối quan hệ"
     },
@@ -106,7 +106,7 @@
     "viyog": "Làm dịu phản ứng tức thì",
     "ardha": "Đổi góc nhìn nhận thức",
     "kiaan": "Nói chuyện để hiểu rõ",
-    "sambandh-dharma": "Tìm sự sáng tỏ trong mối quan hệ",
+    "relationship-compass": "Tìm sự sáng tỏ trong mối quan hệ",
     "journey": "Rèn luyện sự vững vàng nội tâm lâu dài"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Chế độ Tạm dừng",
     "ardha": "Chế độ Sáng tỏ",
     "kiaan": "Chế độ Bạn đồng hành",
-    "sambandh-dharma": "Chế độ Mối quan hệ",
+    "relationship-compass": "Chế độ Mối quan hệ",
     "journey": "Chế độ Luyện tập"
   }
 }

@@ -49,19 +49,19 @@ const PROTECTION_MESSAGES = [
 // Protection verses from Gita
 const PROTECTION_VERSES = [
   {
-    verse: "<placeholder pending PD-baseline rebuild>",
+    verse: "Whenever there is a decline in righteousness and rise of unrighteousness, I manifest myself. For protection of the good, I appear in every age.",
     reference: "Gita 4.7-8",
   },
   {
-    verse: "<placeholder pending PD-baseline rebuild>",
+    verse: "Those who worship Me, thinking of nothing else, to them who are ever devoted, I provide what they lack and preserve what they have.",
     reference: "Gita 9.22",
   },
   {
-    verse: "<placeholder pending PD-baseline rebuild>",
+    verse: "Abandon all dharmas and surrender to Me alone. I shall liberate you from all sins. Do not grieve.",
     reference: "Gita 18.66",
   },
   {
-    verse: "<placeholder pending PD-baseline rebuild>",
+    verse: "The one who sees Me everywhere and sees everything in Me - I am never lost to them, and they are never lost to Me.",
     reference: "Gita 6.30",
   },
 ];

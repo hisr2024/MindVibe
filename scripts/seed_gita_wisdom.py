@@ -43,13 +43,13 @@ SOURCES_DATA = [
     {
         "name": "Gita Press Gorakhpur",
         "description": "One of the most renowned publishers of Hindu scriptures in India, founded in 1923",
-        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+        "url": "https://www.gitapress.org/",
         "credibility_rating": 5,
     },
     {
         "name": "ISKCON (International Society for Krishna Consciousness)",
         "description": "Bhagavad-gita As It Is by A.C. Bhaktivedanta Swami Prabhupada",
-        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+        "url": "https://www.iskcon.org/",
         "credibility_rating": 5,
     },
     {
@@ -61,7 +61,7 @@ SOURCES_DATA = [
     {
         "name": "Swami Sivananda Divine Life Society",
         "description": "Translation and commentary by Swami Sivananda",
-        "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+        "url": "https://www.sivanandaonline.org/",
         "credibility_rating": 5,
     },
 ]
@@ -402,15 +402,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import os as _os
-    if _os.getenv("MINDVIBE_GITA_SEED_ENABLED", "0") != "1":
-        import sys as _sys
-        _sys.stderr.write(
-            "ERROR: Gita seed script is disabled pending PD-baseline corpus.\n"
-            "  Set MINDVIBE_GITA_SEED_ENABLED=1 only after the modernized\n"
-            "  PD-baseline corpus (Phase 1A) has been produced, verified,\n"
-            "  and committed to the proprietary repo. See internal\n"
-            "  IP-drafts/_telang_baseline/README.md for the workflow.\n"
-        )
-        raise SystemExit(2)
     asyncio.run(main())

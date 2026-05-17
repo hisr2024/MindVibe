@@ -13,7 +13,7 @@
  *   KIAAN + repeated theme ≥2  → suggest JOURNEY
  *   JOURNEY + trigger today    → suggest VIYOGA
  *   EMOTIONAL_RESET            → suggest VIYOGA
- *   KARMA_RESET                → suggest SAMBANDH_DHARMA
+ *   KARMA_RESET                → suggest RELATIONSHIP_COMPASS
  *   KARMA_FOOTPRINT            → suggest EMOTIONAL_RESET
  *
  * No network dependency — works fully offline.
@@ -190,9 +190,9 @@ export function getNextStepSuggestion(input: SuggestionInput): Suggestion | null
   if (tool === 'karma-reset') {
     return {
       targetTool: 'compass',
-      href: '/sambandh-dharma',
+      href: '/relationship-compass',
       labelKey: 'navigation.next_step.apply_compass',
-      labelFallback: 'Apply with Sambandh Dharma (Relationship Compass) \u2192',
+      labelFallback: 'Apply with Relationship Compass \u2192',
     }
   }
 

@@ -18,7 +18,6 @@
 import saData from './gita-data/sa.json';
 import enData from './gita-data/en.json';
 import hiData from './gita-data/hi.json';
-import themesData from './gita-data/themes.json';
 
 interface RawLanguageFile {
   readonly languageCode: string;
@@ -134,50 +133,4 @@ export function getLocalVerse(chapterNum: number, verseNum: number): LocalGitaVe
 /** Did the local corpus successfully load? Used for diagnostics. */
 export function isLocalGitaAvailable(): boolean {
   return EN.chapters.length === 18 && SA.chapters.length === 18 && HI.chapters.length === 18;
-}
-
-// ============ Theme curation ============
-//
-// Bundled JSON: each of the 6 Home-screen "Explore by Theme" tiles maps to a
-// hand-tagged list of verse refs ("c.v"). Generated from the corpus's per-verse
-// `mental_health_applications` + chapter-level `theme` tags by
-// scripts/generate_themes.py. Curation rules live in that script's docstring.
-
-const THEMES = themesData as Readonly<Record<string, ReadonlyArray<string>>>;
-
-/** Stable list of supported theme IDs (matches WISDOM_THEMES on the Wisdom page). */
-export const LOCAL_GITA_THEME_IDS = [
-  'peace', 'courage', 'wisdom', 'devotion', 'action', 'detachment',
-] as const;
-export type LocalGitaThemeId = typeof LOCAL_GITA_THEME_IDS[number];
-
-/** Return the ordered list of verse refs ("c.v") curated for the given theme. */
-export function getLocalThemeVerseRefs(themeId: string): ReadonlyArray<string> {
-  return THEMES[themeId] ?? [];
-}
-
-/** Return the resolved verse objects curated for the given theme.
- *
- * Verses are returned in canonical (chapter, verse) order. Verses whose refs
- * cannot be resolved (corrupt corpus / partial bundle) are silently skipped so
- * the UI never shows holes — but in a healthy build, every ref resolves.
- */
-export function getLocalVersesByTheme(themeId: string): ReadonlyArray<LocalGitaVerse> {
-  const refs = getLocalThemeVerseRefs(themeId);
-  const verses: LocalGitaVerse[] = [];
-  for (const ref of refs) {
-    const parts = ref.split('.');
-    if (parts.length !== 2) continue;
-    const c = Number(parts[0]);
-    const v = Number(parts[1]);
-    if (!Number.isInteger(c) || !Number.isInteger(v)) continue;
-    const resolved = getLocalVerse(c, v);
-    if (resolved) verses.push(resolved);
-  }
-  return verses;
-}
-
-/** How many verses are curated under this theme. */
-export function getLocalThemeVerseCount(themeId: string): number {
-  return THEMES[themeId]?.length ?? 0;
 }

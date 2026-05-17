@@ -9,7 +9,7 @@
  * Features:
  * - 16+ tools mapped with triggers, Gita wisdom, and friend-style suggestions
  * - Emotion → tool routing (anxiety → breathing, grief → journal, etc.)
- * - Situation → tool routing (breakup → Viyoga, conflict → Sambandh Dharma (Relationship Compass))
+ * - Situation → tool routing (breakup → Viyoga, conflict → Relationship Compass)
  * - Natural conversational suggestions (not menu-driven)
  * - Anti-repetition: tracks recently suggested tools
  */
@@ -103,14 +103,14 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     icon: '🕊️',
   },
   {
-    id: 'sambandh-dharma',
-    name: 'Sambandh Dharma (Relationship Compass)',
-    route: '/tools/sambandh-dharma',
+    id: 'relationship-compass',
+    name: 'Relationship Compass',
+    route: '/tools/relationship-compass',
     friendDescription: 'Navigate relationship challenges with clarity, fairness, and compassion.',
     suggestions: [
-      'Relationships are complicated, friend, and what you are describing sounds like it needs more than just talking it out. Our Sambandh Dharma (Relationship Compass) is designed exactly for this — it helps you navigate the conflict with clarity and compassion. The Gita teaches seeing the divine in every being. Shall I guide you there?',
-      'You know, when Arjuna faced his loved ones on the battlefield, he was torn apart. That is not so different from what you are feeling. The Sambandh Dharma (Relationship Compass) uses that same wisdom to help you find your way through relationship challenges. Want to try it?',
-      'Dear one, I want you to try the Sambandh Dharma (Relationship Compass). It takes your relationship situation and helps you see it through the lens of dharma — what is right, what is kind, and what is wise. It has helped so many people find clarity.',
+      'Relationships are complicated, friend, and what you are describing sounds like it needs more than just talking it out. Our Relationship Compass is designed exactly for this — it helps you navigate the conflict with clarity and compassion. The Gita teaches seeing the divine in every being. Shall I guide you there?',
+      'You know, when Arjuna faced his loved ones on the battlefield, he was torn apart. That is not so different from what you are feeling. The Relationship Compass uses that same wisdom to help you find your way through relationship challenges. Want to try it?',
+      'Dear one, I want you to try the Relationship Compass. It takes your relationship situation and helps you see it through the lens of dharma — what is right, what is kind, and what is wise. It has helped so many people find clarity.',
     ],
     triggerKeywords: ['relationship', 'partner', 'spouse', 'husband', 'wife', 'boyfriend', 'girlfriend', 'marriage', 'argument', 'fight with', 'conflict with', 'not talking', 'trust', 'betrayed', 'cheating', 'divorce'],
     emotions: ['anger', 'sadness', 'betrayal', 'confusion', 'grief'],
@@ -247,12 +247,12 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     icon: '🎵',
   },
   {
-    id: 'karma-marg',
-    name: 'Karma Marg (Karma Journey) (Six Enemies)',
+    id: 'journey-engine',
+    name: 'Journey Engine (Six Enemies)',
     route: '/journeys',
     friendDescription: 'Guided multi-day journeys to reduce the grip of the six inner tendencies described in the Gita.',
     suggestions: [
-      'Friend, in the Gita, there are six inner tendencies that unsettle our peace: desire, anger, greed, delusion, arrogance, and envy. The Karma Marg (Karma Journey) is a structured multi-day program where we loosen their influence one by one. Which tendency is weighing on you most right now?',
+      'Friend, in the Gita, there are six inner tendencies that unsettle our peace: desire, anger, greed, delusion, arrogance, and envy. The Journey Engine is a structured multi-day program where we loosen their influence one by one. Which tendency is weighing on you most right now?',
       'There is a powerful system I want to introduce you to. The ancient sages identified six tendencies of the mind — and we have built guided journeys to help you strengthen steadiness against each one. It is not a quick fix. It is real work. But I will be with you every step.',
     ],
     triggerKeywords: ['journey', 'program', 'multi-day', 'structured', 'enemy', 'desire', 'greed', 'arrogance', 'envy', 'delusion', 'shadripu', 'six enemies', 'conquer'],
@@ -284,7 +284,7 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     route: '/deep-insights',
     friendDescription: 'Guided, high-focus tools for deep emotional and spiritual work.',
     suggestions: [
-      'Friend, I think you are ready for something deeper. The Deep Insights Hub brings together our most powerful tools — Ardha for thought reframing, Viyoga for letting go, and Sambandh Dharma (Relationship Compass) for navigating conflicts. These are not surface-level. They go deep. Ready?',
+      'Friend, I think you are ready for something deeper. The Deep Insights Hub brings together our most powerful tools — Ardha for thought reframing, Viyoga for letting go, and Relationship Compass for navigating conflicts. These are not surface-level. They go deep. Ready?',
     ],
     triggerKeywords: ['deep work', 'intense', 'serious', 'therapy level', 'profound', 'go deeper', 'advanced tools'],
     emotions: ['determination', 'seeking', 'curiosity'],

@@ -30,25 +30,24 @@
 /**
  * Stable identifiers for every bundled track.
  *
- * Only tracks with VERIFIED LICENSED PROVENANCE may be added here. The two
- * currently bundled tracks are documented in
- * `apps/mobile/assets/audio/README.md`:
- *   - 'gayatri'      — Sounova Music Gayatri Mantra (Pixabay #493174, CC0)
- *   - 'om-hanumate'  — Om Hanumate Namaha (Pixabay Kals #447279, CC0)
+ * Three are explicitly identified Sanskrit / Vedic mantras:
+ *   - 'gayatri'        — Sounova Music Gayatri Mantra (~7m26s)
+ *   - 'shanti-mantra'  — Shanti (peace) Mantra (~2m49s)
+ *   - 'om-hanumate'    — Om Hanumate Namaha (Hanuman bhakti, ~1m15s)
  *
- * Earlier drafts of this registry referenced 5 additional tracks
- * ('shanti-mantra', 'mantra-001'..'mantra-004') that lacked licensed
- * source records. They were removed in Phase 1N IP-hygiene to avoid
- * shipping audio whose copyright posture cannot be defended. To re-add
- * any track:
- *   1. Source it from a CC0/PD origin (Pixabay, Free Music Archive)
- *   2. Record the source URL + license in `assets/audio/README.md`
- *   3. Add the key here AND a matching `bundledAudioKey` in
- *      `audioFallbacks.ts`
+ * Four are generic mantra slots (`mantra-001` .. `mantra-004`). They
+ * were uploaded with non-ASCII filenames that were stripped on transit,
+ * so they ship under neutral names until each one is identified and
+ * given a descriptive key.
  */
 export type BundledAudioKey =
   | 'gayatri'
-  | 'om-hanumate';
+  | 'shanti-mantra'
+  | 'om-hanumate'
+  | 'mantra-001'
+  | 'mantra-002'
+  | 'mantra-003'
+  | 'mantra-004';
 
 /**
  * Metro asset ids for every bundled audio file.
@@ -67,7 +66,12 @@ export const BUNDLED_AUDIO_REGISTRY: Readonly<
   Partial<Record<BundledAudioKey, number>>
 > = {
   'gayatri': require('../../assets/audio/gayatri.mp3') as number,
+  'shanti-mantra': require('../../assets/audio/shanti-mantra.mp3') as number,
   'om-hanumate': require('../../assets/audio/om-hanumate.mp3') as number,
+  'mantra-001': require('../../assets/audio/mantra-001.mp3') as number,
+  'mantra-002': require('../../assets/audio/mantra-002.mp3') as number,
+  'mantra-003': require('../../assets/audio/mantra-003.mp3') as number,
+  'mantra-004': require('../../assets/audio/mantra-004.mp3') as number,
 };
 /* eslint-enable @typescript-eslint/no-var-requires, global-require */
 

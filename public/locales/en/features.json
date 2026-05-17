@@ -23,17 +23,17 @@
     "error": "Viyoga is having trouble connecting right now. Please try again in a moment.",
     "badge": "Local only"
   },
-  "sambandhDharma": {
-    "title": "Sambandh Dharma (Relationship Compass)",
+  "relationshipCompass": {
+    "title": "Relationship Compass",
     "subtitle": "Dharma Compass for Relationships",
     "description": "Calm, secular conflict guidance that keeps KIAAN intact—right action, ego detachment, clear wording.",
     "placeholder": "Example: My partner feels I don't listen, and I keep getting defensive when they bring it up.",
-    "button": "Guide me with Sambandh Dharma (Relationship Compass)",
+    "button": "Guide me with Relationship Compass",
     "buttonLoading": "Balancing guidance...",
     "sendToKiaan": "Send context to KIAAN",
     "label": "Describe the conflict",
-    "response": "Sambandh Dharma (Relationship Compass) response",
-    "error": "Sambandh Dharma (Relationship Compass) is unavailable right now. Please try again shortly.",
+    "response": "Relationship Compass response",
+    "error": "Relationship Compass is unavailable right now. Please try again shortly.",
     "badges": {
       "neutral": "Neutral and grounded",
       "intact": "Keeps Kiaan intact"

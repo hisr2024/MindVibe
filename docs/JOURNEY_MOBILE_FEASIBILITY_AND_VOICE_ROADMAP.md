@@ -23,8 +23,8 @@
 
 The Journey feature on mobile is **fully feasible** and well-positioned for implementation. The existing codebase already provides:
 
-- A mature backend with Journey models, templates, step states, and KIAAN AI generation (`backend/models/journeys.py`, `backend/services/karma_marg/`)
-- A RESTful API layer (`backend/routes/journeys.py`, `backend/routes/karma_marg.py`)
+- A mature backend with Journey models, templates, step states, and KIAAN AI generation (`backend/models/journeys.py`, `backend/services/journey_engine/`)
+- A RESTful API layer (`backend/routes/journeys.py`, `backend/routes/journey_engine.py`)
 - A React Native scaffold with navigation, state management, and theming (`mobile/react-native/`)
 - An Android Kotlin native shell (`mobile/android/`)
 - Shared services architecture (`mobile/shared/services/`)
@@ -385,7 +385,7 @@ User opens Journey Step
 │           │                      │                       │               │
 │  ┌────────┴──────────────────────┴───────────────────────┴───────────┐  │
 │  │                     Service Layer                                  │  │
-│  │  Karma Marg (Karma Journey) │ KIAAN Core │ Multilingual Voice │ Gita Service   │  │
+│  │  Journey Engine │ KIAAN Core │ Multilingual Voice │ Gita Service   │  │
 │  └────────┬──────────────────────┬───────────────────────────────────┘  │
 │           │                      │                                       │
 │  ┌────────┴──────────┐  ┌───────┴────────────────────────────────────┐  │

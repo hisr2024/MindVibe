@@ -1,0 +1,519 @@
+/**
+ * Journey Engine Service - Frontend service for the Six Enemies (Shadripu) Journey System.
+ *
+ * Provides a clean API for interacting with the journey engine backend.
+ * All types match backend response models in backend/routes/journey_engine.py
+ */
+
+import type {
+  JourneyTemplate,
+  JourneyResponse,
+  StepResponse,
+  EnemyProgressResponse,
+  EnemyRadarData,
+  DashboardResponse,
+  StartJourneyRequest,
+  CompleteStepRequest,
+  ListTemplatesParams,
+  ListJourneysParams,
+  TemplateListResponse,
+  JourneyListResponse,
+  CompletionResponse,
+  ExampleResponse,
+  ExampleListResponse,
+  EnemyInfoResponse,
+} from '@/types/journeyEngine.types';
+
+import { apiFetch } from '@/lib/api';
+
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+
+const _API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const JOURNEY_ENGINE_ENDPOINT = '/api/journey-engine';
+
+// Retry configuration — proxy layer now handles transient retries with longer
+// timeouts (45s) and 2 retries. Frontend retries are reduced to avoid
+// compounding: proxy 2 retries * frontend 3 retries = 9 requests per action.
+const MAX_RETRIES = 1;
+const INITIAL_RETRY_DELAY_MS = 3000;
+const RETRYABLE_STATUS_CODES = [502, 503, 504];
+
+// =============================================================================
+// ERROR HANDLING
+// =============================================================================
+
+export class JourneyEngineError extends Error {
+  public code: string;
+  public statusCode: number;
+
+  constructor(message: string, code: string = 'UNKNOWN_ERROR', statusCode: number = 500) {
+    super(message);
+    this.name = 'JourneyEngineError';
+    this.code = code;
+    this.statusCode = statusCode;
+  }
+
+  isAuthError(): boolean {
+    return this.statusCode === 401 || this.statusCode === 403;
+  }
+
+  isNotFoundError(): boolean {
+    return this.statusCode === 404;
+  }
+
+  isMaxJourneysError(): boolean {
+    return this.code === 'MAX_ACTIVE_JOURNEYS' || this.message.includes('5 active');
+  }
+}
+
+// =============================================================================
+// HTTP UTILITIES
+// =============================================================================
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+interface ApiRequestOptions {
+  signal?: AbortSignal;
+  idempotencyKey?: string;
+}
+
+async function apiRequest<T>(
+  method: string,
+  endpoint: string,
+  body?: unknown,
+  options: ApiRequestOptions = {},
+): Promise<T> {
+  const upperMethod = method.toUpperCase();
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod);
+  // BUG-15: only retry safe methods (GET/HEAD/OPTIONS) OR requests carrying an
+  // Idempotency-Key header. Retrying a plain POST on 502/503 can double-create
+  // resources (e.g. duplicate journeys) when the first attempt actually
+  // succeeded server-side before the proxy returned the error.
+  const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+  const safeToRetry =
+    SAFE_METHODS.includes(upperMethod) || !!options.idempotencyKey;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Use apiFetch for proper auth (httpOnly cookies, CSRF) and
+      // Vercel proxy routing (relative paths in production, absolute in dev)
+      const headers: Record<string, string> = {};
+      if (hasBody) {
+        headers['Content-Type'] = 'application/json';
+      }
+      if (options.idempotencyKey) {
+        headers['Idempotency-Key'] = options.idempotencyKey;
+      }
+
+      const response = await apiFetch(endpoint, {
+        method,
+        headers,
+        body: hasBody && body ? JSON.stringify(body) : undefined,
+        signal: options.signal,
+      });
+
+      if (response.status === 204) {
+        return undefined as T;
+      }
+
+      let data: unknown;
+      try {
+        data = await response.json();
+      } catch {
+        if (!response.ok) {
+          throw new JourneyEngineError(
+            `Request failed with status ${response.status}`,
+            'PARSE_ERROR',
+            response.status
+          );
+        }
+        data = {};
+      }
+
+      if (!response.ok) {
+        const dataObj = (data && typeof data === 'object') ? data as Record<string, unknown> : undefined;
+        const detail = dataObj?.detail;
+        const message = typeof detail === 'string' ? detail : `Error ${response.status}`;
+        const rawCode = dataObj?.code;
+        const code = rawCode === 'MAX_ACTIVE_JOURNEYS'
+          || (response.status === 400 && message.includes('5 active'))
+          ? 'MAX_ACTIVE_JOURNEYS'
+          : 'API_ERROR';
+
+        if (
+          RETRYABLE_STATUS_CODES.includes(response.status) &&
+          safeToRetry &&
+          attempt < MAX_RETRIES
+        ) {
+          await sleep(INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt));
+          continue;
+        }
+
+        // BUG-16: surface 401 as a typed AUTH_REQUIRED error so the caller
+        // can show "Session expired, please log in" instead of a generic
+        // failure message.
+        if (response.status === 401) {
+          throw new JourneyEngineError(
+            'Session expired. Please log in and try again.',
+            'AUTH_REQUIRED',
+            401,
+          );
+        }
+
+        throw new JourneyEngineError(message, code, response.status);
+      }
+
+      return data as T;
+    } catch (error) {
+      if (error instanceof JourneyEngineError) {
+        throw error;
+      }
+
+      // Propagate AbortError immediately — it's a deliberate cancellation
+      // (e.g. the 15s timeout in handleStart), never a retryable network blip.
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw error;
+      }
+
+      if (safeToRetry && attempt < MAX_RETRIES) {
+        await sleep(INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt));
+        continue;
+      }
+
+      throw new JourneyEngineError(
+        'Network error: Please check your connection',
+        'NETWORK_ERROR',
+        0
+      );
+    }
+  }
+
+  throw new JourneyEngineError('Request failed after retries', 'MAX_RETRIES', 503);
+}
+
+// =============================================================================
+// TEMPLATE OPERATIONS
+// =============================================================================
+
+/**
+ * List available journey templates.
+ * GET /api/journey-engine/templates
+ */
+export async function listTemplates(params: ListTemplatesParams = {}): Promise<TemplateListResponse> {
+  const searchParams = new URLSearchParams();
+
+  if (params.enemy) searchParams.set('enemy', params.enemy);
+  if (params.difficulty_max !== undefined) searchParams.set('difficulty_max', String(params.difficulty_max));
+  if (params.free_only !== undefined) searchParams.set('free_only', String(params.free_only));
+  if (params.featured_only !== undefined) searchParams.set('featured_only', String(params.featured_only));
+  if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
+  if (params.offset !== undefined) searchParams.set('offset', String(params.offset));
+
+  const queryString = searchParams.toString();
+  const endpoint = queryString
+    ? `${JOURNEY_ENGINE_ENDPOINT}/templates?${queryString}`
+    : `${JOURNEY_ENGINE_ENDPOINT}/templates`;
+
+  return apiRequest<TemplateListResponse>('GET', endpoint);
+}
+
+/**
+ * Get a specific template by ID.
+ * GET /api/journey-engine/templates/{template_id}
+ */
+export async function getTemplate(templateId: string): Promise<JourneyTemplate> {
+  return apiRequest<JourneyTemplate>('GET', `${JOURNEY_ENGINE_ENDPOINT}/templates/${templateId}`);
+}
+
+/**
+ * Get featured templates for home display.
+ */
+export async function getFeaturedTemplates(): Promise<JourneyTemplate[]> {
+  const response = await listTemplates({ featured_only: true, limit: 6 });
+  return response.templates;
+}
+
+/**
+ * Get templates by enemy type.
+ */
+export async function getTemplatesByEnemy(enemy: string): Promise<JourneyTemplate[]> {
+  const response = await listTemplates({ enemy, limit: 10 });
+  return response.templates;
+}
+
+// =============================================================================
+// JOURNEY OPERATIONS
+// =============================================================================
+
+/**
+ * List user's journeys.
+ * GET /api/journey-engine/journeys
+ */
+export async function listJourneys(params: ListJourneysParams = {}): Promise<JourneyListResponse> {
+  const searchParams = new URLSearchParams();
+
+  if (params.status_filter) searchParams.set('status_filter', params.status_filter);
+  if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
+  if (params.offset !== undefined) searchParams.set('offset', String(params.offset));
+
+  const queryString = searchParams.toString();
+  const endpoint = queryString
+    ? `${JOURNEY_ENGINE_ENDPOINT}/journeys?${queryString}`
+    : `${JOURNEY_ENGINE_ENDPOINT}/journeys`;
+
+  return apiRequest<JourneyListResponse>('GET', endpoint);
+}
+
+/**
+ * Get a specific journey.
+ * GET /api/journey-engine/journeys/{journey_id}
+ */
+export async function getJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}`);
+}
+
+/**
+ * Start a new journey from a template.
+ * POST /api/journey-engine/journeys
+ *
+ * Accepts an optional AbortSignal (for the 15s client timeout) and an
+ * Idempotency-Key so concurrent/retried requests for the same template
+ * don't create duplicate journeys on the server.
+ */
+export async function startJourney(
+  request: StartJourneyRequest,
+  options: { signal?: AbortSignal; idempotencyKey?: string } = {},
+): Promise<JourneyResponse> {
+  const response = await apiRequest<JourneyResponse>(
+    'POST',
+    `${JOURNEY_ENGINE_ENDPOINT}/journeys`,
+    request,
+    options,
+  );
+
+  // Runtime guard: backend contract requires journey_id. If it's missing
+  // we cannot navigate, so fail loudly instead of silently routing to undefined.
+  const journeyId = (response as { journey_id?: string; id?: string } | null)?.journey_id
+    ?? (response as { journey_id?: string; id?: string } | null)?.id;
+  if (!journeyId) {
+    throw new JourneyEngineError(
+      'Journey was created but the server response was malformed. Please refresh and try again.',
+      'MALFORMED_RESPONSE',
+      500,
+    );
+  }
+
+  return response;
+}
+
+/**
+ * Pause an active journey.
+ * POST /api/journey-engine/journeys/{journey_id}/pause
+ */
+export async function pauseJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/pause`);
+}
+
+/**
+ * Resume a paused journey.
+ * POST /api/journey-engine/journeys/{journey_id}/resume
+ */
+export async function resumeJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/resume`);
+}
+
+/**
+ * Abandon a journey.
+ * DELETE /api/journey-engine/journeys/{journey_id}
+ */
+export async function abandonJourney(journeyId: string): Promise<JourneyResponse> {
+  return apiRequest<JourneyResponse>('DELETE', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}`);
+}
+
+// =============================================================================
+// STEP OPERATIONS
+// =============================================================================
+
+/**
+ * Get the current step for a journey.
+ * GET /api/journey-engine/journeys/{journey_id}/steps/current
+ */
+export async function getCurrentStep(journeyId: string): Promise<StepResponse | null> {
+  return apiRequest<StepResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/current`);
+}
+
+/**
+ * Get a specific step by day index.
+ * GET /api/journey-engine/journeys/{journey_id}/steps/{day_index}
+ */
+export async function getStep(journeyId: string, dayIndex: number): Promise<StepResponse> {
+  return apiRequest<StepResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/${dayIndex}`);
+}
+
+/**
+ * Complete a step.
+ * POST /api/journey-engine/journeys/{journey_id}/steps/{day_index}/complete
+ */
+export async function completeStep(
+  journeyId: string,
+  dayIndex: number,
+  request: CompleteStepRequest = {}
+): Promise<CompletionResponse> {
+  return apiRequest<CompletionResponse>(
+    'POST',
+    `${JOURNEY_ENGINE_ENDPOINT}/journeys/${journeyId}/steps/${dayIndex}/complete`,
+    request
+  );
+}
+
+// =============================================================================
+// DASHBOARD OPERATIONS
+// =============================================================================
+
+/**
+ * Get the user's journey dashboard.
+ * GET /api/journey-engine/dashboard
+ */
+export async function getDashboard(): Promise<DashboardResponse> {
+  return apiRequest<DashboardResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/dashboard`);
+}
+
+// =============================================================================
+// FIX OPERATIONS
+// =============================================================================
+
+/**
+ * Response from fixing stuck journeys.
+ */
+export interface FixStuckJourneysResponse {
+  message: string;
+  orphaned_cleaned?: number;
+  force_cleared?: number;
+  remaining_active?: number;
+  status: 'fixed' | 'cleaned';
+}
+
+/**
+ * Fix stuck journey state (orphaned or phantom journeys).
+ * Call this when user sees "5 active journeys" error but dashboard shows 0.
+ * POST /api/journey-engine/fix-stuck-journeys
+ */
+export async function fixStuckJourneys(): Promise<FixStuckJourneysResponse> {
+  return apiRequest<FixStuckJourneysResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/fix-stuck-journeys`);
+}
+
+// =============================================================================
+// ENEMY PROGRESS OPERATIONS
+// =============================================================================
+
+/**
+ * List all enemies with basic info.
+ * GET /api/journey-engine/enemies
+ */
+export async function listEnemies(): Promise<EnemyInfoResponse[]> {
+  return apiRequest<EnemyInfoResponse[]>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies`);
+}
+
+/**
+ * Get progress for a specific enemy.
+ * GET /api/journey-engine/enemies/{enemy}
+ */
+export async function getEnemyProgress(enemy: string): Promise<EnemyProgressResponse | null> {
+  return apiRequest<EnemyProgressResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/enemies/${enemy}`);
+}
+
+/**
+ * Get radar chart data for all enemies.
+ * GET /api/journey-engine/enemies/{enemy}/radar
+ * Note: Backend route is /enemies/{enemy}/radar - we call it for each enemy
+ * and aggregate, OR we can call dashboard which includes enemy_progress
+ */
+export async function getEnemyRadar(): Promise<EnemyRadarData> {
+  // The dashboard endpoint includes enemy_progress with mastery_level
+  // We can extract radar data from there
+  const dashboard = await getDashboard();
+
+  const radarData: EnemyRadarData = {
+    kama: 0,
+    krodha: 0,
+    lobha: 0,
+    moha: 0,
+    mada: 0,
+    matsarya: 0,
+  };
+
+  for (const progress of dashboard.enemy_progress) {
+    const enemy = progress.enemy as keyof EnemyRadarData;
+    if (enemy in radarData) {
+      radarData[enemy] = progress.mastery_level;
+    }
+  }
+
+  return radarData;
+}
+
+// =============================================================================
+// EXAMPLES OPERATIONS
+// =============================================================================
+
+/**
+ * Get modern examples for an enemy.
+ * GET /api/journey-engine/examples/{enemy}
+ */
+export async function getExamples(enemy: string, limit: number = 4): Promise<ExampleListResponse> {
+  return apiRequest<ExampleListResponse>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}?limit=${limit}`);
+}
+
+/**
+ * Get a random example for an enemy.
+ * GET /api/journey-engine/examples/{enemy}/random
+ */
+export async function getRandomExample(enemy: string): Promise<ExampleResponse | null> {
+  return apiRequest<ExampleResponse | null>('GET', `${JOURNEY_ENGINE_ENDPOINT}/examples/${enemy}/random`);
+}
+
+// =============================================================================
+// CONVENIENCE EXPORTS
+// =============================================================================
+
+export const journeyEngineService = {
+  // Templates
+  listTemplates,
+  getTemplate,
+  getFeaturedTemplates,
+  getTemplatesByEnemy,
+
+  // Journeys
+  listJourneys,
+  getJourney,
+  startJourney,
+  pauseJourney,
+  resumeJourney,
+  abandonJourney,
+
+  // Steps
+  getCurrentStep,
+  getStep,
+  completeStep,
+
+  // Dashboard
+  getDashboard,
+
+  // Fix operations
+  fixStuckJourneys,
+
+  // Enemies
+  listEnemies,
+  getEnemyProgress,
+  getEnemyRadar,
+
+  // Examples
+  getExamples,
+  getRandomExample,
+};
+
+export default journeyEngineService;

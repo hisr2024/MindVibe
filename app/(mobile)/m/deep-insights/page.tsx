@@ -180,7 +180,7 @@ export default function MobileQuantumDivePage() {
           verse: {
             ref: 'Bhagavad Gita 2.47',
             sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन',
-            translation: '',
+            translation: 'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions.',
           },
         }))
       )

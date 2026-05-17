@@ -268,10 +268,21 @@ AVAILABLE_MODELS: dict[str, ModelConfig] = {
     ),
 
     # Local Models (Ollama)
-    # NOTE: Llama 3 / Llama family entries removed. Meta's Llama-3 Community
-    # License requires "Built with Meta Llama 3" attribution and AUP acceptance;
-    # to keep license posture simple we standardize on Mistral (Apache 2.0),
-    # Phi-3 (MIT), and Qwen2 (Apache 2.0) for local inference.
+    "llama-3-70b": ModelConfig(
+        provider=ModelProvider.OLLAMA,
+        model_id="llama3:70b",
+        display_name="Llama 3 70B",
+        max_tokens=4096,
+        context_window=8192,
+        capabilities=[
+            ModelCapability.CHAT,
+            ModelCapability.CODE,
+            ModelCapability.REASONING
+        ],
+        cost_per_1k_input=0,
+        cost_per_1k_output=0,
+        supports_functions=False
+    ),
     "codellama-34b": ModelConfig(
         provider=ModelProvider.OLLAMA,
         model_id="codellama:34b",
@@ -315,7 +326,21 @@ AVAILABLE_MODELS: dict[str, ModelConfig] = {
         cost_per_1k_output=0,
         supports_functions=False
     ),
-    # Llama 3 8B Local entry removed — see note above the Ollama section.
+    "llama-3-8b-local": ModelConfig(
+        provider=ModelProvider.LOCAL,
+        model_id="QuantFactory/Meta-Llama-3-8B-Instruct-GGUF",
+        display_name="Llama 3 8B Local",
+        max_tokens=4096,
+        context_window=8192,
+        capabilities=[
+            ModelCapability.CHAT,
+            ModelCapability.CODE,
+            ModelCapability.REASONING
+        ],
+        cost_per_1k_input=0,
+        cost_per_1k_output=0,
+        supports_functions=False
+    ),
     "phi-3-mini-local": ModelConfig(
         provider=ModelProvider.LOCAL,
         model_id="microsoft/Phi-3-mini-4k-instruct-gguf",
@@ -510,9 +535,11 @@ class LocalModelRegistry:
             "filename": "mistral-7b-instruct-v0.2.Q4_K_M.gguf",
             "size_gb": 4.4,
         },
-        # Llama 3 8B Instruct entry removed (Meta Llama-3 Community License
-        # requires attribution + AUP acceptance; we standardize on permissive
-        # local models — Mistral, Phi-3, Qwen2 — to keep licensing simple).
+        "llama-3-8b-instruct": {
+            "repo_id": "QuantFactory/Meta-Llama-3-8B-Instruct-GGUF",
+            "filename": "Meta-Llama-3-8B-Instruct.Q4_K_M.gguf",
+            "size_gb": 4.9,
+        },
         "phi-3-mini": {
             "repo_id": "microsoft/Phi-3-mini-4k-instruct-gguf",
             "filename": "Phi-3-mini-4k-instruct-q4.gguf",
@@ -584,11 +611,9 @@ class LocalModelRegistry:
         if not self._available_models:
             return None
 
-        # Prefer models in this order (Llama family removed — permissive
-        # licensing only: Mistral Apache-2.0, Qwen Apache-2.0, Phi-3 MIT,
-        # TinyLlama Apache-2.0).
+        # Prefer models in this order
         preference_order = [
-            "mistral-7b", "qwen", "phi-3", "tinyllama"
+            "mistral-7b", "llama-3", "qwen", "phi-3", "tinyllama"
         ]
 
         for pref in preference_order:
@@ -1410,10 +1435,10 @@ class KIAANModelProvider:
             "tinyllama-1.1b-local",  # Ultra-lightweight (no internet)
         ]
 
-        # Offline-only fallback chain (used when no internet).
-        # Llama 3 entry removed — permissive licensing only.
+        # Offline-only fallback chain (used when no internet)
         self.offline_fallback_chain = [
             "mistral-7b-local",
+            "llama-3-8b-local",
             "phi-3-mini-local",
             "qwen-2-7b-local",
             "lm-studio-default",  # LM Studio if running

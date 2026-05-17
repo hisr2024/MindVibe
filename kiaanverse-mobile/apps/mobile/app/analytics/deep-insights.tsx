@@ -97,7 +97,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                         }
                         style={isDominant ? styles.dominantLabel : undefined}
                       >
-                        {t(GUNA_LABEL_KEYS[gunaKey] ?? '')}
+                        {t(GUNA_LABEL_KEYS[gunaKey])}
                       </Text>
                       <Text variant="caption" color={colors.text.muted}>
                         {value}%
@@ -146,7 +146,7 @@ export default function DeepInsightsScreen(): React.JSX.Element {
                       {pattern.pattern_name}
                     </Text>
                     <Text variant="caption" color={colors.text.muted}>
-                      {t('diFrequencyFmt', { count: String(pattern.frequency) })}
+                      {t('diFrequencyFmt', { count: pattern.frequency })}
                     </Text>
                   </View>
 

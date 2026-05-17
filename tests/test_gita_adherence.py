@@ -50,7 +50,7 @@ Remember to take breaks and prioritize your wellbeing. 💙"""
             {
                 "verse": {
                     "verse_id": "2.47",
-                    "english": "<placeholder pending PD-baseline rebuild>",
+                    "english": "You have the right to perform your duties...",
                     "theme": "action_without_attachment"
                 },
                 "score": 0.85
@@ -58,7 +58,7 @@ Remember to take breaks and prioritize your wellbeing. 💙"""
             {
                 "verse": {
                     "verse_id": "2.48",
-                    "english": "<placeholder pending PD-baseline rebuild>",
+                    "english": "Be steadfast in yoga, O Arjuna...",
                     "theme": "equanimity"
                 },
                 "score": 0.78

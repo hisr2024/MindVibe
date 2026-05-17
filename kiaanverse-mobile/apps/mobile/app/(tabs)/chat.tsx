@@ -404,15 +404,6 @@ export default function ChatScreen(): React.JSX.Element {
               <Text style={styles.heroPrompt} accessibilityRole="header">
                 {t('chatHeroPrompt')}
               </Text>
-              {/* AI disclosure — small subtitle under the hero prompt so every
-                  new chat session surfaces the AI nature + scope before the
-                  user types. Required by upstream LLM AUPs. */}
-              <Text
-                style={styles.aiDisclosure}
-                accessibilityLabel={t('aiDisclosureA11y')}
-              >
-                {t('aiDisclosureHeader')}
-              </Text>
               <View style={styles.startersWrap}>
                 <ConversationStarters onSelect={handleStarterSelect} />
               </View>
@@ -499,14 +490,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 4,
-  },
-  aiDisclosure: {
-    fontFamily: 'Outfit-Regular',
-    fontSize: 11,
-    letterSpacing: 0.8,
-    color: 'rgba(122,112,96,0.85)',
-    textAlign: 'center',
-    marginBottom: 16,
   },
   startersWrap: {
     width: '100%',

@@ -5,7 +5,7 @@
  *
  *   SACRED VOICE       — Sakha · KIAAN Voice Companion (शङ्ख)
  *   SACRED SCRIPTURES  — Bhagavad Gita (18-chapter browser)
- *   WISDOM TOOLS       — Ardha, Viyoga, Sambandh Dharma (Relationship Compass)
+ *   WISDOM TOOLS       — Ardha, Viyoga, Relationship Compass
  *   HEALING TOOLS      — Emotional Reset, Karma Reset
  *   SACRED PATHS       — Wisdom Rooms, Journeys (षड्रिपु — the inner
  *                        battlefield), Sacred Reflections
@@ -91,7 +91,7 @@ const SCRIPTURE_TOOLS: readonly ToolDescriptor[] = [
   },
 ];
 
-// Order honours the user's spec: Ardha → Viyoga → Sambandh Dharma (Relationship Compass).
+// Order honours the user's spec: Ardha → Viyoga → Relationship Compass.
 const WISDOM_TOOLS: readonly ToolDescriptor[] = [
   {
     id: 'ardha',
@@ -112,13 +112,13 @@ const WISDOM_TOOLS: readonly ToolDescriptor[] = [
     route: '/tools/viyoga',
   },
   {
-    id: 'sambandh-dharma',
-    nameKey: 'sambandhDharmaName',
+    id: 'relationship-compass',
+    nameKey: 'relationshipCompassName',
     sanskrit: 'संबंध सूत्र',
-    descriptionKey: 'sambandhDharmaDescription',
+    descriptionKey: 'relationshipCompassDescription',
     color: GREED_GREEN,
     icon: '🧭',
-    route: '/tools/sambandh-dharma',
+    route: '/tools/relationship-compass',
   },
 ];
 

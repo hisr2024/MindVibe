@@ -30,7 +30,7 @@ class TestRegistry:
     def test_known_tools_have_contracts(self):
         for tool in (
             "EMOTIONAL_RESET", "KARMA_RESET", "KARMIC_TREE", "ARDHA",
-            "VIYOGA", "SAMBANDH_DHARMA", "SACRED_REFLECTIONS",
+            "VIYOGA", "RELATIONSHIP_COMPASS", "SACRED_REFLECTIONS",
             "MOOD_INSIGHTS", "SADHANA", "GITA_LIBRARY", "WISDOM_ROOMS",
             "KARMA_FOOTPRINT", "KIAAN_VIBE", "KIAAN_CHAT", "COMPANION",
         ):
@@ -158,7 +158,7 @@ class TestApplyContract:
         assert action == "INPUT_TO_TOOL"
         # Same confidence on a strict tool (default 0.75) → NAVIGATE
         action2, _, _ = apply_contract(
-            "SAMBANDH_DHARMA",
+            "RELATIONSHIP_COMPASS",
             {"relationship_role": "spouse"},
             confidence=0.65,
         )

@@ -549,7 +549,7 @@ function KiaanChatPageInner() {
             मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्तु अकर्मणि ॥
           </p>
           <p className="text-xs leading-relaxed text-[#e8dcc8]/65 italic font-sacred">
-            {t('kiaan.chat.sidebar.verseTranslation', '<placeholder pending PD-baseline rebuild>')}
+            {t('kiaan.chat.sidebar.verseTranslation', 'You have the right to perform your prescribed duty, but not to the fruits of action. Never consider yourself the cause of the results, nor be attached to inaction.')}
           </p>
           <p className="mt-3 text-[11px] text-[#d4a44c]/55 font-mono tracking-widest uppercase">
             {t('kiaan.chat.sidebar.verseRef', 'Bhagavad Gita 2.47')}
@@ -616,7 +616,7 @@ function KiaanChatPageInner() {
               मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्तु अकर्मणि ॥
             </p>
             <p className="text-[13px] leading-relaxed italic font-sacred" style={{ color: 'rgba(232, 220, 200, 0.6)' }}>
-              {t('kiaan.chat.sidebar.verseTranslation', '<placeholder pending PD-baseline rebuild>')}
+              {t('kiaan.chat.sidebar.verseTranslation', 'You have the right to perform your prescribed duty, but not to the fruits of action. Never consider yourself the cause of the results, nor be attached to inaction.')}
             </p>
             <p className="mt-3 font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.5)', letterSpacing: '0.2em', fontWeight: 600 }}>
               {t('kiaan.chat.sidebar.verseRef', 'Bhagavad Gita 2.47')}

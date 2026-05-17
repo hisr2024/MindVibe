@@ -142,7 +142,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'karmic-tree',
     'emotional-reset',
     'karma-footprint',
-    'sambandh-dharma',
+    'relationship-compass',
     'karma-reset',
   ] as const
 

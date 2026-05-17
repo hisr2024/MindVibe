@@ -1,0 +1,104 @@
+{
+  "description": "Transformed verses",
+  "pipeline_version": "1.0.0",
+  "verses": [
+    {
+      "chapter": 2,
+      "verse_number": 47,
+      "theme": "Action Without Attachment",
+      "english": "You have the right to perform your duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, nor be attached to not doing your duty.",
+      "hindi": "तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं। न तो तुम कर्मों के फल का कारण बनो और न ही कर्म न करने में आसक्त होओ।",
+      "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
+      "context": "the wise one the teacher teaches the student about performing duty without attachment to outcomes, a key concept for reducing anxiety.",
+      "mental_health_applications": {
+        "applications": [
+          "anxiety_management",
+          "stress_reduction",
+          "letting_go",
+          "present_moment_focus"
+        ]
+      },
+      "verse_id": "2.47",
+      "principles": [
+        "action",
+        "detachment",
+        "duty",
+        "self_knowledge"
+      ],
+      "keywords": [
+        "about",
+        "actions",
+        "anxiety",
+        "attached",
+        "attachment",
+        "cause",
+        "concept",
+        "consider",
+        "doing",
+        "duties",
+        "duty",
+        "entitled",
+        "fruits",
+        "never",
+        "outcomes",
+        "perform",
+        "performing",
+        "reducing",
+        "results",
+        "right"
+      ],
+      "suggested_applications": [],
+      "searchable_text": "You have the right to perform your duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, nor be attached to not doing your duty. तुम्हारा अधिकार केवल कर्म करने में है, फल में कभी नहीं। न तो तुम कर्मों के फल का कारण बनो और न ही कर्म न करने में आसक्त होओ। the wise one the teacher teaches the student about performing duty without attachment to outcomes, a key concept for reducing anxiety. Action Without Attachment anxiety_management stress_reduction letting_go present_moment_focus",
+      "chapter_theme": "wisdom_and_knowledge",
+      "metadata_score": 1.0
+    },
+    {
+      "chapter": 6,
+      "verse_number": 5,
+      "theme": "Self Empowerment",
+      "english": "Elevate yourself through the power of your mind, and not degrade yourself, for the mind can be the friend and also the enemy of the self.",
+      "hindi": "अपने मन की शक्ति से अपना उद्धार करो, अपने आप को नीचा मत गिराओ। क्योंकि मन ही आत्मा का मित्र है और मन ही शत्रु भी है।",
+      "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+      "context": "the teacher emphasizes personal responsibility for one's mental state and the importance of self-mastery.",
+      "mental_health_applications": {
+        "applications": [
+          "self_empowerment",
+          "depression_recovery",
+          "self_compassion",
+          "personal_growth"
+        ]
+      },
+      "verse_id": "6.5",
+      "principles": [
+        "discipline",
+        "duty",
+        "self_knowledge"
+      ],
+      "keywords": [
+        "also",
+        "degrade",
+        "elevate",
+        "emphasizes",
+        "enemy",
+        "friend",
+        "importance",
+        "mastery",
+        "mental",
+        "mind",
+        "personal",
+        "power",
+        "responsibility",
+        "self",
+        "state",
+        "teacher",
+        "through",
+        "your",
+        "yourself"
+      ],
+      "suggested_applications": [],
+      "searchable_text": "Elevate yourself through the power of your mind, and not degrade yourself, for the mind can be the friend and also the enemy of the self. अपने मन की शक्ति से अपना उद्धार करो, अपने आप को नीचा मत गिराओ। क्योंकि मन ही आत्मा का मित्र है और मन ही शत्रु भी है। the teacher emphasizes personal responsibility for one's mental state and the importance of self-mastery. Self Empowerment self_empowerment depression_recovery self_compassion personal_growth",
+      "chapter_theme": "meditation_and_self_control",
+      "metadata_score": 0.97
+    }
+  ]
+}

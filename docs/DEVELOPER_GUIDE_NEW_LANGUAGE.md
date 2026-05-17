@@ -140,7 +140,7 @@ You need to create these JSON files in your language directory:
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "sambandhDharma": "[Sambandh Dharma (Relationship Compass)]",
+    "relationshipCompass": "[Relationship Compass]",
     "sacredReflections": "[Sacred Reflections]",
     "karmaFootprint": "[Karma Footprint]",
     "karmicTree": "[Karmic Tree]",

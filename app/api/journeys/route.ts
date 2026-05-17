@@ -1,10 +1,10 @@
 /**
  * Journeys API Route
  *
- * GET /api/journeys → List journeys (proxies to karma-marg with fallback catalog)
+ * GET /api/journeys → List journeys (proxies to journey-engine with fallback catalog)
  *
  * This route serves the desktop journeys list page. It tries the
- * karma-marg backend first, falls back to a static catalog
+ * journey-engine backend first, falls back to a static catalog
  * so the page always renders something useful.
  */
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const queryString = status ? `?status=${status}` : ''
 
     const backendResponse = await fetch(
-      `${BACKEND_URL}/api/karma-marg/journeys${queryString}`,
+      `${BACKEND_URL}/api/journey-engine/journeys${queryString}`,
       {
         method: 'GET',
         headers: proxyHeaders(request, 'GET'),

@@ -81,7 +81,7 @@ export const PLANS: Plan[] = [
       { name: 'KIAAN Voice Companion (Shankha)' },
       { name: 'All 6 Shadripu Journeys' },
       { name: 'Karma Reset · Emotional Reset' },
-      { name: 'Viyoga · Ardha · Sambandh Dharma (Relationship Compass)' },
+      { name: 'Viyoga · Ardha · Relationship Compass' },
       { name: 'KIAAN Vibe Player (500+ sacred tracks)' },
       { name: 'Cross-session memory & spiritual journal' },
       { name: 'Priority AI response speed' },

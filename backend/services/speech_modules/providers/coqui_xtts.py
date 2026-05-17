@@ -1,16 +1,6 @@
 """
 Coqui XTTS Provider - Multi-lingual TTS with Voice Cloning
 
-LICENSE & ATTRIBUTION
----------------------
-XTTS is provided by Coqui AI (https://coqui.ai/) under the Coqui Public
-Model License (CPML — https://coqui.ai/cpml). CPML permits commercial
-use with attribution; if this provider is enabled in production, the
-in-app credits screen MUST include:
-    "Speech synthesis by Coqui XTTS · https://coqui.ai/"
-Voice-cloning features must comply with CPML §4 (subject consent).
-This provider is OFF by default in the current production build.
-
 Coqui's XTTS (Cross-lingual Text-to-Speech) is a state-of-the-art
 multilingual TTS model capable of:
 - High-quality speech synthesis in 17+ languages

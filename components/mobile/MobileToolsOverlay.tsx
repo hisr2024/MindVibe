@@ -7,7 +7,7 @@
  * quick access to MindVibe's spiritual wellness tools:
  * - Viyoga (Detachment Coach)
  * - Ardha (Cognitive Reframing)
- * - Sambandh Dharma (Relationship Compass)
+ * - Relationship Compass
  * - Emotional Reset
  * - Karmic Reset
  *
@@ -98,11 +98,11 @@ const OVERLAY_TOOLS: OverlayTool[] = [
     accentBorder: 'border-red-500/20',
   },
   {
-    id: 'sambandh-dharma',
-    label: 'Sambandh Dharma (Relationship Compass)',
+    id: 'relationship-compass',
+    label: 'Relationship Compass',
     description: 'Navigate relationships with clarity',
     icon: Users,
-    href: '/m/sambandh-dharma',
+    href: '/m/relationship-compass',
     gradient: 'from-pink-500/15 to-rose-500/10',
     iconColor: 'text-pink-400',
     accentBorder: 'border-pink-500/20',

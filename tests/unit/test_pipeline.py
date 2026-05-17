@@ -205,7 +205,7 @@ class TestMetadataEnricher:
     def test_extract_principles(self):
         """Test principle extraction from verse content."""
         verse = {
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Perform your duty with detachment",
             "context": "About action without attachment",
             "theme": "action",
         }
@@ -217,7 +217,7 @@ class TestMetadataEnricher:
     def test_extract_keywords(self):
         """Test keyword extraction from verse text."""
         verse = {
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Find inner peace through meditation and mindfulness",
             "context": "About achieving peace",
         }
         keywords = MetadataEnricher.extract_keywords(verse)
@@ -229,7 +229,7 @@ class TestMetadataEnricher:
     def test_suggest_applications(self):
         """Test spiritual wellness application suggestions."""
         verse = {
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Stay calm in times of stress and anxiety",
             "context": "About managing worry and fear",
             "mental_health_applications": {"applications": []},
         }
@@ -286,7 +286,7 @@ class TestMetadataEnricher:
         verse = {
             "chapter": 2,
             "verse_number": 47,
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Perform your duty without attachment",
             "context": "About action and detachment",
             "theme": "action",
             "mental_health_applications": {"applications": ["anxiety"]},
@@ -326,7 +326,7 @@ class TestContextTransformationPipeline:
             "chapter": 2,
             "verse_number": 47,
             "theme": "action",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Krishna taught Arjuna about duty",
             "hindi": "test",
             "sanskrit": "test",
             "context": "About duty",

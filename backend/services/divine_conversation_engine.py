@@ -90,73 +90,73 @@ GITA_WISDOM = {
     "anxiety": {
         "verse": "2.56",
         "sanskrit": "duḥkheṣv anudvigna-manāḥ sukheṣu vigata-spṛhaḥ",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "One whose mind is not disturbed by adversity, who does not hanker after happiness",
         "teaching": "Equanimity in all circumstances is the mark of wisdom. Neither pleasure nor pain should shake your inner peace."
     },
     "fear": {
         "verse": "18.66",
         "sanskrit": "sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "Abandon all varieties of dharma and simply surrender unto Me. I shall deliver you from all sinful reactions.",
         "teaching": "Complete surrender to the Divine removes all fear. You are protected by infinite grace."
     },
     "anger": {
         "verse": "2.62-63",
         "sanskrit": "krodhād bhavati sammohaḥ sammohāt smṛti-vibhramaḥ",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "From anger arises delusion, from delusion loss of memory, from loss of memory destruction of intelligence",
         "teaching": "Anger is a chain reaction that destroys clarity. The wise one breaks this chain at its source - unfulfilled desire."
     },
     "sadness": {
         "verse": "2.14",
         "sanskrit": "mātrā-sparśās tu kaunteya śītoṣṇa-sukha-duḥkha-dāḥ",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "The contact of senses with objects gives rise to feelings of cold and heat, pleasure and pain. They are temporary.",
         "teaching": "All feelings are temporary like seasons. This sadness too shall pass. The Self within you remains untouched."
     },
     "grief": {
         "verse": "2.11",
         "sanskrit": "aśocyān anvaśocas tvaṁ prajñā-vādāṁś ca bhāṣase",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "You grieve for those who should not be grieved for, yet you speak words of wisdom",
         "teaching": "The soul is eternal - it cannot be destroyed. Those we love never truly leave us."
     },
     "confusion": {
         "verse": "2.7",
         "sanskrit": "pṛcchāmi tvāṁ dharma-sammūḍha-cetāḥ",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "My consciousness is confused about my duty. Please tell me clearly what is best for me.",
         "teaching": "Even Arjuna felt confused. Confusion is the first step toward wisdom - it means you're questioning."
     },
     "hopelessness": {
         "verse": "4.11",
         "sanskrit": "ye yathā māṁ prapadyante tāṁs tathaiva bhajāmy aham",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "In whatever way people approach Me, I reciprocate with them accordingly.",
         "teaching": "The Divine responds to your call. No sincere seeker is ever abandoned. Hope is always available."
     },
     "attachment": {
         "verse": "2.47",
         "sanskrit": "karmaṇy evādhikāras te mā phaleṣu kadācana",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "You have the right to work, but never to the fruit of work.",
         "teaching": "Act without attachment to results. Freedom comes from doing your duty without craving outcomes."
     },
     "peace": {
         "verse": "2.70",
         "sanskrit": "āpūryamāṇam acala-pratiṣṭhaṁ samudram āpaḥ praviśanti yadvat",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "As the ocean remains calm though waters flow into it, one who remains undisturbed by desires attains peace.",
         "teaching": "Inner peace comes from being like the ocean - receiving all experiences without being disturbed by them."
     },
     "purpose": {
         "verse": "3.35",
         "sanskrit": "śreyān sva-dharmo viguṇaḥ para-dharmāt sv-anuṣṭhitāt",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "It is better to perform one's own duty imperfectly than to master the duty of another.",
         "teaching": "Your unique path is your dharma. Don't compare yourself to others - walk your own path with integrity."
     },
     "self_doubt": {
         "verse": "6.5",
         "sanskrit": "uddhared ātmanātmānaṁ nātmānam avasādayet",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "One must elevate oneself by one's own mind, not degrade oneself. The mind is the friend of the self and also the enemy.",
         "teaching": "You have the power to lift yourself up. Your mind can be your greatest ally or obstacle - train it well."
     },
     "seeking": {
         "verse": "4.34",
         "sanskrit": "tad viddhi praṇipātena paripraśnena sevayā",
-        "translation": "<placeholder pending PD-baseline rebuild>",
+        "translation": "Learn the truth by approaching a wise teacher, inquiring submissively, and rendering service.",
         "teaching": "Wisdom comes through humble inquiry and genuine seeking. Your very search is sacred."
     },
 }

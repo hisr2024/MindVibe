@@ -330,7 +330,7 @@ class GitaResponseComposer:
             phase=GuidancePhase.GUIDE,
             verse_ref="2.47",
             verse_sanskrit="कर्मण्येवाधिकारस्ते...",
-            verse_translation="<placeholder pending PD-baseline rebuild>",
+            verse_translation="You have the right to action alone...",
             kiaan_interpretation="Your confusion about purpose is natural...",
             user_name="Arjun",
         )

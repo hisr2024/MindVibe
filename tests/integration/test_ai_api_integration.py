@@ -1,6 +1,6 @@
 """
 Comprehensive Integration Tests for AI API Integration
-Testing Viyoga, Ardha, and Sambandh Dharma (Relationship Compass) with OpenAI/Sarvam AI fallback
+Testing Viyoga, Ardha, and Relationship Compass with OpenAI/Sarvam AI fallback
 
 These tests verify:
 1. OpenAI API integration for all three wellness tools
@@ -180,10 +180,10 @@ class TestArdhaAIIntegration:
         assert result.gita_verses_used == 5
 
 
-class TestSambandhDharmaAIIntegration:
+class TestRelationshipCompassAIIntegration:
 
     def test_compass_endpoint_returns_structured_response(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "My partner and I keep arguing.", "relationship_type": "romantic"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "My partner and I keep arguing.", "relationship_type": "romantic"})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "success"
@@ -194,7 +194,7 @@ class TestSambandhDharmaAIIntegration:
         assert "relationship_type" in data
 
     def test_compass_response_contains_gita_wisdom(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "My parent doesn't respect my boundaries.", "relationship_type": "family"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "My parent doesn't respect my boundaries.", "relationship_type": "family"})
         assert response.status_code == 200
         data = response.json()
         response_content = data.get("response", "") or str(data.get("compass_guidance", {}))
@@ -203,7 +203,7 @@ class TestSambandhDharmaAIIntegration:
         assert len(found_terms) >= 2, f"Expected Gita wisdom terms, found: {found_terms}"
 
     def test_compass_attachment_theory_integration(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "I feel abandoned when my partner needs space.", "relationship_type": "romantic"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "I feel abandoned when my partner needs space.", "relationship_type": "romantic"})
         assert response.status_code == 200
         data = response.json()
         assert "relationship_teachings" in data
@@ -211,7 +211,7 @@ class TestSambandhDharmaAIIntegration:
 
     def test_compass_all_relationship_types(self, client):
         for rel_type in ["romantic", "family", "friendship", "workplace", "self", "community"]:
-            response = client.post("/api/sambandh-dharma/guide", json={"conflict": "I'm having difficulty.", "relationship_type": rel_type})
+            response = client.post("/api/relationship-compass/guide", json={"conflict": "I'm having difficulty.", "relationship_type": rel_type})
             assert response.status_code == 200
             data = response.json()
             assert data["relationship_type"] == rel_type
@@ -224,7 +224,7 @@ class TestSambandhDharmaAIIntegration:
         mock_provider_manager.chat = AsyncMock(return_value=mock_sarvam_response)
         with patch.object(wellness_model, '_provider_manager', mock_provider_manager):
             with patch.object(wellness_model, '_fetch_gita_wisdom', AsyncMock(return_value=("Gita context", 7))):
-                result = await wellness_model.generate_response(tool=WellnessTool.SAMBANDH_DHARMA, user_input="My friend betrayed my trust", db=mock_db, analysis_mode=AnalysisMode.STANDARD)
+                result = await wellness_model.generate_response(tool=WellnessTool.RELATIONSHIP_COMPASS, user_input="My friend betrayed my trust", db=mock_db, analysis_mode=AnalysisMode.STANDARD)
         assert result.provider == "sarvam"
         assert result.model == "sarvam-m"
         assert result.gita_verses_used == 7
@@ -252,7 +252,7 @@ class TestProviderFallback:
     async def test_fallback_to_gita_wisdom_when_all_fail(self, wellness_model, mock_db):
         with patch.object(wellness_model, '_provider_manager', None):
             with patch.object(wellness_model, 'client', None):
-                for tool in [WellnessTool.VIYOGA, WellnessTool.ARDHA, WellnessTool.SAMBANDH_DHARMA]:
+                for tool in [WellnessTool.VIYOGA, WellnessTool.ARDHA, WellnessTool.RELATIONSHIP_COMPASS]:
                     result = await wellness_model.generate_response(tool=tool, user_input="Test input", db=mock_db)
                     assert result.model == "fallback"
                     assert "\U0001f499" in result.content
@@ -270,7 +270,7 @@ class TestProviderFallback:
                 assert "thoughts" in ardha_result.content.lower() or "thought" in ardha_result.content.lower()
                 assert "sky" in ardha_result.content.lower() or "clouds" in ardha_result.content.lower()
 
-                compass_result = await wellness_model.generate_response(tool=WellnessTool.SAMBANDH_DHARMA, user_input="My partner doesn't listen to me", db=mock_db)
+                compass_result = await wellness_model.generate_response(tool=WellnessTool.RELATIONSHIP_COMPASS, user_input="My partner doesn't listen to me", db=mock_db)
                 assert "dharma" in compass_result.content.lower() or "compassion" in compass_result.content.lower()
                 assert "peace" in compass_result.content.lower()
 
@@ -287,7 +287,7 @@ class TestMultiLanguageSupport:
         assert response.status_code in (200, 503)
 
     def test_compass_with_telugu(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "My friend betrayed my trust", "relationship_type": "friendship", "language": "te"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "My friend betrayed my trust", "relationship_type": "friendship", "language": "te"})
         assert response.status_code == 200
         assert response.json()["status"] == "success"
 
@@ -309,7 +309,7 @@ class TestResponseQuality:
         assert any(ind.lower() in content.lower() for ind in practice_indicators), "Response should contain practical guidance"
 
     def test_response_ends_with_encouragement(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "My sibling and I haven't spoken in months.", "relationship_type": "family"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "My sibling and I haven't spoken in months.", "relationship_type": "family"})
         assert response.status_code == 200
         content = response.json().get("response", "") or str(response.json().get("compass_guidance", {}))
         assert "\U0001f499" in content or any(word in content.lower() for word in ["whole", "complete", "peace", "wisdom"])
@@ -351,7 +351,7 @@ class TestEdgeCases:
         assert response.json()["status"] == "success"
 
     def test_handles_unicode_input(self, client):
-        response = client.post("/api/sambandh-dharma/guide", json={"conflict": "Test conflict in Hindi", "relationship_type": "romantic"})
+        response = client.post("/api/relationship-compass/guide", json={"conflict": "Test conflict in Hindi", "relationship_type": "romantic"})
         assert response.status_code == 200
         assert response.json()["status"] == "success"
 

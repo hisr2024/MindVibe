@@ -78,17 +78,15 @@ const CATEGORY_FALLBACK: Readonly<Record<string, string>> = {
  * the resolver returns it as the primary source — strictly preferred over
  * any remote URL because it works offline and has no CDN risk.
  *
- * Current mappings reflect the two licensed CC0 tracks bundled in
- * `assets/audio/`. `chanting` and `ambient` fall through to network
- * fallbacks (SoundHelix) until additional licensed audio is sourced —
- * see `bundledAudioRegistry.ts` for the provenance rule.
- *   - mantra      → Gayatri Mantra (Pixabay CC0)
- *   - meditation  → Om Hanumate Namaha (Pixabay CC0)
- *   - chanting    → falls through to network fallback
- *   - ambient     → falls through to network fallback
+ * Current mappings reflect the user-uploaded Sanskrit / Vedic recordings:
+ *   - mantra      → Gayatri Mantra (the universal Vedic prayer)
+ *   - chanting    → Shanti Mantra (chant of peace)
+ *   - meditation  → Om Hanumate Namaha (devotional repetition)
+ *   - ambient     → no bundled file yet, falls through to SoundHelix HTTPS
  */
 const CATEGORY_BUNDLED_KEY: Readonly<Record<string, BundledAudioKey>> = {
   mantra: 'gayatri',
+  chanting: 'shanti-mantra',
   meditation: 'om-hanumate',
 };
 

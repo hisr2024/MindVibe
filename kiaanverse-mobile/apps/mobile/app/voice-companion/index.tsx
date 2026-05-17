@@ -407,7 +407,7 @@ export default function VoiceCompanionScreen() {
   useEffect(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i];
-      if (m && m.role === 'assistant') {
+      if (m.role === 'assistant') {
         latestAssistantRef.current = m.text;
         break;
       }

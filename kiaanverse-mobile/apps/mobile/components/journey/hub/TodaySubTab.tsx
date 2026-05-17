@@ -36,7 +36,7 @@ function getGreeting(now: Date = new Date()): GreetingData {
   if (h >= 5 && h < 12) return { sanskrit: 'सुप्रभातम्', english: 'Good Morning, Warrior' };
   if (h >= 12 && h < 18) return { sanskrit: 'नमस्कार', english: 'Your practice awaits' };
   if (h >= 18 && h < 22) return { sanskrit: 'संध्या वंदना', english: 'Evening reflection' };
-  return { sanskrit: 'रात्री के साधक', english: '' };
+  return { sanskrit: 'रात्री के साधक', english: 'The night belongs to the seeker' };
 }
 
 function formatDate(now: Date = new Date()): string {

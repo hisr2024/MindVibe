@@ -153,7 +153,7 @@ With default settings (pool_size=30, max_overflow=10), each instance can open up
 | KIAAN Chat | gpt-4o-mini | 1 | ~500-2000 |
 | Voice Companion | gpt-4o-mini | 1-2 | ~1000-3000 |
 | Karma Footprint | gpt-4o-mini | 1 | ~500-1500 |
-| Sambandh Dharma (Relationship Compass) | gpt-4o-mini | 1-2 | ~1000-3000 |
+| Relationship Compass | gpt-4o-mini | 1-2 | ~1000-3000 |
 | Emotional Reset | gpt-4o-mini | 1 | ~500-1500 |
 | Ardha Reframe | gpt-4o-mini | 1 | ~500-1500 |
 | Viyoga Detach | gpt-4o-mini | 1 | ~500-1500 |

@@ -1,7 +1,7 @@
 /**
  * KIAAN Local Friend Engine - Intelligent Response Generation Without OpenAI
  *
- * Mirrors the architecture of Ardha/Viyoga/Sambandh Dharma (Relationship Compass) engines:
+ * Mirrors the architecture of Ardha/Viyoga/Relationship Compass engines:
  * 1. Weighted mood detection (17 emotions + positive emotions)
  * 2. Topic detection (family, work, academic, celebration, loss, etc.)
  * 3. Entity extraction (daughter, exam, boss, etc.)

@@ -11,14 +11,11 @@ being added to KIAAN's knowledge base.
 """
 
 import logging
-import os
 import re
 import hashlib
 from datetime import datetime, timezone
 from typing import Optional
 from enum import Enum
-
-_INGESTION_ENV_FLAG = "MINDVIBE_EXTERNAL_INGESTION_ENABLED"
 
 from pydantic import BaseModel, Field
 
@@ -69,11 +66,11 @@ TRUSTED_PODCAST_FEEDS = [
 
 TRUSTED_WEB_DOMAINS = [
     "gitasupersite.iitk.ac.in",
-    "[REMOVED-PENDING-LICENSE-REVIEW]",
+    "holy-bhagavad-gita.org",
     "bhagavad-gita.org",
-    "[REMOVED-PENDING-LICENSE-REVIEW]",
-    "[REMOVED-PENDING-LICENSE-REVIEW]",
-    "[REMOVED-PENDING-LICENSE-REVIEW]",
+    "asitis.com",
+    "gitapress.org",
+    "vedabase.io",
     "wisdomlib.org",
     "sacred-texts.com",
 ]
@@ -267,17 +264,7 @@ def is_trusted_source(url: str, platform: PlatformType) -> bool:
 
 
 async def process_ingestion(request: IngestionRequest) -> IngestionResult:
-    """Process a single content ingestion request.
-
-    Gated by ``MINDVIBE_EXTERNAL_INGESTION_ENABLED=1``. Social-content
-    ingestion is disabled by default pending licensing review of upstream
-    third-party content providers.
-    """
-    if os.getenv(_INGESTION_ENV_FLAG, "0") != "1":
-        raise RuntimeError(
-            "Social content ingestion is disabled pending external-source "
-            f"licensing review. Set {_INGESTION_ENV_FLAG}=1 only after legal sign-off."
-        )
+    """Process a single content ingestion request."""
     content_id = generate_content_id(request.url, request.platform.value)
 
     # Check trusted source

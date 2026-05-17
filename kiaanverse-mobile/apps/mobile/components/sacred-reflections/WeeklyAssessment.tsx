@@ -181,7 +181,7 @@ export function WeeklyAssessment(): React.JSX.Element | null {
               }}
               style={[styles.dot, filled && styles.dotFilled]}
               accessibilityRole="button"
-              accessibilityLabel={t('assessmentConsistencyA11yFmt', { n: String(n) })}
+              accessibilityLabel={t('assessmentConsistencyA11yFmt', { n })}
               accessibilityState={{ selected: consistency === n }}
             >
               <Text

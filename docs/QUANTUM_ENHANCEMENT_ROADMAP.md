@@ -1678,20 +1678,6 @@ mobile/
 
 **Objective**: Sync biofeedback data from Fitbit and Apple Watch (heart rate, sleep, activity) to enhance mood tracking and provide personalized wisdom recommendations.
 
-> **⚠️ PATENT-SPACE WARNING (Phase 1N audit, 2026-05).**
-> The biometric→mood correlation feature below sits inside dense
-> wellness-AI patent territory (US 11M+ range, multiple active patents
-> on wearable-biometric → emotional-state-inference → recommendation
-> chains). Before this feature ships publicly:
->   1. File a US provisional patent on the specific implementation
->      (verse selection + dharmic intervention triggered by biometric
->      signal). Cost ~$120 USPTO + ~$1.5k attorney; gives a 12-month
->      priority date.
->   2. Run a freedom-to-operate search via counsel.
->   3. Re-write user-facing marketing to avoid the specific phrases
->      "AI-matched", "AI-generated affirmations", "biometric-triggered
->      meditation" that appear verbatim in active claims.
-
 **Architecture**:
 ```
 Backend:

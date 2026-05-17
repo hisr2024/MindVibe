@@ -327,14 +327,6 @@ const styles = StyleSheet.create({
   streakValue: {
     fontSize: 48,
     fontStyle: 'italic',
-    // The `<Text variant="h1">` default falls back to a serif display family
-    // (Cormorant / Crimson) whose italic figures at 48pt look like letters:
-    // `0` reads as "U" (calligraphic oval) and `1` reads as "I" (vertical
-    // stroke with serifs). Pin the digit run to the UI sans family so the
-    // shape is unambiguously a digit, and request tabular figures so both
-    // cards line up.
-    fontFamily: 'Outfit-SemiBold',
-    fontVariant: ['tabular-nums'],
   },
   streakTitle: {
     letterSpacing: 1.4,

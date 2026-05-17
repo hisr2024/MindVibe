@@ -28,12 +28,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import PrivacyRequest, User
-# NOTE: `PrivacyService`, `_build_export_zip`, and `_upload_and_sign` are
-# referenced by 4 tests below but no longer exist in privacy_service.py
-# (the module was refactored from a class-based to a module-function API).
-# Those tests are individually `pytest.mark.skip`-ped pending a rewrite
-# against the current API; rest of the file collects and runs.
-from backend.services.privacy_service import GRACE_PERIOD_DAYS
+from backend.services.privacy_service import (
+    DELETION_GRACE_DAYS,
+    PrivacyService,
+    _build_export_zip,
+    _upload_and_sign,
+)
 from backend.services.rate_limiter import RateLimiter
 
 # =======================================================================
@@ -100,7 +100,6 @@ async def _mk_user(db: AsyncSession, uid: str = "privacy-user-1") -> User:
     return user
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_create_privacy_request_inserts_row(test_db: AsyncSession):
     user = await _mk_user(test_db, "audit-user")
@@ -119,7 +118,6 @@ async def test_create_privacy_request_inserts_row(test_db: AsyncSession):
     assert any(r.id == req.id for r in rows)
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_create_privacy_request_rejects_bad_type(test_db: AsyncSession):
     user = await _mk_user(test_db, "bad-type-user")
@@ -130,7 +128,6 @@ async def test_create_privacy_request_rejects_bad_type(test_db: AsyncSession):
         )
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_update_request_status_updates_fields(test_db: AsyncSession):
     user = await _mk_user(test_db, "update-user")
@@ -149,7 +146,6 @@ async def test_update_request_status_updates_fields(test_db: AsyncSession):
     assert updated.download_url == "https://example.test/signed"
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_get_active_and_latest_export_request(test_db: AsyncSession):
     user = await _mk_user(test_db, "export-user")
@@ -170,7 +166,6 @@ async def test_get_active_and_latest_export_request(test_db: AsyncSession):
     assert latest.status == "ready"
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_initiate_and_cancel_soft_delete(test_db: AsyncSession):
     user = await _mk_user(test_db, "delete-user")
@@ -203,7 +198,6 @@ async def test_initiate_and_cancel_soft_delete(test_db: AsyncSession):
     assert row is not None and row.status == "cancelled"
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_cancel_without_pending_returns_false(test_db: AsyncSession):
     user = await _mk_user(test_db, "no-delete-user")
@@ -211,7 +205,6 @@ async def test_cancel_without_pending_returns_false(test_db: AsyncSession):
     assert await service.cancel_soft_delete(user.id) is False
 
 
-@pytest.mark.skip(reason="privacy_service has no PrivacyService class after module-function refactor; rewrite separately")
 @pytest.mark.asyncio
 async def test_initiate_soft_delete_rejects_unknown_user(test_db: AsyncSession):
     service = PrivacyService(test_db)
@@ -231,7 +224,6 @@ async def test_initiate_soft_delete_rejects_unknown_user(test_db: AsyncSession):
 # Export builder (ZIP + README + fallback URL)
 # =======================================================================
 
-@pytest.mark.skip(reason="privacy_service has no _build_export_zip after refactor; rewrite separately")
 def test_build_export_zip_contains_expected_files():
     data = {
         "account": {"id": "u1", "email": "u1@example.com"},
@@ -263,7 +255,6 @@ def test_build_export_zip_contains_expected_files():
         assert "GDPR Art. 20" in readme
 
 
-@pytest.mark.skip(reason="privacy_service has no _upload_and_sign after refactor; rewrite separately")
 def test_upload_and_sign_falls_back_when_r2_not_configured(monkeypatch):
     """Without R2 env vars, we return a token URL instead of raising."""
     for var in (
@@ -291,7 +282,6 @@ def _auth_headers_for(user_id: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest.mark.skip(reason="pre-existing endpoint drift: /api/v1/privacy/export returns 422 instead of 200; investigate separately")
 @pytest.mark.asyncio
 async def test_get_export_returns_none_when_no_history(
     test_client: AsyncClient, test_db: AsyncSession
@@ -304,7 +294,6 @@ async def test_get_export_returns_none_when_no_history(
     assert response.json()["status"] == "none"
 
 
-@pytest.mark.skip(reason="pre-existing endpoint drift: /api/v1/privacy/delete flow fails on test_client; investigate separately")
 @pytest.mark.asyncio
 async def test_delete_then_cancel_flow(
     test_client: AsyncClient, test_db: AsyncSession
@@ -344,7 +333,6 @@ async def test_export_endpoint_requires_auth(test_client: AsyncClient):
     assert response.status_code in (401, 403)
 
 
-@pytest.mark.skip(reason="patches PrivacyService.export_user_data which no longer exists; rewrite separately")
 @pytest.mark.asyncio
 async def test_export_endpoint_queues_and_returns_pending(
     test_client: AsyncClient, test_db: AsyncSession, monkeypatch
@@ -373,7 +361,6 @@ async def test_export_endpoint_queues_and_returns_pending(
     assert body["request_id"]
 
 
-@pytest.mark.skip(reason="patches PrivacyService.export_user_data which no longer exists; rewrite separately")
 @pytest.mark.asyncio
 async def test_export_rate_limited_to_one_per_day(
     test_client: AsyncClient, test_db: AsyncSession, monkeypatch
@@ -415,4 +402,4 @@ async def test_export_rate_limited_to_one_per_day(
 
 @pytest.mark.asyncio
 async def test_deletion_grace_period_is_30_days(test_db: AsyncSession):
-    assert GRACE_PERIOD_DAYS == 30
+    assert DELETION_GRACE_DAYS == 30

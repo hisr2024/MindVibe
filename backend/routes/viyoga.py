@@ -5,7 +5,7 @@ ENHANCED VERSION with AI-Powered Concern Analysis + Direct OpenAI Response Gener
 This router provides outcome anxiety reduction using Bhagavad Gita wisdom
 from the 700+ verse repository. ALL responses are grounded in actual verses.
 
-v4.0 PIPELINE (like Ardha and Sambandh Dharma (Relationship Compass)):
+v4.0 PIPELINE (like Ardha and Relationship Compass):
 1. AI-POWERED CONCERN ANALYSIS - Deep understanding of user's specific situation
 2. ENHANCED VERSE RETRIEVAL - AI-informed search queries for better Gita matches
 3. ANALYSIS-AWARE PROMPT - Deep situational context injected into prompts
@@ -463,7 +463,7 @@ async def viyoga_chat(
 ) -> dict[str, Any]:
     """Chat endpoint for Viyoga Detachment Coach - Enhanced v4.0.
 
-    v4.0 PIPELINE (same quality as Ardha and Sambandh Dharma (Relationship Compass)):
+    v4.0 PIPELINE (same quality as Ardha and Relationship Compass):
     1. AI-POWERED CONCERN ANALYSIS - Deep understanding of specific situation
     2. ENHANCED VERSE RETRIEVAL - AI-informed search for better Gita matches
     3. ANALYSIS-AWARE PROMPT - Situational context injected into system prompt

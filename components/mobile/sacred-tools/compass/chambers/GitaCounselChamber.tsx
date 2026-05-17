@@ -69,7 +69,7 @@ export function GitaCounselChamber({
     >
       <SacredCard variant="divine">
         <WisdomResponseCard
-          tool="sambandh_dharma"
+          tool="relationship_compass"
           sections={response.sections}
           fullResponse={response.response}
           gitaVersesUsed={response.gitaVerses}

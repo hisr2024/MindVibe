@@ -19,7 +19,7 @@ Your current prices ($4.99-$25/mo) are positioned below basic meditation apps th
 - Karma-based behavioral transformation journeys
 - Encrypted journaling, mood analytics, voice companion
 - Cognitive reframing (Ardha), Detachment coaching (Viyoga)
-- Soul Reading, Quantum Dive, Sambandh Dharma (Relationship Compass)
+- Soul Reading, Quantum Dive, Relationship Compass
 
 **Key finding:** You have a category-defining product priced like a commodity.
 
@@ -223,7 +223,7 @@ Your 25% discount for Indian market (INR 360/mo for Plus) is aggressive. India's
 | All Sadhak features | Yes | Yes | Yes |
 | Wisdom Journeys | Unlimited | Unlimited | **Unlimited** |
 | Dedicated Support | Yes | Yes | **Yes** |
-| Sambandh Dharma (Relationship Compass) | Yes | Yes | Yes |
+| Relationship Compass | Yes | Yes | Yes |
 | Lifetime option | No | No | **$399.99** |
 
 **Why $22.99 (not $25):** The ".99" ending at $22.99 feels psychologically cheaper than $25 while being only $2 less. It also creates a clean $10 gap from Sadhak ($12.99), making the upgrade decision intuitive.

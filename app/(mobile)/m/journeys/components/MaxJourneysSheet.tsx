@@ -13,12 +13,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { JourneyResponse, EnemyType } from '@/types/karmaMarg.types'
-import { ENEMY_INFO } from '@/types/karmaMarg.types'
+import type { JourneyResponse, EnemyType } from '@/types/journeyEngine.types'
+import { ENEMY_INFO } from '@/types/journeyEngine.types'
 import {
-  karmaMargService,
-  KarmaMargError,
-} from '@/services/karmaMargService'
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 interface MaxJourneysSheetProps {
@@ -57,14 +57,14 @@ export function MaxJourneysSheet({
     setActionError(null)
     triggerHaptic('medium')
     try {
-      await karmaMargService.pauseJourney(journeyId)
+      await journeyEngineService.pauseJourney(journeyId)
       await onAfterPause()
       triggerHaptic('success')
       onClose()
     } catch (err) {
       triggerHaptic('error')
       const message =
-        err instanceof KarmaMargError
+        err instanceof JourneyEngineError
           ? err.message
           : 'Could not pause this journey. Please try again.'
       setActionError(message)
@@ -81,7 +81,7 @@ export function MaxJourneysSheet({
     setActionError(null)
     triggerHaptic('medium')
     try {
-      await karmaMargService.abandonJourney(journeyId)
+      await journeyEngineService.abandonJourney(journeyId)
       await onAfterPause()
       triggerHaptic('success')
       setConfirmAbandonId(null)
@@ -89,7 +89,7 @@ export function MaxJourneysSheet({
     } catch (err) {
       triggerHaptic('error')
       const message =
-        err instanceof KarmaMargError
+        err instanceof JourneyEngineError
           ? err.message
           : 'Could not close this journey. Please try again.'
       setActionError(message)
@@ -106,7 +106,7 @@ export function MaxJourneysSheet({
     setFixMessage(null)
     triggerHaptic('medium')
     try {
-      const res = await karmaMargService.fixStuckJourneys()
+      const res = await journeyEngineService.fixStuckJourneys()
       const cleared =
         (res.force_cleared ?? 0) + (res.orphaned_cleaned ?? 0)
       setFixMessage(
@@ -121,7 +121,7 @@ export function MaxJourneysSheet({
     } catch (err) {
       triggerHaptic('error')
       const message =
-        err instanceof KarmaMargError
+        err instanceof JourneyEngineError
           ? err.message
           : 'Could not clear stuck journeys. Please try again.'
       setActionError(message)

@@ -116,7 +116,7 @@ const FEATURE_GATES: Record<string, SubscriptionTier> = {
   // Assistants
   arthaReframing: 'sadhak',
   viyogaDetachment: 'sadhak',
-  sambandhDharma: 'sadhak',
+  relationshipCompass: 'sadhak',
   emotionalResetGuide: 'sadhak',
   // Features
   encryptedJournal: 'bhakta',

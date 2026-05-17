@@ -32,18 +32,18 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
-  karmaMargService,
-  KarmaMargError,
-} from '@/services/karmaMargService'
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
 import type {
   JourneyResponse,
   StepResponse,
   EnemyType,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 import {
   ENEMY_INFO,
   getJourneyStatusLabel,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 
 export default function MobileJourneyDetailPage() {
   const router = useRouter()
@@ -78,16 +78,16 @@ export default function MobileJourneyDetailPage() {
       setLoading(true)
       setError(null)
 
-      const journeyData = await karmaMargService.getJourney(journeyId)
+      const journeyData = await journeyEngineService.getJourney(journeyId)
       setJourney(journeyData)
       setSelectedDay(journeyData.current_day)
 
       if (journeyData.status === 'active') {
-        const stepData = await karmaMargService.getCurrentStep(journeyId)
+        const stepData = await journeyEngineService.getCurrentStep(journeyId)
         setStep(stepData)
       }
     } catch (err) {
-      if (err instanceof KarmaMargError) {
+      if (err instanceof JourneyEngineError) {
         if (err.isAuthError()) {
           router.push('/onboarding')
           return
@@ -104,7 +104,7 @@ export default function MobileJourneyDetailPage() {
   const loadStep = useCallback(async (day: number) => {
     if (!journey) return
     try {
-      const stepData = await karmaMargService.getStep(journeyId, day)
+      const stepData = await journeyEngineService.getStep(journeyId, day)
       setStep(stepData)
     } catch {
       setError('Failed to load step.')
@@ -144,7 +144,7 @@ export default function MobileJourneyDetailPage() {
     }
 
     try {
-      const result = await karmaMargService.completeStep(
+      const result = await journeyEngineService.completeStep(
         journeyId,
         step.day_index,
         { reflection: showReflection && reflection.trim() ? reflection.trim() : undefined }
@@ -179,15 +179,15 @@ export default function MobileJourneyDetailPage() {
         await loadJourney()
       }
     } catch (err) {
-      if (err instanceof KarmaMargError && err.isAuthError()) {
+      if (err instanceof JourneyEngineError && err.isAuthError()) {
         router.push('/onboarding')
         return
       }
-      if (err instanceof KarmaMargError && (err.statusCode === 429 || err.statusCode === 400)) {
+      if (err instanceof JourneyEngineError && (err.statusCode === 429 || err.statusCode === 400)) {
         await loadJourney()
         return
       }
-      setError(err instanceof KarmaMargError ? err.message : 'Failed to complete step.')
+      setError(err instanceof JourneyEngineError ? err.message : 'Failed to complete step.')
       triggerHaptic('error')
     } finally {
       isCompletingRef.current = false
@@ -199,10 +199,10 @@ export default function MobileJourneyDetailPage() {
     if (actionLoading) return
     try {
       setActionLoading(action)
-      if (action === 'pause') await karmaMargService.pauseJourney(journeyId)
-      else if (action === 'resume') await karmaMargService.resumeJourney(journeyId)
+      if (action === 'pause') await journeyEngineService.pauseJourney(journeyId)
+      else if (action === 'resume') await journeyEngineService.resumeJourney(journeyId)
       else if (action === 'abandon') {
-        await karmaMargService.abandonJourney(journeyId)
+        await journeyEngineService.abandonJourney(journeyId)
         router.push('/m/journeys')
         return
       }
@@ -210,7 +210,7 @@ export default function MobileJourneyDetailPage() {
       await loadJourney()
       setShowActions(false)
     } catch (err) {
-      setError(err instanceof KarmaMargError ? err.message : `Failed to ${action} journey.`)
+      setError(err instanceof JourneyEngineError ? err.message : `Failed to ${action} journey.`)
       triggerHaptic('error')
     } finally {
       setActionLoading(null)
@@ -566,7 +566,7 @@ export default function MobileJourneyDetailPage() {
                 </div>
                 {/* Detect the legacy hardcoded fallback line and surface a
                     clear "being prepared" chip instead of silently showing it.
-                    The new enemy-aware fallback in karma_marg_service.py
+                    The new enemy-aware fallback in journey_engine_service.py
                     eliminates this for fresh journeys, but pre-existing
                     UserJourneyStepState rows persist the old text in
                     kiaan_step_json — this chip catches those. */}

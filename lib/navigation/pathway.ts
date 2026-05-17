@@ -45,7 +45,7 @@ export const PATHWAY_STEPS: readonly PathwayStep[] = [
     id: 'apply',
     labelKey: 'navigation.pathway.apply',
     labelFallback: 'Apply',
-    href: '/sambandh-dharma',
+    href: '/relationship-compass',
   },
   {
     id: 'train',

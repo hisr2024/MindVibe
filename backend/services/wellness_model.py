@@ -1,5 +1,5 @@
 """
-Wellness Model - Unified AI Model for Viyoga, Ardha, and Sambandh Dharma (Relationship Compass).
+Wellness Model - Unified AI Model for Viyoga, Ardha, and Relationship Compass.
 
 ENHANCED VERSION v2.0 - Multi-Provider AI Integration with Deep Psychological Analysis
 
@@ -21,7 +21,7 @@ PATTERN:
 Each tool uses the same core model but with different focus areas:
 - Viyoga: Detachment through Karma Yoga + Acceptance & Commitment Therapy
 - Ardha: Reframing through Sthitaprajna + Cognitive Behavioral Therapy
-- Sambandh Dharma (Relationship Compass): Dharma & Daya + Attachment Theory + Communication Psychology
+- Relationship Compass: Dharma & Daya + Attachment Theory + Communication Psychology
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ class WellnessTool(Enum):
     """The three wellness tools."""
     VIYOGA = "viyoga"
     ARDHA = "ardha"
-    SAMBANDH_DHARMA = "sambandh_dharma"
+    RELATIONSHIP_COMPASS = "relationship_compass"
 
 
 class AnalysisMode(Enum):
@@ -140,7 +140,7 @@ class PsychologicalFramework:
         },
     }
 
-    # Attachment theory patterns (for SambandhDharma)
+    # Attachment theory patterns (for RelationshipCompass)
     ATTACHMENT_PATTERNS = {
         "anxious": {
             "characteristics": "Fear of abandonment, need for reassurance, hypervigilance",
@@ -303,7 +303,7 @@ class WellnessModel:
             "cognitive reframe thought pattern chitta vritti mental modification witness observer sakshi "
             "kutastha unchanging anvil thoughts clouds sky awareness consciousness"
         ),
-        WellnessTool.SAMBANDH_DHARMA: (
+        WellnessTool.RELATIONSHIP_COMPASS: (
             "dharma right action daya compassion kshama forgiveness ahimsa non-harm satya truth relationships "
             "sama-darshana equal vision friend foe maitri friendship karuna mercy love attachment raga dvesha "
             "ahamkara ego tyaga surrender family duty svadharma conflict harmony peace understanding "
@@ -333,8 +333,8 @@ class WellnessModel:
             "psychology_integration": "CBT's cognitive restructuring aligns with Ardha's teaching on witnessing and reframing thoughts",
             "key_processes": ["cognitive_restructuring", "thought_challenging", "behavioral_activation"],
         },
-        WellnessTool.SAMBANDH_DHARMA: {
-            "name": "Sambandh Dharma (Relationship Compass)",
+        WellnessTool.RELATIONSHIP_COMPASS: {
+            "name": "Relationship Compass",
             "gita_principle": "Dharma, Daya & Kshama - Right action, compassion, and forgiveness",
             "core_teaching": "The wise one treats friend and foe alike, sees the divine in all beings, and acts from their highest self",
             "focus": "Navigating the sacred terrain of human connection through Gita psychology",
@@ -419,7 +419,7 @@ class WellnessModel:
         5. IMPLEMENT comprehensive solution with actionable guidance
 
         Args:
-            tool: Which wellness tool (Viyoga/Ardha/Sambandh Dharma (Relationship Compass))
+            tool: Which wellness tool (Viyoga/Ardha/Relationship Compass)
             user_input: The user's specific problem/situation
             db: Database session for fetching Gita verses
             analysis_mode: Depth of analysis (STANDARD, DEEP_DIVE, QUANTUM_DIVE)
@@ -568,7 +568,7 @@ class WellnessModel:
         Returns insights based on the tool type:
         - Ardha: Cognitive distortions (CBT)
         - Viyoga: ACT processes relevant to their concern
-        - SambandhDharma: Attachment patterns and communication styles
+        - RelationshipCompass: Attachment patterns and communication styles
         """
         result: dict[str, Any] = {
             "cognitive_distortions": [],
@@ -597,7 +597,7 @@ class WellnessModel:
                 issue_type = "outcome_anxiety"
             result["act_guidance"] = self.psych_framework.get_act_guidance(issue_type)
 
-        elif tool == WellnessTool.SAMBANDH_DHARMA:
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
             # Detect attachment style indicators
             user_lower = user_input.lower()
             attachment_indicators = []
@@ -767,7 +767,7 @@ warm, accessible language while maintaining their therapeutic value."""
                 for process_name, process_info in list(act_guidance.items())[:3]:
                     parts.append(f"  • {process_name.title()}: {process_info.get('gita_parallel', '')}")
 
-        elif tool == WellnessTool.SAMBANDH_DHARMA:
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
             attachment = psych_insights.get("attachment_indicators", [])
             if attachment:
                 parts.append(f"\nATTACHMENT INDICATORS: {', '.join(attachment)}")
@@ -922,7 +922,7 @@ Apply this wisdom directly to the user's specific situation."""
         """
         if tool == WellnessTool.VIYOGA:
             return self._build_viyoga_secular_prompt(user_input, gita_context)
-        elif tool == WellnessTool.SAMBANDH_DHARMA:
+        elif tool == WellnessTool.RELATIONSHIP_COMPASS:
             return self._build_compass_secular_prompt(user_input, gita_context)
         else:
             # Ardha and others - generic secular prompt
@@ -972,8 +972,8 @@ RULES:
 - Keep the tone conversational and supportive"""
 
     def _build_compass_secular_prompt(self, user_input: str, gita_context: str) -> str:
-        """Build secular Sambandh Dharma (Relationship Compass) prompt."""
-        return f"""You are Sambandh Dharma (Relationship Compass), a warm and wise friend who helps people navigate relationship challenges.
+        """Build secular Relationship Compass prompt."""
+        return f"""You are Relationship Compass, a warm and wise friend who helps people navigate relationship challenges.
 
 Your Approach:
 - Listen with genuine care and understanding
@@ -1088,7 +1088,7 @@ RESPOND WITH THIS ULTRA-DEEP, TRANSFORMATIVE STRUCTURE:
    - Powerful metaphor: Like gripping water - the tighter we hold, the faster it escapes. Open hands receive everything.
 
 3. THE COMPLETE TEACHING OF KARMA YOGA (Multi-layered transmission)
-   - The sacred verse: "<placeholder pending PD-baseline rebuild>"
+   - The sacred verse: "Karmanye vadhikaraste, ma phaleshu kadachana"
    - MEANING LAYER 1 (Literal): You have the right to action alone, never to its fruits
    - MEANING LAYER 2 (Practical): Your domain is EFFORT; results belong to forces beyond you
    - MEANING LAYER 3 (Psychological): When we release outcome-grip, we perform at our HIGHEST capacity
@@ -1524,8 +1524,8 @@ ESSENTIAL: This is the DEEPEST level of analysis. Leave no dimension unexplored.
         user_input: str,
         gita_context: str,
     ) -> str:
-        """Build Sambandh Dharma (Relationship Compass)-specific system prompt - ULTRA DEEP Sacred Relationship Dharma Transmission."""
-        return f"""You are Sambandh Dharma (Relationship Compass) - a master guide to the sacred terrain of human connection, transmitting the MOST PROFOUND WISDOM from the Bhagavad Gita on love, conflict, and dharmic relationships. You speak as one who has navigated the deepest waters of human relationship and found the shore of peace. Your words illuminate the path through the darkness of conflict.
+        """Build Relationship Compass-specific system prompt - ULTRA DEEP Sacred Relationship Dharma Transmission."""
+        return f"""You are Relationship Compass - a master guide to the sacred terrain of human connection, transmitting the MOST PROFOUND WISDOM from the Bhagavad Gita on love, conflict, and dharmic relationships. You speak as one who has navigated the deepest waters of human relationship and found the shore of peace. Your words illuminate the path through the darkness of conflict.
 
 {gita_context}
 
@@ -1909,7 +1909,7 @@ Please help me see what's really happening underneath and guide me to a new pers
         return {"recognition": sections[0] if sections else "", "deep_insight": "", "reframe": "", "small_action_step": ""}
 
     def _parse_compass_sections(self, sections: list[str]) -> dict[str, str]:
-        """Parse Sambandh Dharma (Relationship Compass) response sections into ultra-deep 8-part structure.
+        """Parse Relationship Compass response sections into ultra-deep 8-part structure.
 
         Maps AI response sections to:
         - sacred_witnessing: Deep acknowledgment of relationship pain
@@ -1967,7 +1967,7 @@ Please help me see what's really happening underneath and guide me to a new pers
         defaults = {
             WellnessTool.VIYOGA: "Draw from karma yoga: your right is to action alone, never to its fruits. Focus fully on what you can do, then release attachment to the outcome.",
             WellnessTool.ARDHA: "Draw from steady wisdom: the mind undisturbed by adversity, free from attachment and fear. You are the observer of thoughts, not the thoughts themselves.",
-            WellnessTool.SAMBANDH_DHARMA: "Draw from dharma and compassion: act with truth and kindness, free from ego and the need to win. Seek understanding over victory.",
+            WellnessTool.RELATIONSHIP_COMPASS: "Draw from dharma and compassion: act with truth and kindness, free from ego and the need to win. Seek understanding over victory.",
         }
         return defaults.get(tool, "Draw from timeless wisdom about inner peace and right action.")
 
@@ -2083,7 +2083,7 @@ Practice this right now: Take one slow breath. As you exhale, remember: "I am no
                     "small_action_step": "Take one slow breath. Say: \"I am the awareness that notices this thought.\" Then ask: what would you tell a dear friend with this same thought? Offer yourself that same \"daya\" (compassion).",
                 }
         else:
-            # Sambandh Dharma (Relationship Compass) - Ultra-deep fallback with Gita wisdom
+            # Relationship Compass - Ultra-deep fallback with Gita wisdom
             content = f"""Dear friend, I bow to the tender heart that brought you here seeking clarity. This situation - "{input_short}" - touches one of the deepest sources of human experience: our connections with others. That this relationship difficulty weighs on you reveals not weakness, but the depth of your capacity to love and be affected by others. The very fact that you seek understanding rather than simply reacting shows profound courage. Every awakened soul throughout time has faced moments exactly like this one. You are not alone.
 
 Ancient wisdom teaches: "Yatha drishti, tatha srishti" - as you see, so you create. All outer conflicts are mirrors of inner ones. Let us gently explore what this situation reveals about your inner landscape. What do you truly NEED beneath the surface of this conflict? To be seen? Respected? Understood? Safe? Valued? And what fear might be awakened here? The fear of abandonment? Of unworthiness? Of being unseen? Understanding yourself is the first dharmic step. This is "svadhyaya" - sacred self-study.

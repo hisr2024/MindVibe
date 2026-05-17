@@ -73,25 +73,24 @@ export interface CloudSpeakOptions {
     | 'energetic'
     | 'soothing'
     | 'storytelling'
-    | 'chanting'
-    | undefined;
+    | 'chanting';
   /** Backend baseURL override. Defaults to ``API_CONFIG.baseURL``. */
-  readonly baseUrl?: string | undefined;
+  readonly baseUrl?: string;
   /** Playback tempo multiplier — range 0.5 (half speed) to 1.5
    *  (1.5× fast). Default 1.0 = natural speed. Sent to backend as
    *  the ``speed`` field in SynthesizeRequest; the provider TTS
    *  engines render audio at that tempo natively, so cache hits
    *  for the same (text, voice, tempo) are perfect replays. */
-  readonly tempo?: number | undefined;
+  readonly tempo?: number;
   /** Async getter for the JWT — re-resolved per call so token rotation
    *  doesn't strand a stale value. */
-  readonly getAccessToken?: (() => Promise<string | null> | string | null) | undefined;
+  readonly getAccessToken?: () => Promise<string | null> | string | null;
   /** Fired when playback finishes (matches ``Speech.SpeechOptions``). */
-  readonly onDone?: (() => void) | undefined;
+  readonly onDone?: () => void;
   /** Fired on fetch / decode / playback failure. */
-  readonly onError?: ((err: Error) => void) | undefined;
+  readonly onError?: (err: Error) => void;
   /** Fired when playback first starts (audio pipeline ready). */
-  readonly onStart?: (() => void) | undefined;
+  readonly onStart?: () => void;
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────────

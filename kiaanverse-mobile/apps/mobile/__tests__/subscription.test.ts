@@ -163,7 +163,7 @@ describe('Subscription Store - Feature Gating', () => {
       expect(hasFeature('kiaanQuantumDive')).toBe(true);
       expect(hasFeature('arthaReframing')).toBe(true);
       expect(hasFeature('viyogaDetachment')).toBe(true);
-      expect(hasFeature('sambandhDharma')).toBe(true);
+      expect(hasFeature('relationshipCompass')).toBe(true);
       expect(hasFeature('emotionalResetGuide')).toBe(true);
       expect(hasFeature('encryptedJournal')).toBe(true);
       expect(hasFeature('advancedAnalytics')).toBe(true);

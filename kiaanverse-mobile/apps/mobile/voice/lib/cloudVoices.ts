@@ -147,7 +147,7 @@ export function listCloudVoicesForLanguage(
   language: string,
 ): CloudVoiceOption[] {
   const lang = language.toLowerCase();
-  const base = lang.split('-')[0] ?? lang;
+  const base = lang.split('-')[0];
   return CLOUD_VOICES.filter((v) =>
     v.supportedLanguages.some((sl) => {
       const sLang = sl.toLowerCase();

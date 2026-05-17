@@ -54,7 +54,7 @@ export interface TierConfig {
     dedicatedSupport: boolean;
     arthaReframing: boolean;
     viyogaDetachment: boolean;
-    sambandhDharma: boolean;
+    relationshipCompass: boolean;
     emotionalResetGuide: boolean;
     teamFeatures: boolean;
     priorityVoiceProcessing: boolean;
@@ -146,7 +146,7 @@ export const TIER_CONFIGS: Record<SubscriptionTier, TierConfig> = {
       dedicatedSupport: false,
       arthaReframing: false,
       viyogaDetachment: false,
-      sambandhDharma: false,
+      relationshipCompass: false,
       emotionalResetGuide: false,
       teamFeatures: false,
       priorityVoiceProcessing: false,
@@ -188,7 +188,7 @@ export const TIER_CONFIGS: Record<SubscriptionTier, TierConfig> = {
       dedicatedSupport: false,
       arthaReframing: false,
       viyogaDetachment: false,
-      sambandhDharma: false,
+      relationshipCompass: false,
       emotionalResetGuide: false,
       teamFeatures: false,
       priorityVoiceProcessing: false,
@@ -230,7 +230,7 @@ export const TIER_CONFIGS: Record<SubscriptionTier, TierConfig> = {
       dedicatedSupport: false,
       arthaReframing: true,
       viyogaDetachment: true,
-      sambandhDharma: true,
+      relationshipCompass: true,
       emotionalResetGuide: true,
       teamFeatures: false,
       priorityVoiceProcessing: false,
@@ -272,7 +272,7 @@ export const TIER_CONFIGS: Record<SubscriptionTier, TierConfig> = {
       dedicatedSupport: true,
       arthaReframing: true,
       viyogaDetachment: true,
-      sambandhDharma: true,
+      relationshipCompass: true,
       emotionalResetGuide: true,
       teamFeatures: true,
       priorityVoiceProcessing: true,

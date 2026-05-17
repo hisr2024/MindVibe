@@ -47,7 +47,7 @@ import type {
   MeditationTrack,
   MoodCreatePayload,
   MoodTrend,
-  SambandhDharmaResult,
+  RelationshipCompassResult,
   RelationshipGuidance,
   SadhanaDaily,
   SadhanaRecord,
@@ -214,7 +214,7 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
 /**
  * A verse is considered "placeholder" when the seed corpus has not yet been
  * populated with real content. The seed generator wrote `sanskrit: "॥ X.Y ॥"`
- * and `english: ""`
+ * and `english: "Bhagavad Gita Chapter X, Verse Y teaches wisdom on <theme>."`
  * for most verses; the backend returns that text verbatim. Treat those rows
  * as missing so the UI can show a real fallback instead of the generated
  * copy — otherwise the home screen literally reads
@@ -248,7 +248,7 @@ const BG_2_47_FALLBACK: GitaVerse = {
   transliteration:
     "karmaṇy-evādhikāras te mā phaleṣhu kadāchana\nmā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
   translation:
-    '',
+    'You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results, nor be attached to inaction.',
 };
 
 export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {
@@ -518,9 +518,9 @@ export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChap
 // ---------------------------------------------------------------------------
 
 /**
- * Backend karma-marg response shapes (snake_case from FastAPI).
+ * Backend journey-engine response shapes (snake_case from FastAPI).
  * Kept local — these mirror TemplateResponse / JourneyResponse / DashboardResponse
- * in backend/routes/karma_marg.py and only exist so we can map them into
+ * in backend/routes/journey_engine.py and only exist so we can map them into
  * the camelCase JourneyTemplate / Journey types the UI consumes.
  */
 interface RawTemplate {
@@ -737,7 +737,7 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
 
 /**
  * Backend step response (GET /journeys/{id}/steps/{day_index}).
- * Mirrors StepResponse in backend/routes/karma_marg.py.
+ * Mirrors StepResponse in backend/routes/journey_engine.py.
  */
 interface RawVerse {
   chapter: number;
@@ -1038,7 +1038,7 @@ export function useAbandonJourney(): UseMutationResult<void, Error, string> {
 
 /**
  * Backend completion response (POST /journeys/{id}/steps/{day}/complete).
- * Mirrors CompletionResponse in backend/routes/karma_marg.py:
+ * Mirrors CompletionResponse in backend/routes/journey_engine.py:
  *   { success, day_completed, journey_complete, next_day,
  *     progress_percentage, ai_response, mastery_delta }
  */
@@ -1437,14 +1437,14 @@ export function useSadhanaHistory(limit?: number): UseQueryResult<SadhanaRecord[
 }
 
 // ---------------------------------------------------------------------------
-// Sambandh Dharma (Relationship Compass)
+// Relationship Compass
 // ---------------------------------------------------------------------------
 
-export function useSambandhDharma(): UseMutationResult<SambandhDharmaResult, Error, { question: string; context?: string }> {
+export function useRelationshipCompass(): UseMutationResult<RelationshipCompassResult, Error, { question: string; context?: string }> {
   return useMutation({
     mutationFn: async ({ question, context }) => {
       const { data } = await api.relationship.guide(question, context);
-      return data as SambandhDharmaResult;
+      return data as RelationshipCompassResult;
     },
   });
 }
@@ -1463,7 +1463,7 @@ function _parseGitaReference(ref: string | undefined): { chapter: number; verse:
 /**
  * Relationship guidance returning extended RelationshipGuidance type.
  *
- * Maps the backend's `compass_guidance` response (routes/sambandh_dharma.py)
+ * Maps the backend's `compass_guidance` response (routes/relationship_compass.py)
  * into the screen-expected RelationshipGuidance shape:
  *   - guidance        ← `response`
  *   - dharma_principles ← `relationship_teachings.core_principles`

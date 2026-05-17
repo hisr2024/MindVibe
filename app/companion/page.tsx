@@ -20,7 +20,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import CompanionChatBubble from '@/components/companion/CompanionChatBubble'
-import CompanionBhavaMirror from '@/components/companion/CompanionBhavaMirror'
+import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -86,7 +86,7 @@ const REFERRAL_GREETINGS: Record<string, string> = {
   'emotional-reset': "Hey friend! I see you just came from the Emotional Reset. How are you feeling now? Sometimes it helps to talk through what came up during that process. I'm all ears.",
   'ardha': "Hey! I noticed you were working with Ardha on reframing your thoughts. Want to talk about what you discovered? Sometimes saying it out loud makes it click even deeper.",
   'viyog': "Friend! You've been working on letting go with Viyoga. That takes real courage. How are you feeling about it? I'm here if you want to process what came up.",
-  'sambandh-dharma': "Hey there. Relationship stuff is never easy, and I saw you were exploring the Sambandh Dharma (Relationship Compass). Want to talk about what's going on? No judgment, just your friend listening.",
+  'relationship-compass': "Hey there. Relationship stuff is never easy, and I saw you were exploring the Relationship Compass. Want to talk about what's going on? No judgment, just your friend listening.",
   'karma-reset': "I see you've been doing some deep work with Karma Reset. That takes a lot of strength. How are you holding up? Sometimes it helps to just talk about it.",
   'karma-footprint': "Hey friend! I noticed you were reflecting on your daily actions. That kind of self-awareness is beautiful. Want to share what you're thinking about?",
   'karmic-tree': "Your growth journey is inspiring, friend! I saw you checking your Karmic Tree. Want to talk about where you are and where you want to go?",
@@ -594,7 +594,7 @@ export default function CompanionPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a14 0%, #12082a 50%, #0a0a14 100%)' }}>
         <div className="text-center">
-          <CompanionBhavaMirror mood="neutral" size="xl" />
+          <CompanionMoodRing mood="neutral" size="xl" />
           <p className="mt-8 text-white/70 text-sm animate-pulse">KIAAN is getting ready...</p>
         </div>
       </div>
@@ -801,7 +801,7 @@ export default function CompanionPage() {
 
         {/* ─── Orb Section ─── */}
         <div className="flex flex-col items-center pt-6 pb-4">
-          <CompanionBhavaMirror
+          <CompanionMoodRing
             mood={currentMood}
             size="xl"
             isSpeaking={isSpeaking}

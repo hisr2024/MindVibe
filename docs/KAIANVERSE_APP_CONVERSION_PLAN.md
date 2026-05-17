@@ -60,7 +60,7 @@ The backend exposes 60+ route modules covering:
 | Domain | Route Modules |
 |--------|---------------|
 | **Core AI (KIAAN)** | chat, kiaan_divine, kiaan_friend_mode, kiaan_learning, kiaan_voice_companion, divine_consciousness |
-| **Journeys** | journeys, karma_marg, beginner_curriculum |
+| **Journeys** | journeys, journey_engine, beginner_curriculum |
 | **Gita Wisdom** | gita_api, gita_ai_analysis, gita_social_ingestion, indian_gita_sources |
 | **Wellness Tools** | ardha, emotional_reset, viyoga, meditation, weekly_assessment |
 | **Voice** | voice, voice_companion, voice_learning, multilingual_voice |
@@ -374,7 +374,7 @@ main (production)
 |--------|-----------|---------------|----------|
 | Journey Catalog | `/journeys` | `JourneysScreen` | P0 |
 | Journey Detail | `/journeys/[id]` | `JourneyDetailScreen` | P0 |
-| Journey Step | `/karma-marg` | `JourneyStepScreen` | P0 |
+| Journey Step | `/journey-engine` | `JourneyStepScreen` | P0 |
 | Profile | `/profile` | `ProfileScreen` | P0 |
 | Settings | `/settings` | `SettingsScreen` | P1 |
 
@@ -471,7 +471,7 @@ main (production)
 | `/companion` | `VoiceCompanionScreen` | Sakha | MVP |
 | `/kiaan-vibe` | `VibeScreen` | Vibe | Phase 2 |
 | `/journeys` | `JourneysScreen` | Journeys | MVP |
-| `/karma-marg` | `JourneyStepScreen` | Journeys | MVP |
+| `/journey-engine` | `JourneyStepScreen` | Journeys | MVP |
 | `/profile` | `ProfileScreen` | Profile | MVP |
 | `/settings` | `SettingsScreen` | Profile | MVP |
 | `/account` | `AccountScreen` | Profile | MVP |
@@ -489,7 +489,7 @@ main (production)
 | `/analytics` | `AnalyticsScreen` | Profile | Phase 2 |
 | `/subscription` | `SubscriptionScreen` | Profile | Phase 3 |
 | `/pricing` | `PricingScreen` | Profile | Phase 3 |
-| `/sambandh-dharma` | `SambandhDharmaScreen` | Tools | Phase 2 |
+| `/relationship-compass` | `RelationshipCompassScreen` | Tools | Phase 2 |
 | `/tools` | `ToolsScreen` | Home/Modal | Phase 2 |
 | `/offline` | N/A (always available) | — | Phase 2 |
 

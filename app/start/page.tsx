@@ -73,7 +73,7 @@ const createPricingTiers = (
       'Soul Reading & Quantum Dive',
       'KIAAN Agent',
       'Ardha, Viyoga & Emotional Reset',
-      'Sambandh Dharma (Relationship Compass)',
+      'Relationship Compass',
       '10 Wisdom Journeys',
       'Advanced mood analytics',
       'Offline access & priority support',
@@ -197,7 +197,7 @@ const BENEFITS = [
   },
   {
     title: 'Emotional Healing Tools',
-    description: 'Ardha reframing, Viyoga detachment therapy, Emotional Reset, and Sambandh Dharma (Relationship Compass) for lasting inner peace.',
+    description: 'Ardha reframing, Viyoga detachment therapy, Emotional Reset, and Relationship Compass for lasting inner peace.',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />

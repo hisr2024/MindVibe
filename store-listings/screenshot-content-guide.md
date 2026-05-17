@@ -11,22 +11,20 @@ This guide defines exactly what UI screens to capture for each screenshot slot a
 **Screen to capture**: Sakha AI chat screen (`/sakha-chat`)
 - Show a warm, active conversation with Sakha
 - Visible: User message asking a life question (e.g., "I feel lost and anxious")
-- Visible: Sakha's compassionate, original response — no copyrighted verse text
+- Visible: Sakha's compassionate response with a Gita verse woven in
 - Visible: Chat bubbles with divine styling, golden accents
 - Visible: Voice input button and Sakha avatar
 - **Why first**: The AI companion is the core differentiator. Lead with it.
-- **Note**: Use original Sakha responses; never screenshot a session that shows a verbatim English/Hindi translation of a verse from any commentator. Sanskrit citations + original reflections are fine.
 
-### Screenshot 2 — Sanskrit Verse Browser
-**Caption**: "Engage with the Sanskrit Source"
-**Screen to capture**: Verse detail view (`/kiaan` or verse reader)
-- Show a specific verse anchor (e.g., Chapter 2, Verse 47 — the iconic Karma Yoga verse)
-- Visible: Sanskrit text in Devanagari script (public domain)
-- Visible: IAST transliteration below (mechanical)
-- Visible: AI-powered contextual reflection rendered by Sakha (original, not a quoted translation)
+### Screenshot 2 — Bhagavad Gita Library
+**Caption**: "Explore Timeless Gita Wisdom"
+**Screen to capture**: Gita verse detail view (`/kiaan` or Gita reader)
+- Show a specific verse (e.g., Chapter 2, Verse 47 — the iconic Karma Yoga verse)
+- Visible: Sanskrit text in Devanagari script
+- Visible: English translation below
+- Visible: AI-powered contextual insight/commentary
 - Visible: Bookmark icon, chapter navigation
-- **Why second**: Establishes the Sanskrit-anchored content foundation.
-- **Note**: Until the in-house modernized translation corpus ships, do NOT display verbatim English/Hindi translations of any commentator in screenshots. The Sanskrit + Sakha's original reflection is the canonical display.
+- **Why second**: Establishes the wisdom content foundation.
 
 ### Screenshot 3 — Daily Sadhana Practice
 **Caption**: "Begin Your Sacred Daily Practice"
@@ -42,7 +40,7 @@ This guide defines exactly what UI screens to capture for each screenshot slot a
 **Caption**: "Track Your Inner Journey"
 **Screen to capture**: Divine Mood Check-In component (`DivineMoodCheckIn`)
 - Show the mood selection interface with emoji/mood options
-- Visible: Bhava Mirror (Mood Ring) visual or mood selection grid
+- Visible: Mood Ring visual or mood selection grid
 - Visible: Current streak or last check-in info
 - Visible: Warm, inviting design encouraging check-in
 - **Alternative**: Show mood analytics/trends view with chart over time

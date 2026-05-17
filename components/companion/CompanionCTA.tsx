@@ -30,7 +30,7 @@ const TOOL_FRIENDLY_NAMES: Record<string, string> = {
   'emotional-reset': 'Emotional Reset',
   'ardha': 'Ardha',
   'viyog': 'Viyoga',
-  'sambandh-dharma': 'Sambandh Dharma (Relationship Compass)',
+  'relationship-compass': 'Relationship Compass',
   'karma-reset': 'Karma Reset',
   'karma-footprint': 'Karma Footprint',
   'karmic-tree': 'Karmic Tree',

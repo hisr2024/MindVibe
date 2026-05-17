@@ -40,7 +40,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 3,
             "sanskrit": "तेजः क्षमा धृतिः शौचमद्रोहो नातिमानिता। भवन्ति सम्पदं दैवीमभिजातस्य भारत॥",
             "transliteration": "tejaḥ kṣamā dhṛtiḥ śaucam adroho nāti-mānitā, bhavanti sampadaṁ daivīm abhijātasya bhārata",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Vigor, forgiveness, fortitude, purity, absence of hatred, absence of pride — these belong to one born of divine nature, O Bharata.",
             "hindi": "तेज, क्षमा, धैर्य, शुद्धि, अद्रोह और अभिमान का अभाव — ये दैवी सम्पत् को प्राप्त हुए मनुष्य के लक्षण हैं।"
         },
         "supporting_verses": [
@@ -70,7 +70,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 15,
             "sanskrit": "अनुद्वेगकरं वाक्यं सत्यं प्रियहितं च यत्। स्वाध्यायाभ्यसनं चैव वाङ्मयं तप उच्यते॥",
             "transliteration": "anudvega-karaṁ vākyaṁ satyaṁ priya-hitaṁ ca yat, svādhyāyābhyasanaṁ caiva vāṅ-mayaṁ tapa ucyate",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Speech that causes no distress, that is truthful, pleasant and beneficial, along with the practice of self-study — this is called austerity of speech.",
             "hindi": "जो वाणी उद्वेग न करने वाली, सत्य, प्रिय और हितकारी हो तथा स्वाध्याय का अभ्यास — यह वाणी का तप कहा जाता है।"
         },
         "supporting_verses": [
@@ -100,7 +100,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 66,
             "sanskrit": "नास्ति बुद्धिरयुक्तस्य न चायुक्तस्य भावना। न चाभावयतः शान्तिरशान्तस्य कुतः सुखम्॥",
             "transliteration": "nāsti buddhir ayuktasya na cāyuktasya bhāvanā, na cābhāvayataḥ śāntir aśāntasya kutaḥ sukham",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "There is no wisdom for the unsteady, and no meditation for the unsteady; and for the un-meditative there is no peace — and for the peaceless, how can there be happiness?",
             "hindi": "जो मनुष्य योग-रहित है उसमें निश्चयात्मिका बुद्धि नहीं होती और भावना भी नहीं होती; भावनाहीन को शान्ति नहीं मिलती और अशान्त को सुख कैसे मिले?"
         },
         "supporting_verses": [
@@ -130,7 +130,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 5,
             "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
             "transliteration": "uddhared ātmanātmānaṁ nātmānam avasādayet, ātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Let one raise oneself by one's own Self, let not one degrade oneself; for the Self alone is the friend of oneself, and the Self alone is the enemy of oneself.",
             "hindi": "अपने द्वारा अपना उद्धार करे और अपने को अधोगति में न डाले; क्योंकि आत्मा ही अपना मित्र है और आत्मा ही अपना शत्रु है।"
         },
         "supporting_verses": [
@@ -160,7 +160,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 19,
             "sanskrit": "तस्मादसक्तः सततं कार्यं कर्म समाचर। असक्तो ह्याचरन्कर्म परमाप्नोति पूरुषः॥",
             "transliteration": "tasmād asaktaḥ satataṁ kāryaṁ karma samācara, asakto hy ācaran karma param āpnoti pūruṣaḥ",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Therefore, without attachment, always perform the action that should be done; for by performing action without attachment, one attains the Supreme.",
             "hindi": "इसलिए तू निरन्तर आसक्ति-रहित होकर कर्तव्य-कर्म कर; क्योंकि आसक्ति-रहित होकर कर्म करने से मनुष्य परमात्मा को प्राप्त होता है।"
         },
         "supporting_verses": [
@@ -190,7 +190,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 2,
             "sanskrit": "अहिंसा सत्यमक्रोधस्त्यागः शान्तिरपैशुनम्। दया भूतेष्वलोलुप्त्वं मार्दवं ह्रीरचापलम्॥",
             "transliteration": "ahiṁsā satyam akrodhas tyāgaḥ śāntir apaiśunam, dayā bhūteṣv aloluptvaṁ mārdavaṁ hrīr acāpalam",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Non-violence, truthfulness, absence of anger, renunciation, tranquility, absence of calumny, compassion to beings, non-covetousness, gentleness, modesty, absence of fickleness.",
             "hindi": "अहिंसा, सत्य, अक्रोध, त्याग, शान्ति, निन्दा न करना, भूतों में दया, अलोलुपता, कोमलता, लज्जा और अचपलता।"
         },
         "supporting_verses": [
@@ -220,7 +220,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 29,
             "sanskrit": "सर्वभूतस्थमात्मानं सर्वभूतानि चात्मनि। ईक्षते योगयुक्तात्मा सर्वत्र समदर्शनः॥",
             "transliteration": "sarva-bhūta-stham ātmānaṁ sarva-bhūtāni cātmani, īkṣate yoga-yuktātmā sarvatra sama-darśanaḥ",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "One whose self is established in yoga sees the Self abiding in all beings and all beings in the Self; one sees the same everywhere.",
             "hindi": "जिसका मन योग में स्थित है वह सब भूतों में आत्मा को और आत्मा में सब भूतों को देखता है; वह सर्वत्र समदर्शी होता है।"
         },
         "supporting_verses": [
@@ -250,7 +250,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 66,
             "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज। अहं त्वा सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः॥",
             "transliteration": "sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja, ahaṁ tvā sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Abandoning all dharmas, take refuge in Me alone. I shall liberate you from all sins; do not grieve.",
             "hindi": "सब धर्मों को त्याग कर केवल मेरी शरण में आ जा। मैं तुझे सब पापों से मुक्त कर दूँगा; शोक मत कर।"
         },
         "supporting_verses": [
@@ -280,7 +280,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 14,
             "sanskrit": "देवद्विजगुरुप्राज्ञपूजनं शौचमार्जवम्। ब्रह्मचर्यमहिंसा च शारीरं तप उच्यते॥",
             "transliteration": "deva-dvija-guru-prājña-pūjanaṁ śaucam ārjavam, brahmacaryam ahiṁsā ca śārīraṁ tapa ucyate",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "Worship of the devas, the wise, the teachers and the learned; purity, straightforwardness, celibacy and non-violence — this is called austerity of the body.",
             "hindi": "देवता, द्विज, गुरु और ज्ञानियों का पूजन, शुद्धि, सरलता, ब्रह्मचर्य और अहिंसा — यह शारीरिक तप कहा जाता है।"
         },
         "supporting_verses": [
@@ -310,7 +310,7 @@ KARMIC_PATHS: dict[str, dict[str, Any]] = {
             "verse": 3,
             "sanskrit": "सत्त्वानुरूपा सर्वस्य श्रद्धा भवति भारत। श्रद्धामयोऽयं पुरुषो यो यच्छ्रद्धः स एव सः॥",
             "transliteration": "sattvānurūpā sarvasya śraddhā bhavati bhārata, śraddhā-mayo 'yaṁ puruṣo yo yac-chraddhaḥ sa eva saḥ",
-            "english": "<placeholder pending PD-baseline rebuild>",
+            "english": "The faith of each is in accordance with one's nature, O Bharata. A person consists of faith. Whatever is one's faith, that indeed one is.",
             "hindi": "हे भारत! सब मनुष्यों की श्रद्धा उनके स्वभाव के अनुसार होती है। यह पुरुष श्रद्धामय है; जो जैसी श्रद्धा वाला है वह वैसा ही है।"
         },
         "supporting_verses": [
@@ -416,42 +416,42 @@ KARMA_RESET_CORE_VERSES = {
         "verse": {"chapter": 2, "verse": 47},
         "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
         "transliteration": "karmaṇy evādhikāras te mā phaleṣu kadācana, mā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "You have a right to perform your prescribed duty, but you are not entitled to the fruits of action. Never consider yourself the cause of the results, and never be attached to inaction.",
         "application_to_karma_reset": "When repairing a relationship, perform the repair as your dharmic duty. Do not attach to whether you will be forgiven. The repair itself is your right; the response is not."
     },
     "equanimity_in_duality": {
         "verse": {"chapter": 2, "verse": 48},
         "sanskrit": "योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय। सिद्ध्यसिद्ध्योः समो भूत्वा समत्वं योग उच्यते॥",
         "transliteration": "yoga-sthaḥ kuru karmāṇi saṅgaṁ tyaktvā dhanañjaya, siddhy-asiddhyoḥ samo bhūtvā samatvaṁ yoga ucyate",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "Perform action, O Dhananjaya, established in yoga, abandoning attachment, remaining equal in success and failure. This equanimity is called yoga.",
         "application_to_karma_reset": "Approach the repair with equanimity. Whether the person forgives you or not, whether the relationship heals or not — your inner state remains balanced. This balance IS yoga."
     },
     "the_self_is_untouched": {
         "verse": {"chapter": 2, "verse": 20},
         "sanskrit": "न जायते म्रियते वा कदाचिन्नायं भूत्वा भविता वा न भूयः। अजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे॥",
         "transliteration": "na jāyate mriyate vā kadācin nāyaṁ bhūtvā bhavitā vā na bhūyaḥ, ajo nityaḥ śāśvato 'yaṁ purāṇo na hanyate hanyamāne śarīre",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "The Self is never born, nor does it die. It has not come into being, does not come into being, and will not come into being. It is unborn, eternal, ever-existing, and primeval. It is not slain when the body is slain.",
         "application_to_karma_reset": "Your mistakes do not define your essence. The atman — your true Self — is untouched by karma. This understanding is not an excuse for harm, but the foundation for self-forgiveness and genuine transformation."
     },
     "nature_performs_action": {
         "verse": {"chapter": 3, "verse": 27},
         "sanskrit": "प्रकृतेः क्रियमाणानि गुणैः कर्माणि सर्वशः। अहंकारविमूढात्मा कर्ताहमिति मन्यते॥",
         "transliteration": "prakṛteḥ kriyamāṇāni guṇaiḥ karmāṇi sarvaśaḥ, ahaṁkāra-vimūḍhātmā kartāham iti manyate",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "All actions are performed by the gunas of prakriti. The self, deluded by ahamkara (ego), thinks: 'I am the doer.'",
         "application_to_karma_reset": "Understanding this is liberation. Your harmful action arose from the gunas (rajas/tamas), not from your true Self. Correct the instrument (mind-body), but do not condemn the atman. This is the key to genuine self-forgiveness."
     },
     "supreme_surrender": {
         "verse": {"chapter": 18, "verse": 66},
         "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज। अहं त्वा सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः॥",
         "transliteration": "sarva-dharmān parityajya mām ekaṁ śaraṇaṁ vraja, ahaṁ tvā sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "Abandoning all dharmas, take refuge in Me alone. I shall liberate you from all sins; do not grieve.",
         "application_to_karma_reset": "The ultimate promise: when all other paths feel insufficient, surrender completely. Offer your mistake, your guilt, your desire to repair — offer everything to the divine. You will be freed from all karmic debt. Do not grieve."
     },
     "steady_wisdom": {
         "verse": {"chapter": 2, "verse": 56},
         "sanskrit": "दुःखेष्वनुद्विग्नमनाः सुखेषु विगतस्पृहः। वीतरागभयक्रोधः स्थितधीर्मुनिरुच्यते॥",
         "transliteration": "duḥkheṣv anudvigna-manāḥ sukheṣu vigata-spṛhaḥ, vīta-rāga-bhaya-krodhaḥ sthita-dhīr munir ucyate",
-        "english": "<placeholder pending PD-baseline rebuild>",
+        "english": "One whose mind is not shaken by adversity, who does not hanker after pleasures, who is free from attachment, fear and anger, is called a sage of steady wisdom.",
         "hindi": "जिसका मन दुःखों में उद्विग्न नहीं होता, सुखों में जिसकी स्पृहा नहीं है, जो राग, भय और क्रोध से रहित है — वह स्थितधी मुनि कहलाता है।",
         "application_to_karma_reset": "The goal of karma reset is not to eliminate all conflict, but to develop sthitaprajna — steady wisdom that remains unshaken regardless of whether the repair succeeds or fails."
     }

@@ -126,7 +126,7 @@ Contains:
 Contains:
 - Ardha (Cognitive Reframing) text
 - Viyoga (Detachment Coach) text
-- Sambandh Dharma (Relationship Compass) text
+- Relationship Compass text
 - Sacred Reflections (Journal) text
 - Other feature descriptions (Karma Footprint, Karmic Tree, etc.)
 

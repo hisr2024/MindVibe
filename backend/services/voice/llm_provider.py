@@ -72,7 +72,7 @@ class LLMProvider(Protocol):
 _FALLBACK_VERSE = {
     "ref": "BG 2.47",
     "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।",
-    "english": "<placeholder pending PD-baseline rebuild>",
+    "english": "You have a right to action alone, never to its fruits.",
 }
 
 
