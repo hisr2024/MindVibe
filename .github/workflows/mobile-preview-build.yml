@@ -4,8 +4,16 @@ on:
   push:
     branches:
       - develop
+      # Disposable branch — pushing to it triggers a one-shot preview build
+      # with --clear-cache forced (see CLEAR_CACHE below). Delete the
+      # branch once the build is verified.
+      - claude/eas-preview-clear-cache
     paths:
       - 'kiaanverse-mobile/**'
+      # Also fire when this workflow itself is the only thing that changed
+      # on the cache-clear branch — otherwise the path filter would block
+      # a workflow-only commit on that branch.
+      - '.github/workflows/mobile-preview-build.yml'
   # Manual dispatch lets maintainers preview-build any branch (e.g. a
   # feature branch with an open PR) without first merging to develop.
   # Useful for verifying an EAS build before review-merge — this branch
@@ -81,8 +89,10 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           # On push-to-develop, defaults to all-platforms. On manual
           # dispatch, the maintainer picks platform + cache strategy.
-          PLATFORM: ${{ github.event.inputs.platform || 'all' }}
-          CLEAR_CACHE: ${{ github.event.inputs.clear_cache || 'false' }}
+          # On push to the cache-clear branch, force --clear-cache (that
+          # branch exists for the sole purpose of a fresh-native build).
+          PLATFORM: ${{ github.event.inputs.platform || 'android' }}
+          CLEAR_CACHE: ${{ github.event.inputs.clear_cache || (github.ref == 'refs/heads/claude/eas-preview-clear-cache' && 'true') || 'false' }}
         run: |
           EXTRA=""
           if [ "$CLEAR_CACHE" = "true" ]; then
