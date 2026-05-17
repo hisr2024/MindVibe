@@ -8,8 +8,13 @@
  *   II.  Stillness     Dhyana (silent mandala, 60 s minimum sit)
  *   III. Wisdom        Shravana (ShlokaCard + "Ask Sakha")
  *   IV.  Reflection    Manana (SacredInput journal entry)
- *   V.   Movement      Asana (Surya Namaskar, 3 min timer)
+ *   V.   Application   Vyavahara (Sakha-drawn modern scenario of the verse)
  *   VI.  Gratitude     Kritajñata (mood + gratitude statement)
+ *
+ * Wisdom (III) and Application (V) both read today's verse from
+ * `gitaStore` — the same date-hashed pick used by the home tab and the
+ * vibe player banner — so all four surfaces stay in sync and rotate
+ * together at local midnight.
  *
  * Between phases, `PhaseCeremony` runs a 1.4 s lotus-bloom transition.
  * When the final phase completes we fire CompletionCelebration with
@@ -17,7 +22,7 @@
  * settle into a "completed" card that routes the user back.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -36,9 +41,11 @@ import {
 } from '@kiaanverse/ui';
 import {
   useCompleteSadhana,
+  useGitaVerse,
   useSadhanaDaily,
   useSadhanaStreak,
 } from '@kiaanverse/api';
+import { useGitaStore } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
 
 import { LotusProgressHeader } from '../../components/sadhana/LotusProgressHeader';
@@ -81,6 +88,44 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
   const { data: dailyData } = useSadhanaDaily();
   const { data: streakData } = useSadhanaStreak();
   const completeSadhana = useCompleteSadhana();
+
+  // Today's verse — shared with home tab + vibe player. The store picks a
+  // verse deterministically per calendar day (see gitaStore.pickDailyVerse).
+  // refreshVerseOfTheDay is idempotent so calling it on every mount is safe;
+  // it short-circuits when vodDate already matches today.
+  const vodChapter = useGitaStore((s) => s.vodChapter);
+  const vodVerse = useGitaStore((s) => s.vodVerse);
+  const refreshVerseOfTheDay = useGitaStore((s) => s.refreshVerseOfTheDay);
+  useEffect(() => {
+    refreshVerseOfTheDay();
+  }, [refreshVerseOfTheDay]);
+  // Fall back to BG 2.47 (the curated default) so the hooks below always
+  // have real inputs on first launch before the store hydrates.
+  const todayChapter = vodChapter ?? 2;
+  const todayVerseNum = vodVerse ?? 47;
+  const { data: todayVerseData } = useGitaVerse(todayChapter, todayVerseNum);
+
+  const todayWisdomVerse = useMemo(() => {
+    if (!todayVerseData) return undefined;
+    return {
+      sanskrit: todayVerseData.sanskrit,
+      transliteration: todayVerseData.transliteration,
+      meaning: todayVerseData.translation,
+      reference: `Bhagavad Gita ${todayVerseData.chapter}.${todayVerseData.verse}`,
+    };
+  }, [todayVerseData]);
+
+  const todayApplicationVerse = useMemo(() => {
+    if (!todayVerseData) return undefined;
+    return {
+      chapter: todayVerseData.chapter,
+      verse: todayVerseData.verse,
+      sanskrit: todayVerseData.sanskrit,
+      transliteration: todayVerseData.transliteration,
+      translation: todayVerseData.translation,
+      reference: `Bhagavad Gita ${todayVerseData.chapter}.${todayVerseData.verse}`,
+    };
+  }, [todayVerseData]);
 
   const [phase, setPhase] = useState<PhaseKey>('arrival');
   const [completed, setCompleted] = useState<Set<PhaseKey>>(() => new Set());
@@ -150,7 +195,12 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
       case 'stillness':
         return <StillnessPhase onComplete={() => advance('stillness')} />;
       case 'wisdom':
-        return <WisdomPhase onComplete={() => advance('wisdom')} />;
+        return (
+          <WisdomPhase
+            verse={todayWisdomVerse}
+            onComplete={() => advance('wisdom')}
+          />
+        );
       case 'reflection':
         return (
           <ReflectionPhase
@@ -160,7 +210,12 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
           />
         );
       case 'movement':
-        return <MovementPhase onComplete={() => advance('movement')} />;
+        return (
+          <MovementPhase
+            verse={todayApplicationVerse}
+            onComplete={() => advance('movement')}
+          />
+        );
       case 'gratitude':
         return (
           <GratitudePhase
@@ -181,6 +236,8 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
     advance,
     handleFinalComplete,
     completeSadhana.isPending,
+    todayWisdomVerse,
+    todayApplicationVerse,
   ]);
 
   // ---------------------------------------------------------------------------

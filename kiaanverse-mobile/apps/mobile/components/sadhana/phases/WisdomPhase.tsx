@@ -1,13 +1,15 @@
 /**
- * WisdomPhase — Phase 3 of Nitya Sadhana: contemplate today's verse.
+ * WisdomPhase — Phase III of Nitya Sadhana: contemplate today's verse.
  *
  * Renders the shared ShlokaCard (gold-shimmer top + VerseRevelation
  * word-by-word Sanskrit reveal) and an "Ask Sakha" secondary CTA that
  * deep-links into the Sakha chat with the verse pre-filled as context.
  *
- * The verse defaults to BG 2.47 (karmaṇy-evādhikāras te…) until the
- * backend's /api/sadhana/daily route exposes a real shloka. When the
- * parent has a better source, it can pass `verse` directly.
+ * The parent (`sadhana/index.tsx`) passes the day's verse from the
+ * shared `gitaStore` rotation so this screen, the home tab, the vibe-
+ * player banner, and the Application phase all stay on the same verse
+ * for the day. The hardcoded BG 2.47 fallback below only renders on the
+ * first cold-start before the store hydrates.
  */
 
 import React, { useCallback } from 'react';

@@ -29,9 +29,11 @@ export {
   type KarmaLytixMetadata as KiaanKarmaLytixMetadata,
   useKiaanRoomChat,
   useKiaanVoice,
+  useVerseModernExample,
   type KiaanRoomChatMessage,
   type UseKiaanRoomChatResult,
   type UseKiaanVoiceResult,
+  type VerseModernExampleInput,
 } from './kiaan';
 
 // Error classes and type guards
