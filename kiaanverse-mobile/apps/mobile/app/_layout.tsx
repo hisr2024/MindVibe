@@ -56,6 +56,7 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
 import { useArrivalStatus } from '../hooks/useArrivalStatus';
 import { useSacredFonts } from '../hooks/useSacredFonts';
+import { requestMicrophonePermission } from '../utils/permissions';
 import { OfflineBanner } from '../components/common/OfflineBanner';
 import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
@@ -370,6 +371,20 @@ function AppContent(): React.JSX.Element {
         await setupTrackPlayer();
       } catch (err) {
         if (__DEV__) console.warn('[setup] setupTrackPlayer failed:', err);
+      }
+      try {
+        // Request microphone permission at boot. Sakha voice conversations,
+        // dictation in the journal editor, and the voice companion all
+        // depend on RECORD_AUDIO; requesting it now means the user has
+        // already granted (or declined) by the time they reach any of
+        // those features, instead of seeing an in-context dialog mid-flow
+        // that's easy to miss. The call is idempotent — if Android has
+        // already granted, no dialog is shown; if denied, the user can
+        // still grant it later from Settings (or when the in-feature
+        // request fires as a second chance). Never blocks boot.
+        await requestMicrophonePermission();
+      } catch (err) {
+        if (__DEV__) console.warn('[setup] requestMicrophonePermission failed:', err);
       }
     };
     void setup();

@@ -60,6 +60,7 @@ export default function MobileJourneyDetailPage() {
   const [isCompleting, setIsCompleting] = useState(false)
   const isCompletingRef = useRef(false)
   const [showActions, setShowActions] = useState(false)
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [reflection, setReflection] = useState('')
   const [showReflection, setShowReflection] = useState(false)
@@ -404,14 +405,75 @@ export default function MobileJourneyDetailPage() {
             )}
             {(journey.status === 'active' || journey.status === 'paused') && (
               <button
-                onClick={() => handleAction('abandon')}
+                // Open a confirmation step rather than firing the destructive
+                // abandon immediately. Without this, a single accidental tap
+                // erases progress on a long-running journey.
+                onClick={() => {
+                  setShowActions(false)
+                  setShowQuitConfirm(true)
+                }}
                 disabled={actionLoading !== null}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-red-500/10 text-red-400 text-sm disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
-                {actionLoading === 'abandon' ? 'Abandoning...' : 'Abandon Journey'}
+                {actionLoading === 'abandon' ? 'Quitting…' : 'Quit Journey'}
               </button>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Quit confirmation modal — guards the irreversible abandon action.
+          Shows journey name + progress so the user knows what they're
+          giving up before they tap Quit. */}
+      <AnimatePresence>
+        {showQuitConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+            onClick={() => !actionLoading && setShowQuitConfirm(false)}
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          >
+            <motion.div
+              initial={{ y: 24, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 24, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm mx-4 mb-4 rounded-2xl bg-[#0B0E2A] border border-white/[0.08] overflow-hidden"
+            >
+              <div className="p-5 border-b border-white/[0.06]">
+                <h3 className="text-base font-semibold text-white mb-1">Quit this journey?</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  This will mark <span className="text-white/90 font-medium">{journey?.title || 'this journey'}</span> as
+                  abandoned. Your progress (<span className="text-white/90 font-medium">{journey?.current_day ? `day ${journey.current_day} of ${journey.total_days}` : 'in progress'}</span>) will
+                  be saved, but the journey will no longer appear in your active list. You can start it again from the catalog any time.
+                </p>
+              </div>
+              <div className="p-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowQuitConfirm(false)}
+                  disabled={actionLoading !== null}
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-white/[0.06] text-white text-sm font-medium disabled:opacity-50"
+                >
+                  Keep going
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleAction('abandon')
+                    setShowQuitConfirm(false)
+                  }}
+                  disabled={actionLoading !== null}
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium disabled:opacity-50"
+                >
+                  {actionLoading === 'abandon' ? 'Quitting…' : 'Quit Journey'}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

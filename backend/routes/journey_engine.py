@@ -578,6 +578,81 @@ def _build_sakha_response(
     return body, mastery_delta
 
 
+# ===========================================================================
+# Static Wisdom Core — direct JSON hydration for verses whose DB rows are
+# the seed-script placeholders ("॥ X.Y ॥" sanskrit, "Bhagavad Gita Chapter
+# X, Verse Y teaches wisdom on <theme>" english). When the gita_verses
+# table holds the placeholder, the runtime falls back to the real corpus
+# at data/gita/gita_verses_complete.json so the user sees the actual
+# śloka — not the seed placeholder. Loaded once at module import; the
+# file is ~1MB and the lookup is O(1) after indexing.
+# ===========================================================================
+
+_STATIC_WISDOM_INDEX: dict[str, dict[str, Any]] | None = None
+
+
+def _load_static_wisdom_index() -> dict[str, dict[str, Any]]:
+    """Index the 701-verse corpus by 'C.V' for O(1) lookup. Returns empty
+    dict on any failure so the runtime degrades gracefully to the existing
+    _ENEMY_SACRED fallback for the six canonical enemy verses."""
+    global _STATIC_WISDOM_INDEX
+    if _STATIC_WISDOM_INDEX is not None:
+        return _STATIC_WISDOM_INDEX
+    import json
+    from pathlib import Path
+    index: dict[str, dict[str, Any]] = {}
+    gita_path = (
+        Path(__file__).resolve().parent.parent.parent
+        / "data" / "gita" / "gita_verses_complete.json"
+    )
+    try:
+        if gita_path.exists():
+            with open(gita_path, "r", encoding="utf-8") as f:
+                for verse in json.load(f):
+                    chapter = verse.get("chapter")
+                    verse_num = verse.get("verse")
+                    if chapter is not None and verse_num is not None:
+                        index[f"{chapter}.{verse_num}"] = verse
+    except Exception as exc:
+        logger.warning("Static Wisdom Core JSON load failed: %s", exc)
+    _STATIC_WISDOM_INDEX = index
+    return index
+
+
+def _is_placeholder_sanskrit(value: str | None) -> bool:
+    """Detect the seed-script Sanskrit placeholder '॥ X.Y ॥'.
+
+    Real ślokas are 30+ characters of Devanagari; the placeholder is the
+    pure danda-marker form (e.g., '॥ 2.63 ॥'). Anything that matches the
+    short-marker pattern is treated as a missing row.
+    """
+    if not value:
+        return True
+    stripped = value.strip()
+    if not stripped:
+        return True
+    import re
+    return bool(re.fullmatch(r"॥\s*\d+\.\d+\s*॥", stripped))
+
+
+def _is_placeholder_english(value: str | None) -> bool:
+    """Detect the seed-script English placeholder.
+
+    The seeded English starts with 'Bhagavad Gita Chapter X, Verse Y
+    teaches wisdom on …' — case-insensitive contains check is enough.
+    """
+    if not value:
+        return True
+    return "teaches wisdom on" in value.lower()
+
+
+def _hydrate_from_static_wisdom(
+    chapter: int, verse: int
+) -> dict[str, Any] | None:
+    """Look up (chapter, verse) in the Static Wisdom Core JSON corpus."""
+    return _load_static_wisdom_index().get(f"{chapter}.{verse}")
+
+
 def _step_to_response(
     step: Any, *, enemy_tag: str | None = None
 ) -> StepResponse:
@@ -590,18 +665,41 @@ def _step_to_response(
             provided we fall back to the sacred defaults keyed by the verse
             chapter — safe because every step always has at least one verse.
     """
-    verses = [
-        VerseContent(
+    # Hydrate each verse from the Static Wisdom Core JSON when the DB row
+    # is the seed-script placeholder. Without this, the verse card on
+    # screen reads "Bhagavad Gita Chapter X, Verse Y teaches wisdom on
+    # <theme>" instead of the real śloka — exactly what the user reported.
+    verses: list[VerseContent] = []
+    for v in step.verses:
+        sanskrit = v.get("sanskrit")
+        english = v.get("english")
+        translit = v.get("transliteration")
+        hindi = v.get("hindi")
+        theme = v.get("theme")
+        if _is_placeholder_sanskrit(sanskrit) or _is_placeholder_english(english):
+            corpus = _hydrate_from_static_wisdom(v["chapter"], v["verse"])
+            if corpus:
+                # Only overwrite the placeholder fields — keep any real
+                # values the DB row may already carry.
+                if _is_placeholder_sanskrit(sanskrit) and corpus.get("sanskrit"):
+                    sanskrit = corpus["sanskrit"]
+                if (not translit or translit.strip().lower().startswith("verse ")) and corpus.get("transliteration"):
+                    translit = corpus["transliteration"]
+                if _is_placeholder_english(english) and corpus.get("english"):
+                    english = corpus["english"]
+                if not hindi and corpus.get("hindi"):
+                    hindi = corpus["hindi"]
+                if not theme and corpus.get("theme"):
+                    theme = corpus["theme"]
+        verses.append(VerseContent(
             chapter=v["chapter"],
             verse=v["verse"],
-            sanskrit=v.get("sanskrit"),
-            hindi=v.get("hindi"),
-            english=v["english"],
-            transliteration=v.get("transliteration"),
-            theme=v.get("theme"),
-        )
-        for v in step.verses
-    ]
+            sanskrit=sanskrit,
+            hindi=hindi,
+            english=english or "",
+            transliteration=translit,
+            theme=theme,
+        ))
 
     first_verse = verses[0] if verses else None
     sacred = _sacred_for_enemy(enemy_tag)
@@ -615,9 +713,14 @@ def _step_to_response(
 
     if first_verse is not None:
         verse_ref = {"chapter": first_verse.chapter, "verse": first_verse.verse}
-        verse_sanskrit = first_verse.sanskrit
-        verse_translit = first_verse.transliteration
-        verse_translation = first_verse.english
+        # Treat post-hydration placeholders the same as missing so the
+        # sacred fallback can take over.
+        if not _is_placeholder_sanskrit(first_verse.sanskrit):
+            verse_sanskrit = first_verse.sanskrit
+        if first_verse.transliteration and not first_verse.transliteration.strip().lower().startswith("verse "):
+            verse_translit = first_verse.transliteration
+        if not _is_placeholder_english(first_verse.english):
+            verse_translation = first_verse.english
 
     if sacred is not None:
         verse_ref = verse_ref or sacred["verse_ref"]
