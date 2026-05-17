@@ -1,0 +1,8 @@
+<resources>
+  <string name="app_name">Kiaanverse</string>
+  <string name="expo_runtime_version">1.3.2</string>
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="sakha_notification_title">सखा सुन रहे हैं</string>
+  <string name="sakha_notification_body">Voice companion active</string>
+</resources>
