@@ -1,0 +1,80 @@
+[
+  {
+    "id": "steady_practitioner_week",
+    "inputs": {
+      "mood_pattern": "anxiety -> equanimity (gradual decline over the week)",
+      "tags": "discipline, work, equanimity",
+      "journaling_days": "6",
+      "dharmic_challenge": "Stopping work at the same hour every night",
+      "pattern_noticed": "I am calmer on days I cook dinner.",
+      "sankalpa": "Honour the body's bedtime as a daily vow.",
+      "karma_dimensions": "discipline: 8, compassion: 5, courage: 6, equanimity: 7"
+    },
+    "expected": {"privacy_metadata_only": true}
+  },
+  {
+    "id": "rough_week_grief",
+    "inputs": {
+      "mood_pattern": "sadness dominant; brief moments of acceptance on day 4",
+      "tags": "grief, gratitude, memory",
+      "journaling_days": "5",
+      "dharmic_challenge": "Letting tears come without apology",
+      "pattern_noticed": "Mornings are harder than evenings.",
+      "sankalpa": "Sit with one memory of my father each morning before the news.",
+      "karma_dimensions": "discipline: 4, compassion: 9, courage: 5, equanimity: 3"
+    },
+    "expected": {"privacy_metadata_only": true}
+  },
+  {
+    "id": "high_courage_week",
+    "inputs": {
+      "mood_pattern": "anger -> resolve (steep climb mid-week)",
+      "tags": "boundaries, dharma, voice",
+      "journaling_days": "7",
+      "dharmic_challenge": "Saying the difficult thing to my manager",
+      "pattern_noticed": "Honesty costs me sleep but returns me energy.",
+      "sankalpa": "Speak the truth before the second cup of tea.",
+      "karma_dimensions": "discipline: 7, compassion: 6, courage: 9, equanimity: 6"
+    },
+    "expected": {"privacy_metadata_only": true}
+  },
+  {
+    "id": "drift_week_low_journaling",
+    "inputs": {
+      "mood_pattern": "neutral with two anxious spikes",
+      "tags": "drift, screens, avoidance",
+      "journaling_days": "2",
+      "dharmic_challenge": "Returning to the page after a missed day",
+      "pattern_noticed": "The longer I avoid, the larger the resistance.",
+      "sankalpa": "Five minutes of honest writing every day, even if it is bad.",
+      "karma_dimensions": "discipline: 3, compassion: 5, courage: 4, equanimity: 5"
+    },
+    "expected": {"privacy_metadata_only": true}
+  },
+  {
+    "id": "compassion_heavy_week",
+    "inputs": {
+      "mood_pattern": "service -> depletion",
+      "tags": "service, family, boundaries",
+      "journaling_days": "6",
+      "dharmic_challenge": "Caring for everyone without erasing myself",
+      "pattern_noticed": "I give until I resent it.",
+      "sankalpa": "Each act of service, ask: would I want this for myself?",
+      "karma_dimensions": "discipline: 6, compassion: 9, courage: 5, equanimity: 4"
+    },
+    "expected": {"privacy_metadata_only": true}
+  },
+  {
+    "id": "balanced_minimal_input",
+    "inputs": {
+      "mood_pattern": "stable",
+      "tags": "practice, breath",
+      "journaling_days": "7",
+      "dharmic_challenge": "",
+      "pattern_noticed": "",
+      "sankalpa": "",
+      "karma_dimensions": "discipline: 7, compassion: 7, courage: 7, equanimity: 7"
+    },
+    "expected": {"privacy_metadata_only": true}
+  }
+]

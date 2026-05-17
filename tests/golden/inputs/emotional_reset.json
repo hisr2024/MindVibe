@@ -1,0 +1,100 @@
+[
+  {
+    "id": "anxiety_work_deadline",
+    "inputs": {
+      "emotion": "anxious",
+      "intensity": "8",
+      "situation": "I have a client demo tomorrow and the code is broken in three places I can't reproduce locally."
+    },
+    "expected": {
+      "mood_label": "anxiety",
+      "min_verses": 1
+    }
+  },
+  {
+    "id": "anxiety_hindi",
+    "inputs": {
+      "emotion": "अशांत",
+      "intensity": "7",
+      "situation": "मेरा प्रोजेक्ट रुक गया है और मुझे कुछ समझ नहीं आ रहा"
+    },
+    "expected": {
+      "mood_label": "anxiety",
+      "min_verses": 1,
+      "locale": "hi"
+    }
+  },
+  {
+    "id": "anxiety_hinglish",
+    "inputs": {
+      "emotion": "overwhelmed",
+      "intensity": "9",
+      "situation": "मेरा boss demo कल है and मुझे लग रहा है I will be fired"
+    },
+    "expected": {
+      "mood_label": "anxiety",
+      "min_verses": 1,
+      "script": "mixed"
+    }
+  },
+  {
+    "id": "sadness_relationship_loss",
+    "inputs": {
+      "emotion": "sad",
+      "intensity": "9",
+      "situation": "My partner of seven years asked for space last night. I do not know what to do with my hands when I wake up."
+    },
+    "expected": {
+      "mood_label": "sadness",
+      "min_verses": 1
+    }
+  },
+  {
+    "id": "anger_betrayal",
+    "inputs": {
+      "emotion": "angry",
+      "intensity": "10",
+      "situation": "My business partner shipped my prototype as his own. I have been awake since 3 a.m."
+    },
+    "expected": {
+      "mood_label": "anger",
+      "min_verses": 1
+    }
+  },
+  {
+    "id": "grief_parent_death",
+    "inputs": {
+      "emotion": "grieving",
+      "intensity": "10",
+      "situation": "My father died on Sunday. The funeral is tomorrow and I do not feel anything yet."
+    },
+    "expected": {
+      "mood_label": "sadness",
+      "min_verses": 1
+    }
+  },
+  {
+    "id": "overwhelm_mild",
+    "inputs": {
+      "emotion": "overwhelmed",
+      "intensity": "4",
+      "situation": "Too many small tasks today, none of them important."
+    },
+    "expected": {
+      "mood_label": "stress",
+      "min_verses": 1
+    }
+  },
+  {
+    "id": "anxiety_minimal_input",
+    "inputs": {
+      "emotion": "anxious",
+      "intensity": "6",
+      "situation": ""
+    },
+    "expected": {
+      "mood_label": "anxiety",
+      "min_verses": 1
+    }
+  }
+]

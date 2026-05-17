@@ -88,6 +88,35 @@ serve later; the unary endpoint populates the cache for next time.
 Bypass conditions: same as unary — `user_id=None`, `system_override`,
 `gita_verse` pin, or `KIAAN_RESPONSE_CACHE_ENABLED=false`.
 
+## Golden-answer regression suite
+
+`tests/golden/` carries a canonical input corpus per surface (six
+sacred tools + bare chat = 56 inputs total spanning English / Hindi /
+Hinglish, moods from anxiety to gratitude, and crisis-signal probes).
+Two layers run via `tests/test_golden_regression.py`:
+
+* **Layer A — input invariants** (always in CI): every corpus loads
+  as a non-empty list with unique IDs and required fields; every tool
+  record's `build_tool_message` envelope renders cleanly.
+* **Layer B — drift checks** (engage when recordings exist): each
+  recorded `input_record` must still match the live corpus byte-for-
+  byte; recording payload schema is valid. When no recordings exist
+  (fresh checkout), Layer B skips with a clear message.
+
+A mock-LLM end-to-end smoke runs every CI to assert the recorder
+pipeline still wires together.
+
+**Recording.** Ops runs `python scripts/record_golden_responses.py
+--all` after an intentional prompt / persona / model change. Costs
+~$0.03, takes ~3 minutes, writes one JSON per (surface, id) under
+`tests/golden/recordings/`. The recordings are version-controlled —
+diffs in PR are the audit trail for prompt / model changes.
+
+**Drift tolerances** (from `tests/test_golden_regression.py`):
+- `wisdom_score` may drop ≤ 0.10
+- `filter_applied` rate may drop ≤ 2 pp
+- recorded `verse_refs` must still appear in the new response
+
 ## Sacred-tool envelope
 
 `backend/services/tool_envelope.build_tool_message(tool_name, inputs)`
