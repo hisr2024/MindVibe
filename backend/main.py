@@ -1052,16 +1052,10 @@ except Exception as e:
 startup_logger.info("\n[Monitoring] Loading monitoring and observability router...")
 try:
     from backend.monitoring.health import router as monitoring_router
-    from backend.routes.kiaan_metrics import router as kiaan_metrics_router
 
     app.include_router(monitoring_router)
-    app.include_router(kiaan_metrics_router)
-    _startup_status["routers_loaded"] += 2
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Monitoring router loaded")
-    startup_logger.info(
-        "✅ [SUCCESS] KIAAN Prometheus metrics router loaded "
-        "(GET /api/monitoring/prometheus)"
-    )
     startup_logger.info(
         "   • GET    /api/monitoring/health/detailed - Detailed health check"
     )

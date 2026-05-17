@@ -266,16 +266,6 @@ class VoiceCompanionOrchestrator:
                     audio_chunks_emitted += 1
             else:
                 # ── Cache miss: LLM stream → filter → TTS sentence by sentence ──
-                # ``memories`` and ``session_summaries`` are the per-user
-                # long-term context the WSS handler fetches from
-                # ``backend.services.companion_context`` and hands us via
-                # the VoiceTurnContext. Including them in the user_payload
-                # closes the personalisation gap AUDIT_VOICE_COMPANION.md
-                # flagged on the Android voice surface — Sakha now
-                # remembers across sessions the same way the REST voice
-                # companion already does. Empty lists for cold-start
-                # users render to ``[]`` in the JSON, which the persona
-                # prompt knows to skip without complaint.
                 user_payload = json.dumps({
                     "persona_version": ctx.persona_version,
                     "render_mode": ctx.render_mode,
@@ -283,8 +273,6 @@ class VoiceCompanionOrchestrator:
                     "lang_hint": ctx.lang_hint,
                     "user_latest": ctx.user_latest,
                     "history": ctx.history,
-                    "memories": ctx.memories,
-                    "session_summaries": ctx.session_summaries,
                     "mood": {
                         "label": mood_label,
                         "intensity": mood_intensity,
@@ -343,36 +331,12 @@ class VoiceCompanionOrchestrator:
                         yield ServerTextDeltaFrame(content=sentence)
                         sentences_emitted += 1
 
-                        # 2. Synthesize that sentence with per-sentence
-                        # language detection (IMPROVEMENT_ROADMAP.md
-                        # P1 §8). Hindi sentences route to Sarvam,
-                        # English to ElevenLabs, Hinglish to Sarvam
-                        # Hindi (which handles Devanagari + Latin
-                        # script cleanly — ElevenLabs Aria does not).
-                        # Falls back to the turn-level lang_hint when
-                        # the sentence carries no scripted characters.
-                        from backend.services.voice.lang_detect import (
-                            pick_tts_lang,
-                        )
-                        from backend.services.voice.tts_router import (
-                            get_voice_id,
-                        )
-
-                        per_sentence_lang = pick_tts_lang(
-                            sentence, fallback=ctx.lang_hint
-                        )
-                        per_sentence_voice = (
-                            get_voice_id(per_sentence_lang)
-                            if per_sentence_lang != ctx.lang_hint
-                            else tts_decision.voice_id
-                        )
-                        tts_provider, _ = self._tts.build_provider(
-                            per_sentence_lang
-                        )
+                        # 2. Synthesize that sentence
+                        tts_provider, _ = self._tts.build_provider(ctx.lang_hint)
                         async for chunk in tts_provider.synthesize_streaming(
                             text=sentence,
-                            voice_id=per_sentence_voice,
-                            lang_hint=per_sentence_lang,
+                            voice_id=tts_decision.voice_id,
+                            lang_hint=ctx.lang_hint,
                         ):
                             if first_byte_ms is None:
                                 first_byte_ms = int(
@@ -406,29 +370,12 @@ class VoiceCompanionOrchestrator:
                     tier_used = fallback_tier  # noqa: F841 — assigned for telemetry below
                     yield ServerTextDeltaFrame(content=fallback_text)
                     sentences_emitted += 1
-                    # Per-sentence routing for the fallback text too —
-                    # tier-3 templates may be hi-en even when the turn
-                    # hint is en. See IMPROVEMENT_ROADMAP.md P1 §8.
-                    from backend.services.voice.lang_detect import (
-                        pick_tts_lang as _pick_fb_lang,
-                    )
-                    from backend.services.voice.tts_router import (
-                        get_voice_id as _get_fb_voice,
-                    )
-                    fb_lang = _pick_fb_lang(
-                        fallback_text, fallback=ctx.lang_hint
-                    )
-                    fb_voice = (
-                        _get_fb_voice(fb_lang)
-                        if fb_lang != ctx.lang_hint
-                        else tts_decision.voice_id
-                    )
-                    fb_tts_provider, _ = self._tts.build_provider(fb_lang)
+                    fb_tts_provider, _ = self._tts.build_provider(ctx.lang_hint)
                     accumulated_chunks = []  # don't cache failed-LLM audio
                     async for chunk in fb_tts_provider.synthesize_streaming(
                         text=fallback_text,
-                        voice_id=fb_voice,
-                        lang_hint=fb_lang,
+                        voice_id=tts_decision.voice_id,
+                        lang_hint=ctx.lang_hint,
                     ):
                         if first_byte_ms is None:
                             first_byte_ms = int(

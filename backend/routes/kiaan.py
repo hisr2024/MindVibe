@@ -17,12 +17,10 @@ to :func:`backend.services.ai_provider.call_kiaan_ai`, and returns a tight
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,12 +29,9 @@ from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.services.ai_provider import (
     AIProviderError,
     AIProviderNotConfigured,
+    call_kiaan_ai,
 )
-from backend.services.kiaan_grounded_ai import (
-    call_kiaan_ai_grounded,
-    call_kiaan_ai_grounded_stream,
-)
-from backend.services.tool_envelope import build_tool_message
+from backend.services.kiaan_wisdom_helper import compose_kiaan_system_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -130,26 +125,15 @@ async def _run_ai(
     gita_verse: dict[str, Any] | None = None,
     system_override: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Call the AI provider through the Wisdom-Core-gated pipeline.
+    """Call the AI provider grounded in Wisdom Core, modern-secular framing.
 
-    Delegates to :func:`backend.services.kiaan_grounded_ai.call_kiaan_ai_grounded`,
-    which enforces the three-stage invariant the codebase commits to for
-    every user-facing KIAAN response:
-
-      * **Pre-LLM:** when ``db`` is provided and the caller has *not*
-        shipped its own ``system_override``, the system prompt is composed
-        by Wisdom Core — persona-version 1.2.0 (modern-secular text
-        persona) + retrieved verses block from
-        :class:`backend.services.wisdom_core.WisdomCore` (static + dynamic
-        corpus, effectiveness-weighted) + ``gita_practical_wisdom`` modern
-        implementation. That replaces the legacy Krishna-flavoured
-        constant in :mod:`backend.services.ai_provider`.
-      * **LLM:** routed by the configured ``AI_PROVIDER`` via
-        :func:`call_kiaan_ai`.
-      * **Post-LLM:** the response passes through
-        :class:`backend.services.gita_wisdom_filter.GitaWisdomFilter`,
-        which validates Gita grounding and enhances when the wisdom
-        score is low.
+    When ``db`` is provided and the caller has *not* shipped its own
+    ``system_override``, this composes a system prompt = persona-version
+    1.2.0 (modern-secular text persona) + retrieved verses block from
+    :class:`backend.services.wisdom_core.WisdomCore` (static + dynamic
+    corpus, effectiveness-weighted). That replaces the legacy Krishna-
+    flavoured constant in :mod:`backend.services.ai_provider` for every
+    chat + tool request routed here.
 
     Returns ``(response_text, verses)`` so the caller can echo verse
     refs back to the client (Android already parses them from the
@@ -161,17 +145,26 @@ async def _run_ai(
     upstream failures surface as 502 (bad gateway). Validation errors from
     the provider layer become 400.
     """
-    try:
-        grounded = await call_kiaan_ai_grounded(
-            message=message,
+    verses: list[dict[str, Any]] = []
+    if db is not None and not (system_override and system_override.strip()):
+        composed, verses = await compose_kiaan_system_prompt(
             db=db,
-            user_id=user_id,
+            query=message,
             tool_name=tool_name,
+            user_id=user_id,
+        )
+        if composed:
+            system_override = composed
+
+    try:
+        text = await call_kiaan_ai(
+            message=message,
             conversation_history=history or [],
             gita_verse=gita_verse,
+            tool_name=tool_name,
             system_override=system_override,
         )
-        return grounded.text, grounded.verses
+        return text, verses
     except AIProviderNotConfigured as exc:
         logger.error("KIAAN AI not configured: %s", exc)
         raise HTTPException(
@@ -243,119 +236,6 @@ async def sakha_chat_alias(
     return await _handle_sakha_chat(payload, current_user_id, db)
 
 
-# ── ENDPOINT 1b: Sakha Chat (streaming SSE variant) ──────────────────────
-@router.post("/chat/stream")
-@limiter.limit(CHAT_RATE_LIMIT)
-async def sakha_chat_stream(
-    request: Request,
-    payload: ChatRequest,
-    current_user_id: str = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> StreamingResponse:
-    """Streaming variant of the Sakha chat endpoint (P1 §5).
-
-    Wire format: Server-Sent Events. Three event types in order:
-
-      * ``event: verses``  → list[dict] of Wisdom Core verses
-      * ``event: token``   → str delta (one PASS sentence + trailing space)
-      * ``event: done``    → telemetry dict (wisdom_score,
-                              is_gita_grounded, enhancement_applied,
-                              filter_applied, cache_hit, failure_reason)
-
-    Cache HITs are emitted as the same protocol so the client never has
-    to special-case them: ``verses`` event + a single ``token`` event
-    carrying the cached text + ``done`` with ``cache_hit: true``.
-
-    The pre-LLM Wisdom Core composer runs identically to the unary
-    endpoint (same persona, same Static + Dynamic retrieval, same
-    practical-wisdom enrichment). The post-LLM filter is the streaming
-    variant — sentence-by-sentence PASS / HOLD / FAIL with the same
-    rules the voice WSS path applies.
-
-    Errors:
-      * Provider not configured → 503 before the stream starts.
-      * Upstream transient failure → 502 before the stream starts.
-      * Mid-stream filter FAIL → the stream closes cleanly with a
-        ``done`` event carrying ``failure_reason`` and ``fallback_tier``.
-        The client renders the partial response under a "fallback"
-        affordance.
-    """
-    history = [
-        {"role": m.role, "content": m.content} for m in payload.conversation_history
-    ]
-
-    async def _event_stream():
-        try:
-            async for event in call_kiaan_ai_grounded_stream(
-                message=payload.message,
-                db=db,
-                user_id=current_user_id,
-                tool_name=payload.tool_name,
-                conversation_history=history,
-                gita_verse=payload.gita_verse,
-                system_override=payload.system_context,
-            ):
-                # Serialize each event as one SSE record. ``data:`` MUST
-                # be valid JSON (the field is a single string, but JSON
-                # is the simplest unambiguous encoding for arbitrary
-                # payloads — dict, list, str all serialize cleanly).
-                payload_json = json.dumps(event.data, ensure_ascii=False)
-                yield (
-                    f"event: {event.kind}\n"
-                    f"data: {payload_json}\n\n"
-                ).encode()
-        except AIProviderNotConfigured as exc:
-            logger.error("KIAAN AI stream not configured: %s", exc)
-            # Once the StreamingResponse has started we cannot change
-            # the HTTP status. Emit a done event with the failure
-            # reason so the client can surface it.
-            yield (
-                "event: done\n"
-                f'data: {{"failure_reason": "ai_not_configured", "detail": "{str(exc)[:160]}"}}\n\n'
-            ).encode()
-        except AIProviderError as exc:
-            logger.error(
-                "KIAAN AI stream provider error (tool=%s): %s",
-                payload.tool_name,
-                exc,
-            )
-            yield (
-                "event: done\n"
-                f'data: {{"failure_reason": "ai_provider_error", "detail": "{str(exc)[:160]}"}}\n\n'
-            ).encode()
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("KIAAN AI stream crashed: %s", exc)
-            yield (
-                b"event: done\n"
-                b'data: {"failure_reason": "internal_error"}\n\n'
-            )
-
-    # Pre-flight: bounce the obvious config error before opening the
-    # SSE so the client gets a clean 503 instead of a degraded stream.
-    # We mirror the unary route's behaviour here.
-    import os as _os
-    if (
-        _os.getenv("AI_PROVIDER", "openai").strip().lower() == "openai"
-        and not _os.getenv("OPENAI_API_KEY", "").strip()
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Sakha is temporarily unavailable. Please try again shortly.",
-        )
-
-    return StreamingResponse(
-        _event_stream(),
-        media_type="text/event-stream",
-        # Disable buffering at any intermediate proxy so each SSE record
-        # reaches the client immediately.
-        headers={
-            "Cache-Control": "no-cache, no-transform",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
-
-
 # ── ENDPOINT 2: Emotional Reset ──────────────────────────────────────────
 @router.post("/tools/emotional-reset", response_model=ChatResponse)
 @limiter.limit(CHAT_RATE_LIMIT)
@@ -365,15 +245,15 @@ async def emotional_reset(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    # Structured envelope (IMPROVEMENT_ROADMAP.md P1.5 §10) replaces
-    # the hand-rolled English narrative. Same fields the Android client
-    # already sends; the LLM gets a parse-stable JSON shape inside
-    # <TOOL>/<INPUTS>/<REQUEST> tags.
-    message = build_tool_message("Emotional Reset", {
-        "emotion": _tool_input(payload.inputs, "emotion", "overwhelmed"),
-        "intensity": _tool_input(payload.inputs, "intensity", "5"),
-        "situation": _tool_input(payload.inputs, "situation"),
-    })
+    emotion = _tool_input(payload.inputs, "emotion", "overwhelmed")
+    intensity = _tool_input(payload.inputs, "intensity", "5")
+    situation = _tool_input(payload.inputs, "situation")
+
+    message = (
+        f"I am experiencing {emotion} with an intensity of {intensity}/10. "
+        f"Here is what happened: {situation}. "
+        "Please guide me through an emotional reset."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -397,11 +277,17 @@ async def ardha(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    message = build_tool_message("Ardha", {
-        "situation": _tool_input(payload.inputs, "situation"),
-        "limiting_belief": _tool_input(payload.inputs, "limiting_belief"),
-        "fear": _tool_input(payload.inputs, "fear"),
-    })
+    situation = _tool_input(payload.inputs, "situation")
+    belief = _tool_input(payload.inputs, "limiting_belief")
+    fear = _tool_input(payload.inputs, "fear")
+
+    message = (
+        "I need cognitive reframing. "
+        f"My situation: {situation}. "
+        f"The limiting belief holding me: {belief}. "
+        f"What I fear most: {fear}. "
+        "Please help me reframe this."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -425,11 +311,16 @@ async def viyoga(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    message = build_tool_message("Viyoga", {
-        "attachment": _tool_input(payload.inputs, "attachment"),
-        "attachment_type": _tool_input(payload.inputs, "attachment_type"),
-        "freedom_vision": _tool_input(payload.inputs, "freedom_vision"),
-    })
+    attachment = _tool_input(payload.inputs, "attachment")
+    attachment_type = _tool_input(payload.inputs, "attachment_type")
+    freedom_vision = _tool_input(payload.inputs, "freedom_vision")
+
+    message = (
+        f"I am struggling to let go of: {attachment}. "
+        f"This is an attachment to: {attachment_type}. "
+        f"What freedom would feel like: {freedom_vision}. "
+        "Please guide me through Viyoga — the practice of non-attachment."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -453,11 +344,16 @@ async def karma_reset(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    message = build_tool_message("Karma Reset", {
-        "pattern": _tool_input(payload.inputs, "pattern"),
-        "dimension": _tool_input(payload.inputs, "dimension"),
-        "dharmic_action": _tool_input(payload.inputs, "dharmic_action"),
-    })
+    pattern = _tool_input(payload.inputs, "pattern")
+    dimension = _tool_input(payload.inputs, "dimension")
+    dharmic_action = _tool_input(payload.inputs, "dharmic_action")
+
+    message = (
+        f"I want to examine this recurring pattern: {pattern}. "
+        f"This pattern shows up as: {dimension}. "
+        f"The action I feel called to: {dharmic_action}. "
+        "Please guide me through a Karma Reset."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -481,11 +377,16 @@ async def sambandh_dharma(
     current_user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    message = build_tool_message("Sambandh Dharma (Relationship Compass)", {
-        "challenge": _tool_input(payload.inputs, "challenge"),
-        "relationship_type": _tool_input(payload.inputs, "relationship_type"),
-        "core_difficulty": _tool_input(payload.inputs, "core_difficulty"),
-    })
+    challenge = _tool_input(payload.inputs, "challenge")
+    relationship_type = _tool_input(payload.inputs, "relationship_type")
+    difficulty = _tool_input(payload.inputs, "core_difficulty")
+
+    message = (
+        f"I have a relationship challenge: {challenge}. "
+        f"This is with: {relationship_type}. "
+        f"The core difficulty is: {difficulty}. "
+        "Please guide me through the Sambandh Dharma (Relationship Compass)."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -516,19 +417,29 @@ async def karmalytix(
     Journal entries remain encrypted on the client. Do not add journal text
     to this prompt under any circumstances.
     """
-    # The KarmaLytix tool envelope carries the PRIVACY directive in
-    # its <REQUEST> tag (see backend/services/tool_envelope.py).
-    # Journal content is encrypted client-side and never reaches the
-    # LLM; only the metadata fields below do.
-    message = build_tool_message("KarmaLytix", {
-        "mood_pattern": _tool_input(payload.inputs, "mood_pattern"),
-        "tags": _tool_input(payload.inputs, "tags"),
-        "journaling_days": _tool_input(payload.inputs, "journaling_days", "0"),
-        "dharmic_challenge": _tool_input(payload.inputs, "dharmic_challenge"),
-        "pattern_noticed": _tool_input(payload.inputs, "pattern_noticed"),
-        "sankalpa": _tool_input(payload.inputs, "sankalpa"),
-        "karma_dimensions": _tool_input(payload.inputs, "karma_dimensions"),
-    })
+    mood_pattern = _tool_input(payload.inputs, "mood_pattern")
+    tags = _tool_input(payload.inputs, "tags")
+    journaling_days = _tool_input(payload.inputs, "journaling_days", "0")
+    challenge = _tool_input(payload.inputs, "dharmic_challenge")
+    pattern = _tool_input(payload.inputs, "pattern_noticed")
+    sankalpa = _tool_input(payload.inputs, "sankalpa")
+    dimensions = _tool_input(payload.inputs, "karma_dimensions")
+
+    message = (
+        "Generate a weekly Sacred Mirror for this devotee. "
+        "METADATA ONLY — journal content is encrypted and never shared. "
+        f"Mood pattern this week: {mood_pattern}. "
+        f"Sacred themes they tagged: {tags}. "
+        f"Days journaled: {journaling_days}/7. "
+        f"Dharmic challenge they identified: {challenge}. "
+        f"Pattern they noticed in themselves: {pattern}. "
+        f"Sankalpa for next week: {sankalpa}. "
+        f"Karma dimension scores: {dimensions}. "
+        "Generate a warm, specific Sacred Mirror with: "
+        "Mirror (what the data reveals), Pattern (recurring theme), "
+        "Gita Echo (most relevant verse), Growth Edge (invitation to deepen), "
+        "Blessing (acknowledgment of where they are)."
+    )
     response_text, verses = await _run_ai(
         message=message,
         db=db,
@@ -540,136 +451,4 @@ async def karmalytix(
         response=response_text,
         conversation_id=current_user_id,
         verses=verses,
-    )
-
-
-# ── ENDPOINT 8: Assistant Engine ─────────────────────────────────────────
-# Implements IMPROVEMENT_ROADMAP.md P1 §9. Exposes the fourth engine
-# (``EngineType.ASSISTANT``, suppressed in voice mode by design) as a
-# text-mode HTTP surface. Same Wisdom-Core-gated pipeline as the other
-# tools — the LLM receives an envelope tagged ``<TOOL>Assistant</TOOL>``
-# and a directive that asks it to surface task intent without inventing
-# tool execution. Per-action wiring (start_journey, schedule_reflection,
-# get_streak) is a follow-up; this commit lands the addressable surface.
-
-
-class AssistantRequest(BaseModel):
-    """Text-mode task query for the Assistant engine."""
-
-    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
-    conversation_history: list[Message] = Field(default_factory=list)
-
-    @field_validator("conversation_history")
-    @classmethod
-    def _bound_history(cls, v: list[Message]) -> list[Message]:
-        if len(v) > MAX_HISTORY_MESSAGES:
-            raise ValueError(
-                f"conversation_history exceeds {MAX_HISTORY_MESSAGES} messages"
-            )
-        return v
-
-
-@router.post("/assistant", response_model=ChatResponse)
-@limiter.limit(CHAT_RATE_LIMIT)
-async def assistant(
-    request: Request,
-    payload: AssistantRequest,
-    current_user_id: str = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> ChatResponse:
-    """KIAAN Assistant — text-mode task / lookup / navigation engine.
-
-    Routes the query through the same Wisdom-Core-gated pipeline the
-    six sacred tools use, tagged as ``Assistant`` so the LLM gets the
-    practical-task directive (from ``tool_envelope._TOOL_DIRECTIVES``).
-    The Assistant is intentionally text-mode only — the voice
-    orchestrator suppresses it because mid-conversation tool execution
-    breaks the divine-presence experience. Use ``/api/kiaan/chat`` for
-    voice and ``/api/kiaan/assistant`` for explicit task intents.
-    """
-    history = [
-        {"role": m.role, "content": m.content}
-        for m in payload.conversation_history
-    ]
-    message = build_tool_message("Assistant", {"query": payload.message})
-    response_text, verses = await _run_ai(
-        message=message,
-        db=db,
-        user_id=current_user_id,
-        history=history,
-        tool_name="Assistant",
-    )
-    return ChatResponse(
-        response=response_text,
-        conversation_id=current_user_id,
-        verses=verses,
-    )
-
-
-# ── ENDPOINT 9: Engine Routing Introspection ────────────────────────────
-# Lightweight read-only endpoint that exposes what
-# ``EngineRouter.route`` would decide for a given message. Used by the
-# client to render "which engine is responding" affordances and by ops
-# dashboards to debug misrouted queries. Auth required — message text
-# can contain sensitive content.
-
-
-class RouteRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
-    voice_mode: bool = Field(
-        default=False,
-        description=(
-            "When True, applies voice-mode routing biases (FRIEND for "
-            "casual queries, GUIDANCE for wisdom-direct, VOICE_GUIDE "
-            "for navigation, ASSISTANT suppressed unless intent score "
-            ">= 0.6)."
-        ),
-    )
-
-
-class RouteResponse(BaseModel):
-    primary_engine: str
-    secondary_engines: list[str] = Field(default_factory=list)
-    confidence: float
-    reasoning: str
-    detected_intent: str | None = None
-    detected_emotion: str | None = None
-    is_crisis: bool = False
-    voice_mode: bool = False
-    voice_render_mode: str | None = None
-    voice_target_duration_sec: int | None = None
-    voice_engine_bias: str | None = None
-
-
-@router.post("/route", response_model=RouteResponse)
-@limiter.limit(CHAT_RATE_LIMIT)
-async def route_query(
-    request: Request,
-    payload: RouteRequest,
-    current_user_id: str = Depends(get_current_user),
-) -> RouteResponse:
-    """Return what engine ``payload.message`` would route to.
-
-    Read-only — does not invoke any LLM, does not write anything.
-    Useful for clients that want to show "Sakha is thinking" vs
-    "Assistant is looking that up" affordances, and for ops dashboards
-    debugging engine mis-routes.
-    """
-    from backend.services.kiaan_engine_router import get_engine_router
-
-    decision = get_engine_router().route(
-        payload.message, voice_mode=payload.voice_mode
-    )
-    return RouteResponse(
-        primary_engine=decision.primary_engine.value,
-        secondary_engines=[e.value for e in decision.secondary_engines],
-        confidence=decision.confidence,
-        reasoning=decision.reasoning,
-        detected_intent=decision.detected_intent,
-        detected_emotion=decision.detected_emotion,
-        is_crisis=decision.is_crisis,
-        voice_mode=payload.voice_mode,
-        voice_render_mode=decision.voice_render_mode,
-        voice_target_duration_sec=decision.voice_target_duration_sec,
-        voice_engine_bias=decision.voice_engine_bias,
     )

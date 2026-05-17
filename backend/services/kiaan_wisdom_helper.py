@@ -101,9 +101,40 @@ def _load_text_persona() -> str | None:
 _TEXT_PERSONA: str | None = _load_text_persona()
 
 
-# Mood detection moved to ``backend.services.wisdom.detect_mood`` after
-# the IMPROVEMENT_ROADMAP.md P0 §4 consolidation. Imported lazily inside
-# the helper module that uses it; no public surface change.
+# ── MOOD DETECTION (inline mirror of KIAANResponseOptimizer) ─────────────
+# Keyword-based mood detector. Mirrored from
+# ``backend.services.kiaan_core.KIAANResponseOptimizer.detect_mood_from_message``
+# so this module stays free of an import cycle (kiaan_core indirectly
+# imports ai_provider; this module is imported by routes/kiaan.py which
+# also imports ai_provider). Behaviour kept deliberately identical.
+_MOOD_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "anxiety": (
+        "anxious", "worried", "nervous", "panic", "fear", "scared", "terrified",
+    ),
+    "sadness": (
+        "sad", "depressed", "lonely", "grief", "loss", "crying", "tears",
+        "hopeless",
+    ),
+    "stress": (
+        "stressed", "overwhelmed", "pressure", "burden", "exhausted", "tired",
+        "burnt",
+    ),
+    "anger": (
+        "angry", "furious", "rage", "mad", "irritated", "frustrated", "resent",
+    ),
+    "gratitude": ("thank", "grateful", "appreciate", "blessed"),
+}
+
+
+def _detect_mood(message: str) -> str | None:
+    """Return the first matching mood label, or None for general queries."""
+    if not message:
+        return None
+    lowered = message.lower()
+    for mood, keywords in _MOOD_KEYWORDS.items():
+        if any(kw in lowered for kw in keywords):
+            return mood
+    return None
 
 
 # ── PUBLIC API ───────────────────────────────────────────────────────────
@@ -167,39 +198,111 @@ async def compose_kiaan_system_prompt(
     if _TEXT_PERSONA is None:
         return None, []
 
-    # Delegates the entire data path to the unified retriever (see
-    # IMPROVEMENT_ROADMAP.md P0 §4). All three tiers — dynamic
-    # effectiveness pick, static Gita search, gita_practical_wisdom
-    # enrichment — now live in one place: backend.services.wisdom.
-    # This function's job is reduced to: drive retrieval, project the
-    # WisdomVerse objects into the dict shape this module's
-    # _format_retrieved_verses_block expects, and stitch the persona +
-    # verses block.
-    #
-    # ``tool_name`` is accepted for backward compatibility (callers pass
-    # it via kwarg) and for telemetry. The unified retriever does not
-    # yet differentiate by tool; logging it here keeps the signal until
-    # per-tool retrieval tuning lands.
-    logger.debug(
-        "compose_kiaan_system_prompt: tool=%s user=%s limit=%d",
-        tool_name,
-        user_id,
-        verses_limit,
-    )
-    from backend.services.wisdom import retrieve_wisdom
+    verses: list[dict[str, Any]] = []
+    seen_refs: set[str] = set()
 
-    bundle = await retrieve_wisdom(
-        db=db,
-        query=query,
-        user_id=user_id,
-        limit=verses_limit,
-        include_dynamic=True,
-        include_practical=True,
-        include_learned=False,  # STRICTLY Gita corpus
-        phase="guide",
-        allow_mock_catalogue=False,  # chat falls back to persona-only
-    )
-    verses = [_wisdom_verse_to_chat_dict(v) for v in bundle.verses]
+    # ─── Tier 1: Gita-based dynamic effectiveness pick ───────────────
+    # Only fires when we have a user_id (the dynamic corpus keys
+    # selections + history off user) and the query carries a mood
+    # signal. The verse returned is always a Bhagavad Gita verse —
+    # ``DynamicWisdomCorpus._resolve_verse`` looks it up in
+    # ``gita_verses``. Misses (no effectiveness data, all verses
+    # already seen, etc.) return None and we fall through.
+    mood = _detect_mood(query) if user_id else None
+    if mood and user_id:
+        try:
+            from backend.services.dynamic_wisdom_corpus import (
+                get_dynamic_wisdom_corpus,
+            )
+
+            dyn = get_dynamic_wisdom_corpus()
+            dyn_verse = await dyn.get_effectiveness_weighted_verse(
+                db=db,
+                mood=mood,
+                user_message=query,
+                phase="guide",
+                user_id=user_id,
+            )
+            if dyn_verse:
+                normalized = _normalise_dynamic_verse(dyn_verse)
+                if normalized.get("verse_ref"):
+                    seen_refs.add(normalized["verse_ref"])
+                    verses.append(normalized)
+        except Exception as exc:
+            # Dynamic corpus is best-effort. Static Gita search below
+            # is the floor.
+            logger.debug(
+                "kiaan_wisdom_helper: dynamic-effectiveness pick skipped "
+                "(mood=%s tool=%s): %s",
+                mood,
+                tool_name,
+                exc,
+            )
+
+    # ─── Tier 2: Static Gita corpus search (always runs) ─────────────
+    # ``include_learned=False`` is the strict-Gita guarantee: only rows
+    # from ``gita_verses`` reach the prompt; ``learned_wisdom`` (which
+    # may carry non-Gita content) is excluded.
+    try:
+        from backend.services.wisdom_core import get_wisdom_core
+
+        wisdom_core = get_wisdom_core()
+        # Pull a few extras so we can fill ``verses_limit`` after
+        # de-duplicating against the dynamic pick above.
+        results = await wisdom_core.search(
+            db=db,
+            query=query,
+            limit=verses_limit + 2,
+            include_learned=False,  # ← STRICTLY Gita
+        )
+        for r in results:
+            chapter = r.chapter or ""
+            verse_num = r.verse or ""
+            verse_ref = r.verse_ref or (
+                f"{chapter}.{verse_num}" if chapter and verse_num else ""
+            )
+            if not verse_ref or verse_ref in seen_refs:
+                continue
+            seen_refs.add(verse_ref)
+            verses.append({
+                "verse_ref": verse_ref,
+                "chapter": chapter,
+                "verse": verse_num,
+                "sanskrit": r.sanskrit or "",
+                "english": r.content or "",
+                "principle": r.principle or "",
+                "theme": r.theme or "",
+                "source": "gita_corpus",
+            })
+            if len(verses) >= verses_limit:
+                break
+    except Exception as exc:
+        # Retrieval failures must not break chat. Persona alone still
+        # produces a coherent (though un-grounded) response.
+        logger.warning(
+            "kiaan_wisdom_helper: Wisdom Core search failed (tool=%s): %s",
+            tool_name,
+            exc,
+        )
+
+    # ─── Tier 3: Modern-implementation enrichment ────────────────────
+    # For every retrieved Gita verse, pull its rows from
+    # ``gita_practical_wisdom`` (principle_in_action, micro_practice,
+    # action_steps, modern_scenario, reflection_prompt, counter_pattern).
+    # This is what gives the persona's "Modern Application" + "Practical
+    # Steps" sections grounding in the real Gita-implementation corpus
+    # rather than the model's training data. Failures are silent — the
+    # verse still renders with sanskrit + english + principle.
+    if verses:
+        try:
+            await _enrich_with_practical_wisdom(db, verses)
+        except Exception as exc:
+            logger.debug(
+                "kiaan_wisdom_helper: practical-wisdom enrichment skipped "
+                "(tool=%s): %s",
+                tool_name,
+                exc,
+            )
 
     block = _format_retrieved_verses_block(verses)
     system_prompt = (
@@ -208,29 +311,107 @@ async def compose_kiaan_system_prompt(
     return system_prompt, verses
 
 
-def _wisdom_verse_to_chat_dict(v: Any) -> dict[str, Any]:
-    """Project a :class:`backend.services.wisdom.WisdomVerse` into the
-    dict shape ``_format_retrieved_verses_block`` consumes (verse_ref,
-    chapter, verse, sanskrit, english, principle, theme, source,
-    practical_wisdom)."""
+async def _enrich_with_practical_wisdom(
+    db: AsyncSession,
+    verses: list[dict[str, Any]],
+) -> None:
+    """Attach ``GitaPracticalWisdom`` rows to each verse, in place.
+
+    Each verse dict gains a ``practical_wisdom`` key — a list of
+    rows (one per ``life_domain``) containing the modern-world
+    implementation fields. The persona consumes these to ground the
+    "Modern Application" + "Practical Steps" sections.
+
+    No-op when no ``verse_ref`` keys are present or the
+    ``gita_practical_wisdom`` table is empty / unmigrated.
+    """
+    refs = [v.get("verse_ref") for v in verses if v.get("verse_ref")]
+    if not refs:
+        return
+
+    from sqlalchemy import select
+
+    from backend.models.wisdom import GitaPracticalWisdom
+
+    result = await db.execute(
+        select(GitaPracticalWisdom).where(
+            GitaPracticalWisdom.verse_ref.in_(refs),
+            GitaPracticalWisdom.is_validated.is_(True),
+        )
+    )
+    rows = result.scalars().all()
+    if not rows:
+        return
+
+    # Group by verse_ref and pick the top 1-2 most-effective entries
+    # per verse so the prompt doesn't balloon. Sorted by
+    # effectiveness_score desc → highest-scoring entry leads.
+    by_ref: dict[str, list[GitaPracticalWisdom]] = {}
+    for row in rows:
+        by_ref.setdefault(row.verse_ref, []).append(row)
+    for ref, entries in by_ref.items():
+        entries.sort(
+            key=lambda r: getattr(r, "effectiveness_score", 0.0) or 0.0,
+            reverse=True,
+        )
+
+    for v in verses:
+        ref = v.get("verse_ref")
+        if not ref:
+            continue
+        ref_entries = by_ref.get(ref) or []
+        if not ref_entries:
+            continue
+        # Cap at 2 per verse — leading domain + one alternate keeps
+        # the prompt focused without losing variety.
+        v["practical_wisdom"] = [
+            {
+                "life_domain": e.life_domain,
+                "principle_in_action": e.principle_in_action or "",
+                "micro_practice": e.micro_practice or "",
+                "action_steps": list(e.action_steps or []),
+                "reflection_prompt": e.reflection_prompt or "",
+                "modern_scenario": e.modern_scenario or "",
+                "counter_pattern": e.counter_pattern or "",
+            }
+            for e in ref_entries[:2]
+        ]
+
+
+def _normalise_dynamic_verse(verse: dict[str, Any]) -> dict[str, Any]:
+    """Normalise a DynamicWisdomCorpus verse dict to the shape used here.
+
+    Two upstream paths produce slightly different keys:
+      * SakhaWisdomEngine — usually ``english`` / ``content``
+      * DB fallback (DynamicWisdomCorpus._resolve_verse) — uses
+        ``wisdom`` for the English text
+
+    We accept both and emit the helper's canonical shape.
+    """
+    verse_ref = verse.get("verse_ref") or ""
+    chapter: Any = verse.get("chapter") or ""
+    verse_num: Any = verse.get("verse") or ""
+    if (not chapter or not verse_num) and verse_ref:
+        # Reconstruct chapter/verse from the ref.
+        parts = verse_ref.split(".")
+        if len(parts) == 2:
+            chapter = chapter or parts[0]
+            verse_num = verse_num or parts[1]
     return {
-        "verse_ref": v.verse_ref,
-        "chapter": v.chapter,
-        "verse": v.verse,
-        "sanskrit": v.sanskrit,
-        "english": v.english,
-        "principle": v.principle,
-        "theme": v.theme,
-        "source": v.source,
-        "practical_wisdom": v.practical_wisdom,
+        "verse_ref": verse_ref,
+        "chapter": chapter,
+        "verse": verse_num,
+        "sanskrit": verse.get("sanskrit") or "",
+        "english": (
+            verse.get("english")
+            or verse.get("wisdom")
+            or verse.get("content")
+            or ""
+        ),
+        "principle": verse.get("principle") or "",
+        "theme": verse.get("theme") or "",
+        "source": verse.get("source") or "dynamic_corpus",
     }
-
-
-# Retrieval helpers (dynamic-effectiveness pick, static Gita search,
-# gita_practical_wisdom enrichment, verse normalisation) moved to
-# ``backend.services.wisdom.retrieve`` as part of the IMPROVEMENT_ROADMAP.md
-# P0 §4 consolidation. The only formatting concern that still lives here
-# is the persona-specific ``RETRIEVED VERSES`` block below.
 
 
 def _format_retrieved_verses_block(verses: list[dict[str, Any]]) -> str:

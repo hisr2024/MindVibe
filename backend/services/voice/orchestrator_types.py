@@ -37,16 +37,7 @@ class VoiceTurnContext:
     user_region: str = "GLOBAL"
     persona_version: str = "1.0.0"
     history: list[dict] = field(default_factory=list)
-    # Per-user long-term memory (top-N by importance, formatted as
-    # "<type>: <value>"). Populated by the WSS handler from
-    # ``backend.services.companion_context.get_user_memories`` so the
-    # voice companion remembers across sessions the same way the REST
-    # voice route already does. Empty list for cold-start users.
-    memories: list[str] = field(default_factory=list)
-    # Per-user recent closed-session summaries (most recent first).
-    # Each entry is the ``topics_discussed`` JSON dict the engine
-    # writes when a session ends. Populated alongside ``memories``.
-    session_summaries: list[dict] = field(default_factory=list)
+    session_summaries: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

@@ -28,10 +28,9 @@ from .base import (
     ProviderResponse,
     ProviderStatus,
 )
-from .local_llama_provider import LocalLlamaProvider
-from .oai_compat_provider import OpenAICompatibleProvider
 from .openai_provider import OpenAIProvider
 from .sarvam_provider import SarvamProvider
+from .oai_compat_provider import OpenAICompatibleProvider
 
 logger = logging.getLogger(__name__)
 
@@ -75,15 +74,7 @@ class ProviderManager:
 
         # Get configuration from environment
         self._primary_provider = os.getenv("AI_PROVIDER", "auto")
-        # Default chain places ``local_llama`` at the tail so cloud
-        # providers serve normal traffic and the on-device model is
-        # the floor when keys / network are down. See
-        # IMPROVEMENT_ROADMAP.md P1 §6 and
-        # backend/services/ai/providers/local_llama_provider.py.
-        fallbacks_str = os.getenv(
-            "AI_PROVIDER_FALLBACKS",
-            "openai,sarvam,oai_compat,local_llama",
-        )
+        fallbacks_str = os.getenv("AI_PROVIDER_FALLBACKS", "openai,sarvam,oai_compat")
         self._fallback_order = [p.strip() for p in fallbacks_str.split(",") if p.strip()]
 
         # Initialize providers
@@ -113,29 +104,6 @@ class ProviderManager:
         if oai_compat_provider.is_configured:
             self._providers["oai_compat"] = oai_compat_provider
             logger.info("OpenAI-compatible provider configured")
-
-        # Local llama.cpp (P1 §6) — opt-in via KIAAN_LOCAL_MODEL_PATH +
-        # llama-cpp-python install. Registered last so it serves as the
-        # true offline floor of the chain. ``is_configured`` returns
-        # False when the model file or library is missing, so the
-        # manager silently skips it in cloud-only deployments.
-        local_llama_provider = LocalLlamaProvider()
-        if local_llama_provider.is_configured:
-            self._providers["local_llama"] = local_llama_provider
-            logger.info(
-                "Local llama.cpp provider configured (model=%s)",
-                os.getenv("KIAAN_LOCAL_MODEL_PATH", "<unset>"),
-            )
-        else:
-            # Don't log a warning — the most common case is "operator
-            # chose not to bundle a local model". Surface details only
-            # when something inconsistent is set.
-            status = local_llama_provider.configuration_status()
-            if status["enabled"] and status["model_path"]:
-                logger.warning(
-                    "Local llama.cpp provider NOT registered: %s",
-                    status,
-                )
 
     def get_provider(self, name: str) -> AIProvider | None:
         """Get a specific provider by name."""
