@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import {
   kiaan,
   type KiaanChatResponse,
@@ -221,4 +222,96 @@ export function useKiaanVoice(
     submit,
     reset,
   };
+}
+
+// ── useVerseModernExample — daily-fresh modern application of a verse ────
+
+/**
+ * Generated grounding for the Nitya Sadhana "Application / Vyavahara"
+ * phase. Asks Sakha for a vivid, single-paragraph modern-day scenario
+ * that shows the day's verse landing in an ordinary life — the kind of
+ * everyday situation a working person, parent or student would
+ * recognise. The verse rotates daily (see gitaStore.pickDailyVerse), so
+ * a fresh example is generated once per day per verse and persisted via
+ * the React Query AsyncStorage cache for the next 24 hours.
+ *
+ * Why a dedicated hook (not just a generic ask-Sakha mutation):
+ *  - the prompt template is fixed (single paragraph, modern-day, no
+ *    sermon) so callers don't accidentally reword it and drift the tone
+ *  - the query key is verse-scoped, so the same verse always returns
+ *    the same cached example for the rest of the day, even across
+ *    cold starts of the app
+ *  - cache settings match the existing 24h Gita-content pattern
+ *    (see `useGitaVerse` / `useGitaTranslations` in hooks.ts)
+ */
+const MODERN_EXAMPLE_PROMPT =
+  "Give one short, vivid modern-day scenario (3-4 sentences, present " +
+  "tense) of an ordinary person — a working professional, parent, " +
+  "student or commuter — living this verse without naming it. No " +
+  "Sanskrit, no scripture references, no 'imagine that' framing. Open " +
+  "directly in the scene. End with a single line in italics that names " +
+  "the inner shift the verse is asking for.";
+
+export interface VerseModernExampleInput {
+  readonly chapter: number;
+  readonly verse: number;
+  readonly sanskrit: string;
+  readonly transliteration?: string;
+  readonly translation: string;
+}
+
+/** Stable YYYY-MM-DD bucket so the cache key changes at local midnight. */
+function todayBucket(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Fetch (and cache for 24 h) a Sakha-generated modern application of a
+ * Gita verse. The hook is a no-op until `verse` is provided so callers
+ * can wire it before today's verse has resolved without firing a wasted
+ * request.
+ */
+export function useVerseModernExample(
+  verse: VerseModernExampleInput | null | undefined,
+): UseQueryResult<string> {
+  const day = todayBucket();
+  return useQuery({
+    queryKey: [
+      'kiaan',
+      'modern-example',
+      'v1',
+      verse?.chapter ?? null,
+      verse?.verse ?? null,
+      day,
+    ] as const,
+    enabled: verse != null,
+    queryFn: async (): Promise<string> => {
+      if (!verse) throw new Error('verse missing');
+      const gita_verse: KiaanGitaVerse = {
+        chapter: verse.chapter,
+        verse: verse.verse,
+        sanskrit: verse.sanskrit,
+        translation: verse.translation,
+      };
+      if (verse.transliteration) {
+        // KiaanGitaVerse allows extra string fields; safe to attach.
+        (gita_verse as Record<string, string>).transliteration =
+          verse.transliteration;
+      }
+      const res = await kiaan.chat({
+        message: MODERN_EXAMPLE_PROMPT,
+        gita_verse,
+        context: 'sadhana:vyavahara',
+      });
+      return res.response.trim();
+    },
+    // Match the immutable-Gita-content pattern used by useGitaVerse /
+    // useGitaTranslations: one call per verse per day, persisted via
+    // the AsyncStorage query cache so cold-starting tomorrow shows
+    // yesterday's example for today's verse if the user revisits it.
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
 }

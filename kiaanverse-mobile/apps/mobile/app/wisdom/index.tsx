@@ -25,7 +25,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
   Pressable,
   ScrollView,
   Share,
@@ -240,25 +239,15 @@ export default function WisdomLandingScreen(): React.JSX.Element {
   }, [chapter, router, verseNum]);
 
   const handleThemePress = useCallback(
-    (themeLabel: string) => {
+    (themeId: string) => {
       void Haptics.selectionAsync().catch(() => undefined);
-      // Themes don't yet have dedicated curated lists — surface a polite
-      // teaser and route into the chapter browser so the journey continues.
-      // The {{theme}} placeholder receives the already-localized label so
-      // the alert reads naturally in the active UI language.
-      Alert.alert(
-        t('wisdom.comingSoonTitle'),
-        t('wisdom.comingSoonMessage', { theme: themeLabel }),
-        [
-          {
-            text: t('wisdom.continueButton'),
-            onPress: () => router.push('/(tabs)/shlokas/gita' as never),
-          },
-          { text: t('common.cancel'), style: 'cancel' },
-        ],
-      );
+      // Each theme now owns a curated Bhagavad Gita verse list (see
+      // app/wisdom/theme/curatedThemes.ts). The detail screen reads the
+      // refs synchronously from the bundled corpus, so the navigation
+      // feels instant and there is no "coming soon" intermediate dialog.
+      router.push(`/wisdom/theme/${themeId}` as never);
     },
-    [router, t],
+    [router],
   );
 
   const handleAskKiaan = useCallback(() => {
@@ -451,7 +440,7 @@ export default function WisdomLandingScreen(): React.JSX.Element {
                   style={styles.themeCell}
                 >
                   <Pressable
-                    onPress={() => handleThemePress(label)}
+                    onPress={() => handleThemePress(theme.id)}
                     style={({ pressed }) => [
                       styles.themeTile,
                       { borderColor: theme.border },

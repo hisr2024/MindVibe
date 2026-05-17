@@ -23,7 +23,9 @@ export {
 export {
   useKiaanRoomChat,
   useKiaanVoice,
+  useVerseModernExample,
   type KiaanRoomChatMessage,
   type UseKiaanRoomChatResult,
   type UseKiaanVoiceResult,
+  type VerseModernExampleInput,
 } from './hooks';

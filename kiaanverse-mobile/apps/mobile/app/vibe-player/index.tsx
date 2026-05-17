@@ -25,7 +25,7 @@
  *     an Alert that explains "coming soon" vs a real playback error.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -38,9 +38,9 @@ import {
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { DivineBackground, LoadingMandala, useTheme } from '@kiaanverse/ui';
-import { useMeditationTracks } from '@kiaanverse/api';
+import { useGitaVerse, useMeditationTracks } from '@kiaanverse/api';
 import type { MeditationTrack } from '@kiaanverse/api';
-import { useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
+import { useGitaStore, useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
 
 import {
@@ -61,13 +61,53 @@ const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200,191,168,0.7)';
 
 /**
- * Today's verse is a hard-coded seed until the API exposes a daily-verse
- * endpoint. Sanskrit text stays Devanagari across every locale (it IS
- * Sanskrit); the meaning + reference route through i18n at the call site.
+ * Cold-start fallback for the daily-verse banner: rendered for the few
+ * frames before `gitaStore.refreshVerseOfTheDay()` hydrates the actual
+ * date-hashed pick. After that, the banner reads from the shared store
+ * so the home tab, sadhana phases and this banner all stay on the same
+ * verse for the day.
  */
-const TODAY_VERSE = {
+const TODAY_VERSE_FALLBACK = {
   sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन',
 } as const;
+
+/**
+ * Stable YYYY-MM-DD bucket for the daily-rotation of the featured track.
+ * Same algorithm the gitaStore uses for verse-of-the-day, kept inline
+ * here so this file does not need to reach into store internals.
+ */
+function todayBucket(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Date-hashed index into a non-empty list — same per calendar day, per user. */
+function dailyIndex(length: number): number {
+  if (length <= 0) return 0;
+  const key = todayBucket();
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % length;
+}
+
+/**
+ * Reorder a track list so today's featured pick sits at the top, leaving
+ * the rest in their existing order. Pure / deterministic — given the same
+ * input list on the same calendar day this returns the same arrangement
+ * for every user.
+ */
+function withDailyFeaturedFirst(
+  tracks: readonly MeditationTrack[],
+): readonly MeditationTrack[] {
+  if (tracks.length <= 1) return tracks;
+  const idx = dailyIndex(tracks.length);
+  if (idx === 0) return tracks;
+  const featured = tracks[idx];
+  if (!featured) return tracks;
+  const rest = tracks.filter((_, i) => i !== idx);
+  return [featured, ...rest];
+}
 
 /**
  * Built-in fallback catalog. Rendered whenever the API has no tracks for
@@ -213,6 +253,12 @@ function SegmentedTabs({
 // Library — track catalog (extracted so each tab body stays focused)
 // ---------------------------------------------------------------------------
 
+interface DailyVerseDisplay {
+  readonly sanskrit: string;
+  readonly meaning: string;
+  readonly reference: string;
+}
+
 interface LibrarySectionProps {
   readonly filter: FilterKey;
   readonly onFilterChange: (key: FilterKey) => void;
@@ -222,6 +268,7 @@ interface LibrarySectionProps {
   readonly isPlaying: boolean;
   readonly bookmarks: ReadonlySet<string>;
   readonly onToggleBookmark: (trackId: string) => void;
+  readonly dailyVerse: DailyVerseDisplay;
 }
 
 function LibrarySection({
@@ -233,6 +280,7 @@ function LibrarySection({
   isPlaying,
   bookmarks,
   onToggleBookmark,
+  dailyVerse,
 }: LibrarySectionProps): React.JSX.Element {
   const { t } = useTranslation();
   const apiCategory = resolveApiCategory(filter);
@@ -240,11 +288,17 @@ function LibrarySection({
 
   // Always render something: prefer real API tracks, fall back to the
   // built-in catalog when the API returns empty (or hasn't responded yet).
+  // The final list is reordered so today's featured track sits at the
+  // top — same date-hash algorithm as the verse rotation, so the spotlight
+  // moves at local midnight without the user touching the catalog.
   const tracks = useMemo<readonly MeditationTrack[]>(
-    () =>
-      apiTracks && apiTracks.length > 0
-        ? apiTracks
-        : selectBuiltinTracks(apiCategory, t),
+    () => {
+      const base =
+        apiTracks && apiTracks.length > 0
+          ? apiTracks
+          : selectBuiltinTracks(apiCategory, t);
+      return withDailyFeaturedFirst(base);
+    },
     [apiTracks, apiCategory, t]
   );
 
@@ -283,9 +337,9 @@ function LibrarySection({
       ListHeaderComponent={
         <View style={styles.listHeaderStack}>
           <DailyVerseBanner
-            sanskrit={TODAY_VERSE.sanskrit}
-            meaning={t('vibe-player.todayVerseMeaning')}
-            reference={t('vibe-player.todayVerseReference')}
+            sanskrit={dailyVerse.sanskrit}
+            meaning={dailyVerse.meaning}
+            reference={dailyVerse.reference}
             onPress={onDailyVersePress}
           />
           <CategoryPills value={filter} onChange={onFilterChange} />
@@ -322,15 +376,48 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   // `tracks` is also read by the Library body via its own hook, but we need
   // it here so `handleTrackPress` can hydrate the queue with everything the
   // user currently sees (keeps skip-next aligned with the visible filter).
-  // Mirror LibrarySection's fallback so the queue matches what's rendered.
+  // Mirror LibrarySection's fallback + daily-featured ordering so the queue
+  // matches what the user sees rendered.
   const apiCategory = resolveApiCategory(filter);
   const { data: apiTracks } = useMeditationTracks(apiCategory);
   const tracks = useMemo<readonly MeditationTrack[]>(
-    () =>
-      apiTracks && apiTracks.length > 0
-        ? apiTracks
-        : selectBuiltinTracks(apiCategory, t),
+    () => {
+      const base =
+        apiTracks && apiTracks.length > 0
+          ? apiTracks
+          : selectBuiltinTracks(apiCategory, t);
+      return withDailyFeaturedFirst(base);
+    },
     [apiTracks, apiCategory, t]
+  );
+
+  // Today's verse — shared with the home tab + sadhana phases via gitaStore.
+  // `refreshVerseOfTheDay` is idempotent so calling it on every mount is
+  // safe; it short-circuits when vodDate already matches today.
+  const vodChapter = useGitaStore((s) => s.vodChapter);
+  const vodVerse = useGitaStore((s) => s.vodVerse);
+  const refreshVerseOfTheDay = useGitaStore((s) => s.refreshVerseOfTheDay);
+  useEffect(() => {
+    refreshVerseOfTheDay();
+  }, [refreshVerseOfTheDay]);
+  const todayChapter = vodChapter ?? 2;
+  const todayVerseNum = vodVerse ?? 47;
+  const { data: todayVerseData } = useGitaVerse(todayChapter, todayVerseNum);
+
+  const dailyVerse = useMemo<DailyVerseDisplay>(
+    () =>
+      todayVerseData
+        ? {
+            sanskrit: todayVerseData.sanskrit.split('\n')[0] ?? todayVerseData.sanskrit,
+            meaning: todayVerseData.translation,
+            reference: `Bhagavad Gita ${todayVerseData.chapter}.${todayVerseData.verse}`,
+          }
+        : {
+            sanskrit: TODAY_VERSE_FALLBACK.sanskrit,
+            meaning: t('vibe-player.todayVerseMeaning'),
+            reference: t('vibe-player.todayVerseReference'),
+          },
+    [todayVerseData, t]
   );
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
@@ -472,6 +559,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
               isPlaying={isPlaying}
               bookmarks={bookmarks}
               onToggleBookmark={handleToggleBookmark}
+              dailyVerse={dailyVerse}
             />
           ) : null}
 

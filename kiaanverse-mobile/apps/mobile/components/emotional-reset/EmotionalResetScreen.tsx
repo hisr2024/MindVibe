@@ -1,7 +1,15 @@
 /**
- * EmotionalResetScreen — Orchestrates the 6-phase sacred ritual on Android.
+ * EmotionalResetScreen — Orchestrates the 5-phase sacred ritual on Android.
  *
- * Phase order: arrival → mandala → witness → breath → integration → ceremony.
+ * Phase order: mandala → witness → breath → integration → ceremony.
+ *
+ * The legacy 'arrival' phase (an "Entering sacred space…" OmLoader that
+ * auto-advanced after 1.6s) was removed: it gave the impression of a
+ * navigation reload every time the screen mounted, and the mandala
+ * phase is itself a meaningful entry surface — the user offers their
+ * emotion straight away. The shared `EmotionalResetCanvas` already
+ * fades in beneath the mandala, so the sacred-space feeling is
+ * preserved without the blocking delay.
  *
  * Architecture notes:
  *   - Each phase owns the full viewport; the background canvas stays
@@ -27,7 +35,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { api } from '@kiaanverse/api';
 import { EmotionalResetCanvas } from './visuals/EmotionalResetCanvas';
-import { ArrivalPhase } from './phases/ArrivalPhase';
 import { MandalaPhase } from './phases/MandalaPhase';
 import { WitnessPhase } from './phases/WitnessPhase';
 import { BreathPhase } from './phases/BreathPhase';
@@ -69,7 +76,7 @@ type StartPayload = {
 export function EmotionalResetScreen(): React.JSX.Element {
   const router = useRouter();
 
-  const [phase, setPhase] = useState<EmotionalResetPhase>('arrival');
+  const [phase, setPhase] = useState<EmotionalResetPhase>('mandala');
   const [emotion, setEmotion] = useState<EmotionalState | null>(null);
   const [intensity, setIntensity] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -91,9 +98,6 @@ export function EmotionalResetScreen(): React.JSX.Element {
     );
   }, [phase, fade]);
   const fadeStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
-
-  // Phase 0 → 1
-  const handleArrivalComplete = useCallback(() => setPhase('mandala'), []);
 
   // Phase 1 → 2 (start session + step 1)
   const handleOffer = useCallback(
@@ -211,10 +215,6 @@ export function EmotionalResetScreen(): React.JSX.Element {
       <EmotionalResetCanvas phase={phase} />
 
       <Animated.View style={[StyleSheet.absoluteFill, fadeStyle]} key={phase}>
-        {phase === 'arrival' ? (
-          <ArrivalPhase onComplete={handleArrivalComplete} />
-        ) : null}
-
         {phase === 'mandala' ? <MandalaPhase onOffer={handleOffer} /> : null}
 
         {phase === 'witness' && emotion ? (

@@ -579,6 +579,14 @@ export default function RootLayout(): React.JSX.Element {
               'vibe-player',
               'analytics',
               'settings',
+              'subscription',
+              'sacred-reflections',
+              'arrival',
+              'wisdom',
+              'voice',
+              'wellness',
+              'support',
+              'onboarding',
             ]}
           >
             <ErrorBoundary>
