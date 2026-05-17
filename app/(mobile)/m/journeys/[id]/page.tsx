@@ -447,8 +447,8 @@ export default function MobileJourneyDetailPage() {
               <div className="p-5 border-b border-white/[0.06]">
                 <h3 className="text-base font-semibold text-white mb-1">Quit this journey?</h3>
                 <p className="text-sm text-white/60 leading-relaxed">
-                  This will mark <span className="text-white/90 font-medium">{journey?.template?.title || 'this journey'}</span> as
-                  abandoned. Your progress (<span className="text-white/90 font-medium">{journey?.current_day_index ? `day ${journey.current_day_index}` : 'in progress'}</span>) will
+                  This will mark <span className="text-white/90 font-medium">{journey?.title || 'this journey'}</span> as
+                  abandoned. Your progress (<span className="text-white/90 font-medium">{journey?.current_day ? `day ${journey.current_day} of ${journey.total_days}` : 'in progress'}</span>) will
                   be saved, but the journey will no longer appear in your active list. You can start it again from the catalog any time.
                 </p>
               </div>
