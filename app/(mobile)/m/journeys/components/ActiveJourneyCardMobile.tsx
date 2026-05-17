@@ -7,11 +7,11 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import type { JourneyResponse, EnemyType } from '@/types/karmaMarg.types'
+import type { JourneyResponse, EnemyType } from '@/types/journeyEngine.types'
 import {
   ENEMY_INFO,
   getJourneyStatusLabel,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 import { JourneyProgressRing } from './JourneyProgressRing'
 import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
 

@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Guida situazionale"
     },
-    "sambandh-dharma": {
+    "relationship-compass": {
       "title": "Bussola delle relazioni",
       "description": "Guida relazionale"
     },
@@ -106,7 +106,7 @@
     "viyog": "Calma la reazione immediata",
     "ardha": "Riformula la percezione",
     "kiaan": "Parlane insieme",
-    "sambandh-dharma": "Naviga nella chiarezza relazionale",
+    "relationship-compass": "Naviga nella chiarezza relazionale",
     "journey": "Allena la stabilità interiore a lungo termine"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Modalità pausa",
     "ardha": "Modalità chiarezza",
     "kiaan": "Modalità compagno",
-    "sambandh-dharma": "Modalità relazione",
+    "relationship-compass": "Modalità relazione",
     "journey": "Modalità allenamento"
   }
 }

@@ -77,12 +77,12 @@ const SACRED_TOOLS = [
     symbol: '\u{1F4FF}',
   },
   {
-    id: 'sambandh-dharma',
-    title: 'Sambandh Dharma (Relationship Compass)',
+    id: 'relationship-compass',
+    title: 'Relationship Compass',
     sanskrit: '\u0938\u0902\u092C\u0928\u094D\u0927',
     subtitle: 'Dharma-Guided Clarity',
     verse: 'BG 6.29',
-    href: '/tools/sambandh-dharma',
+    href: '/tools/relationship-compass',
     symbol: '\u{1F54A}\uFE0F',
   },
 ] as const
@@ -621,7 +621,7 @@ export default function DashboardClient() {
                 </div>
               </div>
 
-              {/* Featured Sacred Tools — Viyoga, Ardha, Sambandh Dharma (Relationship Compass) */}
+              {/* Featured Sacred Tools — Viyoga, Ardha, Relationship Compass */}
               <div className="relative space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
                 {SACRED_TOOLS.map((tool, idx) => (
                   <motion.div

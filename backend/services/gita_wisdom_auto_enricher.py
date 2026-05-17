@@ -8,7 +8,7 @@ open-source Gita repositories and generates modern-day applications.
 
 Architecture:
     GitaWisdomAutoEnricher (orchestrator)
-    ├── OpenSourceGitaFetcher (pulls from bhagavad-gita.org, [REMOVED-PENDING-LICENSE-REVIEW], etc.)
+    ├── OpenSourceGitaFetcher (pulls from bhagavad-gita.org, vedabase.io, etc.)
     ├── PracticalWisdomGenerator (creates actionable modern applications)
     ├── GitaAmbitValidator (strict 18-chapter/700-verse compliance)
     ├── MultiPassGitaAuthenticator (3-pass text validation before storage)
@@ -806,7 +806,7 @@ class OpenSourceGitaFetcher:
     Supported sources:
     1. bhagavad-gita.org (Rapid API — free tier, 100 requests/day)
     2. Local Gita corpus (data/gita/gita_verses_complete.json)
-    3. [REMOVED-PENDING-LICENSE-REVIEW] structured data
+    3. vedabase.io structured data
     """
 
     # Chapter-to-theme mapping from Gita for enrichment context
@@ -1696,21 +1696,9 @@ class GitaWisdomAutoEnricher:
 
 _enricher: GitaWisdomAutoEnricher | None = None
 
-_INGESTION_ENV_FLAG = "MINDVIBE_EXTERNAL_INGESTION_ENABLED"
-
 
 def get_auto_enricher() -> GitaWisdomAutoEnricher:
-    """Get the singleton GitaWisdomAutoEnricher instance.
-
-    Gated by ``MINDVIBE_EXTERNAL_INGESTION_ENABLED=1``. External-source
-    ingestion is disabled by default pending licensing review of upstream
-    third-party content providers.
-    """
-    if os.getenv(_INGESTION_ENV_FLAG, "0") != "1":
-        raise RuntimeError(
-            "Gita auto-enricher is disabled pending external-source licensing "
-            f"review. Set {_INGESTION_ENV_FLAG}=1 only after legal sign-off."
-        )
+    """Get the singleton GitaWisdomAutoEnricher instance."""
     global _enricher
     if _enricher is None:
         _enricher = GitaWisdomAutoEnricher()

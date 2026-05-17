@@ -1,5 +1,5 @@
 /**
- * Sambandh Dharma (Relationship Compass) — guna calculation tests.
+ * Relationship Compass — guna calculation tests.
  *
  * `useGunaCalculation` is a pure memoized hook: given three pattern
  * selection arrays, it returns normalized 0..1 scores and the dominant
@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-native';
 import {
   useGunaCalculation,
   type GunaSelections,
-} from '../app/tools/sambandh-dharma/hooks/useGunaCalculation';
+} from '../app/tools/relationship-compass/hooks/useGunaCalculation';
 
 const EMPTY: GunaSelections = {
   tamas: [],

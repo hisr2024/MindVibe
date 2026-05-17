@@ -349,7 +349,7 @@ export default function VoiceSettingsScreen(): React.JSX.Element {
                       color={colors.text.muted}
                       style={styles.mt2}
                     >
-                      {v.gender} · {t('voiceLanguagesFmt', { count: String(v.supportedLanguages.length) })}
+                      {v.gender} · {t('voiceLanguagesFmt', { count: v.supportedLanguages.length })}
                     </Text>
                   </Pressable>
                   <View style={styles.voiceRowActions}>

@@ -45,7 +45,7 @@ describe('ToolHeader - mode label', () => {
     render(
       <ToolHeader
         icon="🧭"
-        title="Sambandh Dharma (Relationship Compass)"
+        title="Relationship Compass"
         subtitle="Navigate relationship challenges."
       />
     )

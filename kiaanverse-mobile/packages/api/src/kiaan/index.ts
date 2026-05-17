@@ -16,7 +16,7 @@ export {
   type ArdhaInputs,
   type ViyogaInputs,
   type KarmaResetInputs,
-  type SambandhDharmaInputs,
+  type RelationshipCompassInputs,
   type KarmaLytixMetadata,
 } from './client';
 

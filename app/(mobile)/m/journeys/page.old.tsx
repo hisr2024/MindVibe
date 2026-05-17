@@ -4,7 +4,7 @@
  * Mobile Journeys Page
  *
  * Browse templates and track active transformational journeys.
- * Fetches user's active journeys from karma-marg and available
+ * Fetches user's active journeys from journey-engine and available
  * templates from the templates endpoint.
  */
 
@@ -31,13 +31,13 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
-  karmaMargService,
-  KarmaMargError,
-} from '@/services/karmaMargService'
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
 import type {
   JourneyResponse,
   JourneyTemplate,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 
 // Map enemy types to UI categories
 const ENEMY_TO_CATEGORY: Record<string, string> = {
@@ -177,13 +177,13 @@ export default function MobileJourneysPage() {
     // Templates are public catalog data — always fetch regardless of auth
     // Active journeys require auth — only fetch when authenticated
     const promises: [
-      Promise<Awaited<ReturnType<typeof karmaMargService.listJourneys>> | null>,
-      Promise<Awaited<ReturnType<typeof karmaMargService.listTemplates>> | null>,
+      Promise<Awaited<ReturnType<typeof journeyEngineService.listJourneys>> | null>,
+      Promise<Awaited<ReturnType<typeof journeyEngineService.listTemplates>> | null>,
     ] = [
       authenticated
-        ? karmaMargService.listJourneys({ status_filter: 'active' }).catch(() => null)
+        ? journeyEngineService.listJourneys({ status_filter: 'active' }).catch(() => null)
         : Promise.resolve(null),
-      karmaMargService.listTemplates({ limit: 20 }).catch(() => null),
+      journeyEngineService.listTemplates({ limit: 20 }).catch(() => null),
     ]
 
     const [activeResult, templatesResult] = await Promise.allSettled(promises)
@@ -258,13 +258,13 @@ export default function MobileJourneysPage() {
     triggerHaptic('selection')
 
     try {
-      const journey = await karmaMargService.startJourney({
+      const journey = await journeyEngineService.startJourney({
         template_id: templateId,
       })
       triggerHaptic('success')
       router.push(`/m/journeys/${journey.journey_id}`)
     } catch (err) {
-      if (err instanceof KarmaMargError) {
+      if (err instanceof JourneyEngineError) {
         if (err.isAuthError()) {
           router.push('/onboarding')
           return

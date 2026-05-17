@@ -76,7 +76,7 @@ describe('ToolHeader', () => {
     render(
       <ToolHeader
         icon="🧭"
-        title="Sambandh Dharma (Relationship Compass)"
+        title="Relationship Compass"
         subtitle="Conflict guidance"
         backLink={{ label: 'Back to home', href: '/' }}
       />

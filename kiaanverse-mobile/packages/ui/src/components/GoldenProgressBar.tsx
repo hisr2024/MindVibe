@@ -7,8 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  type ColorValue, View, StyleSheet, type ViewStyle } from 'react-native';
+import { View, StyleSheet, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -98,7 +97,7 @@ function GoldenProgressBarInner({
           {shimmer && clampedProgress > 0 && (
             <Animated.View style={[StyleSheet.absoluteFill, shimmerStyle]}>
               <LinearGradient
-                colors={shimmerColors as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
+                colors={shimmerColors as unknown as string[]}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}

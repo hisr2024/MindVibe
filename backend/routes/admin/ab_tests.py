@@ -277,41 +277,35 @@ async def get_ab_test_results(
     best_variant = None
     best_rate = 0.0
     
-    # Performance: aggregate ALL variants in 2 GROUP BY queries instead
-    # of 3 queries per variant. For a 5-variant test this is 2 round-trips
-    # instead of 15. The participant + conversion + value totals are still
-    # computed in-memory below, just from pre-aggregated rows.
-    participants_by_variant_stmt = (
-        select(ABTestAssignment.variant, func.count(ABTestAssignment.id))
-        .where(ABTestAssignment.test_id == test_id)
-        .group_by(ABTestAssignment.variant)
-    )
-    participants_rows = (await db.execute(participants_by_variant_stmt)).all()
-    participants_by_variant: dict[str, int] = {
-        v: c for v, c in participants_rows
-    }
-
-    conversions_agg_stmt = (
-        select(
-            ABTestConversion.variant,
-            func.count(ABTestConversion.id),
-            func.sum(ABTestConversion.event_value),
-        )
-        .where(ABTestConversion.test_id == test_id)
-        .group_by(ABTestConversion.variant)
-    )
-    conversions_rows = (await db.execute(conversions_agg_stmt)).all()
-    conversions_by_variant: dict[str, tuple[int, float]] = {
-        v: (count or 0, float(value or 0)) for v, count, value in conversions_rows
-    }
-
     for variant_data in test.variants or []:
         variant_name = variant_data["name"]
-        participants = participants_by_variant.get(variant_name, 0)
-        conversions, total_value = conversions_by_variant.get(variant_name, (0, 0.0))
-
+        
+        # Count participants
+        participants_stmt = select(func.count(ABTestAssignment.id)).where(
+            ABTestAssignment.test_id == test_id,
+            ABTestAssignment.variant == variant_name,
+        )
+        participants_result = await db.execute(participants_stmt)
+        participants = participants_result.scalar() or 0
+        
+        # Count conversions
+        conversions_stmt = select(func.count(ABTestConversion.id)).where(
+            ABTestConversion.test_id == test_id,
+            ABTestConversion.variant == variant_name,
+        )
+        conversions_result = await db.execute(conversions_stmt)
+        conversions = conversions_result.scalar() or 0
+        
+        # Sum conversion value
+        value_stmt = select(func.sum(ABTestConversion.event_value)).where(
+            ABTestConversion.test_id == test_id,
+            ABTestConversion.variant == variant_name,
+        )
+        value_result = await db.execute(value_stmt)
+        total_value = float(value_result.scalar() or 0)
+        
         conversion_rate = (conversions / participants * 100) if participants > 0 else 0.0
-
+        
         variant_results.append(
             VariantResult(
                 variant=variant_name,
@@ -321,10 +315,10 @@ async def get_ab_test_results(
                 total_value=round(total_value, 2),
             )
         )
-
+        
         total_participants += participants
         total_conversions += conversions
-
+        
         if conversion_rate > best_rate:
             best_rate = conversion_rate
             best_variant = variant_name

@@ -69,7 +69,7 @@ const createPricingTiers = (
       'Soul Reading & Quantum Dive',
       'KIAAN Agent',
       'Ardha, Viyoga & Emotional Reset',
-      'Sambandh Dharma (Relationship Compass)',
+      'Relationship Compass',
       '10 Wisdom Journeys',
       'Advanced mood analytics',
       'Offline access & priority support',
@@ -110,7 +110,7 @@ const comparisonFeatures = [
     items: [
       { name: 'Ardha Reframing', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
       { name: 'Viyoga Detachment', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
-      { name: 'Sambandh Dharma (Relationship Compass)', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Relationship Compass', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
       { name: 'Emotional Reset Guide', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
     ],
   },

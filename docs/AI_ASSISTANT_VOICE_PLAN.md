@@ -95,7 +95,7 @@
 │  /api/karma-reset    → karma_reset_service.py (exists)             │
 │  /api/kiaan/chat     → kiaan_core.py (exists)                      │
 │  /api/ardha          → ardha_reframing_engine.py (exists)          │
-│  /api/rel-compass    → sambandh_dharma_engine.py (exists)     │
+│  /api/rel-compass    → relationship_compass_engine.py (exists)     │
 │  /api/voice/tts      → tts_service.py (exists)                     │
 │                                                                     │
 │  NEW: /api/kiaan/route  → intent classification + routing          │
@@ -119,7 +119,7 @@ export type IntentAction =
 
 export interface UserIntent {
   action: IntentAction
-  targetTool: string | null        // e.g. 'ardha', 'sambandh-dharma'
+  targetTool: string | null        // e.g. 'ardha', 'relationship-compass'
   query: string                     // original user text
   extractedContext: {
     emotion: string | null
@@ -285,7 +285,7 @@ Response: {
 |-----|------|-------|
 | 1-2 | Create `UniversalVoiceInput` component wrapping existing `VoiceInputButton` with text fallback, consent rationale, and accessibility | `components/voice/UniversalVoiceInput.tsx` |
 | 2-3 | Create `VoiceControllerService` with intent classification using existing `detectToolSuggestion()` + new NL patterns | `lib/voice-controller.ts`, `types/voice-controller.types.ts` |
-| 3-4 | Integrate `UniversalVoiceInput` into ViYoga, Ardha, KIAAN Chat, Sambandh Dharma (Relationship Compass) pages | `app/tools/*/page.tsx` modifications |
+| 3-4 | Integrate `UniversalVoiceInput` into ViYoga, Ardha, KIAAN Chat, Relationship Compass pages | `app/tools/*/page.tsx` modifications |
 | 4-5 | Unit tests for voice controller intent classification + component tests for UniversalVoiceInput | `tests/unit/voice-controller.test.ts`, `tests/frontend/UniversalVoiceInput.test.tsx` |
 
 **Week 2: KIAAN Voice Companion + Karma Reset Service**
@@ -345,7 +345,7 @@ Response: {
 ### Integration Tests
 - Voice transcript → intent classification → route resolution → navigation
 - Karma Reset invoked from Ardha → context propagated → guidance reflects Ardha context
-- Karma Reset invoked from Sambandh Dharma (Relationship Compass) → different context → different guidance
+- Karma Reset invoked from Relationship Compass → different context → different guidance
 - `ecosystemNavigator.detectToolSuggestion()` → `VoiceController.resolveRoute()` pipeline
 
 ### E2E Tests (Playwright)
@@ -405,7 +405,7 @@ MODIFIED FILES:
   types/karma-reset.types.ts               — Add KarmaResetContext, KarmaResetResult
   app/layout.tsx                           — Add KiaanVoiceNav FAB
   app/tools/ardha/page.tsx                 — Integrate UniversalVoiceInput
-  app/tools/sambandh-dharma/page.tsx  — Integrate UniversalVoiceInput (redirect → actual page)
+  app/tools/relationship-compass/page.tsx  — Integrate UniversalVoiceInput (redirect → actual page)
   app/tools/viyog/page.tsx                 — Integrate UniversalVoiceInput
   app/kiaan/chat/page.tsx                  — Integrate UniversalVoiceInput
 ```

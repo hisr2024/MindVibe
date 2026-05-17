@@ -4,7 +4,7 @@ Integration tests for Enhanced Wellness Routes v2.0
 Tests the API endpoints for:
 1. Ardha (Cognitive Reframing) with CBT integration
 2. Viyoga (Detachment Coach) with ACT integration
-3. SambandhDharma with Attachment Theory integration
+3. RelationshipCompass with Attachment Theory integration
 
 All routes now support:
 - Depth modes (quick, deep, quantum)
@@ -228,13 +228,13 @@ class TestViyogaEnhancedRoute:
 # RELATIONSHIP COMPASS ROUTE TESTS
 # =============================================================================
 
-class TestSambandhDharmaEnhancedRoute:
-    """Test suite for enhanced SambandhDharma endpoint."""
+class TestRelationshipCompassEnhancedRoute:
+    """Test suite for enhanced RelationshipCompass endpoint."""
 
     def test_compass_guide_basic_request(self, client):
-        """Test basic SambandhDharma guide request."""
+        """Test basic RelationshipCompass guide request."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "My partner and I had a big argument about communication. I feel unheard and frustrated.",
                 "relationship_type": "romantic",
@@ -250,9 +250,9 @@ class TestSambandhDharmaEnhancedRoute:
         assert "relationship_teachings" in data
 
     def test_compass_guide_with_analysis_mode(self, client):
-        """Test SambandhDharma with analysis mode parameter."""
+        """Test RelationshipCompass with analysis mode parameter."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "We keep having the same arguments about chores.",
                 "relationship_type": "romantic",
@@ -265,9 +265,9 @@ class TestSambandhDharmaEnhancedRoute:
         assert data["status"] == "success"
 
     def test_compass_guide_detects_attachment_patterns(self, client):
-        """Test that SambandhDharma provides relationship insights."""
+        """Test that RelationshipCompass provides relationship insights."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "I feel abandoned when my partner needs space. I worry they'll leave me.",
                 "relationship_type": "romantic",
@@ -283,9 +283,9 @@ class TestSambandhDharmaEnhancedRoute:
         assert len(data.get("response", "")) > 50
 
     def test_compass_guide_detects_communication_patterns(self, client):
-        """Test that SambandhDharma detects communication issues."""
+        """Test that RelationshipCompass detects communication issues."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "They always criticize me. You always do this, you never listen.",
                 "relationship_type": "romantic",
@@ -298,9 +298,9 @@ class TestSambandhDharmaEnhancedRoute:
         assert "communication_patterns" in data
 
     def test_compass_guide_with_emotion_and_outcome(self, client):
-        """Test SambandhDharma with emotion and desired outcome."""
+        """Test RelationshipCompass with emotion and desired outcome."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "My parent doesn't respect my boundaries.",
                 "relationship_type": "family",
@@ -316,9 +316,9 @@ class TestSambandhDharmaEnhancedRoute:
         assert data["relationship_type"] == "family"
 
     def test_compass_guide_with_language(self, client):
-        """Test SambandhDharma with language parameter."""
+        """Test RelationshipCompass with language parameter."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "My friend betrayed my trust.",
                 "relationship_type": "friendship",
@@ -333,7 +333,7 @@ class TestSambandhDharmaEnhancedRoute:
     def test_compass_guide_validation_short_conflict(self, client):
         """Test validation rejects too short conflict."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "Hurt",
                 "relationship_type": "romantic",
@@ -351,7 +351,7 @@ class TestSambandhDharmaEnhancedRoute:
 
         for rel_type in relationship_types:
             response = client.post(
-                "/api/sambandh-dharma/guide",
+                "/api/relationship-compass/guide",
                 json={
                     "conflict": "I'm having difficulty in this relationship.",
                     "relationship_type": rel_type,
@@ -389,14 +389,14 @@ class TestHealthEndpoints:
         assert data["status"] in ("ok", "degraded")
         assert data["service"] == "viyoga"
 
-    def test_sambandh_dharma_health(self, client):
-        """Test SambandhDharma health endpoint."""
-        response = client.get("/api/sambandh-dharma/health")
+    def test_relationship_compass_health(self, client):
+        """Test RelationshipCompass health endpoint."""
+        response = client.get("/api/relationship-compass/health")
 
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ok"
-        assert data["service"] == "sambandh-dharma"
+        assert data["service"] == "relationship-compass"
 
 
 # =============================================================================
@@ -452,11 +452,11 @@ class TestErrorHandling:
         assert response.status_code == 400
 
     def test_compass_handles_long_input(self, client):
-        """Test SambandhDharma handles input that's too long."""
+        """Test RelationshipCompass handles input that's too long."""
         long_conflict = "x" * 3500  # Exceeds 3000 char limit
 
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": long_conflict,
                 "relationship_type": "romantic",
@@ -466,9 +466,9 @@ class TestErrorHandling:
         assert response.status_code == 400
 
     def test_compass_invalid_relationship_type(self, client):
-        """Test SambandhDharma handles invalid relationship type."""
+        """Test RelationshipCompass handles invalid relationship type."""
         response = client.post(
-            "/api/sambandh-dharma/guide",
+            "/api/relationship-compass/guide",
             json={
                 "conflict": "I'm having trouble in this relationship.",
                 "relationship_type": "invalid_type",

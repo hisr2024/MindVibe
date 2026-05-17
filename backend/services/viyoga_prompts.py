@@ -2,7 +2,7 @@
 
 ENHANCED v5.0: Deep Gita Compliance with 5 Non-Negotiable Pillars.
 Viyoga now receives deep AI-powered concern analysis BEFORE generating responses,
-enabling truly personalized, situation-specific guidance like Ardha and Sambandh Dharma (Relationship Compass).
+enabling truly personalized, situation-specific guidance like Ardha and Relationship Compass.
 
 v5.0 adds the Five Pillars of True Gita Compliance:
 1. Atman-Prakriti Viveka (Self vs Mind distinction)
@@ -280,7 +280,7 @@ Essential Bhagavad Gita teachings for the Five Pillars of deep detachment:
 
 === PILLAR 2: PHALA-TYAGA (Complete Fruit Renunciation) ===
 
-- BG 2.47: "Karmanye vadhikaraste ma phaleshu kadachana — Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached."
+- BG 2.47: "Karmanye vadhikaraste ma phaleshu kadachana — You have the right to perform your prescribed duty, but you are not entitled to the fruits of your actions."
   Pillar: Phala-tyaga. Not merely "focus on effort." RENOUNCE the claim. You never owned the outcome.
   Application: "Your right was to the preparation. The result was never yours to hold."
 
@@ -646,7 +646,7 @@ def build_enhanced_viyoga_prompt(
     """Build enhanced message array for Viyoga with deep concern analysis.
 
     This is the key function that makes Viyoga responses personalized like
-    Ardha and Sambandh Dharma (Relationship Compass) - by injecting the AI analysis of the
+    Ardha and Relationship Compass - by injecting the AI analysis of the
     user's specific concern into the prompt.
 
     Args:

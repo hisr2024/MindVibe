@@ -10,7 +10,7 @@
  * - Sacred gradient background matching the Gold-Black divine theme
  * - Collapsible cards with haptic feedback for sidebar content
  *
- * Used by: Viyoga, Ardha, Sambandh Dharma (Relationship Compass) mobile pages
+ * Used by: Viyoga, Ardha, Relationship Compass mobile pages
  */
 
 import { type ReactNode, useState } from 'react'

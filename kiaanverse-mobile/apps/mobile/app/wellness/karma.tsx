@@ -127,7 +127,7 @@ function LevelProgress({
         <View style={styles.pointsRow}>
           <Award size={14} color={colors.primary[300]} />
           <Text variant="label" color={colors.primary[300]}>
-            {t('karmaPointsFmt', { count: String(totalPoints) })}
+            {t('karmaPointsFmt', { count: totalPoints })}
           </Text>
         </View>
 
@@ -152,7 +152,7 @@ function LevelProgress({
             </View>
             <Text variant="caption" color={c.textTertiary}>
               {t('karmaPointsToNextFmt', {
-                count: String(next.minPoints - totalPoints),
+                count: next.minPoints - totalPoints,
                 emoji: next.emoji,
                 name: t(next.nameKey),
               })}
@@ -214,7 +214,7 @@ function NodeDetail({
         <View style={styles.nodePointsRow}>
           <Award size={12} color={colors.primary[300]} />
           <Text variant="caption" color={colors.primary[300]}>
-            {t('karmaPointsAddFmt', { count: String(node.points) })}
+            {t('karmaPointsAddFmt', { count: node.points })}
           </Text>
           {node.completed ? (
             <Text variant="caption" color={colors.semantic.success}>
@@ -382,7 +382,7 @@ export default function KarmaTreeScreen(): React.JSX.Element {
                       {t(lvl.nameKey)}
                     </Text>
                     <Text variant="caption" color={c.textTertiary}>
-                      {t('karmaLevelPointsFmt', { count: String(lvl.minPoints) })}
+                      {t('karmaLevelPointsFmt', { count: lvl.minPoints })}
                     </Text>
                   </View>
                 </View>

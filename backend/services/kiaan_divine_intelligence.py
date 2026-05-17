@@ -399,7 +399,7 @@ GITA_VERSES_BY_CHALLENGE = {
         ("4.10", "vīta-rāga-bhaya-krodhāḥ",
          "Free from attachment, fear, and anger, absorbed in Me."),
         ("18.66", "sarva-dharmān parityajya",
-         "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins."),
+         "Abandon all varieties of dharma and surrender unto Me. I shall deliver you."),
     ],
 
     SpiritualChallenge.ANGER_RESENTMENT: [

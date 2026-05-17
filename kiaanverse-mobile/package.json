@@ -20,15 +20,6 @@
   "pnpm": {
     "patchedDependencies": {
       "expo-modules-core@1.12.26": "patches/expo-modules-core@1.12.26.patch"
-    },
-    "overrides": {
-      "tar": "^7.4.3",
-      "@xmldom/xmldom": "^0.9.4",
-      "brace-expansion": "^2.0.3",
-      "markdown-it": "^14.1.0",
-      "postcss": "^8.5.10",
-      "send": "^1.2.0",
-      "fast-xml-parser": "^5.0.0"
     }
   },
   "devDependencies": {

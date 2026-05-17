@@ -148,8 +148,8 @@ describe('Tool Pages Exist', () => {
     expect(pageModule.default).toBeDefined()
   })
 
-  it('sambandh-dharma tool page exists', async () => {
-    const pageModule = await import('@/app/tools/sambandh-dharma/page')
+  it('relationship-compass tool page exists', async () => {
+    const pageModule = await import('@/app/tools/relationship-compass/page')
     expect(pageModule.default).toBeDefined()
   })
 
@@ -190,12 +190,12 @@ describe('Tool Pages Headers', () => {
     })
   })
 
-  it('sambandh-dharma page has correct heading', async () => {
-    const { default: SambandhDharmaPage } = await import('@/app/tools/sambandh-dharma/page')
-    render(<SambandhDharmaPage />)
+  it('relationship-compass page has correct heading', async () => {
+    const { default: RelationshipCompassPage } = await import('@/app/tools/relationship-compass/page')
+    render(<RelationshipCompassPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Sambandh Dharma (Relationship Compass)')).toBeInTheDocument()
+      expect(screen.getByText('Relationship Compass')).toBeInTheDocument()
     })
   })
 

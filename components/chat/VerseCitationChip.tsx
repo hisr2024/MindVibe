@@ -36,7 +36,7 @@ export function VerseCitationChip({ chapter, verse }: VerseCitationChipProps) {
 
   const verseData = isModalOpen ? getVerse(chapter, verse) : null
   const chapterInfo = isModalOpen
-    ? CHAPTERS.find(c => c.chapter === chapter)
+    ? CHAPTERS.find(c => c.number === chapter)
     : null
 
   return (
@@ -73,7 +73,7 @@ export function VerseCitationChip({ chapter, verse }: VerseCitationChipProps) {
           {chapterInfo && (
             <div className="text-center">
               <p className="text-sm text-[#a89e8e]">
-                Chapter {chapterInfo.chapter} — {chapterInfo.englishName}
+                Chapter {chapterInfo.number} — {chapterInfo.name}
               </p>
               <p className="font-serif text-base text-[#e8b54a]">
                 {chapterInfo.sanskritName}
@@ -106,19 +106,29 @@ export function VerseCitationChip({ chapter, verse }: VerseCitationChipProps) {
               )}
 
               {/* English translation */}
-              {verseData.translation && (
+              <div>
+                <p className="mb-1 text-xs uppercase tracking-wider text-[#a89e8e]">
+                  English
+                </p>
+                <p className="text-sm leading-relaxed text-[#f5f0e8]">
+                  {verseData.english}
+                </p>
+              </div>
+
+              {/* Hindi translation */}
+              {verseData.hindi && (
                 <div>
                   <p className="mb-1 text-xs uppercase tracking-wider text-[#a89e8e]">
-                    English
+                    Hindi
                   </p>
                   <p className="text-sm leading-relaxed text-[#f5f0e8]">
-                    {verseData.translation}
+                    {verseData.hindi}
                   </p>
                 </div>
               )}
 
-              {/* Themes — optional metadata when available. */}
-              {verseData.themes && verseData.themes.length > 0 && (
+              {/* Themes */}
+              {verseData.themes.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {verseData.themes.map(theme => (
                     <span
@@ -131,14 +141,14 @@ export function VerseCitationChip({ chapter, verse }: VerseCitationChipProps) {
                 </div>
               )}
 
-              {/* Practical wisdom — optional companion text. */}
-              {verseData.practicalWisdom && (
+              {/* Reflection */}
+              {verseData.reflection && (
                 <div className="rounded-lg border border-[#e8b54a]/10 bg-[#e8b54a]/5 p-3">
                   <p className="mb-1 text-xs uppercase tracking-wider text-[#a89e8e]">
-                    Practical wisdom
+                    Reflection
                   </p>
                   <p className="text-sm italic leading-relaxed text-[#d4c4a8]">
-                    {verseData.practicalWisdom}
+                    {verseData.reflection}
                   </p>
                 </div>
               )}

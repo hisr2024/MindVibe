@@ -28,7 +28,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।\nमा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
       transliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana\nmā karma-phala-hetur bhūr mā te saṅgo \'stv akarmaṇi',
-      english: '',
+      english: 'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, and never be attached to inaction.',
       chapter: 2,
       verse: 47,
       chapterName: 'Sānkhya Yoga',
@@ -47,7 +47,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'अनुद्वेगकरं वाक्यं सत्यं प्रियहितं च यत्।\nस्वाध्यायाभ्यसनं चैव वाङ्मयं तप उच्यते॥',
       transliteration: 'anudvega-karaṁ vākyaṁ satyaṁ priya-hitaṁ ca yat\nsvādhyāyābhyasanaṁ caiva vāṅ-mayaṁ tapa ucyate',
-      english: '',
+      english: 'Speech that causes no agitation, that is truthful, pleasing, and beneficial, and the regular recitation of sacred texts — this is called the austerity of speech.',
       chapter: 17,
       verse: 15,
       chapterName: 'Śraddhā-traya Vibhāga Yoga',
@@ -66,7 +66,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।\nआत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥',
       transliteration: 'uddhared ātmanātmānaṁ nātmānam avasādayet\nātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ',
-      english: '',
+      english: 'Let one lift oneself by one\'s own Self; let one not degrade oneself. For the Self alone is the friend of the self, and the Self alone is the enemy of the self.',
       chapter: 6,
       verse: 5,
       chapterName: 'Dhyāna Yoga',
@@ -85,7 +85,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'दुःखेष्वनुद्विग्नमनाः सुखेषु विगतस्पृहः।\nवीतरागभयक्रोधः स्थितधीर्मुनिरुच्यते॥',
       transliteration: 'duḥkheṣv anudvigna-manāḥ sukheṣu vigata-spṛhaḥ\nvīta-rāga-bhaya-krodhaḥ sthita-dhīr munir ucyate',
-      english: '',
+      english: 'One whose mind is undisturbed by sorrow, who does not crave pleasure, who is free from attachment, fear, and anger — such a person is called a sage of steady wisdom.',
       chapter: 2,
       verse: 56,
       chapterName: 'Sānkhya Yoga',
@@ -104,7 +104,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'स्वधर्ममपि चावेक्ष्य न विकम्पितुमर्हसि।\nधर्म्याद्धि युद्धाच्छ्रेयोऽन्यत्क्षत्रियस्य न विद्यते॥',
       transliteration: 'sva-dharmam api cāvekṣya na vikampitum arhasi\ndharmyāddhi yuddhāc chreyo \'nyat kṣatriyasya na vidyate',
-      english: '',
+      english: 'Considering your own dharma, you should not waver. For a warrior, there is nothing more ennobling than a righteous duty.',
       chapter: 2,
       verse: 31,
       chapterName: 'Sānkhya Yoga',
@@ -123,7 +123,7 @@ const FALLBACK_WISDOM: Record<string, {
     primaryShloka: {
       sanskrit: 'यज्ञार्थात्कर्मणोऽन्यत्र लोकोऽयं कर्मबन्धनः।\nतदर्थं कर्म कौन्तेय मुक्तसङ्गः समाचर॥',
       transliteration: 'yajñārthāt karmaṇo \'nyatra loko \'yaṁ karma-bandhanaḥ\ntad-arthaṁ karma kaunteya mukta-saṅgaḥ samācara',
-      english: '',
+      english: 'Work done as a sacrifice to the Supreme frees one from bondage. Therefore, O Arjuna, perform your duty free from attachment.',
       chapter: 3,
       verse: 9,
       chapterName: 'Karma Yoga',

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * CompassSacredJourney — Main orchestrator for Sambandh Dharma (Relationship Compass)'s 6 Sacred Chambers
+ * CompassSacredJourney — Main orchestrator for Relationship Compass's 6 Sacred Chambers
  *
  * Chamber I:   COMPASS ALTAR      — Entry, relationship naming, guna meter
  * Chamber II:  GUNA MIRROR        — 3-panel pattern selection (Tamas/Rajas/Sattva)
@@ -10,7 +10,7 @@
  * Chamber V:   DHARMIC INTENTION  — Sankalpa setting
  * Chamber VI:  COMPASS SEAL       — Completion & summary
  *
- * Uses the same /api/sambandh-dharma/guide endpoint — response generation unchanged.
+ * Uses the same /api/relationship-compass/guide endpoint — response generation unchanged.
  * The UI enriches the message with guna context before sending.
  */
 
@@ -168,7 +168,7 @@ export default function CompassSacredJourney() {
       const activeSessionId = sessionId || window.crypto.randomUUID()
       if (!sessionId) setSessionId(activeSessionId)
 
-      const response = await apiFetch('/api/sambandh-dharma/guide', {
+      const response = await apiFetch('/api/relationship-compass/guide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -183,7 +183,7 @@ export default function CompassSacredJourney() {
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok && !data.response) {
-        setError('Sambandh Dharma (Relationship Compass) is gathering wisdom. Try again shortly.')
+        setError('Relationship Compass is gathering wisdom. Try again shortly.')
         return
       }
 
@@ -212,7 +212,7 @@ export default function CompassSacredJourney() {
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return
-      setError('Unable to reach Sambandh Dharma (Relationship Compass). Check your connection.')
+      setError('Unable to reach Relationship Compass. Check your connection.')
     } finally {
       setLoading(false)
     }

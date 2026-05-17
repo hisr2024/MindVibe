@@ -7,7 +7,7 @@ Enables automatic Gita wisdom acquisition from external sources.
 Sources:
 - YouTube (ISKCON, Swami Mukundananda, Gaur Gopal Das, etc.)
 - Audio Platforms (Spotify, Apple Music, Gaana, JioSaavn podcasts)
-- Web Sources (IIT Kanpur Gita Supersite, [REMOVED-PENDING-LICENSE-REVIEW], etc.)
+- Web Sources (IIT Kanpur Gita Supersite, holy-bhagavad-gita.org, etc.)
 
 All content is validated for strict Bhagavad Gita compliance.
 """
@@ -136,7 +136,7 @@ async def get_learning_status() -> dict[str, Any]:
         "sources": {
             "youtube": ["ISKCON", "Swami Mukundananda", "Gaur Gopal Das", "Swami Sarvapriyananda"],
             "audio_platforms": ["Spotify", "Apple Music", "Gaana", "JioSaavn"],
-            "web_sources": ["IIT Kanpur Gita Supersite", "[REMOVED-PENDING-LICENSE-REVIEW]", "[REMOVED-PENDING-LICENSE-REVIEW]"],
+            "web_sources": ["IIT Kanpur Gita Supersite", "holy-bhagavad-gita.org", "vedabase.io"],
         },
         "compliance": "Strict Bhagavad Gita only - all content validated",
     }

@@ -19,10 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # index build is cached by Docker's layer cache and does not re-run on every
 # backend code change.
 COPY data/ ./data/
-COPY scripts/build-sambandh-dharma-index-local.py ./scripts/build-sambandh-dharma-index-local.py
+COPY scripts/build-relationship-compass-index-local.py ./scripts/build-relationship-compass-index-local.py
 
-# Build the Sambandh Dharma (Relationship Compass) index (cached unless data/ or the script change)
-RUN python scripts/build-sambandh-dharma-index-local.py
+# Build the Relationship Compass index (cached unless data/ or the script change)
+RUN python scripts/build-relationship-compass-index-local.py
 
 # Now copy the rest of the source (changes frequently — but the index layer
 # above stays cached).

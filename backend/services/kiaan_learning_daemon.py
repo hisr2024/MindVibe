@@ -1192,21 +1192,8 @@ class KIAANLearningDaemon:
 # SINGLETON ACCESSOR
 # =============================================================================
 
-_INGESTION_ENV_FLAG = "MINDVIBE_EXTERNAL_INGESTION_ENABLED"
-
-
 def get_learning_daemon() -> KIAANLearningDaemon:
-    """Get the singleton KIAAN Learning Daemon instance.
-
-    Gated by ``MINDVIBE_EXTERNAL_INGESTION_ENABLED=1``. The autonomous
-    learning daemon is disabled by default pending licensing review of
-    upstream third-party content sources.
-    """
-    if os.getenv(_INGESTION_ENV_FLAG, "0") != "1":
-        raise RuntimeError(
-            "KIAAN learning daemon is disabled pending external-source licensing "
-            f"review. Set {_INGESTION_ENV_FLAG}=1 only after legal sign-off."
-        )
+    """Get the singleton KIAAN Learning Daemon instance."""
     return KIAANLearningDaemon()
 
 

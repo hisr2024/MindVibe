@@ -66,14 +66,14 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.47", chapter=2, verse=47,
             sanskrit="कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="You have a right to action alone, never to its fruits.",
             principle="nishkama_karma", theme="anxiety_about_results",
             mood_application_match=0.92,
         ),
         RetrievedVerse(
             ref="BG 6.35", chapter=6, verse=35,
             sanskrit="अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="Through practice and detachment, the mind is restrained.",
             principle="abhyasa_vairagya", theme="restless_mind",
             mood_application_match=0.85,
         ),
@@ -82,7 +82,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.14", chapter=2, verse=14,
             sanskrit="आगमापायिनोऽनित्यास्तांस्तितिक्षस्व भारत।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="They come and go, impermanent — endure them, Bharata.",
             principle="anitya", theme="this_too_passes",
             mood_application_match=0.88,
         ),
@@ -91,7 +91,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 6.5", chapter=6, verse=5,
             sanskrit="उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="Lift yourself by your own self; do not let the self sink.",
             principle="atma_uddharana", theme="self_lifting",
             mood_application_match=0.93,
         ),
@@ -100,7 +100,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 6.30", chapter=6, verse=30,
             sanskrit="यो मां पश्यति सर्वत्र सर्वं च मयि पश्यति।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="One who sees Me everywhere is never lost to Me.",
             principle="ishvara_drishti", theme="you_are_not_alone",
             mood_application_match=0.94,
         ),
@@ -109,7 +109,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.62", chapter=2, verse=62,
             sanskrit="ध्यायतो विषयान्पुंसः सङ्गस्तेषूपजायते।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="Brooding on objects gives rise to attachment.",
             principle="krodha_chain", theme="anger_origin",
             mood_application_match=0.91,
         ),
@@ -127,7 +127,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 18.46", chapter=18, verse=46,
             sanskrit="स्वकर्मणा तमभ्यर्च्य सिद्धिं विन्दति मानवः।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="By one's own work, perfection is attained.",
             principle="one_thing_at_a_time", theme="rest_is_allowed",
             mood_application_match=0.84,
         ),
@@ -136,7 +136,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 18.66", chapter=18, verse=66,
             sanskrit="सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="Abandoning all dharmas, take refuge in Me alone.",
             principle="sharanagati", theme="surrender_in_uncertainty",
             mood_application_match=0.83,
         ),
@@ -145,7 +145,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.40", chapter=2, verse=40,
             sanskrit="नेहाभिक्रमनाशोऽस्ति प्रत्यवायो न विद्यते।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="On this path no effort is wasted, no progress is lost.",
             principle="no_effort_wasted", theme="fear_of_failure",
             mood_application_match=0.80,
         ),
@@ -154,7 +154,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.13", chapter=2, verse=13,
             sanskrit="देहिनोऽस्मिन्यथा देहे कौमारं यौवनं जरा।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="As childhood, youth, and old age come to the embodied — so too another body.",
             principle="deha_atma_viveka", theme="grief_and_continuity",
             mood_application_match=0.94,
         ),
@@ -163,7 +163,7 @@ _MOCK_VERSE_CATALOGUE: dict[str, list[RetrievedVerse]] = {
         RetrievedVerse(
             ref="BG 2.50", chapter=2, verse=50,
             sanskrit="बुद्धियुक्तो जहातीह उभे सुकृतदुष्कृते।",
-            english="<placeholder pending PD-baseline rebuild>",
+            english="One united with intelligence sets aside both good and bad deeds.",
             principle="buddhi_yoga", theme="neutral_steadiness",
             mood_application_match=0.65,
         ),

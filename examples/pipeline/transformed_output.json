@@ -1,0 +1,24 @@
+{
+  "description": "Example transformed verse data after pipeline processing",
+  "transformation_details": {
+    "pipeline_version": "1.0.0",
+    "stages_applied": ["validation", "normalization", "sanitization", "enrichment"]
+  },
+  "verses": [
+    {
+      "verse_id": "2.47",
+      "chapter": 2,
+      "verse_number": 47,
+      "theme": "action_without_attachment",
+      "english": "You have the right to perform your duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, nor be attached to not doing your duty.",
+      "context": "the wise one teaches the student about performing duty without attachment to outcomes, a key concept for reducing anxiety.",
+      "mental_health_applications": {
+        "applications": ["anxiety_management", "stress_reduction", "letting_go", "present_moment_focus"]
+      },
+      "principles": ["action", "detachment", "duty"],
+      "keywords": ["perform", "duties", "actions", "results", "attachment", "anxiety"],
+      "chapter_theme": "wisdom_and_knowledge",
+      "metadata_score": 0.85
+    }
+  ]
+}

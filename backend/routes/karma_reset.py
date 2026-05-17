@@ -164,7 +164,7 @@ async def generate_karma_reset(
 
 GITA WISDOM CONTEXT:
 The Bhagavad Gita teaches profound principles about karma (action), kshama (forgiveness), and dharma (righteous conduct):
-- BG 18.66: "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins."
+- BG 18.66: "Abandon all varieties of dharmas and surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear."
 - BG 4.36-37: "Even if you are the most sinful of all sinners, you will cross over all misfortune by the boat of knowledge."
 - BG 6.5: "One must elevate, not degrade oneself by one's own mind. The mind is the friend of the conditioned soul, and his enemy as well."
 - BG 17.15: "Speech should be truthful, pleasing, beneficial, and not agitating to others."

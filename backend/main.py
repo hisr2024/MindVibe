@@ -1548,7 +1548,7 @@ if compliance_routers_loaded:
 else:
     startup_logger.info("❌ [ERROR] No Compliance routers were loaded")
 
-# Load Karma Reset router (Viyog, Sambandh Dharma (Relationship Compass), Ardha use KIAAN's wisdom system)
+# Load Karma Reset router (Viyog, Relationship Compass, Ardha use KIAAN's wisdom system)
 startup_logger.info("\n[Karma Reset] Attempting to import Karma Reset router...")
 try:
     from backend.routes.karma_reset import router as karma_reset_router
@@ -1644,40 +1644,40 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Gita AI Analysis router: {e}")
 
-# Load Sambandh Dharma (Relationship Compass) router
+# Load Relationship Compass router
 startup_logger.info(
-    "\n[Sambandh Dharma (Relationship Compass)] Attempting to import Sambandh Dharma (Relationship Compass) router..."
+    "\n[Relationship Compass] Attempting to import Relationship Compass router..."
 )
 try:
-    from backend.routes.sambandh_dharma import (
-        router as sambandh_dharma_router,
+    from backend.routes.relationship_compass import (
+        router as relationship_compass_router,
     )
 
-    app.include_router(sambandh_dharma_router)
+    app.include_router(relationship_compass_router)
     _startup_status["routers_loaded"] += 1
     startup_logger.info(
-        "✅ [SUCCESS] Sambandh Dharma (Relationship Compass) router loaded with KIAAN integration"
+        "✅ [SUCCESS] Relationship Compass router loaded with KIAAN integration"
     )
 except Exception as e:
     _startup_status["routers_failed"] += 1
-    startup_logger.info(f"❌ [ERROR] Failed to load Sambandh Dharma (Relationship Compass) router: {e}")
+    startup_logger.info(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
 
-# Load Sambandh Dharma Engine router
+# Load Relationship Compass Engine router
 startup_logger.info(
-    "\n[Sambandh Dharma Engine] Attempting to import Sambandh Dharma Engine router..."
+    "\n[Relationship Compass Engine] Attempting to import Relationship Compass Engine router..."
 )
 try:
-    from backend.routes.sambandh_dharma_engine import (
-        router as sambandh_dharma_engine_router,
+    from backend.routes.relationship_compass_engine import (
+        router as relationship_compass_engine_router,
     )
 
-    app.include_router(sambandh_dharma_engine_router)
+    app.include_router(relationship_compass_engine_router)
     _startup_status["routers_loaded"] += 1
-    startup_logger.info("✅ [SUCCESS] Sambandh Dharma Engine router loaded")
+    startup_logger.info("✅ [SUCCESS] Relationship Compass Engine router loaded")
 except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(
-        f"❌ [ERROR] Failed to load Sambandh Dharma Engine router: {e}"
+        f"❌ [ERROR] Failed to load Relationship Compass Engine router: {e}"
     )
 
 # Load Daily Analysis router
@@ -1879,37 +1879,37 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Journeys router: {e}")
 
-# Load Karma Marg (Karma Journey) router (Guided Journeys - Six Enemies / Shadripu)
-startup_logger.info("\n[Karma Marg (Karma Journey)] Attempting to import Karma Marg (Karma Journey) router...")
+# Load Journey Engine router (Guided Journeys - Six Enemies / Shadripu)
+startup_logger.info("\n[Journey Engine] Attempting to import Journey Engine router...")
 try:
-    from backend.routes.karma_marg import router as karma_marg_router
+    from backend.routes.journey_engine import router as journey_engine_router
 
-    app.include_router(karma_marg_router, prefix="/api/karma-marg")
+    app.include_router(journey_engine_router, prefix="/api/journey-engine")
     _startup_status["routers_loaded"] += 1
     startup_logger.info(
-        "✅ [SUCCESS] Karma Marg (Karma Journey) router loaded (Six Enemies / Shadripu)"
+        "✅ [SUCCESS] Journey Engine router loaded (Six Enemies / Shadripu)"
     )
     startup_logger.info(
-        "   • GET    /api/karma-marg/templates - List journey templates"
+        "   • GET    /api/journey-engine/templates - List journey templates"
     )
-    startup_logger.info("   • GET    /api/karma-marg/templates/{id} - Get template")
-    startup_logger.info("   • GET    /api/karma-marg/journeys - List user journeys")
-    startup_logger.info("   • POST   /api/karma-marg/journeys - Start journey")
+    startup_logger.info("   • GET    /api/journey-engine/templates/{id} - Get template")
+    startup_logger.info("   • GET    /api/journey-engine/journeys - List user journeys")
+    startup_logger.info("   • POST   /api/journey-engine/journeys - Start journey")
     startup_logger.info(
-        "   • GET    /api/karma-marg/journeys/{id}/steps/current - Get current step"
-    )
-    startup_logger.info(
-        "   • POST   /api/karma-marg/journeys/{id}/steps/{day}/complete - Complete step"
+        "   • GET    /api/journey-engine/journeys/{id}/steps/current - Get current step"
     )
     startup_logger.info(
-        "   • GET    /api/karma-marg/dashboard - Get user dashboard"
+        "   • POST   /api/journey-engine/journeys/{id}/steps/{day}/complete - Complete step"
     )
     startup_logger.info(
-        "   • GET    /api/karma-marg/enemies - List enemies with info"
+        "   • GET    /api/journey-engine/dashboard - Get user dashboard"
+    )
+    startup_logger.info(
+        "   • GET    /api/journey-engine/enemies - List enemies with info"
     )
 except Exception as e:
     _startup_status["routers_failed"] += 1
-    startup_logger.info(f"❌ [ERROR] Failed to load Karma Marg (Karma Journey) router: {e}")
+    startup_logger.info(f"❌ [ERROR] Failed to load Journey Engine router: {e}")
 
 # Load Sync router (Quantum Enhancement #2)
 startup_logger.info("\n[Sync] Attempting to import Sync router...")
@@ -2565,7 +2565,7 @@ try:
     startup_logger.info("   • POST   /api/kiaan/tools/ardha")
     startup_logger.info("   • POST   /api/kiaan/tools/viyoga")
     startup_logger.info("   • POST   /api/kiaan/tools/karma-reset")
-    startup_logger.info("   • POST   /api/kiaan/tools/sambandh-dharma")
+    startup_logger.info("   • POST   /api/kiaan/tools/relationship-compass")
     startup_logger.info("   • POST   /api/kiaan/tools/karmalytix")
 except Exception as e:
     _startup_status["routers_failed"] += 1

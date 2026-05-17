@@ -78,7 +78,7 @@ Response:
     {
       "verse_id": "2.47",
       "theme": "Action Without Attachment",
-      "text": "<placeholder pending PD-baseline rebuild>",
+      "text": "You have the right to perform your duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, nor be attached to not doing your duty.",
       "context": "This verse teaches the principle of performing one's duties without attachment to outcomes, a key concept for reducing anxiety and maintaining inner peace.",
       "language": "english",
       "applications": ["anxiety_management", "stress_reduction", "letting_go", "present_moment_focus"]

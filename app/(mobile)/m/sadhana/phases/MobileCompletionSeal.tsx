@@ -14,8 +14,8 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { CompleteResponse } from '@/types/sadhana.types'
 
 const BENEDICTIONS = [
-  { sanskrit: 'सर्वे भवन्तु सुखिनः', english: '' },
-  { sanskrit: 'लोका समस्ता सुखिनो भवन्तु', english: '' },
+  { sanskrit: 'सर्वे भवन्तु सुखिनः', english: 'May all beings be happy' },
+  { sanskrit: 'लोका समस्ता सुखिनो भवन्तु', english: 'May all worlds be at peace' },
   { sanskrit: 'ॐ शान्तिः शान्तिः शान्तिः', english: 'Peace. Peace. Peace.' },
   { sanskrit: 'तत् त्वम् असि', english: 'That thou art' },
   { sanskrit: 'अहं ब्रह्मास्मि', english: 'I am the infinite' },

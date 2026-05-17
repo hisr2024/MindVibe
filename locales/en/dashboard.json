@@ -36,8 +36,8 @@
       "title": "Ardha",
       "description": "Situational guidance"
     },
-    "sambandh-dharma": {
-      "title": "Sambandh Dharma (Relationship Compass)",
+    "relationship-compass": {
+      "title": "Relationship Compass",
       "description": "Relationship guidance"
     },
     "emotional-reset": {
@@ -106,7 +106,7 @@
     "viyog": "Calm the immediate reaction",
     "ardha": "Reframe the perception",
     "kiaan": "Talk it through",
-    "sambandh-dharma": "Navigate relational clarity",
+    "relationship-compass": "Navigate relational clarity",
     "journey": "Train long-term inner steadiness"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Pause Mode",
     "ardha": "Clarity Mode",
     "kiaan": "Companion Mode",
-    "sambandh-dharma": "Relationship Mode",
+    "relationship-compass": "Relationship Mode",
     "journey": "Training Mode"
   }
 }

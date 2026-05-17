@@ -26,7 +26,7 @@ These are foundational features that make MindVibe a serious platform, not a toy
 
 | # | Feature | What It Does | Why It's Valuable |
 |---|---------|-------------|-------------------|
-| 9 | **Sambandh Dharma (Relationship Compass)** | RAG-powered relationship guidance using Gita wisdom, pattern analysis, action plans | Combines therapy-grade relationship work with ancient wisdom |
+| 9 | **Relationship Compass** | RAG-powered relationship guidance using Gita wisdom, pattern analysis, action plans | Combines therapy-grade relationship work with ancient wisdom |
 | 10 | **Karma System** | Karma reset, karma footprint, karmic tree visualization, karma-problems resolution | Unique behavioral transformation framework |
 | 11 | **Emotional Reset** | Pattern recognition, cognitive reframing, emotion-to-Gita-verse mapping | Real-time emotional crisis intervention |
 | 12 | **Ardha** (Cognitive Reframing) | Economic stress navigation, Gita-based scarcity mindset reframing | Therapeutic tool with spiritual depth |
@@ -78,7 +78,7 @@ PLUS ($4.99):     +135 questions + Journal + Voice Synthesis + 3 Journeys
                   = Good value. But MISSING 8 premium features.
 
 PRO ($9.99):      +150 questions + Voice Companion + Soul Reading
-                  + Quantum Dive + KIAAN Agent + Sambandh Dharma (Relationship Compass)
+                  + Quantum Dive + KIAAN Agent + Relationship Compass
                   + Analytics + Offline + 10 Journeys
                   = MASSIVE jump. Too much unlocked at once.
 
@@ -120,7 +120,7 @@ Tier:             FREE        PLUS               PRO                    ELITE   
 | Voice Learning (9 modules) | $50K-80K | $3-5/mo | No competitor |
 | Soul Reading + Quantum Dive | $20K-30K | $3-5/mo | No competitor |
 | KIAAN Agent | $30K-50K | $5-8/mo | No competitor |
-| Sambandh Dharma (Relationship Compass) (RAG) | $40K-60K | $5-10/mo | Therapy: $60-100/session |
+| Relationship Compass (RAG) | $40K-60K | $5-10/mo | Therapy: $60-100/session |
 | Emotional Reset + Ardha + Viyoga | $30K-50K | $5-8/mo | CBT apps: $15-30/mo |
 
 **Total estimated build cost: $350K-550K**
@@ -155,7 +155,7 @@ Tier:             FREE        PLUS               PRO                    ELITE   
 
 3. **Multi-Provider AI with Circuit Breakers** - Automatic failover between OpenAI, Sarvam, and compatible providers. This is Netflix-grade resilience.
 
-4. **RAG-Powered Sambandh Dharma (Relationship Compass)** - Using Bhagavad Gita as a knowledge base for relationship guidance through retrieval-augmented generation. Genuinely novel.
+4. **RAG-Powered Relationship Compass** - Using Bhagavad Gita as a knowledge base for relationship guidance through retrieval-augmented generation. Genuinely novel.
 
 5. **Sad-Ripu System** - Digitizing the 6 inner enemies framework from Gita into trackable behavioral patterns. No one else has this.
 
@@ -206,7 +206,7 @@ Tier:             FREE        PLUS               PRO                    ELITE   
 │  - Ardha + Viyoga + Emotional Reset    $8/mo         $0 (within quota)   │
 │  - Soul Reading + Quantum Dive         $5/mo         $0 (within quota)   │
 │  - KIAAN Agent                         $5/mo         $0 (within quota)   │
-│  - Sambandh Dharma (Relationship Compass)                $8/mo         $0 (within quota)   │
+│  - Relationship Compass                $8/mo         $0 (within quota)   │
 │  - 10 Wisdom Journeys                  $5/mo         ~$0/mo              │
 │  - Advanced mood analytics             $3/mo         ~$0/mo              │
 │  - Offline access                      $3/mo         ~$0/mo              │

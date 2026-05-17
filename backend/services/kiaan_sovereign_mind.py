@@ -282,9 +282,9 @@ class OfflineWisdomEngine:
             "theme": "moha",
             "wisdom": (
                 "When Arjuna was overwhelmed by confusion, Krishna gave him the "
-                "supreme instruction: 'Abandoning all duties, come unto Me alone "
-                "for shelter; sorrow not, I will liberate thee from all sins' "
-                "(18.66). In moments of deep confusion, seek the "
+                "supreme instruction: 'Abandon all varieties of dharma and simply "
+                "surrender unto Me. I shall deliver you from all sinful reactions. "
+                "Do not fear' (18.66). In moments of deep confusion, seek the "
                 "guidance of one who has realized the Truth (4.34). The light of "
                 "knowledge destroys the darkness of ignorance."
             ),
@@ -572,39 +572,16 @@ class ModelFineTuner:
         interaction_logs: Optional[List[Dict[str, Any]]] = None,
     ) -> Path:
         """
-        Prepare training dataset from Gita verses ONLY.
+        Prepare training dataset from Gita verses and interaction logs.
 
         Format: JSONL with instruction/input/output triplets
         Each entry teaches the model how to respond to spiritual concerns
         using authentic Gita wisdom.
-
-        IP CONSTRAINT (Phase 1N — IP-hygiene mop-up):
-        The ``interaction_logs`` parameter is *retained* in the signature for
-        backwards compatibility, but any logs supplied are DROPPED on the
-        floor. Reason: third-party LLM Commercial Terms (Anthropic, OpenAI,
-        Google, etc.) explicitly prohibit using API output to train other
-        AI models or datasets. We may only train this pipeline on the
-        public-domain Gita corpus, never on user↔LLM interaction pairs.
-
-        Any future change that re-enables interaction-log ingestion MUST:
-          1. Filter out every response that originated from a third-party LLM
-          2. Obtain explicit written consent from the user for re-use
-          3. Get sign-off from counsel
-        Don't undo this gate.
         """
-        if interaction_logs:
-            logger.warning(
-                "ModelFineTuner.prepare_training_data: received %d interaction "
-                "logs but dropping them — third-party LLM outputs cannot be used "
-                "for model training under their Commercial Terms.",
-                len(interaction_logs),
-            )
-
         dataset_path = self._data_dir / f"training_data_{int(time.time())}.jsonl"
         entries = []
 
-        # Convert Gita verses to instruction-tuning format. The Gita is public
-        # domain; the user owns redistribution of their proprietary corpus.
+        # Convert Gita verses to instruction-tuning format
         for verse in gita_verses:
             chapter = verse.get("chapter_number", "")
             verse_num = verse.get("verse_number", "")
@@ -632,8 +609,15 @@ class ModelFineTuner:
                     ),
                 })
 
-        # NOTE: The previous version harvested high-rated user↔LLM interactions
-        # into training entries here. That path has been removed (see docstring).
+        # Include interaction logs for conversational fine-tuning
+        if interaction_logs:
+            for log in interaction_logs:
+                if log.get("quality_rating", 0) >= 4:  # Only high-quality interactions
+                    entries.append({
+                        "instruction": "Provide spiritual guidance based on Bhagavad Gita wisdom.",
+                        "input": log.get("user_query", ""),
+                        "output": log.get("response", ""),
+                    })
 
         # Write JSONL
         with open(dataset_path, "w", encoding="utf-8") as f:

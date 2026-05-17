@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import {
-  type ColorValue, StyleSheet, type ViewStyle } from 'react-native';
+import { StyleSheet, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/useTheme';
 import { gradients } from '../tokens/gradients';
@@ -24,7 +23,7 @@ export function SacredDivider({ style }: SacredDividerProps): React.JSX.Element 
 
   return (
     <LinearGradient
-      colors={gradients.goldenDivider[mode] as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
+      colors={gradients.goldenDivider[mode] as unknown as string[]}
       start={{ x: 0, y: 0.5 }}
       end={{ x: 1, y: 0.5 }}
       style={[styles.divider, style]}

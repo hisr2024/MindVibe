@@ -23,7 +23,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
       transliteration:
         "karmaṇy evādhikāras te mā phaleṣu kadācana\nmā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
       english:
-        '',
+        'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself the cause of the results, and never be attached to inaction.',
       chapter: 2,
       verse: 47,
       chapterName: 'Sānkhya Yoga',
@@ -67,7 +67,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
       transliteration:
         'anudvega-karaṁ vākyaṁ satyaṁ priya-hitaṁ ca yat\nsvādhyāyābhyasanaṁ caiva vāṅ-mayaṁ tapa ucyate',
       english:
-        '',
+        'Speech that causes no agitation, that is truthful, pleasing, and beneficial, and the regular recitation of sacred texts — this is called the austerity of speech.',
       chapter: 17,
       verse: 15,
       chapterName: 'Śraddhā-traya Vibhāga Yoga',
@@ -110,7 +110,8 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
         'उद्धरेदात्मनात्मानं नात्मानमवसादयेत्।\nआत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥',
       transliteration:
         'uddhared ātmanātmānaṁ nātmānam avasādayet\nātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ',
-      english: '',
+      english:
+        "Let one lift oneself by one's own Self; let one not degrade oneself. For the Self alone is the friend of the self, and the Self alone is the enemy of the self.",
       chapter: 6,
       verse: 5,
       chapterName: 'Dhyāna Yoga',
@@ -154,7 +155,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
       transliteration:
         'duḥkheṣv anudvigna-manāḥ sukheṣu vigata-spṛhaḥ\nvīta-rāga-bhaya-krodhaḥ sthita-dhīr munir ucyate',
       english:
-        '',
+        'One whose mind is undisturbed by sorrow, who does not crave pleasure, who is free from attachment, fear, and anger — such a person is called a sage of steady wisdom.',
       chapter: 2,
       verse: 56,
       chapterName: 'Sānkhya Yoga',
@@ -198,7 +199,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
       transliteration:
         "sva-dharmam api cāvekṣya na vikampitum arhasi\ndharmyāddhi yuddhāc chreyo 'nyat kṣatriyasya na vidyate",
       english:
-        '',
+        'Considering your own dharma, you should not waver. For a warrior, there is nothing more ennobling than a righteous duty.',
       chapter: 2,
       verse: 31,
       chapterName: 'Sānkhya Yoga',
@@ -242,7 +243,7 @@ export const FALLBACK_WISDOM: Record<KarmaCategory, KarmaWisdomResponse> = {
       transliteration:
         "yajñārthāt karmaṇo 'nyatra loko 'yaṁ karma-bandhanaḥ\ntad-arthaṁ karma kaunteya mukta-saṅgaḥ samācara",
       english:
-        '',
+        'Work done as a sacrifice to the Supreme frees one from bondage. Therefore, O Arjuna, perform your duty free from attachment.',
       chapter: 3,
       verse: 9,
       chapterName: 'Karma Yoga',

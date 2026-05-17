@@ -395,7 +395,7 @@ export default function ArdhaClient() {
       subtitle="Atma-Reframing through Dharma & Higher Awareness"
       modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.ardha', 'ARDHA Mode')}`}
       verse={{
-        english: '',
+        english: 'The unreal has no existence, and the real never ceases to be.',
         reference: 'Bhagavad Gita 2.16',
       }}
       leftContent={leftContent}

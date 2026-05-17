@@ -9,7 +9,7 @@ CORE PRINCIPLES:
 1. Every AI response MUST be grounded in Bhagavad Gita teachings
 2. Static wisdom from 701 verses provides the foundation
 3. Dynamic enhancement adds contextual Gita insights
-4. All tools (Ardha, Viyoga, Sambandh Dharma (Relationship Compass), Emotional Reset, Karma Reset)
+4. All tools (Ardha, Viyoga, Relationship Compass, Emotional Reset, Karma Reset)
    MUST have their responses filtered through this service
 
 FILTER STAGES:
@@ -24,7 +24,7 @@ USAGE:
     # Filter any AI response
     filtered_response = await gita_wisdom_filter.filter_response(
         content=ai_response,
-        tool_type="viyoga",  # ardha, viyoga, sambandh_dharma, emotional_reset, karma_reset
+        tool_type="viyoga",  # ardha, viyoga, relationship_compass, emotional_reset, karma_reset
         user_context="User's original concern"
     )
 """
@@ -46,7 +46,7 @@ class WisdomTool(Enum):
     """Tools that require Gita wisdom filtering."""
     ARDHA = "ardha"
     VIYOGA = "viyoga"
-    SAMBANDH_DHARMA = "sambandh_dharma"
+    RELATIONSHIP_COMPASS = "relationship_compass"
     EMOTIONAL_RESET = "emotional_reset"
     KARMA_RESET = "karma_reset"
     GENERAL = "general"
@@ -149,7 +149,7 @@ TOOL_CORE_TEACHINGS = {
     },
     WisdomTool.VIYOGA: {
         "primary_verse": "BG 2.47",
-        "teaching": "Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached.",
+        "teaching": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action.",
         "concepts": [
             "karma", "nishkama", "phala", "samatva", "vairagya", "karma yoga",
             "atman", "prakriti", "sakshi bhava", "ahamkara", "phala tyaga",
@@ -161,7 +161,7 @@ TOOL_CORE_TEACHINGS = {
             "equanimity", "steady", "identity", "unchanging", "awareness",
         ],
     },
-    WisdomTool.SAMBANDH_DHARMA: {
+    WisdomTool.RELATIONSHIP_COMPASS: {
         "primary_verse": "BG 6.32",
         "teaching": "One who sees equality everywhere, seeing his own self in all beings, is the highest yogi.",
         "concepts": ["dharma", "daya", "kshama", "ahimsa", "sama-darshana", "maitri"],
@@ -175,7 +175,7 @@ TOOL_CORE_TEACHINGS = {
     },
     WisdomTool.KARMA_RESET: {
         "primary_verse": "BG 18.66",
-        "teaching": "Abandoning all duties, come unto Me alone for shelter; sorrow not, I will liberate thee from all sins.",
+        "teaching": "Abandon all varieties of dharmas and surrender unto Me alone. I shall deliver you from all sinful reactions. Do not fear.",
         "concepts": ["karma", "kshama", "pratyavekshanam", "dharma", "prayaschitta"],
         "keywords": ["repair", "forgive", "amend", "intention", "action", "heal", "restore"],
     },
@@ -609,7 +609,7 @@ async def filter_ai_response(
 
     Args:
         content: AI response content
-        tool_type: Type of tool (ardha, viyoga, sambandh_dharma, etc.)
+        tool_type: Type of tool (ardha, viyoga, relationship_compass, etc.)
         user_context: Original user input
 
     Returns:

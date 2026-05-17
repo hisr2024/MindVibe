@@ -1,11 +1,11 @@
 # Development & testing dependencies (not installed in production images)
-pytest>=9.0.3,<9.1.0
-pytest-cov>=7.1.0
+pytest>=7.3.1,<9.1.0
+pytest-cov>=4.0.0
 pytest-asyncio>=0.21.0
 pytest-mock>=3.15.1
 aiosqlite>=0.19.0
 mypy>=1.0.0
-black>=26.3.1
+black>=22.0.0
 flake8>=5.0.0
 isort>=5.0.0
 types-requests>=2.31.0,<3.0.0

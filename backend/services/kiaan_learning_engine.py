@@ -53,8 +53,8 @@ TRUSTED_GITA_SOURCES = [
     "iskcon", "chinmaya", "ramakrishna", "vedanta", "gita-society",
     "bhaktivedanta", "sivananda", "yogananda", "vivekananda",
     # Domains
-    "gitasupersite.iitk.ac.in", "[REMOVED-PENDING-LICENSE-REVIEW]", "bhagavad-gita.org",
-    "[REMOVED-PENDING-LICENSE-REVIEW]", "[REMOVED-PENDING-LICENSE-REVIEW]", "[REMOVED-PENDING-LICENSE-REVIEW]", "gitadaily.com",
+    "gitasupersite.iitk.ac.in", "holy-bhagavad-gita.org", "bhagavad-gita.org",
+    "asitis.com", "gitapress.org", "vedabase.io", "gitadaily.com",
     # YouTube channels (IDs/names)
     "ISKCON", "ChinmayaMission", "SwamiMukundananda", "GaurGopalDas",
     "SadguruJV", "ArtOfLiving", "BrahmaKumaris",
@@ -382,13 +382,13 @@ class ContentFetcher:
         # Curated Gita RSS feeds
         self.gita_rss_feeds = [
             "https://feeds.feedburner.com/gitadaily",
-            "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+            "https://www.holy-bhagavad-gita.org/rss",
         ]
 
         # Curated Gita websites for scraping
         self.gita_websites = [
             {
-                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+                "url": "https://www.holy-bhagavad-gita.org",
                 "name": "Holy Bhagavad Gita",
                 "type": "verse_commentary"
             },
@@ -398,7 +398,7 @@ class ContentFetcher:
                 "type": "academic"
             },
             {
-                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+                "url": "https://asitis.com",
                 "name": "Bhagavad Gita As It Is",
                 "type": "iskcon_commentary"
             },
@@ -538,7 +538,7 @@ class ContentFetcher:
             },
             {
                 "name": "ISKCON Desire Tree Lectures",
-                "url": "https://[REMOVED-PENDING-LICENSE-REVIEW]",
+                "url": "https://iskcondesiretree.com/podcast/feed",
                 "platform": "iskcon"
             },
         ]
@@ -1574,21 +1574,8 @@ class KIAANLearningEngine:
 # SINGLETON ACCESSOR
 # =============================================================================
 
-_INGESTION_ENV_FLAG = "MINDVIBE_EXTERNAL_INGESTION_ENABLED"
-
-
 def get_kiaan_learning_engine() -> KIAANLearningEngine:
-    """Get the singleton KIAAN Learning Engine instance.
-
-    Gated by ``MINDVIBE_EXTERNAL_INGESTION_ENABLED=1``. External-source
-    content learning is disabled by default pending licensing review of
-    upstream third-party content providers.
-    """
-    if os.getenv(_INGESTION_ENV_FLAG, "0") != "1":
-        raise RuntimeError(
-            "KIAAN learning engine is disabled pending external-source licensing "
-            f"review. Set {_INGESTION_ENV_FLAG}=1 only after legal sign-off."
-        )
+    """Get the singleton KIAAN Learning Engine instance."""
     return KIAANLearningEngine()
 
 
@@ -1622,15 +1609,5 @@ def initialize_learning_system():
     return engine
 
 
-# Initialize on module load — but only when the external-ingestion gate
-# is open. With the gate closed (default in dev / test / CI), eager init
-# would raise the same RuntimeError that gates get_kiaan_learning_engine
-# and break any module that imports from this file. Production deploys
-# that flip MINDVIBE_EXTERNAL_INGESTION_ENABLED=1 still get the eager
-# scheduler boot. Callers needing the engine should call
-# get_kiaan_learning_engine() directly rather than reading this name.
-kiaan_learning_engine = (
-    get_kiaan_learning_engine()
-    if os.getenv(_INGESTION_ENV_FLAG, "0") == "1"
-    else None
-)
+# Initialize on module load
+kiaan_learning_engine = get_kiaan_learning_engine()

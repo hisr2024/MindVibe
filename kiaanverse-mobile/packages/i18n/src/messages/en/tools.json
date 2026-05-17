@@ -21,8 +21,8 @@
   "viyogaName": "Viyoga",
   "viyogaDescription": "The art of letting go",
 
-  "sambandhDharmaName": "Sambandh Dharma (Relationship Compass)",
-  "sambandhDharmaDescription": "Dharma-guided clarity",
+  "relationshipCompassName": "Relationship Compass",
+  "relationshipCompassDescription": "Dharma-guided clarity",
 
   "emotionalResetName": "Emotional Reset",
   "emotionalResetDescription": "Release and transform emotions",
@@ -216,7 +216,7 @@
   "viyogaMedScreen8": "The bond holds. It always holds.",
   "viyogaMedScreen9": "Breathe out slowly. You are exactly where you are meant to be.",
 
-  "rcHeaderTitle": "Sambandh Dharma (Relationship Compass)",
+  "rcHeaderTitle": "Relationship Compass",
   "rcBackA11y": "Back",
   "rcNotificationsA11y": "Notifications",
   "rcLongingFallback": "the bond you named",
@@ -251,7 +251,7 @@
   "rcGitaCopyLabel": "Copy",
   "rcGitaStopReadA11y": "Stop reading",
   "rcGitaReadA11y": "Read transmission aloud",
-  "rcGitaTransmissionTitle1": "Sambandh Dharma (Relationship Compass)'s",
+  "rcGitaTransmissionTitle1": "Relationship Compass's",
   "rcGitaTransmissionTitle2": "Transmission",
   "rcGitaBadgeOmFmt": "ॐ Gita Wisdom ({{count}} {{verseWord}})",
   "rcGitaVerseSingular": "verse",

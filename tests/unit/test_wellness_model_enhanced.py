@@ -53,7 +53,7 @@ def sample_outcome_worry():
 
 @pytest.fixture
 def sample_relationship_conflict():
-    """Sample relationship conflict for SambandhDharma testing."""
+    """Sample relationship conflict for RelationshipCompass testing."""
     return "My partner abandoned me emotionally. They never listen and I feel like I'm not enough for them."
 
 
@@ -163,11 +163,11 @@ class TestWellnessModelInitialization:
         """Test that tool keywords are defined for all tools."""
         assert WellnessTool.VIYOGA in wellness_model.TOOL_KEYWORDS
         assert WellnessTool.ARDHA in wellness_model.TOOL_KEYWORDS
-        assert WellnessTool.SAMBANDH_DHARMA in wellness_model.TOOL_KEYWORDS
+        assert WellnessTool.RELATIONSHIP_COMPASS in wellness_model.TOOL_KEYWORDS
 
     def test_tool_gita_focus_has_psychology_integration(self, wellness_model):
         """Test that tool focus includes psychological framework."""
-        for tool in [WellnessTool.VIYOGA, WellnessTool.ARDHA, WellnessTool.SAMBANDH_DHARMA]:
+        for tool in [WellnessTool.VIYOGA, WellnessTool.ARDHA, WellnessTool.RELATIONSHIP_COMPASS]:
             focus = wellness_model.TOOL_GITA_FOCUS[tool]
             assert "psychological_framework" in focus
             assert "psychology_integration" in focus
@@ -257,16 +257,16 @@ class TestViyogaDetachment:
 # RELATIONSHIP COMPASS TESTS
 # =============================================================================
 
-class TestSambandhDharma:
-    """Test suite for SambandhDharma guidance."""
+class TestRelationshipCompass:
+    """Test suite for RelationshipCompass guidance."""
 
     @pytest.mark.asyncio
     async def test_analyze_psychological_patterns_for_relationships(
         self, wellness_model, sample_relationship_conflict
     ):
-        """Test attachment-aware analysis for SambandhDharma."""
+        """Test attachment-aware analysis for RelationshipCompass."""
         psych_insights = wellness_model._analyze_psychological_patterns(
-            WellnessTool.SAMBANDH_DHARMA, sample_relationship_conflict
+            WellnessTool.RELATIONSHIP_COMPASS, sample_relationship_conflict
         )
 
         assert "attachment_indicators" in psych_insights
@@ -275,11 +275,11 @@ class TestSambandhDharma:
         attachment_indicators = psych_insights["attachment_indicators"]
         assert "anxious_attachment" in attachment_indicators
 
-    def test_sambandh_dharma_gita_focus_includes_attachment_theory(
+    def test_relationship_compass_gita_focus_includes_attachment_theory(
         self, wellness_model
     ):
-        """Test that SambandhDharma includes Attachment Theory."""
-        compass_focus = wellness_model.TOOL_GITA_FOCUS[WellnessTool.SAMBANDH_DHARMA]
+        """Test that RelationshipCompass includes Attachment Theory."""
+        compass_focus = wellness_model.TOOL_GITA_FOCUS[WellnessTool.RELATIONSHIP_COMPASS]
 
         assert "Attachment Theory" in compass_focus["psychological_framework"]
 
@@ -399,7 +399,7 @@ class TestPsychologicalContextBuilding:
         }
 
         context = wellness_model._build_psychological_context(
-            WellnessTool.SAMBANDH_DHARMA, psych_insights
+            WellnessTool.RELATIONSHIP_COMPASS, psych_insights
         )
 
         assert "ATTACHMENT INDICATORS" in context
@@ -573,4 +573,4 @@ class TestEdgeCasesAndErrorHandling:
         """Test WellnessTool enum has correct values."""
         assert WellnessTool.VIYOGA.value == "viyoga"
         assert WellnessTool.ARDHA.value == "ardha"
-        assert WellnessTool.SAMBANDH_DHARMA.value == "sambandh_dharma"
+        assert WellnessTool.RELATIONSHIP_COMPASS.value == "relationship_compass"

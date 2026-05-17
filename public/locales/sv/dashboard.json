@@ -36,7 +36,7 @@
       "title": "Ardha",
       "description": "Situationsanpassad vägledning"
     },
-    "sambandh-dharma": {
+    "relationship-compass": {
       "title": "Relationskompass",
       "description": "Relationsvägledning"
     },
@@ -106,7 +106,7 @@
     "viyog": "Lugna den omedelbara reaktionen",
     "ardha": "Omforma uppfattningen",
     "kiaan": "Prata igenom det",
-    "sambandh-dharma": "Navigera relationsklarhet",
+    "relationship-compass": "Navigera relationsklarhet",
     "journey": "Träna långsiktig inre stabilitet"
   },
   "mode_label": {
@@ -114,7 +114,7 @@
     "viyog": "Pausläge",
     "ardha": "Klarhetsläge",
     "kiaan": "Följeslagarläge",
-    "sambandh-dharma": "Relationsläge",
+    "relationship-compass": "Relationsläge",
     "journey": "Träningsläge"
   }
 }

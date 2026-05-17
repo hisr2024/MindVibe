@@ -15,7 +15,7 @@ import Link from 'next/link'
  * - Responsive two-column layout slots
  * - Top and bottom golden radiance lines
  *
- * All three sacred instruments (Viyoga, Ardha, Sambandh Dharma (Relationship Compass)) share this shell
+ * All three sacred instruments (Viyoga, Ardha, Relationship Compass) share this shell
  * to maintain visual unity within the Gold-Black divine theme.
  */
 

@@ -1,4 +1,5 @@
 {
+  "_confidential": "CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. Do not distribute. See prompts/CONFIDENTIAL.md.",
   "schema_version": "1.0.0",
   "persona_version": "1.0.0",
   "description": "Pre-rendered Sakha safety audio bundle. Three categories × 10 languages = 30 clips. Each clip is locked to the per-language voice_id in tts_router.DEFAULT_VOICE_IDS so the same Sakha that speaks during a normal turn also speaks the safety messages — no jarring voice switch when the user enters crisis or hits quota.",

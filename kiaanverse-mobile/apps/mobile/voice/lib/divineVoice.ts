@@ -134,7 +134,7 @@ function scoreVoice(voice: Speech.Voice, targetLang: string): number {
   const wanted = targetLang.toLowerCase();
   if (voiceLang === wanted) {
     score += 100;
-  } else if (voiceLang.startsWith(wanted.split('-')[0] ?? wanted)) {
+  } else if (voiceLang.startsWith(wanted.split('-')[0])) {
     // Same base language but different region (e.g., en-US vs en-IN).
     // Worse than exact match, better than nothing.
     score += 40;
@@ -261,7 +261,7 @@ export async function listVoicesForLanguage(
   const lang = language.toLowerCase();
   const matched = all.filter((v) => {
     const vl = v.language.toLowerCase();
-    return vl === lang || vl.startsWith(lang.split('-')[0] ?? lang);
+    return vl === lang || vl.startsWith(lang.split('-')[0]);
   });
   return matched
     .map((v) => ({
@@ -448,7 +448,7 @@ export interface DivineProsody {
   language: string;
   rate: number;
   pitch: number;
-  voice?: string | undefined;
+  voice?: string;
 }
 
 /**
@@ -594,10 +594,9 @@ export async function speakDivinely(
     // failure is diagnosable, but don't surface to the user as an
     // error — they're about to hear the on-device voice instead.
     if (typeof console !== 'undefined' && console.warn) {
-      const errMsg = (cloudError as Error | null)?.message;
       console.warn(
         'speakDivinely: cloud TTS failed, falling through to on-device —',
-        errMsg,
+        cloudError?.message,
       );
     }
     // Drop through to Tier 3 below.
@@ -632,10 +631,9 @@ export async function speakDivinely(
         return;
       }
       if (typeof console !== 'undefined' && console.warn) {
-        const errMsg = (cloudError as Error | null)?.message;
         console.warn(
           'speakDivinely: persisted cloud voice failed, falling through to on-device —',
-          errMsg,
+          cloudError?.message,
         );
       }
     }
@@ -651,18 +649,12 @@ export async function speakDivinely(
   // Default 1.0 = unchanged; 0.5 = half-speed; 1.5 = 1.5× fast.
   const rate = baseRate * (options.tempo ?? 1.0);
   const pitch = isSanskrit ? preset.pitch - 0.01 : preset.pitch;
-  // expo-speech's SpeechOptions is from a 3rd-party type and requires
-  // truly-optional fields (exactOptionalPropertyTypes: true). Build the
-  // options object conditionally so `voice` and `onDone` are omitted
-  // entirely when undefined rather than passed as explicit `undefined`.
-  const speechVoice =
-    resolvedVoice && !isCloudVoiceId(resolvedVoice) ? resolvedVoice : undefined;
   Speech.speak(text, {
     language,
-    ...(speechVoice !== undefined && { voice: speechVoice }),
+    voice: resolvedVoice && !isCloudVoiceId(resolvedVoice) ? resolvedVoice : undefined,
     rate,
     pitch,
-    ...(options.onDone !== undefined && { onDone: options.onDone }),
+    onDone: options.onDone,
     onError: (err) => {
       const e =
         err instanceof Error

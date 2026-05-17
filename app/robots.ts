@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           '/karmic-tree',
           '/emotional-reset',
           '/karma-footprint',
-          '/sambandh-dharma',
+          '/relationship-compass',
           '/viyog',
         ],
       },

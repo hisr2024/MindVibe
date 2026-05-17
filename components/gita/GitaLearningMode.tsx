@@ -47,7 +47,7 @@ const SAMPLE_VERSE: GitaVerse = {
   sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन ।\nमा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि ॥',
   transliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana\nmā karma-phala-hetur bhūr mā te saṅgo \'stv akarmaṇi',
   wordMeaning: 'karmaṇi—in prescribed duties; eva—certainly; adhikāraḥ—right; te—of you; mā—not; phaleṣu—in the fruits; kadācana—at any time; mā—never; karma-phala—in the result of the work; hetuḥ—cause; bhūḥ—become; mā—never; te—of you; saṅgaḥ—attachment; astu—be there; akarmaṇi—in not doing prescribed duties',
-  translation: '',
+  translation: 'You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results of your activities, nor be attached to inaction.',
   commentary: 'This is one of the most important verses of the Bhagavad Gita, encapsulating the essence of Karma Yoga. Lord Krishna advises Arjuna to focus solely on action without attachment to results. This teaching liberates one from the bondage of karma.'
 }
 

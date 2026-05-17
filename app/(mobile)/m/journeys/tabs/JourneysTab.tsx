@@ -16,13 +16,13 @@ import type {
   JourneyTemplate,
   EnemyType,
   PersonalizationSettings,
-} from '@/types/karmaMarg.types'
-import { ENEMY_INFO, ENEMY_ORDER, getDifficultyLabel } from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
+import { ENEMY_INFO, ENEMY_ORDER, getDifficultyLabel } from '@/types/journeyEngine.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
-  karmaMargService,
-  KarmaMargError,
-} from '@/services/karmaMargService'
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
 import { ActiveJourneyCardMobile } from '../components/ActiveJourneyCardMobile'
 import { ActiveJourneyActions } from '../components/ActiveJourneyActions'
 import { JourneyTemplateCard } from '../components/JourneyTemplateCard'
@@ -201,7 +201,7 @@ export function JourneysTab({
       }, 15_000)
 
       try {
-        const journey = await karmaMargService.startJourney(
+        const journey = await journeyEngineService.startJourney(
           { template_id: templateId, personalization },
           { signal: controller.signal, idempotencyKey },
         )
@@ -236,9 +236,9 @@ export function JourneysTab({
           err instanceof Error &&
           (err.name === 'AbortError' || err.message === 'REQUEST_TIMEOUT')
         const isAuth =
-          err instanceof KarmaMargError && err.code === 'AUTH_REQUIRED'
+          err instanceof JourneyEngineError && err.code === 'AUTH_REQUIRED'
         const isMax =
-          err instanceof KarmaMargError && err.isMaxJourneysError()
+          err instanceof JourneyEngineError && err.isMaxJourneysError()
         const isOffline =
           typeof navigator !== 'undefined' && !navigator.onLine
 
@@ -264,7 +264,7 @@ export function JourneysTab({
           setModalError(
             'No internet connection. Please reconnect and try again.',
           )
-        } else if (err instanceof KarmaMargError) {
+        } else if (err instanceof JourneyEngineError) {
           if (err.statusCode === 403) {
             setModalError('Permission denied. Try refreshing the page.')
           } else if (err.statusCode === 404) {
@@ -431,13 +431,13 @@ export function JourneysTab({
                 onClick={async () => {
                   triggerHaptic('medium')
                   try {
-                    await karmaMargService.fixStuckJourneys()
+                    await journeyEngineService.fixStuckJourneys()
                     triggerHaptic('success')
                     onRefresh()
                   } catch (err) {
                     triggerHaptic('error')
                     setError(
-                      err instanceof KarmaMargError
+                      err instanceof JourneyEngineError
                         ? err.message
                         : 'Could not clear stuck journeys.',
                     )

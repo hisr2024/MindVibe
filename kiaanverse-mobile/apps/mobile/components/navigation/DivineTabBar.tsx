@@ -6,7 +6,7 @@
  *
  * Slot 3 is the Sacred Tools hub — a single doorway that opens to every
  * sacred instrument the user has: the Bhagavad Gita scriptures, the
- * wellness/wisdom tools (Ardha, Viyoga, Sambandh Dharma (Relationship Compass), Emotional
+ * wellness/wisdom tools (Ardha, Viyoga, Relationship Compass, Emotional
  * Reset, Karma Reset), Journeys (षड्रिपु — the inner battlefield),
  * Wisdom Rooms, Sacred Reflections, and the KIAAN Vibe Player. Its glyph
  * is the ManuscriptIcon — the scroll carries the "sacred utterance"

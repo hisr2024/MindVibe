@@ -5,7 +5,7 @@ This module provides the complete ARDHA reframing framework, mapping each of the
 
 ARDHA Pillars:
   A - Atma Distinction (Right Identity) — BG 2.16, 2.20, 2.13, 13.33, etc.
-  R - Raga-Dvesha Reflection (Attachment Scan) — BG 2.62-63, 3.37, 5.3, etc.
+  R - Raga-Dvesha Diagnosis (Attachment Scan) — BG 2.62-63, 3.37, 5.3, etc.
   D - Dharma Alignment (Right Action) — BG 2.47, 3.35, 18.47, etc.
   H - Hrdaya Samatvam (Equanimity of Heart) — BG 2.38, 2.48, 6.7, etc.
   A - Arpana (Offering & Surrender) — BG 18.66, 9.27, 12.6-7, etc.
@@ -171,12 +171,12 @@ ATMA_DISTINCTION = ArdhaPillar(
 
 
 # ---------------------------------------------------------------------------
-# PILLAR R: Raga-Dvesha Reflection — Attachment Scan
+# PILLAR R: Raga-Dvesha Diagnosis — Attachment Scan
 # ---------------------------------------------------------------------------
 
 RAGA_DVESHA_DIAGNOSIS = ArdhaPillar(
     code="R",
-    name="Raga-Dvesha Reflection",
+    name="Raga-Dvesha Diagnosis",
     sanskrit_name="Raga-Dvesha Pariksha",
     core_teaching=(
         "Disturbance arises from attachment (raga) and aversion (dvesha). "
@@ -326,9 +326,10 @@ DHARMA_ALIGNMENT = ArdhaPillar(
             chapter=2, verse=47,
             sanskrit_key="karmany evadhikaras te",
             english=(
-                "Thy business is with the action only, never with its fruits; "
-                "so let not the fruit of action be thy motive, nor be thou to "
-                "inaction attached."
+                "You have a right to perform your prescribed duty, but you "
+                "are not entitled to the fruits of action. Never consider "
+                "yourself the cause of the results, and never be attached "
+                "to not doing your duty."
             ),
             principle=(
                 "You control action alone, never its fruits. "
@@ -381,9 +382,9 @@ DHARMA_ALIGNMENT = ArdhaPillar(
             chapter=3, verse=8,
             sanskrit_key="niyatam kuru karma tvam",
             english=(
-                "Do thou perform right action, for action is better than "
-                "inaction; the body's journey cannot be accomplished by "
-                "inaction."
+                "Perform your prescribed duty, for action is better than "
+                "inaction. Even the maintenance of your body would not be "
+                "possible by inaction."
             ),
             principle="Action is always superior to inaction.",
             pillar="dharma_alignment",
@@ -574,8 +575,8 @@ ARPANA_SURRENDER = ArdhaPillar(
             chapter=18, verse=66,
             sanskrit_key="sarva-dharman parityajya",
             english=(
-                "Abandoning all duties, come unto Me alone for shelter; "
-                "sorrow not, I will liberate thee from all sins."
+                "Abandon all varieties of dharma and just surrender unto Me. "
+                "I shall deliver you from all sinful reactions. Do not fear."
             ),
             principle=(
                 "Ultimate surrender: let go of all anxiety. "
@@ -741,7 +742,7 @@ ARDHA_COMPLIANCE_TESTS: list[dict[str, str]] = [
         "test": "Is action performed without craving?",
         "pillar": "R",
         "fail_indicator": "User is still driven by raga (desire) or dvesha (aversion).",
-        "correction": "Apply Raga-Dvesha Reflection: name the attachment.",
+        "correction": "Apply Raga-Dvesha Diagnosis: name the attachment.",
     },
     {
         "test": "Is outcome mentally released?",
@@ -772,7 +773,7 @@ ARDHA_COMPLIANCE_TESTS: list[dict[str, str]] = [
 ARDHA_KEY_VERSE_REFS: list[tuple[int, int]] = [
     # Atma Distinction
     (2, 16), (2, 20), (2, 13), (13, 33), (5, 8),
-    # Raga-Dvesha Reflection
+    # Raga-Dvesha Diagnosis
     (2, 62), (2, 63), (3, 37), (5, 3), (3, 34),
     # Dharma Alignment
     (2, 47), (3, 35), (18, 47), (3, 8), (3, 19),

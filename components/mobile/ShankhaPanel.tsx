@@ -70,7 +70,7 @@ const TOOL_LINKS = [
   { id: 'viyoga', icon: '🕉️', label: 'Viyoga', href: '/m/viyog' },
   { id: 'ardha', icon: '📿', label: 'Ardha', href: '/m/ardha' },
   { id: 'kiaan-chat', icon: '🧘', label: 'Chat', href: '/m/kiaan' },
-  { id: 'compass', icon: '🕊️', label: 'Compass', href: '/m/sambandh-dharma' },
+  { id: 'compass', icon: '🕊️', label: 'Compass', href: '/m/relationship-compass' },
 ] as const
 
 // ─── Component ──────────────────────────────────────────────────────────────

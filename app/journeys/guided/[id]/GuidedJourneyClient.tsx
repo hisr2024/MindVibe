@@ -18,19 +18,19 @@ import { useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
-  karmaMargService,
-  KarmaMargError,
-} from '@/services/karmaMargService'
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
 import type {
   JourneyResponse,
   StepResponse,
   EnemyType,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 import {
   ENEMY_INFO,
   getJourneyStatusLabel,
   getJourneyStatusColor,
-} from '@/types/karmaMarg.types'
+} from '@/types/journeyEngine.types'
 import { JourneyDayHeader } from '@/components/journey/JourneyDayHeader'
 import { MicroPractice } from '@/components/journey/MicroPractice'
 import { Day14Completed } from '@/components/journey/Day14Completed'
@@ -490,17 +490,17 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
       setLoading(true)
       setError(null)
 
-      const journeyData = await karmaMargService.getJourney(journeyId)
+      const journeyData = await journeyEngineService.getJourney(journeyId)
       setJourney(journeyData)
       setSelectedDay(journeyData.current_day)
 
       // Load current step
       if (journeyData.status === 'active') {
-        const stepData = await karmaMargService.getCurrentStep(journeyId)
+        const stepData = await journeyEngineService.getCurrentStep(journeyId)
         setStep(stepData)
       }
     } catch (err) {
-      if (err instanceof KarmaMargError) {
+      if (err instanceof JourneyEngineError) {
         if (err.isNotFoundError()) {
           setError('Journey not found.')
         } else if (err.isAuthError()) {
@@ -523,7 +523,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
     if (!journey) return
 
     try {
-      const stepData = await karmaMargService.getStep(journeyId, day)
+      const stepData = await journeyEngineService.getStep(journeyId, day)
       setStep(stepData)
     } catch (err) {
       console.error('[GuidedJourneyClient] Error loading step:', err)
@@ -570,7 +570,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
     }
 
     try {
-      const result = await karmaMargService.completeStep(
+      const result = await journeyEngineService.completeStep(
         journeyId,
         step.day_index,
         { reflection }
@@ -584,19 +584,19 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         await loadJourney()
       }
     } catch (err) {
-      if (err instanceof KarmaMargError && err.isAuthError()) {
+      if (err instanceof JourneyEngineError && err.isAuthError()) {
         router.push('/onboarding')
         return
       }
 
       // On 429 (time-gated) or 400 (step not available / day mismatch / already completed),
       // the frontend state is stale — auto-refresh to sync with backend.
-      if (err instanceof KarmaMargError && (err.statusCode === 429 || err.statusCode === 400)) {
+      if (err instanceof JourneyEngineError && (err.statusCode === 429 || err.statusCode === 400)) {
         await loadJourney()
         return
       }
 
-      const message = err instanceof KarmaMargError
+      const message = err instanceof JourneyEngineError
         ? err.message
         : 'Failed to complete step. Please try again.'
       setError(message)
@@ -615,11 +615,11 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
       setActionLoading(action)
 
       if (action === 'pause') {
-        await karmaMargService.pauseJourney(journeyId)
+        await journeyEngineService.pauseJourney(journeyId)
       } else if (action === 'resume') {
-        await karmaMargService.resumeJourney(journeyId)
+        await journeyEngineService.resumeJourney(journeyId)
       } else if (action === 'abandon') {
-        await karmaMargService.abandonJourney(journeyId)
+        await journeyEngineService.abandonJourney(journeyId)
         router.push('/journeys')
         return
       }
@@ -628,7 +628,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
       await loadJourney()
       setShowActions(false)
     } catch (err) {
-      const message = err instanceof KarmaMargError
+      const message = err instanceof JourneyEngineError
         ? err.message
         : `Failed to ${action} journey.`
       setError(message)

@@ -94,7 +94,7 @@ export { GoldenButton, type GoldenButtonProps, type GoldenButtonVariant } from '
 export { SakhaAvatar, type SakhaAvatarProps, type SakhaState } from './components/SakhaAvatar';
 export { VerseCard, type VerseCardProps, type VerseData } from './components/VerseCard';
 export { ChatBubble, type ChatBubbleProps, type ChatRole } from './components/ChatBubble';
-export { BhavaMirror, type BhavaMirrorProps, type Mood } from './components/BhavaMirror';
+export { MoodRing, type MoodRingProps, type Mood } from './components/MoodRing';
 export { KarmaTree, type KarmaTreeProps, type KarmaNode } from './components/KarmaTree';
 export { GoldenHeader, type GoldenHeaderProps } from './components/GoldenHeader';
 export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMandala';

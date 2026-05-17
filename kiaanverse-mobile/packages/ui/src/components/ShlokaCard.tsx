@@ -15,8 +15,7 @@
  */
 
 import React from 'react';
-import {
-  type ColorValue, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VerseRevelation } from './VerseRevelation';
 
@@ -62,7 +61,7 @@ function ShlokaCardInner({
   return (
     <View style={[styles.card, style]} testID={testID}>
       <LinearGradient
-        colors={TOP_SHIMMER as unknown as readonly [ColorValue, ColorValue, ...ColorValue[]]}
+        colors={TOP_SHIMMER as unknown as string[]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         style={styles.topShimmer}

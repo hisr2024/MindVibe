@@ -6,7 +6,7 @@
  */
 
 export { default as CompanionChatBubble } from './CompanionChatBubble'
-export { default as CompanionBhavaMirror } from './CompanionBhavaMirror'
+export { default as CompanionMoodRing } from './CompanionMoodRing'
 export { default as CompanionVoiceRecorder } from './CompanionVoiceRecorder'
 export { default as CompanionSuggestions } from './CompanionSuggestions'
 export { default as CompanionVoicePlayer } from './CompanionVoicePlayer'

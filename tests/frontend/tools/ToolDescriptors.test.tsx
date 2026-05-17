@@ -35,12 +35,12 @@ vi.mock('@/hooks/useLanguage', () => ({
         'dashboard.tools.viyog.description': 'Outcome anxiety reducer',
         'dashboard.tools.ardha.title': 'Ardha',
         'dashboard.tools.ardha.description': 'Ancient wisdom reframing',
-        'dashboard.tools.sambandh-dharma.title': 'Sambandh Dharma (Relationship Compass)',
-        'dashboard.tools.sambandh-dharma.description': 'Calm conflict guidance',
+        'dashboard.tools.relationship-compass.title': 'Relationship Compass',
+        'dashboard.tools.relationship-compass.description': 'Calm conflict guidance',
         'dashboard.tool_desc.viyog': 'Calm the immediate reaction',
         'dashboard.tool_desc.ardha': 'Reframe the perception',
         'dashboard.tool_desc.kiaan': 'Talk it through',
-        'dashboard.tool_desc.sambandh-dharma': 'Navigate relational clarity',
+        'dashboard.tool_desc.relationship-compass': 'Navigate relational clarity',
         'dashboard.tool_desc.journey': 'Train long-term inner steadiness',
       }
       return translations[key] ?? fallback ?? key

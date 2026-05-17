@@ -1,5 +1,5 @@
 # CONFIDENTIAL — TRADE SECRET. Property of MindVibe / Kiaanverse. See backend/services/CONFIDENTIAL.md.
-"""Shared Gita Wisdom Retrieval Service for Viyoga and Sambandh Dharma (Relationship Compass).
+"""Shared Gita Wisdom Retrieval Service for Viyoga and Relationship Compass.
 
 This service provides direct access to the 701 Bhagavad Gita verses stored in JSON,
 with keyword-based search optimized for spiritual wellness applications.
@@ -9,7 +9,7 @@ Keyword matching serves as fallback when AI is unavailable.
 
 Used by:
 - Viyoga (Detachment Coach) - Karma Yoga focused verses
-- Sambandh Dharma (Relationship Compass) - Dharma/Daya/Kshama focused verses
+- Relationship Compass - Dharma/Daya/Kshama focused verses
 - Fallback for all tools when RAG/OpenAI is unavailable
 
 The service ensures ALL responses are grounded in actual Gita wisdom from the repository.
@@ -60,7 +60,7 @@ VIYOGA_KEYWORDS = {
     "equanimity": ["equanimity", "balance", "steady", "calm", "peace", "even-minded"],
 }
 
-# Sambandh Dharma (Relationship Compass) keywords
+# Relationship Compass keywords
 RELATIONSHIP_KEYWORDS = {
     # Emotions
     "anger": ["angry", "anger", "rage", "furious", "irritated", "frustrated", "mad"],
@@ -104,7 +104,7 @@ def search_gita_verses(
 
     Args:
         query: User's input/concern
-        tool: Which tool is searching ("viyoga", "sambandh_dharma", "general")
+        tool: Which tool is searching ("viyoga", "relationship_compass", "general")
         limit: Maximum verses to return
         depth: Analysis depth ("standard", "deep_dive", "quantum_dive")
 
@@ -121,7 +121,7 @@ def search_gita_verses(
     # Select keyword mapping based on tool
     if tool == "viyoga":
         keyword_map = VIYOGA_KEYWORDS
-    elif tool == "sambandh_dharma":
+    elif tool == "relationship_compass":
         keyword_map = RELATIONSHIP_KEYWORDS
     else:
         keyword_map = {**VIYOGA_KEYWORDS, **RELATIONSHIP_KEYWORDS}
@@ -178,7 +178,7 @@ def search_gita_verses(
                 score *= 1.4
             elif chapter == 6:
                 score *= 1.2
-        elif tool == "sambandh_dharma":
+        elif tool == "relationship_compass":
             # Relationship focus: chapters 2, 12, 16, 18
             if chapter in [12, 16]:
                 score *= 1.4
@@ -212,7 +212,7 @@ def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> t
 
     Args:
         verses: List of verse dictionaries from 701-verse repository
-        tool: Tool requesting context ("viyoga", "sambandh_dharma", "general")
+        tool: Tool requesting context ("viyoga", "relationship_compass", "general")
 
     Returns:
         Tuple of (context_string, source_references)
@@ -310,7 +310,7 @@ def generate_viyoga_fallback(
     if not teachings:
         teachings = [{
             "ref": "BG 2.47",
-            "text": "Thy business is with the action only, never with its fruits; so let not the fruit of action be thy motive, nor be thou to inaction attached.",
+            "text": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action.",
             "principle": "Nishkama Karma",
         }]
 
@@ -353,12 +353,12 @@ def generate_viyoga_fallback(
     }
 
 
-def generate_sambandh_dharma_fallback(
+def generate_relationship_compass_fallback(
     user_input: str,
     verses: list[dict[str, Any]],
     relationship_type: str = "other"
 ) -> dict[str, Any]:
-    """Generate Gita-grounded Sambandh Dharma (Relationship Compass) response when AI is unavailable.
+    """Generate Gita-grounded Relationship Compass response when AI is unavailable.
 
     Args:
         user_input: User's relationship concern
@@ -525,7 +525,7 @@ def _fallback_relationship_keyword_analysis(user_input: str) -> dict[str, any]:
                 break
 
     # Get relevant verse
-    verses = search_gita_verses(user_input, tool="sambandh_dharma", limit=3)
+    verses = search_gita_verses(user_input, tool="relationship_compass", limit=3)
     if verses:
         verse = verses[0]
         verse_ref = f"BG {verse.get('chapter', 6)}.{verse.get('verse', 32)}"

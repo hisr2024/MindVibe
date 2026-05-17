@@ -33,10 +33,10 @@ interface MobileArrivalPhaseProps {
 
 function getTimeGreeting(): { sanskrit: string; english: string } {
   const hour = new Date().getHours()
-  if (hour >= 5 && hour < 11) return { sanskrit: 'प्रभात नमस्कार', english: '' }
-  if (hour >= 11 && hour < 17) return { sanskrit: 'दोपहर आशीर्वाद', english: '' }
-  if (hour >= 17 && hour < 21) return { sanskrit: 'सांध्य प्रणाम', english: '' }
-  return { sanskrit: 'रात्रि साधना', english: '' }
+  if (hour >= 5 && hour < 11) return { sanskrit: 'प्रभात नमस्कार', english: 'Good Morning, dear seeker' }
+  if (hour >= 11 && hour < 17) return { sanskrit: 'दोपहर आशीर्वाद', english: 'Sacred afternoon greetings' }
+  if (hour >= 17 && hour < 21) return { sanskrit: 'सांध्य प्रणाम', english: 'Evening blessings upon you' }
+  return { sanskrit: 'रात्रि साधना', english: 'The sacred night begins' }
 }
 
 export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
